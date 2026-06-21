@@ -37,7 +37,7 @@ function StageDetail() {
   useEffect(() => {
     if (data?.progress) {
       setNotes(data.progress.notes ?? "");
-      setCompletedTasks(data.progress.completed_tasks ?? []);
+      setCompletedTasks((data.progress.completed_tasks as number[]) ?? []);
     }
   }, [data?.progress]);
 
