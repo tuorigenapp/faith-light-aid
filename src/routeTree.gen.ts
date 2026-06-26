@@ -17,7 +17,6 @@ import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedMembresiaRouteImport } from './routes/_authenticated/membresia'
 import { Route as AuthenticatedEtapasRouteImport } from './routes/_authenticated/etapas'
-import { Route as AuthenticatedEjerciciosRouteImport } from './routes/_authenticated/ejercicios'
 import { Route as AuthenticatedDiarioRouteImport } from './routes/_authenticated/diario'
 import { Route as AuthenticatedDiagnosticoRouteImport } from './routes/_authenticated/diagnostico'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
@@ -63,11 +62,6 @@ const AuthenticatedMembresiaRoute = AuthenticatedMembresiaRouteImport.update({
 const AuthenticatedEtapasRoute = AuthenticatedEtapasRouteImport.update({
   id: '/etapas',
   path: '/etapas',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedEjerciciosRoute = AuthenticatedEjerciciosRouteImport.update({
-  id: '/ejercicios',
-  path: '/ejercicios',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedDiarioRoute = AuthenticatedDiarioRouteImport.update({
@@ -118,7 +112,6 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/diagnostico': typeof AuthenticatedDiagnosticoRoute
   '/diario': typeof AuthenticatedDiarioRoute
-  '/ejercicios': typeof AuthenticatedEjerciciosRoute
   '/etapas': typeof AuthenticatedEtapasRouteWithChildren
   '/membresia': typeof AuthenticatedMembresiaRoute
   '/perfil': typeof AuthenticatedPerfilRoute
@@ -135,7 +128,6 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/diagnostico': typeof AuthenticatedDiagnosticoRoute
   '/diario': typeof AuthenticatedDiarioRoute
-  '/ejercicios': typeof AuthenticatedEjerciciosRoute
   '/etapas': typeof AuthenticatedEtapasRouteWithChildren
   '/membresia': typeof AuthenticatedMembresiaRoute
   '/perfil': typeof AuthenticatedPerfilRoute
@@ -154,7 +146,6 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/diagnostico': typeof AuthenticatedDiagnosticoRoute
   '/_authenticated/diario': typeof AuthenticatedDiarioRoute
-  '/_authenticated/ejercicios': typeof AuthenticatedEjerciciosRoute
   '/_authenticated/etapas': typeof AuthenticatedEtapasRouteWithChildren
   '/_authenticated/membresia': typeof AuthenticatedMembresiaRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
@@ -173,7 +164,6 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/diagnostico'
     | '/diario'
-    | '/ejercicios'
     | '/etapas'
     | '/membresia'
     | '/perfil'
@@ -190,7 +180,6 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/diagnostico'
     | '/diario'
-    | '/ejercicios'
     | '/etapas'
     | '/membresia'
     | '/perfil'
@@ -208,7 +197,6 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/diagnostico'
     | '/_authenticated/diario'
-    | '/_authenticated/ejercicios'
     | '/_authenticated/etapas'
     | '/_authenticated/membresia'
     | '/_authenticated/perfil'
@@ -282,13 +270,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEtapasRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/ejercicios': {
-      id: '/_authenticated/ejercicios'
-      path: '/ejercicios'
-      fullPath: '/ejercicios'
-      preLoaderRoute: typeof AuthenticatedEjerciciosRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/diario': {
       id: '/_authenticated/diario'
       path: '/diario'
@@ -359,7 +340,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedDiagnosticoRoute: typeof AuthenticatedDiagnosticoRoute
   AuthenticatedDiarioRoute: typeof AuthenticatedDiarioRoute
-  AuthenticatedEjerciciosRoute: typeof AuthenticatedEjerciciosRoute
   AuthenticatedEtapasRoute: typeof AuthenticatedEtapasRouteWithChildren
   AuthenticatedMembresiaRoute: typeof AuthenticatedMembresiaRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
@@ -372,7 +352,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedDiagnosticoRoute: AuthenticatedDiagnosticoRoute,
   AuthenticatedDiarioRoute: AuthenticatedDiarioRoute,
-  AuthenticatedEjerciciosRoute: AuthenticatedEjerciciosRoute,
   AuthenticatedEtapasRoute: AuthenticatedEtapasRouteWithChildren,
   AuthenticatedMembresiaRoute: AuthenticatedMembresiaRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
