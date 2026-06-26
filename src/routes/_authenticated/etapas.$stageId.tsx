@@ -33,12 +33,14 @@ function StageDetail() {
     queryKey: ["stage", id, user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const [stage, progress, allProgress] = await Promise.all([
+      const [stage, progress, allProgress, diagnostic, stages] = await Promise.all([
         supabase.from("stages").select("*").eq("id", id).maybeSingle(),
         supabase.from("stage_progress").select("*").eq("user_id", user!.id).eq("stage_id", id).maybeSingle(),
         supabase.from("stage_progress").select("stage_id,status").eq("user_id", user!.id),
+        supabase.from("diagnostic_results").select("*").eq("user_id", user!.id).order("created_at", { ascending: false }).limit(1).maybeSingle(),
+        supabase.from("stages").select("id,focus_area").order("id"),
       ]);
-      return { stage: stage.data, progress: progress.data, allProgress: allProgress.data ?? [] };
+      return { stage: stage.data, progress: progress.data, allProgress: allProgress.data ?? [], diagnostic: diagnostic.data, stages: stages.data ?? [] };
     },
   });
 
@@ -54,7 +56,10 @@ function StageDetail() {
   const tasks = ((stage.tasks as string[]) ?? []).filter(Boolean);
   const solutionSteps = ((stage.solution_steps as string[]) ?? []).filter(Boolean);
   const image = IMAGE_MAP[stage.image_key ?? "journey"] ?? stageImg;
-  const previousCompleted = id === 1 || (data.allProgress ?? []).some((p: any) => p.stage_id === id - 1 && p.status === "completed");
+  const orderedStageIds = orderStageIds(data.stages ?? [], getRecommendedFocuses(data.diagnostic));
+  const currentIndex = orderedStageIds.indexOf(id);
+  const previousId = orderedStageIds[currentIndex - 1];
+  const previousCompleted = currentIndex <= 0 || (data.allProgress ?? []).some((p: any) => p.stage_id === previousId && p.status === "completed");
   const currentCompleted = data.progress?.status === "completed";
 
   function toggle(i: number) {
@@ -177,4 +182,31 @@ function StageDetail() {
       </div>
     </div>
   );
+}
+
+const KEY_TO_FOCUS: Record<string, string> = {
+  familia: "restauración familiar",
+  autoestima: "identidad",
+  ansiedad: "sanidad emocional",
+  espiritual: "reconexión",
+  fe: "reconexión",
+  habitos: "disciplina espiritual",
+  proposito: "propósito",
+  emocional: "sanidad emocional",
+};
+
+function getRecommendedFocuses(diagnostic: any): string[] {
+  const weaknesses: string[] = diagnostic?.weaknesses ?? [];
+  const focuses = weaknesses.map((k) => KEY_TO_FOCUS[k]).filter(Boolean);
+  return Array.from(new Set(focuses.length ? focuses : ["reconexión", "sanidad emocional", "identidad"])).slice(0, 4);
+}
+
+function orderStageIds(stages: any[], focuses: string[]) {
+  return [...stages].sort((a, b) => {
+    const af = focuses.findIndex((f) => (a.focus_area ?? "").toLowerCase().includes(f));
+    const bf = focuses.findIndex((f) => (b.focus_area ?? "").toLowerCase().includes(f));
+    const ar = af === -1 ? 99 : af;
+    const br = bf === -1 ? 99 : bf;
+    return ar - br || a.id - b.id;
+  }).map((s) => s.id);
 }
