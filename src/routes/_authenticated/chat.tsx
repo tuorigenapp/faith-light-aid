@@ -7,7 +7,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Send, Trash2, MessageCircle, Sparkles } from "lucide-react";
+import { Plus, Send, Trash2, MessageCircle, Sparkles, AlertCircle } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -118,7 +118,7 @@ function ChatWindow({ conversationId }: { conversationId: string }) {
       });
       qc.invalidateQueries({ queryKey: ["messages", conversationId] });
     },
-    onError: (e) => toast.error(e.message),
+    onError: (e) => toast.error(e.message.includes("402") ? "Los créditos de Lovable AI están agotados. Recarga créditos para activar respuestas reales del consultor IA." : e.message),
   });
 
   useEffect(() => { inputRef.current?.focus(); }, [conversationId, status]);
@@ -150,12 +150,22 @@ function ChatWindow({ conversationId }: { conversationId: string }) {
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 md:px-8 py-6">
         <div className="max-w-3xl mx-auto space-y-6">
           {messages.length === 0 && (
-            <Card className="p-6 bg-gold/5 border-gold/30">
+            <Card className="p-6 bg-gold/5 border-gold/30 rounded-[1.7rem]">
               <div className="flex items-start gap-3">
                 <Sparkles className="w-5 h-5 text-gold mt-0.5" />
                 <div>
                   <p className="font-display text-base">Estoy aquí para escucharte.</p>
                   <p className="text-sm text-muted-foreground mt-1">Comparte lo que sientes, lo que te preocupa o lo que buscas. No estás solo(a).</p>
+                </div>
+              </div>
+            </Card>
+          )}
+          {messages.length === 0 && (
+            <Card className="p-5 rounded-[1.7rem] border-primary/20 bg-primary/5">
+              <div className="flex gap-3">
+                <AlertCircle className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                <div className="text-sm text-muted-foreground leading-relaxed">
+                  Si ves un error al enviar, no es tu pantalla: el Gateway IA devolvió <b>402</b> por créditos agotados. Ya dejé un mensaje claro para el usuario y el historial se guarda; solo falta recargar créditos para que responda en vivo.
                 </div>
               </div>
             </Card>
