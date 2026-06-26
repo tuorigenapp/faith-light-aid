@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import type { ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -178,7 +179,7 @@ function Dashboard() {
   );
 }
 
-function ActionCard({ to, icon, title, desc }: { to: any; icon: React.ReactNode; title: string; desc: string }) {
+function ActionCard({ to, icon, title, desc }: { to: any; icon: ReactNode; title: string; desc: string }) {
   return (
     <Link to={to}>
       <Card className="h-full p-4 rounded-[1.5rem] hover:border-primary transition-colors shadow-soft">
