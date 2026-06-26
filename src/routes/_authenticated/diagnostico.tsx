@@ -8,6 +8,8 @@ import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
+import stageImg from "@/assets/stage-journey.jpg";
+import { ArrowRight, CheckCircle2, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/diagnostico")({
   head: () => ({ meta: [{ title: "Diagnóstico Espiritual — Reconectando" }] }),
@@ -42,7 +44,7 @@ function Diagnostico() {
   async function submit() {
     if (!user) return;
     setSubmitting(true);
-    const scores = answers;
+    const scores = Object.fromEntries(QUESTIONS.map(q => [q.key, answers[q.key] ?? 5]));
     const avg = Object.values(scores).reduce((a, b) => a + b, 0) / Object.values(scores).length;
     const level = avg < 4 ? "En proceso de sanidad" : avg < 7 ? "En crecimiento" : "Caminando firme";
 
@@ -51,7 +53,7 @@ function Diagnostico() {
 
     const recommended = avg < 4 ? "basico" : avg < 7 ? "avanzado" : "anual";
 
-    const summary = `Tu diagnóstico inicial muestra un nivel "${level}". ${lows.length ? `Áreas a fortalecer: ${lows.join(", ")}.` : ""} ${highs.length ? `Fortalezas: ${highs.join(", ")}.` : ""} Te recomendamos comenzar por la Etapa 1 y dialogar con el Consultor IA.`;
+    const summary = `Tu diagnóstico inicial muestra un nivel "${level}". ${lows.length ? `Áreas a fortalecer: ${lows.join(", ")}.` : ""} ${highs.length ? `Fortalezas: ${highs.join(", ")}.` : ""} La app ordenará tus etapas según estas áreas y guardará tu avance.`;
 
     const { error } = await supabase.from("diagnostic_results").insert({
       user_id: user.id,
@@ -71,17 +73,24 @@ function Diagnostico() {
   }
 
   return (
-    <div className="p-6 md:p-10 max-w-2xl mx-auto">
-      <h1 className="font-display text-3xl">Diagnóstico Espiritual Inicial</h1>
-      <p className="text-muted-foreground mt-2 text-sm">Responde con honestidad. Esto nos ayudará a personalizar tu camino.</p>
+    <div className="px-4 py-6 md:p-10 max-w-4xl mx-auto mobile-safe-bottom lg:pb-10">
+      <section className="relative overflow-hidden rounded-[2rem] p-6 md:p-8 text-primary-foreground min-h-56 flex items-end shadow-glow">
+        <img src={stageImg} alt="Diagnóstico espiritual" width={1024} height={1024} className="absolute inset-0 h-full w-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-t from-foreground/85 via-foreground/35 to-transparent" />
+        <div className="relative z-10">
+          <div className="inline-flex items-center gap-2 rounded-full bg-background/15 border border-primary-foreground/20 backdrop-blur-xl px-3 py-1 text-xs font-bold text-gold"><Sparkles className="w-3.5 h-3.5" /> Ruta personalizada</div>
+          <h1 className="font-display font-extrabold text-4xl mt-4">Diagnóstico Espiritual Inicial</h1>
+          <p className="text-primary-foreground/80 mt-2 max-w-2xl">Este paso define qué etapas se recomiendan primero y cómo se desbloquea tu camino.</p>
+        </div>
+      </section>
 
       <Progress value={((step + 1) / (total + 1)) * 100} className="mt-6" />
       <div className="text-xs text-muted-foreground mt-2">Pregunta {Math.min(step + 1, total + 1)} de {total + 1}</div>
 
-      <Card className="mt-6 p-8">
+      <Card className="mt-6 p-6 md:p-8 rounded-[2rem] shadow-soft">
         {step < total ? (
           <>
-            <h2 className="font-display text-xl">{current.label}</h2>
+            <h2 className="font-display font-bold text-2xl">{current.label}</h2>
             <div className="mt-8">
               <Slider value={[value]} min={1} max={10} step={1} onValueChange={(v) => setVal(v[0])} />
               <div className="flex justify-between text-xs text-muted-foreground mt-3">
@@ -93,18 +102,18 @@ function Diagnostico() {
           </>
         ) : (
           <>
-            <h2 className="font-display text-xl">¿Hay algo más que quieras compartir?</h2>
+            <h2 className="font-display font-bold text-2xl">¿Hay algo más que quieras compartir?</h2>
             <p className="text-sm text-muted-foreground mt-1">Opcional. Lo que escribas es privado.</p>
-            <Textarea value={context} onChange={e => setContext(e.target.value)} className="mt-4 min-h-32" placeholder="Ej. Estoy atravesando un momento difícil con..." />
+            <Textarea value={context} onChange={e => setContext(e.target.value)} className="mt-4 min-h-32 rounded-2xl" placeholder="Ej. Estoy atravesando un momento difícil con..." />
           </>
         )}
         <div className="flex justify-between mt-8">
-          <Button variant="ghost" disabled={step === 0} onClick={() => setStep(s => s - 1)}>Atrás</Button>
+          <Button variant="ghost" disabled={step === 0} onClick={() => setStep(s => s - 1)} className="rounded-full">Atrás</Button>
           {step < total ? (
-            <Button onClick={() => setStep(s => s + 1)} className="bg-primary">Continuar</Button>
+            <Button onClick={() => setStep(s => s + 1)} className="bg-primary rounded-full">Continuar <ArrowRight className="w-4 h-4 ml-2" /></Button>
           ) : (
-            <Button onClick={submit} disabled={submitting} className="bg-gold text-gold-foreground hover:bg-gold/90">
-              {submitting ? "Procesando..." : "Ver mi plan"}
+            <Button onClick={submit} disabled={submitting} className="bg-primary rounded-full">
+              {submitting ? "Procesando..." : <><CheckCircle2 className="w-4 h-4 mr-2" /> Ver mi plan</>}
             </Button>
           )}
         </div>
