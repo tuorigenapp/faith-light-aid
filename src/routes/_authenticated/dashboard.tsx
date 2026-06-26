@@ -119,6 +119,21 @@ function Dashboard() {
         </Link>
       )}
 
+      <section className="mt-5 grid grid-cols-7 gap-2">
+        {Array.from({ length: 7 }).map((_, idx) => {
+          const d = new Date();
+          d.setDate(d.getDate() - 3 + idx);
+          const active = idx === 3;
+          return (
+            <div key={idx} className={cnCalendar(active)}>
+              <div className="text-[10px] uppercase font-extrabold opacity-70">{format(d, "EEE", { locale: es }).slice(0, 3)}</div>
+              <div className="font-display font-extrabold text-lg">{format(d, "d")}</div>
+              {active && <div className="mx-auto mt-1 h-1.5 w-1.5 rounded-full bg-current" />}
+            </div>
+          );
+        })}
+      </section>
+
       <section className="mt-5 grid lg:grid-cols-[1.1fr_0.9fr] gap-5">
         <Card className="overflow-hidden rounded-[2rem] border-border shadow-soft">
           <img src={devotionalImage} alt="Devocional del día" width={1024} height={1024} loading="lazy" className="h-48 w-full object-cover" />
@@ -189,4 +204,11 @@ function ActionCard({ to, icon, title, desc }: { to: any; icon: ReactNode; title
       </Card>
     </Link>
   );
+}
+
+function cnCalendar(active: boolean) {
+  return [
+    "rounded-2xl p-2 text-center border shadow-soft",
+    active ? "bg-primary text-primary-foreground border-primary" : "bg-card text-muted-foreground border-border",
+  ].join(" ");
 }
