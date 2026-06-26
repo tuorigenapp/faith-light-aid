@@ -165,7 +165,7 @@ function ChatWindow({ conversationId }: { conversationId: string }) {
               <div className="flex gap-3">
                 <AlertCircle className="w-5 h-5 text-primary shrink-0 mt-0.5" />
                 <div className="text-sm text-muted-foreground leading-relaxed">
-                  Si ves un error al enviar, no es tu pantalla: el Gateway IA devolvió <b>402</b> por créditos agotados. Ya dejé un mensaje claro para el usuario y el historial se guarda; solo falta recargar créditos para que responda en vivo.
+                  Si el consultor no responde, puede ser por falta temporal de créditos de IA. Tu mensaje queda guardado y podrás continuar cuando el servicio vuelva a estar activo.
                 </div>
               </div>
             </Card>
