@@ -7,7 +7,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Send, Trash2, MessageCircle, Sparkles } from "lucide-react";
+import { Plus, Send, Trash2, MessageCircle, Sparkles, AlertCircle } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -105,7 +105,7 @@ function ChatWindow({ conversationId }: { conversationId: string }) {
     },
   });
 
-  const { messages, sendMessage, status } = useChat({
+  const { messages, sendMessage, status, setMessages } = useChat({
     id: conversationId,
     messages: initialMessages ?? [],
     transport: new DefaultChatTransport({ api: "/api/chat" }),
@@ -118,8 +118,23 @@ function ChatWindow({ conversationId }: { conversationId: string }) {
       });
       qc.invalidateQueries({ queryKey: ["messages", conversationId] });
     },
-    onError: (e) => toast.error(e.message),
+    onError: async (e) => {
+      const text = e.message.includes("402")
+        ? "El consultor IA no puede responder ahora porque los créditos del servicio están agotados. Tu mensaje quedó guardado; recarga créditos de IA para activar respuestas reales."
+        : "No pude responder ahora. Tu mensaje quedó guardado; intenta nuevamente en unos minutos.";
+      const fallback: UIMessage = { id: crypto.randomUUID(), role: "assistant", parts: [{ type: "text", text }] };
+      setMessages((prev) => [...prev, fallback]);
+      if (user) {
+        await supabase.from("messages").insert({ conversation_id: conversationId, user_id: user.id, role: "assistant", content: fallback.parts as any });
+      }
+      qc.invalidateQueries({ queryKey: ["messages", conversationId] });
+      toast.error(text);
+    },
   });
+
+  useEffect(() => {
+    if (initialMessages) setMessages(initialMessages);
+  }, [conversationId, initialMessages, setMessages]);
 
   useEffect(() => { inputRef.current?.focus(); }, [conversationId, status]);
   useEffect(() => { scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" }); }, [messages]);
@@ -150,12 +165,22 @@ function ChatWindow({ conversationId }: { conversationId: string }) {
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 md:px-8 py-6">
         <div className="max-w-3xl mx-auto space-y-6">
           {messages.length === 0 && (
-            <Card className="p-6 bg-gold/5 border-gold/30">
+            <Card className="p-6 bg-gold/5 border-gold/30 rounded-[1.7rem]">
               <div className="flex items-start gap-3">
                 <Sparkles className="w-5 h-5 text-gold mt-0.5" />
                 <div>
                   <p className="font-display text-base">Estoy aquí para escucharte.</p>
                   <p className="text-sm text-muted-foreground mt-1">Comparte lo que sientes, lo que te preocupa o lo que buscas. No estás solo(a).</p>
+                </div>
+              </div>
+            </Card>
+          )}
+          {messages.length === 0 && (
+            <Card className="p-5 rounded-[1.7rem] border-primary/20 bg-primary/5">
+              <div className="flex gap-3">
+                <AlertCircle className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                <div className="text-sm text-muted-foreground leading-relaxed">
+                  Si el consultor no responde, puede ser por falta temporal de créditos de IA. Tu mensaje queda guardado y podrás continuar cuando el servicio vuelva a estar activo.
                 </div>
               </div>
             </Card>
