@@ -77,7 +77,8 @@ function Dashboard() {
   const firstName = data?.profile?.full_name?.split(" ")[0] ?? "Hermano";
   const devotional = data?.devotional ?? FALLBACK_DEVOTIONAL;
   const devotionalDone = (data?.activities ?? []).some((a: any) => a.activity_type === "devotional");
-  const exerciseDone = data?.dailyExercise ? (data?.completions ?? []).some((c: any) => c.exercise_id === data.dailyExercise.id) : false;
+  const dailyExerciseId = data?.dailyExercise?.id;
+  const exerciseDone = dailyExerciseId ? (data?.completions ?? []).some((c: any) => c.exercise_id === dailyExerciseId) : false;
   const devotionalImage = IMAGE_MAP[(data?.devotional as any)?.image_key ?? "daily"] ?? dailyImg;
 
   async function markDevotionalDone() {
