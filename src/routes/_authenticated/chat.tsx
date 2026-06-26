@@ -105,7 +105,7 @@ function ChatWindow({ conversationId }: { conversationId: string }) {
     },
   });
 
-  const { messages, sendMessage, status } = useChat({
+  const { messages, sendMessage, status, setMessages } = useChat({
     id: conversationId,
     messages: initialMessages ?? [],
     transport: new DefaultChatTransport({ api: "/api/chat" }),
@@ -118,7 +118,17 @@ function ChatWindow({ conversationId }: { conversationId: string }) {
       });
       qc.invalidateQueries({ queryKey: ["messages", conversationId] });
     },
-    onError: (e) => toast.error(e.message.includes("402") ? "Los créditos de Lovable AI están agotados. Recarga créditos para activar respuestas reales del consultor IA." : e.message),
+    onError: async (e) => {
+      const text = e.message.includes("402")
+        ? "El consultor IA no puede responder ahora porque los créditos del servicio están agotados. Tu mensaje quedó guardado; recarga créditos de IA para activar respuestas reales."
+        : "No pude responder ahora. Tu mensaje quedó guardado; intenta nuevamente en unos minutos.";
+      const fallback: UIMessage = { id: crypto.randomUUID(), role: "assistant", parts: [{ type: "text", text }] };
+      setMessages((prev) => [...prev, fallback]);
+      if (user) {
+        await supabase.from("messages").insert({ conversation_id: conversationId, user_id: user.id, role: "assistant", content: fallback.parts as any });
+      }
+      toast.error(text);
+    },
   });
 
   useEffect(() => { inputRef.current?.focus(); }, [conversationId, status]);
