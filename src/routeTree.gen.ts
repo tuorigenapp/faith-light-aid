@@ -16,6 +16,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedMembresiaRouteImport } from './routes/_authenticated/membresia'
+import { Route as AuthenticatedEtapasRouteImport } from './routes/_authenticated/etapas'
 import { Route as AuthenticatedEjerciciosRouteImport } from './routes/_authenticated/ejercicios'
 import { Route as AuthenticatedDiarioRouteImport } from './routes/_authenticated/diario'
 import { Route as AuthenticatedDiagnosticoRouteImport } from './routes/_authenticated/diagnostico'
@@ -59,6 +60,11 @@ const AuthenticatedMembresiaRoute = AuthenticatedMembresiaRouteImport.update({
   path: '/membresia',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedEtapasRoute = AuthenticatedEtapasRouteImport.update({
+  id: '/etapas',
+  path: '/etapas',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedEjerciciosRoute = AuthenticatedEjerciciosRouteImport.update({
   id: '/ejercicios',
   path: '/ejercicios',
@@ -97,9 +103,9 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
 } as any)
 const AuthenticatedEtapasStageIdRoute =
   AuthenticatedEtapasStageIdRouteImport.update({
-    id: '/etapas/$stageId',
-    path: '/etapas/$stageId',
-    getParentRoute: () => AuthenticatedRouteRoute,
+    id: '/$stageId',
+    path: '/$stageId',
+    getParentRoute: () => AuthenticatedEtapasRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -113,6 +119,7 @@ export interface FileRoutesByFullPath {
   '/diagnostico': typeof AuthenticatedDiagnosticoRoute
   '/diario': typeof AuthenticatedDiarioRoute
   '/ejercicios': typeof AuthenticatedEjerciciosRoute
+  '/etapas': typeof AuthenticatedEtapasRouteWithChildren
   '/membresia': typeof AuthenticatedMembresiaRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/api/chat': typeof ApiChatRoute
@@ -129,6 +136,7 @@ export interface FileRoutesByTo {
   '/diagnostico': typeof AuthenticatedDiagnosticoRoute
   '/diario': typeof AuthenticatedDiarioRoute
   '/ejercicios': typeof AuthenticatedEjerciciosRoute
+  '/etapas': typeof AuthenticatedEtapasRouteWithChildren
   '/membresia': typeof AuthenticatedMembresiaRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/api/chat': typeof ApiChatRoute
@@ -147,6 +155,7 @@ export interface FileRoutesById {
   '/_authenticated/diagnostico': typeof AuthenticatedDiagnosticoRoute
   '/_authenticated/diario': typeof AuthenticatedDiarioRoute
   '/_authenticated/ejercicios': typeof AuthenticatedEjerciciosRoute
+  '/_authenticated/etapas': typeof AuthenticatedEtapasRouteWithChildren
   '/_authenticated/membresia': typeof AuthenticatedMembresiaRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
   '/api/chat': typeof ApiChatRoute
@@ -165,6 +174,7 @@ export interface FileRouteTypes {
     | '/diagnostico'
     | '/diario'
     | '/ejercicios'
+    | '/etapas'
     | '/membresia'
     | '/perfil'
     | '/api/chat'
@@ -181,6 +191,7 @@ export interface FileRouteTypes {
     | '/diagnostico'
     | '/diario'
     | '/ejercicios'
+    | '/etapas'
     | '/membresia'
     | '/perfil'
     | '/api/chat'
@@ -198,6 +209,7 @@ export interface FileRouteTypes {
     | '/_authenticated/diagnostico'
     | '/_authenticated/diario'
     | '/_authenticated/ejercicios'
+    | '/_authenticated/etapas'
     | '/_authenticated/membresia'
     | '/_authenticated/perfil'
     | '/api/chat'
@@ -263,6 +275,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMembresiaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/etapas': {
+      id: '/_authenticated/etapas'
+      path: '/etapas'
+      fullPath: '/etapas'
+      preLoaderRoute: typeof AuthenticatedEtapasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/ejercicios': {
       id: '/_authenticated/ejercicios'
       path: '/ejercicios'
@@ -314,13 +333,24 @@ declare module '@tanstack/react-router' {
     }
     '/_authenticated/etapas/$stageId': {
       id: '/_authenticated/etapas/$stageId'
-      path: '/etapas/$stageId'
+      path: '/$stageId'
       fullPath: '/etapas/$stageId'
       preLoaderRoute: typeof AuthenticatedEtapasStageIdRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      parentRoute: typeof AuthenticatedEtapasRoute
     }
   }
 }
+
+interface AuthenticatedEtapasRouteChildren {
+  AuthenticatedEtapasStageIdRoute: typeof AuthenticatedEtapasStageIdRoute
+}
+
+const AuthenticatedEtapasRouteChildren: AuthenticatedEtapasRouteChildren = {
+  AuthenticatedEtapasStageIdRoute: AuthenticatedEtapasStageIdRoute,
+}
+
+const AuthenticatedEtapasRouteWithChildren =
+  AuthenticatedEtapasRoute._addFileChildren(AuthenticatedEtapasRouteChildren)
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
@@ -330,9 +360,9 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDiagnosticoRoute: typeof AuthenticatedDiagnosticoRoute
   AuthenticatedDiarioRoute: typeof AuthenticatedDiarioRoute
   AuthenticatedEjerciciosRoute: typeof AuthenticatedEjerciciosRoute
+  AuthenticatedEtapasRoute: typeof AuthenticatedEtapasRouteWithChildren
   AuthenticatedMembresiaRoute: typeof AuthenticatedMembresiaRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
-  AuthenticatedEtapasStageIdRoute: typeof AuthenticatedEtapasStageIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -343,9 +373,9 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDiagnosticoRoute: AuthenticatedDiagnosticoRoute,
   AuthenticatedDiarioRoute: AuthenticatedDiarioRoute,
   AuthenticatedEjerciciosRoute: AuthenticatedEjerciciosRoute,
+  AuthenticatedEtapasRoute: AuthenticatedEtapasRouteWithChildren,
   AuthenticatedMembresiaRoute: AuthenticatedMembresiaRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
-  AuthenticatedEtapasStageIdRoute: AuthenticatedEtapasStageIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

@@ -90,7 +90,7 @@ function Etapas() {
         {orderedStages.map((s: any, i: number) => {
           const p = progressMap.get(s.id);
           const completed = p?.status === "completed";
-          const unlocked = i === 0 || completed || orderedStages.slice(0, i).some((prev: any) => completedIds.has(prev.id));
+          const unlocked = i === 0 || completed || completedIds.has(orderedStages[i - 1]?.id);
           const active = unlocked && !completed;
           const image = IMAGE_MAP[s.image_key ?? "journey"] ?? stageImg;
           const recommended = recommendedFocuses.some((f) => (s.focus_area ?? "").toLowerCase().includes(f));
