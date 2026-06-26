@@ -4,7 +4,7 @@ import { useAuth } from "@/lib/use-auth";
 import { useTheme } from "@/lib/theme";
 import {
   Home, MessageCircle, Compass, Layers, BookHeart, Dumbbell, Library,
-  CreditCard, User as UserIcon, Shield, LogOut, Menu, Sun, Moon, X,
+  CreditCard, User as UserIcon, Shield, LogOut, Menu, Sun, Moon, X, PhoneCall,
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -177,6 +177,16 @@ function AuthLayout() {
         </header>
 
         <main className="flex-1 pb-[calc(env(safe-area-inset-bottom)+72px)] lg:pb-0"><Outlet /></main>
+
+        <a
+          href="https://wa.me/?text=Hola%2C%20necesito%20acompa%C3%B1amiento%20en%20Reconectando%20el%20Esp%C3%ADritu%20con%20Dios"
+          target="_blank"
+          rel="noreferrer"
+          className="fixed right-4 bottom-[calc(env(safe-area-inset-bottom)+5.2rem)] lg:bottom-6 lg:right-6 z-30 h-14 w-14 rounded-full bg-[#25D366] text-white shadow-glow grid place-items-center hover:scale-105 transition-transform"
+          aria-label="Abrir WhatsApp"
+        >
+          <PhoneCall className="w-6 h-6" />
+        </a>
 
         {/* Mobile bottom nav */}
         <nav
