@@ -127,9 +127,14 @@ function ChatWindow({ conversationId }: { conversationId: string }) {
       if (user) {
         await supabase.from("messages").insert({ conversation_id: conversationId, user_id: user.id, role: "assistant", content: fallback.parts as any });
       }
+      qc.invalidateQueries({ queryKey: ["messages", conversationId] });
       toast.error(text);
     },
   });
+
+  useEffect(() => {
+    if (initialMessages) setMessages(initialMessages);
+  }, [conversationId, initialMessages, setMessages]);
 
   useEffect(() => { inputRef.current?.focus(); }, [conversationId, status]);
   useEffect(() => { scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" }); }, [messages]);
