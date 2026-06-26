@@ -7,7 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import heroImg from "@/assets/hero.jpg";
+import heroImg from "@/assets/spiritual-hero.jpg";
+import dailyImg from "@/assets/daily-devotional.jpg";
+import { ArrowRight, CheckCircle2, Heart } from "lucide-react";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({ meta: [{ title: "Iniciar sesión — Reconectando" }] }),
@@ -40,17 +42,21 @@ function AuthPage() {
   async function signUp(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email, password,
       options: {
-        emailRedirectTo: `${window.location.origin}/dashboard`,
+        emailRedirectTo: `${window.location.origin}/auth`,
         data: { full_name: fullName },
       },
     });
     setLoading(false);
     if (error) return toast.error(error.message);
-    toast.success("Cuenta creada. Revisa tu correo si se requiere verificación.");
-    navigate({ to: "/diagnostico" });
+    if (data.session) {
+      toast.success("Cuenta creada. Comienza tu diagnóstico espiritual.");
+      navigate({ to: "/diagnostico" });
+    } else {
+      toast.success("Cuenta creada. Revisa tu correo para confirmar el acceso.");
+    }
   }
 
   async function googleSignIn() {
@@ -70,22 +76,32 @@ function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen grid md:grid-cols-2">
-      <div className="hidden md:block relative">
-        <img src={heroImg} alt="" className="absolute inset-0 w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-primary/70" />
-        <div className="relative z-10 p-12 h-full flex flex-col justify-between text-white">
-          <Link to="/" className="font-display text-xl">Reconectando</Link>
-          <div>
-            <p className="scripture text-gold text-lg">"En Cristo somos más que vencedores."</p>
-            <p className="mt-1 text-white/70 text-sm">Romanos 8:37</p>
+    <div className="min-h-screen grid lg:grid-cols-[1.05fr_0.95fr] bg-background">
+      <div className="relative hidden lg:block overflow-hidden">
+        <img src={heroImg} alt="Biblia abierta con luz cálida" width={1280} height={1600} className="absolute inset-0 w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/35 to-transparent" />
+        <div className="relative z-10 p-12 h-full flex flex-col justify-between text-primary-foreground">
+          <Link to="/" className="flex items-center gap-3 font-display font-bold text-xl">
+            <img src="/app-icon.png" alt="" width={42} height={42} className="rounded-2xl" /> Reconectando
+          </Link>
+          <div className="max-w-md">
+            <div className="rounded-[2rem] bg-background/14 backdrop-blur-xl border border-primary-foreground/20 p-6">
+              <img src={dailyImg} alt="Devocional diario" width={1024} height={1024} loading="lazy" className="w-full h-40 object-cover rounded-[1.4rem] mb-5" />
+              <p className="scripture text-gold text-xl leading-snug">"En Cristo somos más que vencedores."</p>
+              <p className="mt-2 text-primary-foreground/75 text-sm">Romanos 8:37</p>
+            </div>
           </div>
         </div>
       </div>
-      <div className="flex items-center justify-center p-6 md:p-12">
-        <div className="w-full max-w-md">
-          <h1 className="font-display text-3xl text-foreground">Bienvenido</h1>
-          <p className="mt-2 text-muted-foreground text-sm">Tu camino de restauración empieza aquí.</p>
+      <div className="flex items-center justify-center p-4 sm:p-6 md:p-12">
+        <div className="w-full max-w-md app-card p-5 sm:p-7">
+          <Link to="/" className="lg:hidden flex items-center gap-2 mb-6">
+            <img src="/app-icon.png" alt="" width={34} height={34} className="rounded-xl" />
+            <span className="font-display font-bold">Reconectando</span>
+          </Link>
+          <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 text-primary px-3 py-1 text-xs font-bold"><Heart className="w-3.5 h-3.5" /> Espacio seguro</div>
+          <h1 className="font-display font-extrabold text-4xl text-foreground mt-4">Bienvenido</h1>
+          <p className="mt-2 text-muted-foreground text-sm">Crea tu cuenta, pasa por el diagnóstico y recibe una ruta espiritual personalizada.</p>
 
           <div className="mt-8 grid gap-2.5">
             <Button onClick={googleSignIn} disabled={loading} variant="outline" className="w-full h-11">
@@ -101,8 +117,8 @@ function AuthPage() {
             <div className="flex-1 h-px bg-border" /> O CON CORREO <div className="flex-1 h-px bg-border" />
           </div>
 
-          <Tabs defaultValue="signin">
-            <TabsList className="grid grid-cols-2 w-full">
+          <Tabs defaultValue="signup">
+            <TabsList className="grid grid-cols-2 w-full rounded-full p-1 h-12 bg-muted">
               <TabsTrigger value="signin">Iniciar sesión</TabsTrigger>
               <TabsTrigger value="signup">Crear cuenta</TabsTrigger>
             </TabsList>
@@ -110,7 +126,7 @@ function AuthPage() {
               <form onSubmit={signIn} className="space-y-4 mt-4">
                 <div><Label>Correo</Label><Input type="email" required value={email} onChange={e => setEmail(e.target.value)} /></div>
                 <div><Label>Contraseña</Label><Input type="password" required value={password} onChange={e => setPassword(e.target.value)} /></div>
-                <Button disabled={loading} type="submit" className="w-full h-11 bg-primary">Entrar</Button>
+                <Button disabled={loading} type="submit" className="w-full h-12 rounded-full bg-primary">Entrar <ArrowRight className="ml-2 w-4 h-4" /></Button>
               </form>
             </TabsContent>
             <TabsContent value="signup">
@@ -118,7 +134,7 @@ function AuthPage() {
                 <div><Label>Nombre completo</Label><Input required value={fullName} onChange={e => setFullName(e.target.value)} /></div>
                 <div><Label>Correo</Label><Input type="email" required value={email} onChange={e => setEmail(e.target.value)} /></div>
                 <div><Label>Contraseña</Label><Input type="password" required minLength={6} value={password} onChange={e => setPassword(e.target.value)} /></div>
-                <Button disabled={loading} type="submit" className="w-full h-11 bg-gold text-gold-foreground hover:bg-gold/90">Crear cuenta gratis</Button>
+                <Button disabled={loading} type="submit" className="w-full h-12 rounded-full bg-primary">Crear cuenta gratis <CheckCircle2 className="ml-2 w-4 h-4" /></Button>
                 <p className="text-[11px] text-muted-foreground text-center">Al crear tu cuenta aceptas nuestro acompañamiento espiritual. Esta herramienta no reemplaza ayuda profesional.</p>
               </form>
             </TabsContent>
