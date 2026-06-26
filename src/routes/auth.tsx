@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import type { FormEvent } from "react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
@@ -29,7 +30,7 @@ function AuthPage() {
     });
   }, [navigate]);
 
-  async function signIn(e: React.FormEvent) {
+  async function signIn(e: FormEvent) {
     e.preventDefault();
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -39,7 +40,7 @@ function AuthPage() {
     navigate({ to: "/dashboard" });
   }
 
-  async function signUp(e: React.FormEvent) {
+  async function signUp(e: FormEvent) {
     e.preventDefault();
     setLoading(true);
     const { data, error } = await supabase.auth.signUp({
