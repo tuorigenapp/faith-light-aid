@@ -24,6 +24,7 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedChatRouteImport } from './routes/_authenticated/chat'
 import { Route as AuthenticatedBibliotecaRouteImport } from './routes/_authenticated/biblioteca'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedEtapasStageIdRouteImport } from './routes/_authenticated/etapas.$stageId'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -100,6 +101,12 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedEtapasStageIdRoute =
+  AuthenticatedEtapasStageIdRouteImport.update({
+    id: '/$stageId',
+    path: '/$stageId',
+    getParentRoute: () => AuthenticatedEtapasRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -112,10 +119,11 @@ export interface FileRoutesByFullPath {
   '/diagnostico': typeof AuthenticatedDiagnosticoRoute
   '/diario': typeof AuthenticatedDiarioRoute
   '/ejercicios': typeof AuthenticatedEjerciciosRoute
-  '/etapas': typeof AuthenticatedEtapasRoute
+  '/etapas': typeof AuthenticatedEtapasRouteWithChildren
   '/membresia': typeof AuthenticatedMembresiaRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/api/chat': typeof ApiChatRoute
+  '/etapas/$stageId': typeof AuthenticatedEtapasStageIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -128,10 +136,11 @@ export interface FileRoutesByTo {
   '/diagnostico': typeof AuthenticatedDiagnosticoRoute
   '/diario': typeof AuthenticatedDiarioRoute
   '/ejercicios': typeof AuthenticatedEjerciciosRoute
-  '/etapas': typeof AuthenticatedEtapasRoute
+  '/etapas': typeof AuthenticatedEtapasRouteWithChildren
   '/membresia': typeof AuthenticatedMembresiaRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/api/chat': typeof ApiChatRoute
+  '/etapas/$stageId': typeof AuthenticatedEtapasStageIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -146,10 +155,11 @@ export interface FileRoutesById {
   '/_authenticated/diagnostico': typeof AuthenticatedDiagnosticoRoute
   '/_authenticated/diario': typeof AuthenticatedDiarioRoute
   '/_authenticated/ejercicios': typeof AuthenticatedEjerciciosRoute
-  '/_authenticated/etapas': typeof AuthenticatedEtapasRoute
+  '/_authenticated/etapas': typeof AuthenticatedEtapasRouteWithChildren
   '/_authenticated/membresia': typeof AuthenticatedMembresiaRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
   '/api/chat': typeof ApiChatRoute
+  '/_authenticated/etapas/$stageId': typeof AuthenticatedEtapasStageIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -168,6 +178,7 @@ export interface FileRouteTypes {
     | '/membresia'
     | '/perfil'
     | '/api/chat'
+    | '/etapas/$stageId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -184,6 +195,7 @@ export interface FileRouteTypes {
     | '/membresia'
     | '/perfil'
     | '/api/chat'
+    | '/etapas/$stageId'
   id:
     | '__root__'
     | '/'
@@ -201,6 +213,7 @@ export interface FileRouteTypes {
     | '/_authenticated/membresia'
     | '/_authenticated/perfil'
     | '/api/chat'
+    | '/_authenticated/etapas/$stageId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -318,8 +331,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/etapas/$stageId': {
+      id: '/_authenticated/etapas/$stageId'
+      path: '/$stageId'
+      fullPath: '/etapas/$stageId'
+      preLoaderRoute: typeof AuthenticatedEtapasStageIdRouteImport
+      parentRoute: typeof AuthenticatedEtapasRoute
+    }
   }
 }
+
+interface AuthenticatedEtapasRouteChildren {
+  AuthenticatedEtapasStageIdRoute: typeof AuthenticatedEtapasStageIdRoute
+}
+
+const AuthenticatedEtapasRouteChildren: AuthenticatedEtapasRouteChildren = {
+  AuthenticatedEtapasStageIdRoute: AuthenticatedEtapasStageIdRoute,
+}
+
+const AuthenticatedEtapasRouteWithChildren =
+  AuthenticatedEtapasRoute._addFileChildren(AuthenticatedEtapasRouteChildren)
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
@@ -329,7 +360,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDiagnosticoRoute: typeof AuthenticatedDiagnosticoRoute
   AuthenticatedDiarioRoute: typeof AuthenticatedDiarioRoute
   AuthenticatedEjerciciosRoute: typeof AuthenticatedEjerciciosRoute
-  AuthenticatedEtapasRoute: typeof AuthenticatedEtapasRoute
+  AuthenticatedEtapasRoute: typeof AuthenticatedEtapasRouteWithChildren
   AuthenticatedMembresiaRoute: typeof AuthenticatedMembresiaRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
 }
@@ -342,7 +373,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDiagnosticoRoute: AuthenticatedDiagnosticoRoute,
   AuthenticatedDiarioRoute: AuthenticatedDiarioRoute,
   AuthenticatedEjerciciosRoute: AuthenticatedEjerciciosRoute,
-  AuthenticatedEtapasRoute: AuthenticatedEtapasRoute,
+  AuthenticatedEtapasRoute: AuthenticatedEtapasRouteWithChildren,
   AuthenticatedMembresiaRoute: AuthenticatedMembresiaRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
 }
