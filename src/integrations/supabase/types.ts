@@ -38,6 +38,72 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_activity: {
+        Row: {
+          activity_date: string
+          activity_type: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          reference_id: string | null
+          user_id: string
+        }
+        Insert: {
+          activity_date?: string
+          activity_type: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          reference_id?: string | null
+          user_id: string
+        }
+        Update: {
+          activity_date?: string
+          activity_type?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          reference_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      daily_devotionals: {
+        Row: {
+          challenge: string
+          created_at: string
+          day_of_year: number
+          id: string
+          image_key: string | null
+          quote: string
+          reflection: string
+          scripture: string
+          word: string
+        }
+        Insert: {
+          challenge: string
+          created_at?: string
+          day_of_year: number
+          id?: string
+          image_key?: string | null
+          quote: string
+          reflection: string
+          scripture: string
+          word: string
+        }
+        Update: {
+          challenge?: string
+          created_at?: string
+          day_of_year?: number
+          id?: string
+          image_key?: string | null
+          quote?: string
+          reflection?: string
+          scripture?: string
+          word?: string
+        }
+        Relationships: []
+      }
       diagnostic_results: {
         Row: {
           ai_summary: string | null
@@ -116,30 +182,42 @@ export type Database = {
         Row: {
           category: string
           created_at: string
+          day_index: number | null
           description: string | null
+          difficulty: string
           duration_minutes: number | null
           id: string
+          image_key: string | null
           scripture: string | null
+          sort_order: number
           steps: Json | null
           title: string
         }
         Insert: {
           category: string
           created_at?: string
+          day_index?: number | null
           description?: string | null
+          difficulty?: string
           duration_minutes?: number | null
           id?: string
+          image_key?: string | null
           scripture?: string | null
+          sort_order?: number
           steps?: Json | null
           title: string
         }
         Update: {
           category?: string
           created_at?: string
+          day_index?: number | null
           description?: string | null
+          difficulty?: string
           duration_minutes?: number | null
           id?: string
+          image_key?: string | null
           scripture?: string | null
+          sort_order?: number
           steps?: Json | null
           title?: string
         }
@@ -344,36 +422,54 @@ export type Database = {
       stages: {
         Row: {
           created_at: string
+          deep_explanation: string | null
           description: string | null
+          focus_area: string | null
           id: number
+          image_key: string | null
           prayer: string | null
+          problem_tags: string[] | null
+          recommended_action: string | null
           reflection: string | null
           scripture: string | null
           scripture_reference: string | null
+          solution_steps: Json | null
           subtitle: string | null
           tasks: Json | null
           title: string
         }
         Insert: {
           created_at?: string
+          deep_explanation?: string | null
           description?: string | null
+          focus_area?: string | null
           id: number
+          image_key?: string | null
           prayer?: string | null
+          problem_tags?: string[] | null
+          recommended_action?: string | null
           reflection?: string | null
           scripture?: string | null
           scripture_reference?: string | null
+          solution_steps?: Json | null
           subtitle?: string | null
           tasks?: Json | null
           title: string
         }
         Update: {
           created_at?: string
+          deep_explanation?: string | null
           description?: string | null
+          focus_area?: string | null
           id?: number
+          image_key?: string | null
           prayer?: string | null
+          problem_tags?: string[] | null
+          recommended_action?: string | null
           reflection?: string | null
           scripture?: string | null
           scripture_reference?: string | null
+          solution_steps?: Json | null
           subtitle?: string | null
           tasks?: Json | null
           title?: string
