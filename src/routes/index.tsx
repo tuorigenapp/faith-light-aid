@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import type { ReactNode } from "react";
 import heroImg from "@/assets/spiritual-hero.jpg";
 import dailyImg from "@/assets/daily-devotional.jpg";
 import stageImg from "@/assets/stage-journey.jpg";
@@ -141,7 +142,7 @@ function MiniStat({ value, label }: { value: string; label: string }) {
   return <div className="rounded-3xl bg-card/80 border border-border p-4 text-center shadow-soft"><div className="font-display font-extrabold text-2xl text-primary">{value}</div><div className="text-[11px] uppercase tracking-wider text-muted-foreground font-bold">{label}</div></div>;
 }
 
-function PhoneTile({ icon, label }: { icon: React.ReactNode; label: string }) {
+function PhoneTile({ icon, label }: { icon: ReactNode; label: string }) {
   return <div className="rounded-2xl bg-muted p-3 flex items-center gap-2 text-xs font-bold"> <span className="text-primary">{icon}</span>{label}</div>;
 }
 
