@@ -56,7 +56,13 @@ function AuthPage() {
       toast.success("Cuenta creada. Comienza tu diagnóstico espiritual.");
       navigate({ to: "/diagnostico" });
     } else {
-      toast.success("Cuenta creada. Revisa tu correo para confirmar el acceso.");
+      const signin = await supabase.auth.signInWithPassword({ email, password });
+      if (!signin.error) {
+        toast.success("Cuenta creada. Comienza tu diagnóstico espiritual.");
+        navigate({ to: "/diagnostico" });
+      } else {
+        toast.success("Cuenta creada. Revisa tu correo para confirmar el acceso.");
+      }
     }
   }
 
