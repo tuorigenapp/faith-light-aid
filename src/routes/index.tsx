@@ -71,7 +71,7 @@ function Landing() {
               </div>
               <div className="mt-8 grid grid-cols-3 gap-3 max-w-lg">
                 <MiniStat value="8" label="etapas" />
-                <MiniStat value="365" label="devocionales" />
+                <MiniStat value="Diario" label="frases" />
                 <MiniStat value="24/7" label="guía IA" />
               </div>
             </div>
