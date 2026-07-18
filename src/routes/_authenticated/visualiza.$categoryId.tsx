@@ -31,12 +31,12 @@ function Playlist() {
 
   return (
     <div className="pb-24">
-      <div className="relative h-72 md:h-80 overflow-hidden" style={{ background: `linear-gradient(180deg, ${c.color}, ${c.color}55 60%, transparent)` }}>
+      <div className="relative h-72 md:h-80 overflow-hidden" style={{ background: `linear-gradient(180deg, ${c.color ?? "#7C6AED"}, ${c.color ?? "#7C6AED"}55 60%, transparent)` }}>
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />
         <div className="relative max-w-5xl mx-auto px-4 md:px-10 h-full flex flex-col justify-end pb-6">
           <Link to="/visualiza" className="inline-flex items-center gap-2 text-white/90 text-sm mb-4 w-fit"><ArrowLeft className="w-4 h-4" /> Playlists</Link>
           <div className="flex items-end gap-4">
-            <div className="w-32 h-32 md:w-40 md:h-40 rounded-2xl grid place-items-center shadow-glow shrink-0" style={{ background: c.color }}>
+            <div className="w-32 h-32 md:w-40 md:h-40 rounded-2xl grid place-items-center shadow-glow shrink-0" style={{ background: c.color ?? "#7C6AED" }}>
               <Headphones className="w-16 h-16 text-white drop-shadow" />
             </div>
             <div>

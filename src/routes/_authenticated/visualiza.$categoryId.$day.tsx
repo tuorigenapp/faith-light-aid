@@ -111,7 +111,7 @@ function DayPlayer() {
           <Link to="/visualiza/$categoryId" params={{ categoryId }} className="inline-flex items-center gap-2 text-white/95 text-sm"><ArrowLeft className="w-4 h-4" /> {c.title}</Link>
           <div className="text-center mt-6">
             <div className="text-[11px] uppercase tracking-widest text-white/80 font-bold">Día {a.day_index} de 21</div>
-            <div className="mx-auto mt-4 w-56 h-56 md:w-64 md:h-64 rounded-3xl grid place-items-center shadow-glow" style={{ background: c.color }}>
+            <div className="mx-auto mt-4 w-56 h-56 md:w-64 md:h-64 rounded-3xl grid place-items-center shadow-glow" style={{ background: c.color ?? "#7C6AED" }}>
               <Headphones className="w-24 h-24 text-white/95 drop-shadow" />
             </div>
           </div>
