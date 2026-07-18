@@ -63,7 +63,7 @@ function Playlist() {
             return (
               <Link key={a.id} to="/visualiza/$categoryId/$day" params={{ categoryId, day: String(a.day_index) }}>
                 <Card className={cn("rounded-2xl p-4 flex items-center gap-4 hover:bg-accent/40 transition-colors", done && "border-accent bg-accent/10")}>
-                  <div className="w-11 h-11 rounded-xl grid place-items-center shrink-0" style={{ background: done ? "var(--accent)" : c.color + "22", color: done ? "white" : c.color }}>
+                  <div className="w-11 h-11 rounded-xl grid place-items-center shrink-0" style={{ background: done ? "var(--accent)" : (c.color ?? "#7C6AED") + "22", color: done ? "white" : (c.color ?? "#7C6AED") }}>
                     {done ? <Check className="w-5 h-5" /> : <Play className="w-5 h-5" />}
                   </div>
                   <div className="flex-1 min-w-0">

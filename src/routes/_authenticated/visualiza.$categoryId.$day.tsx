@@ -105,7 +105,7 @@ function DayPlayer() {
 
   return (
     <div className="pb-32">
-      <div className="relative overflow-hidden" style={{ background: `linear-gradient(180deg, ${c.color}, ${c.color}77 40%, transparent)` }}>
+      <div className="relative overflow-hidden" style={{ background: `linear-gradient(180deg, ${c.color ?? "#7C6AED"}, ${(c.color ?? "#7C6AED")}77 40%, transparent)` }}>
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/20 to-background" />
         <div className="relative max-w-3xl mx-auto px-4 md:px-8 pt-6 pb-10">
           <Link to="/visualiza/$categoryId" params={{ categoryId }} className="inline-flex items-center gap-2 text-white/95 text-sm"><ArrowLeft className="w-4 h-4" /> {c.title}</Link>
