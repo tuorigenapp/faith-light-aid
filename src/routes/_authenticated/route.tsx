@@ -60,6 +60,22 @@ function AuthLayout() {
       return !!data;
     },
   });
+  const { data: intake } = useQuery({
+    queryKey: ["intake-status", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase.from("intake_sessions").select("status").eq("user_id", user!.id).maybeSingle();
+      return data?.status ?? "missing";
+    },
+  });
+
+  useEffect(() => {
+    if (!user || intake === undefined) return;
+    if (intake !== "completed" && location.pathname !== "/onboarding") {
+      navigate({ to: "/onboarding", replace: true });
+    }
+  }, [intake, user, location.pathname, navigate]);
+
 
   async function signOut() {
     await qc.cancelQueries();
