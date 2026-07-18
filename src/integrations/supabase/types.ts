@@ -223,6 +223,51 @@ export type Database = {
         }
         Relationships: []
       }
+      intake_sessions: {
+        Row: {
+          ai_plan: Json | null
+          ai_summary: string | null
+          childhood: Json | null
+          closure_completed_at: string | null
+          created_at: string
+          genealogy: Json | null
+          id: string
+          primary_focus: string | null
+          stage: number
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ai_plan?: Json | null
+          ai_summary?: string | null
+          childhood?: Json | null
+          closure_completed_at?: string | null
+          created_at?: string
+          genealogy?: Json | null
+          id?: string
+          primary_focus?: string | null
+          stage?: number
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ai_plan?: Json | null
+          ai_summary?: string | null
+          childhood?: Json | null
+          closure_completed_at?: string | null
+          created_at?: string
+          genealogy?: Json | null
+          id?: string
+          primary_focus?: string | null
+          stage?: number
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       journal_entries: {
         Row: {
           content: string
@@ -291,6 +336,139 @@ export type Database = {
           title?: string
         }
         Relationships: []
+      }
+      manifest_audios: {
+        Row: {
+          affirmation: string
+          audio_url: string | null
+          category_id: string
+          cover_url: string | null
+          created_at: string
+          day_index: number
+          duration_seconds: number | null
+          id: string
+          title: string
+        }
+        Insert: {
+          affirmation: string
+          audio_url?: string | null
+          category_id: string
+          cover_url?: string | null
+          created_at?: string
+          day_index: number
+          duration_seconds?: number | null
+          id?: string
+          title: string
+        }
+        Update: {
+          affirmation?: string
+          audio_url?: string | null
+          category_id?: string
+          cover_url?: string | null
+          created_at?: string
+          day_index?: number
+          duration_seconds?: number | null
+          id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manifest_audios_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "manifest_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      manifest_categories: {
+        Row: {
+          affirmation_ya_tengo: string
+          color: string | null
+          created_at: string
+          gratitude_gracias: string
+          id: string
+          identity_yo_soy: string
+          petition: string
+          sort_order: number
+          subtitle: string | null
+          title: string
+        }
+        Insert: {
+          affirmation_ya_tengo: string
+          color?: string | null
+          created_at?: string
+          gratitude_gracias: string
+          id: string
+          identity_yo_soy: string
+          petition: string
+          sort_order?: number
+          subtitle?: string | null
+          title: string
+        }
+        Update: {
+          affirmation_ya_tengo?: string
+          color?: string | null
+          created_at?: string
+          gratitude_gracias?: string
+          id?: string
+          identity_yo_soy?: string
+          petition?: string
+          sort_order?: number
+          subtitle?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
+      manifest_entries: {
+        Row: {
+          audio_id: string
+          completed: boolean | null
+          created_at: string
+          gratitud: string | null
+          id: string
+          peticion: string | null
+          played: boolean | null
+          updated_at: string
+          user_id: string
+          ya_tengo: string | null
+          yo_soy: string | null
+        }
+        Insert: {
+          audio_id: string
+          completed?: boolean | null
+          created_at?: string
+          gratitud?: string | null
+          id?: string
+          peticion?: string | null
+          played?: boolean | null
+          updated_at?: string
+          user_id: string
+          ya_tengo?: string | null
+          yo_soy?: string | null
+        }
+        Update: {
+          audio_id?: string
+          completed?: boolean | null
+          created_at?: string
+          gratitud?: string | null
+          id?: string
+          peticion?: string | null
+          played?: boolean | null
+          updated_at?: string
+          user_id?: string
+          ya_tengo?: string | null
+          yo_soy?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manifest_entries_audio_id_fkey"
+            columns: ["audio_id"]
+            isOneToOne: false
+            referencedRelation: "manifest_audios"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       messages: {
         Row: {

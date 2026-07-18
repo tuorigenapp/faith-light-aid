@@ -13,8 +13,11 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiIntakeClosureRouteImport } from './routes/api/intake-closure'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as AuthenticatedVisualizaRouteImport } from './routes/_authenticated/visualiza'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
+import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedMembresiaRouteImport } from './routes/_authenticated/membresia'
 import { Route as AuthenticatedEtapasRouteImport } from './routes/_authenticated/etapas'
 import { Route as AuthenticatedEjerciciosRouteImport } from './routes/_authenticated/ejercicios'
@@ -24,7 +27,9 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedChatRouteImport } from './routes/_authenticated/chat'
 import { Route as AuthenticatedBibliotecaRouteImport } from './routes/_authenticated/biblioteca'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedVisualizaCategoryIdRouteImport } from './routes/_authenticated/visualiza.$categoryId'
 import { Route as AuthenticatedEtapasStageIdRouteImport } from './routes/_authenticated/etapas.$stageId'
+import { Route as AuthenticatedVisualizaCategoryIdDayRouteImport } from './routes/_authenticated/visualiza.$categoryId.$day'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -45,14 +50,29 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiIntakeClosureRoute = ApiIntakeClosureRouteImport.update({
+  id: '/api/intake-closure',
+  path: '/api/intake-closure',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiChatRoute = ApiChatRouteImport.update({
   id: '/api/chat',
   path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedVisualizaRoute = AuthenticatedVisualizaRouteImport.update({
+  id: '/visualiza',
+  path: '/visualiza',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedPerfilRoute = AuthenticatedPerfilRouteImport.update({
   id: '/perfil',
   path: '/perfil',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedMembresiaRoute = AuthenticatedMembresiaRouteImport.update({
@@ -101,11 +121,23 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedVisualizaCategoryIdRoute =
+  AuthenticatedVisualizaCategoryIdRouteImport.update({
+    id: '/$categoryId',
+    path: '/$categoryId',
+    getParentRoute: () => AuthenticatedVisualizaRoute,
+  } as any)
 const AuthenticatedEtapasStageIdRoute =
   AuthenticatedEtapasStageIdRouteImport.update({
     id: '/$stageId',
     path: '/$stageId',
     getParentRoute: () => AuthenticatedEtapasRoute,
+  } as any)
+const AuthenticatedVisualizaCategoryIdDayRoute =
+  AuthenticatedVisualizaCategoryIdDayRouteImport.update({
+    id: '/$day',
+    path: '/$day',
+    getParentRoute: () => AuthenticatedVisualizaCategoryIdRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -121,9 +153,14 @@ export interface FileRoutesByFullPath {
   '/ejercicios': typeof AuthenticatedEjerciciosRoute
   '/etapas': typeof AuthenticatedEtapasRouteWithChildren
   '/membresia': typeof AuthenticatedMembresiaRoute
+  '/onboarding': typeof AuthenticatedOnboardingRoute
   '/perfil': typeof AuthenticatedPerfilRoute
+  '/visualiza': typeof AuthenticatedVisualizaRouteWithChildren
   '/api/chat': typeof ApiChatRoute
+  '/api/intake-closure': typeof ApiIntakeClosureRoute
   '/etapas/$stageId': typeof AuthenticatedEtapasStageIdRoute
+  '/visualiza/$categoryId': typeof AuthenticatedVisualizaCategoryIdRouteWithChildren
+  '/visualiza/$categoryId/$day': typeof AuthenticatedVisualizaCategoryIdDayRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -138,9 +175,14 @@ export interface FileRoutesByTo {
   '/ejercicios': typeof AuthenticatedEjerciciosRoute
   '/etapas': typeof AuthenticatedEtapasRouteWithChildren
   '/membresia': typeof AuthenticatedMembresiaRoute
+  '/onboarding': typeof AuthenticatedOnboardingRoute
   '/perfil': typeof AuthenticatedPerfilRoute
+  '/visualiza': typeof AuthenticatedVisualizaRouteWithChildren
   '/api/chat': typeof ApiChatRoute
+  '/api/intake-closure': typeof ApiIntakeClosureRoute
   '/etapas/$stageId': typeof AuthenticatedEtapasStageIdRoute
+  '/visualiza/$categoryId': typeof AuthenticatedVisualizaCategoryIdRouteWithChildren
+  '/visualiza/$categoryId/$day': typeof AuthenticatedVisualizaCategoryIdDayRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -157,9 +199,14 @@ export interface FileRoutesById {
   '/_authenticated/ejercicios': typeof AuthenticatedEjerciciosRoute
   '/_authenticated/etapas': typeof AuthenticatedEtapasRouteWithChildren
   '/_authenticated/membresia': typeof AuthenticatedMembresiaRoute
+  '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
+  '/_authenticated/visualiza': typeof AuthenticatedVisualizaRouteWithChildren
   '/api/chat': typeof ApiChatRoute
+  '/api/intake-closure': typeof ApiIntakeClosureRoute
   '/_authenticated/etapas/$stageId': typeof AuthenticatedEtapasStageIdRoute
+  '/_authenticated/visualiza/$categoryId': typeof AuthenticatedVisualizaCategoryIdRouteWithChildren
+  '/_authenticated/visualiza/$categoryId/$day': typeof AuthenticatedVisualizaCategoryIdDayRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -176,9 +223,14 @@ export interface FileRouteTypes {
     | '/ejercicios'
     | '/etapas'
     | '/membresia'
+    | '/onboarding'
     | '/perfil'
+    | '/visualiza'
     | '/api/chat'
+    | '/api/intake-closure'
     | '/etapas/$stageId'
+    | '/visualiza/$categoryId'
+    | '/visualiza/$categoryId/$day'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -193,9 +245,14 @@ export interface FileRouteTypes {
     | '/ejercicios'
     | '/etapas'
     | '/membresia'
+    | '/onboarding'
     | '/perfil'
+    | '/visualiza'
     | '/api/chat'
+    | '/api/intake-closure'
     | '/etapas/$stageId'
+    | '/visualiza/$categoryId'
+    | '/visualiza/$categoryId/$day'
   id:
     | '__root__'
     | '/'
@@ -211,9 +268,14 @@ export interface FileRouteTypes {
     | '/_authenticated/ejercicios'
     | '/_authenticated/etapas'
     | '/_authenticated/membresia'
+    | '/_authenticated/onboarding'
     | '/_authenticated/perfil'
+    | '/_authenticated/visualiza'
     | '/api/chat'
+    | '/api/intake-closure'
     | '/_authenticated/etapas/$stageId'
+    | '/_authenticated/visualiza/$categoryId'
+    | '/_authenticated/visualiza/$categoryId/$day'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -222,6 +284,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiChatRoute: typeof ApiChatRoute
+  ApiIntakeClosureRoute: typeof ApiIntakeClosureRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -254,6 +317,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/intake-closure': {
+      id: '/api/intake-closure'
+      path: '/api/intake-closure'
+      fullPath: '/api/intake-closure'
+      preLoaderRoute: typeof ApiIntakeClosureRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/chat': {
       id: '/api/chat'
       path: '/api/chat'
@@ -261,11 +331,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/visualiza': {
+      id: '/_authenticated/visualiza'
+      path: '/visualiza'
+      fullPath: '/visualiza'
+      preLoaderRoute: typeof AuthenticatedVisualizaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/perfil': {
       id: '/_authenticated/perfil'
       path: '/perfil'
       fullPath: '/perfil'
       preLoaderRoute: typeof AuthenticatedPerfilRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/onboarding': {
+      id: '/_authenticated/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof AuthenticatedOnboardingRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/membresia': {
@@ -331,12 +415,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/visualiza/$categoryId': {
+      id: '/_authenticated/visualiza/$categoryId'
+      path: '/$categoryId'
+      fullPath: '/visualiza/$categoryId'
+      preLoaderRoute: typeof AuthenticatedVisualizaCategoryIdRouteImport
+      parentRoute: typeof AuthenticatedVisualizaRoute
+    }
     '/_authenticated/etapas/$stageId': {
       id: '/_authenticated/etapas/$stageId'
       path: '/$stageId'
       fullPath: '/etapas/$stageId'
       preLoaderRoute: typeof AuthenticatedEtapasStageIdRouteImport
       parentRoute: typeof AuthenticatedEtapasRoute
+    }
+    '/_authenticated/visualiza/$categoryId/$day': {
+      id: '/_authenticated/visualiza/$categoryId/$day'
+      path: '/$day'
+      fullPath: '/visualiza/$categoryId/$day'
+      preLoaderRoute: typeof AuthenticatedVisualizaCategoryIdDayRouteImport
+      parentRoute: typeof AuthenticatedVisualizaCategoryIdRoute
     }
   }
 }
@@ -352,6 +450,36 @@ const AuthenticatedEtapasRouteChildren: AuthenticatedEtapasRouteChildren = {
 const AuthenticatedEtapasRouteWithChildren =
   AuthenticatedEtapasRoute._addFileChildren(AuthenticatedEtapasRouteChildren)
 
+interface AuthenticatedVisualizaCategoryIdRouteChildren {
+  AuthenticatedVisualizaCategoryIdDayRoute: typeof AuthenticatedVisualizaCategoryIdDayRoute
+}
+
+const AuthenticatedVisualizaCategoryIdRouteChildren: AuthenticatedVisualizaCategoryIdRouteChildren =
+  {
+    AuthenticatedVisualizaCategoryIdDayRoute:
+      AuthenticatedVisualizaCategoryIdDayRoute,
+  }
+
+const AuthenticatedVisualizaCategoryIdRouteWithChildren =
+  AuthenticatedVisualizaCategoryIdRoute._addFileChildren(
+    AuthenticatedVisualizaCategoryIdRouteChildren,
+  )
+
+interface AuthenticatedVisualizaRouteChildren {
+  AuthenticatedVisualizaCategoryIdRoute: typeof AuthenticatedVisualizaCategoryIdRouteWithChildren
+}
+
+const AuthenticatedVisualizaRouteChildren: AuthenticatedVisualizaRouteChildren =
+  {
+    AuthenticatedVisualizaCategoryIdRoute:
+      AuthenticatedVisualizaCategoryIdRouteWithChildren,
+  }
+
+const AuthenticatedVisualizaRouteWithChildren =
+  AuthenticatedVisualizaRoute._addFileChildren(
+    AuthenticatedVisualizaRouteChildren,
+  )
+
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedBibliotecaRoute: typeof AuthenticatedBibliotecaRoute
@@ -362,7 +490,9 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedEjerciciosRoute: typeof AuthenticatedEjerciciosRoute
   AuthenticatedEtapasRoute: typeof AuthenticatedEtapasRouteWithChildren
   AuthenticatedMembresiaRoute: typeof AuthenticatedMembresiaRoute
+  AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
+  AuthenticatedVisualizaRoute: typeof AuthenticatedVisualizaRouteWithChildren
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -375,7 +505,9 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedEjerciciosRoute: AuthenticatedEjerciciosRoute,
   AuthenticatedEtapasRoute: AuthenticatedEtapasRouteWithChildren,
   AuthenticatedMembresiaRoute: AuthenticatedMembresiaRoute,
+  AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
+  AuthenticatedVisualizaRoute: AuthenticatedVisualizaRouteWithChildren,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -387,17 +519,8 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiChatRoute: ApiChatRoute,
+  ApiIntakeClosureRoute: ApiIntakeClosureRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
