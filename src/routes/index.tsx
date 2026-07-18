@@ -12,8 +12,8 @@ export const Route = createFileRoute("/")({
     meta: [
       { title: "Reconectando el Espíritu con Dios — App cristiana" },
       { name: "description", content: "App cristiana motivacional con diagnóstico espiritual, etapas personalizadas, ejercicios diarios, consultor IA, diario, calendario y acompañamiento." },
-      { property: "og:title", content: "Reconectando el Espíritu con Dios" },
-      { property: "og:description", content: "Un espacio vivo de restauración espiritual, hábitos diarios y acompañamiento cristiano." },
+      { property: "og:title", content: "Reconectando el Espíritu con Dios — App cristiana" },
+      { property: "og:description", content: "App cristiana motivacional con diagnóstico espiritual, etapas personalizadas, ejercicios diarios, consultor IA, diario, calendario y acompañamiento." },
       { property: "og:image", content: heroImg },
       { name: "twitter:image", content: heroImg },
     ],
