@@ -4,9 +4,9 @@ import { useAuth } from "@/lib/use-auth";
 import { useTheme } from "@/lib/theme";
 import {
   Home, MessageCircle, Compass, Layers, BookHeart, Dumbbell, Library,
-  CreditCard, User as UserIcon, Shield, LogOut, Menu, Sun, Moon, X, PhoneCall,
+  CreditCard, User as UserIcon, Shield, LogOut, Menu, Sun, Moon, X, PhoneCall, Headphones,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
@@ -24,15 +24,16 @@ export const Route = createFileRoute("/_authenticated")({
 // Primary (bottom-bar) navigation — keep to 5 for mobile thumb reach
 const BOTTOM_NAV = [
   { to: "/dashboard", label: "Hoy", icon: Home },
+  { to: "/visualiza", label: "Vívelo", icon: Headphones },
   { to: "/etapas", label: "Etapas", icon: Layers },
   { to: "/chat", label: "Chat IA", icon: MessageCircle },
-  { to: "/diario", label: "Diario", icon: BookHeart },
   { to: "/perfil", label: "Perfil", icon: UserIcon },
 ] as const;
 
 // Full nav for sidebar / drawer
 const FULL_NAV = [
   { to: "/dashboard", label: "Inicio", icon: Home },
+  { to: "/visualiza", label: "Visualízalo y Vívelo", icon: Headphones },
   { to: "/chat", label: "Consultor IA", icon: MessageCircle },
   { to: "/diagnostico", label: "Diagnóstico", icon: Compass },
   { to: "/etapas", label: "8 Etapas", icon: Layers },
