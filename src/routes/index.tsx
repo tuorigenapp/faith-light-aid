@@ -674,11 +674,9 @@ function FinalCTA() {
           <p className="mt-5 text-primary-foreground/80 max-w-2xl mx-auto">
             La versión de ti que ya vive esa paz empezó un día como hoy, con 5 minutos. Hoy lo pruebas gratis. ¿Lo empiezas o lo dejas para "algún día"?
           </p>
-          <Link to="/auth">
-            <Button size="lg" className="mt-8 rounded-full bg-gold text-gold-foreground hover:bg-gold/90 h-14 px-10 font-bold text-base shadow-glow">
-              Sí, quiero empezar mi camino <ArrowRight className="ml-2 w-4 h-4" />
-            </Button>
-          </Link>
+          <StartButton size="lg" className="mt-8 rounded-full bg-gold text-gold-foreground hover:bg-gold/90 h-14 px-10 font-bold text-base shadow-glow">
+            Sí, quiero empezar mi camino <ArrowRight className="ml-2 w-4 h-4" />
+          </StartButton>
           <p className="mt-4 text-xs text-primary-foreground/70">
             Empieza gratis hoy · prueba completa por $0 · cancelas cuando quieras
           </p>
