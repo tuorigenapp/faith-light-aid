@@ -552,11 +552,9 @@ function PricingCard({ featured, title, price, unit, was, note, badge, savings, 
         ))}
       </ul>
 
-      <Link to="/auth" className="block mt-6">
-        <Button size="lg" className={`w-full rounded-full h-13 font-bold ${featured ? "bg-gold text-gold-foreground hover:bg-gold/90" : "bg-foreground text-background hover:bg-foreground/90"}`}>
-          {cta}
-        </Button>
-      </Link>
+      <StartButton size="lg" className={`w-full mt-6 rounded-full h-13 font-bold ${featured ? "bg-gold text-gold-foreground hover:bg-gold/90" : "bg-foreground text-background hover:bg-foreground/90"}`}>
+        {cta}
+      </StartButton>
 
       {featured && (
         <ul className="mt-5 space-y-1.5 text-xs text-primary-foreground/80">
