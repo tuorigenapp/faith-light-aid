@@ -1,14 +1,52 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
 import heroImg from "@/assets/spiritual-hero.jpg";
 import dailyImg from "@/assets/daily-devotional.jpg";
 import stageImg from "@/assets/stage-journey.jpg";
 import exerciseImg from "@/assets/prayer-exercise.jpg";
 import { Button } from "@/components/ui/button";
-import {
-  ArrowRight, BookOpen, Check, ChevronDown, Flame, Heart, MessageCircle,
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { Loader2, ArrowRight, BookOpen, Check, ChevronDown, Flame, Heart, MessageCircle,
   Play, Shield, Sparkles, Sun, Moon, HeartHandshake, Star, Lock, Clock,
 } from "lucide-react";
+
+function useStartTrial() {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  async function start() {
+    setLoading(true);
+    try {
+      const { data: sess } = await supabase.auth.getSession();
+      if (sess.session) { navigate({ to: "/onboarding" }); return; }
+      const rand = Math.random().toString(36).slice(2, 10);
+      const email = `invitado_${Date.now()}_${rand}@reconectando.test`;
+      const password = `Prueba_${rand}${Math.random().toString(36).slice(2, 8)}!A9`;
+      const { error } = await supabase.auth.signUp({
+        email, password,
+        options: { emailRedirectTo: `${window.location.origin}/onboarding` },
+      });
+      if (error) throw error;
+      const { error: sErr } = await supabase.auth.signInWithPassword({ email, password });
+      if (sErr) throw sErr;
+      navigate({ to: "/onboarding" });
+    } catch (e) {
+      toast.error((e as Error).message || "No se pudo iniciar. Intenta de nuevo.");
+    } finally {
+      setLoading(false);
+    }
+  }
+  return { start, loading };
+}
+
+function StartButton({ children, className, size }: { children: ReactNode; className?: string; size?: "lg" | "default" }) {
+  const { start, loading } = useStartTrial();
+  return (
+    <Button onClick={start} disabled={loading} size={size} className={className}>
+      {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Preparando tu espacio…</> : children}
+    </Button>
+  );
+}
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -65,11 +103,9 @@ function Nav() {
           <Link to="/auth" className="hidden sm:block text-sm font-semibold text-muted-foreground hover:text-foreground px-3 py-2">
             Entrar
           </Link>
-          <Link to="/auth">
-            <Button className="rounded-full bg-primary shadow-glow px-5 h-10 font-bold">
-              Empezar gratis
-            </Button>
-          </Link>
+          <StartButton className="rounded-full bg-primary shadow-glow px-5 h-10 font-bold">
+            Empezar gratis
+          </StartButton>
         </div>
       </div>
     </header>
@@ -102,11 +138,9 @@ function Hero() {
           </p>
 
           <div className="mt-8 flex flex-col sm:flex-row gap-3">
-            <Link to="/auth">
-              <Button size="lg" className="rounded-full h-14 px-8 bg-primary shadow-glow font-bold text-base">
-                Crear mi camino gratis <ArrowRight className="ml-2 w-4 h-4" />
-              </Button>
-            </Link>
+            <StartButton size="lg" className="rounded-full h-14 px-8 bg-primary shadow-glow font-bold text-base">
+              Crear mi camino gratis <ArrowRight className="ml-2 w-4 h-4" />
+            </StartButton>
             <a href="#metodo">
               <Button size="lg" variant="outline" className="rounded-full h-14 px-8 bg-card/70 font-bold">
                 <Play className="mr-2 w-4 h-4" /> Ver cómo funciona
@@ -189,11 +223,9 @@ function HeroCard() {
             <button className="w-10 h-10 rounded-full bg-background text-foreground grid place-items-center shadow-soft">
               <Play className="w-4 h-4 ml-0.5" />
             </button>
-            <Link to="/auth" className="flex-1">
-              <div className="h-10 rounded-full bg-foreground text-background grid place-items-center text-sm font-bold">
-                Empezar ahora
-              </div>
-            </Link>
+            <StartButton className="flex-1 h-10 rounded-full bg-foreground text-background hover:bg-foreground/90 text-sm font-bold">
+              Empezar ahora
+            </StartButton>
           </div>
         </div>
       </div>
@@ -518,11 +550,9 @@ function PricingCard({ featured, title, price, unit, was, note, badge, savings, 
         ))}
       </ul>
 
-      <Link to="/auth" className="block mt-6">
-        <Button size="lg" className={`w-full rounded-full h-13 font-bold ${featured ? "bg-gold text-gold-foreground hover:bg-gold/90" : "bg-foreground text-background hover:bg-foreground/90"}`}>
-          {cta}
-        </Button>
-      </Link>
+      <StartButton size="lg" className={`w-full mt-6 rounded-full h-13 font-bold ${featured ? "bg-gold text-gold-foreground hover:bg-gold/90" : "bg-foreground text-background hover:bg-foreground/90"}`}>
+        {cta}
+      </StartButton>
 
       {featured && (
         <ul className="mt-5 space-y-1.5 text-xs text-primary-foreground/80">
@@ -644,11 +674,9 @@ function FinalCTA() {
           <p className="mt-5 text-primary-foreground/80 max-w-2xl mx-auto">
             La versión de ti que ya vive esa paz empezó un día como hoy, con 5 minutos. Hoy lo pruebas gratis. ¿Lo empiezas o lo dejas para "algún día"?
           </p>
-          <Link to="/auth">
-            <Button size="lg" className="mt-8 rounded-full bg-gold text-gold-foreground hover:bg-gold/90 h-14 px-10 font-bold text-base shadow-glow">
-              Sí, quiero empezar mi camino <ArrowRight className="ml-2 w-4 h-4" />
-            </Button>
-          </Link>
+          <StartButton size="lg" className="mt-8 rounded-full bg-gold text-gold-foreground hover:bg-gold/90 h-14 px-10 font-bold text-base shadow-glow">
+            Sí, quiero empezar mi camino <ArrowRight className="ml-2 w-4 h-4" />
+          </StartButton>
           <p className="mt-4 text-xs text-primary-foreground/70">
             Empieza gratis hoy · prueba completa por $0 · cancelas cuando quieras
           </p>
