@@ -140,11 +140,9 @@ function Hero() {
           </p>
 
           <div className="mt-8 flex flex-col sm:flex-row gap-3">
-            <Link to="/auth">
-              <Button size="lg" className="rounded-full h-14 px-8 bg-primary shadow-glow font-bold text-base">
-                Crear mi camino gratis <ArrowRight className="ml-2 w-4 h-4" />
-              </Button>
-            </Link>
+            <StartButton size="lg" className="rounded-full h-14 px-8 bg-primary shadow-glow font-bold text-base">
+              Crear mi camino gratis <ArrowRight className="ml-2 w-4 h-4" />
+            </StartButton>
             <a href="#metodo">
               <Button size="lg" variant="outline" className="rounded-full h-14 px-8 bg-card/70 font-bold">
                 <Play className="mr-2 w-4 h-4" /> Ver cómo funciona
