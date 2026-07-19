@@ -225,11 +225,9 @@ function HeroCard() {
             <button className="w-10 h-10 rounded-full bg-background text-foreground grid place-items-center shadow-soft">
               <Play className="w-4 h-4 ml-0.5" />
             </button>
-            <Link to="/auth" className="flex-1">
-              <div className="h-10 rounded-full bg-foreground text-background grid place-items-center text-sm font-bold">
-                Empezar ahora
-              </div>
-            </Link>
+            <StartButton className="flex-1 h-10 rounded-full bg-foreground text-background hover:bg-foreground/90 text-sm font-bold">
+              Empezar ahora
+            </StartButton>
           </div>
         </div>
       </div>
