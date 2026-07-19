@@ -103,11 +103,9 @@ function Nav() {
           <Link to="/auth" className="hidden sm:block text-sm font-semibold text-muted-foreground hover:text-foreground px-3 py-2">
             Entrar
           </Link>
-          <Link to="/auth">
-            <Button className="rounded-full bg-primary shadow-glow px-5 h-10 font-bold">
-              Empezar gratis
-            </Button>
-          </Link>
+          <StartButton className="rounded-full bg-primary shadow-glow px-5 h-10 font-bold">
+            Empezar gratis
+          </StartButton>
         </div>
       </div>
     </header>
