@@ -1,14 +1,52 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
 import heroImg from "@/assets/spiritual-hero.jpg";
 import dailyImg from "@/assets/daily-devotional.jpg";
 import stageImg from "@/assets/stage-journey.jpg";
 import exerciseImg from "@/assets/prayer-exercise.jpg";
 import { Button } from "@/components/ui/button";
-import {
-  ArrowRight, BookOpen, Check, ChevronDown, Flame, Heart, MessageCircle,
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { Loader2, ArrowRight, BookOpen, Check, ChevronDown, Flame, Heart, MessageCircle,
   Play, Shield, Sparkles, Sun, Moon, HeartHandshake, Star, Lock, Clock,
 } from "lucide-react";
+
+function useStartTrial() {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  async function start() {
+    setLoading(true);
+    try {
+      const { data: sess } = await supabase.auth.getSession();
+      if (sess.session) { navigate({ to: "/onboarding" }); return; }
+      const rand = Math.random().toString(36).slice(2, 10);
+      const email = `invitado_${Date.now()}_${rand}@reconectando.test`;
+      const password = `Prueba_${rand}${Math.random().toString(36).slice(2, 8)}!A9`;
+      const { error } = await supabase.auth.signUp({
+        email, password,
+        options: { emailRedirectTo: `${window.location.origin}/onboarding` },
+      });
+      if (error) throw error;
+      const { error: sErr } = await supabase.auth.signInWithPassword({ email, password });
+      if (sErr) throw sErr;
+      navigate({ to: "/onboarding" });
+    } catch (e) {
+      toast.error((e as Error).message || "No se pudo iniciar. Intenta de nuevo.");
+    } finally {
+      setLoading(false);
+    }
+  }
+  return { start, loading };
+}
+
+function StartButton({ children, className, size }: { children: ReactNode; className?: string; size?: "lg" | "default" }) {
+  const { start, loading } = useStartTrial();
+  return (
+    <Button onClick={start} disabled={loading} size={size} className={className}>
+      {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Preparando tu espacio…</> : children}
+    </Button>
+  );
+}
 
 export const Route = createFileRoute("/")({
   head: () => ({
