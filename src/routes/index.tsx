@@ -137,7 +137,7 @@ function Hero() {
           </h1>
 
           <p className="mt-6 text-base sm:text-lg text-muted-foreground max-w-xl leading-relaxed">
-            Un método diario cristiano guiado por IA, con devocional, oración y ejercicios cortos que te devuelven la paz, rompen ciclos y te acercan otra vez a Dios.
+            Un método diario cristiano guiado, con devocional, oración y ejercicios cortos que te devuelven la paz, rompen ciclos generacionales y te acercan otra vez a Dios.
           </p>
 
           <div className="mt-8 flex flex-col sm:flex-row gap-3">
