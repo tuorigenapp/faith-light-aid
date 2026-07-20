@@ -16,6 +16,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiIntakeClosureRouteImport } from './routes/api/intake-closure'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedVisualizaRouteImport } from './routes/_authenticated/visualiza'
+import { Route as AuthenticatedPremiosRouteImport } from './routes/_authenticated/premios'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedMembresiaRouteImport } from './routes/_authenticated/membresia'
@@ -26,6 +27,7 @@ import { Route as AuthenticatedDiagnosticoRouteImport } from './routes/_authenti
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedChatRouteImport } from './routes/_authenticated/chat'
 import { Route as AuthenticatedBibliotecaRouteImport } from './routes/_authenticated/biblioteca'
+import { Route as AuthenticatedArbolRouteImport } from './routes/_authenticated/arbol'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedVisualizaCategoryIdRouteImport } from './routes/_authenticated/visualiza.$categoryId'
 import { Route as AuthenticatedEtapasStageIdRouteImport } from './routes/_authenticated/etapas.$stageId'
@@ -63,6 +65,11 @@ const ApiChatRoute = ApiChatRouteImport.update({
 const AuthenticatedVisualizaRoute = AuthenticatedVisualizaRouteImport.update({
   id: '/visualiza',
   path: '/visualiza',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPremiosRoute = AuthenticatedPremiosRouteImport.update({
+  id: '/premios',
+  path: '/premios',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedPerfilRoute = AuthenticatedPerfilRouteImport.update({
@@ -116,6 +123,11 @@ const AuthenticatedBibliotecaRoute = AuthenticatedBibliotecaRouteImport.update({
   path: '/biblioteca',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedArbolRoute = AuthenticatedArbolRouteImport.update({
+  id: '/arbol',
+  path: '/arbol',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -145,6 +157,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/arbol': typeof AuthenticatedArbolRoute
   '/biblioteca': typeof AuthenticatedBibliotecaRoute
   '/chat': typeof AuthenticatedChatRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -155,6 +168,7 @@ export interface FileRoutesByFullPath {
   '/membresia': typeof AuthenticatedMembresiaRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/perfil': typeof AuthenticatedPerfilRoute
+  '/premios': typeof AuthenticatedPremiosRoute
   '/visualiza': typeof AuthenticatedVisualizaRouteWithChildren
   '/api/chat': typeof ApiChatRoute
   '/api/intake-closure': typeof ApiIntakeClosureRoute
@@ -167,6 +181,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/arbol': typeof AuthenticatedArbolRoute
   '/biblioteca': typeof AuthenticatedBibliotecaRoute
   '/chat': typeof AuthenticatedChatRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -177,6 +192,7 @@ export interface FileRoutesByTo {
   '/membresia': typeof AuthenticatedMembresiaRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/perfil': typeof AuthenticatedPerfilRoute
+  '/premios': typeof AuthenticatedPremiosRoute
   '/visualiza': typeof AuthenticatedVisualizaRouteWithChildren
   '/api/chat': typeof ApiChatRoute
   '/api/intake-closure': typeof ApiIntakeClosureRoute
@@ -191,6 +207,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/arbol': typeof AuthenticatedArbolRoute
   '/_authenticated/biblioteca': typeof AuthenticatedBibliotecaRoute
   '/_authenticated/chat': typeof AuthenticatedChatRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
@@ -201,6 +218,7 @@ export interface FileRoutesById {
   '/_authenticated/membresia': typeof AuthenticatedMembresiaRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
+  '/_authenticated/premios': typeof AuthenticatedPremiosRoute
   '/_authenticated/visualiza': typeof AuthenticatedVisualizaRouteWithChildren
   '/api/chat': typeof ApiChatRoute
   '/api/intake-closure': typeof ApiIntakeClosureRoute
@@ -215,6 +233,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/sitemap.xml'
     | '/admin'
+    | '/arbol'
     | '/biblioteca'
     | '/chat'
     | '/dashboard'
@@ -225,6 +244,7 @@ export interface FileRouteTypes {
     | '/membresia'
     | '/onboarding'
     | '/perfil'
+    | '/premios'
     | '/visualiza'
     | '/api/chat'
     | '/api/intake-closure'
@@ -237,6 +257,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/sitemap.xml'
     | '/admin'
+    | '/arbol'
     | '/biblioteca'
     | '/chat'
     | '/dashboard'
@@ -247,6 +268,7 @@ export interface FileRouteTypes {
     | '/membresia'
     | '/onboarding'
     | '/perfil'
+    | '/premios'
     | '/visualiza'
     | '/api/chat'
     | '/api/intake-closure'
@@ -260,6 +282,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/sitemap.xml'
     | '/_authenticated/admin'
+    | '/_authenticated/arbol'
     | '/_authenticated/biblioteca'
     | '/_authenticated/chat'
     | '/_authenticated/dashboard'
@@ -270,6 +293,7 @@ export interface FileRouteTypes {
     | '/_authenticated/membresia'
     | '/_authenticated/onboarding'
     | '/_authenticated/perfil'
+    | '/_authenticated/premios'
     | '/_authenticated/visualiza'
     | '/api/chat'
     | '/api/intake-closure'
@@ -336,6 +360,13 @@ declare module '@tanstack/react-router' {
       path: '/visualiza'
       fullPath: '/visualiza'
       preLoaderRoute: typeof AuthenticatedVisualizaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/premios': {
+      id: '/_authenticated/premios'
+      path: '/premios'
+      fullPath: '/premios'
+      preLoaderRoute: typeof AuthenticatedPremiosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/perfil': {
@@ -406,6 +437,13 @@ declare module '@tanstack/react-router' {
       path: '/biblioteca'
       fullPath: '/biblioteca'
       preLoaderRoute: typeof AuthenticatedBibliotecaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/arbol': {
+      id: '/_authenticated/arbol'
+      path: '/arbol'
+      fullPath: '/arbol'
+      preLoaderRoute: typeof AuthenticatedArbolRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/admin': {
@@ -482,6 +520,7 @@ const AuthenticatedVisualizaRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedArbolRoute: typeof AuthenticatedArbolRoute
   AuthenticatedBibliotecaRoute: typeof AuthenticatedBibliotecaRoute
   AuthenticatedChatRoute: typeof AuthenticatedChatRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
@@ -492,11 +531,13 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedMembresiaRoute: typeof AuthenticatedMembresiaRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
+  AuthenticatedPremiosRoute: typeof AuthenticatedPremiosRoute
   AuthenticatedVisualizaRoute: typeof AuthenticatedVisualizaRouteWithChildren
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedArbolRoute: AuthenticatedArbolRoute,
   AuthenticatedBibliotecaRoute: AuthenticatedBibliotecaRoute,
   AuthenticatedChatRoute: AuthenticatedChatRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
@@ -507,6 +548,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMembresiaRoute: AuthenticatedMembresiaRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
+  AuthenticatedPremiosRoute: AuthenticatedPremiosRoute,
   AuthenticatedVisualizaRoute: AuthenticatedVisualizaRouteWithChildren,
 }
 

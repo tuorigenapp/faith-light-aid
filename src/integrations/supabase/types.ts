@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      appointments: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          plan: string
+          scheduled_at: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          plan: string
+          scheduled_at: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          plan?: string
+          scheduled_at?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       conversations: {
         Row: {
           created_at: string
@@ -220,6 +250,63 @@ export type Database = {
           sort_order?: number
           steps?: Json | null
           title?: string
+        }
+        Relationships: []
+      }
+      family_members: {
+        Row: {
+          created_at: string
+          full_name: string
+          id: string
+          lineage: string
+          notes: string | null
+          relationship: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          full_name: string
+          id?: string
+          lineage: string
+          notes?: string | null
+          relationship: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          full_name?: string
+          id?: string
+          lineage?: string
+          notes?: string | null
+          relationship?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      gem_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          meta: Json | null
+          reason: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          meta?: Json | null
+          reason: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          meta?: Json | null
+          reason?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -514,8 +601,10 @@ export type Database = {
           country: string | null
           created_at: string
           current_stage: number
+          display_name: string | null
           email: string | null
           full_name: string | null
+          gems: number
           id: string
           last_activity_at: string | null
           spiritual_level: string
@@ -529,8 +618,10 @@ export type Database = {
           country?: string | null
           created_at?: string
           current_stage?: number
+          display_name?: string | null
           email?: string | null
           full_name?: string | null
+          gems?: number
           id: string
           last_activity_at?: string | null
           spiritual_level?: string
@@ -544,8 +635,10 @@ export type Database = {
           country?: string | null
           created_at?: string
           current_stage?: number
+          display_name?: string | null
           email?: string | null
           full_name?: string | null
+          gems?: number
           id?: string
           last_activity_at?: string | null
           spiritual_level?: string
@@ -722,6 +815,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      award_gems: {
+        Args: { _amount: number; _meta?: Json; _reason: string }
+        Returns: number
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

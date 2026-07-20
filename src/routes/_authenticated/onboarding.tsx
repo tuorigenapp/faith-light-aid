@@ -1,192 +1,243 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
-import { ArrowRight, Heart, Sparkles, TreeDeciduous, Baby, HandHeart, Loader2, ShieldCheck } from "lucide-react";
+import { ArrowRight, ArrowLeft, Heart, Sparkles, HandHeart, Loader2, ShieldCheck, Gem } from "lucide-react";
+import { awardGems, GEM_REWARDS } from "@/lib/gems";
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
   head: () => ({ meta: [{ title: "Bienvenida — Reconectando" }] }),
   component: Onboarding,
 });
 
-const GENE_Q = [
-  { key: "relaciones", label: "Pensando en 3-4 familiares (abuelos, padres, tíos, sobrinos): ¿qué patrones repetidos ves en sus relaciones, hábitos o forma de amar?" },
-  { key: "miedos", label: "¿Qué miedos, traumas o creencias limitantes se repiten en tu familia?" },
-  { key: "crisis", label: "¿Qué crisis (adicción, ruina económica, divorcio, enfermedad, abandono, etc.) se han repetido de generación en generación?" },
-];
-const CHILD_Q = [
-  { key: "recuerdos", label: "¿Cuáles son los recuerdos más marcados de tu infancia (buenos o dolorosos)? Escribe con confianza, nadie más lo verá." },
-  { key: "heridas", label: "¿Qué herida emocional cargas desde niño(a) que aún no has soltado?" },
-  { key: "creencias", label: "¿Qué creencias sobre ti mismo(a), sobre Dios o sobre la vida aprendiste en tu infancia y hoy quieres cambiar?" },
+type Step = {
+  key: string;
+  section: "genealogy" | "childhood";
+  emoji: string;
+  label: string;
+  placeholder: string;
+};
+
+const STEPS: Step[] = [
+  { key: "relaciones", section: "genealogy", emoji: "🌳", label: "Pensando en 3-4 familiares (abuelos, padres, tíos, sobrinos): ¿qué patrones repetidos ves en sus relaciones o forma de amar?", placeholder: "Escribe con sinceridad. Ejemplo: mi mamá y mi abuela vivieron relaciones donde daban todo y recibían poco…" },
+  { key: "miedos", section: "genealogy", emoji: "😰", label: "¿Qué miedos, traumas o creencias limitantes se repiten en tu familia?", placeholder: "Ejemplo: miedo a la escasez, a quedarse solo, a fallar…" },
+  { key: "crisis", section: "genealogy", emoji: "⛓️", label: "¿Qué crisis (adicción, ruina, divorcio, enfermedad, abandono, etc.) se han repetido de generación en generación?", placeholder: "Menciona 2-3 concretas que veas repetirse…" },
+  { key: "recuerdos", section: "childhood", emoji: "🧒", label: "¿Cuáles son los recuerdos más marcados de tu infancia (buenos o dolorosos)?", placeholder: "Nadie más lo verá. Escribe con confianza…" },
+  { key: "heridas", section: "childhood", emoji: "💔", label: "¿Qué herida emocional cargas desde niño(a) que aún no has soltado?", placeholder: "Describe la herida con tus propias palabras…" },
+  { key: "creencias", section: "childhood", emoji: "💭", label: "¿Qué creencias sobre ti, sobre Dios o sobre la vida aprendiste de niño(a) y hoy quieres cambiar?", placeholder: "Ejemplo: 'no soy suficiente', 'Dios está lejos', 'tengo que ganarme el amor'…" },
 ];
 
 function Onboarding() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [stage, setStage] = useState(1);
-  const [gen, setGen] = useState<Record<string, string>>({});
-  const [child, setChild] = useState<Record<string, string>>({});
+  const [name, setName] = useState("");
+  const [step, setStep] = useState(-1); // -1 = welcome/name, 0..N-1 = questions, N = generating, N+1 = closure
+  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [rewarded, setRewarded] = useState<Record<string, boolean>>({});
   const [ai, setAi] = useState<{ summary: string; primary_focus: string; recommended_categories: string[]; closure_prayer: string; welcome_message: string; needs_more: false | string } | null>(null);
   const [processing, setProcessing] = useState(false);
 
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const { data } = await supabase.from("intake_sessions").select("*").eq("user_id", user.id).maybeSingle();
-      if (data?.status === "completed") { navigate({ to: "/dashboard", replace: true }); return; }
-      if (data) {
-        setStage(data.stage ?? 1);
-        setGen((data.genealogy as any) ?? {});
-        setChild((data.childhood as any) ?? {});
-        if (data.ai_plan) setAi(data.ai_plan as any);
-      }
+      const [{ data: intake }, { data: profile }] = await Promise.all([
+        supabase.from("intake_sessions").select("*").eq("user_id", user.id).maybeSingle(),
+        supabase.from("profiles").select("full_name, display_name").eq("id", user.id).maybeSingle(),
+      ]);
+      if (intake?.status === "completed") { navigate({ to: "/dashboard", replace: true }); return; }
+      const genealogy = (intake?.genealogy as Record<string, string>) ?? {};
+      const childhood = (intake?.childhood as Record<string, string>) ?? {};
+      setAnswers({ ...genealogy, ...childhood });
+      setName(profile?.display_name || profile?.full_name || "");
+      if (intake?.ai_plan) { setAi(intake.ai_plan as never); setStep(STEPS.length + 1); }
+      else if (intake?.stage === 2) setStep(3);
+      else setStep(-1);
       setLoading(false);
     })();
   }, [user, navigate]);
 
-  async function saveDraft(nextStage: number, extra: Partial<{ genealogy: any; childhood: any; ai_plan: any; ai_summary: string; primary_focus: string; status: string; closure_completed_at: string }> = {}) {
+  const current = step >= 0 && step < STEPS.length ? STEPS[step] : null;
+  const progress = step < 0 ? 5 : step >= STEPS.length ? 100 : Math.round(((step + 1) / (STEPS.length + 1)) * 90 + 5);
+
+  async function persist(stageNumber: number, extra: Record<string, unknown> = {}) {
     if (!user) return;
+    const genealogy: Record<string, string> = {};
+    const childhood: Record<string, string> = {};
+    for (const s of STEPS) {
+      const v = answers[s.key] ?? "";
+      if (s.section === "genealogy") genealogy[s.key] = v; else childhood[s.key] = v;
+    }
     await supabase.from("intake_sessions").upsert({
-      user_id: user.id,
-      stage: nextStage,
-      genealogy: gen,
-      childhood: child,
-      ...extra,
+      user_id: user.id, stage: stageNumber, genealogy, childhood, ...extra,
     }, { onConflict: "user_id" });
   }
 
-  async function nextFromGen() {
-    for (const q of GENE_Q) if (!(gen[q.key] ?? "").trim()) return toast.error("Responde las 3 preguntas con sinceridad.");
-    await saveDraft(2);
-    setStage(2);
+  async function saveName() {
+    if (!user) return;
+    const clean = name.trim();
+    if (!clean) return toast.error("Escribe tu nombre para comenzar");
+    await supabase.from("profiles").update({ display_name: clean, full_name: clean }).eq("id", user.id);
+    setStep(0);
+  }
+
+  async function goNext() {
+    if (!current) return;
+    const v = (answers[current.key] ?? "").trim();
+    if (v.length < 8) return toast.error("Responde con al menos una frase completa. Tu sinceridad importa.");
+    if (!rewarded[current.key]) {
+      await awardGems(GEM_REWARDS.onboardingStep, `Paso completado: ${current.emoji}`);
+      setRewarded({ ...rewarded, [current.key]: true });
+    }
+    if (step === STEPS.length - 1) {
+      await persist(2);
+      await generateClosure();
+    } else {
+      await persist(current.section === "genealogy" && STEPS[step + 1].section === "childhood" ? 2 : 1);
+      setStep(step + 1);
+    }
   }
 
   async function generateClosure() {
-    for (const q of CHILD_Q) if (!(child[q.key] ?? "").trim()) return toast.error("Responde las 3 preguntas con sinceridad.");
     setProcessing(true);
+    setStep(STEPS.length);
     try {
-      const r = await fetch("/api/intake-closure", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ genealogy: gen, childhood: child }) });
+      const genealogy: Record<string, string> = {};
+      const childhood: Record<string, string> = {};
+      for (const s of STEPS) {
+        const v = answers[s.key] ?? "";
+        if (s.section === "genealogy") genealogy[s.key] = v; else childhood[s.key] = v;
+      }
+      const r = await fetch("/api/intake-closure", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ genealogy, childhood }) });
       const j = await r.json();
       if (!r.ok) throw new Error(j.error ?? "Error");
       setAi(j);
-      await saveDraft(3, { ai_plan: j, ai_summary: j.summary, primary_focus: j.primary_focus });
-      setStage(3);
-    } catch (e) { toast.error((e as Error).message); }
+      await persist(3, { ai_plan: j, ai_summary: j.summary, primary_focus: j.primary_focus });
+      setStep(STEPS.length + 1);
+    } catch (e) { toast.error((e as Error).message); setStep(STEPS.length - 1); }
     setProcessing(false);
   }
 
   async function completeIntake() {
     if (!user || !ai) return;
-    await saveDraft(3, { status: "completed", closure_completed_at: new Date().toISOString(), ai_plan: ai, ai_summary: ai.summary, primary_focus: ai.primary_focus });
+    await persist(3, { status: "completed", closure_completed_at: new Date().toISOString(), ai_plan: ai });
+    await awardGems(500, "Bienvenida completa 🎉");
     toast.success("Bienvenido(a) a tu programa personalizado");
     navigate({ to: "/dashboard", replace: true });
   }
 
   if (loading) return <div className="min-h-[60vh] grid place-items-center"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
 
-  const progress = stage === 1 ? 33 : stage === 2 ? 66 : 100;
-
   return (
-    <div className="max-w-3xl mx-auto px-4 py-6 md:p-10 pb-24">
-      <div className="text-center mb-6">
-        <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 text-primary px-4 py-1.5 text-xs font-bold uppercase tracking-widest"><ShieldCheck className="w-3.5 h-3.5" /> 100% privado · no se comparte</div>
-        <h1 className="font-display font-extrabold text-3xl md:text-5xl mt-4">Antes de comenzar</h1>
-        <p className="text-muted-foreground mt-2">Este proceso identifica el patrón espiritual y emocional de tu linaje para personalizar tu programa.</p>
+    <div className="max-w-2xl mx-auto px-4 py-6 md:p-10 pb-28">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
+          {step < 0 ? "Bienvenida" : step >= STEPS.length ? "Cierre" : `Paso ${step + 1} de ${STEPS.length}`}
+        </div>
+        <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 text-primary px-3 py-1 text-xs font-extrabold">
+          <Gem className="w-3.5 h-3.5" /> +{Object.keys(rewarded).length * GEM_REWARDS.onboardingStep}
+        </div>
       </div>
-      <Progress value={progress} className="mb-8" />
+      <Progress value={progress} className="mb-8 h-2" />
 
-      {stage === 1 && (
-        <Card className="p-6 md:p-8 rounded-[2rem] shadow-soft">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary grid place-items-center"><TreeDeciduous className="w-6 h-6" /></div>
-            <div>
-              <div className="text-[11px] uppercase tracking-widest text-primary font-extrabold">Etapa 1 de 3</div>
-              <h2 className="font-display font-bold text-2xl">Patrón del árbol genealógico</h2>
-            </div>
+      {/* WELCOME */}
+      {step === -1 && (
+        <Card className="p-6 md:p-10 rounded-[2rem] shadow-soft text-center animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="text-6xl mb-3 animate-bounce">✨</div>
+          <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 text-primary px-3 py-1 text-[11px] font-black uppercase tracking-widest"><ShieldCheck className="w-3.5 h-3.5" /> 100% privado</div>
+          <h1 className="font-display font-extrabold text-3xl md:text-4xl mt-4">Antes de comenzar</h1>
+          <p className="text-muted-foreground mt-3">Vamos a personalizar tu programa contigo. Toma 3 minutos, con sinceridad. Cada paso te da <span className="font-bold text-primary">gemas de sanación 💎</span>.</p>
+          <div className="mt-6 text-left">
+            <label className="text-sm font-semibold">¿Cómo quieres que te llamemos?</label>
+            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Tu nombre" className="mt-2 rounded-2xl h-12" />
           </div>
-          <p className="text-sm text-muted-foreground mt-4">Basándonos en tus familiares (no importa si son abuelo, abuela, padre, madre, tío, tía, sobrino, sobrina), responde con sinceridad. Esto crea tu programa de reconectar tu espíritu con Dios.</p>
-          <div className="mt-6 space-y-6">
-            {GENE_Q.map((q) => (
-              <div key={q.key}>
-                <label className="font-medium text-sm">{q.label}</label>
-                <Textarea value={gen[q.key] ?? ""} onChange={(e) => setGen({ ...gen, [q.key]: e.target.value })} className="mt-2 min-h-28 rounded-2xl" placeholder="Sé específico y sincero..." />
-              </div>
-            ))}
-          </div>
-          <Button onClick={nextFromGen} className="mt-8 w-full rounded-full h-12 bg-primary">Continuar a la infancia <ArrowRight className="w-4 h-4 ml-2" /></Button>
+          <Button onClick={saveName} className="mt-6 w-full h-13 rounded-full bg-primary font-bold text-base">Comenzar mi camino <ArrowRight className="w-4 h-4 ml-2" /></Button>
         </Card>
       )}
 
-      {stage === 2 && (
-        <Card className="p-6 md:p-8 rounded-[2rem] shadow-soft">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-gold/15 text-gold grid place-items-center"><Baby className="w-6 h-6" /></div>
-            <div>
-              <div className="text-[11px] uppercase tracking-widest text-gold font-extrabold">Etapa 2 de 3</div>
-              <h2 className="font-display font-bold text-2xl">Tu infancia</h2>
-            </div>
+      {/* QUESTION STEPS */}
+      {current && (
+        <Card key={current.key} className="p-6 md:p-10 rounded-[2rem] shadow-soft animate-in fade-in slide-in-from-right-4 duration-400">
+          <div className="text-[11px] font-black uppercase tracking-widest text-primary">
+            {current.section === "genealogy" ? "🌳 Tu árbol genealógico" : "🧒 Tu infancia"}
           </div>
-          <p className="text-sm text-muted-foreground mt-4">Sin tabúes, sin miedo, nadie te juzga. Nada de lo que escribas se comparte con otras personas.</p>
-          <div className="mt-6 space-y-6">
-            {CHILD_Q.map((q) => (
-              <div key={q.key}>
-                <label className="font-medium text-sm">{q.label}</label>
-                <Textarea value={child[q.key] ?? ""} onChange={(e) => setChild({ ...child, [q.key]: e.target.value })} className="mt-2 min-h-28 rounded-2xl" placeholder="Con toda confianza..." />
-              </div>
-            ))}
+          <div className="mt-4 flex items-start gap-4">
+            <div className="text-5xl md:text-6xl animate-[bounce_1.6s_ease-in-out_infinite]" aria-hidden>{current.emoji}</div>
+            <h2 className="font-display font-bold text-xl md:text-2xl leading-tight">{current.label}</h2>
           </div>
-          <div className="mt-8 flex gap-3">
-            <Button variant="ghost" onClick={() => setStage(1)} className="rounded-full">Atrás</Button>
-            <Button onClick={generateClosure} disabled={processing} className="flex-1 rounded-full h-12 bg-primary">
-              {processing ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Analizando con IA...</> : <>Generar mi cierre y solución <Sparkles className="w-4 h-4 ml-2" /></>}
+          <Textarea
+            value={answers[current.key] ?? ""}
+            onChange={(e) => setAnswers({ ...answers, [current.key]: e.target.value })}
+            placeholder={current.placeholder}
+            className="mt-5 min-h-32 md:min-h-40 rounded-2xl text-base"
+            autoFocus
+          />
+          <div className="mt-2 text-xs text-muted-foreground flex items-center gap-1">
+            <ShieldCheck className="w-3 h-3" /> Nada de lo que escribas se comparte con nadie.
+          </div>
+          <div className="mt-6 flex items-center gap-3">
+            {step > 0 && <Button variant="ghost" onClick={() => setStep(step - 1)} className="rounded-full"><ArrowLeft className="w-4 h-4 mr-1" /> Atrás</Button>}
+            <Button onClick={goNext} className="flex-1 h-12 rounded-full bg-primary font-bold">
+              {step === STEPS.length - 1 ? <>Generar mi diagnóstico <Sparkles className="w-4 h-4 ml-2" /></> : <>Continuar +{GEM_REWARDS.onboardingStep} 💎 <ArrowRight className="w-4 h-4 ml-2" /></>}
             </Button>
           </div>
         </Card>
       )}
 
-      {stage === 3 && ai && (
-        <div className="space-y-5">
-          <Card className="p-6 md:p-8 rounded-[2rem] shadow-glow bg-gradient-to-br from-primary/8 via-background to-gold/6">
+      {/* GENERATING */}
+      {step === STEPS.length && processing && (
+        <Card className="p-10 rounded-[2rem] shadow-soft text-center">
+          <div className="text-6xl mb-4 animate-pulse">🕊️</div>
+          <h2 className="font-display font-bold text-2xl">Analizando tu historia…</h2>
+          <p className="mt-2 text-muted-foreground">Identificando el patrón espiritual de tu linaje.</p>
+          <Loader2 className="w-6 h-6 animate-spin mx-auto mt-6 text-primary" />
+        </Card>
+      )}
+
+      {/* CLOSURE */}
+      {step > STEPS.length && ai && (
+        <div className="space-y-5 animate-in fade-in duration-500">
+          <Card className="p-6 md:p-8 rounded-[2rem] shadow-glow bg-gradient-to-br from-primary/10 via-background to-gold/10">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-2xl bg-primary text-primary-foreground grid place-items-center"><HandHeart className="w-6 h-6" /></div>
               <div>
-                <div className="text-[11px] uppercase tracking-widest text-primary font-extrabold">Etapa 3 de 3 · Cierre y solución</div>
+                <div className="text-[11px] uppercase tracking-widest text-primary font-black">Cierre y solución</div>
                 <h2 className="font-display font-bold text-2xl">Tu diagnóstico personalizado</h2>
               </div>
             </div>
-            {ai.needs_more && <p className="mt-4 text-sm text-destructive">⚠ La IA necesita más detalle: {ai.needs_more}. Vuelve atrás y amplía tus respuestas.</p>}
+            {ai.needs_more && <p className="mt-4 text-sm text-destructive">⚠ Falta detalle: {ai.needs_more}</p>}
             <div className="mt-5">
-              <div className="text-[11px] uppercase tracking-widest text-muted-foreground font-bold">Resumen del patrón identificado</div>
+              <div className="text-[11px] uppercase tracking-widest text-muted-foreground font-bold">Patrón identificado</div>
               <p className="mt-2 text-sm md:text-base leading-relaxed whitespace-pre-line">{ai.summary}</p>
             </div>
             <div className="mt-5 grid sm:grid-cols-2 gap-3">
               <div className="rounded-2xl bg-background/60 p-4 border border-border">
-                <div className="text-[11px] uppercase tracking-widest text-primary font-bold">Enfoque principal</div>
+                <div className="text-[11px] uppercase tracking-widest text-primary font-bold">Enfoque</div>
                 <div className="font-display font-bold text-lg mt-1 capitalize">{ai.primary_focus}</div>
               </div>
               <div className="rounded-2xl bg-background/60 p-4 border border-border">
-                <div className="text-[11px] uppercase tracking-widest text-gold font-bold">Categorías recomendadas</div>
+                <div className="text-[11px] uppercase tracking-widest text-gold font-bold">Áreas recomendadas</div>
                 <div className="text-sm mt-1">{(ai.recommended_categories ?? []).join(" · ")}</div>
               </div>
             </div>
           </Card>
 
           <Card className="p-6 md:p-8 rounded-[2rem] shadow-soft border-l-4 border-l-gold">
-            <div className="text-[11px] uppercase tracking-widest text-gold font-bold flex items-center gap-2"><Heart className="w-4 h-4" /> Ritual de cierre — perdona, suelta, avanza</div>
-            <p className="scripture mt-3 text-base md:text-lg leading-relaxed whitespace-pre-line">{ai.closure_prayer}</p>
-            <p className="text-sm text-muted-foreground mt-4">Repite esta oración en voz alta. Al terminar, presiona el botón para cerrar el ciclo y entrar a tu programa personalizado.</p>
+            <div className="text-[11px] uppercase tracking-widest text-gold font-bold flex items-center gap-2"><Heart className="w-4 h-4" /> Oración de cierre — perdona, suelta, avanza</div>
+            <p className="mt-3 text-base md:text-lg leading-relaxed whitespace-pre-line italic">{ai.closure_prayer}</p>
           </Card>
 
           <Card className="p-5 rounded-[1.7rem] bg-primary text-primary-foreground text-center">
             <p className="text-sm leading-relaxed">{ai.welcome_message}</p>
             <Button onClick={completeIntake} disabled={!!ai.needs_more} className="mt-4 rounded-full bg-gold text-gold-foreground hover:bg-gold/90 h-12 px-8 font-bold">
-              Cerrar ciclo y comenzar mi programa <ArrowRight className="w-4 h-4 ml-2" />
+              Cerrar ciclo y entrar (+500 💎) <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </Card>
         </div>
