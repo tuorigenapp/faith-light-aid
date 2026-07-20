@@ -74,6 +74,8 @@ function Landing() {
         <Method />
         <Inside />
         <Features />
+        <Reviews />
+        <Booking />
         <Pricing />
         <Author />
         <FAQ />
@@ -83,6 +85,7 @@ function Landing() {
     </div>
   );
 }
+
 
 /* ───────────────────────── NAV ───────────────────────── */
 
