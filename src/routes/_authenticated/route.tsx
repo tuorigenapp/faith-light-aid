@@ -69,6 +69,18 @@ function AuthLayout() {
       return data?.status ?? "missing";
     },
   });
+  const { data: profile } = useQuery({
+    queryKey: ["profile", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase.from("profiles").select("display_name, full_name, gems, avatar_url").eq("id", user!.id).maybeSingle();
+      return data;
+    },
+    refetchInterval: 30000,
+  });
+  const displayName = (profile?.display_name || profile?.full_name || user?.email?.split("@")[0] || "Amigo").split(" ")[0];
+  const gems = profile?.gems ?? 0;
+
 
   useEffect(() => {
     if (!user || intake === undefined) return;
