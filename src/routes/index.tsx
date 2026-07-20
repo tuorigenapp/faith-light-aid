@@ -707,5 +707,154 @@ function Footer() {
   );
 }
 
+/* ───────────────────────── REVIEWS SLIDER ───────────────────────── */
+
+const REVIEWS_DATA = [
+  { name: "María L.", city: "Bogotá", text: "Este programa me ayudó bastante a reconocer mis patrones y errores. Ahora soy libre.", avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&h=200&fit=crop&crop=faces" },
+  { name: "Camila R.", city: "Medellín", text: "Por fin entendí de dónde venían mis miedos. El diagnóstico fue exacto y las etapas cambiaron mi vida.", avatar: "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=200&h=200&fit=crop&crop=faces" },
+  { name: "Verónica P.", city: "Ciudad de México", text: "Rompí un ciclo que llevaba tres generaciones en mi familia. No lo puedo creer, gloria a Dios.", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&h=200&fit=crop&crop=faces" },
+  { name: "Andrea M.", city: "Lima", text: "Cinco minutos al día devolvieron el orden a mi corazón. Recomendado 100%.", avatar: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=200&h=200&fit=crop&crop=faces" },
+  { name: "Sofía G.", city: "Buenos Aires", text: "El Chat me acompañó en la noche más oscura. Nunca me sentí sola.", avatar: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=200&h=200&fit=crop&crop=faces" },
+  { name: "Elena T.", city: "Madrid", text: "El árbol genealógico me abrió los ojos. Volver a Dios se sintió posible otra vez.", avatar: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=200&h=200&fit=crop&crop=faces" },
+  { name: "Rocío D.", city: "Quito", text: "Nunca había sentido tanta paz. Los audios del método 3-6-9 son un abrazo diario.", avatar: "https://images.unsplash.com/photo-1502378735452-bc7d86632805?w=200&h=200&fit=crop&crop=faces" },
+];
+
+function Reviews() {
+  return (
+    <section className="px-4 sm:px-6 py-16 sm:py-24 bg-secondary/40">
+      <div className="mx-auto max-w-6xl">
+        <div className="text-center max-w-2xl mx-auto">
+          <div className="text-xs font-black uppercase tracking-widest text-primary">Testimonios reales</div>
+          <h2 className="mt-3 font-display font-extrabold text-3xl sm:text-5xl tracking-tight">
+            Miles ya volvieron a <span className="text-primary">sentir a Dios</span>
+          </h2>
+        </div>
+        <div className="mt-10 overflow-hidden relative">
+          <div className="flex gap-4 animate-[scroll_40s_linear_infinite] hover:[animation-play-state:paused]" style={{ width: "max-content" }}>
+            {[...REVIEWS_DATA, ...REVIEWS_DATA].map((r, i) => (
+              <div key={i} className="w-[320px] shrink-0 rounded-3xl bg-card border border-border p-5 shadow-soft">
+                <div className="flex items-center gap-3">
+                  <img src={r.avatar} alt={r.name} className="w-12 h-12 rounded-full object-cover grayscale-[0.2]" loading="lazy" />
+                  <div>
+                    <div className="font-display font-bold text-sm">{r.name}</div>
+                    <div className="text-[11px] text-muted-foreground">{r.city}</div>
+                  </div>
+                  <div className="ml-auto flex gap-0.5">
+                    {Array.from({ length: 5 }).map((_, k) => <Star key={k} className="w-3 h-3 fill-gold text-gold" />)}
+                  </div>
+                </div>
+                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">"{r.text}"</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+      <style>{`@keyframes scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }`}</style>
+    </section>
+  );
+}
+
+/* ───────────────────────── BOOKING (Consultoría con profesional) ───────────────────────── */
+
+function Booking() {
+  const [open, setOpen] = useState(false);
+  const [plan, setPlan] = useState<"full" | "limitado" | null>(null);
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
+
+  function submit() {
+    if (!plan || !date || !time) return;
+    const label = plan === "full" ? "Plan FULL (2h · $495.99)" : "Plan LIMITADO (1h · $270)";
+    const msg = encodeURIComponent(`Hola, quiero agendar una consulta profesional en Reconectando.\n\n${label}\nFecha: ${date}\nHora: ${time}\n\nMe gustaría que revisen mi diagnóstico personal y me acompañen en mi proceso.`);
+    window.open(`https://wa.me/?text=${msg}`, "_blank");
+  }
+
+  return (
+    <section id="agendar" className="px-4 sm:px-6 py-16 sm:py-24">
+      <div className="mx-auto max-w-5xl rounded-[2rem] bg-card border border-border p-6 sm:p-10 shadow-soft">
+        <div className="text-center max-w-2xl mx-auto">
+          <div className="inline-flex items-center gap-2 rounded-full bg-emerald-500/15 text-emerald-600 px-3 py-1.5 text-xs font-black uppercase tracking-widest">
+            <HeartHandshake className="w-3.5 h-3.5" /> Agenda con un profesional
+          </div>
+          <h2 className="mt-4 font-display font-extrabold text-3xl sm:text-4xl tracking-tight">
+            Casos especiales · Acompañamiento privado
+          </h2>
+          <p className="mt-3 text-muted-foreground">Reserva una sesión personal con un consejero profesional. El pago se coordina tras confirmar tu cita.</p>
+        </div>
+
+        <div className="mt-8 grid md:grid-cols-2 gap-5">
+          <PlanCard
+            plan="full"
+            featured
+            title="PLAN FULL"
+            price="$495.99"
+            installments="o 3 cuotas de $165.33"
+            duration="2 horas · WhatsApp o Zoom"
+            perks={["Manual de guianza personalizado", "Seguimiento durante 6 meses", "Material profesional completo", "Contrato de confidencialidad"]}
+            onClick={() => { setPlan("full"); setOpen(true); }}
+          />
+          <PlanCard
+            plan="limitado"
+            title="PLAN LIMITADO"
+            price="$270"
+            installments="o 3 cuotas de $90"
+            duration="1 hora · WhatsApp o Zoom"
+            perks={["Manual básico de guianza", "Seguimiento durante 3 meses", "Material de apoyo básico", "Contrato de confidencialidad"]}
+            onClick={() => { setPlan("limitado"); setOpen(true); }}
+          />
+        </div>
+      </div>
+
+      {open && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm grid place-items-center p-4 animate-in fade-in duration-200" onClick={() => setOpen(false)}>
+          <div className="w-full max-w-md rounded-3xl bg-card p-6 shadow-glow animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
+            <div className="text-[11px] uppercase tracking-widest text-emerald-600 font-black">Agendar cita</div>
+            <h3 className="mt-1 font-display font-extrabold text-2xl">{plan === "full" ? "Plan FULL" : "Plan LIMITADO"}</h3>
+            <p className="mt-2 text-sm text-muted-foreground">Elige el día y la hora. El profesional revisará tu diagnóstico antes de la llamada.</p>
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs font-bold">Fecha</label>
+                <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="mt-1 w-full h-11 rounded-2xl border border-input bg-background px-3 text-sm" />
+              </div>
+              <div>
+                <label className="text-xs font-bold">Hora</label>
+                <input type="time" value={time} onChange={(e) => setTime(e.target.value)} className="mt-1 w-full h-11 rounded-2xl border border-input bg-background px-3 text-sm" />
+              </div>
+            </div>
+            <Button onClick={submit} className="mt-6 w-full h-12 rounded-full bg-emerald-600 hover:bg-emerald-700 font-bold shadow-glow">
+              Agendar ahora
+            </Button>
+            <button onClick={() => setOpen(false)} className="mt-2 w-full text-xs text-muted-foreground hover:text-foreground">Cancelar</button>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
+function PlanCard({ featured, title, price, installments, duration, perks, onClick }: {
+  plan: "full" | "limitado"; featured?: boolean; title: string; price: string; installments: string; duration: string; perks: string[]; onClick: () => void;
+}) {
+  return (
+    <div className={`relative rounded-3xl p-6 border-2 ${featured ? "border-emerald-500 bg-emerald-500/5 shadow-glow" : "border-border bg-background"}`}>
+      {featured && <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-500 text-white text-[11px] font-black uppercase tracking-widest rounded-full px-3 py-1">Más completo</div>}
+      <div className="font-display font-extrabold text-xl">{title}</div>
+      <div className="text-xs text-muted-foreground mt-1">{duration}</div>
+      <div className="mt-4 flex items-end gap-2">
+        <span className="font-display font-black text-4xl text-emerald-600">{price}</span>
+        <span className="text-xs text-muted-foreground pb-1.5">USD</span>
+      </div>
+      <div className="text-xs text-muted-foreground">{installments}</div>
+      <ul className="mt-4 space-y-2">
+        {perks.map((p) => <li key={p} className="flex items-start gap-2 text-sm"><Check className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" /><span>{p}</span></li>)}
+      </ul>
+      <Button onClick={onClick} className="w-full mt-6 h-12 rounded-full bg-emerald-600 hover:bg-emerald-700 font-bold text-base shadow-glow animate-pulse">
+        Agendar ahora
+      </Button>
+    </div>
+  );
+}
+
 // keep referenced imports used (types)
 export type _ = ReactNode;
+
