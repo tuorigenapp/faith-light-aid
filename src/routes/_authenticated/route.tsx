@@ -192,31 +192,29 @@ function AuthLayout() {
       )}
 
       <div className="flex-1 min-w-0 flex flex-col">
-        {/* Mobile header */}
-        <header className="lg:hidden sticky top-0 z-20 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 px-4 h-14 bg-background/85 backdrop-blur-xl border-b border-border">
+        {/* Mobile header with name + gems */}
+        <header className="lg:hidden sticky top-0 z-20 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 px-3 h-16 bg-background/90 backdrop-blur-xl border-b border-border">
+          <Link to="/perfil" className="flex items-center gap-2 min-w-0 rounded-2xl px-2 py-1.5 hover:bg-muted/50">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-gold text-primary-foreground grid place-items-center font-black text-sm shrink-0">
+              {displayName.slice(0, 1).toUpperCase()}
+            </div>
+            <div className="min-w-0 leading-tight">
+              <div className="text-[10px] uppercase text-muted-foreground tracking-wider truncate">Hola,</div>
+              <div className="font-display font-bold text-sm truncate">{displayName}</div>
+            </div>
+          </Link>
+          <Link to="/premios" className="justify-self-center inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-fuchsia-500/15 to-primary/15 border border-primary/30 px-3 py-1.5 shadow-soft">
+            <Gem className="w-4 h-4 text-fuchsia-500" />
+            <span className="font-display font-black text-sm text-primary">{gems.toLocaleString()}</span>
+          </Link>
           <Button variant="ghost" size="icon" onClick={() => setOpen(true)} aria-label="Abrir menú">
             <Menu className="w-5 h-5" />
-          </Button>
-          <Link to="/dashboard" className="flex items-center gap-2 justify-self-center">
-            <img src="/app-icon.png" alt="" width={26} height={26} className="rounded-md" />
-            <span className="font-display text-sm truncate">Reconectando</span>
-          </Link>
-          <Button variant="ghost" size="icon" onClick={toggle} aria-label="Cambiar tema">
-            {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
           </Button>
         </header>
 
         <main className="flex-1 pb-[calc(env(safe-area-inset-bottom)+72px)] lg:pb-0"><Outlet /></main>
 
-        <a
-          href="https://wa.me/?text=Hola%2C%20necesito%20acompa%C3%B1amiento%20en%20Reconectando%20el%20Esp%C3%ADritu%20con%20Dios"
-          target="_blank"
-          rel="noreferrer"
-          className="fixed right-4 bottom-[calc(env(safe-area-inset-bottom)+5.2rem)] lg:bottom-6 lg:right-6 z-30 h-14 w-14 rounded-full bg-[#25D366] text-white shadow-glow grid place-items-center hover:scale-105 transition-transform"
-          aria-label="Abrir WhatsApp"
-        >
-          <PhoneCall className="w-6 h-6" />
-        </a>
+
 
         {/* Mobile bottom nav */}
         <nav
