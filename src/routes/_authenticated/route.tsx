@@ -4,7 +4,7 @@ import { useAuth } from "@/lib/use-auth";
 import { useTheme } from "@/lib/theme";
 import {
   Home, MessageCircle, Compass, Layers, BookHeart, Dumbbell, Library,
-  CreditCard, User as UserIcon, Shield, LogOut, Menu, Sun, Moon, X, PhoneCall, Headphones,
+  CreditCard, User as UserIcon, Shield, LogOut, Menu, Sun, Moon, X, Headphones, TreeDeciduous, Trophy, Gem,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -21,20 +21,20 @@ export const Route = createFileRoute("/_authenticated")({
   component: AuthLayout,
 });
 
-// Primary (bottom-bar) navigation — keep to 5 for mobile thumb reach
 const BOTTOM_NAV = [
-  { to: "/dashboard", label: "Hoy", icon: Home },
+  { to: "/dashboard", label: "Inicio", icon: Home },
+  { to: "/arbol", label: "Árbol", icon: TreeDeciduous },
   { to: "/visualiza", label: "Vívelo", icon: Headphones },
-  { to: "/etapas", label: "Etapas", icon: Layers },
-  { to: "/chat", label: "Chat IA", icon: MessageCircle },
+  { to: "/premios", label: "Premios", icon: Trophy },
   { to: "/perfil", label: "Perfil", icon: UserIcon },
 ] as const;
 
-// Full nav for sidebar / drawer
 const FULL_NAV = [
   { to: "/dashboard", label: "Inicio", icon: Home },
+  { to: "/arbol", label: "Mi Árbol Genealógico", icon: TreeDeciduous },
+  { to: "/premios", label: "Premios", icon: Trophy },
   { to: "/visualiza", label: "Visualízalo y Vívelo", icon: Headphones },
-  { to: "/chat", label: "Consultor IA", icon: MessageCircle },
+  { to: "/chat", label: "Chat", icon: MessageCircle },
   { to: "/diagnostico", label: "Diagnóstico", icon: Compass },
   { to: "/etapas", label: "8 Etapas", icon: Layers },
   { to: "/diario", label: "Diario", icon: BookHeart },
@@ -43,6 +43,7 @@ const FULL_NAV = [
   { to: "/membresia", label: "Membresía", icon: CreditCard },
   { to: "/perfil", label: "Perfil", icon: UserIcon },
 ] as const;
+
 
 function AuthLayout() {
   const { user } = useAuth();
