@@ -5,7 +5,7 @@ export async function awardGems(amount: number, reason: string, meta?: Record<st
   const { data, error } = await supabase.rpc("award_gems", {
     _amount: amount,
     _reason: reason,
-    _meta: meta ?? null,
+    _meta: (meta ?? null) as never,
   });
   if (error) {
     console.error("[gems] award failed", error);
