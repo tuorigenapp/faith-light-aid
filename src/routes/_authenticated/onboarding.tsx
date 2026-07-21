@@ -1,48 +1,50 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { ArrowRight, ArrowLeft, Heart, Sparkles, HandHeart, Loader2, ShieldCheck, Gem } from "lucide-react";
+import { ArrowRight, ArrowLeft, Loader2, Lock, User as UserIcon, Heart, DollarSign, Brain, Sprout, Mountain, HandHeart } from "lucide-react";
 import { awardGems, GEM_REWARDS } from "@/lib/gems";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
-  head: () => ({ meta: [{ title: "Bienvenida — Reconectando" }] }),
+  head: () => ({ meta: [{ title: "Bienvenido — Reconectando" }] }),
   component: Onboarding,
 });
 
-type Step = {
-  key: string;
-  section: "genealogy" | "childhood";
-  emoji: string;
-  label: string;
-  placeholder: string;
+type Impact = { relaciones: string; prosperidad: string; emociones: string };
+type Strengths = { adaptarte: string; resistir: string; ayudar: string };
+type AIResult = {
+  pattern_name: string;
+  pattern_summary: string;
+  impact: Impact;
+  strengths: Strengths;
+  primary_focus: string;
+  recommended_categories: string[];
+  closure_reflection: string;
+  welcome_message: string;
+  needs_more: false | string;
 };
 
-const STEPS: Step[] = [
-  { key: "relaciones", section: "genealogy", emoji: "🌳", label: "Pensando en 3-4 familiares (abuelos, padres, tíos, sobrinos): ¿qué patrones repetidos ves en sus relaciones o forma de amar?", placeholder: "Escribe con sinceridad. Ejemplo: mi mamá y mi abuela vivieron relaciones donde daban todo y recibían poco…" },
-  { key: "miedos", section: "genealogy", emoji: "😰", label: "¿Qué miedos, traumas o creencias limitantes se repiten en tu familia?", placeholder: "Ejemplo: miedo a la escasez, a quedarse solo, a fallar…" },
-  { key: "crisis", section: "genealogy", emoji: "⛓️", label: "¿Qué crisis (adicción, ruina, divorcio, enfermedad, abandono, etc.) se han repetido de generación en generación?", placeholder: "Menciona 2-3 concretas que veas repetirse…" },
-  { key: "recuerdos", section: "childhood", emoji: "🧒", label: "¿Cuáles son los recuerdos más marcados de tu infancia (buenos o dolorosos)?", placeholder: "Nadie más lo verá. Escribe con confianza…" },
-  { key: "heridas", section: "childhood", emoji: "💔", label: "¿Qué herida emocional cargas desde niño(a) que aún no has soltado?", placeholder: "Describe la herida con tus propias palabras…" },
-  { key: "creencias", section: "childhood", emoji: "💭", label: "¿Qué creencias sobre ti, sobre Dios o sobre la vida aprendiste de niño(a) y hoy quieres cambiar?", placeholder: "Ejemplo: 'no soy suficiente', 'Dios está lejos', 'tengo que ganarme el amor'…" },
-];
+const TOTAL_STEPS = 6;
 
 function Onboarding() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [step, setStep] = useState(1);
+  const [dir, setDir] = useState<1 | -1>(1);
+
   const [name, setName] = useState("");
-  const [step, setStep] = useState(-1); // -1 = welcome/name, 0..N-1 = questions, N = generating, N+1 = closure
-  const [answers, setAnswers] = useState<Record<string, string>>({});
-  const [rewarded, setRewarded] = useState<Record<string, boolean>>({});
-  const [ai, setAi] = useState<{ summary: string; primary_focus: string; recommended_categories: string[]; closure_prayer: string; welcome_message: string; needs_more: false | string } | null>(null);
+  const [raices, setRaices] = useState("");
+  const [recuerdos, setRecuerdos] = useState("");
+
   const [processing, setProcessing] = useState(false);
+  const [ai, setAi] = useState<AIResult | null>(null);
+  const [analysisLine, setAnalysisLine] = useState(0);
 
   useEffect(() => {
     if (!user) return;
@@ -51,197 +53,456 @@ function Onboarding() {
         supabase.from("intake_sessions").select("*").eq("user_id", user.id).maybeSingle(),
         supabase.from("profiles").select("full_name, display_name").eq("id", user.id).maybeSingle(),
       ]);
-      if (intake?.status === "completed") { navigate({ to: "/dashboard", replace: true }); return; }
-      const genealogy = (intake?.genealogy as Record<string, string>) ?? {};
-      const childhood = (intake?.childhood as Record<string, string>) ?? {};
-      setAnswers({ ...genealogy, ...childhood });
+      if (intake?.status === "completed") {
+        navigate({ to: "/dashboard", replace: true });
+        return;
+      }
+      const g = (intake?.genealogy as Record<string, string>) ?? {};
+      const c = (intake?.childhood as Record<string, string>) ?? {};
+      setRaices(g.raices ?? "");
+      setRecuerdos(c.recuerdos ?? "");
       setName(profile?.display_name || profile?.full_name || "");
-      if (intake?.ai_plan) { setAi(intake.ai_plan as never); setStep(STEPS.length + 1); }
-      else if (intake?.stage === 2) setStep(3);
-      else setStep(-1);
       setLoading(false);
     })();
   }, [user, navigate]);
 
-  const current = step >= 0 && step < STEPS.length ? STEPS[step] : null;
-  const progress = step < 0 ? 5 : step >= STEPS.length ? 100 : Math.round(((step + 1) / (STEPS.length + 1)) * 90 + 5);
+  const lines = [
+    "Leyendo tus respuestas…",
+    "Encontrando patrones…",
+    "Conectando tu experiencia…",
+    "Analizando emociones…",
+    "Detectando fortalezas…",
+    "Preparando tu diagnóstico personalizado…",
+  ];
 
-  async function persist(stageNumber: number, extra: Record<string, unknown> = {}) {
+  useEffect(() => {
+    if (step !== 4 || !processing) return;
+    setAnalysisLine(0);
+    const id = setInterval(() => setAnalysisLine((n) => Math.min(n + 1, lines.length - 1)), 1100);
+    return () => clearInterval(id);
+  }, [step, processing, lines.length]);
+
+  async function persist(extra: Record<string, unknown> = {}) {
     if (!user) return;
-    const genealogy: Record<string, string> = {};
-    const childhood: Record<string, string> = {};
-    for (const s of STEPS) {
-      const v = answers[s.key] ?? "";
-      if (s.section === "genealogy") genealogy[s.key] = v; else childhood[s.key] = v;
-    }
     await supabase.from("intake_sessions").upsert({
-      user_id: user.id, stage: stageNumber, genealogy, childhood, ...extra,
+      user_id: user.id,
+      stage: step,
+      genealogy: { raices },
+      childhood: { recuerdos },
+      ...extra,
     }, { onConflict: "user_id" });
   }
 
-  async function saveName() {
-    if (!user) return;
-    const clean = name.trim();
-    if (!clean) return toast.error("Escribe tu nombre para comenzar");
-    await supabase.from("profiles").update({ display_name: clean, full_name: clean }).eq("id", user.id);
-    setStep(0);
-  }
-
   async function goNext() {
-    if (!current) return;
-    const v = (answers[current.key] ?? "").trim();
-    if (v.length < 8) return toast.error("Responde con al menos una frase completa. Tu sinceridad importa.");
-    if (!rewarded[current.key]) {
-      await awardGems(GEM_REWARDS.onboardingStep, `Paso completado: ${current.emoji}`);
-      setRewarded({ ...rewarded, [current.key]: true });
-    }
-    if (step === STEPS.length - 1) {
-      await persist(2);
-      await generateClosure();
-    } else {
-      await persist(current.section === "genealogy" && STEPS[step + 1].section === "childhood" ? 2 : 1);
-      setStep(step + 1);
+    if (step === 1) {
+      if (!name.trim()) return toast.error("Escribe cómo quieres que te llamemos");
+      await supabase.from("profiles").update({ display_name: name.trim(), full_name: name.trim() }).eq("id", user!.id);
+      await awardGems(GEM_REWARDS.onboardingStep, "Paso 1 completado");
+      setDir(1); setStep(2);
+    } else if (step === 2) {
+      if (raices.trim().length < 8) return toast.error("Cuéntanos con al menos una frase");
+      await persist();
+      await awardGems(GEM_REWARDS.onboardingStep, "Paso 2 completado");
+      setDir(1); setStep(3);
+    } else if (step === 3) {
+      if (recuerdos.trim().length < 8) return toast.error("Cuéntanos con al menos una frase");
+      await persist();
+      await awardGems(GEM_REWARDS.onboardingStep, "Paso 3 completado");
+      setDir(1); setStep(4);
+      await runAnalysis();
+    } else if (step === 5) {
+      setDir(1); setStep(6);
+    } else if (step === 6) {
+      await complete();
     }
   }
 
-  async function generateClosure() {
+  async function runAnalysis() {
     setProcessing(true);
-    setStep(STEPS.length);
     try {
-      const genealogy: Record<string, string> = {};
-      const childhood: Record<string, string> = {};
-      for (const s of STEPS) {
-        const v = answers[s.key] ?? "";
-        if (s.section === "genealogy") genealogy[s.key] = v; else childhood[s.key] = v;
-      }
-      const r = await fetch("/api/intake-closure", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ genealogy, childhood }) });
+      const r = await fetch("/api/intake-closure", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, genealogy: { raices }, childhood: { recuerdos } }),
+      });
       const j = await r.json();
       if (!r.ok) throw new Error(j.error ?? "Error");
+      // ensure minimum time so the analysis screen doesn't flash
+      await new Promise((res) => setTimeout(res, 3800));
       setAi(j);
-      await persist(3, { ai_plan: j, ai_summary: j.summary, primary_focus: j.primary_focus });
-      setStep(STEPS.length + 1);
-    } catch (e) { toast.error((e as Error).message); setStep(STEPS.length - 1); }
-    setProcessing(false);
+      await persist({ ai_plan: j, ai_summary: j.pattern_summary, primary_focus: j.primary_focus });
+      setDir(1); setStep(5);
+    } catch (e) {
+      toast.error((e as Error).message);
+      setDir(-1); setStep(3);
+    } finally {
+      setProcessing(false);
+    }
   }
 
-  async function completeIntake() {
+  async function complete() {
     if (!user || !ai) return;
-    await persist(3, { status: "completed", closure_completed_at: new Date().toISOString(), ai_plan: ai });
-    await awardGems(500, "Bienvenida completa 🎉");
-    toast.success("Bienvenido(a) a tu programa personalizado");
+    await persist({ status: "completed", closure_completed_at: new Date().toISOString(), ai_plan: ai });
+    await awardGems(500, "Onboarding completo");
+    toast.success(`¡Bienvenido${name ? ", " + name : ""}!`);
     navigate({ to: "/dashboard", replace: true });
   }
 
-  if (loading) return <div className="min-h-[60vh] grid place-items-center"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
+  if (loading) {
+    return (
+      <div className="min-h-screen grid place-items-center bg-white">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6 md:p-10 pb-28">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
-          {step < 0 ? "Bienvenida" : step >= STEPS.length ? "Cierre" : `Paso ${step + 1} de ${STEPS.length}`}
-        </div>
-        <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 text-primary px-3 py-1 text-xs font-extrabold">
-          <Gem className="w-3.5 h-3.5" /> +{Object.keys(rewarded).length * GEM_REWARDS.onboardingStep}
+    <div className="relative min-h-screen bg-white overflow-hidden">
+      {/* Ambient blurred lights */}
+      <div aria-hidden className="pointer-events-none absolute -top-40 -left-32 w-[34rem] h-[34rem] rounded-full blur-[110px]"
+        style={{ background: "radial-gradient(circle, rgba(124,92,255,0.18), transparent 65%)" }} />
+      <div aria-hidden className="pointer-events-none absolute -bottom-40 -right-32 w-[36rem] h-[36rem] rounded-full blur-[110px]"
+        style={{ background: "radial-gradient(circle, rgba(245,139,203,0.16), transparent 65%)" }} />
+      <div aria-hidden className="pointer-events-none absolute top-1/3 right-1/4 w-[22rem] h-[22rem] rounded-full blur-[110px]"
+        style={{ background: "radial-gradient(circle, rgba(97,168,255,0.10), transparent 65%)" }} />
+
+      <div className="relative z-10 mx-auto max-w-lg px-5 pt-10 pb-16 min-h-screen flex flex-col">
+        {/* Progress header (hidden on analysis step) */}
+        {step !== 4 && (
+          <div className="mb-8">
+            <div className="text-center text-[13px] font-medium text-[#64667A]">Paso {step} de {TOTAL_STEPS}</div>
+            <div className="mt-3 flex items-center justify-center gap-1.5">
+              {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
+                <div key={i}
+                  className={cn(
+                    "h-1.5 rounded-full transition-all duration-500",
+                    i + 1 <= step ? "w-8 bg-gradient-primary" : "w-5 bg-[#ECEEF5]"
+                  )} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="flex-1 flex items-start justify-center">
+          <div
+            key={step}
+            className={cn(
+              "w-full",
+              dir === 1
+                ? "animate-in fade-in slide-in-from-right-6 duration-300"
+                : "animate-in fade-in slide-in-from-left-6 duration-300"
+            )}
+          >
+            {step === 1 && <Screen1 name={name} setName={setName} onNext={goNext} />}
+            {step === 2 && <Screen2 value={raices} setValue={setRaices} onNext={goNext} onBack={() => { setDir(-1); setStep(1); }} />}
+            {step === 3 && <Screen3 value={recuerdos} setValue={setRecuerdos} onNext={goNext} onBack={() => { setDir(-1); setStep(2); }} />}
+            {step === 4 && <Screen4 line={lines[analysisLine]} />}
+            {step === 5 && ai && <Screen5 ai={ai} onNext={goNext} />}
+            {step === 6 && ai && <Screen6 ai={ai} onNext={goNext} />}
+          </div>
         </div>
       </div>
-      <Progress value={progress} className="mb-8 h-2" />
+    </div>
+  );
+}
 
-      {/* WELCOME */}
-      {step === -1 && (
-        <Card className="p-6 md:p-10 rounded-[2rem] shadow-soft text-center animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <div className="text-6xl mb-3 animate-bounce">✨</div>
-          <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 text-primary px-3 py-1 text-[11px] font-black uppercase tracking-widest"><ShieldCheck className="w-3.5 h-3.5" /> 100% privado</div>
-          <h1 className="font-display font-extrabold text-3xl md:text-4xl mt-4">Antes de comenzar</h1>
-          <p className="text-muted-foreground mt-3">Vamos a personalizar tu programa contigo. Toma 3 minutos, con sinceridad. Cada paso te da <span className="font-bold text-primary">gemas de sanación 💎</span>.</p>
-          <div className="mt-6 text-left">
-            <label className="text-sm font-semibold">¿Cómo quieres que te llamemos?</label>
-            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Tu nombre" className="mt-2 rounded-2xl h-12" />
-          </div>
-          <Button onClick={saveName} className="mt-6 w-full h-13 rounded-full bg-primary font-bold text-base">Comenzar mi camino <ArrowRight className="w-4 h-4 ml-2" /></Button>
-        </Card>
-      )}
+/* ────────── Shared building blocks ────────── */
 
-      {/* QUESTION STEPS */}
-      {current && (
-        <Card key={current.key} className="p-6 md:p-10 rounded-[2rem] shadow-soft animate-in fade-in slide-in-from-right-4 duration-400">
-          <div className="text-[11px] font-black uppercase tracking-widest text-primary">
-            {current.section === "genealogy" ? "🌳 Tu árbol genealógico" : "🧒 Tu infancia"}
-          </div>
-          <div className="mt-4 flex items-start gap-4">
-            <div className="text-5xl md:text-6xl animate-[bounce_1.6s_ease-in-out_infinite]" aria-hidden>{current.emoji}</div>
-            <h2 className="font-display font-bold text-xl md:text-2xl leading-tight">{current.label}</h2>
-          </div>
-          <Textarea
-            value={answers[current.key] ?? ""}
-            onChange={(e) => setAnswers({ ...answers, [current.key]: e.target.value })}
-            placeholder={current.placeholder}
-            className="mt-5 min-h-32 md:min-h-40 rounded-2xl text-base"
-            autoFocus
-          />
-          <div className="mt-2 text-xs text-muted-foreground flex items-center gap-1">
-            <ShieldCheck className="w-3 h-3" /> Nada de lo que escribas se comparte con nadie.
-          </div>
-          <div className="mt-6 flex items-center gap-3">
-            {step > 0 && <Button variant="ghost" onClick={() => setStep(step - 1)} className="rounded-full"><ArrowLeft className="w-4 h-4 mr-1" /> Atrás</Button>}
-            <Button onClick={goNext} className="flex-1 h-12 rounded-full bg-primary font-bold">
-              {step === STEPS.length - 1 ? <>Generar mi diagnóstico <Sparkles className="w-4 h-4 ml-2" /></> : <>Continuar +{GEM_REWARDS.onboardingStep} 💎 <ArrowRight className="w-4 h-4 ml-2" /></>}
-            </Button>
-          </div>
-        </Card>
-      )}
+function AuraIcon({ children, tint = "purple" }: { children: React.ReactNode; tint?: "purple" | "blue" | "pink" }) {
+  const bg =
+    tint === "blue"
+      ? "radial-gradient(circle, rgba(97,168,255,0.35), rgba(97,168,255,0) 65%)"
+      : tint === "pink"
+        ? "radial-gradient(circle, rgba(245,139,203,0.38), rgba(245,139,203,0) 65%)"
+        : "radial-gradient(circle, rgba(124,92,255,0.35), rgba(124,92,255,0) 65%)";
+  return (
+    <div className="relative mx-auto w-32 h-32 grid place-items-center">
+      <div aria-hidden className="absolute inset-0 rounded-full blur-2xl animate-glow" style={{ background: bg }} />
+      <div className="relative w-24 h-24 rounded-full bg-white shadow-soft grid place-items-center animate-breathe">
+        {children}
+      </div>
+    </div>
+  );
+}
 
-      {/* GENERATING */}
-      {step === STEPS.length && processing && (
-        <Card className="p-10 rounded-[2rem] shadow-soft text-center">
-          <div className="text-6xl mb-4 animate-pulse">🕊️</div>
-          <h2 className="font-display font-bold text-2xl">Analizando tu historia…</h2>
-          <p className="mt-2 text-muted-foreground">Identificando el patrón espiritual de tu linaje.</p>
-          <Loader2 className="w-6 h-6 animate-spin mx-auto mt-6 text-primary" />
-        </Card>
-      )}
+function ScreenCard({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="rounded-[2rem] bg-white shadow-soft p-7 md:p-9 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      {children}
+    </div>
+  );
+}
 
-      {/* CLOSURE */}
-      {step > STEPS.length && ai && (
-        <div className="space-y-5 animate-in fade-in duration-500">
-          <Card className="p-6 md:p-8 rounded-[2rem] shadow-glow bg-gradient-to-br from-primary/10 via-background to-gold/10">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-primary text-primary-foreground grid place-items-center"><HandHeart className="w-6 h-6" /></div>
-              <div>
-                <div className="text-[11px] uppercase tracking-widest text-primary font-black">Cierre y solución</div>
-                <h2 className="font-display font-bold text-2xl">Tu diagnóstico personalizado</h2>
-              </div>
-            </div>
-            {ai.needs_more && <p className="mt-4 text-sm text-destructive">⚠ Falta detalle: {ai.needs_more}</p>}
-            <div className="mt-5">
-              <div className="text-[11px] uppercase tracking-widest text-muted-foreground font-bold">Patrón identificado</div>
-              <p className="mt-2 text-sm md:text-base leading-relaxed whitespace-pre-line">{ai.summary}</p>
-            </div>
-            <div className="mt-5 grid sm:grid-cols-2 gap-3">
-              <div className="rounded-2xl bg-background/60 p-4 border border-border">
-                <div className="text-[11px] uppercase tracking-widest text-primary font-bold">Enfoque</div>
-                <div className="font-display font-bold text-lg mt-1 capitalize">{ai.primary_focus}</div>
-              </div>
-              <div className="rounded-2xl bg-background/60 p-4 border border-border">
-                <div className="text-[11px] uppercase tracking-widest text-gold font-bold">Áreas recomendadas</div>
-                <div className="text-sm mt-1">{(ai.recommended_categories ?? []).join(" · ")}</div>
-              </div>
-            </div>
-          </Card>
+function PrimaryButton({ children, onClick, disabled }: { children: React.ReactNode; onClick: () => void; disabled?: boolean }) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className="w-full h-14 rounded-[18px] btn-primary-gradient font-semibold text-[15px] tracking-tight text-white inline-flex items-center justify-center gap-2 disabled:opacity-60"
+    >
+      {children}
+    </button>
+  );
+}
 
-          <Card className="p-6 md:p-8 rounded-[2rem] shadow-soft border-l-4 border-l-gold">
-            <div className="text-[11px] uppercase tracking-widest text-gold font-bold flex items-center gap-2"><Heart className="w-4 h-4" /> Oración de cierre — perdona, suelta, avanza</div>
-            <p className="mt-3 text-base md:text-lg leading-relaxed whitespace-pre-line italic">{ai.closure_prayer}</p>
-          </Card>
+function BackLink({ onBack }: { onBack?: () => void }) {
+  if (!onBack) return null;
+  return (
+    <button onClick={onBack} className="inline-flex items-center gap-1 text-[13px] text-[#64667A] hover:text-[#1B1B27] transition-colors mb-4">
+      <ArrowLeft className="w-4 h-4" /> Atrás
+    </button>
+  );
+}
 
-          <Card className="p-5 rounded-[1.7rem] bg-primary text-primary-foreground text-center">
-            <p className="text-sm leading-relaxed">{ai.welcome_message}</p>
-            <Button onClick={completeIntake} disabled={!!ai.needs_more} className="mt-4 rounded-full bg-gold text-gold-foreground hover:bg-gold/90 h-12 px-8 font-bold">
-              Cerrar ciclo y entrar (+500 💎) <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
-          </Card>
+function PrivacyNote() {
+  return (
+    <div className="mt-3 inline-flex items-center gap-1.5 text-[12px] text-[#64667A]">
+      <Lock className="w-3.5 h-3.5" /> Solo tú podrás leer esto.
+    </div>
+  );
+}
+
+/* ────────── Screens ────────── */
+
+function Screen1({ name, setName, onNext }: { name: string; setName: (s: string) => void; onNext: () => void }) {
+  return (
+    <ScreenCard>
+      <AuraIcon tint="purple">
+        <svg viewBox="0 0 24 24" className="w-11 h-11" fill="none" stroke="url(#g1)" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <defs>
+            <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stopColor="#7C5CFF" /><stop offset="1" stopColor="#F58BCB" />
+            </linearGradient>
+          </defs>
+          <path d="M12 3c1.8 2.5 1.8 5 0 7.5-1.8-2.5-1.8-5 0-7.5Z" />
+          <path d="M4.5 10.5c2.9-.5 5.1.7 6.5 3.2-2.9.5-5.1-.7-6.5-3.2Z" />
+          <path d="M19.5 10.5c-2.9-.5-5.1.7-6.5 3.2 2.9.5 5.1-.7 6.5-3.2Z" />
+          <path d="M8 17c1.4-1.6 3.3-2.2 4-2.2s2.6.6 4 2.2c-1.4 1.7-3.3 2.3-4 2.3s-2.6-.6-4-2.3Z" />
+          <circle cx="12" cy="13.7" r="1.4" />
+        </svg>
+      </AuraIcon>
+      <h1 className="text-center font-display font-extrabold text-[34px] leading-[1.1] mt-6 text-[#1B1B27]">
+        Bienvenido <span className="text-[#F58BCB]">♡</span>
+      </h1>
+      <p className="text-center text-[15px] text-[#64667A] mt-4 leading-relaxed">
+        Este recorrido dura menos de 3 minutos.<br />
+        Cada respuesta nos ayudará a comprender mejor tu historia.
+      </p>
+      <p className="text-center text-[13px] text-[#7C5CFF] font-medium mt-3">No existen respuestas correctas.</p>
+
+      <div className="mt-8 rounded-[18px] border border-[#ECEEF5] bg-white px-4 py-4 shadow-[0_2px_10px_rgba(22,25,45,0.03)]">
+        <div className="flex items-center gap-2 text-[#7C5CFF]">
+          <UserIcon className="w-4 h-4" />
+          <span className="text-[13px] font-semibold text-[#1B1B27]">¿Cómo quieres que te llamemos?</span>
         </div>
-      )}
+        <Input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Escribe tu nombre"
+          className="mt-2 h-11 border-0 shadow-none bg-transparent px-0 text-[16px] focus-visible:ring-0"
+        />
+      </div>
+
+      <div className="mt-7">
+        <PrimaryButton onClick={onNext}>Continuar <ArrowRight className="w-4 h-4" /></PrimaryButton>
+      </div>
+    </ScreenCard>
+  );
+}
+
+function Screen2({ value, setValue, onNext, onBack }: { value: string; setValue: (s: string) => void; onNext: () => void; onBack?: () => void }) {
+  return (
+    <>
+      <BackLink onBack={onBack} />
+      <ScreenCard>
+        <AuraIcon tint="purple">
+          <svg viewBox="0 0 24 24" className="w-11 h-11" fill="none" stroke="url(#g2)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <defs>
+              <linearGradient id="g2" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stopColor="#7C5CFF" /><stop offset="1" stopColor="#61A8FF" />
+              </linearGradient>
+            </defs>
+            <path d="M12 3v18" />
+            <path d="M12 8c-2-2-5-2-7 0" /><path d="M12 8c2-2 5-2 7 0" />
+            <path d="M12 12c-3-2-6-2-8 0" /><path d="M12 12c3-2 6-2 8 0" />
+            <path d="M9 21h6" />
+          </svg>
+        </AuraIcon>
+        <h2 className="text-center font-display font-extrabold text-[30px] mt-6 text-[#1B1B27]">Tus raíces 🌿</h2>
+        <p className="text-center text-[14px] text-[#64667A] mt-3 leading-relaxed">
+          Las historias familiares pueden influir en cómo vivimos hoy.
+        </p>
+        <p className="text-center font-display font-semibold text-[16px] mt-5 text-[#1B1B27]">
+          ¿Qué patrones has observado repetirse en tu familia o linaje?
+        </p>
+        <Textarea
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          placeholder="Escribe con libertad…"
+          className="mt-5 min-h-36 rounded-[18px] border-[#ECEEF5] bg-white text-[15px] resize-none focus-visible:ring-2 focus-visible:ring-[#7C5CFF]/25 focus-visible:border-[#7C5CFF]"
+        />
+        <div className="mt-5 flex items-center justify-between gap-3">
+          <PrivacyNote />
+          <button onClick={onNext} className="h-12 px-6 rounded-[18px] btn-primary-gradient font-semibold text-[14px] text-white inline-flex items-center gap-2">
+            Continuar <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+      </ScreenCard>
+    </>
+  );
+}
+
+function Screen3({ value, setValue, onNext, onBack }: { value: string; setValue: (s: string) => void; onNext: () => void; onBack?: () => void }) {
+  return (
+    <>
+      <BackLink onBack={onBack} />
+      <ScreenCard>
+        <AuraIcon tint="pink">
+          <svg viewBox="0 0 24 24" className="w-11 h-11" fill="none" stroke="url(#g3)" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+            <defs>
+              <linearGradient id="g3" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stopColor="#7C5CFF" /><stop offset="1" stopColor="#F58BCB" />
+              </linearGradient>
+            </defs>
+            <circle cx="12" cy="6.5" r="2" />
+            <path d="M8 21c0-3 1.8-5 4-5s4 2 4 5" />
+            <path d="M5 14c1.5-2 4-3 7-3s5.5 1 7 3" />
+            <path d="M3 20c2-3 6-5 9-5s7 2 9 5" opacity=".3" />
+          </svg>
+        </AuraIcon>
+        <h2 className="text-center font-display font-extrabold text-[30px] mt-6 text-[#1B1B27]">
+          Tus primeros recuerdos <span className="text-[#F58BCB]">♡</span>
+        </h2>
+        <p className="text-center text-[14px] text-[#64667A] mt-3 leading-relaxed">
+          A veces un recuerdo explica más que cientos de palabras.
+        </p>
+        <p className="text-center font-display font-semibold text-[16px] mt-5 text-[#1B1B27]">
+          ¿Qué experiencia marcó tu infancia de manera profunda?
+        </p>
+        <Textarea
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          placeholder="Escribe con libertad…"
+          className="mt-5 min-h-36 rounded-[18px] border-[#ECEEF5] bg-white text-[15px] resize-none focus-visible:ring-2 focus-visible:ring-[#7C5CFF]/25 focus-visible:border-[#7C5CFF]"
+        />
+        <div className="mt-5 flex items-center justify-between gap-3">
+          <PrivacyNote />
+          <button onClick={onNext} className="h-12 px-6 rounded-[18px] btn-primary-gradient font-semibold text-[14px] text-white inline-flex items-center gap-2">
+            Continuar <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+      </ScreenCard>
+    </>
+  );
+}
+
+function Screen4({ line }: { line: string }) {
+  return (
+    <div className="pt-14 text-center">
+      <div className="relative mx-auto w-40 h-40 grid place-items-center">
+        <div aria-hidden className="absolute inset-0 rounded-full blur-3xl animate-glow"
+          style={{ background: "radial-gradient(circle, rgba(124,92,255,0.35), rgba(245,139,203,0.25) 40%, transparent 70%)" }} />
+        <div className="relative w-28 h-28 rounded-full bg-white shadow-soft animate-breathe"
+          style={{ background: "radial-gradient(circle at 30% 30%, #ffffff, #F4F6FF 60%, #E9E4FF 100%)" }} />
+      </div>
+      <h2 className="mt-8 font-display font-extrabold text-[26px] text-[#1B1B27]">Analizando tu historia…</h2>
+      <div className="mt-6 h-6">
+        <p key={line} className="text-[14px] text-[#64667A] animate-in fade-in slide-in-from-bottom-2 duration-500">
+          {line}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function Screen5({ ai, onNext }: { ai: AIResult; onNext: () => void }) {
+  return (
+    <div>
+      <p className="text-center text-[12px] tracking-widest font-semibold text-[#7C5CFF] uppercase mt-2">
+        Tu patrón principal ✨
+      </p>
+      <h2 className="text-center font-display font-extrabold text-[30px] mt-3 text-gradient-emotional">
+        {ai.pattern_name}
+      </h2>
+
+      <div className="mt-6 rounded-[24px] bg-[#F7F8FD] p-5">
+        <p className="text-[14px] leading-relaxed text-[#1B1B27]">
+          <span className="text-[#7C5CFF] font-bold">“</span>
+          {ai.pattern_summary}
+          <span className="text-[#7C5CFF] font-bold">”</span>
+        </p>
+      </div>
+
+      <p className="mt-7 font-display font-semibold text-[15px] text-[#1B1B27]">Cómo afecta hoy</p>
+      <div className="mt-3 grid grid-cols-3 gap-3">
+        <ImpactCard icon={<Heart className="w-5 h-5" />} tint="pink" title="Relaciones" text={ai.impact.relaciones} />
+        <ImpactCard icon={<DollarSign className="w-5 h-5" />} tint="purple" title="Prosperidad" text={ai.impact.prosperidad} />
+        <ImpactCard icon={<Brain className="w-5 h-5" />} tint="blue" title="Emociones" text={ai.impact.emociones} />
+      </div>
+
+      <div className="mt-8">
+        <PrimaryButton onClick={onNext}>Continuar <ArrowRight className="w-4 h-4" /></PrimaryButton>
+      </div>
+    </div>
+  );
+}
+
+function ImpactCard({ icon, tint, title, text }: { icon: React.ReactNode; tint: "pink" | "purple" | "blue"; title: string; text: string }) {
+  const color = tint === "pink" ? "#F58BCB" : tint === "blue" ? "#61A8FF" : "#7C5CFF";
+  const bg = tint === "pink" ? "#FFF1F8" : tint === "blue" ? "#EEF5FF" : "#F1EDFF";
+  return (
+    <div className="rounded-[20px] bg-white border border-[#ECEEF5] p-3.5 text-center">
+      <div className="mx-auto w-10 h-10 rounded-2xl grid place-items-center" style={{ background: bg, color }}>
+        {icon}
+      </div>
+      <div className="mt-2 text-[12px] font-semibold" style={{ color }}>{title}</div>
+      <p className="mt-1 text-[11px] leading-snug text-[#64667A]">{text}</p>
+    </div>
+  );
+}
+
+function Screen6({ ai, onNext }: { ai: AIResult; onNext: () => void }) {
+  return (
+    <div>
+      <p className="text-[12px] tracking-widest font-semibold text-[#43C78E] uppercase">Lo positivo ♡</p>
+      <h2 className="font-display font-extrabold text-[26px] mt-2 text-[#1B1B27]">
+        Toda herida también desarrolla fortalezas.
+      </h2>
+      <p className="text-[14px] text-[#64667A] mt-2">Has aprendido a…</p>
+
+      <div className="mt-5 grid grid-cols-3 gap-3">
+        <StrengthCard icon={<Sprout className="w-5 h-5" />} tint="blue" title="Adaptarte" text={ai.strengths.adaptarte} />
+        <StrengthCard icon={<Mountain className="w-5 h-5" />} tint="purple" title="Resistir" text={ai.strengths.resistir} />
+        <StrengthCard icon={<HandHeart className="w-5 h-5" />} tint="pink" title="Ayudar a otros" text={ai.strengths.ayudar} />
+      </div>
+
+      <div className="mt-8 rounded-[24px] bg-[#F7F8FD] p-6">
+        <p className="text-[12px] tracking-widest font-semibold text-[#7C5CFF] uppercase">Tu camino ✨</p>
+        <h3 className="mt-2 font-display font-bold text-[20px] text-[#1B1B27]">Aquí empieza el verdadero cambio.</h3>
+        <p className="mt-3 text-[14px] leading-relaxed text-[#64667A]">
+          No prometemos milagros. Te acompañaremos con herramientas prácticas para ayudarte a comprender tu historia,
+          fortalecer tu bienestar emocional y avanzar paso a paso hacia una vida con mayor claridad y equilibrio.
+        </p>
+        <p className="mt-4 text-[13px] italic text-[#7C5CFF]">{ai.welcome_message}</p>
+      </div>
+
+      <div className="mt-8">
+        <PrimaryButton onClick={onNext}>Comenzar mi transformación ✨</PrimaryButton>
+      </div>
+    </div>
+  );
+}
+
+function StrengthCard({ icon, tint, title, text }: { icon: React.ReactNode; tint: "pink" | "purple" | "blue"; title: string; text: string }) {
+  const color = tint === "pink" ? "#F58BCB" : tint === "blue" ? "#61A8FF" : "#7C5CFF";
+  const bg = tint === "pink" ? "#FFF1F8" : tint === "blue" ? "#EEF5FF" : "#F1EDFF";
+  return (
+    <div className="rounded-[20px] bg-white border border-[#ECEEF5] p-3.5 text-center">
+      <div className="mx-auto w-10 h-10 rounded-2xl grid place-items-center" style={{ background: bg, color }}>
+        {icon}
+      </div>
+      <div className="mt-2 text-[12px] font-semibold text-[#1B1B27]">{title}</div>
+      <p className="mt-1 text-[11px] leading-snug text-[#64667A]">{text}</p>
     </div>
   );
 }
