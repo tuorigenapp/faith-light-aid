@@ -100,6 +100,16 @@ function AuthLayout() {
   const isActive = (to: string) =>
     location.pathname === to || (to !== "/dashboard" && location.pathname.startsWith(to));
 
+  // Fullscreen immersive routes: hide all navigation chrome
+  const immersive = location.pathname.startsWith("/onboarding");
+  if (immersive) {
+    return (
+      <div className="min-h-screen bg-background text-foreground">
+        <Outlet />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex bg-background text-foreground">
       {/* Desktop sidebar */}

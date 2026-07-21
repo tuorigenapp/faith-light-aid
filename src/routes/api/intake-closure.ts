@@ -1,26 +1,47 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-type Body = { genealogy: Record<string, string>; childhood: Record<string, string> };
+type Body = {
+  name?: string;
+  genealogy: Record<string, string>;
+  childhood: Record<string, string>;
+};
 
 export const Route = createFileRoute("/api/intake-closure")({
   server: {
     handlers: {
       POST: async ({ request }) => {
         const key = process.env.LOVABLE_API_KEY;
-        if (!key) return new Response(JSON.stringify({ error: "AI no disponible" }), { status: 500 });
+        if (!key) return new Response(JSON.stringify({ error: "Servicio no disponible" }), { status: 500 });
         const body = (await request.json()) as Body;
 
-        const sys = `Eres un consejero cristiano especializado en sanidad emocional, restauración y cierre de ciclos. Analizas respuestas del usuario sobre su árbol genealógico y su infancia para identificar UN patrón principal repetido en su linaje y ofrecer un cierre energético cristiano (pedir perdón, soltar, avanzar). Nunca inventes ni supongas: si las respuestas son insuficientes o ambiguas, indícalo en "needs_more" y explica qué falta. Responde SIEMPRE en JSON estricto con este shape exacto:
+        const sys = `Eres un guía de bienestar emocional y crecimiento personal (NO religioso). Analizas respuestas del usuario sobre patrones familiares y recuerdos de infancia para identificar UN patrón emocional principal y ofrecer un cierre reflexivo (comprender, soltar, avanzar). Nunca inventes ni supongas: si las respuestas son insuficientes o ambiguas, indícalo en "needs_more". Responde SIEMPRE en JSON estricto con este shape exacto:
 {
-  "summary": "string — 2-4 párrafos resumen del patrón identificado en su linaje/infancia",
-  "primary_focus": "restauración familiar" | "sanidad emocional" | "identidad" | "reconexión" | "propósito" | "disciplina espiritual",
-  "recommended_categories": ["dinero"|"pareja"|"casa"|"negocio"|"trabajo"|"proposito"|"abundancia"|"libre"],
-  "closure_prayer": "string — oración de cierre personalizada, 4-6 líneas, tono cristiano evangélico, incluye pedir perdón, soltar y avanzar",
-  "welcome_message": "string — 1 párrafo de bienvenida al programa personalizado",
-  "needs_more": false | "string con lo que falta"
+  "pattern_name": "string corto (2-4 palabras). Ejemplos: 'Herida de abandono', 'Miedo a fallar', 'Necesidad de aprobación', 'Autoexigencia crónica', 'Miedo a la escasez'",
+  "pattern_summary": "string — 1 frase (máx 25 palabras) que resume qué aprendió el usuario a hacer por causa del patrón. Ejemplo: 'Has aprendido a protegerte porque durante mucho tiempo sentiste que debías hacerlo solo.'",
+  "impact": {
+    "relaciones": "string — 1 frase corta de cómo afecta hoy sus relaciones",
+    "prosperidad": "string — 1 frase corta de cómo afecta hoy sus decisiones/oportunidades",
+    "emociones": "string — 1 frase corta de cómo afecta hoy sus emociones"
+  },
+  "strengths": {
+    "adaptarte": "string — 1 frase de cómo esta experiencia lo hizo adaptable",
+    "resistir": "string — 1 frase de cómo desarrolló resistencia",
+    "ayudar": "string — 1 frase de cómo puede ayudar a otros con esta experiencia"
+  },
+  "primary_focus": "relaciones" | "prosperidad" | "emociones" | "identidad" | "propósito",
+  "recommended_categories": ["array de 2-4 categorías breves"],
+  "closure_reflection": "string — reflexión de cierre suave, 3-4 líneas, tono cálido y humano (no religioso), incluye comprender, soltar y avanzar",
+  "welcome_message": "string — 1-2 frases dando la bienvenida al programa personalizado",
+  "needs_more": false
 }`;
 
-        const userMsg = `ÁRBOL GENEALÓGICO:\n${Object.entries(body.genealogy).map(([k, v]) => `- ${k}: ${v}`).join("\n")}\n\nINFANCIA:\n${Object.entries(body.childhood).map(([k, v]) => `- ${k}: ${v}`).join("\n")}`;
+        const userMsg = `NOMBRE: ${body.name ?? "usuario"}
+
+PATRONES FAMILIARES / LINAJE:
+${Object.entries(body.genealogy).map(([k, v]) => `- ${k}: ${v}`).join("\n")}
+
+RECUERDOS / INFANCIA:
+${Object.entries(body.childhood).map(([k, v]) => `- ${k}: ${v}`).join("\n")}`;
 
         try {
           const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -34,7 +55,13 @@ export const Route = createFileRoute("/api/intake-closure")({
           });
           if (!r.ok) {
             const t = await r.text();
-            return new Response(JSON.stringify({ error: r.status === 402 ? "Créditos IA agotados. Contacta al administrador." : r.status === 429 ? "Demasiadas solicitudes, intenta en un momento." : "Error de IA: " + t.slice(0, 200) }), { status: r.status });
+            return new Response(JSON.stringify({
+              error: r.status === 402
+                ? "Créditos agotados. Contacta al administrador."
+                : r.status === 429
+                ? "Demasiadas solicitudes, intenta en un momento."
+                : "Error: " + t.slice(0, 200),
+            }), { status: r.status });
           }
           const j = await r.json();
           const content = j.choices?.[0]?.message?.content ?? "{}";
