@@ -151,20 +151,6 @@ function TreePage() {
         </DialogContent>
       </Dialog>
 
-      {/* Celebration overlay */}
-      {celebrate && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-black/70 backdrop-blur animate-in fade-in duration-300">
-          <div className="text-center animate-in zoom-in duration-500">
-            <PartyPopper className="w-16 h-16 text-gold mx-auto animate-bounce" />
-            <div className="mt-4 font-display font-black text-4xl text-white">¡Felicidades!</div>
-            <div className="mt-2 text-white/80">Has agregado un nuevo familiar</div>
-            <div className="mt-6 inline-flex items-center gap-2 bg-gold text-gold-foreground rounded-full px-6 py-3 font-black text-2xl">
-              <Gem className="w-6 h-6" /> +{celebrate}
-            </div>
-            <div className="mt-2 text-white/70 text-sm">Gemas de Sanación</div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
