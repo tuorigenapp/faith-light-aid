@@ -87,7 +87,7 @@ function PatronesPage() {
             name: name.trim(),
             birthdate,
             question: question.trim(),
-            profile: { display_name: profile?.display_name ?? "", primary_focus: profile?.primary_focus ?? "" },
+            profile: { display_name: profile?.display_name ?? "" },
             intake,
             family: family ?? [],
           }),
