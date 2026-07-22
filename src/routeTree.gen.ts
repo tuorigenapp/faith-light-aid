@@ -13,6 +13,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiPatronesRouteImport } from './routes/api/patrones'
 import { Route as ApiIntakeClosureRouteImport } from './routes/api/intake-closure'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedVisualizaRouteImport } from './routes/_authenticated/visualiza'
@@ -50,6 +51,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPatronesRoute = ApiPatronesRouteImport.update({
+  id: '/api/patrones',
+  path: '/api/patrones',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiIntakeClosureRoute = ApiIntakeClosureRouteImport.update({
@@ -172,6 +178,7 @@ export interface FileRoutesByFullPath {
   '/visualiza': typeof AuthenticatedVisualizaRouteWithChildren
   '/api/chat': typeof ApiChatRoute
   '/api/intake-closure': typeof ApiIntakeClosureRoute
+  '/api/patrones': typeof ApiPatronesRoute
   '/etapas/$stageId': typeof AuthenticatedEtapasStageIdRoute
   '/visualiza/$categoryId': typeof AuthenticatedVisualizaCategoryIdRouteWithChildren
   '/visualiza/$categoryId/$day': typeof AuthenticatedVisualizaCategoryIdDayRoute
@@ -196,6 +203,7 @@ export interface FileRoutesByTo {
   '/visualiza': typeof AuthenticatedVisualizaRouteWithChildren
   '/api/chat': typeof ApiChatRoute
   '/api/intake-closure': typeof ApiIntakeClosureRoute
+  '/api/patrones': typeof ApiPatronesRoute
   '/etapas/$stageId': typeof AuthenticatedEtapasStageIdRoute
   '/visualiza/$categoryId': typeof AuthenticatedVisualizaCategoryIdRouteWithChildren
   '/visualiza/$categoryId/$day': typeof AuthenticatedVisualizaCategoryIdDayRoute
@@ -222,6 +230,7 @@ export interface FileRoutesById {
   '/_authenticated/visualiza': typeof AuthenticatedVisualizaRouteWithChildren
   '/api/chat': typeof ApiChatRoute
   '/api/intake-closure': typeof ApiIntakeClosureRoute
+  '/api/patrones': typeof ApiPatronesRoute
   '/_authenticated/etapas/$stageId': typeof AuthenticatedEtapasStageIdRoute
   '/_authenticated/visualiza/$categoryId': typeof AuthenticatedVisualizaCategoryIdRouteWithChildren
   '/_authenticated/visualiza/$categoryId/$day': typeof AuthenticatedVisualizaCategoryIdDayRoute
@@ -248,6 +257,7 @@ export interface FileRouteTypes {
     | '/visualiza'
     | '/api/chat'
     | '/api/intake-closure'
+    | '/api/patrones'
     | '/etapas/$stageId'
     | '/visualiza/$categoryId'
     | '/visualiza/$categoryId/$day'
@@ -272,6 +282,7 @@ export interface FileRouteTypes {
     | '/visualiza'
     | '/api/chat'
     | '/api/intake-closure'
+    | '/api/patrones'
     | '/etapas/$stageId'
     | '/visualiza/$categoryId'
     | '/visualiza/$categoryId/$day'
@@ -297,6 +308,7 @@ export interface FileRouteTypes {
     | '/_authenticated/visualiza'
     | '/api/chat'
     | '/api/intake-closure'
+    | '/api/patrones'
     | '/_authenticated/etapas/$stageId'
     | '/_authenticated/visualiza/$categoryId'
     | '/_authenticated/visualiza/$categoryId/$day'
@@ -309,6 +321,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiIntakeClosureRoute: typeof ApiIntakeClosureRoute
+  ApiPatronesRoute: typeof ApiPatronesRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -339,6 +352,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/patrones': {
+      id: '/api/patrones'
+      path: '/api/patrones'
+      fullPath: '/api/patrones'
+      preLoaderRoute: typeof ApiPatronesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/intake-closure': {
@@ -562,6 +582,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiChatRoute: ApiChatRoute,
   ApiIntakeClosureRoute: ApiIntakeClosureRoute,
+  ApiPatronesRoute: ApiPatronesRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
