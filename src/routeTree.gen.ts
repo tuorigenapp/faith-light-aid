@@ -19,6 +19,7 @@ import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedVisualizaRouteImport } from './routes/_authenticated/visualiza'
 import { Route as AuthenticatedPremiosRouteImport } from './routes/_authenticated/premios'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
+import { Route as AuthenticatedPatronesRouteImport } from './routes/_authenticated/patrones'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedMembresiaRouteImport } from './routes/_authenticated/membresia'
 import { Route as AuthenticatedEtapasRouteImport } from './routes/_authenticated/etapas'
@@ -81,6 +82,11 @@ const AuthenticatedPremiosRoute = AuthenticatedPremiosRouteImport.update({
 const AuthenticatedPerfilRoute = AuthenticatedPerfilRouteImport.update({
   id: '/perfil',
   path: '/perfil',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPatronesRoute = AuthenticatedPatronesRouteImport.update({
+  id: '/patrones',
+  path: '/patrones',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
@@ -173,6 +179,7 @@ export interface FileRoutesByFullPath {
   '/etapas': typeof AuthenticatedEtapasRouteWithChildren
   '/membresia': typeof AuthenticatedMembresiaRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/patrones': typeof AuthenticatedPatronesRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/premios': typeof AuthenticatedPremiosRoute
   '/visualiza': typeof AuthenticatedVisualizaRouteWithChildren
@@ -198,6 +205,7 @@ export interface FileRoutesByTo {
   '/etapas': typeof AuthenticatedEtapasRouteWithChildren
   '/membresia': typeof AuthenticatedMembresiaRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/patrones': typeof AuthenticatedPatronesRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/premios': typeof AuthenticatedPremiosRoute
   '/visualiza': typeof AuthenticatedVisualizaRouteWithChildren
@@ -225,6 +233,7 @@ export interface FileRoutesById {
   '/_authenticated/etapas': typeof AuthenticatedEtapasRouteWithChildren
   '/_authenticated/membresia': typeof AuthenticatedMembresiaRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
+  '/_authenticated/patrones': typeof AuthenticatedPatronesRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
   '/_authenticated/premios': typeof AuthenticatedPremiosRoute
   '/_authenticated/visualiza': typeof AuthenticatedVisualizaRouteWithChildren
@@ -252,6 +261,7 @@ export interface FileRouteTypes {
     | '/etapas'
     | '/membresia'
     | '/onboarding'
+    | '/patrones'
     | '/perfil'
     | '/premios'
     | '/visualiza'
@@ -277,6 +287,7 @@ export interface FileRouteTypes {
     | '/etapas'
     | '/membresia'
     | '/onboarding'
+    | '/patrones'
     | '/perfil'
     | '/premios'
     | '/visualiza'
@@ -303,6 +314,7 @@ export interface FileRouteTypes {
     | '/_authenticated/etapas'
     | '/_authenticated/membresia'
     | '/_authenticated/onboarding'
+    | '/_authenticated/patrones'
     | '/_authenticated/perfil'
     | '/_authenticated/premios'
     | '/_authenticated/visualiza'
@@ -394,6 +406,13 @@ declare module '@tanstack/react-router' {
       path: '/perfil'
       fullPath: '/perfil'
       preLoaderRoute: typeof AuthenticatedPerfilRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/patrones': {
+      id: '/_authenticated/patrones'
+      path: '/patrones'
+      fullPath: '/patrones'
+      preLoaderRoute: typeof AuthenticatedPatronesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/onboarding': {
@@ -550,6 +569,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedEtapasRoute: typeof AuthenticatedEtapasRouteWithChildren
   AuthenticatedMembresiaRoute: typeof AuthenticatedMembresiaRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
+  AuthenticatedPatronesRoute: typeof AuthenticatedPatronesRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
   AuthenticatedPremiosRoute: typeof AuthenticatedPremiosRoute
   AuthenticatedVisualizaRoute: typeof AuthenticatedVisualizaRouteWithChildren
@@ -567,6 +587,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedEtapasRoute: AuthenticatedEtapasRouteWithChildren,
   AuthenticatedMembresiaRoute: AuthenticatedMembresiaRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
+  AuthenticatedPatronesRoute: AuthenticatedPatronesRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
   AuthenticatedPremiosRoute: AuthenticatedPremiosRoute,
   AuthenticatedVisualizaRoute: AuthenticatedVisualizaRouteWithChildren,

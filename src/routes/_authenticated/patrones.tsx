@@ -49,7 +49,7 @@ function PatronesPage() {
     queryKey: ["profile", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const { data } = await supabase.from("profiles").select("display_name, full_name, primary_focus").eq("id", user!.id).maybeSingle();
+      const { data } = await supabase.from("profiles").select("display_name, full_name").eq("id", user!.id).maybeSingle();
       return data;
     },
   });
