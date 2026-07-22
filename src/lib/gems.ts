@@ -1,5 +1,4 @@
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 
 export async function awardGems(amount: number, reason: string, meta?: Record<string, unknown>) {
   const { data, error } = await supabase.rpc("award_gems", {
@@ -11,10 +10,6 @@ export async function awardGems(amount: number, reason: string, meta?: Record<st
     console.error("[gems] award failed", error);
     return null;
   }
-  toast.success(`+${amount} 💎 Gemas de Sanación`, {
-    description: reason,
-    duration: 2500,
-  });
   return data as number;
 }
 
