@@ -56,13 +56,11 @@ function TreePage() {
     });
     if (error) return toast.error(error.message);
     await awardGems(GEM_REWARDS.familyMember, `Nuevo familiar: ${form.full_name}`);
-    setCelebrate(GEM_REWARDS.familyMember);
     setForm({ full_name: "", relationship: "", lineage: form.lineage });
     setOpen(false);
     qc.invalidateQueries({ queryKey: ["family_members"] });
     qc.invalidateQueries({ queryKey: ["profile"] });
     qc.invalidateQueries({ queryKey: ["profile-gems"] });
-    setTimeout(() => setCelebrate(null), 2600);
   }
 
   return (
