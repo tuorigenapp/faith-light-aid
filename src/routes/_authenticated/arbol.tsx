@@ -23,7 +23,6 @@ function TreePage() {
   const { user } = useAuth();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
-  const [celebrate, setCelebrate] = useState<number | null>(null);
   const [form, setForm] = useState({ full_name: "", relationship: "", lineage: "materno" as "materno" | "paterno" });
 
   const { data: members = [] } = useQuery({
