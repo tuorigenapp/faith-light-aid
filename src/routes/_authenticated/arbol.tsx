@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Gem, Trophy, TreeDeciduous, PartyPopper } from "lucide-react";
+import { Plus, Gem, Trophy, TreeDeciduous, Sparkles } from "lucide-react";
 import { awardGems, GEM_REWARDS } from "@/lib/gems";
 import { toast } from "sonner";
 
@@ -23,7 +23,6 @@ function TreePage() {
   const { user } = useAuth();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
-  const [celebrate, setCelebrate] = useState<number | null>(null);
   const [form, setForm] = useState({ full_name: "", relationship: "", lineage: "materno" as "materno" | "paterno" });
 
   const { data: members = [] } = useQuery({
@@ -57,13 +56,11 @@ function TreePage() {
     });
     if (error) return toast.error(error.message);
     await awardGems(GEM_REWARDS.familyMember, `Nuevo familiar: ${form.full_name}`);
-    setCelebrate(GEM_REWARDS.familyMember);
     setForm({ full_name: "", relationship: "", lineage: form.lineage });
     setOpen(false);
     qc.invalidateQueries({ queryKey: ["family_members"] });
     qc.invalidateQueries({ queryKey: ["profile"] });
     qc.invalidateQueries({ queryKey: ["profile-gems"] });
-    setTimeout(() => setCelebrate(null), 2600);
   }
 
   return (
@@ -102,6 +99,9 @@ function TreePage() {
         </Button>
         <Link to="/premios" className="inline-flex items-center gap-2 rounded-full bg-gold/15 text-gold px-4 h-12 font-bold hover:bg-gold/25">
           <Trophy className="w-4 h-4" /> Canjear Puntos
+        </Link>
+        <Link to="/patrones" className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#7C5CFF] to-[#F58BCB] text-white px-5 h-12 font-bold shadow-soft hover:opacity-95 animate-pulse">
+          <Sparkles className="w-4 h-4" /> Explorar Patrones Familiares
         </Link>
       </div>
 
@@ -151,20 +151,6 @@ function TreePage() {
         </DialogContent>
       </Dialog>
 
-      {/* Celebration overlay */}
-      {celebrate && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-black/70 backdrop-blur animate-in fade-in duration-300">
-          <div className="text-center animate-in zoom-in duration-500">
-            <PartyPopper className="w-16 h-16 text-gold mx-auto animate-bounce" />
-            <div className="mt-4 font-display font-black text-4xl text-white">¡Felicidades!</div>
-            <div className="mt-2 text-white/80">Has agregado un nuevo familiar</div>
-            <div className="mt-6 inline-flex items-center gap-2 bg-gold text-gold-foreground rounded-full px-6 py-3 font-black text-2xl">
-              <Gem className="w-6 h-6" /> +{celebrate}
-            </div>
-            <div className="mt-2 text-white/70 text-sm">Gemas de Sanación</div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { ArrowRight, ArrowLeft, Loader2, Lock, User as UserIcon, Heart, DollarSign, Brain, Sprout, Mountain, HandHeart } from "lucide-react";
 import { awardGems, GEM_REWARDS } from "@/lib/gems";
 import { cn } from "@/lib/utils";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
   head: () => ({ meta: [{ title: "Bienvenido — Reconectando" }] }),
@@ -34,6 +35,7 @@ const TOTAL_STEPS = 6;
 function Onboarding() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const qc = useQueryClient();
   const [loading, setLoading] = useState(true);
   const [step, setStep] = useState(1);
   const [dir, setDir] = useState<1 | -1>(1);
@@ -144,6 +146,8 @@ function Onboarding() {
     if (!user || !ai) return;
     await persist({ status: "completed", closure_completed_at: new Date().toISOString(), ai_plan: ai });
     await awardGems(500, "Onboarding completo");
+    await qc.invalidateQueries({ queryKey: ["intake-status"] });
+    await qc.refetchQueries({ queryKey: ["intake-status"] });
     toast.success(`¡Bienvenido${name ? ", " + name : ""}!`);
     navigate({ to: "/dashboard", replace: true });
   }
