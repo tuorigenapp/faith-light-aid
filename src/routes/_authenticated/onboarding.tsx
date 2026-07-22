@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { ArrowRight, ArrowLeft, Loader2, Lock, User as UserIcon, Heart, DollarSign, Brain, Sprout, Mountain, HandHeart } from "lucide-react";
 import { awardGems, GEM_REWARDS } from "@/lib/gems";
 import { cn } from "@/lib/utils";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
   head: () => ({ meta: [{ title: "Bienvenido — Reconectando" }] }),
