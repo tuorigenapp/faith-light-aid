@@ -35,6 +35,7 @@ const TOTAL_STEPS = 6;
 function Onboarding() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const qc = useQueryClient();
   const [loading, setLoading] = useState(true);
   const [step, setStep] = useState(1);
   const [dir, setDir] = useState<1 | -1>(1);
