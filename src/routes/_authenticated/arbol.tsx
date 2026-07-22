@@ -100,6 +100,9 @@ function TreePage() {
         <Link to="/premios" className="inline-flex items-center gap-2 rounded-full bg-gold/15 text-gold px-4 h-12 font-bold hover:bg-gold/25">
           <Trophy className="w-4 h-4" /> Canjear Puntos
         </Link>
+        <Link to="/patrones" className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#7C5CFF] to-[#F58BCB] text-white px-5 h-12 font-bold shadow-soft hover:opacity-95 animate-pulse">
+          <Sparkles className="w-4 h-4" /> Explorar Patrones Familiares
+        </Link>
       </div>
 
       {/* Tree */}
