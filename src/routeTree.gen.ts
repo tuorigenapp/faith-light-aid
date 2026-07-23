@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiPatronesRouteImport } from './routes/api/patrones'
+import { Route as ApiParejaRouteImport } from './routes/api/pareja'
 import { Route as ApiIntakeClosureRouteImport } from './routes/api/intake-closure'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedVisualizaRouteImport } from './routes/_authenticated/visualiza'
@@ -63,6 +64,11 @@ const IndexRoute = IndexRouteImport.update({
 const ApiPatronesRoute = ApiPatronesRouteImport.update({
   id: '/api/patrones',
   path: '/api/patrones',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiParejaRoute = ApiParejaRouteImport.update({
+  id: '/api/pareja',
+  path: '/api/pareja',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiIntakeClosureRoute = ApiIntakeClosureRouteImport.update({
@@ -192,6 +198,7 @@ export interface FileRoutesByFullPath {
   '/visualiza': typeof AuthenticatedVisualizaRouteWithChildren
   '/api/chat': typeof ApiChatRoute
   '/api/intake-closure': typeof ApiIntakeClosureRoute
+  '/api/pareja': typeof ApiParejaRoute
   '/api/patrones': typeof ApiPatronesRoute
   '/etapas/$stageId': typeof AuthenticatedEtapasStageIdRoute
   '/visualiza/$categoryId': typeof AuthenticatedVisualizaCategoryIdRouteWithChildren
@@ -219,6 +226,7 @@ export interface FileRoutesByTo {
   '/visualiza': typeof AuthenticatedVisualizaRouteWithChildren
   '/api/chat': typeof ApiChatRoute
   '/api/intake-closure': typeof ApiIntakeClosureRoute
+  '/api/pareja': typeof ApiParejaRoute
   '/api/patrones': typeof ApiPatronesRoute
   '/etapas/$stageId': typeof AuthenticatedEtapasStageIdRoute
   '/visualiza/$categoryId': typeof AuthenticatedVisualizaCategoryIdRouteWithChildren
@@ -248,6 +256,7 @@ export interface FileRoutesById {
   '/_authenticated/visualiza': typeof AuthenticatedVisualizaRouteWithChildren
   '/api/chat': typeof ApiChatRoute
   '/api/intake-closure': typeof ApiIntakeClosureRoute
+  '/api/pareja': typeof ApiParejaRoute
   '/api/patrones': typeof ApiPatronesRoute
   '/_authenticated/etapas/$stageId': typeof AuthenticatedEtapasStageIdRoute
   '/_authenticated/visualiza/$categoryId': typeof AuthenticatedVisualizaCategoryIdRouteWithChildren
@@ -277,6 +286,7 @@ export interface FileRouteTypes {
     | '/visualiza'
     | '/api/chat'
     | '/api/intake-closure'
+    | '/api/pareja'
     | '/api/patrones'
     | '/etapas/$stageId'
     | '/visualiza/$categoryId'
@@ -304,6 +314,7 @@ export interface FileRouteTypes {
     | '/visualiza'
     | '/api/chat'
     | '/api/intake-closure'
+    | '/api/pareja'
     | '/api/patrones'
     | '/etapas/$stageId'
     | '/visualiza/$categoryId'
@@ -332,6 +343,7 @@ export interface FileRouteTypes {
     | '/_authenticated/visualiza'
     | '/api/chat'
     | '/api/intake-closure'
+    | '/api/pareja'
     | '/api/patrones'
     | '/_authenticated/etapas/$stageId'
     | '/_authenticated/visualiza/$categoryId'
@@ -346,6 +358,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiIntakeClosureRoute: typeof ApiIntakeClosureRoute
+  ApiParejaRoute: typeof ApiParejaRoute
   ApiPatronesRoute: typeof ApiPatronesRoute
 }
 
@@ -391,6 +404,13 @@ declare module '@tanstack/react-router' {
       path: '/api/patrones'
       fullPath: '/api/patrones'
       preLoaderRoute: typeof ApiPatronesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/pareja': {
+      id: '/api/pareja'
+      path: '/api/pareja'
+      fullPath: '/api/pareja'
+      preLoaderRoute: typeof ApiParejaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/intake-closure': {
@@ -624,6 +644,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiChatRoute: ApiChatRoute,
   ApiIntakeClosureRoute: ApiIntakeClosureRoute,
+  ApiParejaRoute: ApiParejaRoute,
   ApiPatronesRoute: ApiPatronesRoute,
 }
 export const routeTree = rootRouteImport
