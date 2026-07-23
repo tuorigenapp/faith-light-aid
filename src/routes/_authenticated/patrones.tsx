@@ -212,7 +212,7 @@ function Step1({
         onClick={onSubmit}
         className="mt-6 w-full h-14 rounded-[18px] bg-gradient-to-r from-[#7C5CFF] via-[#61A8FF] to-[#F58BCB] text-white font-semibold text-[15px] inline-flex items-center justify-center gap-2 shadow-soft active:scale-[.98] transition"
       >
-        <Sparkles className="w-4 h-4" /> Comenzar análisis <ArrowRight className="w-4 h-4" />
+        <Sparkles className="w-4 h-4" /> Analizar mi patrón <ArrowRight className="w-4 h-4" />
       </button>
       <div className="mt-3 inline-flex items-center gap-1.5 text-[12px] text-[#64667A] w-full justify-center">
         <Lock className="w-3.5 h-3.5" /> Tu información es privada y segura.
