@@ -1,58 +1,117 @@
-## Etapa 1 (rev) — Dirección visual única "ORIGEN" + Splash
 
-Descarto A/B/C. Construyo UNA sola dirección, viva y premium, alineada al logotipo ORIGEN (morado/rosado/azul con nubes) y a "el origen de una transformación". Aplico la sección 3 del Knowledge (radios, espaciado, sombras, animaciones baseline).
+## Etapa 2 — Aplicar identidad "Amanecer ORIGEN" a toda la app + nuevas funciones
 
-### Paleta "Amanecer ORIGEN" (clara, viva, no apagada)
-- Fondo base: blanco casi-puro `#FBFAFF` con radiales de acento MUY sutiles (5-7% opacidad) del morado y rosado en las esquinas — nunca fondo plano.
-- Superficie card: `#FFFFFF` con borde `#EEE9F7` (1px) y sombra suave.
-- Acento principal (marca): morado `#7C5CFF` — CTA, iconos activos, dato clave.
-- Acento secundario funcional: azul cielo `#5AA9FF` — links, chips info, estados "en progreso".
-- Rosado marca: `#F58BCB` — solo highlights emocionales (racha, celebración, gemas).
-- Verde sanación: `#3FBE8F` — checks, completado, "libre".
-- Texto: casi-negro con tinte púrpura `#1B1930`; muted `#6B6A85`.
-- Degradé marca (héroe, CTA principal, splash): `linear-gradient(135deg, #A78BFA 0%, #7C5CFF 40%, #5AA9FF 80%, #F58BCB 100%)` — tonal/análogo dentro de familia fría-cálida, mismo brillo. NO se usa en fondos planos; solo en tarjeta héroe, botón principal y logo container.
-- Semánticos: rojo `#FF5F74`, ámbar `#F7B955`.
+Aplico la dirección visual aprobada (`/estilos`) a toda la app y agrego lo pedido, sin popups de gemas, sin mencionar IA (siempre "la mentora Ruth Esther / el método ORIGEN") y respetando el gating de planes.
 
-### Tipografía
-- Display: **Sora 600/700** — moderna, geométrica, con carácter (no Inter/Poppins genérico).
-- Body: **Manrope 400/500/600** — humana, legible en móvil.
-- Cargadas por `<link>` en `__root.tsx`.
+### A. Identidad visual global (aplicar tokens actuales)
+- Reescribo Landing (`/`), Auth, Onboarding, Home, Chat, Etapas, Diario, Árbol, Patrones, Visualiza, Premios, Perfil con: `bg-aura`, `hero-card`, `btn-primary-gradient`, radios 20/14/12, Sora+Manrope, degradé marca en CTAs, blobs vivos, checks verdes, racha rosa. Mobile-first 375px, desktop centrado max 1100px.
+- Bottom-nav renovado (5 destinos, activo morado): Inicio · Camino · Mentora · Vívelo · Yo.
 
-### Sistema (fijo en toda la app)
-- Radios: card 20px (un pelín más generoso para "vivo"), botón 14px, chip 12px, input 12px.
-- CTA principal: 56px alto, degradé marca, sombra glow morada `0 10px 28px rgba(124,92,255,0.35)`.
-- Sombras claras: reposo `0 1px 3px rgba(27,25,48,0.06)`, elevada `0 12px 36px rgba(27,25,48,0.10)`, glow acento en CTA.
-- Espaciado: lateral 20px, gap cards 12px, padding card 20px.
-- Fondos con vida: cada pantalla incluye 1-2 blobs radiales fijos (blur 120px, opacidad 8-12%) morado + rosa + azul en esquinas — no molestan, dan aire.
-- Micro-detalles: hairline degradada 1px SOLO en 2-3 elementos clave por vista (borde de card héroe, línea bajo título de sección).
+### B. HOME renovado — 3 pilares al frente
+Orden fijo:
+1. Header: avatar con inicial + saludo "Hola, {nombre}" + fecha real + chip **Árbol de Sanación** con total de gemas (sin popups).
+2. Card héroe: próxima misión del día + CTA degradé.
+3. **3 pilares destacados** (cards grandes, imagen + título + CTA):
+   - 💬 **Conversa con Ruth Esther** (Mentora) — pilar 1
+   - 💞 **¿Tu pareja es Deuda Ancestral o Propósito?** (nuevo) — pilar 2
+   - 🌳 **Encuentra tu patrón familiar** — pilar 3
+4. Racha (7 puntos) + progreso de etapa actual.
+5. **Árbol de Sanación diario**: card animada con árbol/corazón; al tocar "Agitar árbol" da 10-30💎 gratis (1 vez/día real, guardado en `daily_activity`).
+6. **Descubre hoy**: sección con secciones bloqueadas 🔒 (Visualiza avanzado, Meditaciones, Círculo de mujeres, etc.) y desbloqueadas atractivas — antojo controlado.
+7. **Invita y gana** (afiliados): card educada, no presiva.
+8. Devocional del día + versículo.
 
-### Splash screen con logotipo (NUEVO)
-- Se muestra al abrir la app la primera carga (antes del router principal), 1.8–2.2s, saltable si el bundle ya está listo.
-- Fondo: degradé marca sutil (morado→rosa→azul, 10-15% saturación) — hace juego con el logo.
-- En el centro: logo ORIGEN grande (200x200), con 3 pulsaciones concéntricas de aro (opacidad 0→0.35→0, escala 1→1.6, stagger 0.6s, loop). El propio logo respira suavemente (scale 1↔1.04, 2.4s).
-- Debajo: nombre "ORIGEN" en Sora 700, tagline "Transforma tu alma, vive tu propósito" en Manrope 400 opacidad 60%.
-- Respeta `prefers-reduced-motion` (sin pulso, solo fade-in).
-- Implementación: componente `<SplashScreen />` renderizado dentro de `RootComponent`, controlado por estado `showSplash`; se auto-oculta al terminar la animación o al primer clic. Se muestra una vez por sesión (sessionStorage flag).
+### C. Nueva sección: "¿Tu pareja es Deuda Ancestral o Propósito?"
+Ruta `/pareja`. Flujo 3 pasos:
+1. Formulario: tu nombre + fecha de nacimiento, nombre pareja + fecha de nacimiento, pregunta abierta corta.
+2. Animación de dos corazones entrelazándose (8-10s).
+3. Resultado en tarjeta: veredicto (Propósito / Deuda ancestral / Aprendizaje kármico traducido a "lección de alma"), qué observamos, patrón, lo que Ruth Esther aconseja, próximo paso.
+Backend: endpoint `src/routes/api/pareja.ts` que arma prompt con datos + book-context + numerología suave de fechas; llama a Lovable AI Gateway con **`google/gemini-3.1-pro-preview`** para respuestas más humanas. Guarda en tabla `pareja_lecturas`. Nunca menciona IA; firma "análisis del método ORIGEN — Ruth Esther Paredes Sufrán".
 
-### Mockup HOME que voy a construir para que apruebes
-Renderizo UN mockup mobile 375px del HOME aplicando toda esta dirección:
-- Header: avatar + saludo "Hola, Ruth" (Sora 600, 24px) + fecha + badge gema morada `1,240 💎`.
-- Card héroe con degradé marca sutil (opacidad 12% sobre blanco) + borde hairline degradado, label "Tu misión de hoy", título grande, meta "8 min", CTA 56px degradé glow.
-- Racha con icono llama rosa, semana en 7 puntos (5 morados llenos, 1 rosa "hoy en riesgo", 1 outline).
-- Sección "Continúa donde lo dejaste" con 2 ejercicios (uno con check verde, uno pendiente con chevron).
-- Bottom-nav 60px + safe-area, 5 destinos con activo (Inicio) en morado.
+### D. Árbol de Sanación (reemplaza narrativa de "gemas")
+- Renombro en UI toda mención a "gemas" → **"hojas de sanación 🍃"** (mantenemos columna DB `gems` internamente).
+- Card en HOME con árbol SVG animado + botón "Agitar hoy" → +10-30 hojas aleatorio (1/día, `daily_activity.action='shake_tree'`).
+- Corazón latiendo secundario (en `/arbol` genealógico): agitar = +5 hojas (cooldown 6h).
+- Sin toasts al ganar; solo se actualiza el número del header con transición.
 
-### Qué haré (en orden)
-1. **Aprobación del logo** — copio el logo ORIGEN subido a `src/assets/logo-origen.png` vía `lovable-assets` para reusarlo (splash, favicon, __root og:image queda como está).
-2. **Splash screen** — creo `src/components/SplashScreen.tsx` y lo monto en `RootComponent`. Sessionstorage `origen_splash_seen` para no repetir dentro de la sesión.
-3. **Tokens globales** — reescribo `src/styles.css`: paleta arriba, degradé marca, radios (`--radius: 1.25rem`), sombras, blobs `.bg-aura` con los 3 colores marca, utilidades `.hero-gradient`, `.cta-glow`, `.hairline-brand`.
-4. **Fuentes** — cambio el `<link>` en `__root.tsx` a Sora + Manrope; actualizo `--font-display` y `--font-sans`.
-5. **Mockup HOME de referencia** — creo ruta pública temporal `/estilos` con la pantalla HOME 375px aplicando todo, SIN tocar el resto de la app.
-6. Espero tu OK visual para arrancar Etapa 2 (Landing 10 secciones con esta identidad).
+### E. Afiliados
+Ruta `/invita`. Copy educado y motivador ("Si alguien que amas está atravesando lo mismo…"). Genera código único por usuario (nueva tabla `referrals` con `code`, `owner_id`, `invited_email`, `status`, `reward_paid`). Muestra: enlace copiable, mensaje sugerido para WhatsApp, "ganas 20% del primer mes" + panel de invitados/estado. Sin presión, opt-in.
 
-Detalles técnicos:
-- No toco lógica ni datos; solo tokens + splash + una vista de referencia.
-- `SplashScreen` es cliente-only (`useEffect` para arrancar timer, `useHydrated`-safe: monta oculto en SSR, se muestra tras hidratar). Nada de `window` en el render inicial.
-- El favicon/PWA `theme-color` los actualizo al morado marca `#7C5CFF`.
+### F. Gating por plan (respetar a toda costa)
+Middleware simple `usePlan()`:
+- **Explorador (free)**: 1 conversación/día con mentora, 1 lectura de pareja/mes, 1 análisis de patrón/mes, etapa 1 completa, resto 🔒.
+- **Camino ORIGEN (premium)**: chat ilimitado, lecturas ilimitadas, todas las etapas, todo Vívelo, afiliados avanzados.
+- Contador diario en `daily_activity` (`action='chat_message'`). Al llegar al límite: card elegante "Volvió mañana a las HH:MM" + CTA "Desbloquea ahora" al paywall — nunca popup.
+- Secciones bloqueadas se ven con overlay difuminado + 🔒 + "Desbloquea con Camino ORIGEN".
 
-Aprueba y ejecuto los 5 pasos en una sola generación.
+### G. Chat mentora — mantener siempre visible
+- Botón flotante inferior derecha (56px, degradé, glow) presente en TODA la app excepto durante onboarding y splash. Al tocar → `/chat`.
+- Reforzar system prompt: nunca menciona IA/modelo; siempre "Ruth Esther / método ORIGEN". Fuente = libro. Toca respetar límite diario (contador incrementa por mensaje del usuario).
+
+### H. Quizzes / micro-desafíos únicos (diferenciación)
+Añado en Home rotativo "Reflexión del día" (1 pregunta, 3 opciones, respuesta amable de la mentora + 5🍃). Guardado en `daily_activity`.
+
+### I. Base de datos (migraciones nuevas)
+```sql
+create table public.pareja_lecturas (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  self_name text, self_dob date,
+  partner_name text, partner_dob date,
+  question text,
+  verdict text,       -- 'proposito' | 'deuda' | 'leccion'
+  summary text,
+  pattern text,
+  advice text,
+  next_step text,
+  created_at timestamptz default now()
+);
+-- grants + RLS (owner-only) + policies
+
+create table public.referrals (
+  id uuid primary key default gen_random_uuid(),
+  owner_id uuid not null references auth.users(id) on delete cascade,
+  code text unique not null,
+  invited_email text,
+  status text default 'pending', -- pending|joined|paid
+  reward_gems int default 0,
+  created_at timestamptz default now()
+);
+-- grants + RLS + policies
+
+create table public.daily_reflections (
+  id uuid primary key default gen_random_uuid(),
+  day date not null,
+  question text not null,
+  options jsonb not null,     -- [{key,label,response}]
+  created_at timestamptz default now()
+);
+grant select on public.daily_reflections to authenticated, anon;
+alter table public.daily_reflections enable row level security;
+create policy "public read" on public.daily_reflections for select using (true);
+-- seed 30 días
+```
+- Extender `daily_activity` para acciones: `shake_tree`, `chat_message`, `pareja_read`, `patron_read`, `reflection_done` (usar columna existente).
+- Añadir `profiles.referral_code` (texto único) generado en signup.
+
+### J. Endpoints
+- `src/routes/api/pareja.ts`: server route público protegido con auth; usa `google/gemini-3.1-pro-preview`; devuelve JSON estructurado.
+- `src/routes/api/chat.ts`: revisar system prompt (nunca IA, siempre Ruth Esther), enforcar límite diario para plan free.
+- `src/lib/plan.ts`: helper `getPlan()`, `getRemaining(action)`.
+
+### K. Splash + logo
+Ya vivo. Verifico que `SplashScreen` no bloquee rutas protegidas.
+
+### L. Reglas transversales
+- Cero popups por gemas/hojas.
+- Cero mención de IA en UI/copy.
+- Todas las secciones bloqueadas con 🔒 y CTA a paywall.
+- Nombre del usuario visible en header y saludo, siempre.
+- Botón chat mentora flotante siempre visible en app.
+
+### Detalles técnicos
+- Modelo IA: `google/gemini-3.1-pro-preview` para pareja y patrones (más humano y matizado); mentora en chat mantiene `openai/gpt-5.5`.
+- Sin cambios en Splash ni en `/estilos`.
+- Todo mobile-first 375px con desktop max-w 1100px.
+
+Aprueba y ejecuto todo en la próxima generación.
