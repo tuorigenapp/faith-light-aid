@@ -41,11 +41,9 @@ const FULL_NAV = [
   { to: "/visualiza", label: "Visualízalo y Vívelo", icon: Headphones },
   { to: "/diario", label: "Diario íntimo", icon: BookHeart },
   { to: "/ejercicios", label: "Ejercicios", icon: Dumbbell },
-  { to: "/biblioteca", label: "Biblioteca", icon: Library },
   { to: "/premios", label: "Hojas de sanación", icon: Trophy },
   { to: "/invita", label: "Invita y gana", icon: Sparkles },
   { to: "/membresia", label: "Camino ORIGEN", icon: CreditCard },
-  { to: "/diagnostico", label: "Diagnóstico", icon: Compass },
   { to: "/perfil", label: "Perfil", icon: UserIcon },
 ] as const;
 
