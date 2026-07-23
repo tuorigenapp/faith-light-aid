@@ -1,214 +1,284 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import type { ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Card } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Button } from "@/components/ui/button";
-import heroImg from "@/assets/spiritual-hero.jpg";
-import dailyImg from "@/assets/daily-devotional.jpg";
-import stageImg from "@/assets/stage-journey.jpg";
-import exerciseImg from "@/assets/prayer-exercise.jpg";
-import { ArrowRight, BookHeart, CalendarDays, CheckCircle2, Clock3, Compass, Flame, Layers, MessageCircle, Sparkles } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { HealingTree } from "@/components/HealingTree";
+import { DailyReflection } from "@/components/DailyReflection";
+import { LockedCard } from "@/components/LockedCard";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import {
+  ArrowRight, BookHeart, Compass, Flame, HeartHandshake, Headphones,
+  Layers, MessageCircle, Sparkles, TreeDeciduous, Trophy, Users2, HeartPulse,
+} from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
-  head: () => ({ meta: [{ title: "Hoy — Reconectando" }] }),
+  head: () => ({ meta: [{ title: "Hoy — ORIGEN" }] }),
   component: Dashboard,
 });
 
-const FALLBACK_DEVOTIONAL = {
-  quote: "El patrón se rompe contigo cuando decides caminar con verdad.",
-  scripture: "Juan 8:32",
-  word: "Libertad",
-  reflection: "Lo que reconoces con humildad puede ser sanado con gracia. No temas mirar tu historia con Dios al lado.",
-  challenge: "Nombra un patrón que deseas romper y ora por dirección.",
-};
-
-const IMAGE_MAP: Record<string, string> = { hero: heroImg, daily: dailyImg, journey: stageImg, exercise: exerciseImg };
-
-function dayOfYear() {
-  const now = new Date();
-  const start = new Date(now.getFullYear(), 0, 0);
-  return Math.floor((now.getTime() - start.getTime()) / 86400000);
-}
-
-function todayIso() {
-  return new Date().toISOString().slice(0, 10);
-}
+function todayIso() { return new Date().toISOString().slice(0, 10); }
 
 function Dashboard() {
   const { user } = useAuth();
-  const qc = useQueryClient();
 
   const { data } = useQuery({
     queryKey: ["dashboard", user?.id, todayIso()],
     enabled: !!user,
     queryFn: async () => {
-      const todayNumber = ((dayOfYear() - 1) % 7) + 1;
-      const [profile, diag, progress, journal, msgs, devotional, activities, completions, dailyExercise] = await Promise.all([
-        supabase.from("profiles").select("*").eq("id", user!.id).maybeSingle(),
-        supabase.from("diagnostic_results").select("*").eq("user_id", user!.id).order("created_at", { ascending: false }).limit(1).maybeSingle(),
+      const [profile, diag, progress, activities, streak] = await Promise.all([
+        supabase.from("profiles").select("display_name, full_name, gems").eq("id", user!.id).maybeSingle(),
+        supabase.from("diagnostic_results").select("level").eq("user_id", user!.id).order("created_at", { ascending: false }).limit(1).maybeSingle(),
         supabase.from("stage_progress").select("stage_id,status").eq("user_id", user!.id),
-        supabase.from("journal_entries").select("id", { count: "exact", head: true }).eq("user_id", user!.id),
-        supabase.from("messages").select("id", { count: "exact", head: true }).eq("user_id", user!.id),
-        supabase.from("daily_devotionals").select("*").eq("day_of_year", todayNumber).maybeSingle(),
-        supabase.from("daily_activity").select("*").eq("user_id", user!.id).eq("activity_date", todayIso()),
-        supabase.from("exercise_completions").select("exercise_id,created_at").eq("user_id", user!.id),
-        supabase.from("exercises").select("*").eq("day_index", todayNumber).order("sort_order").limit(1).maybeSingle(),
+        supabase.from("daily_activity").select("activity_date").eq("user_id", user!.id).order("activity_date", { ascending: false }).limit(14),
+        supabase.from("daily_activity").select("activity_date").eq("user_id", user!.id).order("activity_date", { ascending: false }).limit(30),
       ]);
       return {
         profile: profile.data,
         diagnostic: diag.data,
         progressItems: progress.data ?? [],
-        journalCount: journal.count ?? 0,
-        msgCount: msgs.count ?? 0,
-        devotional: devotional.data,
         activities: activities.data ?? [],
-        completions: completions.data ?? [],
-        dailyExercise: dailyExercise.data,
+        streakActivities: streak.data ?? [],
       };
     },
   });
 
+  const displayName = (data?.profile?.display_name || data?.profile?.full_name || "Amigo").split(" ")[0];
   const completed = (data?.progressItems ?? []).filter((p) => p.status === "completed").length;
-  const pct = Math.round((completed / 8) * 100);
-  const firstName = data?.profile?.full_name?.split(" ")[0] ?? "Hermano";
-  const devotional = data?.devotional ?? FALLBACK_DEVOTIONAL;
-  const devotionalDone = (data?.activities ?? []).some((a: any) => a.activity_type === "devotional");
-  const dailyExerciseId = data?.dailyExercise?.id;
-  const exerciseDone = dailyExerciseId ? (data?.completions ?? []).some((c: any) => c.exercise_id === dailyExerciseId) : false;
-  const devotionalImage = IMAGE_MAP[(data?.devotional as any)?.image_key ?? "daily"] ?? dailyImg;
 
-  async function markDevotionalDone() {
-    if (!user) return;
-    await supabase.from("daily_activity").upsert({
-      user_id: user.id,
-      activity_date: todayIso(),
-      activity_type: "devotional",
-      reference_id: String(dayOfYear()),
-      metadata: { word: devotional.word },
-    }, { onConflict: "user_id,activity_date,activity_type,reference_id" });
-    qc.invalidateQueries({ queryKey: ["dashboard"] });
-  }
+  // Streak calc: consecutive days from today back
+  const streakDates = new Set((data?.streakActivities ?? []).map((a) => a.activity_date));
+  const week = Array.from({ length: 7 }).map((_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - (6 - i));
+    return { date: d, iso: d.toISOString().slice(0, 10), active: streakDates.has(d.toISOString().slice(0, 10)) };
+  });
+  const activeCount = week.filter((w) => w.active).length;
 
   return (
-    <div className="px-4 py-5 md:p-10 max-w-6xl mx-auto mobile-safe-bottom lg:pb-10">
-      <section className="relative overflow-hidden rounded-[2rem] min-h-[360px] p-5 sm:p-8 text-primary-foreground shadow-glow">
-        <img src={heroImg} alt="Biblia abierta al amanecer" width={1280} height={1600} className="absolute inset-0 h-full w-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/35 to-transparent" />
-        <div className="relative z-10 h-full flex flex-col justify-end min-h-[310px]">
-          <span className="w-fit inline-flex items-center gap-2 rounded-full bg-background/15 backdrop-blur-xl border border-primary-foreground/20 px-3 py-1 text-[11px] font-bold text-gold"><Flame className="w-3.5 h-3.5" /> {format(new Date(), "EEEE d 'de' MMMM", { locale: es })}</span>
-          <h1 className="mt-4 font-display font-extrabold text-4xl md:text-5xl">Hola, {firstName}.</h1>
-          <p className="mt-2 text-primary-foreground/82 max-w-xl">Hoy tienes palabra, reto, ejercicio y una ruta espiritual para seguir avanzando sin perder tu progreso.</p>
-        </div>
-      </section>
-
-      {!data?.diagnostic && (
-        <Link to="/diagnostico">
-          <Card className="mt-5 p-5 border-primary/30 bg-primary/8 hover:bg-primary/12 transition-colors flex items-center justify-between rounded-[1.7rem]">
-            <div>
-              <div className="text-xs uppercase tracking-widest text-primary font-bold">Obligatorio para personalizar</div>
-              <h2 className="mt-1 font-display font-bold text-lg">Realiza tu Diagnóstico Espiritual Inicial</h2>
-              <p className="text-sm text-muted-foreground mt-1">La app desbloquea y recomienda etapas según tu resultado.</p>
+    <div className="relative min-h-[calc(100vh-4rem)] bg-aura-top">
+      <div className="relative z-10 max-w-lg lg:max-w-4xl mx-auto px-4 pt-4 pb-10 space-y-4">
+        {/* Greeting header */}
+        <header className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-11 h-11 rounded-2xl bg-brand-gradient shadow-glow grid place-items-center text-white font-display font-bold shrink-0">
+              {displayName.slice(0, 1).toUpperCase()}
             </div>
-            <ArrowRight className="w-5 h-5 text-primary" />
-          </Card>
-        </Link>
-      )}
-
-      <section className="mt-5 grid grid-cols-7 gap-2">
-        {Array.from({ length: 7 }).map((_, idx) => {
-          const d = new Date();
-          d.setDate(d.getDate() - 3 + idx);
-          const active = idx === 3;
-          return (
-            <div key={idx} className={cnCalendar(active)}>
-              <div className="text-[10px] uppercase font-extrabold opacity-70">{format(d, "EEE", { locale: es }).slice(0, 3)}</div>
-              <div className="font-display font-extrabold text-lg">{format(d, "d")}</div>
-              {active && <div className="mx-auto mt-1 h-1.5 w-1.5 rounded-full bg-current" />}
+            <div className="min-w-0">
+              <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">
+                {format(new Date(), "EEEE d 'de' MMMM", { locale: es })}
+              </p>
+              <h1 className="font-display font-bold text-[20px] leading-tight truncate">
+                Hola, {displayName}
+              </h1>
             </div>
-          );
-        })}
-      </section>
-
-      <section className="mt-5 grid lg:grid-cols-[1.1fr_0.9fr] gap-5">
-        <Card className="overflow-hidden rounded-[2rem] border-border shadow-soft">
-          <img src={devotionalImage} alt="Devocional del día" width={1024} height={1024} loading="lazy" className="h-48 w-full object-cover" />
-          <div className="p-5">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <div className="text-[11px] uppercase tracking-widest text-primary font-extrabold">Palabra del día</div>
-                <h2 className="font-display font-extrabold text-3xl mt-1">{devotional.word}</h2>
-              </div>
-              {devotionalDone && <div className="rounded-full bg-accent text-accent-foreground px-3 py-1 text-xs font-bold flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5" /> Hecho</div>}
-            </div>
-            <p className="scripture mt-4 text-xl leading-snug">“{devotional.quote}”</p>
-            <p className="text-sm text-primary font-bold mt-2">{devotional.scripture}</p>
-            <p className="text-sm text-muted-foreground mt-4 leading-relaxed">{devotional.reflection}</p>
-            <div className="mt-5 rounded-3xl bg-secondary/70 p-4 text-sm"><span className="font-bold">Reto:</span> {devotional.challenge}</div>
-            <Button onClick={markDevotionalDone} disabled={devotionalDone} className="mt-5 w-full rounded-full bg-primary">
-              {devotionalDone ? "Devocional registrado" : "Marcar devocional de hoy"}
-            </Button>
           </div>
-        </Card>
+        </header>
 
-        <div className="space-y-5">
-          <Card className="p-5 rounded-[2rem] shadow-soft">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-xs uppercase tracking-wider text-muted-foreground font-bold">Progreso de etapas</div>
-                <div className="mt-1 font-display font-extrabold text-4xl">{completed}<span className="text-base text-muted-foreground"> / 8</span></div>
-              </div>
-              <div className="w-14 h-14 rounded-3xl bg-primary/10 text-primary grid place-items-center"><Layers className="w-6 h-6" /></div>
-            </div>
-            <Progress value={pct} className="mt-4" />
-            <Link to="/etapas"><Button variant="outline" className="mt-4 w-full rounded-full">Ver mis etapas</Button></Link>
-          </Card>
-
-          <Card className="overflow-hidden rounded-[2rem] shadow-soft">
-            <img src={exerciseImg} alt="Ejercicio espiritual del día" width={1024} height={1024} loading="lazy" className="h-36 w-full object-cover" />
-            <div className="p-5">
-              <div className="flex items-center justify-between">
-                <div className="text-xs uppercase tracking-wider text-primary font-extrabold">Ejercicio de hoy</div>
-                {exerciseDone && <CheckCircle2 className="w-5 h-5 text-accent-foreground" />}
-              </div>
-              <h2 className="font-display font-bold text-xl mt-1">{data?.dailyExercise?.title ?? "Respira y ora"}</h2>
-              <p className="text-sm text-muted-foreground mt-2">{data?.dailyExercise?.description ?? "Una práctica breve para volver al centro."}</p>
-              <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground"><Clock3 className="w-3.5 h-3.5" /> {data?.dailyExercise?.duration_minutes ?? 8} min</div>
-              <Link to="/ejercicios"><Button className="mt-4 w-full rounded-full bg-primary">Abrir ejercicios</Button></Link>
-            </div>
-          </Card>
+        {/* Hero mission */}
+        <div className="hero-card">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[11px] uppercase tracking-widest font-bold text-primary">Tu misión de hoy</span>
+            <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-secondary text-primary">
+              {data?.diagnostic?.level ?? "Personalizado"}
+            </span>
+          </div>
+          <h2 className="font-display font-bold text-[20px] leading-tight">
+            {data?.diagnostic ? "Continúa tu Camino ORIGEN" : "Empieza con tu Diagnóstico Inicial"}
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            {data?.diagnostic
+              ? `Llevas ${completed} etapas completadas. Sigue avanzando en tu proceso.`
+              : "Necesito conocerte para personalizar tu camino de sanación."}
+          </p>
+          <Link
+            to={data?.diagnostic ? "/etapas" : "/diagnostico"}
+            className="mt-4 btn-primary-gradient w-full h-[54px] rounded-[14px] flex items-center justify-center gap-2 text-[15px]"
+          >
+            {data?.diagnostic ? "Ver mis etapas" : "Comenzar diagnóstico"}
+            <ArrowRight className="w-4 h-4" />
+          </Link>
         </div>
-      </section>
 
-      <section className="mt-5 grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <ActionCard to="/chat" icon={<MessageCircle className="w-5 h-5" />} title="Consultor IA" desc={`${data?.msgCount ?? 0} mensajes`} />
-        <ActionCard to="/diario" icon={<BookHeart className="w-5 h-5" />} title="Diario" desc={`${data?.journalCount ?? 0} entradas`} />
-        <ActionCard to="/diagnostico" icon={<Compass className="w-5 h-5" />} title="Diagnóstico" desc={data?.diagnostic ? data.diagnostic.level : "Pendiente"} />
-        <ActionCard to="/membresia" icon={<Sparkles className="w-5 h-5" />} title="WhatsApp" desc="Soporte y comunidad" />
-      </section>
+        {/* 3 pilares principales */}
+        <section>
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="font-display font-bold text-[15px]">Los 3 pilares del método</h3>
+          </div>
+          <div className="hairline-brand mb-3" />
+
+          <div className="space-y-3">
+            <PilarCard
+              to="/chat"
+              gradient="from-[#7C5CFF] to-[#5AA9FF]"
+              icon={<MessageCircle className="w-6 h-6" />}
+              badge="Mentora en vivo"
+              title="Conversa con Ruth Esther"
+              desc="Cuéntale lo que sientes. Te acompaña con la sabiduría del libro y del método ORIGEN."
+              cta="Abrir conversación"
+            />
+            <PilarCard
+              to="/pareja"
+              gradient="from-[#F58BCB] to-[#7C5CFF]"
+              icon={<HeartHandshake className="w-6 h-6" />}
+              badge="Nuevo"
+              title="¿Tu pareja es deuda o propósito?"
+              desc="Descubre qué viene a enseñarte esta persona. Solo necesitas los datos de ambos."
+              cta="Comenzar lectura"
+            />
+            <PilarCard
+              to="/patrones"
+              gradient="from-[#3FBE8F] to-[#5AA9FF]"
+              icon={<Users2 className="w-6 h-6" />}
+              badge="Análisis profundo"
+              title="Encuentra tu patrón familiar"
+              desc="Basado en tu árbol y tu historia. Identifica qué se está repitiendo y cómo romperlo."
+              cta="Explorar mi patrón"
+            />
+          </div>
+        </section>
+
+        {/* Racha + Progreso */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="app-card p-4">
+            <div className="flex items-center gap-2">
+              <div className="w-9 h-9 rounded-xl bg-[#F58BCB]/15 grid place-items-center">
+                <Flame className="w-5 h-5 text-[#F58BCB]" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Racha</p>
+                <p className="font-display font-bold text-base">{activeCount} días</p>
+              </div>
+            </div>
+            <div className="mt-3 flex gap-1 items-center">
+              {week.map((w, i) => (
+                <span key={i} className={"w-2 h-2 rounded-full " + (w.active ? "bg-primary" : "bg-border")} />
+              ))}
+            </div>
+          </div>
+          <div className="app-card p-4">
+            <div className="flex items-center gap-2">
+              <div className="w-9 h-9 rounded-xl bg-secondary grid place-items-center">
+                <Layers className="w-5 h-5 text-primary" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Etapas</p>
+                <p className="font-display font-bold text-base">{completed} / 8</p>
+              </div>
+            </div>
+            <div className="mt-3 h-2 bg-secondary rounded-full overflow-hidden">
+              <div className="h-full bg-brand-gradient" style={{ width: `${(completed / 8) * 100}%` }} />
+            </div>
+          </div>
+        </div>
+
+        {/* Árbol de Sanación */}
+        <HealingTree />
+
+        {/* Reflexión del día */}
+        <DailyReflection />
+
+        {/* Descubre hoy — mezcla desbloqueado + bloqueado */}
+        <section>
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="font-display font-bold text-[15px]">Descubre hoy</h3>
+            <span className="text-[11px] font-semibold text-primary">Explorar</span>
+          </div>
+          <div className="hairline-brand mb-3" />
+          <div className="grid grid-cols-2 gap-3">
+            <Link to="/arbol" className="app-card p-4">
+              <div className="w-10 h-10 rounded-xl bg-[#3FBE8F]/15 grid place-items-center text-[#3FBE8F]">
+                <TreeDeciduous className="w-5 h-5" />
+              </div>
+              <h4 className="font-display font-bold text-[14px] mt-2">Mi árbol genealógico</h4>
+              <p className="text-xs text-muted-foreground mt-1">Suma familiares y sana tu linaje.</p>
+            </Link>
+            <Link to="/diario" className="app-card p-4">
+              <div className="w-10 h-10 rounded-xl bg-[#F58BCB]/15 grid place-items-center text-[#F58BCB]">
+                <BookHeart className="w-5 h-5" />
+              </div>
+              <h4 className="font-display font-bold text-[14px] mt-2">Diario íntimo</h4>
+              <p className="text-xs text-muted-foreground mt-1">Escribe lo que llevas en el alma.</p>
+            </Link>
+            <LockedCard
+              title="Círculo de mujeres"
+              subtitle="Sesiones en vivo cada semana"
+              icon={<div className="w-10 h-10 rounded-xl bg-primary/15 grid place-items-center text-primary"><HeartPulse className="w-5 h-5" /></div>}
+            />
+            <LockedCard
+              title="Meditaciones guiadas"
+              subtitle="Audios diarios del método"
+              icon={<div className="w-10 h-10 rounded-xl bg-accent/15 grid place-items-center text-accent"><Headphones className="w-5 h-5" /></div>}
+            />
+          </div>
+        </section>
+
+        {/* Diagnóstico prompt */}
+        {!data?.diagnostic && (
+          <Link to="/diagnostico" className="app-card p-4 flex items-center justify-between bg-brand-soft">
+            <div>
+              <div className="text-[10px] uppercase tracking-widest text-primary font-bold">Necesario</div>
+              <h4 className="font-display font-bold text-sm mt-0.5">Haz tu diagnóstico espiritual</h4>
+              <p className="text-xs text-muted-foreground">Personaliza tus etapas y ejercicios.</p>
+            </div>
+            <Compass className="w-6 h-6 text-primary" />
+          </Link>
+        )}
+
+        {/* Invita y gana */}
+        <Link to="/invita" className="app-card p-5 relative overflow-hidden">
+          <div className="absolute -right-4 -bottom-4 text-6xl opacity-10">💜</div>
+          <div className="flex items-start gap-3 relative">
+            <div className="w-10 h-10 rounded-xl bg-brand-gradient grid place-items-center text-white shadow-glow">
+              <Sparkles className="w-5 h-5" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-[10px] uppercase tracking-widest text-primary font-bold">Invita sin presión</div>
+              <h4 className="font-display font-bold text-[15px] mt-0.5">¿Conoces a alguien que necesite esto?</h4>
+              <p className="text-xs text-muted-foreground mt-1">Comparte tu enlace, ayuda a un ser querido y gana un dinerito extra.</p>
+            </div>
+            <ArrowRight className="w-4 h-4 text-primary self-center" />
+          </div>
+        </Link>
+
+        {/* Premios */}
+        <Link to="/premios" className="app-card p-4 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-[#F7B955]/20 grid place-items-center text-[#F7B955]">
+            <Trophy className="w-5 h-5" />
+          </div>
+          <div className="flex-1">
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Tus hojas de sanación</p>
+            <p className="font-display font-bold text-base">{(data?.profile?.gems ?? 0).toLocaleString()} 🍃</p>
+          </div>
+          <span className="text-xs font-bold text-primary">Canjear</span>
+        </Link>
+      </div>
     </div>
   );
 }
 
-function ActionCard({ to, icon, title, desc }: { to: any; icon: ReactNode; title: string; desc: string }) {
+function PilarCard({
+  to, gradient, icon, badge, title, desc, cta,
+}: { to: string; gradient: string; icon: React.ReactNode; badge: string; title: string; desc: string; cta: string }) {
   return (
-    <Link to={to}>
-      <Card className="h-full p-4 rounded-[1.5rem] hover:border-primary transition-colors shadow-soft">
-        <div className="w-11 h-11 rounded-2xl bg-primary/10 grid place-items-center text-primary">{icon}</div>
-        <h3 className="mt-3 font-display font-bold text-base">{title}</h3>
-        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{desc}</p>
-      </Card>
+    <Link to={to} className="block app-card overflow-hidden">
+      <div className={`h-1.5 bg-gradient-to-r ${gradient}`} />
+      <div className="p-4 flex items-start gap-3">
+        <div className={`w-12 h-12 shrink-0 rounded-2xl bg-gradient-to-br ${gradient} text-white shadow-soft grid place-items-center`}>
+          {icon}
+        </div>
+        <div className="min-w-0 flex-1">
+          <span className="text-[10px] uppercase tracking-widest font-bold text-primary">{badge}</span>
+          <h4 className="font-display font-bold text-[16px] leading-tight mt-0.5">{title}</h4>
+          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{desc}</p>
+        </div>
+        <ArrowRight className="w-4 h-4 text-muted-foreground self-center shrink-0" />
+      </div>
+      <div className="px-4 pb-3 -mt-1">
+        <span className="text-[11px] font-bold text-primary inline-flex items-center gap-1">
+          {cta} <ArrowRight className="w-3 h-3" />
+        </span>
+      </div>
     </Link>
   );
-}
-
-function cnCalendar(active: boolean) {
-  return [
-    "rounded-2xl p-2 text-center border shadow-soft",
-    active ? "bg-primary text-primary-foreground border-primary" : "bg-card text-muted-foreground border-border",
-  ].join(" ");
 }

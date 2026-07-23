@@ -134,6 +134,30 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_reflections: {
+        Row: {
+          created_at: string
+          day: string
+          id: string
+          options: Json
+          question: string
+        }
+        Insert: {
+          created_at?: string
+          day: string
+          id?: string
+          options: Json
+          question: string
+        }
+        Update: {
+          created_at?: string
+          day?: string
+          id?: string
+          options?: Json
+          question?: string
+        }
+        Relationships: []
+      }
       diagnostic_results: {
         Row: {
           ai_summary: string | null
@@ -592,6 +616,54 @@ export type Database = {
           },
         ]
       }
+      pareja_lecturas: {
+        Row: {
+          advice: string | null
+          created_at: string
+          id: string
+          next_step: string | null
+          partner_dob: string | null
+          partner_name: string | null
+          pattern: string | null
+          question: string | null
+          self_dob: string | null
+          self_name: string | null
+          summary: string | null
+          user_id: string
+          verdict: string | null
+        }
+        Insert: {
+          advice?: string | null
+          created_at?: string
+          id?: string
+          next_step?: string | null
+          partner_dob?: string | null
+          partner_name?: string | null
+          pattern?: string | null
+          question?: string | null
+          self_dob?: string | null
+          self_name?: string | null
+          summary?: string | null
+          user_id: string
+          verdict?: string | null
+        }
+        Update: {
+          advice?: string | null
+          created_at?: string
+          id?: string
+          next_step?: string | null
+          partner_dob?: string | null
+          partner_name?: string | null
+          pattern?: string | null
+          question?: string | null
+          self_dob?: string | null
+          self_name?: string | null
+          summary?: string | null
+          user_id?: string
+          verdict?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           age: number | null
@@ -607,6 +679,7 @@ export type Database = {
           gems: number
           id: string
           last_activity_at: string | null
+          referral_code: string | null
           spiritual_level: string
           updated_at: string
         }
@@ -624,6 +697,7 @@ export type Database = {
           gems?: number
           id: string
           last_activity_at?: string | null
+          referral_code?: string | null
           spiritual_level?: string
           updated_at?: string
         }
@@ -641,8 +715,39 @@ export type Database = {
           gems?: number
           id?: string
           last_activity_at?: string | null
+          referral_code?: string | null
           spiritual_level?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      referrals: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          invited_email: string | null
+          owner_id: string
+          reward_gems: number
+          status: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          invited_email?: string | null
+          owner_id: string
+          reward_gems?: number
+          status?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          invited_email?: string | null
+          owner_id?: string
+          reward_gems?: number
+          status?: string
         }
         Relationships: []
       }

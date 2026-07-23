@@ -15,14 +15,17 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiPatronesRouteImport } from './routes/api/patrones'
+import { Route as ApiParejaRouteImport } from './routes/api/pareja'
 import { Route as ApiIntakeClosureRouteImport } from './routes/api/intake-closure'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedVisualizaRouteImport } from './routes/_authenticated/visualiza'
 import { Route as AuthenticatedPremiosRouteImport } from './routes/_authenticated/premios'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedPatronesRouteImport } from './routes/_authenticated/patrones'
+import { Route as AuthenticatedParejaRouteImport } from './routes/_authenticated/pareja'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedMembresiaRouteImport } from './routes/_authenticated/membresia'
+import { Route as AuthenticatedInvitaRouteImport } from './routes/_authenticated/invita'
 import { Route as AuthenticatedEtapasRouteImport } from './routes/_authenticated/etapas'
 import { Route as AuthenticatedEjerciciosRouteImport } from './routes/_authenticated/ejercicios'
 import { Route as AuthenticatedDiarioRouteImport } from './routes/_authenticated/diario'
@@ -65,6 +68,11 @@ const ApiPatronesRoute = ApiPatronesRouteImport.update({
   path: '/api/patrones',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiParejaRoute = ApiParejaRouteImport.update({
+  id: '/api/pareja',
+  path: '/api/pareja',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiIntakeClosureRoute = ApiIntakeClosureRouteImport.update({
   id: '/api/intake-closure',
   path: '/api/intake-closure',
@@ -95,6 +103,11 @@ const AuthenticatedPatronesRoute = AuthenticatedPatronesRouteImport.update({
   path: '/patrones',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedParejaRoute = AuthenticatedParejaRouteImport.update({
+  id: '/pareja',
+  path: '/pareja',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
@@ -103,6 +116,11 @@ const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
 const AuthenticatedMembresiaRoute = AuthenticatedMembresiaRouteImport.update({
   id: '/membresia',
   path: '/membresia',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedInvitaRoute = AuthenticatedInvitaRouteImport.update({
+  id: '/invita',
+  path: '/invita',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedEtapasRoute = AuthenticatedEtapasRouteImport.update({
@@ -184,14 +202,17 @@ export interface FileRoutesByFullPath {
   '/diario': typeof AuthenticatedDiarioRoute
   '/ejercicios': typeof AuthenticatedEjerciciosRoute
   '/etapas': typeof AuthenticatedEtapasRouteWithChildren
+  '/invita': typeof AuthenticatedInvitaRoute
   '/membresia': typeof AuthenticatedMembresiaRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/pareja': typeof AuthenticatedParejaRoute
   '/patrones': typeof AuthenticatedPatronesRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/premios': typeof AuthenticatedPremiosRoute
   '/visualiza': typeof AuthenticatedVisualizaRouteWithChildren
   '/api/chat': typeof ApiChatRoute
   '/api/intake-closure': typeof ApiIntakeClosureRoute
+  '/api/pareja': typeof ApiParejaRoute
   '/api/patrones': typeof ApiPatronesRoute
   '/etapas/$stageId': typeof AuthenticatedEtapasStageIdRoute
   '/visualiza/$categoryId': typeof AuthenticatedVisualizaCategoryIdRouteWithChildren
@@ -211,14 +232,17 @@ export interface FileRoutesByTo {
   '/diario': typeof AuthenticatedDiarioRoute
   '/ejercicios': typeof AuthenticatedEjerciciosRoute
   '/etapas': typeof AuthenticatedEtapasRouteWithChildren
+  '/invita': typeof AuthenticatedInvitaRoute
   '/membresia': typeof AuthenticatedMembresiaRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/pareja': typeof AuthenticatedParejaRoute
   '/patrones': typeof AuthenticatedPatronesRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/premios': typeof AuthenticatedPremiosRoute
   '/visualiza': typeof AuthenticatedVisualizaRouteWithChildren
   '/api/chat': typeof ApiChatRoute
   '/api/intake-closure': typeof ApiIntakeClosureRoute
+  '/api/pareja': typeof ApiParejaRoute
   '/api/patrones': typeof ApiPatronesRoute
   '/etapas/$stageId': typeof AuthenticatedEtapasStageIdRoute
   '/visualiza/$categoryId': typeof AuthenticatedVisualizaCategoryIdRouteWithChildren
@@ -240,14 +264,17 @@ export interface FileRoutesById {
   '/_authenticated/diario': typeof AuthenticatedDiarioRoute
   '/_authenticated/ejercicios': typeof AuthenticatedEjerciciosRoute
   '/_authenticated/etapas': typeof AuthenticatedEtapasRouteWithChildren
+  '/_authenticated/invita': typeof AuthenticatedInvitaRoute
   '/_authenticated/membresia': typeof AuthenticatedMembresiaRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
+  '/_authenticated/pareja': typeof AuthenticatedParejaRoute
   '/_authenticated/patrones': typeof AuthenticatedPatronesRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
   '/_authenticated/premios': typeof AuthenticatedPremiosRoute
   '/_authenticated/visualiza': typeof AuthenticatedVisualizaRouteWithChildren
   '/api/chat': typeof ApiChatRoute
   '/api/intake-closure': typeof ApiIntakeClosureRoute
+  '/api/pareja': typeof ApiParejaRoute
   '/api/patrones': typeof ApiPatronesRoute
   '/_authenticated/etapas/$stageId': typeof AuthenticatedEtapasStageIdRoute
   '/_authenticated/visualiza/$categoryId': typeof AuthenticatedVisualizaCategoryIdRouteWithChildren
@@ -269,14 +296,17 @@ export interface FileRouteTypes {
     | '/diario'
     | '/ejercicios'
     | '/etapas'
+    | '/invita'
     | '/membresia'
     | '/onboarding'
+    | '/pareja'
     | '/patrones'
     | '/perfil'
     | '/premios'
     | '/visualiza'
     | '/api/chat'
     | '/api/intake-closure'
+    | '/api/pareja'
     | '/api/patrones'
     | '/etapas/$stageId'
     | '/visualiza/$categoryId'
@@ -296,14 +326,17 @@ export interface FileRouteTypes {
     | '/diario'
     | '/ejercicios'
     | '/etapas'
+    | '/invita'
     | '/membresia'
     | '/onboarding'
+    | '/pareja'
     | '/patrones'
     | '/perfil'
     | '/premios'
     | '/visualiza'
     | '/api/chat'
     | '/api/intake-closure'
+    | '/api/pareja'
     | '/api/patrones'
     | '/etapas/$stageId'
     | '/visualiza/$categoryId'
@@ -324,14 +357,17 @@ export interface FileRouteTypes {
     | '/_authenticated/diario'
     | '/_authenticated/ejercicios'
     | '/_authenticated/etapas'
+    | '/_authenticated/invita'
     | '/_authenticated/membresia'
     | '/_authenticated/onboarding'
+    | '/_authenticated/pareja'
     | '/_authenticated/patrones'
     | '/_authenticated/perfil'
     | '/_authenticated/premios'
     | '/_authenticated/visualiza'
     | '/api/chat'
     | '/api/intake-closure'
+    | '/api/pareja'
     | '/api/patrones'
     | '/_authenticated/etapas/$stageId'
     | '/_authenticated/visualiza/$categoryId'
@@ -346,6 +382,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiIntakeClosureRoute: typeof ApiIntakeClosureRoute
+  ApiParejaRoute: typeof ApiParejaRoute
   ApiPatronesRoute: typeof ApiPatronesRoute
 }
 
@@ -393,6 +430,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPatronesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/pareja': {
+      id: '/api/pareja'
+      path: '/api/pareja'
+      fullPath: '/api/pareja'
+      preLoaderRoute: typeof ApiParejaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/intake-closure': {
       id: '/api/intake-closure'
       path: '/api/intake-closure'
@@ -435,6 +479,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPatronesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/pareja': {
+      id: '/_authenticated/pareja'
+      path: '/pareja'
+      fullPath: '/pareja'
+      preLoaderRoute: typeof AuthenticatedParejaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/onboarding': {
       id: '/_authenticated/onboarding'
       path: '/onboarding'
@@ -447,6 +498,13 @@ declare module '@tanstack/react-router' {
       path: '/membresia'
       fullPath: '/membresia'
       preLoaderRoute: typeof AuthenticatedMembresiaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/invita': {
+      id: '/_authenticated/invita'
+      path: '/invita'
+      fullPath: '/invita'
+      preLoaderRoute: typeof AuthenticatedInvitaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/etapas': {
@@ -587,8 +645,10 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDiarioRoute: typeof AuthenticatedDiarioRoute
   AuthenticatedEjerciciosRoute: typeof AuthenticatedEjerciciosRoute
   AuthenticatedEtapasRoute: typeof AuthenticatedEtapasRouteWithChildren
+  AuthenticatedInvitaRoute: typeof AuthenticatedInvitaRoute
   AuthenticatedMembresiaRoute: typeof AuthenticatedMembresiaRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
+  AuthenticatedParejaRoute: typeof AuthenticatedParejaRoute
   AuthenticatedPatronesRoute: typeof AuthenticatedPatronesRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
   AuthenticatedPremiosRoute: typeof AuthenticatedPremiosRoute
@@ -605,8 +665,10 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDiarioRoute: AuthenticatedDiarioRoute,
   AuthenticatedEjerciciosRoute: AuthenticatedEjerciciosRoute,
   AuthenticatedEtapasRoute: AuthenticatedEtapasRouteWithChildren,
+  AuthenticatedInvitaRoute: AuthenticatedInvitaRoute,
   AuthenticatedMembresiaRoute: AuthenticatedMembresiaRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
+  AuthenticatedParejaRoute: AuthenticatedParejaRoute,
   AuthenticatedPatronesRoute: AuthenticatedPatronesRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
   AuthenticatedPremiosRoute: AuthenticatedPremiosRoute,
@@ -624,18 +686,9 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiChatRoute: ApiChatRoute,
   ApiIntakeClosureRoute: ApiIntakeClosureRoute,
+  ApiParejaRoute: ApiParejaRoute,
   ApiPatronesRoute: ApiPatronesRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

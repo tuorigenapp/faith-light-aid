@@ -4,16 +4,16 @@ import { DefaultChatTransport, type UIMessage } from "ai";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Send, Trash2, MessageCircle, Sparkles, AlertCircle } from "lucide-react";
+import { Plus, Send, Trash2, MessageCircle, HeartHandshake, Lock } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { getUserPlan, getDailyUsage, PLAN_LIMITS } from "@/lib/plan";
+import { Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_authenticated/chat")({
-  head: () => ({ meta: [{ title: "Consultor IA — Reconectando" }] }),
+  head: () => ({ meta: [{ title: "Conversa con Ruth Esther — ORIGEN" }] }),
   component: ChatPage,
 });
 
@@ -26,6 +26,17 @@ function ChatPage() {
     queryKey: ["conversations", user?.id],
     enabled: !!user,
     queryFn: async () => (await supabase.from("conversations").select("*").eq("user_id", user!.id).order("updated_at", { ascending: false })).data ?? [],
+  });
+
+  const { data: gate } = useQuery({
+    queryKey: ["chat-gate", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const plan = await getUserPlan(user!.id);
+      const used = await getDailyUsage(user!.id, "chat_message");
+      const limit = PLAN_LIMITS[plan].chat_message_per_day;
+      return { plan, used, limit, remaining: limit === Infinity ? Infinity : Math.max(0, limit - used) };
+    },
   });
 
   useEffect(() => {
@@ -47,14 +58,18 @@ function ChatPage() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-0px)] md:h-screen">
-      <aside className="hidden lg:flex w-72 border-r border-border flex-col bg-card">
+    <div className="flex h-[calc(100vh-4rem)] md:h-screen bg-aura-top">
+      {/* Sidebar */}
+      <aside className="hidden lg:flex w-72 border-r border-border flex-col bg-white/70 backdrop-blur">
         <div className="p-4 border-b border-border">
-          <Button onClick={newConversation} className="w-full bg-gold text-gold-foreground hover:bg-gold/90"><Plus className="w-4 h-4 mr-2" />Nueva conversación</Button>
+          <button onClick={newConversation} className="w-full h-11 rounded-[12px] btn-primary-gradient inline-flex items-center justify-center gap-2 text-sm">
+            <Plus className="w-4 h-4" />Nueva conversación
+          </button>
         </div>
         <div className="flex-1 overflow-y-auto p-2">
-          {(conversations ?? []).map(c => (
-            <div key={c.id} className={cn("group flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer mb-1", activeId === c.id ? "bg-accent" : "hover:bg-accent/50")}
+          {(conversations ?? []).map((c) => (
+            <div key={c.id} className={cn("group flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer mb-1",
+              activeId === c.id ? "bg-secondary" : "hover:bg-secondary/50")}
               onClick={() => setActiveId(c.id)}>
               <MessageCircle className="w-4 h-4 text-muted-foreground shrink-0" />
               <span className="flex-1 text-sm truncate">{c.title}</span>
@@ -63,22 +78,41 @@ function ChatPage() {
               </button>
             </div>
           ))}
-          {conversations && conversations.length === 0 && (
-            <p className="text-sm text-muted-foreground text-center mt-8 px-4">Empieza una conversación con el Consultor Espiritual.</p>
-          )}
         </div>
       </aside>
 
       <main className="flex-1 flex flex-col min-w-0">
-        {activeId ? (
-          <ChatWindow key={activeId} conversationId={activeId} />
+        {/* Ruth Esther header */}
+        <div className="border-b border-border bg-white/70 backdrop-blur px-4 py-3 flex items-center gap-3">
+          <div className="w-11 h-11 rounded-2xl bg-brand-gradient shadow-glow grid place-items-center text-white">
+            <HeartHandshake className="w-5 h-5" />
+          </div>
+          <div className="min-w-0">
+            <p className="font-display font-bold text-[15px] leading-none">Ruth Esther</p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">Mentora · método ORIGEN</p>
+          </div>
+          <button onClick={newConversation} className="ml-auto lg:hidden text-xs font-bold text-primary">
+            + Nueva
+          </button>
+        </div>
+
+        {gate && gate.remaining === 0 ? (
+          <FreePlanLimit used={gate.used} limit={gate.limit as number} />
+        ) : activeId ? (
+          <ChatWindow key={activeId} conversationId={activeId} onSent={() => qc.invalidateQueries({ queryKey: ["chat-gate"] })} />
         ) : (
-          <div className="flex-1 grid place-items-center p-8 text-center">
+          <div className="flex-1 grid place-items-center p-6 text-center">
             <div>
-              <div className="w-16 h-16 rounded-full bg-divine grid place-items-center text-white mx-auto"><Sparkles className="w-7 h-7" /></div>
-              <h2 className="font-display text-2xl mt-4">Asistente de Restauración Espiritual</h2>
-              <p className="text-muted-foreground mt-2 max-w-md">Empieza una nueva conversación. Te escucho sin juzgar, con compasión y palabra.</p>
-              <Button onClick={newConversation} className="mt-6 bg-gold text-gold-foreground hover:bg-gold/90"><Plus className="w-4 h-4 mr-2" />Nueva conversación</Button>
+              <div className="mx-auto w-16 h-16 rounded-2xl bg-brand-gradient grid place-items-center text-white shadow-glow">
+                <HeartHandshake className="w-8 h-8" />
+              </div>
+              <h2 className="font-display font-bold text-xl mt-4">Cuéntame qué llevas hoy</h2>
+              <p className="text-muted-foreground text-sm mt-2 max-w-xs mx-auto">
+                Estoy aquí para escucharte con calma. Cuando quieras, empezamos.
+              </p>
+              <button onClick={newConversation} className="mt-5 btn-primary-gradient h-12 px-6 rounded-[14px] inline-flex items-center gap-2">
+                <Plus className="w-4 h-4" />Comenzar conversación
+              </button>
             </div>
           </div>
         )}
@@ -87,7 +121,27 @@ function ChatPage() {
   );
 }
 
-function ChatWindow({ conversationId }: { conversationId: string }) {
+function FreePlanLimit({ used, limit }: { used: number; limit: number }) {
+  return (
+    <div className="flex-1 grid place-items-center p-6">
+      <div className="app-card p-6 max-w-sm text-center">
+        <div className="mx-auto w-14 h-14 rounded-2xl bg-secondary grid place-items-center text-primary">
+          <Lock className="w-6 h-6" />
+        </div>
+        <h3 className="font-display font-bold text-lg mt-3">Ya usaste tu conversación de hoy</h3>
+        <p className="text-sm text-muted-foreground mt-2">
+          En el plan Explorador tienes {limit} conversación al día. Vuelve mañana o desbloquea el chat ilimitado con Camino ORIGEN.
+        </p>
+        <p className="text-xs text-muted-foreground mt-2">Mensajes de hoy: {used} / {limit}</p>
+        <Link to="/membresia" className="mt-4 btn-primary-gradient w-full h-12 rounded-[14px] inline-flex items-center justify-center gap-2 text-sm">
+          Desbloquear ahora
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+function ChatWindow({ conversationId, onSent }: { conversationId: string; onSent: () => void }) {
   const { user } = useAuth();
   const qc = useQueryClient();
   const [input, setInput] = useState("");
@@ -98,9 +152,12 @@ function ChatWindow({ conversationId }: { conversationId: string }) {
     queryKey: ["messages", conversationId],
     queryFn: async () => {
       const { data } = await supabase.from("messages").select("*").eq("conversation_id", conversationId).order("created_at");
-      return (data ?? []).map((m: any): UIMessage => ({
-        id: m.id, role: m.role,
-        parts: typeof m.content === "string" ? [{ type: "text", text: m.content }] : m.content,
+      return (data ?? []).map((m): UIMessage => ({
+        id: m.id,
+        role: (m.role === "assistant" || m.role === "system" || m.role === "user") ? m.role : "user",
+        parts: (typeof m.content === "string"
+          ? [{ type: "text", text: m.content }]
+          : Array.isArray(m.content) ? (m.content as unknown as UIMessage["parts"]) : [{ type: "text", text: String(m.content ?? "") }]),
       }));
     },
   });
@@ -111,31 +168,26 @@ function ChatWindow({ conversationId }: { conversationId: string }) {
     transport: new DefaultChatTransport({ api: "/api/chat" }),
     onFinish: async ({ message }) => {
       if (!user) return;
-      // Persist assistant message
       await supabase.from("messages").insert({
         conversation_id: conversationId, user_id: user.id,
-        role: "assistant", content: message.parts as any,
+        role: "assistant", content: message.parts as never,
       });
       qc.invalidateQueries({ queryKey: ["messages", conversationId] });
     },
     onError: async (e) => {
       const text = e.message.includes("402")
-        ? "El consultor IA no puede responder ahora porque los créditos del servicio están agotados. Tu mensaje quedó guardado; recarga créditos de IA para activar respuestas reales."
-        : "No pude responder ahora. Tu mensaje quedó guardado; intenta nuevamente en unos minutos.";
+        ? "Perdona, en este momento no puedo responderte. Tu mensaje quedó guardado, vuelve en un rato."
+        : "No pude responderte ahora. Tu mensaje quedó guardado; intentemos de nuevo en unos minutos.";
       const fallback: UIMessage = { id: crypto.randomUUID(), role: "assistant", parts: [{ type: "text", text }] };
       setMessages((prev) => [...prev, fallback]);
       if (user) {
-        await supabase.from("messages").insert({ conversation_id: conversationId, user_id: user.id, role: "assistant", content: fallback.parts as any });
+        await supabase.from("messages").insert({ conversation_id: conversationId, user_id: user.id, role: "assistant", content: fallback.parts as never });
       }
       qc.invalidateQueries({ queryKey: ["messages", conversationId] });
-      toast.error(text);
     },
   });
 
-  useEffect(() => {
-    if (initialMessages) setMessages(initialMessages);
-  }, [conversationId, initialMessages, setMessages]);
-
+  useEffect(() => { if (initialMessages) setMessages(initialMessages); }, [conversationId, initialMessages, setMessages]);
   useEffect(() => { inputRef.current?.focus(); }, [conversationId, status]);
   useEffect(() => { scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" }); }, [messages]);
 
@@ -143,12 +195,17 @@ function ChatWindow({ conversationId }: { conversationId: string }) {
     if (!input.trim() || !user) return;
     const text = input.trim();
     setInput("");
-    // Persist user message
     await supabase.from("messages").insert({
       conversation_id: conversationId, user_id: user.id,
-      role: "user", content: [{ type: "text", text }],
+      role: "user", content: [{ type: "text", text }] as never,
     });
-    // Update conversation title if first message
+    await supabase.from("daily_activity").insert({
+      user_id: user.id,
+      activity_type: "chat_message",
+      activity_date: new Date().toISOString().slice(0, 10),
+      reference_id: conversationId,
+      metadata: {} as never,
+    });
     if (messages.length === 0) {
       await supabase.from("conversations").update({ title: text.slice(0, 50), updated_at: new Date().toISOString() }).eq("id", conversationId);
       qc.invalidateQueries({ queryKey: ["conversations"] });
@@ -156,69 +213,64 @@ function ChatWindow({ conversationId }: { conversationId: string }) {
       await supabase.from("conversations").update({ updated_at: new Date().toISOString() }).eq("id", conversationId);
     }
     sendMessage({ text });
+    onSent();
   }
 
   const loading = status === "submitted" || status === "streaming";
 
   return (
     <>
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 md:px-8 py-6">
-        <div className="max-w-3xl mx-auto space-y-6">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-5">
+        <div className="max-w-2xl mx-auto space-y-4">
           {messages.length === 0 && (
-            <Card className="p-6 bg-gold/5 border-gold/30 rounded-[1.7rem]">
+            <div className="app-card p-5 bg-brand-soft">
               <div className="flex items-start gap-3">
-                <Sparkles className="w-5 h-5 text-gold mt-0.5" />
+                <HeartHandshake className="w-5 h-5 text-primary mt-0.5" />
                 <div>
-                  <p className="font-display text-base">Estoy aquí para escucharte.</p>
-                  <p className="text-sm text-muted-foreground mt-1">Comparte lo que sientes, lo que te preocupa o lo que buscas. No estás solo(a).</p>
+                  <p className="font-display font-bold text-[15px]">Estoy aquí, contigo.</p>
+                  <p className="text-sm text-muted-foreground mt-1">Cuéntame lo que sientes, lo que te preocupa, lo que buscas romper. Sin juicio, sin prisa.</p>
                 </div>
               </div>
-            </Card>
+            </div>
           )}
-          {messages.length === 0 && (
-            <Card className="p-5 rounded-[1.7rem] border-primary/20 bg-primary/5">
-              <div className="flex gap-3">
-                <AlertCircle className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                <div className="text-sm text-muted-foreground leading-relaxed">
-                  Si el consultor no responde, puede ser por falta temporal de créditos de IA. Tu mensaje queda guardado y podrás continuar cuando el servicio vuelva a estar activo.
-                </div>
-              </div>
-            </Card>
-          )}
-          {messages.map(m => (
-            <div key={m.id} className={cn("flex gap-3", m.role === "user" && "flex-row-reverse")}>
-              <div className={cn("shrink-0 w-8 h-8 rounded-full grid place-items-center text-xs font-medium",
-                m.role === "user" ? "bg-primary text-primary-foreground" : "bg-divine text-white"
+          {messages.map((m) => (
+            <div key={m.id} className={cn("flex gap-2.5", m.role === "user" && "flex-row-reverse")}>
+              <div className={cn("shrink-0 w-8 h-8 rounded-full grid place-items-center text-xs font-bold shadow-soft",
+                m.role === "user" ? "bg-secondary text-primary" : "bg-brand-gradient text-white"
               )}>
-                {m.role === "user" ? "Tú" : "✦"}
+                {m.role === "user" ? "Tú" : "R"}
               </div>
-              <div className={cn("rounded-2xl px-4 py-3 max-w-[85%]",
-                m.role === "user" ? "bg-primary text-primary-foreground" : "bg-card border border-border"
+              <div className={cn("rounded-2xl px-4 py-3 max-w-[82%] text-sm leading-relaxed",
+                m.role === "user"
+                  ? "bg-primary text-primary-foreground rounded-tr-md"
+                  : "bg-white border border-border rounded-tl-md shadow-soft"
               )}>
-                {m.parts.map((p, i) => p.type === "text" ? <span key={i} className="whitespace-pre-wrap text-sm leading-relaxed">{p.text}</span> : null)}
+                {m.parts.map((p, i) => p.type === "text" ? <span key={i} className="whitespace-pre-wrap">{p.text}</span> : null)}
               </div>
             </div>
           ))}
           {loading && (
-            <div className="flex gap-3">
-              <div className="shrink-0 w-8 h-8 rounded-full bg-divine grid place-items-center text-white text-xs">✦</div>
-              <div className="rounded-2xl px-4 py-3 bg-card border border-border text-sm text-muted-foreground italic">Reflexionando...</div>
+            <div className="flex gap-2.5">
+              <div className="shrink-0 w-8 h-8 rounded-full bg-brand-gradient grid place-items-center text-white text-xs font-bold">R</div>
+              <div className="rounded-2xl px-4 py-3 bg-white border border-border text-sm text-muted-foreground italic">Escribiendo...</div>
             </div>
           )}
         </div>
       </div>
-      <div className="border-t border-border bg-background p-4">
-        <div className="max-w-3xl mx-auto">
-          <div className="flex gap-2 items-end">
-            <Textarea ref={inputRef} value={input} onChange={e => setInput(e.target.value)}
-              onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
-              placeholder="Comparte lo que sientes hoy..." className="min-h-12 max-h-40 resize-none" disabled={loading} />
-            <Button onClick={handleSend} disabled={loading || !input.trim()} className="bg-gold text-gold-foreground hover:bg-gold/90 h-12">
-              <Send className="w-4 h-4" />
-            </Button>
-          </div>
-          <p className="text-[10px] text-muted-foreground mt-2 text-center">Esta herramienta no reemplaza ayuda psicológica, psiquiátrica o médica profesional.</p>
+      <div className="border-t border-border bg-white/85 backdrop-blur p-3">
+        <div className="max-w-2xl mx-auto flex gap-2 items-end">
+          <Textarea ref={inputRef} value={input} onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+            placeholder="Comparte lo que sientes hoy..."
+            className="min-h-12 max-h-40 resize-none rounded-[14px] bg-secondary/40 border-border" disabled={loading} />
+          <button onClick={handleSend} disabled={loading || !input.trim()}
+            className="h-12 w-12 rounded-[14px] btn-primary-gradient grid place-items-center disabled:opacity-40">
+            <Send className="w-4 h-4" />
+          </button>
         </div>
+        <p className="text-[10px] text-muted-foreground mt-2 text-center max-w-2xl mx-auto">
+          Esta conversación no reemplaza apoyo psicológico profesional cuando lo necesites.
+        </p>
       </div>
     </>
   );
