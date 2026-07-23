@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useParams, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useParams, useNavigate, useRouterState } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -65,6 +65,8 @@ const EX_HINTS = [
 
 function CategoryPage() {
   const { categoryId } = useParams({ from: "/_authenticated/visualiza/$categoryId" });
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const isDayRoute = /^\/visualiza\/[^/]+\/[^/]+$/.test(pathname);
   const { user } = useAuth();
   const navigate = useNavigate();
   const qc = useQueryClient();
@@ -73,6 +75,8 @@ function CategoryPage() {
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [exercise, setExercise] = useState("");
+
+  if (isDayRoute) return <Outlet />;
 
   const { data } = useQuery({
     queryKey: ["cat-full", categoryId, user?.id],

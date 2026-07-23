@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { useQuery } from "@tanstack/react-query";
@@ -119,6 +119,11 @@ const INCLUDES = [
 
 function Visualiza() {
   const { user } = useAuth();
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const isCategoryRoute = /^\/visualiza\/[^/]+(?:\/[^/]+)?$/.test(pathname);
+
+  if (isCategoryRoute) return <Outlet />;
+
   const { data } = useQuery({
     queryKey: ["manifest-cats", user?.id],
     queryFn: async () => {
