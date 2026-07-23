@@ -153,8 +153,11 @@ function ChatWindow({ conversationId, onSent }: { conversationId: string; onSent
     queryFn: async () => {
       const { data } = await supabase.from("messages").select("*").eq("conversation_id", conversationId).order("created_at");
       return (data ?? []).map((m): UIMessage => ({
-        id: m.id, role: m.role,
-        parts: typeof m.content === "string" ? [{ type: "text", text: m.content }] : m.content,
+        id: m.id,
+        role: (m.role === "assistant" || m.role === "system" || m.role === "user") ? m.role : "user",
+        parts: (typeof m.content === "string"
+          ? [{ type: "text", text: m.content }]
+          : Array.isArray(m.content) ? (m.content as unknown as UIMessage["parts"]) : [{ type: "text", text: String(m.content ?? "") }]),
       }));
     },
   });
