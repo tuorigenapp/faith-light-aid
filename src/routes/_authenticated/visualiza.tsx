@@ -159,8 +159,13 @@ function Visualiza() {
   const selectedCatTitle = cats.find((c: any) => (doneByCat.get(c.id) ?? 0) > 0)?.title ?? null;
   const progressPct = Math.min(100, Math.round((totalDone / 21) * 100));
 
-  // Map methods to real categories by index (fallback to first)
-  const methodTargets = METHODS.map((_, i) => cats[i]?.id ?? firstCatId);
+  // Map methods to their route. Música uses a dynamic categoryId; Limpieza is its own dedicated route.
+  const methodTargets: { to: string; params?: Record<string, string> }[] = [
+    firstCatId ? { to: "/visualiza/$categoryId", params: { categoryId: firstCatId } } : { to: "/visualiza" },
+    { to: "/visualiza/limpieza" },
+    firstCatId ? { to: "/visualiza/$categoryId", params: { categoryId: firstCatId } } : { to: "/visualiza" },
+    firstCatId ? { to: "/visualiza/$categoryId", params: { categoryId: firstCatId } } : { to: "/visualiza" },
+  ];
 
   return (
     <div className="px-4 py-6 md:px-8 md:py-10 max-w-6xl mx-auto pb-28 space-y-6">
@@ -189,7 +194,8 @@ function Visualiza() {
         <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           {METHODS.map((m, i) => {
             const target = methodTargets[i];
-            const done = target ? doneByCat.get(target) ?? 0 : 0;
+            const targetCatId = target.params?.categoryId;
+            const done = targetCatId ? doneByCat.get(targetCatId) ?? 0 : 0;
             const CardBody = (
               <div className="app-card overflow-hidden h-full flex flex-col shadow-soft hover:shadow-glow transition-all">
                 <div className="relative h-44">
@@ -223,12 +229,15 @@ function Visualiza() {
                 </div>
               </div>
             );
-            return target ? (
-              <Link key={m.key} to="/visualiza/$categoryId" params={{ categoryId: target }} className="block">
+            return (
+              <Link
+                key={m.key}
+                to={target.to as any}
+                params={target.params as any}
+                className="block"
+              >
                 {CardBody}
               </Link>
-            ) : (
-              <div key={m.key}>{CardBody}</div>
             );
           })}
         </div>
