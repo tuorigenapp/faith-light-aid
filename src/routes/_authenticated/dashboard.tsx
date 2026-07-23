@@ -9,9 +9,12 @@ import { LockedCard } from "@/components/LockedCard";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import {
-  ArrowRight, BookHeart, Compass, Flame, HeartHandshake, Headphones,
-  Layers, MessageCircle, Sparkles, TreeDeciduous, Trophy, Users2, HeartPulse,
+  ArrowRight, BookHeart, Compass, Flame, Headphones,
+  Layers, Sparkles, TreeDeciduous, Trophy, HeartPulse,
 } from "lucide-react";
+import pilarMentora from "@/assets/pilar-mentora.png.asset.json";
+import pilarPareja from "@/assets/pilar-pareja.png.asset.json";
+import pilarPatron from "@/assets/pilar-patron.png.asset.json";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Hoy — ORIGEN" }] }),
