@@ -30,6 +30,9 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-gold: var(--gold);
   --color-gold-foreground: var(--gold-foreground);
+  --color-accent-blue: #5AA9FF;
+  --color-accent-green: #3FBE8F;
+  --color-accent-pink: #F58BCB;
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-success: var(--success);
