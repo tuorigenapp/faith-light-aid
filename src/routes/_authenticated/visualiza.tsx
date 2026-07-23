@@ -164,7 +164,7 @@ function Visualiza() {
   const methodTargets: { to: string; params?: Record<string, string> }[] = [
     firstCatId ? { to: "/visualiza/$categoryId", params: { categoryId: firstCatId } } : { to: "/visualiza" },
     { to: "/visualiza/limpieza" },
-    firstCatId ? { to: "/visualiza/$categoryId", params: { categoryId: firstCatId } } : { to: "/visualiza" },
+    { to: "/visualiza/identidad" },
     firstCatId ? { to: "/visualiza/$categoryId", params: { categoryId: firstCatId } } : { to: "/visualiza" },
   ];
 
