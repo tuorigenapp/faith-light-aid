@@ -1,4 +1,4 @@
-import { createFileRoute, Link, Outlet, useLocation } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { useQuery } from "@tanstack/react-query";
@@ -30,8 +30,8 @@ const KEY_TO_FOCUS: Record<string, string> = {
 
 function Etapas() {
   const { user } = useAuth();
-  const location = useLocation();
-  const isDetailRoute = /^\/etapas\/[^/]+$/.test(location.pathname);
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const isDetailRoute = /^\/etapas\/[^/]+$/.test(pathname);
   const { data } = useQuery({
     queryKey: ["etapas", user?.id],
     enabled: !!user,
