@@ -113,7 +113,7 @@ function MinistracionPage() {
                 <Input type="date" value={form.dob} onChange={(e) => setForm({ ...form, dob: e.target.value })}
                   className="h-12 rounded-[14px] bg-white" />
               </Field>
-              <Field label="¿Qué deseas consultar? (opcional)">
+              <Field label="¿Qué deseas preguntarle al Cielo hoy? (Opcional)">
                 <Textarea value={form.question} onChange={(e) => setForm({ ...form, question: e.target.value })}
                   placeholder="Describe la situación o pregunta que deseas presentar ante la Corte Celestial..."
                   className="min-h-24 rounded-[14px] bg-white resize-none" />
