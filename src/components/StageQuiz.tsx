@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Check, Brain, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { awardGems } from "@/lib/gems";
