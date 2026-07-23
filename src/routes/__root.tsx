@@ -14,6 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { ThemeProvider } from "@/lib/theme";
+import { SplashScreen } from "@/components/SplashScreen";
 
 function NotFoundComponent() {
   return (
@@ -73,15 +74,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:description", content: "App cristiana motivacional con diagnóstico espiritual, etapas personalizadas, ejercicios diarios, consultor IA, diario, calendario y acompañamiento." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "theme-color", content: "#1a2541" },
+      { name: "theme-color", content: "#7C5CFF" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
-      { name: "apple-mobile-web-app-title", content: "Reconectando" },
+      { name: "apple-mobile-web-app-title", content: "ORIGEN" },
       { name: "mobile-web-app-capable", content: "yes" },
       { name: "twitter:title", content: "Reconectando el Espíritu con Dios — App cristiana" },
       { name: "twitter:description", content: "App cristiana motivacional con diagnóstico espiritual, etapas personalizadas, ejercicios diarios, consultor IA, diario, calendario y acompañamiento." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/8e7d03be-210d-4ab2-be80-fd7e3fb2e377/id-preview-55bf025b--40146c29-e7de-4b1d-96e6-f416fa0c0a8f.lovable.app-1784407898001.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/8e7d03be-210d-4ab2-be80-fd7e3fb2e377/id-preview-55bf025b--40146c29-e7de-4b1d-96e6-f416fa0c0a8f.lovable.app-1784407898001.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -90,7 +89,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "apple-touch-icon", href: "/app-icon.png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap" },
+      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" },
     ],
   }),
   shellComponent: RootShell,
@@ -127,6 +126,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
+        <SplashScreen />
         <Outlet />
         <Toaster richColors position="top-center" />
       </ThemeProvider>
