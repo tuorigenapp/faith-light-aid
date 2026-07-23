@@ -248,12 +248,3 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     </div>
   );
 }
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div>
-      <label className="text-[13px] font-semibold text-foreground">{label}</label>
-      <div className="mt-1.5">{children}</div>
-    </div>
-  );
-}
