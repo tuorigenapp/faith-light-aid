@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import heroImg from "@/assets/dios-te-dice-hoy.png.asset.json";
+import heroImg from "@/assets/ministracion-hero.jpg";
 
 export const Route = createFileRoute("/_authenticated/ministracion")({
   head: () => ({ meta: [{ title: "Lo que Dios quiere decirte hoy — ORIGEN" }] }),
@@ -21,6 +21,7 @@ type Result = {
   senales: string[];
   ministracion: string;
   versiculo: string;
+  rompe_ciclo: string;
 };
 
 const LOADING_LINES = [
@@ -88,9 +89,10 @@ function MinistracionPage() {
 
         {step === 1 && (
           <div className="animate-in fade-in slide-in-from-right-6 duration-300">
-            <div className="hero-card p-0 overflow-hidden">
+            <div className="hero-card p-0 overflow-hidden relative shadow-[0_20px_60px_-15px_rgba(255,255,255,0.9),0_0_0_1px_rgba(255,255,255,0.6)] ring-1 ring-white/70">
               <div className="relative">
-                <img src={heroImg.url} alt="Dios te dice hoy — Corte Celestial" className="w-full h-auto block" />
+                <img src={heroImg} alt="Dios te dice hoy — Corte Celestial" className="w-full h-auto block" />
+                <div className="absolute inset-0 pointer-events-none" style={{ boxShadow: "inset 0 0 40px rgba(255,255,255,0.4)" }} />
               </div>
               <div className="p-5 text-center">
                 <div className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-widest font-bold text-primary bg-brand-soft px-3 py-1 rounded-full">
@@ -111,7 +113,7 @@ function MinistracionPage() {
                 <Input type="date" value={form.dob} onChange={(e) => setForm({ ...form, dob: e.target.value })}
                   className="h-12 rounded-[14px] bg-white" />
               </Field>
-              <Field label="¿Qué deseas consultar? (opcional)">
+              <Field label="¿Qué deseas preguntarle al Cielo hoy? (Opcional)">
                 <Textarea value={form.question} onChange={(e) => setForm({ ...form, question: e.target.value })}
                   placeholder="Describe la situación o pregunta que deseas presentar ante la Corte Celestial..."
                   className="min-h-24 rounded-[14px] bg-white resize-none" />
@@ -190,6 +192,15 @@ function MinistracionPage() {
               <p className="whitespace-pre-line font-medium">{result.ministracion}</p>
             </ResultBlock>
 
+            {result.rompe_ciclo && (
+              <ResultBlock emoji="⛓️‍💥" title="Consejo del Cielo: Rompe el Ciclo en tu vida" color="coral">
+                <p className="text-[11px] uppercase tracking-widest font-bold text-[#E05A6B] mb-2">
+                  Deuda generacional que se repite en tu vida
+                </p>
+                <p className="whitespace-pre-line">{result.rompe_ciclo}</p>
+              </ResultBlock>
+            )}
+
             {result.versiculo && (
               <ResultBlock emoji="📖" title="Palabra que respalda el decreto" color="green">
                 <p className="text-sm italic leading-relaxed">"{result.versiculo}"</p>
@@ -219,6 +230,7 @@ const COLOR_MAP = {
   pink:   { border: "border-[#F58BCB]", bg: "bg-[#F58BCB]/8", chip: "bg-[#F58BCB]/15 text-[#F58BCB]" },
   gold:   { border: "border-[#F7B955]", bg: "bg-[#F7B955]/10", chip: "bg-[#F7B955]/20 text-[#B8862E]" },
   green:  { border: "border-[#3FBE8F]", bg: "bg-[#3FBE8F]/8", chip: "bg-[#3FBE8F]/15 text-[#3FBE8F]" },
+  coral:  { border: "border-[#E05A6B]", bg: "bg-[#E05A6B]/8", chip: "bg-[#E05A6B]/15 text-[#E05A6B]" },
 } as const;
 
 function ResultBlock({
