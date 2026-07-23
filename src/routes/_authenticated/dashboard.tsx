@@ -157,20 +157,22 @@ function Dashboard() {
               ))}
             </div>
           </div>
-          <div className="app-card p-4">
+          <Link to="/etapas" className="app-card p-4">
             <div className="flex items-center gap-2">
               <div className="w-9 h-9 rounded-xl bg-secondary grid place-items-center">
                 <Layers className="w-5 h-5 text-primary" />
               </div>
               <div className="min-w-0">
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Etapas</p>
-                <p className="font-display font-bold text-base">{completed} / 8</p>
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Camino 365</p>
+                <p className="font-display font-bold text-base">Día {Math.min(365, Math.max(1, data?.streakActivities?.length || 1))} / 365</p>
               </div>
             </div>
             <div className="mt-3 h-2 bg-secondary rounded-full overflow-hidden">
-              <div className="h-full bg-brand-gradient" style={{ width: `${(completed / 8) * 100}%` }} />
+              <div className="h-full bg-brand-gradient" style={{ width: `${Math.min(100, ((data?.streakActivities?.length ?? 0) / 365) * 100)}%` }} />
             </div>
-          </div>
+            <p className="mt-2 text-[10px] text-muted-foreground">Semana {Math.max(1, Math.ceil((data?.streakActivities?.length || 1) / 7))} de 52 · {completed} etapas</p>
+          </Link>
+
         </div>
 
         {/* Árbol de Sanación */}
