@@ -21,6 +21,7 @@ type Result = {
   senales: string[];
   ministracion: string;
   versiculo: string;
+  rompe_ciclo: string;
 };
 
 const LOADING_LINES = [
