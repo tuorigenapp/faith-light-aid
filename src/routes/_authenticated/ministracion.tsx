@@ -167,36 +167,33 @@ function MinistracionPage() {
               </h2>
             </div>
 
-            <ResultCard icon={<Scale className="w-4 h-4" />} title="Dictamen de la Corte Celestial">
+            <ResultBlock emoji="⚖️" title="Dictamen de la Corte Celestial" color="violet">
               <p className="whitespace-pre-line">{result.dictamen}</p>
-            </ResultCard>
+            </ResultBlock>
 
-            <ResultCard icon={<CalendarClock className="w-4 h-4" />} title="Línea de tiempo">
+            <ResultBlock emoji="⏳" title="Línea de tiempo" color="blue">
               <p className="whitespace-pre-line">{result.linea_tiempo}</p>
-            </ResultCard>
+            </ResultBlock>
 
-            <ResultCard icon={<Eye className="w-4 h-4" />} title="Señales de confirmación">
+            <ResultBlock emoji="🕊️" title="Señales de confirmación" color="pink">
               <ul className="space-y-2">
                 {result.senales?.map((s, i) => (
                   <li key={i} className="flex gap-2">
-                    <span className="mt-1 w-1.5 h-1.5 rounded-full bg-brand-gradient shrink-0" />
+                    <span className="mt-1 w-1.5 h-1.5 rounded-full bg-[#F58BCB] shrink-0" />
                     <span>{s}</span>
                   </li>
                 ))}
               </ul>
-            </ResultCard>
+            </ResultBlock>
 
-            <ResultCard icon={<ShieldAlert className="w-4 h-4" />} title="Ministración y advertencia" tone="brand">
+            <ResultBlock emoji="💫" title="Ministración para tu vida" color="gold">
               <p className="whitespace-pre-line font-medium">{result.ministracion}</p>
-            </ResultCard>
+            </ResultBlock>
 
             {result.versiculo && (
-              <div className="app-card p-5 bg-brand-soft">
-                <div className="text-[11px] uppercase tracking-widest font-bold text-primary flex items-center gap-1.5">
-                  <BookOpen className="w-3.5 h-3.5" /> Palabra que respalda el decreto
-                </div>
-                <p className="mt-2 text-sm italic leading-relaxed">"{result.versiculo}"</p>
-              </div>
+              <ResultBlock emoji="📖" title="Palabra que respalda el decreto" color="green">
+                <p className="text-sm italic leading-relaxed">"{result.versiculo}"</p>
+              </ResultBlock>
             )}
 
             <div className="grid grid-cols-2 gap-2 pt-2">
@@ -216,13 +213,38 @@ function MinistracionPage() {
   );
 }
 
-function ResultCard({ icon, title, children, tone }: { icon: React.ReactNode; title: string; children: React.ReactNode; tone?: "brand" }) {
+const COLOR_MAP = {
+  violet: { border: "border-[#7C5CFF]", bg: "bg-[#7C5CFF]/8", chip: "bg-[#7C5CFF]/15 text-[#7C5CFF]" },
+  blue:   { border: "border-[#5AA9FF]", bg: "bg-[#5AA9FF]/8", chip: "bg-[#5AA9FF]/15 text-[#5AA9FF]" },
+  pink:   { border: "border-[#F58BCB]", bg: "bg-[#F58BCB]/8", chip: "bg-[#F58BCB]/15 text-[#F58BCB]" },
+  gold:   { border: "border-[#F7B955]", bg: "bg-[#F7B955]/10", chip: "bg-[#F7B955]/20 text-[#B8862E]" },
+  green:  { border: "border-[#3FBE8F]", bg: "bg-[#3FBE8F]/8", chip: "bg-[#3FBE8F]/15 text-[#3FBE8F]" },
+} as const;
+
+function ResultBlock({
+  emoji, title, children, color,
+}: { emoji: string; title: string; children: React.ReactNode; color: keyof typeof COLOR_MAP }) {
+  const c = COLOR_MAP[color];
   return (
-    <div className={cn("app-card p-5", tone === "brand" && "bg-brand-soft")}>
-      <div className="text-[11px] uppercase tracking-widest font-bold text-primary flex items-center gap-1.5">
-        {icon} {title}
+    <div className={cn("rounded-[20px] border-2 p-5 shadow-soft", c.border, c.bg)}>
+      <div className="flex items-center gap-2.5">
+        <div className={cn("w-11 h-11 rounded-2xl grid place-items-center text-2xl shadow-soft bg-white")}>
+          <span className="drop-shadow-[0_2px_4px_rgba(0,0,0,0.15)]">{emoji}</span>
+        </div>
+        <div className={cn("text-[11px] uppercase tracking-widest font-bold px-2.5 py-1 rounded-full", c.chip)}>
+          {title}
+        </div>
       </div>
-      <div className="mt-2 text-sm leading-relaxed text-foreground/90">{children}</div>
+      <div className="mt-3 text-sm leading-relaxed text-foreground/90">{children}</div>
+    </div>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <label className="text-[13px] font-semibold text-foreground">{label}</label>
+      <div className="mt-1.5">{children}</div>
     </div>
   );
 }
