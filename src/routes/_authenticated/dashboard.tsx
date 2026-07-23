@@ -175,6 +175,9 @@ function Dashboard() {
 
         </div>
 
+        {/* Palabras para ti Hoy */}
+        <PalabrasHoy name={displayName} />
+
         {/* Árbol de Sanación */}
         <HealingTree />
 
@@ -183,6 +186,7 @@ function Dashboard() {
 
         {/* Quiz diario */}
         <DailyQuiz />
+
 
         {/* Descubre hoy — mezcla desbloqueado + bloqueado */}
         <section>
