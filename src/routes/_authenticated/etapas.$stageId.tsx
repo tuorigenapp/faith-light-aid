@@ -6,13 +6,16 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeft, Check, CheckCircle2, Lightbulb, ListChecks, Lock, MessageCircle, Sparkles } from "lucide-react";
+import { ArrowLeft, Check, CheckCircle2, Lightbulb, ListChecks, Lock, MessageCircle, Sparkles, Target } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import heroImg from "@/assets/spiritual-hero.jpg";
 import dailyImg from "@/assets/daily-devotional.jpg";
 import stageImg from "@/assets/stage-journey.jpg";
 import exerciseImg from "@/assets/prayer-exercise.jpg";
+import { WordSearch } from "@/components/WordSearch";
+import { StageQuiz } from "@/components/StageQuiz";
+import { getStageContent } from "@/lib/stage-content";
 
 export const Route = createFileRoute("/_authenticated/etapas/$stageId")({
   head: () => ({ meta: [{ title: "Detalle de etapa — Reconectando" }] }),
@@ -180,9 +183,48 @@ function StageDetail() {
           </div>
         </div>
       </div>
+
+      {/* Bloque interactivo: tips, quiz, sopa de letras, reto */}
+      <StageInteractive stageId={id} focusArea={stage.focus_area} />
     </div>
   );
 }
+
+function StageInteractive({ stageId, focusArea }: { stageId: number; focusArea: string | null }) {
+  const content = getStageContent(focusArea, stageId);
+  return (
+    <section className="mt-8 space-y-5">
+      <div className="text-center">
+        <div className="text-[11px] uppercase tracking-widest font-bold text-primary">Sazón de la etapa</div>
+        <h2 className="font-display font-extrabold text-2xl mt-1">Vívela, no solo léela</h2>
+        <p className="text-sm text-muted-foreground mt-1 max-w-lg mx-auto">Datos que transforman, un quiz que te reta y un juego para grabar las palabras en tu memoria.</p>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-4">
+        {content.tips.map((t, i) => (
+          <div key={i} className="app-card p-5 bg-brand-soft">
+            <div className="flex items-center gap-2 text-primary font-bold text-sm">
+              <Lightbulb className="w-4 h-4" /> {t.title}
+            </div>
+            <p className="text-sm leading-relaxed mt-2">{t.body}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="app-card p-5 border-primary/30 border-2 bg-primary/5">
+        <div className="flex items-center gap-2 text-primary font-bold text-sm">
+          <Target className="w-4 h-4" /> Tu reto de hoy
+        </div>
+        <p className="mt-2 text-sm leading-relaxed font-medium">{content.challenge}</p>
+      </div>
+
+      <StageQuiz items={content.quiz} storageKey={`stage-${stageId}`} />
+
+      <WordSearch words={content.words} storageKey={`stage-${stageId}`} />
+    </section>
+  );
+}
+
 
 const KEY_TO_FOCUS: Record<string, string> = {
   familia: "restauración familiar",

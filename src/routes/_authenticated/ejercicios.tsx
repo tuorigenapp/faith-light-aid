@@ -14,6 +14,22 @@ import dailyImg from "@/assets/daily-devotional.jpg";
 import stageImg from "@/assets/stage-journey.jpg";
 import heroImg from "@/assets/spiritual-hero.jpg";
 import { cn } from "@/lib/utils";
+import { WordSearch } from "@/components/WordSearch";
+import { StageQuiz } from "@/components/StageQuiz";
+import { getStageContent } from "@/lib/stage-content";
+
+const CAT_TO_FOCUS: Record<string, string> = {
+  perdon: "restauración familiar",
+  familiar: "restauración familiar",
+  sanidad: "sanidad emocional",
+  ansiedad: "sanidad emocional",
+  pensamientos: "sanidad emocional",
+  identidad: "identidad",
+  fe: "reconexión",
+  gratitud: "reconexión",
+  biblia: "reconexión",
+  proposito: "propósito",
+};
 
 export const Route = createFileRoute("/_authenticated/ejercicios")({
   head: () => ({ meta: [{ title: "Ejercicios diarios — Reconectando" }] }),
@@ -194,6 +210,12 @@ function ExerciseModal({ active, completed, notes, setNotes, onClose, onComplete
             ))}
           </ol>
           <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} className="mt-5 rounded-2xl min-h-24" placeholder="Notas de lo que sentiste, oraste o recibiste..." />
+
+          {/* Bloque interactivo: quiz + sopa */}
+          <div className="mt-6 space-y-4">
+            <ExerciseInteractive exerciseId={active.id} category={active.category} />
+          </div>
+
           <div className="flex gap-2 mt-5">
             <Button variant="ghost" onClick={onClose} className="flex-1 rounded-full">Cerrar</Button>
             <Button onClick={() => onComplete(notes)} className="flex-1 rounded-full bg-primary"><Check className="w-4 h-4 mr-2" />{completed ? "Actualizar" : "Completar"}</Button>
@@ -201,5 +223,21 @@ function ExerciseModal({ active, completed, notes, setNotes, onClose, onComplete
         </div>
       </Card>
     </div>
+  );
+}
+
+function ExerciseInteractive({ exerciseId, category }: { exerciseId: string; category: string }) {
+  const focus = CAT_TO_FOCUS[category] ?? "reconexión";
+  const seed = exerciseId.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
+  const content = getStageContent(focus, seed);
+  return (
+    <>
+      <div className="rounded-2xl bg-brand-soft p-4">
+        <div className="text-[11px] uppercase tracking-widest font-bold text-primary">Sabías que…</div>
+        <p className="text-sm mt-1 leading-relaxed">{content.tips[0].body}</p>
+      </div>
+      <StageQuiz items={content.quiz.slice(0, 2)} storageKey={`ex-${exerciseId}`} gemsPerCorrect={10} />
+      <WordSearch words={content.words.slice(0, 6)} storageKey={`ex-${exerciseId}`} gemsReward={25} />
+    </>
   );
 }
