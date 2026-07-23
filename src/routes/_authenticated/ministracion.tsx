@@ -230,6 +230,7 @@ const COLOR_MAP = {
   pink:   { border: "border-[#F58BCB]", bg: "bg-[#F58BCB]/8", chip: "bg-[#F58BCB]/15 text-[#F58BCB]" },
   gold:   { border: "border-[#F7B955]", bg: "bg-[#F7B955]/10", chip: "bg-[#F7B955]/20 text-[#B8862E]" },
   green:  { border: "border-[#3FBE8F]", bg: "bg-[#3FBE8F]/8", chip: "bg-[#3FBE8F]/15 text-[#3FBE8F]" },
+  coral:  { border: "border-[#E05A6B]", bg: "bg-[#E05A6B]/8", chip: "bg-[#E05A6B]/15 text-[#E05A6B]" },
 } as const;
 
 function ResultBlock({
