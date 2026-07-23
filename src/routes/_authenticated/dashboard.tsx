@@ -4,6 +4,7 @@ import { useAuth } from "@/lib/use-auth";
 import { useQuery } from "@tanstack/react-query";
 import { HealingTree } from "@/components/HealingTree";
 import { DailyReflection } from "@/components/DailyReflection";
+import { DailyQuiz } from "@/components/DailyQuiz";
 import { LockedCard } from "@/components/LockedCard";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -177,6 +178,9 @@ function Dashboard() {
 
         {/* Reflexión del día */}
         <DailyReflection />
+
+        {/* Quiz diario */}
+        <DailyQuiz />
 
         {/* Descubre hoy — mezcla desbloqueado + bloqueado */}
         <section>
