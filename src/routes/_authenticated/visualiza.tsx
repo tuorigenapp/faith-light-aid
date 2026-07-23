@@ -122,10 +122,9 @@ function Visualiza() {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const isCategoryRoute = /^\/visualiza\/[^/]+(?:\/[^/]+)?$/.test(pathname);
 
-  if (isCategoryRoute) return <Outlet />;
-
   const { data } = useQuery({
     queryKey: ["manifest-cats", user?.id],
+    enabled: !isCategoryRoute,
     queryFn: async () => {
       const [cats, entries, intake] = await Promise.all([
         supabase.from("manifest_categories").select("*").order("sort_order"),
@@ -143,6 +142,8 @@ function Visualiza() {
       };
     },
   });
+
+  if (isCategoryRoute) return <Outlet />;
 
   const doneByCat = new Map<string, number>();
   let totalDone = 0;
@@ -163,7 +164,7 @@ function Visualiza() {
   const methodTargets: { to: string; params?: Record<string, string> }[] = [
     firstCatId ? { to: "/visualiza/$categoryId", params: { categoryId: firstCatId } } : { to: "/visualiza" },
     { to: "/visualiza/limpieza" },
-    firstCatId ? { to: "/visualiza/$categoryId", params: { categoryId: firstCatId } } : { to: "/visualiza" },
+    { to: "/visualiza/identidad" },
     firstCatId ? { to: "/visualiza/$categoryId", params: { categoryId: firstCatId } } : { to: "/visualiza" },
   ];
 

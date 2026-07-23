@@ -36,6 +36,7 @@ import { Route as AuthenticatedBibliotecaRouteImport } from './routes/_authentic
 import { Route as AuthenticatedArbolRouteImport } from './routes/_authenticated/arbol'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedVisualizaLimpiezaRouteImport } from './routes/_authenticated/visualiza.limpieza'
+import { Route as AuthenticatedVisualizaIdentidadRouteImport } from './routes/_authenticated/visualiza.identidad'
 import { Route as AuthenticatedVisualizaCategoryIdRouteImport } from './routes/_authenticated/visualiza.$categoryId'
 import { Route as AuthenticatedEtapasStageIdRouteImport } from './routes/_authenticated/etapas.$stageId'
 import { Route as AuthenticatedVisualizaCategoryIdDayRouteImport } from './routes/_authenticated/visualiza.$categoryId.$day'
@@ -176,6 +177,12 @@ const AuthenticatedVisualizaLimpiezaRoute =
     path: '/limpieza',
     getParentRoute: () => AuthenticatedVisualizaRoute,
   } as any)
+const AuthenticatedVisualizaIdentidadRoute =
+  AuthenticatedVisualizaIdentidadRouteImport.update({
+    id: '/identidad',
+    path: '/identidad',
+    getParentRoute: () => AuthenticatedVisualizaRoute,
+  } as any)
 const AuthenticatedVisualizaCategoryIdRoute =
   AuthenticatedVisualizaCategoryIdRouteImport.update({
     id: '/$categoryId',
@@ -223,6 +230,7 @@ export interface FileRoutesByFullPath {
   '/api/patrones': typeof ApiPatronesRoute
   '/etapas/$stageId': typeof AuthenticatedEtapasStageIdRoute
   '/visualiza/$categoryId': typeof AuthenticatedVisualizaCategoryIdRouteWithChildren
+  '/visualiza/identidad': typeof AuthenticatedVisualizaIdentidadRoute
   '/visualiza/limpieza': typeof AuthenticatedVisualizaLimpiezaRoute
   '/visualiza/$categoryId/$day': typeof AuthenticatedVisualizaCategoryIdDayRoute
 }
@@ -254,6 +262,7 @@ export interface FileRoutesByTo {
   '/api/patrones': typeof ApiPatronesRoute
   '/etapas/$stageId': typeof AuthenticatedEtapasStageIdRoute
   '/visualiza/$categoryId': typeof AuthenticatedVisualizaCategoryIdRouteWithChildren
+  '/visualiza/identidad': typeof AuthenticatedVisualizaIdentidadRoute
   '/visualiza/limpieza': typeof AuthenticatedVisualizaLimpiezaRoute
   '/visualiza/$categoryId/$day': typeof AuthenticatedVisualizaCategoryIdDayRoute
 }
@@ -287,6 +296,7 @@ export interface FileRoutesById {
   '/api/patrones': typeof ApiPatronesRoute
   '/_authenticated/etapas/$stageId': typeof AuthenticatedEtapasStageIdRoute
   '/_authenticated/visualiza/$categoryId': typeof AuthenticatedVisualizaCategoryIdRouteWithChildren
+  '/_authenticated/visualiza/identidad': typeof AuthenticatedVisualizaIdentidadRoute
   '/_authenticated/visualiza/limpieza': typeof AuthenticatedVisualizaLimpiezaRoute
   '/_authenticated/visualiza/$categoryId/$day': typeof AuthenticatedVisualizaCategoryIdDayRoute
 }
@@ -320,6 +330,7 @@ export interface FileRouteTypes {
     | '/api/patrones'
     | '/etapas/$stageId'
     | '/visualiza/$categoryId'
+    | '/visualiza/identidad'
     | '/visualiza/limpieza'
     | '/visualiza/$categoryId/$day'
   fileRoutesByTo: FileRoutesByTo
@@ -351,6 +362,7 @@ export interface FileRouteTypes {
     | '/api/patrones'
     | '/etapas/$stageId'
     | '/visualiza/$categoryId'
+    | '/visualiza/identidad'
     | '/visualiza/limpieza'
     | '/visualiza/$categoryId/$day'
   id:
@@ -383,6 +395,7 @@ export interface FileRouteTypes {
     | '/api/patrones'
     | '/_authenticated/etapas/$stageId'
     | '/_authenticated/visualiza/$categoryId'
+    | '/_authenticated/visualiza/identidad'
     | '/_authenticated/visualiza/limpieza'
     | '/_authenticated/visualiza/$categoryId/$day'
   fileRoutesById: FileRoutesById
@@ -590,6 +603,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedVisualizaLimpiezaRouteImport
       parentRoute: typeof AuthenticatedVisualizaRoute
     }
+    '/_authenticated/visualiza/identidad': {
+      id: '/_authenticated/visualiza/identidad'
+      path: '/identidad'
+      fullPath: '/visualiza/identidad'
+      preLoaderRoute: typeof AuthenticatedVisualizaIdentidadRouteImport
+      parentRoute: typeof AuthenticatedVisualizaRoute
+    }
     '/_authenticated/visualiza/$categoryId': {
       id: '/_authenticated/visualiza/$categoryId'
       path: '/$categoryId'
@@ -642,6 +662,7 @@ const AuthenticatedVisualizaCategoryIdRouteWithChildren =
 
 interface AuthenticatedVisualizaRouteChildren {
   AuthenticatedVisualizaCategoryIdRoute: typeof AuthenticatedVisualizaCategoryIdRouteWithChildren
+  AuthenticatedVisualizaIdentidadRoute: typeof AuthenticatedVisualizaIdentidadRoute
   AuthenticatedVisualizaLimpiezaRoute: typeof AuthenticatedVisualizaLimpiezaRoute
 }
 
@@ -649,6 +670,7 @@ const AuthenticatedVisualizaRouteChildren: AuthenticatedVisualizaRouteChildren =
   {
     AuthenticatedVisualizaCategoryIdRoute:
       AuthenticatedVisualizaCategoryIdRouteWithChildren,
+    AuthenticatedVisualizaIdentidadRoute: AuthenticatedVisualizaIdentidadRoute,
     AuthenticatedVisualizaLimpiezaRoute: AuthenticatedVisualizaLimpiezaRoute,
   }
 
