@@ -34,31 +34,32 @@ function Etapas() {
     queryKey: ["etapas", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const [stages, progress, diagnostic] = await Promise.all([
+      const [stages, progress, intake] = await Promise.all([
         supabase.from("stages").select("*").order("id"),
         supabase.from("stage_progress").select("*").eq("user_id", user!.id),
-        supabase.from("diagnostic_results").select("*").eq("user_id", user!.id).order("created_at", { ascending: false }).limit(1).maybeSingle(),
+        supabase.from("intake_sessions").select("status, primary_focus, ai_plan, ai_summary, genealogy, childhood").eq("user_id", user!.id).maybeSingle(),
       ]);
-      return { stages: stages.data ?? [], progress: progress.data ?? [], diagnostic: diagnostic.data };
+      return { stages: stages.data ?? [], progress: progress.data ?? [], intake: intake.data };
     },
   });
 
   const progressMap = new Map((data?.progress ?? []).map((p: any) => [p.stage_id, p]));
   const completedIds = new Set((data?.progress ?? []).filter((p: any) => p.status === "completed").map((p: any) => p.stage_id));
   const completedCount = completedIds.size;
-  const recommendedFocuses = getRecommendedFocuses(data?.diagnostic);
+  const recommendedFocuses = getRecommendedFocuses(data?.intake);
   const orderedStages = orderStages(data?.stages ?? [], recommendedFocuses);
+  const aiPlan = (data?.intake?.ai_plan ?? {}) as { pattern_name?: string; recommended_categories?: string[] };
 
-  if (!data?.diagnostic) {
+  if (data && data.intake?.status !== "completed") {
     return (
       <div className="px-4 py-6 md:p-10 max-w-5xl mx-auto mobile-safe-bottom lg:pb-10">
         <Card className="overflow-hidden rounded-[2rem] shadow-soft">
           <img src={stageImg} alt="Camino espiritual" className="h-64 w-full object-cover" />
           <div className="p-6 md:p-8 text-center">
             <div className="w-14 h-14 rounded-3xl bg-primary/10 text-primary grid place-items-center mx-auto"><AlertCircle className="w-6 h-6" /></div>
-            <h1 className="font-display font-extrabold text-3xl mt-4">Primero necesitas tu diagnóstico</h1>
-            <p className="text-muted-foreground mt-2 max-w-xl mx-auto">Cada usuario debe pasar por el diagnóstico para que la app ordene y recomiende etapas según su necesidad real.</p>
-            <Link to="/diagnostico"><Button className="mt-6 rounded-full bg-primary">Hacer diagnóstico ahora</Button></Link>
+            <h1 className="font-display font-extrabold text-3xl mt-4">Primero completa tu onboarding</h1>
+            <p className="text-muted-foreground mt-2 max-w-xl mx-auto">Ruth Esther usa tus respuestas iniciales para adaptar el Camino ORIGEN a tu historia real.</p>
+            <Link to="/onboarding"><Button className="mt-6 rounded-full bg-primary">Completar onboarding</Button></Link>
           </div>
         </Card>
       </div>
@@ -71,7 +72,7 @@ function Etapas() {
         <img src={stageImg} alt="Ruta espiritual" width={1024} height={1024} className="absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-foreground/85 via-foreground/30 to-transparent" />
         <div className="relative z-10 max-w-2xl">
-          <div className="inline-flex items-center gap-2 rounded-full bg-background/15 border border-primary-foreground/20 backdrop-blur-xl px-3 py-1 text-xs font-bold text-gold"><Compass className="w-3.5 h-3.5" /> Plan según tu diagnóstico</div>
+          <div className="inline-flex items-center gap-2 rounded-full bg-background/15 border border-primary-foreground/20 backdrop-blur-xl px-3 py-1 text-xs font-bold text-gold"><Compass className="w-3.5 h-3.5" /> Plan según tu onboarding</div>
           <h1 className="font-display font-extrabold text-4xl md:text-5xl mt-4">Mis etapas de restauración</h1>
           <p className="mt-2 text-primary-foreground/80">Avanza una etapa a la vez. Las completadas se guardan con check verde y la siguiente se desbloquea automáticamente.</p>
         </div>
@@ -80,7 +81,7 @@ function Etapas() {
       <Card className="mt-5 p-5 rounded-[1.7rem] flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between shadow-soft">
         <div>
           <div className="text-xs uppercase tracking-wider text-primary font-extrabold">Resultado</div>
-          <h2 className="font-display font-bold text-xl">{data.diagnostic.level}</h2>
+          <h2 className="font-display font-bold text-xl">{aiPlan.pattern_name ?? "Camino ORIGEN personalizado"}</h2>
           <p className="text-sm text-muted-foreground mt-1">Áreas recomendadas: {recommendedFocuses.join(" · ")}</p>
         </div>
         <div className="rounded-full bg-accent px-4 py-2 text-sm font-bold text-accent-foreground">{completedCount}/8 completadas</div>
@@ -117,16 +118,17 @@ function Etapas() {
               </div>
             </Card>
           );
-          return unlocked ? <Link key={s.id} to="/etapas/$stageId" params={{ stageId: String(s.id) }}>{content}</Link> : <div key={s.id}>{content}</div>;
+          return <Link key={s.id} to="/etapas/$stageId" params={{ stageId: String(s.id) }} className="block h-full">{content}</Link>;
         })}
       </div>
     </div>
   );
 }
 
-function getRecommendedFocuses(diagnostic: any): string[] {
-  const weaknesses: string[] = diagnostic?.weaknesses ?? [];
-  const focuses = weaknesses.map((k) => KEY_TO_FOCUS[k]).filter(Boolean);
+function getRecommendedFocuses(intake: any): string[] {
+  const plan = intake?.ai_plan ?? {};
+  const raw = [intake?.primary_focus, ...(plan.recommended_categories ?? [])].filter(Boolean).map((x: string) => x.toLowerCase());
+  const focuses = raw.flatMap((k: string) => [KEY_TO_FOCUS[k], ...Object.entries(KEY_TO_FOCUS).filter(([key]) => k.includes(key)).map(([, value]) => value)]).filter(Boolean);
   return Array.from(new Set(focuses.length ? focuses : ["reconexión", "sanidad emocional", "identidad"])).slice(0, 4);
 }
 

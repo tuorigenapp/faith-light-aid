@@ -30,16 +30,16 @@ function Dashboard() {
     queryKey: ["dashboard", user?.id, todayIso()],
     enabled: !!user,
     queryFn: async () => {
-      const [profile, diag, progress, activities, streak] = await Promise.all([
+      const [profile, intake, progress, activities, streak] = await Promise.all([
         supabase.from("profiles").select("display_name, full_name, gems").eq("id", user!.id).maybeSingle(),
-        supabase.from("diagnostic_results").select("level").eq("user_id", user!.id).order("created_at", { ascending: false }).limit(1).maybeSingle(),
+        supabase.from("intake_sessions").select("status, primary_focus, ai_plan, ai_summary").eq("user_id", user!.id).maybeSingle(),
         supabase.from("stage_progress").select("stage_id,status").eq("user_id", user!.id),
         supabase.from("daily_activity").select("activity_date").eq("user_id", user!.id).order("activity_date", { ascending: false }).limit(14),
         supabase.from("daily_activity").select("activity_date").eq("user_id", user!.id).order("activity_date", { ascending: false }).limit(30),
       ]);
       return {
         profile: profile.data,
-        diagnostic: diag.data,
+        intake: intake.data,
         progressItems: progress.data ?? [],
         activities: activities.data ?? [],
         streakActivities: streak.data ?? [],
@@ -49,6 +49,8 @@ function Dashboard() {
 
   const displayName = (data?.profile?.display_name || data?.profile?.full_name || "Amigo").split(" ")[0];
   const completed = (data?.progressItems ?? []).filter((p) => p.status === "completed").length;
+  const aiPlan = (data?.intake?.ai_plan ?? {}) as { pattern_name?: string; welcome_message?: string };
+  const hasOnboarding = data?.intake?.status === "completed";
 
   // Streak calc: consecutive days from today back
   const streakDates = new Set((data?.streakActivities ?? []).map((a) => a.activity_date));
@@ -84,22 +86,22 @@ function Dashboard() {
           <div className="flex items-center justify-between mb-2">
             <span className="text-[11px] uppercase tracking-widest font-bold text-primary">Tu misión de hoy</span>
             <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-secondary text-primary">
-              {data?.diagnostic?.level ?? "Personalizado"}
+              {aiPlan.pattern_name ?? "Personalizado"}
             </span>
           </div>
           <h2 className="font-display font-bold text-[20px] leading-tight">
-            {data?.diagnostic ? "Continúa tu Camino ORIGEN" : "Empieza con tu Diagnóstico Inicial"}
+            {hasOnboarding ? "Continúa tu Camino ORIGEN" : "Primero personalizamos tu caso"}
           </h2>
           <p className="text-sm text-muted-foreground mt-1">
-            {data?.diagnostic
-              ? `Llevas ${completed} etapas completadas. Sigue avanzando en tu proceso.`
-              : "Necesito conocerte para personalizar tu camino de sanación."}
+            {hasOnboarding
+              ? `Ruth Esther ya adaptó tu camino. Llevas ${completed} etapas completadas.`
+              : "El onboarding recoge tu historia para que ORIGEN encuentre tu punto de partida."}
           </p>
           <Link
-            to={data?.diagnostic ? "/etapas" : "/diagnostico"}
+            to={hasOnboarding ? "/etapas" : "/onboarding"}
             className="mt-4 btn-primary-gradient w-full h-[54px] rounded-[14px] flex items-center justify-center gap-2 text-[15px]"
           >
-            {data?.diagnostic ? "Ver mis etapas" : "Comenzar diagnóstico"}
+            {hasOnboarding ? "Ver mis etapas" : "Completar onboarding"}
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
@@ -156,7 +158,7 @@ function Dashboard() {
         </div>
 
         {/* Palabras para ti Hoy */}
-        <PalabrasHoy name={displayName} />
+        <PalabrasHoy name={displayName} aiPlan={aiPlan} />
 
         {/* Árbol de Sanación */}
         <HealingTree />
@@ -202,18 +204,6 @@ function Dashboard() {
             />
           </div>
         </section>
-
-        {/* Diagnóstico prompt */}
-        {!data?.diagnostic && (
-          <Link to="/diagnostico" className="app-card p-4 flex items-center justify-between bg-brand-soft">
-            <div>
-              <div className="text-[10px] uppercase tracking-widest text-primary font-bold">Necesario</div>
-              <h4 className="font-display font-bold text-sm mt-0.5">Haz tu diagnóstico espiritual</h4>
-              <p className="text-xs text-muted-foreground">Personaliza tus etapas y ejercicios.</p>
-            </div>
-            <Compass className="w-6 h-6 text-primary" />
-          </Link>
-        )}
 
         {/* Invita y gana */}
         <Link to="/invita" className="app-card p-5 relative overflow-hidden">
@@ -266,9 +256,10 @@ const PALABRAS = [
   "Cada vez que eliges responderte con ternura, tu niña interior confía un poco más.",
 ];
 
-function PalabrasHoy({ name }: { name: string }) {
+function PalabrasHoy({ name, aiPlan }: { name: string; aiPlan: { pattern_name?: string; welcome_message?: string } }) {
   const day = Math.floor(Date.now() / 86400000);
   const msg = PALABRAS[day % PALABRAS.length];
+  const personalized = aiPlan.welcome_message || (aiPlan.pattern_name ? `Hoy trabaja con suavidad el patrón “${aiPlan.pattern_name}”. No lo pelees: obsérvalo, nómbralo y da un paso pequeño distinto.` : msg);
   return (
     <section className="app-card p-5 bg-brand-soft relative overflow-hidden">
       <div className="absolute -right-6 -top-6 text-7xl opacity-10">✨</div>
@@ -277,7 +268,7 @@ function PalabrasHoy({ name }: { name: string }) {
           <Sparkles className="w-3.5 h-3.5" /> Palabras para ti hoy
         </div>
         <h3 className="font-display font-bold text-[17px] mt-2 leading-snug">{name}, esto es lo que necesitas escuchar</h3>
-        <p className="mt-2 text-sm leading-relaxed text-foreground/85">"{msg}"</p>
+        <p className="mt-2 text-sm leading-relaxed text-foreground/85">"{personalized}"</p>
         <p className="mt-3 text-[11px] text-muted-foreground italic">— Ruth Esther, desde el método ORIGEN</p>
       </div>
     </section>
