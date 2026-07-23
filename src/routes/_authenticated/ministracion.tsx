@@ -3,11 +3,11 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  ArrowLeft, ArrowRight, Sparkles, Scale, CalendarClock, Eye, ShieldAlert, BookOpen, Lock,
+  ArrowLeft, ArrowRight, Sparkles, BookOpen, Lock,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import heroImg from "@/assets/ministracion-hero.jpg";
+import heroImg from "@/assets/dios-te-dice-hoy.png.asset.json";
 
 export const Route = createFileRoute("/_authenticated/ministracion")({
   head: () => ({ meta: [{ title: "Lo que Dios quiere decirte hoy — ORIGEN" }] }),
@@ -24,7 +24,7 @@ type Result = {
 };
 
 const LOADING_LINES = [
-  "Revisando tu información...",
+  "Recibiendo tu información...",
   "Aplicando el Método ORIGEN...",
   "Consultando los decretos divinos...",
   "Abriendo los libros de la Corte Celestial...",
@@ -89,29 +89,25 @@ function MinistracionPage() {
         {step === 1 && (
           <div className="animate-in fade-in slide-in-from-right-6 duration-300">
             <div className="hero-card p-0 overflow-hidden">
-              <div className="relative h-52">
-                <img src={heroImg} alt="Puertas celestiales" className="absolute inset-0 w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-white via-white/40 to-transparent" />
+              <div className="relative">
+                <img src={heroImg.url} alt="Dios te dice hoy — Corte Celestial" className="w-full h-auto block" />
               </div>
-              <div className="p-5 text-center -mt-2">
+              <div className="p-5 text-center">
                 <div className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-widest font-bold text-primary bg-brand-soft px-3 py-1 rounded-full">
                   <Sparkles className="w-3 h-3" /> Ministración diaria
                 </div>
                 <h1 className="font-display font-extrabold text-[26px] leading-tight mt-3">
                   Recibe tu <span className="text-gradient-brand">Ministración del Cielo</span>
                 </h1>
-                <p className="text-sm text-muted-foreground mt-2">
-                  Comparte tu nombre y fecha de nacimiento (opcionales) y presenta tu situación ante la Corte Celestial.
-                </p>
               </div>
             </div>
 
             <div className="mt-5 space-y-3">
-              <Field label="Nombre (opcional)">
+              <Field label="Nombre">
                 <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
                   placeholder="Tu nombre" className="h-12 rounded-[14px] bg-white" />
               </Field>
-              <Field label="Fecha de nacimiento (opcional)">
+              <Field label="Fecha de nacimiento">
                 <Input type="date" value={form.dob} onChange={(e) => setForm({ ...form, dob: e.target.value })}
                   className="h-12 rounded-[14px] bg-white" />
               </Field>
