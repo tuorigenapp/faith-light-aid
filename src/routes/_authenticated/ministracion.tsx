@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import heroImg from "@/assets/dios-te-dice-hoy.png.asset.json";
+import heroImg from "@/assets/ministracion-hero.jpg";
 
 export const Route = createFileRoute("/_authenticated/ministracion")({
   head: () => ({ meta: [{ title: "Lo que Dios quiere decirte hoy — ORIGEN" }] }),
