@@ -91,7 +91,9 @@ function MinistracionPage() {
           <div className="animate-in fade-in slide-in-from-right-6 duration-300">
             <div className="hero-card p-0 overflow-hidden">
               <div className="relative">
-                <img src={heroImg.url} alt="Dios te dice hoy — Corte Celestial" className="w-full h-auto block" />
+                <img src={heroImg} alt="Dios te dice hoy — Corte Celestial" className="w-full h-auto block" />
+              </div>
+              <div className="absolute inset-0 pointer-events-none ring-1 ring-white/60 rounded-t-[inherit]" style={{ boxShadow: "0 20px 60px -20px rgba(255,255,255,0.9), inset 0 0 40px rgba(255,255,255,0.35)" }} />
               </div>
               <div className="p-5 text-center">
                 <div className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-widest font-bold text-primary bg-brand-soft px-3 py-1 rounded-full">
