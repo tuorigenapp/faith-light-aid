@@ -9,7 +9,7 @@ import { LockedCard } from "@/components/LockedCard";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import {
-  ArrowRight, BookHeart, Compass, Flame, Headphones,
+  ArrowRight, BookHeart, Flame, Headphones,
   Layers, Sparkles, TreeDeciduous, Trophy, HeartPulse,
 } from "lucide-react";
 import pilarMentora from "@/assets/pilar-mentora.png.asset.json";

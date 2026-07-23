@@ -161,7 +161,7 @@ function HeroCard() {
       <div className="absolute -inset-10 bg-primary/25 blur-3xl rounded-full -z-10" />
       <div className="hero-card space-y-3">
         <div className="flex items-center justify-between">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-primary">Tu diagnóstico</span>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-primary">Tu mapa ORIGEN</span>
           <div className="flex items-center gap-1 text-[11px] font-bold text-[#F58BCB]">
             <Flame className="w-3.5 h-3.5" /> 3 min
           </div>

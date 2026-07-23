@@ -12,7 +12,18 @@ export const Route = createFileRoute("/_authenticated/membresia")({
   component: Membresia,
 });
 
-const PLANS = [
+type MembershipPlan = {
+  id: string;
+  name: string;
+  price: string;
+  per: string;
+  billing?: string;
+  features: string[];
+  popular?: boolean;
+  icon: typeof Lock;
+};
+
+const PLANS: MembershipPlan[] = [
   {
     id: "explorador",
     name: "Explorador",
