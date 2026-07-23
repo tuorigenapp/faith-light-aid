@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { useTheme } from "@/lib/theme";
 import {
-  Home, MessageCircle, Compass, Layers, BookHeart, Dumbbell, Library,
+  Home, MessageCircle, Layers, BookHeart, Dumbbell,
   CreditCard, User as UserIcon, Shield, LogOut, Menu, Sun, Moon, X,
   Headphones, TreeDeciduous, Trophy, HeartHandshake, Sparkles,
 } from "lucide-react";
