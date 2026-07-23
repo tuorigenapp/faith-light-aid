@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useLocation } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { useQuery } from "@tanstack/react-query";
@@ -30,6 +30,8 @@ const KEY_TO_FOCUS: Record<string, string> = {
 
 function Etapas() {
   const { user } = useAuth();
+  const location = useLocation();
+  const isDetailRoute = /^\/etapas\/[^/]+$/.test(location.pathname);
   const { data } = useQuery({
     queryKey: ["etapas", user?.id],
     enabled: !!user,
@@ -49,6 +51,8 @@ function Etapas() {
   const recommendedFocuses = getRecommendedFocuses(data?.intake);
   const orderedStages = orderStages(data?.stages ?? [], recommendedFocuses);
   const aiPlan = (data?.intake?.ai_plan ?? {}) as { pattern_name?: string; recommended_categories?: string[] };
+
+  if (isDetailRoute) return <Outlet />;
 
   if (data && data.intake?.status !== "completed") {
     return (
