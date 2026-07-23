@@ -6,13 +6,16 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeft, Check, CheckCircle2, Lightbulb, ListChecks, Lock, MessageCircle, Sparkles } from "lucide-react";
+import { ArrowLeft, Check, CheckCircle2, Lightbulb, ListChecks, Lock, MessageCircle, Sparkles, Target } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import heroImg from "@/assets/spiritual-hero.jpg";
 import dailyImg from "@/assets/daily-devotional.jpg";
 import stageImg from "@/assets/stage-journey.jpg";
 import exerciseImg from "@/assets/prayer-exercise.jpg";
+import { WordSearch } from "@/components/WordSearch";
+import { StageQuiz } from "@/components/StageQuiz";
+import { getStageContent } from "@/lib/stage-content";
 
 export const Route = createFileRoute("/_authenticated/etapas/$stageId")({
   head: () => ({ meta: [{ title: "Detalle de etapa — Reconectando" }] }),
