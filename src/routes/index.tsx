@@ -1,14 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState, type ReactNode } from "react";
-import heroImg from "@/assets/spiritual-hero.jpg";
-import dailyImg from "@/assets/daily-devotional.jpg";
-import stageImg from "@/assets/stage-journey.jpg";
-import exerciseImg from "@/assets/prayer-exercise.jpg";
+import { useEffect, useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Loader2, ArrowRight, BookOpen, Check, ChevronDown, Flame, Heart, MessageCircle,
-  Play, Shield, Sparkles, Sun, Moon, HeartHandshake, Star, Lock, Clock,
+import {
+  Loader2, ArrowRight, Check, ChevronDown, HeartHandshake, MessageCircle,
+  Sparkles, Users2, Shield, Clock, Star, Flame, Leaf, Lock,
 } from "lucide-react";
 
 function useStartTrial() {
@@ -20,7 +17,7 @@ function useStartTrial() {
       const { data: sess } = await supabase.auth.getSession();
       if (sess.session) { navigate({ to: "/onboarding" }); return; }
       const rand = Math.random().toString(36).slice(2, 10);
-      const email = `invitado_${Date.now()}_${rand}@reconectando.test`;
+      const email = `invitado_${Date.now()}_${rand}@origen.test`;
       const password = `Prueba_${rand}${Math.random().toString(36).slice(2, 8)}!A9`;
       const { error } = await supabase.auth.signUp({
         email, password,
@@ -51,13 +48,12 @@ function StartButton({ children, className, size }: { children: ReactNode; class
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Reconectando el Espíritu con Dios — 5 minutos al día para volver a sentirlo" },
-      { name: "description", content: "Deja de sentirte lejos de Dios. Un método diario cristiano de 5 minutos con IA, devocional, oración guiada y ejercicios que te devuelven la paz." },
-      { property: "og:title", content: "Reconectando el Espíritu con Dios" },
-      { property: "og:description", content: "Un método diario cristiano de 5 minutos para volver a sentir a Dios." },
-      { property: "og:image", content: heroImg },
+      { title: "ORIGEN — Entiende por qué repites lo mismo y rómpelo en 5 minutos al día" },
+      { name: "description", content: "El método de Ruth Esther para descubrir el patrón que arrastras de tu familia, romper el ciclo y sentir paz real. Basado en el libro. Sin religión impuesta." },
+      { property: "og:title", content: "ORIGEN — Rompe el patrón que arrastras" },
+      { property: "og:description", content: "Descubre tu patrón familiar en 3 minutos. Método guiado + mentora IA. 7 días gratis." },
+      { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:image", content: heroImg },
     ],
   }),
   component: Landing,
@@ -70,14 +66,12 @@ function Landing() {
       <main>
         <Hero />
         <Pain />
-        <WhyFailed />
+        <Cost />
         <Method />
         <Inside />
-        <Features />
         <Reviews />
-        <Booking />
         <Pricing />
-        <Author />
+        <Guarantee />
         <FAQ />
         <FinalCTA />
       </main>
@@ -86,27 +80,25 @@ function Landing() {
   );
 }
 
-
 /* ───────────────────────── NAV ───────────────────────── */
-
 function Nav() {
   return (
-    <header className="sticky top-0 inset-x-0 z-40 bg-background/70 backdrop-blur-xl border-b border-border/60">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 h-16 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-2xl bg-divine grid place-items-center shadow-soft">
-            <Sparkles className="w-4 h-4 text-gold" />
+    <header className="sticky top-0 inset-x-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border/50">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 h-14 flex items-center justify-between">
+        <Link to="/" className="flex items-center gap-2">
+          <div className="w-9 h-9 rounded-2xl bg-brand-gradient grid place-items-center shadow-glow">
+            <Leaf className="w-4 h-4 text-white" />
           </div>
           <div className="leading-none">
-            <div className="font-display font-extrabold text-base">Reconectando</div>
-            <div className="text-[10px] uppercase tracking-[0.18em] text-primary font-bold">Espíritu con Dios</div>
+            <div className="font-display font-extrabold text-[15px] tracking-tight">ORIGEN</div>
+            <div className="text-[9px] uppercase tracking-[0.22em] text-primary font-bold">Rompe el patrón</div>
           </div>
         </Link>
         <div className="flex items-center gap-2">
           <Link to="/auth" className="hidden sm:block text-sm font-semibold text-muted-foreground hover:text-foreground px-3 py-2">
             Entrar
           </Link>
-          <StartButton className="rounded-full bg-primary shadow-glow px-5 h-10 font-bold">
+          <StartButton className="rounded-full btn-primary-gradient px-4 h-10 font-bold text-[13px]">
             Empezar gratis
           </StartButton>
         </div>
@@ -116,50 +108,43 @@ function Nav() {
 }
 
 /* ───────────────────────── HERO ───────────────────────── */
-
 function Hero() {
   return (
-    <section className="relative overflow-hidden px-4 sm:px-6 pt-10 sm:pt-16 pb-20">
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute top-20 -left-20 w-80 h-80 rounded-full bg-primary/20 blur-3xl" />
-        <div className="absolute bottom-0 right-0 w-96 h-96 rounded-full bg-gold/25 blur-3xl" />
-      </div>
-
-      <div className="mx-auto max-w-6xl grid lg:grid-cols-[1.05fr_0.95fr] gap-10 lg:gap-14 items-center">
+    <section className="relative overflow-hidden bg-aura-top">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 pt-8 sm:pt-14 pb-12 grid lg:grid-cols-[1.1fr_0.9fr] gap-10 items-center">
         <div>
-          <div className="inline-flex items-center gap-2 rounded-full bg-card border border-border px-3 py-1.5 text-xs font-bold text-primary shadow-soft">
-            <Sparkles className="w-3.5 h-3.5" /> Si ya oraste y sigues sintiéndote lejos, esto es para ti
+          <div className="inline-flex items-center gap-2 rounded-full bg-white/70 border border-border/60 backdrop-blur px-3 py-1.5 text-[11px] font-bold text-primary shadow-soft">
+            <Sparkles className="w-3.5 h-3.5" /> Basado en el libro de Ruth Esther
           </div>
 
-          <h1 className="mt-6 font-display font-extrabold text-[2.6rem] sm:text-6xl lg:text-[4.4rem] leading-[0.98] tracking-tight">
-            Deja de sentir que Dios ya no te escucha.
-            <span className="block mt-4 text-primary">Vuelve a sentirlo, cada día, en 5 minutos.</span>
+          <h1 className="mt-5 font-display font-extrabold text-[34px] sm:text-6xl lg:text-[68px] leading-[1.02] tracking-tight">
+            Repites lo mismo y no sabes por qué.
+            <span className="block mt-3 text-transparent bg-clip-text bg-brand-gradient">
+              En 3 minutos vas a saberlo.
+            </span>
           </h1>
 
-          <p className="mt-6 text-base sm:text-lg text-muted-foreground max-w-xl leading-relaxed">
-            Un método diario cristiano guiado, con devocional, oración y ejercicios cortos que te devuelven la paz, rompen ciclos generacionales y te acercan otra vez a Dios.
+          <p className="mt-5 text-[16px] sm:text-lg text-muted-foreground max-w-xl leading-relaxed">
+            No es tu culpa. Es un patrón que heredaste. Con ORIGEN lo descubres, lo entiendes y aprendes a romperlo. Sin religión impuesta. Sin terapia genérica.
           </p>
 
-          <div className="mt-8 flex flex-col sm:flex-row gap-3">
-            <StartButton size="lg" className="rounded-full h-14 px-8 bg-primary shadow-glow font-bold text-base">
-              Crear mi camino gratis <ArrowRight className="ml-2 w-4 h-4" />
+          <div className="mt-6 flex flex-col sm:flex-row gap-3">
+            <StartButton size="lg" className="rounded-full h-14 px-7 btn-primary-gradient font-bold text-[15px]">
+              Descubrir mi patrón gratis <ArrowRight className="ml-2 w-4 h-4" />
             </StartButton>
-            <a href="#metodo">
-              <Button size="lg" variant="outline" className="rounded-full h-14 px-8 bg-card/70 font-bold">
-                <Play className="mr-2 w-4 h-4" /> Ver cómo funciona
-              </Button>
-            </a>
           </div>
-          <p className="mt-3 text-xs text-muted-foreground font-semibold">
-            Empieza gratis hoy · 7 días de prueba · cancela cuando quieras
+          <p className="mt-3 text-[12px] text-muted-foreground font-semibold flex items-center gap-1.5">
+            <Shield className="w-3.5 h-3.5 text-primary" /> 7 días gratis · cancelas en 1 clic · sin tarjeta al inicio
           </p>
 
-          <div className="mt-10 flex items-center gap-5 flex-wrap">
-            <div className="flex items-center gap-1.5">
-              {Array.from({ length: 5 }).map((_, i) => <Star key={i} className="w-4 h-4 fill-gold text-gold" />)}
+          <div className="mt-7 flex items-center gap-4 flex-wrap">
+            <div className="flex -space-x-2">
+              {["#F58BCB","#7C5CFF","#5AA9FF","#3FBE8F"].map((c, i) => (
+                <span key={i} className="w-8 h-8 rounded-full ring-2 ring-background" style={{ background: c }} />
+              ))}
             </div>
-            <p className="text-sm text-muted-foreground">
-              <span className="font-bold text-foreground">+2,300 creyentes</span> ya volvieron a sentir a Dios cada mañana.
+            <p className="text-[13px] text-muted-foreground">
+              <span className="font-bold text-foreground">+2,300 personas</span> ya entendieron su origen.
             </p>
           </div>
         </div>
@@ -172,64 +157,40 @@ function Hero() {
 
 function HeroCard() {
   return (
-    <div className="relative mx-auto w-full max-w-[420px]">
-      <div className="absolute -inset-8 bg-gold/25 blur-3xl rounded-full -z-10" />
-
-      <div className="rounded-[2rem] bg-card border border-border shadow-glow p-5 sm:p-6 space-y-4">
+    <div className="relative mx-auto w-full max-w-[380px]">
+      <div className="absolute -inset-10 bg-primary/25 blur-3xl rounded-full -z-10" />
+      <div className="hero-card space-y-3">
         <div className="flex items-center justify-between">
-          <span className="text-[11px] font-bold uppercase tracking-widest bg-foreground text-background rounded-full px-3 py-1.5">
-            Tu ritual listo en 5 min
-          </span>
-          <div className="flex items-center gap-1 text-xs font-bold text-primary">
-            <Flame className="w-3.5 h-3.5" /> 12 días
+          <span className="text-[10px] font-bold uppercase tracking-widest text-primary">Tu diagnóstico</span>
+          <div className="flex items-center gap-1 text-[11px] font-bold text-[#F58BCB]">
+            <Flame className="w-3.5 h-3.5" /> 3 min
           </div>
         </div>
+        <h3 className="font-display font-bold text-[19px] leading-tight">
+          Patrón detectado: <span className="text-primary">"Cargo lo que no me toca"</span>
+        </h3>
+        <p className="text-[13px] text-muted-foreground">
+          Vienes de mujeres que aguantaron en silencio. Repites la lealtad invisible sin darte cuenta.
+        </p>
 
-        <div className="grid grid-cols-2 gap-3">
-          <div className="rounded-2xl bg-secondary p-3.5">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full bg-primary/15 grid place-items-center text-primary"><Heart className="w-3.5 h-3.5" /></div>
-              <span className="text-xs font-bold">Intención</span>
-            </div>
-            <div className="mt-2 font-display font-bold text-sm">Recuperar la paz</div>
-          </div>
-          <div className="rounded-2xl bg-accent/50 p-3.5">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full bg-gold/30 grid place-items-center text-gold"><Sun className="w-3.5 h-3.5" /></div>
-              <span className="text-xs font-bold">Hoy</span>
-            </div>
-            <div className="mt-2 font-display font-bold text-sm">Palabra: Confianza</div>
-          </div>
-        </div>
-
-        <div className="rounded-2xl border border-primary/25 bg-primary/5 p-4">
-          <div className="text-[10px] font-black uppercase tracking-widest text-primary">Diagnóstico de hoy</div>
-          <p className="mt-2 font-display font-bold text-base leading-snug">
-            Tu bloqueo no es falta de fe. Es orar solo cuando ya no puedes más.
+        <div className="rounded-2xl bg-secondary p-3">
+          <div className="text-[10px] font-black uppercase tracking-widest text-primary">Tu primer paso</div>
+          <p className="mt-1.5 text-[13px] font-semibold">
+            Escribir en una hoja lo que tu abuela nunca dijo. Hoy, 5 minutos.
           </p>
-          <div className="mt-3 rounded-xl bg-gold/15 p-3 text-xs">
-            <span className="font-bold">Micro-paso:</span> antes de abrir el celular, cierra los ojos y dile a Dios una frase corta de gratitud.
-          </div>
         </div>
 
-        <div className="rounded-2xl bg-divine text-primary-foreground p-4">
-          <div className="text-[10px] font-black uppercase tracking-widest text-gold">Tu oración personalizada</div>
-          <p className="mt-2 scripture text-base leading-snug">
-            "Señor, hoy suelto lo que no controlo y confío en tu tiempo."
-          </p>
-          <ul className="mt-3 space-y-1.5 text-sm">
-            <li className="flex items-center gap-2"><Check className="w-4 h-4 text-gold" /> Versículo del día</li>
-            <li className="flex items-center gap-2"><Check className="w-4 h-4 text-gold" /> Oración guiada</li>
-            <li className="flex items-center gap-2"><Check className="w-4 h-4 text-gold" /> Un pequeño paso</li>
-          </ul>
-          <div className="mt-4 flex items-center gap-2">
-            <button className="w-10 h-10 rounded-full bg-background text-foreground grid place-items-center shadow-soft">
-              <Play className="w-4 h-4 ml-0.5" />
-            </button>
-            <StartButton className="flex-1 h-10 rounded-full bg-foreground text-background hover:bg-foreground/90 text-sm font-bold">
-              Empezar ahora
-            </StartButton>
-          </div>
+        <div className="grid grid-cols-3 gap-2 pt-1">
+          {[
+            { i: <MessageCircle className="w-4 h-4" />, t: "Mentora" },
+            { i: <HeartHandshake className="w-4 h-4" />, t: "Pareja" },
+            { i: <Users2 className="w-4 h-4" />, t: "Patrón" },
+          ].map((x) => (
+            <div key={x.t} className="rounded-xl bg-white border border-border/60 p-2.5 text-center">
+              <div className="w-8 h-8 mx-auto rounded-lg bg-primary/10 text-primary grid place-items-center">{x.i}</div>
+              <div className="mt-1.5 text-[11px] font-bold">{x.t}</div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
@@ -237,32 +198,27 @@ function HeroCard() {
 }
 
 /* ───────────────────────── PAIN ───────────────────────── */
-
 function Pain() {
   const items = [
-    { t: "Oraste… y sentiste que hablabas al techo", d: "Repetir oraciones sin sentir nada te hizo dudar. Y cuando dudas, dejas de acercarte." },
-    { t: "Leíste la Biblia y no entendiste nada", d: "Abriste páginas al azar, buscaste señales, y cerraste el libro más confundido que cuando empezaste." },
-    { t: "Empiezas con fuego y a los 3 días lo dejas", d: "No es falta de fe. Es que nadie te dio un método diario tan pequeño que sea difícil soltarlo." },
+    { t: "\"Repito los mismos errores\"", d: "Cambias de pareja, de trabajo, de ciudad. El escenario cambia. El dolor no." },
+    { t: "\"Siento un vacío que no sé explicar\"", d: "Tienes lo que pediste. Y por dentro sigues faltándote algo. Ni tú sabes qué." },
+    { t: "\"Empiezo con todo y a los 5 días lo dejo\"", d: "Terapia, libros, apps. Nada te sostuvo. Volviste al mismo lugar." },
   ];
   return (
-    <section className="px-4 sm:px-6 py-16 sm:py-24 border-t border-border/60">
-      <div className="mx-auto max-w-5xl text-center">
-        <h2 className="font-display font-extrabold text-3xl sm:text-5xl tracking-tight">
-          Si esto te pasa, no necesitas <span className="text-primary">más motivación</span>
+    <section className="px-4 sm:px-6 py-14 sm:py-20 border-t border-border/40">
+      <div className="mx-auto max-w-4xl text-center">
+        <h2 className="font-display font-extrabold text-[28px] sm:text-5xl tracking-tight leading-tight">
+          ¿Te suena algo de esto?
         </h2>
-        <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
-          Hiciste tu parte: oraste, leíste, lo intentaste una y otra vez. Y por dentro seguías igual. Entonces llegó la peor mentira: <span className="font-bold text-foreground">"será que Dios ya no me escucha"</span>.
-        </p>
       </div>
-
-      <div className="mx-auto max-w-6xl mt-12 grid md:grid-cols-3 gap-4">
+      <div className="mx-auto max-w-5xl mt-10 grid md:grid-cols-3 gap-3">
         {items.map((it) => (
-          <div key={it.t} className="app-card p-6">
-            <div className="w-11 h-11 rounded-2xl bg-primary/10 text-primary grid place-items-center">
-              <Heart className="w-5 h-5" />
+          <div key={it.t} className="app-card p-5">
+            <div className="w-11 h-11 rounded-2xl bg-[#F58BCB]/15 text-[#F58BCB] grid place-items-center">
+              <Flame className="w-5 h-5" />
             </div>
-            <h3 className="mt-4 font-display font-bold text-lg leading-tight">{it.t}</h3>
-            <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{it.d}</p>
+            <h3 className="mt-3 font-display font-bold text-[17px] leading-snug">{it.t}</h3>
+            <p className="mt-2 text-[13px] text-muted-foreground leading-relaxed">{it.d}</p>
           </div>
         ))}
       </div>
@@ -270,38 +226,22 @@ function Pain() {
   );
 }
 
-/* ───────────────────────── WHY FAILED ───────────────────────── */
-
-function WhyFailed() {
-  const tried = [
-    "Escuchar prédicas motivacionales",
-    "Apps bíblicas que abandonaste en una semana",
-    "Devocionales impresos que nunca terminaste",
-    "Retiros que te movieron un rato… y después nada",
-    "Diarios de oración empezados con ilusión",
-    "Promesas de \"desde mañana leo la Biblia todos los días\"",
-  ];
+/* ───────────────────────── COST ───────────────────────── */
+function Cost() {
   return (
-    <section className="px-4 sm:px-6 py-16 sm:py-24 bg-secondary/40">
-      <div className="mx-auto max-w-5xl">
-        <div className="text-center">
-          <h2 className="font-display font-extrabold text-3xl sm:text-5xl tracking-tight">
-            Por qué nada te funcionó antes <span className="text-primary">(y no es tu culpa)</span>
-          </h2>
-          <p className="mt-4 text-muted-foreground">Probablemente ya intentaste más de una de estas cosas:</p>
+    <section className="px-4 sm:px-6 py-14 sm:py-20 bg-secondary/40">
+      <div className="mx-auto max-w-3xl text-center">
+        <div className="inline-flex items-center gap-2 rounded-full bg-white text-primary px-3 py-1.5 text-[11px] font-bold shadow-soft border border-border/60">
+          <Clock className="w-3.5 h-3.5" /> Cada día que pasa
         </div>
-
-        <ul className="mt-10 grid sm:grid-cols-2 gap-3 max-w-3xl mx-auto">
-          {tried.map((t) => (
-            <li key={t} className="flex items-start gap-3 rounded-2xl bg-card border border-border p-4">
-              <div className="w-6 h-6 rounded-full bg-primary/10 text-primary grid place-items-center flex-shrink-0 mt-0.5">✕</div>
-              <span className="text-sm font-medium">{t}</span>
-            </li>
-          ))}
-        </ul>
-
-        <p className="mt-10 text-center text-lg max-w-3xl mx-auto leading-relaxed">
-          Todo eso te enseñó a <span className="italic">querer</span> estar cerca de Dios. Nunca a <span className="font-bold text-primary">caminar con Él, con método, cada día</span>. No te faltó fe. Te faltó la otra mitad.
+        <h2 className="mt-5 font-display font-extrabold text-[28px] sm:text-5xl tracking-tight leading-tight">
+          El patrón no espera. <span className="text-primary">Se transmite.</span>
+        </h2>
+        <p className="mt-5 text-muted-foreground leading-relaxed">
+          Lo que no entiendes de tu historia, lo repites. Lo que no rompes, se lo pasas a tus hijos. Y a los suyos.
+        </p>
+        <p className="mt-4 font-display font-bold text-[18px]">
+          No necesitas más fuerza de voluntad. Necesitas entender de dónde viene.
         </p>
       </div>
     </section>
@@ -309,38 +249,32 @@ function WhyFailed() {
 }
 
 /* ───────────────────────── METHOD ───────────────────────── */
-
 function Method() {
   const steps = [
-    { n: 1, t: "Cuéntale a Dios dónde estás", d: "Un diagnóstico honesto guiado por IA identifica tu patrón: miedo, culpa, ciclos, distancia. Sin juicio." },
-    { n: 2, t: "Recibe tu camino personalizado", d: "8 etapas que se reordenan según tu caso. No es el mismo programa para todos. Es el tuyo." },
-    { n: 3, t: "Tu paso 'si… entonces' diario", d: "Un ejercicio mínimo para cuando aparezca la ansiedad, el miedo o la duda. Respuesta clara, no improvisación." },
-    { n: 4, t: "Riega cada día 5 minutos", d: "Devocional en la mañana, oración en la noche. Tu constancia echa raíz y tu paz crece contigo." },
+    { n: 1, i: <Users2 className="w-5 h-5" />, t: "Mapeas tu origen", d: "Tu árbol, tu infancia y tus vínculos. 3 minutos guiados." },
+    { n: 2, i: <Sparkles className="w-5 h-5" />, t: "Recibes tu patrón", d: "La mentora te dice qué se está repitiendo y por qué." },
+    { n: 3, i: <Leaf className="w-5 h-5" />, t: "Lo rompes en 5 min al día", d: "Ejercicios, audios y micro-pasos hechos para tu caso." },
   ];
   return (
-    <section id="metodo" className="px-4 sm:px-6 py-16 sm:py-24">
-      <div className="mx-auto max-w-6xl">
-        <div className="text-center max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 text-primary px-3 py-1.5 text-xs font-bold">
-            <Sparkles className="w-3.5 h-3.5" /> El Método Raíz
+    <section id="metodo" className="px-4 sm:px-6 py-14 sm:py-20">
+      <div className="mx-auto max-w-5xl">
+        <div className="text-center max-w-2xl mx-auto">
+          <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 text-primary px-3 py-1.5 text-[11px] font-bold">
+            <Sparkles className="w-3.5 h-3.5" /> El método ORIGEN
           </div>
-          <h2 className="mt-5 font-display font-extrabold text-3xl sm:text-5xl tracking-tight">
-            Tus dos mitades, <span className="text-primary">por fin juntas</span>
+          <h2 className="mt-4 font-display font-extrabold text-[28px] sm:text-5xl tracking-tight leading-tight">
+            3 pasos. Nada de teoría.
           </h2>
-          <p className="mt-4 text-muted-foreground leading-relaxed">
-            Reconectando une lo que la fe te dio —el deseo de acercarte a Dios— con lo que siempre le faltó: un método diario, guiado y sostenible. Cuatro pasos que se vuelven un ritual de 5 minutos, hasta que tu vida espiritual echa raíz.
-          </p>
         </div>
 
-        <div className="mt-12 grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="mt-10 grid md:grid-cols-3 gap-3">
           {steps.map((s) => (
-            <div key={s.n} className="app-card p-6 relative overflow-hidden">
-              <div className="absolute -top-6 -right-4 font-display font-black text-8xl text-primary/5 select-none">
-                {s.n}
-              </div>
-              <div className="text-xs font-black uppercase tracking-widest text-primary">Paso {s.n}</div>
-              <h3 className="mt-3 font-display font-bold text-xl leading-tight">{s.t}</h3>
-              <p className="mt-3 text-sm text-muted-foreground leading-relaxed">{s.d}</p>
+            <div key={s.n} className="app-card p-5 relative overflow-hidden">
+              <div className="absolute -top-4 -right-2 font-display font-black text-8xl text-primary/5 select-none">{s.n}</div>
+              <div className="w-11 h-11 rounded-2xl bg-brand-gradient text-white grid place-items-center shadow-glow">{s.i}</div>
+              <div className="mt-3 text-[10px] font-black uppercase tracking-widest text-primary">Paso {s.n}</div>
+              <h3 className="mt-1 font-display font-bold text-[18px] leading-tight">{s.t}</h3>
+              <p className="mt-2 text-[13px] text-muted-foreground leading-relaxed">{s.d}</p>
             </div>
           ))}
         </div>
@@ -349,89 +283,89 @@ function Method() {
   );
 }
 
-/* ───────────────────────── INSIDE (mockups) ───────────────────────── */
-
+/* ───────────────────────── INSIDE ───────────────────────── */
 function Inside() {
-  return (
-    <section className="px-4 sm:px-6 py-16 sm:py-24 bg-secondary/40 overflow-hidden">
-      <div className="mx-auto max-w-6xl">
-        <div className="text-center max-w-2xl mx-auto">
-          <h2 className="font-display font-extrabold text-3xl sm:text-5xl tracking-tight">
-            Mira Reconectando <span className="text-primary">por dentro</span>
-          </h2>
-          <p className="mt-4 text-muted-foreground">No es otra app de devocionales. Así se ve tu camino cada día.</p>
-        </div>
-
-        <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <Screen title="Buenos días, María" subtitle="Tu palabra de hoy" image={dailyImg} kicker="Devocional" quote="El SEÑOR es mi pastor, nada me faltará." reference="Salmo 23:1" />
-          <Screen title="El Consultor" subtitle="Tu compañía cristiana" image={heroImg} kicker="Chat IA" quote="Ese miedo es señal de que te importa. Demos hoy un solo paso pequeño y dejemos que Dios haga el resto." reference="El Consultor · IA" dark />
-          <Screen title="Etapa 3 · Rompiendo ciclos" subtitle="12 de 21 días" image={stageImg} kicker="Camino" quote="Suelto la idea de que nunca cambiaré." reference="Ejercicio de hoy" />
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function Screen({ title, subtitle, image, kicker, quote, reference, dark }: {
-  title: string; subtitle: string; image: string; kicker: string; quote: string; reference: string; dark?: boolean;
-}) {
-  return (
-    <div className="mx-auto w-full max-w-[320px]">
-      <div className="rounded-[2.2rem] border-[10px] border-foreground bg-card shadow-glow overflow-hidden aspect-[9/17]">
-        <div className="relative h-1/2">
-          <img src={image} alt={title} className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent" />
-          <div className="absolute top-3 left-3 text-[10px] font-bold uppercase tracking-widest bg-foreground text-background rounded-full px-2.5 py-1">
-            {kicker}
-          </div>
-        </div>
-        <div className={`p-4 h-1/2 flex flex-col ${dark ? "bg-divine text-primary-foreground" : ""}`}>
-          <div className={`text-xs font-bold ${dark ? "text-gold" : "text-muted-foreground"}`}>{subtitle}</div>
-          <div className="font-display font-bold text-lg leading-tight">{title}</div>
-          <div className={`mt-auto rounded-2xl p-3 ${dark ? "bg-white/10" : "bg-secondary"}`}>
-            <p className="scripture text-sm leading-snug">"{quote}"</p>
-            <p className={`mt-1 text-[10px] font-bold uppercase tracking-widest ${dark ? "text-gold" : "text-primary"}`}>{reference}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ───────────────────────── FEATURES ───────────────────────── */
-
-function Features() {
-  const items = [
-    { icon: Sparkles, t: "Tu camino, hecho para ti", d: "El diagnóstico y la IA arman tu ruta. Dejas de improvisar y sabes qué hacer hoy." },
-    { icon: BookOpen, t: "El libro y sus ejercicios", d: "Reconectando el Espíritu con Dios completo. Capítulos, notas, marcadores y prácticas guiadas." },
-    { icon: MessageCircle, t: "El Consultor Espiritual IA", d: "Acompañamiento cristiano, con Biblia real. Cuando estés triste, ansioso o solo, tienes con quién hablar." },
-    { icon: Flame, t: "Racha y check verde", d: "Cada día que abres la app suma. Un mal día no borra tu progreso: tus escudos protegen tu constancia." },
-    { icon: HeartHandshake, t: "Oración registrada", d: "Guarda por qué oras. Con el tiempo verás lo que Dios respondió, cuándo y cómo." },
-    { icon: Moon, t: "Ritual de mañana y noche", d: "Devocional al despertar, entrega antes de dormir. Dos anclas que ordenan tu día en Dios." },
-    { icon: Shield, t: "Diario privado y seguro", d: "Lo que escribes es tuyo. Nadie lo lee. Ni siquiera nosotros." },
-    { icon: Heart, t: "Comunidad de fe", d: "Testimonios reales, moderados. Ver a otros avanzar te recuerda que no estás sola." },
+  const feats = [
+    { i: <MessageCircle className="w-5 h-5" />, t: "Mentora Ruth Esther", d: "Chat 24/7 con la voz del libro. Te escucha y te guía sin juzgar.", c: "#7C5CFF" },
+    { i: <HeartHandshake className="w-5 h-5" />, t: "Análisis de pareja", d: "¿Es propósito o deuda ancestral? Descúbrelo en minutos.", c: "#F58BCB" },
+    { i: <Users2 className="w-5 h-5" />, t: "Patrón familiar", d: "Tu árbol + tu historia = qué se repite y cómo romperlo.", c: "#3FBE8F" },
+    { i: <Leaf className="w-5 h-5" />, t: "Camino diario", d: "Etapas, ejercicios, audios y diario. 5 min al día.", c: "#5AA9FF" },
   ];
   return (
-    <section className="px-4 sm:px-6 py-16 sm:py-24">
-      <div className="mx-auto max-w-6xl">
+    <section className="px-4 sm:px-6 py-14 sm:py-20 bg-secondary/40">
+      <div className="mx-auto max-w-5xl">
         <div className="text-center max-w-2xl mx-auto">
-          <div className="text-xs font-black uppercase tracking-widest text-primary">Tu ritual diario de 5 minutos</div>
-          <h2 className="mt-3 font-display font-extrabold text-3xl sm:text-5xl tracking-tight">
-            Todo lo que <span className="text-primary">recibes</span>
+          <h2 className="font-display font-extrabold text-[28px] sm:text-5xl tracking-tight leading-tight">
+            Todo en un solo lugar.
           </h2>
-          <p className="mt-4 text-muted-foreground">Cada herramienta riega una parte de tu vida espiritual.</p>
+          <p className="mt-3 text-muted-foreground">Sin apps sueltas. Sin buscar en YouTube. Sin gastar en 10 cosas.</p>
         </div>
-
-        <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {items.map(({ icon: Icon, t, d }) => (
-            <div key={t} className="app-card p-5 hover:-translate-y-1 transition-transform">
-              <div className="w-11 h-11 rounded-2xl bg-primary/10 text-primary grid place-items-center">
-                <Icon className="w-5 h-5" />
+        <div className="mt-10 grid sm:grid-cols-2 gap-3">
+          {feats.map((f) => (
+            <div key={f.t} className="app-card p-5 flex items-start gap-3">
+              <div className="w-12 h-12 rounded-2xl grid place-items-center text-white shadow-soft shrink-0" style={{ background: f.c }}>
+                {f.i}
               </div>
-              <h3 className="mt-4 font-display font-bold text-base leading-tight">{t}</h3>
-              <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{d}</p>
+              <div>
+                <h3 className="font-display font-bold text-[16px]">{f.t}</h3>
+                <p className="mt-1 text-[13px] text-muted-foreground leading-relaxed">{f.d}</p>
+              </div>
             </div>
           ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ───────────────────────── REVIEWS (slider) ───────────────────────── */
+const REVIEWS = [
+  { n: "María, 34", c: "México", t: "Entendí en 3 minutos algo que 2 años de terapia no me habían dicho. Ya no me culpo por lo que traigo de mi mamá." },
+  { n: "Andrés, 41", c: "Colombia", t: "Me sorprendió que no me hablaran de religión. Es directo, honesto y por primera vez sostengo el hábito." },
+  { n: "Lucía, 29", c: "Argentina", t: "Hice el análisis de pareja y solté una relación que llevaba 4 años atrasándome. Nunca lo vi tan claro." },
+  { n: "Rosa, 47", c: "R. Dominicana", t: "Soy escéptica. Pagué el año porque en la primera semana pasó algo dentro de mí que no esperaba." },
+  { n: "Kevin, 26", c: "España", t: "5 minutos al día. Lo estoy haciendo. Nunca sostuve nada tanto tiempo. Eso solo ya me cambió." },
+];
+function Reviews() {
+  const [i, setI] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setI((v) => (v + 1) % REVIEWS.length), 5000);
+    return () => clearInterval(t);
+  }, []);
+  return (
+    <section className="px-4 sm:px-6 py-14 sm:py-20">
+      <div className="mx-auto max-w-3xl">
+        <div className="text-center">
+          <div className="inline-flex items-center gap-1.5">
+            {Array.from({ length: 5 }).map((_, k) => <Star key={k} className="w-4 h-4 fill-[#F7B955] text-[#F7B955]" />)}
+            <span className="ml-2 text-[13px] font-bold">4.9 / 5 · +2,300 personas</span>
+          </div>
+          <h2 className="mt-4 font-display font-extrabold text-[28px] sm:text-5xl tracking-tight leading-tight">
+            Lo que dicen quienes empezaron.
+          </h2>
+        </div>
+
+        <div className="mt-10 relative">
+          <div className="app-card p-6 sm:p-8 min-h-[220px]">
+            <div className="text-primary text-5xl font-display leading-none">"</div>
+            <p className="mt-2 text-[16px] sm:text-lg leading-relaxed font-medium">{REVIEWS[i].t}</p>
+            <div className="mt-5 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-brand-gradient text-white grid place-items-center font-display font-bold shadow-glow">
+                {REVIEWS[i].n[0]}
+              </div>
+              <div>
+                <div className="font-bold text-[14px]">{REVIEWS[i].n}</div>
+                <div className="text-[12px] text-muted-foreground">{REVIEWS[i].c}</div>
+              </div>
+            </div>
+          </div>
+          <div className="mt-4 flex justify-center gap-2">
+            {REVIEWS.map((_, k) => (
+              <button key={k} onClick={() => setI(k)}
+                className={"h-2 rounded-full transition-all " + (k === i ? "w-7 bg-primary" : "w-2 bg-border")}
+                aria-label={`Testimonio ${k + 1}`} />
+            ))}
+          </div>
         </div>
       </div>
     </section>
@@ -439,157 +373,127 @@ function Features() {
 }
 
 /* ───────────────────────── PRICING ───────────────────────── */
-
 function Pricing() {
-  const included = [
-    { t: "Ritual diario con IA (mañana y noche)", v: "$120" },
-    { t: "Devocionales y oraciones guiadas", v: "$60" },
-    { t: "El libro completo + ejercicios", v: "$45" },
-    { t: "Consultor Espiritual IA ilimitado", v: "$80" },
-    { t: "Diario privado, racha y hitos", v: "$40" },
-    { t: "Método 3-6-9: Visualízalo y Vívelo", v: "$50" },
-  ];
+  const [plan, setPlan] = useState<"anual" | "mensual">("anual");
   return (
-    <section id="planes" className="px-4 sm:px-6 py-16 sm:py-24 bg-secondary/40">
-      <div className="mx-auto max-w-6xl">
-        <div className="text-center max-w-2xl mx-auto">
-          <h2 className="font-display font-extrabold text-3xl sm:text-5xl tracking-tight">
-            No lo dejes para <span className="text-primary">otro lunes</span>
+    <section id="planes" className="px-4 sm:px-6 py-14 sm:py-20 bg-secondary/40">
+      <div className="mx-auto max-w-3xl">
+        <div className="text-center">
+          <h2 className="font-display font-extrabold text-[28px] sm:text-5xl tracking-tight leading-tight">
+            Elige tu camino.
           </h2>
-          <p className="mt-4 text-muted-foreground">Empieza hoy con el plan completo. Si no es para ti, cancelas antes del cobro.</p>
+          <p className="mt-3 text-muted-foreground">7 días gratis en ambos planes. Cancelas cuando quieras.</p>
         </div>
 
-        <div className="mt-10 mx-auto max-w-3xl rounded-3xl bg-card border border-border p-6 shadow-soft">
-          <ul className="space-y-2.5">
-            {included.map((i) => (
-              <li key={i.t} className="flex items-center justify-between gap-4 text-sm">
-                <span className="flex items-center gap-2.5">
-                  <Check className="w-4 h-4 text-primary flex-shrink-0" />
-                  <span className="font-medium">{i.t}</span>
-                </span>
-                <span className="text-muted-foreground line-through font-semibold">{i.v}</span>
-              </li>
-            ))}
-          </ul>
-          <p className="mt-5 text-center text-sm">
-            Valor real <span className="line-through text-muted-foreground">$395</span> — hoy desde <span className="font-display font-extrabold text-lg text-primary">$4.08/mes</span>.
-          </p>
+        <div className="mt-8 inline-flex mx-auto rounded-full bg-white p-1 border border-border/60 shadow-soft" style={{ display: "flex", width: "fit-content", marginInline: "auto" }}>
+          <button onClick={() => setPlan("anual")}
+            className={"px-4 h-10 rounded-full text-[13px] font-bold transition " + (plan === "anual" ? "bg-brand-gradient text-white shadow-glow" : "text-muted-foreground")}>
+            Anual · <span className="opacity-80">6 meses gratis</span>
+          </button>
+          <button onClick={() => setPlan("mensual")}
+            className={"px-4 h-10 rounded-full text-[13px] font-bold transition " + (plan === "mensual" ? "bg-brand-gradient text-white shadow-glow" : "text-muted-foreground")}>
+            Mensual
+          </button>
         </div>
 
-        <div className="mt-8 grid md:grid-cols-2 gap-5 max-w-4xl mx-auto">
-          <PricingCard
-            featured
-            title="Anual"
-            price="$4.08"
-            unit="USD/mes"
-            was="antes $6.99"
-            note="Un solo pago de $49/año. Hoy pagas $0."
-            badge="La más elegida ✨"
-            savings="Ahorras 41%"
-            bullets={["Acceso completo a todo", "El precio más bajo, todo el año"]}
-            cta="Probar completo por $0"
-          />
-          <PricingCard
-            title="Mensual"
-            price="$6.99"
-            unit="USD/mes"
-            note="7 días gratis, luego se cobra cada mes."
-            bullets={["Acceso completo", "Sin compromiso anual"]}
-            cta="Probar mensual por $0"
-          />
-        </div>
+        <div className="mt-8 grid md:grid-cols-2 gap-4">
+          {/* Camino ORIGEN */}
+          <div className={"app-card p-6 relative " + (plan === "anual" ? "ring-2 ring-primary shadow-glow" : "")}>
+            {plan === "anual" && (
+              <span className="absolute -top-3 left-6 text-[10px] font-black uppercase tracking-widest bg-brand-gradient text-white px-3 py-1 rounded-full shadow-glow">
+                Recomendado · 6 meses gratis
+              </span>
+            )}
+            <div className="text-[11px] font-black uppercase tracking-widest text-primary">Camino ORIGEN</div>
+            <h3 className="mt-1 font-display font-extrabold text-[22px]">Todo el método</h3>
 
-        <div className="mt-10 grid sm:grid-cols-3 gap-4 max-w-4xl mx-auto">
-          {[
-            { n: "Paso 1", t: "Empiezas gratis", d: "Validamos tu prueba con tarjeta. Hoy pagas $0." },
-            { n: "Paso 2", t: "Activas con tu correo", d: "Acceso al instante desde cualquier dispositivo." },
-            { n: "Paso 3", t: "Tu primer ritual hoy", d: "Diagnóstico, plan personalizado y a caminar." },
-          ].map((s) => (
-            <div key={s.n} className="rounded-2xl bg-card border border-border p-5">
-              <div className="text-[10px] font-black uppercase tracking-widest text-primary">{s.n}</div>
-              <div className="mt-2 font-display font-bold">{s.t}</div>
-              <div className="mt-1 text-sm text-muted-foreground">{s.d}</div>
+            <div className="mt-4 flex items-baseline gap-1.5">
+              <span className="font-display font-black text-5xl tracking-tight">
+                ${plan === "anual" ? "5.99" : "14.99"}
+              </span>
+              <span className="text-muted-foreground text-sm">USD / mes</span>
             </div>
-          ))}
-        </div>
+            <div className="text-[12px] text-muted-foreground mt-1">
+              {plan === "anual" ? "$71.88 al año · equivale a 6 meses gratis" : "Facturado mensual"}
+            </div>
 
-        <p className="mt-8 text-center text-xs text-muted-foreground flex items-center justify-center gap-2">
-          <Lock className="w-3.5 h-3.5" /> Pago 100% seguro · Acceso inmediato · Cancelas en 1 clic
-        </p>
+            <ul className="mt-5 space-y-2.5 text-[14px]">
+              {[
+                "Mentora Ruth Esther ilimitada",
+                "Análisis de pareja y patrón familiar",
+                "Las 8 etapas + audios 3-6-9",
+                "Ejercicios diarios y diario íntimo",
+                "Árbol completo · gemas · premios",
+              ].map((f) => (
+                <li key={f} className="flex items-start gap-2">
+                  <span className="w-5 h-5 rounded-full bg-primary/15 text-primary grid place-items-center shrink-0 mt-0.5">
+                    <Check className="w-3 h-3" />
+                  </span>
+                  <span>{f}</span>
+                </li>
+              ))}
+            </ul>
+
+            <StartButton className="mt-6 w-full h-14 rounded-full btn-primary-gradient font-bold text-[15px]">
+              Empezar mis 7 días gratis
+            </StartButton>
+            <p className="text-[11px] text-center text-muted-foreground mt-2 font-semibold">
+              Te avisamos antes del primer cobro
+            </p>
+          </div>
+
+          {/* Explorador */}
+          <div className="app-card p-6">
+            <div className="text-[11px] font-black uppercase tracking-widest text-muted-foreground">Explorador</div>
+            <h3 className="mt-1 font-display font-extrabold text-[22px]">Empieza sin pagar</h3>
+            <div className="mt-4 flex items-baseline gap-1.5">
+              <span className="font-display font-black text-5xl tracking-tight">$0</span>
+              <span className="text-muted-foreground text-sm">para siempre</span>
+            </div>
+            <div className="text-[12px] text-muted-foreground mt-1">Perfecto para probar el método</div>
+
+            <ul className="mt-5 space-y-2.5 text-[14px]">
+              {[
+                "Diagnóstico completo",
+                "1 mensaje al día con la mentora",
+                "Etapa 1 completa",
+                "Diario íntimo (5 entradas)",
+                "1 ejercicio guiado",
+              ].map((f) => (
+                <li key={f} className="flex items-start gap-2">
+                  <span className="w-5 h-5 rounded-full bg-secondary text-primary grid place-items-center shrink-0 mt-0.5">
+                    <Check className="w-3 h-3" />
+                  </span>
+                  <span className="text-muted-foreground">{f}</span>
+                </li>
+              ))}
+            </ul>
+
+            <StartButton className="mt-6 w-full h-14 rounded-full bg-secondary text-primary hover:bg-secondary/80 font-bold text-[15px]">
+              Explorar gratis
+            </StartButton>
+            <p className="text-[11px] text-center text-muted-foreground mt-2 font-semibold flex items-center justify-center gap-1">
+              <Lock className="w-3 h-3" /> Sin tarjeta
+            </p>
+          </div>
+        </div>
       </div>
     </section>
   );
 }
 
-function PricingCard({ featured, title, price, unit, was, note, badge, savings, bullets, cta }: {
-  featured?: boolean; title: string; price: string; unit: string; was?: string; note: string;
-  badge?: string; savings?: string; bullets: string[]; cta: string;
-}) {
+/* ───────────────────────── GUARANTEE ───────────────────────── */
+function Guarantee() {
   return (
-    <div className={`relative rounded-3xl p-7 border shadow-soft ${featured ? "bg-divine text-primary-foreground border-transparent shadow-glow" : "bg-card border-border"}`}>
-      {badge && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gold text-gold-foreground text-[11px] font-black uppercase tracking-widest rounded-full px-3 py-1">
-          {badge}
-        </div>
-      )}
-      {savings && (
-        <div className={`inline-block text-[11px] font-bold rounded-full px-2.5 py-1 mb-3 ${featured ? "bg-gold/25 text-gold" : "bg-primary/10 text-primary"}`}>
-          {savings}
-        </div>
-      )}
-      <div className="font-display font-extrabold text-2xl">{title}</div>
-      <div className="mt-3 flex items-end gap-2">
-        <span className="font-display font-black text-5xl">{price}</span>
-        <span className={`pb-2 text-sm ${featured ? "text-primary-foreground/70" : "text-muted-foreground"}`}>{unit}</span>
-      </div>
-      {was && <div className={`text-xs ${featured ? "text-primary-foreground/60" : "text-muted-foreground"}`}>{was}</div>}
-      <p className={`mt-3 text-sm ${featured ? "text-primary-foreground/80" : "text-muted-foreground"}`}>{note}</p>
-
-      <ul className="mt-5 space-y-2">
-        {bullets.map((b) => (
-          <li key={b} className="flex items-center gap-2 text-sm">
-            <Check className={`w-4 h-4 ${featured ? "text-gold" : "text-primary"}`} /> {b}
-          </li>
-        ))}
-      </ul>
-
-      <StartButton size="lg" className={`w-full mt-6 rounded-full h-13 font-bold ${featured ? "bg-gold text-gold-foreground hover:bg-gold/90" : "bg-foreground text-background hover:bg-foreground/90"}`}>
-        {cta}
-      </StartButton>
-
-      {featured && (
-        <ul className="mt-5 space-y-1.5 text-xs text-primary-foreground/80">
-          <li>• Hoy: acceso total, sin pagar nada</li>
-          <li>• Día 5: te avisamos antes del cobro</li>
-          <li>• Día 7: recién ahí se cobra, o cancelas en 1 clic</li>
-        </ul>
-      )}
-    </div>
-  );
-}
-
-/* ───────────────────────── AUTHOR ───────────────────────── */
-
-function Author() {
-  return (
-    <section className="px-4 sm:px-6 py-16 sm:py-24">
-      <div className="mx-auto max-w-4xl grid md:grid-cols-[240px_1fr] gap-8 items-center">
-        <div className="relative mx-auto">
-          <div className="absolute -inset-4 bg-gold/30 blur-2xl rounded-full" />
-          <div className="relative w-56 h-56 rounded-full overflow-hidden border-4 border-card shadow-glow">
-            <img src={exerciseImg} alt="El autor" className="w-full h-full object-cover" />
-          </div>
+    <section className="px-4 sm:px-6 py-14 sm:py-20">
+      <div className="mx-auto max-w-3xl app-card p-6 sm:p-10 flex flex-col sm:flex-row items-center gap-5 text-center sm:text-left">
+        <div className="w-16 h-16 rounded-2xl bg-brand-gradient text-white grid place-items-center shadow-glow shrink-0">
+          <Shield className="w-7 h-7" />
         </div>
         <div>
-          <div className="text-xs font-black uppercase tracking-widest text-primary">Sobre esta obra</div>
-          <h2 className="mt-2 font-display font-extrabold text-3xl sm:text-4xl tracking-tight">
-            Hecha con oración, no solo con código.
-          </h2>
-          <p className="mt-4 text-muted-foreground leading-relaxed">
-            Reconectando el Espíritu con Dios nace de años de acompañar creyentes que sentían que su vida espiritual se había secado. Aquí encuentras lo que aprendimos: cómo volver, paso a paso, sin fingir, sin apurar, con Dios de vuelta en el centro.
-          </p>
-          <p className="mt-4 text-sm font-bold">
-            Te acompañamos en el camino 💛
+          <h3 className="font-display font-extrabold text-[22px] leading-tight">Garantía honesta de 7 días</h3>
+          <p className="mt-2 text-[14px] text-muted-foreground leading-relaxed">
+            Prueba todo el método 7 días. Si no sientes algo distinto adentro, cancelas en 1 clic. Sin llamadas, sin explicaciones.
           </p>
         </div>
       </div>
@@ -598,263 +502,104 @@ function Author() {
 }
 
 /* ───────────────────────── FAQ ───────────────────────── */
-
+const FAQS = [
+  { q: "¿Ya probé terapia, libros y apps. Por qué esto sería distinto?", a: "Porque no te pide fuerza de voluntad. Te muestra el patrón que arrastras y te da un paso pequeño cada día. No es información. Es método." },
+  { q: "¿No tengo tiempo. Cuánto me toma al día?", a: "5 minutos. Un ejercicio, un audio o un mensaje con la mentora. Está diseñado para caber en tu día, no para volverlo más pesado." },
+  { q: "¿Me van a imponer religión?", a: "No. ORIGEN toma la sabiduría del libro de Ruth Esther, pero el método es humano, honesto y directo. Sin credo, sin dogma." },
+  { q: "¿Cuánto cuesta después del trial?", a: "Anual: $71.88 USD ($5.99/mes, 6 meses gratis). Mensual: $14.99 USD. Cancelas cuando quieras desde la app." },
+  { q: "¿Es seguro lo que escribo aquí?", a: "Sí. Todo lo que compartes es privado y solo tú lo ves. No lo compartimos con nadie." },
+  { q: "¿Y si cancelo antes del cobro?", a: "No te cobramos. Te avisamos por correo antes del primer cargo para que decidas con tiempo." },
+];
 function FAQ() {
-  const faqs = [
-    {
-      q: "¿Funciona si mi fe está tibia o dudando?",
-      a: "Sí, y es justo para ti. No te pedimos creer más de lo que hoy crees. El método se apoya en 5 minutos diarios de práctica real: una palabra, una oración corta, un paso pequeño. La fe la vuelves a encender tú; el método lo ponemos nosotros.",
-    },
-    {
-      q: "Ya probé apps bíblicas y las dejé a los 3 días. ¿Qué cambia aquí?",
-      a: "No fallaste tú: falló el método. Aquí el ritual te espera cada mañana, el Consultor IA te guía cuando estás mal, la racha te sostiene los días flojos y tus escudos perdonan un mal día. No es más contenido; es un camino sostenible.",
-    },
-    {
-      q: "¿La IA reemplaza a un pastor o consejero?",
-      a: "No. El Consultor te acompaña 24/7 con Biblia real y con el contenido del libro, pero si hay una situación seria (crisis emocional, salud mental) siempre te recomienda buscar ayuda profesional o espiritual humana. Es compañía, no sustituto.",
-    },
-    {
-      q: "¿Necesito tarjeta para la prueba?",
-      a: "Para ver tu diagnóstico y primer ritual no necesitas pagar. Para activar la prueba completa validamos el método de pago, pero hoy se cobra $0. Si cancelas antes de que termine, no pagas nada.",
-    },
-    {
-      q: "¿Me van a cobrar sin avisar?",
-      a: "No. Te decimos desde el inicio cuándo termina la prueba. Al día 5 te enviamos aviso. Si cancelas antes del día 7, no se cobra nada.",
-    },
-    {
-      q: "¿Es cristiano-evangélico, católico, o de qué corriente?",
-      a: "Es cristiano bíblico. Cuando hay diferentes interpretaciones entre tradiciones cristianas, las reconocemos con respeto. No inventamos doctrinas: lo que enseñamos se apoya en la Biblia y en el contenido autorizado del libro.",
-    },
-    {
-      q: "¿Y si después de probarlo siento que no es para mí?",
-      a: "Lo cancelas antes de que terminen tus 7 días, sin llamadas ni explicaciones. Pruebas con todo a tu favor: el único riesgo es quedarte donde estás hoy.",
-    },
-  ];
   return (
-    <section className="px-4 sm:px-6 py-16 sm:py-24 bg-secondary/40">
-      <div className="mx-auto max-w-3xl">
-        <h2 className="font-display font-extrabold text-3xl sm:text-5xl tracking-tight text-center">
-          Preguntas <span className="text-primary">frecuentes</span>
-        </h2>
-        <div className="mt-10 space-y-3">
-          {faqs.map((f) => <FAQItem key={f.q} {...f} />)}
+    <section className="px-4 sm:px-6 py-14 sm:py-20 bg-secondary/40">
+      <div className="mx-auto max-w-2xl">
+        <div className="text-center">
+          <h2 className="font-display font-extrabold text-[28px] sm:text-5xl tracking-tight leading-tight">
+            Lo que se pregunta la gente.
+          </h2>
+        </div>
+        <div className="mt-8 space-y-2">
+          {FAQS.map((f, i) => <FaqItem key={i} {...f} />)}
         </div>
       </div>
     </section>
   );
 }
-
-function FAQItem({ q, a }: { q: string; a: string }) {
+function FaqItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="rounded-2xl bg-card border border-border overflow-hidden">
-      <button onClick={() => setOpen(!open)} className="w-full flex items-center justify-between gap-4 p-5 text-left">
-        <span className="font-display font-bold text-base leading-tight">{q}</span>
-        <ChevronDown className={`w-5 h-5 flex-shrink-0 text-primary transition-transform ${open ? "rotate-180" : ""}`} />
+    <div className="app-card overflow-hidden">
+      <button onClick={() => setOpen(!open)} className="w-full text-left p-4 sm:p-5 flex items-center gap-3">
+        <span className="font-display font-bold text-[15px] flex-1">{q}</span>
+        <ChevronDown className={"w-5 h-5 text-muted-foreground transition-transform " + (open ? "rotate-180" : "")} />
       </button>
-      {open && <div className="px-5 pb-5 text-sm text-muted-foreground leading-relaxed">{a}</div>}
+      {open && <div className="px-4 sm:px-5 pb-5 text-[14px] text-muted-foreground leading-relaxed">{a}</div>}
     </div>
   );
 }
 
 /* ───────────────────────── FINAL CTA ───────────────────────── */
-
 function FinalCTA() {
   return (
-    <section className="px-4 sm:px-6 py-20 sm:py-28">
-      <div className="mx-auto max-w-4xl rounded-[2rem] bg-divine p-8 sm:p-14 text-center text-primary-foreground shadow-glow relative overflow-hidden">
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-gold blur-3xl" />
-        </div>
-        <div className="relative">
-          <div className="inline-flex items-center gap-2 rounded-full bg-white/10 text-gold px-3 py-1.5 text-xs font-bold backdrop-blur">
-            <Clock className="w-3.5 h-3.5" /> En 90 días…
-          </div>
-          <h2 className="mt-6 font-display font-extrabold text-3xl sm:text-5xl tracking-tight leading-tight">
-            Puedes seguir igual… <br className="hidden sm:block" />
-            <span className="text-gold">o llevar 90 días de vuelta con Dios.</span>
-          </h2>
-          <p className="mt-5 text-primary-foreground/80 max-w-2xl mx-auto">
-            La versión de ti que ya vive esa paz empezó un día como hoy, con 5 minutos. Hoy lo pruebas gratis. ¿Lo empiezas o lo dejas para "algún día"?
-          </p>
-          <StartButton size="lg" className="mt-8 rounded-full bg-gold text-gold-foreground hover:bg-gold/90 h-14 px-10 font-bold text-base shadow-glow">
-            Sí, quiero empezar mi camino <ArrowRight className="ml-2 w-4 h-4" />
+    <section className="px-4 sm:px-6 py-16 sm:py-24">
+      <div className="mx-auto max-w-3xl text-center relative">
+        <div className="absolute inset-0 -z-10 bg-primary/10 blur-3xl rounded-full" />
+        <h2 className="font-display font-extrabold text-[32px] sm:text-6xl tracking-tight leading-[1.05]">
+          El patrón sigue ahí.
+          <span className="block mt-3 text-transparent bg-clip-text bg-brand-gradient">
+            ¿Lo entiendes hoy o en 5 años?
+          </span>
+        </h2>
+        <div className="mt-8 flex justify-center">
+          <StartButton size="lg" className="rounded-full h-14 px-8 btn-primary-gradient font-bold text-[15px]">
+            Descubrir mi patrón gratis <ArrowRight className="ml-2 w-4 h-4" />
           </StartButton>
-          <p className="mt-4 text-xs text-primary-foreground/70">
-            Empieza gratis hoy · prueba completa por $0 · cancelas cuando quieras
-          </p>
         </div>
+        <p className="mt-4 text-[13px] text-muted-foreground max-w-lg mx-auto">
+          <span className="font-bold text-foreground">P.D.</span> Lo que no entiendes hoy, lo repites mañana. Y se lo pasas a los que amas. Empieza hoy. 5 minutos. Gratis.
+        </p>
       </div>
     </section>
   );
 }
 
 /* ───────────────────────── FOOTER ───────────────────────── */
-
 function Footer() {
   return (
-    <footer className="border-t border-border/60 px-4 sm:px-6 py-10">
-      <div className="mx-auto max-w-6xl flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-xl bg-divine grid place-items-center">
-            <Sparkles className="w-3.5 h-3.5 text-gold" />
+    <footer className="border-t border-border/40 bg-secondary/30">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 py-10 grid sm:grid-cols-[1.2fr_1fr_1fr] gap-8">
+        <div>
+          <div className="flex items-center gap-2">
+            <div className="w-9 h-9 rounded-2xl bg-brand-gradient grid place-items-center shadow-glow">
+              <Leaf className="w-4 h-4 text-white" />
+            </div>
+            <div className="font-display font-extrabold">ORIGEN</div>
           </div>
-          <span className="font-display font-bold text-foreground">Reconectando el Espíritu con Dios</span>
+          <p className="mt-3 text-[13px] text-muted-foreground max-w-sm">
+            Basado en el libro de Ruth Esther. Hecho para romper el patrón que arrastras.
+          </p>
         </div>
-        <p>© {new Date().getFullYear()} · Hecho con oración.</p>
+        <div>
+          <div className="text-[11px] font-black uppercase tracking-widest text-primary">Legal</div>
+          <ul className="mt-3 space-y-2 text-[13px] text-muted-foreground">
+            <li><a href="/terminos" className="hover:text-foreground">Términos</a></li>
+            <li><a href="/privacidad" className="hover:text-foreground">Privacidad</a></li>
+            <li><a href="/reembolsos" className="hover:text-foreground">Reembolsos</a></li>
+            <li><a href="/disclaimer-ia" className="hover:text-foreground">Uso de IA</a></li>
+          </ul>
+        </div>
+        <div>
+          <div className="text-[11px] font-black uppercase tracking-widest text-primary">Soporte</div>
+          <ul className="mt-3 space-y-2 text-[13px] text-muted-foreground">
+            <li><a href="mailto:infodenegociorm@gmail.com" className="hover:text-foreground">infodenegociorm@gmail.com</a></li>
+            <li><Link to="/auth" className="hover:text-foreground">Iniciar sesión</Link></li>
+          </ul>
+        </div>
+      </div>
+      <div className="text-center text-[11px] text-muted-foreground pb-8">
+        © {new Date().getFullYear()} ORIGEN · Todos los derechos reservados
       </div>
     </footer>
   );
 }
-
-/* ───────────────────────── REVIEWS SLIDER ───────────────────────── */
-
-const REVIEWS_DATA = [
-  { name: "María L.", city: "Bogotá", text: "Este programa me ayudó bastante a reconocer mis patrones y errores. Ahora soy libre.", avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&h=200&fit=crop&crop=faces" },
-  { name: "Camila R.", city: "Medellín", text: "Por fin entendí de dónde venían mis miedos. El diagnóstico fue exacto y las etapas cambiaron mi vida.", avatar: "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=200&h=200&fit=crop&crop=faces" },
-  { name: "Verónica P.", city: "Ciudad de México", text: "Rompí un ciclo que llevaba tres generaciones en mi familia. No lo puedo creer, gloria a Dios.", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&h=200&fit=crop&crop=faces" },
-  { name: "Andrea M.", city: "Lima", text: "Cinco minutos al día devolvieron el orden a mi corazón. Recomendado 100%.", avatar: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=200&h=200&fit=crop&crop=faces" },
-  { name: "Sofía G.", city: "Buenos Aires", text: "El Chat me acompañó en la noche más oscura. Nunca me sentí sola.", avatar: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=200&h=200&fit=crop&crop=faces" },
-  { name: "Elena T.", city: "Madrid", text: "El árbol genealógico me abrió los ojos. Volver a Dios se sintió posible otra vez.", avatar: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=200&h=200&fit=crop&crop=faces" },
-  { name: "Rocío D.", city: "Quito", text: "Nunca había sentido tanta paz. Los audios del método 3-6-9 son un abrazo diario.", avatar: "https://images.unsplash.com/photo-1502378735452-bc7d86632805?w=200&h=200&fit=crop&crop=faces" },
-];
-
-function Reviews() {
-  return (
-    <section className="px-4 sm:px-6 py-16 sm:py-24 bg-secondary/40">
-      <div className="mx-auto max-w-6xl">
-        <div className="text-center max-w-2xl mx-auto">
-          <div className="text-xs font-black uppercase tracking-widest text-primary">Testimonios reales</div>
-          <h2 className="mt-3 font-display font-extrabold text-3xl sm:text-5xl tracking-tight">
-            Miles ya volvieron a <span className="text-primary">sentir a Dios</span>
-          </h2>
-        </div>
-        <div className="mt-10 overflow-hidden relative">
-          <div className="flex gap-4 animate-[scroll_40s_linear_infinite] hover:[animation-play-state:paused]" style={{ width: "max-content" }}>
-            {[...REVIEWS_DATA, ...REVIEWS_DATA].map((r, i) => (
-              <div key={i} className="w-[320px] shrink-0 rounded-3xl bg-card border border-border p-5 shadow-soft">
-                <div className="flex items-center gap-3">
-                  <img src={r.avatar} alt={r.name} className="w-12 h-12 rounded-full object-cover grayscale-[0.2]" loading="lazy" />
-                  <div>
-                    <div className="font-display font-bold text-sm">{r.name}</div>
-                    <div className="text-[11px] text-muted-foreground">{r.city}</div>
-                  </div>
-                  <div className="ml-auto flex gap-0.5">
-                    {Array.from({ length: 5 }).map((_, k) => <Star key={k} className="w-3 h-3 fill-gold text-gold" />)}
-                  </div>
-                </div>
-                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">"{r.text}"</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-      <style>{`@keyframes scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }`}</style>
-    </section>
-  );
-}
-
-/* ───────────────────────── BOOKING (Consultoría con profesional) ───────────────────────── */
-
-function Booking() {
-  const [open, setOpen] = useState(false);
-  const [plan, setPlan] = useState<"full" | "limitado" | null>(null);
-  const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
-
-  function submit() {
-    if (!plan || !date || !time) return;
-    const label = plan === "full" ? "Plan FULL (2h · $495.99)" : "Plan LIMITADO (1h · $270)";
-    const msg = encodeURIComponent(`Hola, quiero agendar una consulta profesional en Reconectando.\n\n${label}\nFecha: ${date}\nHora: ${time}\n\nMe gustaría que revisen mi diagnóstico personal y me acompañen en mi proceso.`);
-    window.open(`https://wa.me/?text=${msg}`, "_blank");
-  }
-
-  return (
-    <section id="agendar" className="px-4 sm:px-6 py-16 sm:py-24">
-      <div className="mx-auto max-w-5xl rounded-[2rem] bg-card border border-border p-6 sm:p-10 shadow-soft">
-        <div className="text-center max-w-2xl mx-auto">
-          <div className="inline-flex items-center gap-2 rounded-full bg-emerald-500/15 text-emerald-600 px-3 py-1.5 text-xs font-black uppercase tracking-widest">
-            <HeartHandshake className="w-3.5 h-3.5" /> Agenda con un profesional
-          </div>
-          <h2 className="mt-4 font-display font-extrabold text-3xl sm:text-4xl tracking-tight">
-            Casos especiales · Acompañamiento privado
-          </h2>
-          <p className="mt-3 text-muted-foreground">Reserva una sesión personal con un consejero profesional. El pago se coordina tras confirmar tu cita.</p>
-        </div>
-
-        <div className="mt-8 grid md:grid-cols-2 gap-5">
-          <PlanCard
-            plan="full"
-            featured
-            title="PLAN FULL"
-            price="$495.99"
-            installments="o 3 cuotas de $165.33"
-            duration="2 horas · WhatsApp o Zoom"
-            perks={["Manual de guianza personalizado", "Seguimiento durante 6 meses", "Material profesional completo", "Contrato de confidencialidad"]}
-            onClick={() => { setPlan("full"); setOpen(true); }}
-          />
-          <PlanCard
-            plan="limitado"
-            title="PLAN LIMITADO"
-            price="$270"
-            installments="o 3 cuotas de $90"
-            duration="1 hora · WhatsApp o Zoom"
-            perks={["Manual básico de guianza", "Seguimiento durante 3 meses", "Material de apoyo básico", "Contrato de confidencialidad"]}
-            onClick={() => { setPlan("limitado"); setOpen(true); }}
-          />
-        </div>
-      </div>
-
-      {open && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm grid place-items-center p-4 animate-in fade-in duration-200" onClick={() => setOpen(false)}>
-          <div className="w-full max-w-md rounded-3xl bg-card p-6 shadow-glow animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
-            <div className="text-[11px] uppercase tracking-widest text-emerald-600 font-black">Agendar cita</div>
-            <h3 className="mt-1 font-display font-extrabold text-2xl">{plan === "full" ? "Plan FULL" : "Plan LIMITADO"}</h3>
-            <p className="mt-2 text-sm text-muted-foreground">Elige el día y la hora. El profesional revisará tu diagnóstico antes de la llamada.</p>
-            <div className="mt-4 grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs font-bold">Fecha</label>
-                <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="mt-1 w-full h-11 rounded-2xl border border-input bg-background px-3 text-sm" />
-              </div>
-              <div>
-                <label className="text-xs font-bold">Hora</label>
-                <input type="time" value={time} onChange={(e) => setTime(e.target.value)} className="mt-1 w-full h-11 rounded-2xl border border-input bg-background px-3 text-sm" />
-              </div>
-            </div>
-            <Button onClick={submit} className="mt-6 w-full h-12 rounded-full bg-emerald-600 hover:bg-emerald-700 font-bold shadow-glow">
-              Agendar ahora
-            </Button>
-            <button onClick={() => setOpen(false)} className="mt-2 w-full text-xs text-muted-foreground hover:text-foreground">Cancelar</button>
-          </div>
-        </div>
-      )}
-    </section>
-  );
-}
-
-function PlanCard({ featured, title, price, installments, duration, perks, onClick }: {
-  plan: "full" | "limitado"; featured?: boolean; title: string; price: string; installments: string; duration: string; perks: string[]; onClick: () => void;
-}) {
-  return (
-    <div className={`relative rounded-3xl p-6 border-2 ${featured ? "border-emerald-500 bg-emerald-500/5 shadow-glow" : "border-border bg-background"}`}>
-      {featured && <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-500 text-white text-[11px] font-black uppercase tracking-widest rounded-full px-3 py-1">Más completo</div>}
-      <div className="font-display font-extrabold text-xl">{title}</div>
-      <div className="text-xs text-muted-foreground mt-1">{duration}</div>
-      <div className="mt-4 flex items-end gap-2">
-        <span className="font-display font-black text-4xl text-emerald-600">{price}</span>
-        <span className="text-xs text-muted-foreground pb-1.5">USD</span>
-      </div>
-      <div className="text-xs text-muted-foreground">{installments}</div>
-      <ul className="mt-4 space-y-2">
-        {perks.map((p) => <li key={p} className="flex items-start gap-2 text-sm"><Check className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" /><span>{p}</span></li>)}
-      </ul>
-      <Button onClick={onClick} className="w-full mt-6 h-12 rounded-full bg-emerald-600 hover:bg-emerald-700 font-bold text-base shadow-glow animate-pulse">
-        Agendar ahora
-      </Button>
-    </div>
-  );
-}
-
-// keep referenced imports used (types)
-export type _ = ReactNode;
-
