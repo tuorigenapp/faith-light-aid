@@ -124,7 +124,7 @@ function Dashboard() {
               badge="Nuevo"
               title="¿Tu pareja es deuda o propósito?"
               desc="Descubre qué viene a enseñarte esta persona. Solo necesitas los datos de ambos."
-              cta="Comenzar lectura"
+              cta="Analizar mi pareja"
             />
             <PilarCard
               to="/patrones"
@@ -133,7 +133,7 @@ function Dashboard() {
               badge="Análisis profundo"
               title="Encuentra tu patrón familiar"
               desc="Basado en tu árbol y tu historia. Identifica qué se está repitiendo y cómo romperlo."
-              cta="Explorar mi patrón"
+              cta="Analizar mi patrón"
             />
           </div>
         </section>

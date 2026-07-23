@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { useTheme } from "@/lib/theme";
 import {
-  Home, MessageCircle, Compass, Layers, BookHeart, Dumbbell, Library,
+  Home, MessageCircle, Layers, BookHeart, Dumbbell,
   CreditCard, User as UserIcon, Shield, LogOut, Menu, Sun, Moon, X,
   Headphones, TreeDeciduous, Trophy, HeartHandshake, Sparkles,
 } from "lucide-react";
@@ -41,11 +41,9 @@ const FULL_NAV = [
   { to: "/visualiza", label: "Visualízalo y Vívelo", icon: Headphones },
   { to: "/diario", label: "Diario íntimo", icon: BookHeart },
   { to: "/ejercicios", label: "Ejercicios", icon: Dumbbell },
-  { to: "/biblioteca", label: "Biblioteca", icon: Library },
   { to: "/premios", label: "Hojas de sanación", icon: Trophy },
   { to: "/invita", label: "Invita y gana", icon: Sparkles },
   { to: "/membresia", label: "Camino ORIGEN", icon: CreditCard },
-  { to: "/diagnostico", label: "Diagnóstico", icon: Compass },
   { to: "/perfil", label: "Perfil", icon: UserIcon },
 ] as const;
 
