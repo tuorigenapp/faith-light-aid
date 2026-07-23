@@ -192,6 +192,15 @@ function MinistracionPage() {
               <p className="whitespace-pre-line font-medium">{result.ministracion}</p>
             </ResultBlock>
 
+            {result.rompe_ciclo && (
+              <ResultBlock emoji="⛓️‍💥" title="Consejo del Cielo: Rompe el Ciclo en tu vida" color="coral">
+                <p className="text-[11px] uppercase tracking-widest font-bold text-[#E05A6B] mb-2">
+                  Deuda generacional que se repite en tu vida
+                </p>
+                <p className="whitespace-pre-line">{result.rompe_ciclo}</p>
+              </ResultBlock>
+            )}
+
             {result.versiculo && (
               <ResultBlock emoji="📖" title="Palabra que respalda el decreto" color="green">
                 <p className="text-sm italic leading-relaxed">"{result.versiculo}"</p>
