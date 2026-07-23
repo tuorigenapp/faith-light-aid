@@ -129,6 +129,28 @@ function InvitaPage() {
             </ul>
           )}
         </div>
+
+        <a
+          href="https://hotmart.com/es/affiliate-market"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="app-card p-5 mt-4 block relative overflow-hidden"
+        >
+          <div className="absolute -right-6 -bottom-6 text-6xl opacity-10">💰</div>
+          <div className="relative">
+            <div className="text-[11px] uppercase tracking-widest font-bold text-primary flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5" /> Programa de afiliados Hotmart
+            </div>
+            <h3 className="font-display font-bold text-[17px] mt-2">Gana hasta 40% recomendando ORIGEN</h3>
+            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+              Únete a nuestro programa oficial en Hotmart. Recibe tus comisiones cada 15 días directo a tu cuenta.
+            </p>
+            <span className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-primary">
+              Registrarme como afiliada <ArrowLeft className="w-3 h-3 rotate-180" />
+            </span>
+          </div>
+        </a>
+
       </div>
     </div>
   );

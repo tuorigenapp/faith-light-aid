@@ -157,21 +157,26 @@ function Dashboard() {
               ))}
             </div>
           </div>
-          <div className="app-card p-4">
+          <Link to="/etapas" className="app-card p-4">
             <div className="flex items-center gap-2">
               <div className="w-9 h-9 rounded-xl bg-secondary grid place-items-center">
                 <Layers className="w-5 h-5 text-primary" />
               </div>
               <div className="min-w-0">
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Etapas</p>
-                <p className="font-display font-bold text-base">{completed} / 8</p>
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Camino 365</p>
+                <p className="font-display font-bold text-base">Día {Math.min(365, Math.max(1, data?.streakActivities?.length || 1))} / 365</p>
               </div>
             </div>
             <div className="mt-3 h-2 bg-secondary rounded-full overflow-hidden">
-              <div className="h-full bg-brand-gradient" style={{ width: `${(completed / 8) * 100}%` }} />
+              <div className="h-full bg-brand-gradient" style={{ width: `${Math.min(100, ((data?.streakActivities?.length ?? 0) / 365) * 100)}%` }} />
             </div>
-          </div>
+            <p className="mt-2 text-[10px] text-muted-foreground">Semana {Math.max(1, Math.ceil((data?.streakActivities?.length || 1) / 7))} de 52 · {completed} etapas</p>
+          </Link>
+
         </div>
+
+        {/* Palabras para ti Hoy */}
+        <PalabrasHoy name={displayName} />
 
         {/* Árbol de Sanación */}
         <HealingTree />
@@ -181,6 +186,7 @@ function Dashboard() {
 
         {/* Quiz diario */}
         <DailyQuiz />
+
 
         {/* Descubre hoy — mezcla desbloqueado + bloqueado */}
         <section>
@@ -286,3 +292,32 @@ function PilarCard({
     </Link>
   );
 }
+
+const PALABRAS = [
+  "Hoy tu linaje respira contigo. Cada paso que das aquí también sana a los que vinieron antes.",
+  "Lo que sentiste no fue debilidad: fue la memoria de tu familia pidiendo ser vista.",
+  "No estás repitiendo por gusto. Estás repitiendo porque nadie te enseñó a cerrar. Hoy empiezas a cerrar.",
+  "El amor que no recibiste puedes darlo. Y al darlo, se rompe el patrón.",
+  "Tu paz de hoy es la oración que tu abuela nunca pudo terminar.",
+  "No tienes que cargar lo que no es tuyo. Devuélvelo con respeto y sigue liviana.",
+  "Cada vez que eliges responderte con ternura, tu niña interior confía un poco más.",
+];
+
+function PalabrasHoy({ name }: { name: string }) {
+  const day = Math.floor(Date.now() / 86400000);
+  const msg = PALABRAS[day % PALABRAS.length];
+  return (
+    <section className="app-card p-5 bg-brand-soft relative overflow-hidden">
+      <div className="absolute -right-6 -top-6 text-7xl opacity-10">✨</div>
+      <div className="relative">
+        <div className="text-[11px] uppercase tracking-widest font-bold text-primary flex items-center gap-1.5">
+          <Sparkles className="w-3.5 h-3.5" /> Palabras para ti hoy
+        </div>
+        <h3 className="font-display font-bold text-[17px] mt-2 leading-snug">{name}, esto es lo que necesitas escuchar</h3>
+        <p className="mt-2 text-sm leading-relaxed text-foreground/85">"{msg}"</p>
+        <p className="mt-3 text-[11px] text-muted-foreground italic">— Ruth Esther, desde el método ORIGEN</p>
+      </div>
+    </section>
+  );
+}
+

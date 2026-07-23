@@ -197,7 +197,7 @@ function AuthLayout() {
 
       <div className="flex-1 min-w-0 flex flex-col">
         {/* Mobile header */}
-        <header className="lg:hidden sticky top-0 z-20 grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-2 px-3 h-16 bg-white/85 backdrop-blur-xl border-b border-border">
+        <header className="lg:hidden sticky top-0 z-20 grid grid-cols-[auto_minmax(0,1fr)_auto_auto_auto] items-center gap-1.5 px-3 h-16 bg-white/85 dark:bg-background/85 backdrop-blur-xl border-b border-border">
           <Link to="/perfil" className="flex items-center gap-2 min-w-0 rounded-2xl px-1.5 py-1 hover:bg-secondary/60">
             <div className="w-9 h-9 rounded-2xl bg-brand-gradient shadow-glow text-white grid place-items-center font-display font-bold text-sm shrink-0">
               {displayName.slice(0, 1).toUpperCase()}
@@ -212,9 +212,13 @@ function AuthLayout() {
             <span className="text-base">🍃</span>
             <span className="font-display font-bold text-sm text-primary">{gems.toLocaleString()}</span>
           </Link>
+          <Button variant="ghost" size="icon" onClick={toggle} aria-label="Cambiar tema">
+            {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          </Button>
           <Button variant="ghost" size="icon" onClick={() => setOpen(true)} aria-label="Menú">
             <Menu className="w-5 h-5" />
           </Button>
+
         </header>
 
         <main className="flex-1 pb-[calc(env(safe-area-inset-bottom)+72px)] lg:pb-0"><Outlet /></main>
