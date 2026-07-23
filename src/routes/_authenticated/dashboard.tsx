@@ -15,6 +15,7 @@ import {
 import pilarMentora from "@/assets/pilar-mentora.png.asset.json";
 import pilarPareja from "@/assets/pilar-pareja.png.asset.json";
 import pilarPatron from "@/assets/pilar-patron.png.asset.json";
+import pilarMinistracion from "@/assets/pilar-ministracion.png";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Hoy — ORIGEN" }] }),
@@ -117,6 +118,7 @@ function Dashboard() {
             <PilarBanner to="/chat" image={pilarMentora.url} alt="Conversa con Ruth Esther" />
             <PilarBanner to="/pareja" image={pilarPareja.url} alt="¿Tu pareja es deuda o propósito?" />
             <PilarBanner to="/patrones" image={pilarPatron.url} alt="Encuentra tu patrón familiar" />
+            <PilarBanner to="/ministracion" image={pilarMinistracion} alt="Dios quiere decirte hoy" />
           </div>
         </section>
 
