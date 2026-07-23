@@ -179,6 +179,9 @@ function Dashboard() {
         {/* Reflexión del día */}
         <DailyReflection />
 
+        {/* Quiz diario */}
+        <DailyQuiz />
+
         {/* Descubre hoy — mezcla desbloqueado + bloqueado */}
         <section>
           <div className="flex items-center justify-between mb-2">
