@@ -138,7 +138,7 @@ function ParejaPage() {
 
             <button onClick={begin}
               className="mt-5 btn-primary-gradient w-full h-14 rounded-[16px] inline-flex items-center justify-center gap-2 text-[15px]">
-              <Sparkles className="w-4 h-4" /> Comenzar la lectura <ArrowRight className="w-4 h-4" />
+              <Sparkles className="w-4 h-4" /> Analizar mi pareja <ArrowRight className="w-4 h-4" />
             </button>
             <div className="mt-3 inline-flex items-center gap-1.5 text-[11px] text-muted-foreground w-full justify-center">
               <Lock className="w-3 h-3" /> Información privada y encriptada
