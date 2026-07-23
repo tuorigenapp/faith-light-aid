@@ -212,9 +212,13 @@ function AuthLayout() {
             <span className="text-base">🍃</span>
             <span className="font-display font-bold text-sm text-primary">{gems.toLocaleString()}</span>
           </Link>
+          <Button variant="ghost" size="icon" onClick={toggle} aria-label="Cambiar tema">
+            {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          </Button>
           <Button variant="ghost" size="icon" onClick={() => setOpen(true)} aria-label="Menú">
             <Menu className="w-5 h-5" />
           </Button>
+
         </header>
 
         <main className="flex-1 pb-[calc(env(safe-area-inset-bottom)+72px)] lg:pb-0"><Outlet /></main>
