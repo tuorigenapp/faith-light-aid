@@ -160,12 +160,12 @@ function Visualiza() {
   const selectedCatTitle = cats.find((c: any) => (doneByCat.get(c.id) ?? 0) > 0)?.title ?? null;
   const progressPct = Math.min(100, Math.round((totalDone / 21) * 100));
 
-  // Map methods to their route. Música uses a dynamic categoryId; Limpieza is its own dedicated route.
+  // Map methods to their dedicated route.
   const methodTargets: { to: string; params?: Record<string, string> }[] = [
     firstCatId ? { to: "/visualiza/$categoryId", params: { categoryId: firstCatId } } : { to: "/visualiza" },
     { to: "/visualiza/limpieza" },
     { to: "/visualiza/identidad" },
-    firstCatId ? { to: "/visualiza/$categoryId", params: { categoryId: firstCatId } } : { to: "/visualiza" },
+    { to: "/visualiza/cristo" },
   ];
 
   return (
