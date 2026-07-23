@@ -4,7 +4,7 @@ import { useAuth } from "@/lib/use-auth";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Check, MessageCircle, Send } from "lucide-react";
+import { Check, Leaf, Lock, MessageCircle, Send, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/membresia")({
@@ -12,11 +12,44 @@ export const Route = createFileRoute("/_authenticated/membresia")({
   component: Membresia,
 });
 
-const PLANS = [
-  { id: "inicial", name: "Inicial", price: "$1", per: "/ mes", features: ["Acceso limitado", "10 consultas IA por mes", "Primer módulo"] },
-  { id: "basico", name: "Básico", price: "$9.99", per: "/ mes", features: ["Consultas IA ilimitadas", "Telegram privado", "Soporte WhatsApp", "Biblioteca completa"] },
-  { id: "avanzado", name: "Avanzado", price: "$15.99", per: "/ mes", features: ["Todo del Básico", "Cursos premium", "Herramientas avanzadas", "Recursos exclusivos"], popular: true },
-  { id: "anual", name: "Anual", price: "$85", per: "/ año", features: ["Acceso total", "Soporte prioritario", "Acceso anticipado", "Todos los bonos"] },
+type MembershipPlan = {
+  id: string;
+  name: string;
+  price: string;
+  per: string;
+  billing?: string;
+  features: string[];
+  popular?: boolean;
+  icon: typeof Lock;
+};
+
+const PLANS: MembershipPlan[] = [
+  {
+    id: "explorador",
+    name: "Explorador",
+    price: "$0",
+    per: "/ siempre",
+    features: ["Onboarding personalizado", "1 respuesta diaria de Ruth", "Solo primera etapa", "Diario con límite"],
+    icon: Lock,
+  },
+  {
+    id: "monthly",
+    name: "Camino Origen mensual",
+    price: "$14.99",
+    per: "/ mes",
+    features: ["Chat con Ruth sin límite", "Etapas y ejercicios completos", "Visualízalo y Vívelo", "Pareja y patrón familiar"],
+    icon: Sparkles,
+  },
+  {
+    id: "annual",
+    name: "Camino Origen anual",
+    price: "$5.99",
+    per: "/ mes",
+    billing: "$71.88 al año",
+    features: ["Todo el Camino Origen", "6 meses gratis", "7 días de prueba", "Mejor precio"],
+    popular: true,
+    icon: Leaf,
+  },
 ];
 
 function Membresia() {
@@ -40,29 +73,37 @@ function Membresia() {
     qc.invalidateQueries({ queryKey: ["subscription"] });
   }
 
-  const hasCommunity = sub && ["basico", "avanzado", "anual"].includes(sub.plan);
+  const hasCommunity = sub && ["camino", "annual", "monthly"].includes(sub.plan);
 
   return (
-    <div className="p-6 md:p-10 max-w-6xl mx-auto">
-      <h1 className="font-display text-3xl">Tu membresía</h1>
-      <p className="text-muted-foreground mt-2">Plan actual: <span className="font-medium text-foreground">{PLANS.find(p => p.id === sub?.plan)?.name ?? "Gratis"}</span></p>
+    <div className="px-4 py-6 md:p-10 max-w-6xl mx-auto mobile-safe-bottom lg:pb-10">
+      <section className="hero-card">
+        <div className="inline-flex items-center gap-2 rounded-full bg-secondary px-3 py-1 text-[11px] font-bold text-primary">
+          <Sparkles className="w-3.5 h-3.5" /> 7 días de prueba en Camino Origen
+        </div>
+        <h1 className="font-display font-extrabold text-[30px] leading-tight mt-4">Tu plan para romper el patrón está listo</h1>
+        <p className="text-muted-foreground mt-2 text-sm">Plan actual: <span className="font-semibold text-foreground">{PLANS.find(p => p.id === sub?.plan)?.name ?? "Explorador"}</span>. La información coincide con la landing: anual recomendado a $5.99/mes.</p>
+      </section>
 
-      <div className="mt-8 grid md:grid-cols-4 gap-4">
+      <div className="mt-5 grid md:grid-cols-3 gap-4">
         {PLANS.map(p => {
           const current = sub?.plan === p.id;
+          const Icon = p.icon;
           return (
-            <Card key={p.id} className={`p-6 relative ${p.popular ? "border-gold shadow-glow" : ""}`}>
-              {p.popular && <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[10px] uppercase tracking-widest bg-gold text-gold-foreground px-3 py-1 rounded-full">Popular</span>}
-              <h3 className="font-display text-lg">{p.name}</h3>
+            <Card key={p.id} className={`p-5 relative rounded-[1.25rem] ${p.popular ? "border-2 border-primary shadow-glow" : "shadow-soft"}`}>
+              {p.popular && <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[10px] uppercase tracking-widest bg-primary text-primary-foreground px-3 py-1 rounded-full">6 meses gratis</span>}
+              <div className="w-11 h-11 rounded-2xl bg-secondary text-primary grid place-items-center mb-4"><Icon className="w-5 h-5" /></div>
+              <h3 className="font-display font-bold text-lg leading-tight">{p.name}</h3>
               <div className="mt-2 flex items-baseline gap-1">
-                <span className="font-display text-3xl">{p.price}</span>
+                <span className="font-display font-extrabold text-3xl">{p.price}</span>
                 <span className="text-muted-foreground text-sm">{p.per}</span>
               </div>
+              {p.billing && <p className="text-xs text-primary font-bold mt-1">{p.billing}</p>}
               <ul className="mt-5 space-y-2 text-sm text-muted-foreground">
                 {p.features.map(f => <li key={f} className="flex gap-2"><Check className="w-4 h-4 text-gold shrink-0 mt-0.5" />{f}</li>)}
               </ul>
-              <Button disabled={current} onClick={() => selectPlan(p.id)} className={`w-full mt-6 ${p.popular ? "bg-gold text-gold-foreground hover:bg-gold/90" : ""}`}>
-                {current ? "Plan actual" : "Elegir"}
+              <Button disabled={current} onClick={() => selectPlan(p.id)} className={`w-full mt-6 rounded-[12px] h-12 ${p.popular ? "btn-primary-gradient" : ""}`} variant={p.popular ? "default" : "outline"}>
+                {current ? "Plan actual" : p.id === "annual" ? "Empezar 7 días gratis" : "Elegir plan"}
               </Button>
             </Card>
           );
@@ -95,7 +136,7 @@ function Membresia() {
         </div>
       )}
 
-      <p className="text-xs text-muted-foreground mt-10">Al activar un plan aceptas nuestros términos. Pronto integraremos pagos seguros con Stripe.</p>
+      <p className="text-xs text-muted-foreground mt-8">Al activar un plan aceptas términos, privacidad y reembolsos. Esta pantalla deja lista la membresía; el cobro seguro se conecta al checkout.</p>
     </div>
   );
 }

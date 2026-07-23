@@ -1,10 +1,9 @@
 import { useMemo, useState, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Sparkles, RotateCcw, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { awardGems } from "@/lib/gems";
-import { toast } from "sonner";
 
 type Cell = { r: number; c: number; l: string };
 type Placed = { word: string; cells: Cell[] };
@@ -78,6 +77,7 @@ function lineCells(a: Cell, b: Cell): Cell[] {
 }
 
 export function WordSearch({ words, storageKey, gemsReward = 40 }: { words: string[]; storageKey: string; gemsReward?: number }) {
+  const queryClient = useQueryClient();
   const seed = useMemo(() => storageKey.split("").reduce((a, c) => a + c.charCodeAt(0), 0), [storageKey]);
   const { grid, placed } = useMemo(() => build(words, seed), [words, seed]);
   const initialFound = (() => {
@@ -87,17 +87,20 @@ export function WordSearch({ words, storageKey, gemsReward = 40 }: { words: stri
   const [found, setFound] = useState<string[]>(initialFound);
   const [start, setStart] = useState<Cell | null>(null);
   const [hover, setHover] = useState<Cell | null>(null);
-  const [awarded, setAwarded] = useState(initialFound.length >= words.length);
+  const [awarded, setAwarded] = useState(initialFound.length >= placed.length);
+  const [feedback, setFeedback] = useState<string | null>(null);
 
   useEffect(() => {
     try { localStorage.setItem(`ws:${storageKey}`, JSON.stringify(found)); } catch {}
     if (found.length >= placed.length && placed.length > 0 && !awarded) {
       setAwarded(true);
       awardGems(gemsReward, "wordsearch_completed", { key: storageKey }).then(() => {
-        toast.success(`¡Sopa completada! +${gemsReward} 🍃 hojas de sanación`);
+        queryClient.invalidateQueries({ queryKey: ["profile"] });
+        queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+        setFeedback(`Sopa completada: +${gemsReward} hojas de sanación`);
       });
     }
-  }, [found]);
+  }, [found, awarded, gemsReward, placed.length, queryClient, storageKey]);
 
   const preview = start && hover && sameLine(start, hover) ? lineCells(start, hover) : [];
 
@@ -110,8 +113,11 @@ export function WordSearch({ words, storageKey, gemsReward = 40 }: { words: stri
     const hit = placed.find((p) => (p.word === word || p.word === rev) && !found.includes(p.word));
     if (hit) {
       setFound((f) => [...f, hit.word]);
-      toast.success(`¡Encontraste "${hit.word}"! +5 🍃`);
-      awardGems(5, "wordsearch_word", { word: hit.word });
+      setFeedback(`Encontraste ${hit.word}: +5 hojas`);
+      awardGems(5, "wordsearch_word", { word: hit.word }).then(() => {
+        queryClient.invalidateQueries({ queryKey: ["profile"] });
+        queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      });
     }
     setStart(null);
   }
@@ -123,7 +129,7 @@ export function WordSearch({ words, storageKey, gemsReward = 40 }: { words: stri
   const previewKeys = new Set(preview.map((c) => `${c.r},${c.c}`));
 
   function reset() {
-    setFound([]); setStart(null); setAwarded(false);
+    setFound([]); setStart(null); setAwarded(false); setFeedback(null);
     try { localStorage.removeItem(`ws:${storageKey}`); } catch {}
   }
 
@@ -180,6 +186,9 @@ export function WordSearch({ words, storageKey, gemsReward = 40 }: { words: stri
       </div>
       {awarded && (
         <p className="mt-3 text-xs text-primary font-bold text-center">✨ Completaste el juego. Tus palabras quedaron sembradas en ti.</p>
+      )}
+      {feedback && !awarded && (
+        <p className="mt-3 text-xs text-primary font-bold text-center">{feedback}</p>
       )}
     </Card>
   );

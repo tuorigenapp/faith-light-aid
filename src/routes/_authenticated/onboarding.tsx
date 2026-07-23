@@ -74,7 +74,7 @@ function Onboarding() {
     "Conectando tu experiencia…",
     "Analizando emociones…",
     "Detectando fortalezas…",
-    "Preparando tu diagnóstico personalizado…",
+    "Preparando tu plan ORIGEN personalizado…",
   ];
 
   useEffect(() => {

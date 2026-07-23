@@ -53,13 +53,13 @@ function AuthPage() {
     setLoading(false);
     if (error) return toast.error(error.message);
     if (data.session) {
-      toast.success("Cuenta creada. Comienza tu diagnóstico espiritual.");
-      navigate({ to: "/diagnostico" });
+      toast.success("Cuenta creada. Comienza tu onboarding ORIGEN.");
+      navigate({ to: "/onboarding" });
     } else {
       const signin = await supabase.auth.signInWithPassword({ email, password });
       if (!signin.error) {
-        toast.success("Cuenta creada. Comienza tu diagnóstico espiritual.");
-        navigate({ to: "/diagnostico" });
+        toast.success("Cuenta creada. Comienza tu onboarding ORIGEN.");
+        navigate({ to: "/onboarding" });
       } else {
         toast.success("Cuenta creada. Revisa tu correo para confirmar el acceso.");
       }
@@ -108,7 +108,7 @@ function AuthPage() {
           </Link>
           <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 text-primary px-3 py-1 text-xs font-bold"><Heart className="w-3.5 h-3.5" /> Espacio seguro</div>
           <h1 className="font-display font-extrabold text-4xl text-foreground mt-4">Bienvenido</h1>
-          <p className="mt-2 text-muted-foreground text-sm">Crea tu cuenta, pasa por el diagnóstico y recibe una ruta espiritual personalizada.</p>
+          <p className="mt-2 text-muted-foreground text-sm">Crea tu cuenta, responde el onboarding y recibe una ruta ORIGEN personalizada.</p>
 
           <div className="mt-8 grid gap-2.5">
             <Button onClick={googleSignIn} disabled={loading} variant="outline" className="w-full h-11">

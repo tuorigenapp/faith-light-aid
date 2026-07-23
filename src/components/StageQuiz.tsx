@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Check, Brain, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { awardGems } from "@/lib/gems";
-import { toast } from "sonner";
 
 export type QuizItem = { q: string; options: string[]; correct: number; tip: string };
 
 export function StageQuiz({ items, storageKey, gemsPerCorrect = 15 }: { items: QuizItem[]; storageKey: string; gemsPerCorrect?: number }) {
+  const queryClient = useQueryClient();
   const initial = (() => {
     if (typeof window === "undefined") return {} as Record<number, number>;
     try { return JSON.parse(localStorage.getItem(`quiz:${storageKey}`) || "{}"); } catch { return {}; }
@@ -26,7 +26,8 @@ export function StageQuiz({ items, storageKey, gemsPerCorrect = 15 }: { items: Q
     if (items[qi].correct === oi && !awardedIdx.has(qi)) {
       setAwardedIdx((s) => new Set(s).add(qi));
       awardGems(gemsPerCorrect, "stage_quiz_correct", { key: storageKey, qi }).then(() => {
-        toast.success(`¡Correcto! +${gemsPerCorrect} 🍃`);
+        queryClient.invalidateQueries({ queryKey: ["profile"] });
+        queryClient.invalidateQueries({ queryKey: ["dashboard"] });
       });
     }
   }
@@ -69,7 +70,7 @@ export function StageQuiz({ items, storageKey, gemsPerCorrect = 15 }: { items: Q
               </div>
               {chosen !== undefined && (
                 <div className="mt-2 p-3 rounded-2xl bg-secondary text-xs leading-relaxed">
-                  💡 <span className="font-bold">Reflexión:</span> {it.tip}
+                  <span className="font-bold text-primary">Reflexión:</span> {it.tip}
                 </div>
               )}
             </div>
