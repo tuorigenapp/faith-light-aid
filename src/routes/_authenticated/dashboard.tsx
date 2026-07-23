@@ -112,35 +112,12 @@ function Dashboard() {
           <div className="hairline-brand mb-3" />
 
           <div className="space-y-3">
-            <PilarCard
-              to="/chat"
-              gradient="from-[#7C5CFF] to-[#5AA9FF]"
-              icon={<MessageCircle className="w-6 h-6" />}
-              badge="Mentora en vivo"
-              title="Conversa con Ruth Esther"
-              desc="Cuéntale lo que sientes. Te acompaña con la sabiduría del libro y del método ORIGEN."
-              cta="Abrir conversación"
-            />
-            <PilarCard
-              to="/pareja"
-              gradient="from-[#F58BCB] to-[#7C5CFF]"
-              icon={<HeartHandshake className="w-6 h-6" />}
-              badge="Nuevo"
-              title="¿Tu pareja es deuda o propósito?"
-              desc="Descubre qué viene a enseñarte esta persona. Solo necesitas los datos de ambos."
-              cta="Analizar mi pareja"
-            />
-            <PilarCard
-              to="/patrones"
-              gradient="from-[#3FBE8F] to-[#5AA9FF]"
-              icon={<Users2 className="w-6 h-6" />}
-              badge="Análisis profundo"
-              title="Encuentra tu patrón familiar"
-              desc="Basado en tu árbol y tu historia. Identifica qué se está repitiendo y cómo romperlo."
-              cta="Analizar mi patrón"
-            />
+            <PilarBanner to="/chat" image={pilarMentora.url} alt="Conversa con Ruth Esther" />
+            <PilarBanner to="/pareja" image={pilarPareja.url} alt="¿Tu pareja es deuda o propósito?" />
+            <PilarBanner to="/patrones" image={pilarPatron.url} alt="Encuentra tu patrón familiar" />
           </div>
         </section>
+
 
         {/* Racha + Progreso */}
         <div className="grid grid-cols-2 gap-3">
@@ -270,31 +247,14 @@ function Dashboard() {
   );
 }
 
-function PilarCard({
-  to, gradient, icon, badge, title, desc, cta,
-}: { to: string; gradient: string; icon: React.ReactNode; badge: string; title: string; desc: string; cta: string }) {
+function PilarBanner({ to, image, alt }: { to: string; image: string; alt: string }) {
   return (
-    <Link to={to} className="block app-card overflow-hidden">
-      <div className={`h-1.5 bg-gradient-to-r ${gradient}`} />
-      <div className="p-4 flex items-start gap-3">
-        <div className={`w-12 h-12 shrink-0 rounded-2xl bg-gradient-to-br ${gradient} text-white shadow-soft grid place-items-center`}>
-          {icon}
-        </div>
-        <div className="min-w-0 flex-1">
-          <span className="text-[10px] uppercase tracking-widest font-bold text-primary">{badge}</span>
-          <h4 className="font-display font-bold text-[16px] leading-tight mt-0.5">{title}</h4>
-          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{desc}</p>
-        </div>
-        <ArrowRight className="w-4 h-4 text-muted-foreground self-center shrink-0" />
-      </div>
-      <div className="px-4 pb-3 -mt-1">
-        <span className="text-[11px] font-bold text-primary inline-flex items-center gap-1">
-          {cta} <ArrowRight className="w-3 h-3" />
-        </span>
-      </div>
+    <Link to={to} className="block rounded-[20px] overflow-hidden shadow-soft hover:shadow-glow transition-all hover-scale">
+      <img src={image} alt={alt} loading="lazy" className="w-full h-auto block" />
     </Link>
   );
 }
+
 
 const PALABRAS = [
   "Hoy tu linaje respira contigo. Cada paso que das aquí también sana a los que vinieron antes.",
