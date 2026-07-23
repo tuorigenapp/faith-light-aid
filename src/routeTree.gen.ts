@@ -16,6 +16,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiPatronesRouteImport } from './routes/api/patrones'
 import { Route as ApiParejaRouteImport } from './routes/api/pareja'
+import { Route as ApiMinistracionRouteImport } from './routes/api/ministracion'
 import { Route as ApiIntakeClosureRouteImport } from './routes/api/intake-closure'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedVisualizaRouteImport } from './routes/_authenticated/visualiza'
@@ -24,6 +25,7 @@ import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedPatronesRouteImport } from './routes/_authenticated/patrones'
 import { Route as AuthenticatedParejaRouteImport } from './routes/_authenticated/pareja'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
+import { Route as AuthenticatedMinistracionRouteImport } from './routes/_authenticated/ministracion'
 import { Route as AuthenticatedMembresiaRouteImport } from './routes/_authenticated/membresia'
 import { Route as AuthenticatedInvitaRouteImport } from './routes/_authenticated/invita'
 import { Route as AuthenticatedEtapasRouteImport } from './routes/_authenticated/etapas'
@@ -76,6 +78,11 @@ const ApiParejaRoute = ApiParejaRouteImport.update({
   path: '/api/pareja',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiMinistracionRoute = ApiMinistracionRouteImport.update({
+  id: '/api/ministracion',
+  path: '/api/ministracion',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiIntakeClosureRoute = ApiIntakeClosureRouteImport.update({
   id: '/api/intake-closure',
   path: '/api/intake-closure',
@@ -116,6 +123,12 @@ const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
   path: '/onboarding',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedMinistracionRoute =
+  AuthenticatedMinistracionRouteImport.update({
+    id: '/ministracion',
+    path: '/ministracion',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedMembresiaRoute = AuthenticatedMembresiaRouteImport.update({
   id: '/membresia',
   path: '/membresia',
@@ -225,6 +238,7 @@ export interface FileRoutesByFullPath {
   '/etapas': typeof AuthenticatedEtapasRouteWithChildren
   '/invita': typeof AuthenticatedInvitaRoute
   '/membresia': typeof AuthenticatedMembresiaRoute
+  '/ministracion': typeof AuthenticatedMinistracionRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/pareja': typeof AuthenticatedParejaRoute
   '/patrones': typeof AuthenticatedPatronesRoute
@@ -233,6 +247,7 @@ export interface FileRoutesByFullPath {
   '/visualiza': typeof AuthenticatedVisualizaRouteWithChildren
   '/api/chat': typeof ApiChatRoute
   '/api/intake-closure': typeof ApiIntakeClosureRoute
+  '/api/ministracion': typeof ApiMinistracionRoute
   '/api/pareja': typeof ApiParejaRoute
   '/api/patrones': typeof ApiPatronesRoute
   '/etapas/$stageId': typeof AuthenticatedEtapasStageIdRoute
@@ -258,6 +273,7 @@ export interface FileRoutesByTo {
   '/etapas': typeof AuthenticatedEtapasRouteWithChildren
   '/invita': typeof AuthenticatedInvitaRoute
   '/membresia': typeof AuthenticatedMembresiaRoute
+  '/ministracion': typeof AuthenticatedMinistracionRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/pareja': typeof AuthenticatedParejaRoute
   '/patrones': typeof AuthenticatedPatronesRoute
@@ -266,6 +282,7 @@ export interface FileRoutesByTo {
   '/visualiza': typeof AuthenticatedVisualizaRouteWithChildren
   '/api/chat': typeof ApiChatRoute
   '/api/intake-closure': typeof ApiIntakeClosureRoute
+  '/api/ministracion': typeof ApiMinistracionRoute
   '/api/pareja': typeof ApiParejaRoute
   '/api/patrones': typeof ApiPatronesRoute
   '/etapas/$stageId': typeof AuthenticatedEtapasStageIdRoute
@@ -293,6 +310,7 @@ export interface FileRoutesById {
   '/_authenticated/etapas': typeof AuthenticatedEtapasRouteWithChildren
   '/_authenticated/invita': typeof AuthenticatedInvitaRoute
   '/_authenticated/membresia': typeof AuthenticatedMembresiaRoute
+  '/_authenticated/ministracion': typeof AuthenticatedMinistracionRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/pareja': typeof AuthenticatedParejaRoute
   '/_authenticated/patrones': typeof AuthenticatedPatronesRoute
@@ -301,6 +319,7 @@ export interface FileRoutesById {
   '/_authenticated/visualiza': typeof AuthenticatedVisualizaRouteWithChildren
   '/api/chat': typeof ApiChatRoute
   '/api/intake-closure': typeof ApiIntakeClosureRoute
+  '/api/ministracion': typeof ApiMinistracionRoute
   '/api/pareja': typeof ApiParejaRoute
   '/api/patrones': typeof ApiPatronesRoute
   '/_authenticated/etapas/$stageId': typeof AuthenticatedEtapasStageIdRoute
@@ -328,6 +347,7 @@ export interface FileRouteTypes {
     | '/etapas'
     | '/invita'
     | '/membresia'
+    | '/ministracion'
     | '/onboarding'
     | '/pareja'
     | '/patrones'
@@ -336,6 +356,7 @@ export interface FileRouteTypes {
     | '/visualiza'
     | '/api/chat'
     | '/api/intake-closure'
+    | '/api/ministracion'
     | '/api/pareja'
     | '/api/patrones'
     | '/etapas/$stageId'
@@ -361,6 +382,7 @@ export interface FileRouteTypes {
     | '/etapas'
     | '/invita'
     | '/membresia'
+    | '/ministracion'
     | '/onboarding'
     | '/pareja'
     | '/patrones'
@@ -369,6 +391,7 @@ export interface FileRouteTypes {
     | '/visualiza'
     | '/api/chat'
     | '/api/intake-closure'
+    | '/api/ministracion'
     | '/api/pareja'
     | '/api/patrones'
     | '/etapas/$stageId'
@@ -395,6 +418,7 @@ export interface FileRouteTypes {
     | '/_authenticated/etapas'
     | '/_authenticated/invita'
     | '/_authenticated/membresia'
+    | '/_authenticated/ministracion'
     | '/_authenticated/onboarding'
     | '/_authenticated/pareja'
     | '/_authenticated/patrones'
@@ -403,6 +427,7 @@ export interface FileRouteTypes {
     | '/_authenticated/visualiza'
     | '/api/chat'
     | '/api/intake-closure'
+    | '/api/ministracion'
     | '/api/pareja'
     | '/api/patrones'
     | '/_authenticated/etapas/$stageId'
@@ -421,6 +446,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiIntakeClosureRoute: typeof ApiIntakeClosureRoute
+  ApiMinistracionRoute: typeof ApiMinistracionRoute
   ApiParejaRoute: typeof ApiParejaRoute
   ApiPatronesRoute: typeof ApiPatronesRoute
 }
@@ -474,6 +500,13 @@ declare module '@tanstack/react-router' {
       path: '/api/pareja'
       fullPath: '/api/pareja'
       preLoaderRoute: typeof ApiParejaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/ministracion': {
+      id: '/api/ministracion'
+      path: '/api/ministracion'
+      fullPath: '/api/ministracion'
+      preLoaderRoute: typeof ApiMinistracionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/intake-closure': {
@@ -530,6 +563,13 @@ declare module '@tanstack/react-router' {
       path: '/onboarding'
       fullPath: '/onboarding'
       preLoaderRoute: typeof AuthenticatedOnboardingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/ministracion': {
+      id: '/_authenticated/ministracion'
+      path: '/ministracion'
+      fullPath: '/ministracion'
+      preLoaderRoute: typeof AuthenticatedMinistracionRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/membresia': {
@@ -713,6 +753,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedEtapasRoute: typeof AuthenticatedEtapasRouteWithChildren
   AuthenticatedInvitaRoute: typeof AuthenticatedInvitaRoute
   AuthenticatedMembresiaRoute: typeof AuthenticatedMembresiaRoute
+  AuthenticatedMinistracionRoute: typeof AuthenticatedMinistracionRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedParejaRoute: typeof AuthenticatedParejaRoute
   AuthenticatedPatronesRoute: typeof AuthenticatedPatronesRoute
@@ -733,6 +774,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedEtapasRoute: AuthenticatedEtapasRouteWithChildren,
   AuthenticatedInvitaRoute: AuthenticatedInvitaRoute,
   AuthenticatedMembresiaRoute: AuthenticatedMembresiaRoute,
+  AuthenticatedMinistracionRoute: AuthenticatedMinistracionRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedParejaRoute: AuthenticatedParejaRoute,
   AuthenticatedPatronesRoute: AuthenticatedPatronesRoute,
@@ -752,6 +794,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiChatRoute: ApiChatRoute,
   ApiIntakeClosureRoute: ApiIntakeClosureRoute,
+  ApiMinistracionRoute: ApiMinistracionRoute,
   ApiParejaRoute: ApiParejaRoute,
   ApiPatronesRoute: ApiPatronesRoute,
 }
