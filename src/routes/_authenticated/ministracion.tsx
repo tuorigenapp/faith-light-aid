@@ -3,11 +3,14 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  ArrowLeft, ArrowRight, Sparkles, BookOpen, Lock,
+  ArrowLeft, ArrowRight, Sparkles, Lock, Download,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import heroImg from "@/assets/ministracion-hero.jpg";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/use-auth";
+import { printMinistracion } from "@/lib/print-pdf";
 
 export const Route = createFileRoute("/_authenticated/ministracion")({
   head: () => ({ meta: [{ title: "Lo que Dios quiere decirte hoy — ORIGEN" }] }),
@@ -34,6 +37,7 @@ const LOADING_LINES = [
 
 function MinistracionPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({ name: "", dob: "", question: "" });
   const [line, setLine] = useState(0);
@@ -63,12 +67,46 @@ function MinistracionPage() {
       setProgress(100);
       setResult(j);
       setStep(3);
+      // Persist the ministración for user's history
+      if (user) {
+        supabase.from("ministracion_lecturas").insert({
+          user_id: user.id,
+          name: form.name || null,
+          dob: form.dob || null,
+          question: form.question || null,
+          headline: j.headline ?? null,
+          dictamen: j.dictamen ?? null,
+          linea_tiempo: j.linea_tiempo ?? null,
+          senales: j.senales ?? null,
+          ministracion: j.ministracion ?? null,
+          versiculo: j.versiculo ?? null,
+          rompe_ciclo: j.rompe_ciclo ?? null,
+        }).then(({ error }) => { if (error) console.warn("save ministracion:", error.message); });
+      }
     } catch (e) {
       clearInterval(timer);
       toast.error((e as Error).message);
       setStep(1);
     }
   }
+
+  function downloadPdf() {
+    if (!result) return;
+    printMinistracion({
+      title: result.headline,
+      subtitle: form.question ? `Consulta: ${form.question}` : undefined,
+      meta: new Date().toLocaleString("es", { dateStyle: "long", timeStyle: "short" }),
+      sections: [
+        { emoji: "⚖️", title: "Dictamen de la Corte Celestial", body: result.dictamen },
+        { emoji: "⏳", title: "Línea de tiempo", body: result.linea_tiempo },
+        { emoji: "🕊️", title: "Señales de confirmación", body: (result.senales ?? []).map((s, i) => `${i+1}. ${s}`).join("\n") },
+        { emoji: "💫", title: "Ministración para tu vida", body: result.ministracion },
+        ...(result.rompe_ciclo ? [{ emoji: "⛓️‍💥", title: "Consejo del Cielo: Rompe el ciclo", body: result.rompe_ciclo }] : []),
+        ...(result.versiculo ? [{ emoji: "📖", title: "Palabra que respalda el decreto", body: result.versiculo }] : []),
+      ],
+    });
+  }
+
 
   return (
     <div className="relative min-h-[calc(100vh-4rem)] bg-aura-top">
@@ -207,14 +245,18 @@ function MinistracionPage() {
               </ResultBlock>
             )}
 
-            <div className="grid grid-cols-2 gap-2 pt-2">
+            <button onClick={downloadPdf}
+              className="w-full h-12 rounded-[14px] btn-primary-gradient text-sm inline-flex items-center justify-center gap-2">
+              <Download className="w-4 h-4" /> Descargar mi ministración en PDF
+            </button>
+            <div className="grid grid-cols-2 gap-2 pt-1">
               <button onClick={() => { setResult(null); setStep(1); }}
                 className="h-12 rounded-[14px] border border-border bg-white font-semibold text-sm">
-                Recibir nueva ministración
+                Recibir nueva
               </button>
-              <button onClick={() => navigate({ to: "/dashboard" })}
-                className="h-12 rounded-[14px] btn-primary-gradient text-sm">
-                Volver al inicio
+              <button onClick={() => navigate({ to: "/perfil" })}
+                className="h-12 rounded-[14px] border border-border bg-white font-semibold text-sm">
+                Ver mi historial
               </button>
             </div>
           </div>

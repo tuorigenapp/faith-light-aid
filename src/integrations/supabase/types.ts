@@ -646,6 +646,54 @@ export type Database = {
           },
         ]
       }
+      ministracion_lecturas: {
+        Row: {
+          created_at: string
+          dictamen: string | null
+          dob: string | null
+          headline: string | null
+          id: string
+          linea_tiempo: string | null
+          ministracion: string | null
+          name: string | null
+          question: string | null
+          rompe_ciclo: string | null
+          senales: Json | null
+          user_id: string
+          versiculo: string | null
+        }
+        Insert: {
+          created_at?: string
+          dictamen?: string | null
+          dob?: string | null
+          headline?: string | null
+          id?: string
+          linea_tiempo?: string | null
+          ministracion?: string | null
+          name?: string | null
+          question?: string | null
+          rompe_ciclo?: string | null
+          senales?: Json | null
+          user_id: string
+          versiculo?: string | null
+        }
+        Update: {
+          created_at?: string
+          dictamen?: string | null
+          dob?: string | null
+          headline?: string | null
+          id?: string
+          linea_tiempo?: string | null
+          ministracion?: string | null
+          name?: string | null
+          question?: string | null
+          rompe_ciclo?: string | null
+          senales?: Json | null
+          user_id?: string
+          versiculo?: string | null
+        }
+        Relationships: []
+      }
       pareja_lecturas: {
         Row: {
           advice: string | null
