@@ -16,7 +16,7 @@ import pilarMentora from "@/assets/pilar-mentora.png.asset.json";
 import pilarPareja from "@/assets/pilar-pareja.png.asset.json";
 import pilarPatron from "@/assets/pilar-patron.png.asset.json";
 import pilarMinistracion from "@/assets/dios-te-dice-hoy.png.asset.json";
-import visualizaBanner from "@/assets/visualiza-banner-home.png.asset.json";
+import visualizaBanner from "@/assets/visualiza-banner-home-v2.png.asset.json";
 import afiliacionBanner from "@/assets/afiliacion-origen-home.png.asset.json";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
@@ -98,7 +98,7 @@ function Dashboard() {
         {/* 3 pilares principales */}
         <section>
           <div className="flex items-center justify-between mb-2">
-            <h3 className="font-display font-bold text-[15px]">Los 3 pilares del método</h3>
+            <h3 className="font-display font-bold text-[15px]">Los 4 pilares más TOP del Método ORIGEN🔥</h3>
           </div>
           <div className="hairline-brand mb-3" />
 
