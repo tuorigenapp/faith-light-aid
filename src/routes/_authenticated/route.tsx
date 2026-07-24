@@ -209,42 +209,45 @@ function AuthLayout() {
       )}
 
       <div className="flex-1 min-w-0 flex flex-col">
-        {/* Mobile top: horizontal deslizante de secciones */}
-        <div className="lg:hidden sticky top-0 z-20 bg-aura-top/95 backdrop-blur-xl border-b border-border/60">
-          <div className="flex items-center gap-2 px-3 pt-3">
-            <Link to="/perfil" className="flex items-center gap-2 min-w-0 flex-1">
-              <div className="w-11 h-11 rounded-2xl bg-brand-gradient shadow-glow text-white grid place-items-center font-display font-bold shrink-0">
-                {displayName.slice(0, 1).toUpperCase()}
-              </div>
-              <div className="min-w-0 leading-tight">
-                <div className="text-[10px] uppercase text-muted-foreground tracking-wider truncate">
-                  {new Date().toLocaleDateString("es", { weekday: "long", day: "numeric", month: "long" })}
-                </div>
-                <div className="font-display font-bold text-[17px] truncate">Hola, {displayName}</div>
-              </div>
-            </Link>
-            <Link to="/premios" className="inline-flex items-center gap-1.5 rounded-full pl-2 pr-3 h-9 bg-white border border-border shadow-soft" aria-label="Hojas de sanación">
-              <span className="text-base">🍃</span>
-              <span className="font-display font-bold text-sm text-primary">{gems.toLocaleString()}</span>
-            </Link>
-            <Button variant="ghost" size="icon" onClick={toggle} aria-label="Cambiar tema" className="shrink-0">
-              {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-            </Button>
-            <Button variant="ghost" size="icon" onClick={() => setOpen(true)} aria-label="Menú" className="shrink-0">
-              <Menu className="w-5 h-5" />
-            </Button>
-          </div>
-
-          <div className="overflow-x-auto no-scrollbar px-3 py-3">
+        {/* Mobile top: una sola fila deslizante con nombre + saldo + todas las secciones */}
+        <div className="lg:hidden px-3 pt-3 pb-1">
+          <div className="overflow-x-auto no-scrollbar">
             <ul className="flex items-center gap-2 w-max">
+              {/* Nombre + saldo inline */}
+              <li className="shrink-0">
+                <Link
+                  to="/perfil"
+                  className="inline-flex items-center gap-2 h-11 pl-1.5 pr-3 rounded-2xl bg-white border-2 border-primary/30 shadow-soft"
+                >
+                  <span className="w-8 h-8 rounded-xl bg-brand-gradient text-white grid place-items-center font-display font-bold text-sm shrink-0">
+                    {displayName.slice(0, 1).toUpperCase()}
+                  </span>
+                  <span className="font-display font-bold text-[13px] text-foreground truncate max-w-[90px]">{displayName}</span>
+                  <span className="inline-flex items-center gap-1 pl-2 ml-1 border-l border-border">
+                    <span className="text-base leading-none">🍃</span>
+                    <span className="font-display font-bold text-[13px] text-primary">{gems.toLocaleString()}</span>
+                  </span>
+                </Link>
+              </li>
+              {/* Toggle tema como chip */}
+              <li className="shrink-0">
+                <button
+                  onClick={toggle}
+                  aria-label="Cambiar tema"
+                  className="inline-flex items-center justify-center h-11 w-11 rounded-2xl border-2 border-border/70 bg-white/80 text-foreground/80"
+                >
+                  {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                </button>
+              </li>
+              {/* Todas las secciones */}
               {TOP_CHIPS.map(({ to, label, icon: Icon }) => {
                 const active = isActive(to);
                 return (
-                  <li key={to}>
+                  <li key={to} className="shrink-0">
                     <Link
                       to={to}
                       className={cn(
-                        "inline-flex items-center gap-1.5 h-11 px-3.5 rounded-2xl border-2 text-[13px] font-semibold whitespace-nowrap transition-all shrink-0",
+                        "inline-flex items-center gap-1.5 h-11 px-3.5 rounded-2xl border-2 text-[13px] font-semibold whitespace-nowrap transition-all",
                         active
                           ? "border-primary bg-primary/10 text-primary shadow-soft"
                           : "border-border/70 bg-white/80 text-foreground/80 hover:border-primary/40"
@@ -256,6 +259,26 @@ function AuthLayout() {
                   </li>
                 );
               })}
+              {isAdmin && (
+                <li className="shrink-0">
+                  <Link
+                    to="/admin"
+                    className="inline-flex items-center gap-1.5 h-11 px-3.5 rounded-2xl border-2 border-primary/40 bg-primary/5 text-primary text-[13px] font-semibold"
+                  >
+                    <Shield className="w-4 h-4" />
+                    Admin
+                  </Link>
+                </li>
+              )}
+              <li className="shrink-0">
+                <button
+                  onClick={signOut}
+                  className="inline-flex items-center gap-1.5 h-11 px-3.5 rounded-2xl border-2 border-border/70 bg-white/80 text-foreground/70 text-[13px] font-semibold"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Salir
+                </button>
+              </li>
             </ul>
           </div>
         </div>
@@ -282,12 +305,12 @@ function AuthLayout() {
             <Link
               to="/dashboard"
               aria-label="Inicio"
-              className="absolute left-1/2 -translate-x-1/2 -top-6 w-16 h-16 rounded-[22px] bg-white shadow-[0_12px_30px_-6px_rgba(124,92,255,0.55)] grid place-items-center border border-border/60 active:scale-95 transition-transform"
+              className="absolute left-1/2 -translate-x-1/2 -top-6 w-16 h-16 rounded-[22px] overflow-hidden shadow-[0_12px_30px_-6px_rgba(124,92,255,0.55)] border border-border/60 active:scale-95 transition-transform bg-white"
             >
-              <img src={origenIcon.url} alt="" className="w-14 h-14 object-contain" />
+              <img src={origenIcon.url} alt="" className="w-full h-full object-cover" />
               <span
                 className={cn(
-                  "absolute -bottom-4 text-[10px] font-bold uppercase tracking-widest",
+                  "absolute left-1/2 -translate-x-1/2 -bottom-4 text-[10px] font-bold uppercase tracking-widest",
                   isActive("/dashboard") ? "text-primary" : "text-muted-foreground"
                 )}
               >
