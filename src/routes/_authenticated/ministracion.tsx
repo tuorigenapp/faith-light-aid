@@ -245,14 +245,18 @@ function MinistracionPage() {
               </ResultBlock>
             )}
 
-            <div className="grid grid-cols-2 gap-2 pt-2">
+            <button onClick={downloadPdf}
+              className="w-full h-12 rounded-[14px] btn-primary-gradient text-sm inline-flex items-center justify-center gap-2">
+              <Download className="w-4 h-4" /> Descargar mi ministración en PDF
+            </button>
+            <div className="grid grid-cols-2 gap-2 pt-1">
               <button onClick={() => { setResult(null); setStep(1); }}
                 className="h-12 rounded-[14px] border border-border bg-white font-semibold text-sm">
-                Recibir nueva ministración
+                Recibir nueva
               </button>
-              <button onClick={() => navigate({ to: "/dashboard" })}
-                className="h-12 rounded-[14px] btn-primary-gradient text-sm">
-                Volver al inicio
+              <button onClick={() => navigate({ to: "/perfil" })}
+                className="h-12 rounded-[14px] border border-border bg-white font-semibold text-sm">
+                Ver mi historial
               </button>
             </div>
           </div>
