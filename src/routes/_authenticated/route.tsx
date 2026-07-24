@@ -8,7 +8,7 @@ import {
   Headphones, TreeDeciduous, Trophy, HeartHandshake, Sparkles,
   MoveUpRight, Settings, Route as RouteIcon,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
