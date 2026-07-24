@@ -314,6 +314,7 @@ export type Database = {
           id: string
           lineage: string
           notes: string | null
+          photo_url: string | null
           relationship: string
           user_id: string
         }
@@ -323,6 +324,7 @@ export type Database = {
           id?: string
           lineage: string
           notes?: string | null
+          photo_url?: string | null
           relationship: string
           user_id: string
         }
@@ -332,6 +334,7 @@ export type Database = {
           id?: string
           lineage?: string
           notes?: string | null
+          photo_url?: string | null
           relationship?: string
           user_id?: string
         }
