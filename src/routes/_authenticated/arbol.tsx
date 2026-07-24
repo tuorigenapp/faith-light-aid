@@ -40,7 +40,7 @@ function TreePage() {
     queryKey: ["family_members", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const { data } = await supabase.from("family_members").select("*").eq("user_id", user!.id).order("created_at");
+      const { data } = await supabase.from("family_members").select("id, full_name, relationship, lineage, photo_url").eq("user_id", user!.id).order("created_at");
       return data ?? [];
     },
   });
