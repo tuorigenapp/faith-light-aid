@@ -27,12 +27,20 @@ export const Route = createFileRoute("/_authenticated")({
 });
 
 const TOP_CHIPS = [
+  { to: "/dashboard", label: "Inicio", icon: Home },
   { to: "/etapas", label: "Mi Camino", icon: MoveUpRight },
-  { to: "/pareja", label: "Pares", icon: HeartHandshake },
+  { to: "/chat", label: "Ruth Esther", icon: MessageCircle },
+  { to: "/pareja", label: "Pareja", icon: HeartHandshake },
+  { to: "/patrones", label: "Patrones", icon: Sparkles },
+  { to: "/ministracion", label: "Dios te dice hoy", icon: Sparkles },
+  { to: "/arbol", label: "Mi árbol", icon: TreeDeciduous },
   { to: "/visualiza", label: "Vívelo", icon: Headphones },
-  { to: "/perfil", label: "Mi Perfil", icon: UserIcon },
-  { to: "/chat", label: "Mensajes", icon: MessageCircle },
-  { to: "/membresia", label: "Configuración", icon: Settings },
+  { to: "/diario", label: "Diario", icon: BookHeart },
+  { to: "/ejercicios", label: "Ejercicios", icon: Dumbbell },
+  { to: "/premios", label: "Premios", icon: Trophy },
+  { to: "/invita", label: "Invita", icon: HeartHandshake },
+  { to: "/membresia", label: "Membresía", icon: CreditCard },
+  { to: "/perfil", label: "Perfil", icon: UserIcon },
 ] as const;
 
 
