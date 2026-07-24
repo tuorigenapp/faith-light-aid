@@ -4,9 +4,9 @@ import { useAuth } from "@/lib/use-auth";
 import { useTheme } from "@/lib/theme";
 import {
   Home, MessageCircle, Layers, BookHeart, Dumbbell,
-  CreditCard, User as UserIcon, Shield, LogOut, Menu, Sun, Moon, X,
+  CreditCard, User as UserIcon, Shield, LogOut, Sun, Moon, X,
   Headphones, TreeDeciduous, Trophy, HeartHandshake, Sparkles,
-  MoveUpRight, Settings, Route as RouteIcon,
+  MoveUpRight, Route as RouteIcon,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
