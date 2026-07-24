@@ -66,22 +66,8 @@ function Dashboard() {
   return (
     <div className="relative min-h-[calc(100vh-4rem)] bg-aura-top">
       <div className="relative z-10 max-w-lg lg:max-w-4xl mx-auto px-4 pt-4 pb-10 space-y-4">
-        {/* Greeting header */}
-        <header className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-11 h-11 rounded-2xl bg-brand-gradient shadow-glow grid place-items-center text-white font-display font-bold shrink-0">
-              {displayName.slice(0, 1).toUpperCase()}
-            </div>
-            <div className="min-w-0">
-              <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">
-                {format(new Date(), "EEEE d 'de' MMMM", { locale: es })}
-              </p>
-              <h1 className="font-display font-bold text-[20px] leading-tight truncate">
-                Hola, {displayName}
-              </h1>
-            </div>
-          </div>
-        </header>
+        {/* Greeting ahora vive en el header móvil deslizante */}
+
 
         {/* Hero mission */}
         <div className="hero-card">
