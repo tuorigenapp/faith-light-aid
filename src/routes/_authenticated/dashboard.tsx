@@ -206,19 +206,12 @@ function Dashboard() {
         </section>
 
         {/* Invita y gana */}
-        <Link to="/invita" className="app-card p-5 relative overflow-hidden">
-          <div className="absolute -right-4 -bottom-4 text-6xl opacity-10">💜</div>
-          <div className="flex items-start gap-3 relative">
-            <div className="w-10 h-10 rounded-xl bg-brand-gradient grid place-items-center text-white shadow-glow">
-              <Sparkles className="w-5 h-5" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="text-[10px] uppercase tracking-widest text-primary font-bold">Invita sin presión</div>
-              <h4 className="font-display font-bold text-[15px] mt-0.5">¿Conoces a alguien que necesite esto?</h4>
-              <p className="text-xs text-muted-foreground mt-1">Comparte tu enlace, ayuda a un ser querido y gana un dinerito extra.</p>
-            </div>
-            <ArrowRight className="w-4 h-4 text-primary self-center" />
-          </div>
+        <Link
+          to="/invita"
+          aria-label="Afiliación ORIGEN — gana el 70% al compartir"
+          className="block rounded-[24px] overflow-hidden shadow-soft hover:shadow-glow transition-all hover-scale"
+        >
+          <img src={afiliacionBanner.url} alt="Afiliación ORIGEN — Gana el 70% de ganancias al compartir ORIGEN" loading="lazy" className="w-full h-auto block" />
         </Link>
 
         {/* Premios */}
