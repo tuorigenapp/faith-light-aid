@@ -26,13 +26,15 @@ export const Route = createFileRoute("/_authenticated")({
   component: AuthLayout,
 });
 
-const BOTTOM_NAV = [
-  { to: "/dashboard", label: "Inicio", icon: Home },
-  { to: "/etapas", label: "Camino", icon: Layers },
-  { to: "/pareja", label: "Pareja", icon: HeartHandshake },
+const TOP_CHIPS = [
+  { to: "/etapas", label: "Mi Camino", icon: MoveUpRight },
+  { to: "/pareja", label: "Pares", icon: HeartHandshake },
   { to: "/visualiza", label: "Vívelo", icon: Headphones },
-  { to: "/perfil", label: "Yo", icon: UserIcon },
+  { to: "/perfil", label: "Mi Perfil", icon: UserIcon },
+  { to: "/chat", label: "Mensajes", icon: MessageCircle },
+  { to: "/membresia", label: "Configuración", icon: Settings },
 ] as const;
+
 
 const FULL_NAV = [
   { to: "/dashboard", label: "Inicio", icon: Home },
