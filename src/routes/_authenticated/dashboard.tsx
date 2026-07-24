@@ -16,6 +16,7 @@ import pilarMentora from "@/assets/pilar-mentora.png.asset.json";
 import pilarPareja from "@/assets/pilar-pareja.png.asset.json";
 import pilarPatron from "@/assets/pilar-patron.png.asset.json";
 import pilarMinistracion from "@/assets/dios-te-dice-hoy.png.asset.json";
+import visualizaBanner from "@/assets/visualiza-banner-home.png.asset.json";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Hoy — ORIGEN" }] }),
@@ -65,22 +66,8 @@ function Dashboard() {
   return (
     <div className="relative min-h-[calc(100vh-4rem)] bg-aura-top">
       <div className="relative z-10 max-w-lg lg:max-w-4xl mx-auto px-4 pt-4 pb-10 space-y-4">
-        {/* Greeting header */}
-        <header className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-11 h-11 rounded-2xl bg-brand-gradient shadow-glow grid place-items-center text-white font-display font-bold shrink-0">
-              {displayName.slice(0, 1).toUpperCase()}
-            </div>
-            <div className="min-w-0">
-              <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">
-                {format(new Date(), "EEEE d 'de' MMMM", { locale: es })}
-              </p>
-              <h1 className="font-display font-bold text-[20px] leading-tight truncate">
-                Hola, {displayName}
-              </h1>
-            </div>
-          </div>
-        </header>
+        {/* Greeting ahora vive en el header móvil deslizante */}
+
 
         {/* Hero mission */}
         <div className="hero-card">
@@ -164,6 +151,16 @@ function Dashboard() {
 
         {/* Árbol de Sanación */}
         <HealingTree />
+
+        {/* Banner Visualízalo y Vívelo */}
+        <Link
+          to="/visualiza"
+          aria-label="Visualízalo y Vívelo — descubre todas nuestras categorías"
+          className="block rounded-[24px] overflow-hidden shadow-soft hover:shadow-glow transition-all hover-scale"
+        >
+          <img src={visualizaBanner.url} alt="Descubre todas nuestras categorías — Visualízalo y Vívelo" loading="lazy" className="w-full h-auto block" />
+        </Link>
+
 
         {/* Reflexión del día */}
         <DailyReflection />

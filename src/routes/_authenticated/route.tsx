@@ -6,12 +6,15 @@ import {
   Home, MessageCircle, Layers, BookHeart, Dumbbell,
   CreditCard, User as UserIcon, Shield, LogOut, Menu, Sun, Moon, X,
   Headphones, TreeDeciduous, Trophy, HeartHandshake, Sparkles,
+  MoveUpRight, Settings, Route as RouteIcon,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { FloatingChatFab } from "@/components/FloatingChatFab";
+import origenIcon from "@/assets/origen-o-icon.png.asset.json";
+
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -23,13 +26,15 @@ export const Route = createFileRoute("/_authenticated")({
   component: AuthLayout,
 });
 
-const BOTTOM_NAV = [
-  { to: "/dashboard", label: "Inicio", icon: Home },
-  { to: "/etapas", label: "Camino", icon: Layers },
-  { to: "/pareja", label: "Pareja", icon: HeartHandshake },
+const TOP_CHIPS = [
+  { to: "/etapas", label: "Mi Camino", icon: MoveUpRight },
+  { to: "/pareja", label: "Pares", icon: HeartHandshake },
   { to: "/visualiza", label: "Vívelo", icon: Headphones },
-  { to: "/perfil", label: "Yo", icon: UserIcon },
+  { to: "/perfil", label: "Mi Perfil", icon: UserIcon },
+  { to: "/chat", label: "Mensajes", icon: MessageCircle },
+  { to: "/membresia", label: "Configuración", icon: Settings },
 ] as const;
+
 
 const FULL_NAV = [
   { to: "/dashboard", label: "Inicio", icon: Home },
@@ -196,58 +201,113 @@ function AuthLayout() {
       )}
 
       <div className="flex-1 min-w-0 flex flex-col">
-        {/* Mobile header */}
-        <header className="lg:hidden sticky top-0 z-20 grid grid-cols-[auto_minmax(0,1fr)_auto_auto_auto] items-center gap-1.5 px-3 h-16 bg-white/85 dark:bg-background/85 backdrop-blur-xl border-b border-border">
-          <Link to="/perfil" className="flex items-center gap-2 min-w-0 rounded-2xl px-1.5 py-1 hover:bg-secondary/60">
-            <div className="w-9 h-9 rounded-2xl bg-brand-gradient shadow-glow text-white grid place-items-center font-display font-bold text-sm shrink-0">
-              {displayName.slice(0, 1).toUpperCase()}
-            </div>
-            <div className="min-w-0 leading-tight">
-              <div className="text-[10px] uppercase text-muted-foreground tracking-wider truncate">Hola</div>
-              <div className="font-display font-bold text-sm truncate">{displayName}</div>
-            </div>
-          </Link>
-          <div />
-          <Link to="/premios" className="justify-self-end inline-flex items-center gap-1.5 rounded-full pl-2 pr-3 h-9 bg-white border border-border shadow-soft" aria-label="Hojas de sanación">
-            <span className="text-base">🍃</span>
-            <span className="font-display font-bold text-sm text-primary">{gems.toLocaleString()}</span>
-          </Link>
-          <Button variant="ghost" size="icon" onClick={toggle} aria-label="Cambiar tema">
-            {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-          </Button>
-          <Button variant="ghost" size="icon" onClick={() => setOpen(true)} aria-label="Menú">
-            <Menu className="w-5 h-5" />
-          </Button>
+        {/* Mobile top: horizontal deslizante de secciones */}
+        <div className="lg:hidden sticky top-0 z-20 bg-aura-top/95 backdrop-blur-xl border-b border-border/60">
+          <div className="flex items-center gap-2 px-3 pt-3">
+            <Link to="/perfil" className="flex items-center gap-2 min-w-0 flex-1">
+              <div className="w-11 h-11 rounded-2xl bg-brand-gradient shadow-glow text-white grid place-items-center font-display font-bold shrink-0">
+                {displayName.slice(0, 1).toUpperCase()}
+              </div>
+              <div className="min-w-0 leading-tight">
+                <div className="text-[10px] uppercase text-muted-foreground tracking-wider truncate">
+                  {new Date().toLocaleDateString("es", { weekday: "long", day: "numeric", month: "long" })}
+                </div>
+                <div className="font-display font-bold text-[17px] truncate">Hola, {displayName}</div>
+              </div>
+            </Link>
+            <Link to="/premios" className="inline-flex items-center gap-1.5 rounded-full pl-2 pr-3 h-9 bg-white border border-border shadow-soft" aria-label="Hojas de sanación">
+              <span className="text-base">🍃</span>
+              <span className="font-display font-bold text-sm text-primary">{gems.toLocaleString()}</span>
+            </Link>
+            <Button variant="ghost" size="icon" onClick={toggle} aria-label="Cambiar tema" className="shrink-0">
+              {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </Button>
+            <Button variant="ghost" size="icon" onClick={() => setOpen(true)} aria-label="Menú" className="shrink-0">
+              <Menu className="w-5 h-5" />
+            </Button>
+          </div>
 
-        </header>
+          <div className="overflow-x-auto no-scrollbar px-3 py-3">
+            <ul className="flex items-center gap-2 w-max">
+              {TOP_CHIPS.map(({ to, label, icon: Icon }) => {
+                const active = isActive(to);
+                return (
+                  <li key={to}>
+                    <Link
+                      to={to}
+                      className={cn(
+                        "inline-flex items-center gap-1.5 h-11 px-3.5 rounded-2xl border-2 text-[13px] font-semibold whitespace-nowrap transition-all shrink-0",
+                        active
+                          ? "border-primary bg-primary/10 text-primary shadow-soft"
+                          : "border-border/70 bg-white/80 text-foreground/80 hover:border-primary/40"
+                      )}
+                    >
+                      <Icon className="w-4 h-4" />
+                      {label}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </div>
 
-        <main className="flex-1 pb-[calc(env(safe-area-inset-bottom)+72px)] lg:pb-0"><Outlet /></main>
+        <main className="flex-1 pb-[calc(env(safe-area-inset-bottom)+92px)] lg:pb-0"><Outlet /></main>
 
         {/* Floating chat with Ruth Esther */}
         <FloatingChatFab />
 
-        {/* Mobile bottom nav */}
-        <nav className="lg:hidden fixed bottom-0 inset-x-0 z-30 border-t border-border bg-white/90 backdrop-blur-xl"
-          style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
-          <ul className="grid grid-cols-5 h-16">
-            {BOTTOM_NAV.map(({ to, label, icon: Icon }) => {
-              const active = isActive(to);
-              return (
-                <li key={to}>
-                  <Link to={to} className={cn(
-                    "h-full flex flex-col items-center justify-center gap-0.5 text-[10px] font-semibold transition-colors relative",
-                    active ? "text-primary" : "text-muted-foreground hover:text-foreground"
-                  )}>
-                    {active && <span className="absolute top-0 h-0.5 w-8 bg-primary rounded-b-full" />}
-                    <Icon className={cn("w-[22px] h-[22px]", active && "drop-shadow-[0_0_6px_currentColor]")} />
-                    {label}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
+        {/* Mobile bottom nav — con botón central O */}
+        <nav
+          className="lg:hidden fixed bottom-3 inset-x-3 z-30"
+          style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+          aria-label="Navegación principal"
+        >
+          <div className="relative">
+            <div className="grid grid-cols-5 items-center h-[68px] rounded-[28px] bg-white/95 backdrop-blur-xl border border-border shadow-[0_10px_40px_-10px_rgba(124,92,255,0.35)]">
+              <BottomItem to="/etapas" label="Camino" icon={RouteIcon} isActive={isActive} />
+              <BottomItem to="/pareja" label="Pareja" icon={HeartHandshake} isActive={isActive} />
+              <div aria-hidden />
+              <BottomItem to="/visualiza" label="Vívelo" icon={Headphones} isActive={isActive} />
+              <BottomItem to="/perfil" label="Yo" icon={UserIcon} isActive={isActive} />
+            </div>
+            <Link
+              to="/dashboard"
+              aria-label="Inicio"
+              className="absolute left-1/2 -translate-x-1/2 -top-6 w-16 h-16 rounded-[22px] bg-white shadow-[0_12px_30px_-6px_rgba(124,92,255,0.55)] grid place-items-center border border-border/60 active:scale-95 transition-transform"
+            >
+              <img src={origenIcon.url} alt="" className="w-14 h-14 object-contain" />
+              <span
+                className={cn(
+                  "absolute -bottom-4 text-[10px] font-bold uppercase tracking-widest",
+                  isActive("/dashboard") ? "text-primary" : "text-muted-foreground"
+                )}
+              >
+                Inicio
+              </span>
+            </Link>
+          </div>
         </nav>
       </div>
     </div>
   );
 }
+
+function BottomItem({
+  to, label, icon: Icon, isActive,
+}: { to: string; label: string; icon: React.ComponentType<{ className?: string }>; isActive: (to: string) => boolean }) {
+  const active = isActive(to);
+  return (
+    <Link
+      to={to}
+      className={cn(
+        "h-full flex flex-col items-center justify-center gap-0.5 text-[10px] font-bold transition-colors",
+        active ? "text-primary" : "text-muted-foreground hover:text-foreground"
+      )}
+    >
+      <Icon className={cn("w-6 h-6", active && "drop-shadow-[0_0_6px_currentColor]")} />
+      {label}
+    </Link>
+  );
+}
+
