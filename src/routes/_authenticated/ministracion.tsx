@@ -3,11 +3,14 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  ArrowLeft, ArrowRight, Sparkles, BookOpen, Lock,
+  ArrowLeft, ArrowRight, Sparkles, Lock, Download,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import heroImg from "@/assets/ministracion-hero.jpg";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/use-auth";
+import { printMinistracion } from "@/lib/print-pdf";
 
 export const Route = createFileRoute("/_authenticated/ministracion")({
   head: () => ({ meta: [{ title: "Lo que Dios quiere decirte hoy — ORIGEN" }] }),
