@@ -16,6 +16,7 @@ import pilarMentora from "@/assets/pilar-mentora.png.asset.json";
 import pilarPareja from "@/assets/pilar-pareja.png.asset.json";
 import pilarPatron from "@/assets/pilar-patron.png.asset.json";
 import pilarMinistracion from "@/assets/dios-te-dice-hoy.png.asset.json";
+import visualizaBanner from "@/assets/visualiza-banner-home.png.asset.json";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Hoy — ORIGEN" }] }),
