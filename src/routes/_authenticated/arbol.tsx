@@ -426,6 +426,39 @@ function AddFamilyView({ onBack }: { onBack: () => void }) {
 
         {/* Form card */}
         <div className="mt-5 rounded-[24px] bg-white shadow-soft p-5 space-y-5">
+          {/* Foto */}
+          <div>
+            <label className="flex items-center gap-2 font-display font-bold text-[14px] mb-2">
+              <span className="w-6 h-6 rounded-full bg-[#1B1930] text-white grid place-items-center text-[10px]">📷</span>
+              Foto del familiar <span className="text-muted-foreground font-normal text-[12px]">(opcional)</span>
+            </label>
+            <div className="flex items-center gap-3">
+              <label className="relative w-20 h-20 rounded-2xl bg-[#F1ECFF] border-2 border-dashed border-[#7C5CFF]/40 grid place-items-center overflow-hidden cursor-pointer active:scale-95 transition">
+                {photoPreview ? (
+                  <img src={photoPreview} alt="preview" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="text-center">
+                    <Plus className="w-6 h-6 text-[#7C5CFF] mx-auto" />
+                    <div className="text-[9px] font-bold text-[#7C5CFF] mt-1">Subir</div>
+                  </div>
+                )}
+                <input type="file" accept="image/*" className="hidden" onChange={onPickPhoto} />
+              </label>
+              <div className="flex-1 text-[12px] text-muted-foreground leading-snug">
+                Agrega una foto para reconocer a tu familiar en el árbol. Máx. 5 MB.
+                {photoFile && (
+                  <button
+                    type="button"
+                    onClick={() => { setPhotoFile(null); setPhotoPreview(null); }}
+                    className="block mt-1 text-[#F5566B] font-bold text-[11px]"
+                  >
+                    Quitar foto
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
           {/* Nombre */}
           <div>
             <label className="flex items-center gap-2 font-display font-bold text-[14px] mb-2">
