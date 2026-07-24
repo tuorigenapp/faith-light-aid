@@ -312,10 +312,14 @@ function SlotOrPerson({ member, color, onAdd }: { member?: Member; color: string
     return (
       <div className="flex flex-col items-center">
         <div
-          className="w-12 h-12 rounded-full grid place-items-center text-white font-black text-sm shadow-soft"
+          className="w-12 h-12 rounded-full grid place-items-center overflow-hidden text-white font-black text-sm shadow-soft"
           style={{ background: `radial-gradient(circle at 30% 30%, ${color}, ${color}CC)`, border: `2.5px solid ${color}` }}
         >
-          {member.full_name.slice(0, 1).toUpperCase()}
+          {member.photo_url ? (
+            <img src={member.photo_url} alt={member.full_name} className="w-full h-full object-cover" />
+          ) : (
+            member.full_name.slice(0, 1).toUpperCase()
+          )}
         </div>
         <div className="text-[9px] font-bold text-foreground mt-1 truncate max-w-[72px] text-center leading-tight">{member.full_name.split(" ")[0]}</div>
         <div className="text-[8px] text-muted-foreground truncate max-w-[72px] text-center">{member.relationship}</div>
