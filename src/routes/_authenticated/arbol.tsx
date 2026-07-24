@@ -151,7 +151,7 @@ function HomeView({ displayName, avatar, gems, onOpenTree }: { displayName: stri
 
 /* ═══════════════════════ VIEW 2 · TREE DETAIL (imagen #2) ═══════════════════════ */
 
-type Member = { id: string; full_name: string; relationship: string; lineage: string };
+type Member = { id: string; full_name: string; relationship: string; lineage: string; photo_url?: string | null };
 
 function TreeDetailView({
   onBack, onAdd, members, gems, displayName, avatar,
