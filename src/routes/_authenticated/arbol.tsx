@@ -344,6 +344,9 @@ function AddFamilyView({ onBack }: { onBack: () => void }) {
   const { user } = useAuth();
   const qc = useQueryClient();
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [form, setForm] = useState({
     full_name: "",
     relationship: "",
@@ -356,26 +359,50 @@ function AddFamilyView({ onBack }: { onBack: () => void }) {
 
   const canSave = !!form.full_name.trim() && !!form.relationship && !!lineage;
 
+  function onPickPhoto(e: React.ChangeEvent<HTMLInputElement>) {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    if (f.size > 5 * 1024 * 1024) return toast.error("La foto debe pesar menos de 5 MB");
+    setPhotoFile(f);
+    setPhotoPreview(URL.createObjectURL(f));
+  }
+
   async function save() {
     if (!user || !canSave) return toast.error("Completa todos los campos");
     setSaving(true);
-    const { error } = await supabase.from("family_members").insert({
-      user_id: user.id,
-      full_name: form.full_name.trim(),
-      relationship: form.relationship,
-      lineage,
-    });
-    if (error) {
+    let photo_url: string | null = null;
+    try {
+      if (photoFile) {
+        setUploading(true);
+        const ext = photoFile.name.split(".").pop() || "jpg";
+        const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
+        const { error: upErr } = await supabase.storage.from("family-photos").upload(path, photoFile, { cacheControl: "3600", upsert: false });
+        if (upErr) throw upErr;
+        const { data: signed } = await supabase.storage.from("family-photos").createSignedUrl(path, 60 * 60 * 24 * 365 * 5);
+        photo_url = signed?.signedUrl ?? null;
+        setUploading(false);
+      }
+      const { error } = await supabase.from("family_members").insert({
+        user_id: user.id,
+        full_name: form.full_name.trim(),
+        relationship: form.relationship,
+        lineage,
+        photo_url,
+      });
+      if (error) throw error;
+      await awardGems(GEM_REWARDS.familyMember, `Nuevo familiar: ${form.full_name}`);
+      qc.invalidateQueries({ queryKey: ["family_members"] });
+      qc.invalidateQueries({ queryKey: ["profile"] });
+      qc.invalidateQueries({ queryKey: ["profile-arbol"] });
+      qc.invalidateQueries({ queryKey: ["profile-gems"] });
+      toast.success(`+${GEM_REWARDS.familyMember} 💎 Gemas de Sanación`);
+      onBack();
+    } catch (e: any) {
+      toast.error(e?.message ?? "No se pudo guardar");
+    } finally {
       setSaving(false);
-      return toast.error(error.message);
+      setUploading(false);
     }
-    await awardGems(GEM_REWARDS.familyMember, `Nuevo familiar: ${form.full_name}`);
-    qc.invalidateQueries({ queryKey: ["family_members"] });
-    qc.invalidateQueries({ queryKey: ["profile"] });
-    qc.invalidateQueries({ queryKey: ["profile-arbol"] });
-    qc.invalidateQueries({ queryKey: ["profile-gems"] });
-    toast.success(`+${GEM_REWARDS.familyMember} 💎 Gemas de Sanación`);
-    onBack();
   }
 
   return (
