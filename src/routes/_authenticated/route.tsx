@@ -217,15 +217,15 @@ function AuthLayout() {
               <li className="shrink-0">
                 <Link
                   to="/perfil"
-                  className="inline-flex items-center gap-2 h-11 pl-1.5 pr-3 rounded-2xl bg-white border-2 border-primary/30 shadow-soft"
+                  className="inline-flex items-center gap-2 h-11 pl-1.5 pr-3 rounded-2xl bg-white border-2 border-primary/30 shadow-soft leading-none"
                 >
-                  <span className="w-8 h-8 rounded-xl bg-brand-gradient text-white grid place-items-center font-display font-bold text-sm shrink-0">
+                  <span className="w-8 h-8 rounded-xl bg-brand-gradient text-white inline-flex items-center justify-center font-display font-bold text-sm shrink-0 leading-none">
                     {displayName.slice(0, 1).toUpperCase()}
                   </span>
-                  <span className="font-display font-bold text-[13px] text-foreground truncate max-w-[90px]">{displayName}</span>
-                  <span className="inline-flex items-center gap-1 pl-2 ml-1 border-l border-border">
+                  <span className="font-display font-bold text-[13px] text-foreground truncate max-w-[90px] leading-none">{displayName}</span>
+                  <span className="inline-flex items-center gap-1 pl-2 ml-1 border-l border-border leading-none">
                     <span className="text-base leading-none">🍃</span>
-                    <span className="font-display font-bold text-[13px] text-primary">{gems.toLocaleString()}</span>
+                    <span className="font-display font-bold text-[13px] text-primary leading-none">{gems.toLocaleString()}</span>
                   </span>
                 </Link>
               </li>
@@ -305,12 +305,16 @@ function AuthLayout() {
             <Link
               to="/dashboard"
               aria-label="Inicio"
-              className="absolute left-1/2 -translate-x-1/2 -top-6 w-16 h-16 rounded-[22px] overflow-hidden shadow-[0_12px_30px_-6px_rgba(124,92,255,0.55)] border border-border/60 active:scale-95 transition-transform bg-white"
+              className="absolute left-1/2 -translate-x-1/2 -top-8 w-20 h-20 grid place-items-center active:scale-95 transition-transform"
             >
-              <img src={origenIcon.url} alt="" className="w-full h-full object-cover" />
+              <img
+                src={origenIcon.url}
+                alt=""
+                className="w-full h-full object-contain drop-shadow-[0_12px_20px_rgba(124,92,255,0.55)]"
+              />
               <span
                 className={cn(
-                  "absolute left-1/2 -translate-x-1/2 -bottom-4 text-[10px] font-bold uppercase tracking-widest",
+                  "absolute left-1/2 -translate-x-1/2 -bottom-3 text-[10px] font-bold uppercase tracking-widest",
                   isActive("/dashboard") ? "text-primary" : "text-muted-foreground"
                 )}
               >
