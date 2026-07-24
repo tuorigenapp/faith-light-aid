@@ -166,6 +166,16 @@ function Dashboard() {
         {/* Árbol de Sanación */}
         <HealingTree />
 
+        {/* Banner Visualízalo y Vívelo */}
+        <Link
+          to="/visualiza"
+          aria-label="Visualízalo y Vívelo — descubre todas nuestras categorías"
+          className="block rounded-[24px] overflow-hidden shadow-soft hover:shadow-glow transition-all hover-scale"
+        >
+          <img src={visualizaBanner.url} alt="Descubre todas nuestras categorías — Visualízalo y Vívelo" loading="lazy" className="w-full h-auto block" />
+        </Link>
+
+
         {/* Reflexión del día */}
         <DailyReflection />
 
