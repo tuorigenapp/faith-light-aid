@@ -37,6 +37,7 @@ const LOADING_LINES = [
 
 function MinistracionPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({ name: "", dob: "", question: "" });
   const [line, setLine] = useState(0);
