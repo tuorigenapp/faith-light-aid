@@ -67,12 +67,46 @@ function MinistracionPage() {
       setProgress(100);
       setResult(j);
       setStep(3);
+      // Persist the ministración for user's history
+      if (user) {
+        supabase.from("ministracion_lecturas").insert({
+          user_id: user.id,
+          name: form.name || null,
+          dob: form.dob || null,
+          question: form.question || null,
+          headline: j.headline ?? null,
+          dictamen: j.dictamen ?? null,
+          linea_tiempo: j.linea_tiempo ?? null,
+          senales: j.senales ?? null,
+          ministracion: j.ministracion ?? null,
+          versiculo: j.versiculo ?? null,
+          rompe_ciclo: j.rompe_ciclo ?? null,
+        }).then(({ error }) => { if (error) console.warn("save ministracion:", error.message); });
+      }
     } catch (e) {
       clearInterval(timer);
       toast.error((e as Error).message);
       setStep(1);
     }
   }
+
+  function downloadPdf() {
+    if (!result) return;
+    printMinistracion({
+      title: result.headline,
+      subtitle: form.question ? `Consulta: ${form.question}` : undefined,
+      meta: new Date().toLocaleString("es", { dateStyle: "long", timeStyle: "short" }),
+      sections: [
+        { emoji: "⚖️", title: "Dictamen de la Corte Celestial", body: result.dictamen },
+        { emoji: "⏳", title: "Línea de tiempo", body: result.linea_tiempo },
+        { emoji: "🕊️", title: "Señales de confirmación", body: (result.senales ?? []).map((s, i) => `${i+1}. ${s}`).join("\n") },
+        { emoji: "💫", title: "Ministración para tu vida", body: result.ministracion },
+        ...(result.rompe_ciclo ? [{ emoji: "⛓️‍💥", title: "Consejo del Cielo: Rompe el ciclo", body: result.rompe_ciclo }] : []),
+        ...(result.versiculo ? [{ emoji: "📖", title: "Palabra que respalda el decreto", body: result.versiculo }] : []),
+      ],
+    });
+  }
+
 
   return (
     <div className="relative min-h-[calc(100vh-4rem)] bg-aura-top">
