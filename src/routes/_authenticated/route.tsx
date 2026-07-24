@@ -288,9 +288,26 @@ function AuthLayout() {
             </Link>
           </div>
         </nav>
-
-        </nav>
       </div>
     </div>
   );
 }
+
+function BottomItem({
+  to, label, icon: Icon, isActive,
+}: { to: string; label: string; icon: React.ComponentType<{ className?: string }>; isActive: (to: string) => boolean }) {
+  const active = isActive(to);
+  return (
+    <Link
+      to={to}
+      className={cn(
+        "h-full flex flex-col items-center justify-center gap-0.5 text-[10px] font-bold transition-colors",
+        active ? "text-primary" : "text-muted-foreground hover:text-foreground"
+      )}
+    >
+      <Icon className={cn("w-6 h-6", active && "drop-shadow-[0_0_6px_currentColor]")} />
+      {label}
+    </Link>
+  );
+}
+
