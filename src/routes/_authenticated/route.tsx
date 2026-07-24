@@ -6,12 +6,15 @@ import {
   Home, MessageCircle, Layers, BookHeart, Dumbbell,
   CreditCard, User as UserIcon, Shield, LogOut, Menu, Sun, Moon, X,
   Headphones, TreeDeciduous, Trophy, HeartHandshake, Sparkles,
+  MoveUpRight, Settings, Route as RouteIcon,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { FloatingChatFab } from "@/components/FloatingChatFab";
+import origenIcon from "@/assets/origen-o-icon.png.asset.json";
+
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
