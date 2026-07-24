@@ -305,12 +305,16 @@ function AuthLayout() {
             <Link
               to="/dashboard"
               aria-label="Inicio"
-              className="absolute left-1/2 -translate-x-1/2 -top-6 w-16 h-16 rounded-[22px] overflow-hidden shadow-[0_12px_30px_-6px_rgba(124,92,255,0.55)] border border-border/60 active:scale-95 transition-transform bg-white"
+              className="absolute left-1/2 -translate-x-1/2 -top-8 w-20 h-20 grid place-items-center active:scale-95 transition-transform"
             >
-              <img src={origenIcon.url} alt="" className="w-full h-full object-cover" />
+              <img
+                src={origenIcon.url}
+                alt=""
+                className="w-full h-full object-contain drop-shadow-[0_12px_20px_rgba(124,92,255,0.55)]"
+              />
               <span
                 className={cn(
-                  "absolute left-1/2 -translate-x-1/2 -bottom-4 text-[10px] font-bold uppercase tracking-widest",
+                  "absolute left-1/2 -translate-x-1/2 -bottom-3 text-[10px] font-bold uppercase tracking-widest",
                   isActive("/dashboard") ? "text-primary" : "text-muted-foreground"
                 )}
               >
