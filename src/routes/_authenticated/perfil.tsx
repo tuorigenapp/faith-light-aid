@@ -31,7 +31,7 @@ export const Route = createFileRoute("/_authenticated/perfil")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: PerfilPage;
+  component: PerfilPage,
 });
 
 const INTENTIONS = [
