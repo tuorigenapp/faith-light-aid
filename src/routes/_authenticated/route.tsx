@@ -13,7 +13,9 @@ import { Button } from "@/components/ui/button";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { FloatingChatFab } from "@/components/FloatingChatFab";
+import { useSignedUrls } from "@/hooks/use-signed-urls";
 import origenIcon from "@/assets/origen-o-icon.png.asset.json";
+
 
 
 export const Route = createFileRoute("/_authenticated")({
@@ -95,6 +97,9 @@ function AuthLayout() {
   });
   const displayName = (profile?.display_name || profile?.full_name || user?.email?.split("@")[0] || "Amigo").split(" ")[0];
   const gems = profile?.gems ?? 0;
+  const signAvatar = useSignedUrls("avatars", [profile?.avatar_url]);
+  const avatarUrl = signAvatar(profile?.avatar_url);
+
 
   useEffect(() => {
     if (!user || intake === undefined) return;
@@ -219,9 +224,10 @@ function AuthLayout() {
                   to="/perfil"
                   className="inline-flex items-center gap-2 h-11 pl-1.5 pr-3 rounded-2xl bg-white border-2 border-primary/30 shadow-soft leading-none"
                 >
-                  <span className="w-8 h-8 rounded-xl bg-brand-gradient text-white inline-flex items-center justify-center font-display font-bold text-sm shrink-0 leading-none">
-                    {displayName.slice(0, 1).toUpperCase()}
+                  <span className="w-8 h-8 rounded-xl bg-brand-gradient text-white inline-flex items-center justify-center overflow-hidden font-display font-bold text-sm shrink-0 leading-none">
+                    {avatarUrl ? <img src={avatarUrl} alt="" className="w-full h-full object-cover" /> : displayName.slice(0, 1).toUpperCase()}
                   </span>
+
                   <span className="font-display font-bold text-[13px] text-foreground truncate max-w-[90px] leading-none">{displayName}</span>
                   <span className="inline-flex items-center gap-1 pl-2 ml-1 border-l border-border leading-none">
                     <span className="text-base leading-none">🍃</span>

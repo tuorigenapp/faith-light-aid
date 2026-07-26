@@ -9,8 +9,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowLeft, Plus, Info, Trophy, Sparkles, User as UserIcon, ChevronRight } from "lucide-react";
 import { awardGems, GEM_REWARDS } from "@/lib/gems";
 import { toast } from "sonner";
+import { PhotoPicker } from "@/components/PhotoPicker";
+import { uploadPhoto } from "@/lib/photo";
+import { useSignedUrls } from "@/hooks/use-signed-urls";
 import arbolGemas from "@/assets/arbol-gemas.png.asset.json";
 import arbolMini from "@/assets/arbol-mini.png.asset.json";
+
 
 export const Route = createFileRoute("/_authenticated/arbol")({
   head: () => ({ meta: [{ title: "Mi Árbol Genealógico — ORIGEN" }] }),
@@ -47,11 +51,16 @@ function TreePage() {
 
   const displayName = (profile?.display_name || profile?.full_name || "Amigo").split(" ")[0];
   const gems = profile?.gems ?? 0;
+  const signFamily = useSignedUrls("family-photos", members.map((m) => m.photo_url));
+  const signAvatar = useSignedUrls("avatars", [profile?.avatar_url]);
+  const avatarUrl = signAvatar(profile?.avatar_url) ?? null;
+  const membersSigned = members.map((m) => ({ ...m, photo_url: signFamily(m.photo_url) ?? null }));
 
   if (view === "add") return <AddFamilyView onBack={() => setView("tree")} />;
-  if (view === "tree") return <TreeDetailView onBack={() => setView("home")} onAdd={() => setView("add")} members={members} gems={gems} displayName={displayName} avatar={profile?.avatar_url ?? null} />;
+  if (view === "tree") return <TreeDetailView onBack={() => setView("home")} onAdd={() => setView("add")} members={membersSigned} gems={gems} displayName={displayName} avatar={avatarUrl} />;
 
-  return <HomeView displayName={displayName} avatar={profile?.avatar_url ?? null} gems={gems} onOpenTree={() => setView("tree")} />;
+  return <HomeView displayName={displayName} avatar={avatarUrl} gems={gems} onOpenTree={() => setView("tree")} />;
+
 }
 
 /* ═══════════════════════ VIEW 1 · HOME (imagen #1) ═══════════════════════ */
@@ -345,7 +354,7 @@ function AddFamilyView({ onBack }: { onBack: () => void }) {
   const qc = useQueryClient();
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoBlob, setPhotoBlob] = useState<Blob | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [form, setForm] = useState({
     full_name: "",
@@ -359,27 +368,14 @@ function AddFamilyView({ onBack }: { onBack: () => void }) {
 
   const canSave = !!form.full_name.trim() && !!form.relationship && !!lineage;
 
-  function onPickPhoto(e: React.ChangeEvent<HTMLInputElement>) {
-    const f = e.target.files?.[0];
-    if (!f) return;
-    if (f.size > 5 * 1024 * 1024) return toast.error("La foto debe pesar menos de 5 MB");
-    setPhotoFile(f);
-    setPhotoPreview(URL.createObjectURL(f));
-  }
-
   async function save() {
     if (!user || !canSave) return toast.error("Completa todos los campos");
     setSaving(true);
     let photo_url: string | null = null;
     try {
-      if (photoFile) {
+      if (photoBlob) {
         setUploading(true);
-        const ext = photoFile.name.split(".").pop() || "jpg";
-        const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
-        const { error: upErr } = await supabase.storage.from("family-photos").upload(path, photoFile, { cacheControl: "3600", upsert: false });
-        if (upErr) throw upErr;
-        const { data: signed } = await supabase.storage.from("family-photos").createSignedUrl(path, 60 * 60 * 24 * 365 * 5);
-        photo_url = signed?.signedUrl ?? null;
+        photo_url = await uploadPhoto("family-photos", user.id, photoBlob);
         setUploading(false);
       }
       const { error } = await supabase.from("family_members").insert({
@@ -404,6 +400,7 @@ function AddFamilyView({ onBack }: { onBack: () => void }) {
       setUploading(false);
     }
   }
+
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#F1ECFF] via-[#FBFAFF] to-[#E8F4FF]">
@@ -432,32 +429,16 @@ function AddFamilyView({ onBack }: { onBack: () => void }) {
               <span className="w-6 h-6 rounded-full bg-[#1B1930] text-white grid place-items-center text-[10px]">📷</span>
               Foto del familiar <span className="text-muted-foreground font-normal text-[12px]">(opcional)</span>
             </label>
-            <div className="flex items-center gap-3">
-              <label className="relative w-20 h-20 rounded-2xl bg-[#F1ECFF] border-2 border-dashed border-[#7C5CFF]/40 grid place-items-center overflow-hidden cursor-pointer active:scale-95 transition">
-                {photoPreview ? (
-                  <img src={photoPreview} alt="preview" className="w-full h-full object-cover" />
-                ) : (
-                  <div className="text-center">
-                    <Plus className="w-6 h-6 text-[#7C5CFF] mx-auto" />
-                    <div className="text-[9px] font-bold text-[#7C5CFF] mt-1">Subir</div>
-                  </div>
-                )}
-                <input type="file" accept="image/*" className="hidden" onChange={onPickPhoto} />
-              </label>
-              <div className="flex-1 text-[12px] text-muted-foreground leading-snug">
-                Agrega una foto para reconocer a tu familiar en el árbol. Máx. 5 MB.
-                {photoFile && (
-                  <button
-                    type="button"
-                    onClick={() => { setPhotoFile(null); setPhotoPreview(null); }}
-                    className="block mt-1 text-[#F5566B] font-bold text-[11px]"
-                  >
-                    Quitar foto
-                  </button>
-                )}
-              </div>
-            </div>
+            <PhotoPicker
+              value={photoPreview}
+              size={80}
+              shape="rounded"
+              label="Agrega una foto para reconocer a tu familiar en el árbol. Podrás recortarla."
+              onCropped={(blob, url) => { setPhotoBlob(blob); setPhotoPreview(url); }}
+              onRemove={() => { setPhotoBlob(null); setPhotoPreview(null); }}
+            />
           </div>
+
 
           {/* Nombre */}
           <div>

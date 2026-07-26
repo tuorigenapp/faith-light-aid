@@ -751,6 +751,7 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           consecutive_days: number
+          content_pref: string | null
           country: string | null
           created_at: string
           current_stage: number
@@ -759,7 +760,10 @@ export type Database = {
           full_name: string | null
           gems: number
           id: string
+          intention: string | null
+          interests: string[] | null
           last_activity_at: string | null
+          profile_completed_at: string | null
           referral_code: string | null
           spiritual_level: string
           updated_at: string
@@ -769,6 +773,7 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           consecutive_days?: number
+          content_pref?: string | null
           country?: string | null
           created_at?: string
           current_stage?: number
@@ -777,7 +782,10 @@ export type Database = {
           full_name?: string | null
           gems?: number
           id: string
+          intention?: string | null
+          interests?: string[] | null
           last_activity_at?: string | null
+          profile_completed_at?: string | null
           referral_code?: string | null
           spiritual_level?: string
           updated_at?: string
@@ -787,6 +795,7 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           consecutive_days?: number
+          content_pref?: string | null
           country?: string | null
           created_at?: string
           current_stage?: number
@@ -795,7 +804,10 @@ export type Database = {
           full_name?: string | null
           gems?: number
           id?: string
+          intention?: string | null
+          interests?: string[] | null
           last_activity_at?: string | null
+          profile_completed_at?: string | null
           referral_code?: string | null
           spiritual_level?: string
           updated_at?: string
