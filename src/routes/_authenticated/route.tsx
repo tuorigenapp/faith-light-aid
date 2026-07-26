@@ -13,7 +13,9 @@ import { Button } from "@/components/ui/button";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { FloatingChatFab } from "@/components/FloatingChatFab";
+import { useSignedUrls } from "@/hooks/use-signed-urls";
 import origenIcon from "@/assets/origen-o-icon.png.asset.json";
+
 
 
 export const Route = createFileRoute("/_authenticated")({
