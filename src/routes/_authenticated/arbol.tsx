@@ -9,8 +9,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowLeft, Plus, Info, Trophy, Sparkles, User as UserIcon, ChevronRight } from "lucide-react";
 import { awardGems, GEM_REWARDS } from "@/lib/gems";
 import { toast } from "sonner";
+import { PhotoPicker } from "@/components/PhotoPicker";
+import { uploadPhoto } from "@/lib/photo";
+import { useSignedUrls } from "@/hooks/use-signed-urls";
 import arbolGemas from "@/assets/arbol-gemas.png.asset.json";
 import arbolMini from "@/assets/arbol-mini.png.asset.json";
+
 
 export const Route = createFileRoute("/_authenticated/arbol")({
   head: () => ({ meta: [{ title: "Mi Árbol Genealógico — ORIGEN" }] }),
