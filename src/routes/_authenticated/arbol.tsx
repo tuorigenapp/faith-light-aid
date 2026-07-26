@@ -51,9 +51,14 @@ function TreePage() {
 
   const displayName = (profile?.display_name || profile?.full_name || "Amigo").split(" ")[0];
   const gems = profile?.gems ?? 0;
+  const signFamily = useSignedUrls("family-photos", members.map((m) => m.photo_url));
+  const signAvatar = useSignedUrls("avatars", [profile?.avatar_url]);
+  const avatarUrl = signAvatar(profile?.avatar_url) ?? null;
+  const membersSigned = members.map((m) => ({ ...m, photo_url: signFamily(m.photo_url) ?? null }));
 
   if (view === "add") return <AddFamilyView onBack={() => setView("tree")} />;
-  if (view === "tree") return <TreeDetailView onBack={() => setView("home")} onAdd={() => setView("add")} members={members} gems={gems} displayName={displayName} avatar={profile?.avatar_url ?? null} />;
+  if (view === "tree") return <TreeDetailView onBack={() => setView("home")} onAdd={() => setView("add")} members={membersSigned} gems={gems} displayName={displayName} avatar={avatarUrl} />;
+
 
   return <HomeView displayName={displayName} avatar={profile?.avatar_url ?? null} gems={gems} onOpenTree={() => setView("tree")} />;
 }
