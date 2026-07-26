@@ -354,7 +354,7 @@ function AddFamilyView({ onBack }: { onBack: () => void }) {
   const qc = useQueryClient();
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoBlob, setPhotoBlob] = useState<Blob | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [form, setForm] = useState({
     full_name: "",
@@ -368,27 +368,14 @@ function AddFamilyView({ onBack }: { onBack: () => void }) {
 
   const canSave = !!form.full_name.trim() && !!form.relationship && !!lineage;
 
-  function onPickPhoto(e: React.ChangeEvent<HTMLInputElement>) {
-    const f = e.target.files?.[0];
-    if (!f) return;
-    if (f.size > 5 * 1024 * 1024) return toast.error("La foto debe pesar menos de 5 MB");
-    setPhotoFile(f);
-    setPhotoPreview(URL.createObjectURL(f));
-  }
-
   async function save() {
     if (!user || !canSave) return toast.error("Completa todos los campos");
     setSaving(true);
     let photo_url: string | null = null;
     try {
-      if (photoFile) {
+      if (photoBlob) {
         setUploading(true);
-        const ext = photoFile.name.split(".").pop() || "jpg";
-        const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
-        const { error: upErr } = await supabase.storage.from("family-photos").upload(path, photoFile, { cacheControl: "3600", upsert: false });
-        if (upErr) throw upErr;
-        const { data: signed } = await supabase.storage.from("family-photos").createSignedUrl(path, 60 * 60 * 24 * 365 * 5);
-        photo_url = signed?.signedUrl ?? null;
+        photo_url = await uploadPhoto("family-photos", user.id, photoBlob);
         setUploading(false);
       }
       const { error } = await supabase.from("family_members").insert({
@@ -413,6 +400,7 @@ function AddFamilyView({ onBack }: { onBack: () => void }) {
       setUploading(false);
     }
   }
+
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#F1ECFF] via-[#FBFAFF] to-[#E8F4FF]">
