@@ -59,8 +59,8 @@ function TreePage() {
   if (view === "add") return <AddFamilyView onBack={() => setView("tree")} />;
   if (view === "tree") return <TreeDetailView onBack={() => setView("home")} onAdd={() => setView("add")} members={membersSigned} gems={gems} displayName={displayName} avatar={avatarUrl} />;
 
+  return <HomeView displayName={displayName} avatar={avatarUrl} gems={gems} onOpenTree={() => setView("tree")} />;
 
-  return <HomeView displayName={displayName} avatar={profile?.avatar_url ?? null} gems={gems} onOpenTree={() => setView("tree")} />;
 }
 
 /* ═══════════════════════ VIEW 1 · HOME (imagen #1) ═══════════════════════ */
