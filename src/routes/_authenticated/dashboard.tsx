@@ -50,7 +50,10 @@ function Dashboard() {
     },
   });
 
-  const displayName = (data?.profile?.display_name || data?.profile?.full_name || "Amigo").split(" ")[0];
+  const realName = [data?.profile?.display_name, data?.profile?.full_name].find(
+    (n) => n && n.trim() && !/^invitado_/i.test(n.trim()),
+  );
+  const displayName = (realName || "Amigo").trim().split(" ")[0];
   const completed = (data?.progressItems ?? []).filter((p) => p.status === "completed").length;
   const aiPlan = (data?.intake?.ai_plan ?? {}) as { pattern_name?: string; welcome_message?: string };
   const hasOnboarding = data?.intake?.status === "completed";

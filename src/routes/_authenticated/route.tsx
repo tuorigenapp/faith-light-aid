@@ -95,7 +95,10 @@ function AuthLayout() {
     },
     refetchInterval: 30000,
   });
-  const displayName = (profile?.display_name || profile?.full_name || user?.email?.split("@")[0] || "Amigo").split(" ")[0];
+  const realName = [profile?.display_name, profile?.full_name].find(
+    (n) => n && n.trim() && !/^invitado_/i.test(n.trim()),
+  );
+  const displayName = (realName || "Amigo").trim().split(" ")[0];
   const gems = profile?.gems ?? 0;
   const signAvatar = useSignedUrls("avatars", [profile?.avatar_url]);
   const avatarUrl = signAvatar(profile?.avatar_url);
