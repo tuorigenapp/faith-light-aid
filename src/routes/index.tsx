@@ -1,12 +1,23 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
-  Loader2, ArrowRight, Check, ChevronDown, HeartHandshake, MessageCircle,
-  Sparkles, Users2, Shield, Clock, Star, Flame, Leaf, Lock,
+  Loader2, ArrowRight, Check, ChevronDown, ChevronLeft, ChevronRight,
+  HeartHandshake, MessageCircle, Sparkles, Shield, Clock, Star, Leaf, Lock,
+  TreeDeciduous, Headphones, BookHeart, Dumbbell, Trophy, Layers, Play, Pause,
 } from "lucide-react";
+import heroImg from "@/assets/hero.jpg";
+import audioCierre from "@/assets/origen-cierre.mp3.asset.json";
+import pilarMentora from "@/assets/pilar-mentora.png.asset.json";
+import pilarPareja from "@/assets/pilar-pareja.png.asset.json";
+import pilarPatron from "@/assets/pilar-patron.png.asset.json";
+import pilarMinistracion from "@/assets/dios-te-dice-hoy.png.asset.json";
+import vivMusic from "@/assets/viv-music.jpg";
+import vivCamino from "@/assets/viv-camino.jpg";
+
+/* ───────────────────────── CTA ───────────────────────── */
 
 function useStartTrial() {
   const navigate = useNavigate();
@@ -36,7 +47,7 @@ function useStartTrial() {
   return { start, loading };
 }
 
-function StartButton({ children, className, size }: { children: ReactNode; className?: string; size?: "lg" | "default" }) {
+function StartButton({ children, className = "", size }: { children: ReactNode; className?: string; size?: "lg" | "default" }) {
   const { start, loading } = useStartTrial();
   return (
     <Button onClick={start} disabled={loading} size={size} className={className}>
@@ -45,13 +56,17 @@ function StartButton({ children, className, size }: { children: ReactNode; class
   );
 }
 
+const CTA_CLASS = "w-full sm:w-auto h-[56px] px-8 rounded-[14px] btn-primary-gradient text-[16px] font-bold shadow-[0_10px_30px_-8px_rgba(124,92,255,.55)] active:scale-[.98] transition";
+
+/* ───────────────────────── ROUTE ───────────────────────── */
+
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "ORIGEN — Entiende por qué repites lo mismo y rómpelo en 5 minutos al día" },
-      { name: "description", content: "El método de Ruth Esther para descubrir el patrón que arrastras de tu familia, romper el ciclo y sentir paz real. Basado en el libro. Sin religión impuesta." },
-      { property: "og:title", content: "ORIGEN — Rompe el patrón que arrastras" },
-      { property: "og:description", content: "Descubre tu patrón familiar en 3 minutos. Método guiado + mentora IA. 7 días gratis." },
+      { title: "ORIGEN — Entiende por qué repites lo mismo y empieza a romperlo hoy" },
+      { name: "description", content: "Una guía espiritual personalizada, basada en tus respuestas: patrón familiar, mentora, audios, ejercicios y diario. Empieza gratis en 3 minutos." },
+      { property: "og:title", content: "ORIGEN — Entiende tu historia. Rompe el ciclo." },
+      { property: "og:description", content: "Diagnóstico guiado en 3 minutos, mentora acompañante, árbol familiar y audios. Versión gratis disponible." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -65,541 +80,607 @@ function Landing() {
       <Nav />
       <main>
         <Hero />
-        <Pain />
-        <Cost />
-        <Method />
-        <Inside />
+        <Problem />
+        <Discover />
+        <HowItWorks />
+        <Benefits />
+        <InsideApp />
+        <Includes />
+        <AudioInvite />
         <Reviews />
         <Pricing />
-        <Guarantee />
         <FAQ />
         <FinalCTA />
       </main>
       <Footer />
+      <StickyCta />
     </div>
   );
 }
 
 /* ───────────────────────── NAV ───────────────────────── */
+
 function Nav() {
   return (
-    <header className="sticky top-0 inset-x-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border/50">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 h-14 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2">
-          <div className="w-9 h-9 rounded-2xl bg-brand-gradient grid place-items-center shadow-glow">
-            <Leaf className="w-4 h-4 text-white" />
+    <header className="sticky top-0 inset-x-0 z-40 bg-background/85 backdrop-blur-xl border-b border-border/50">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
+        <Link to="/" className="flex min-w-0 items-center gap-2">
+          <div className="w-9 h-9 shrink-0 rounded-2xl bg-brand-gradient grid place-items-center shadow-glow">
+            <Leaf className="w-4 h-4 text-primary-foreground" />
           </div>
-          <div className="leading-none">
-            <div className="font-display font-extrabold text-[15px] tracking-tight">ORIGEN</div>
-            <div className="text-[9px] uppercase tracking-[0.22em] text-primary font-bold">Rompe el patrón</div>
-          </div>
+          <span className="font-display font-black tracking-tight truncate">ORIGEN</span>
         </Link>
-        <div className="flex items-center gap-2">
-          <Link to="/auth" className="hidden sm:block text-sm font-semibold text-muted-foreground hover:text-foreground px-3 py-2">
+        <div className="flex items-center gap-2 shrink-0">
+          <Link to="/auth" className="hidden sm:inline-flex h-10 items-center px-4 rounded-[12px] text-sm font-semibold text-foreground/70 hover:text-foreground">
             Entrar
           </Link>
-          <StartButton className="rounded-full btn-primary-gradient px-4 h-10 font-bold text-[13px]">
-            Empezar gratis
-          </StartButton>
+          <StartButton className="h-10 px-5 rounded-[12px] btn-primary-gradient text-sm font-bold">Empezar gratis</StartButton>
         </div>
       </div>
     </header>
   );
 }
 
-/* ───────────────────────── HERO ───────────────────────── */
+/* ───────────────────────── 1. HERO ───────────────────────── */
+
 function Hero() {
   return (
-    <section className="relative overflow-hidden bg-aura-top">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 pt-8 sm:pt-14 pb-12 grid lg:grid-cols-[1.1fr_0.9fr] gap-10 items-center">
-        <div>
-          <div className="inline-flex items-center gap-2 rounded-full bg-white/70 border border-border/60 backdrop-blur px-3 py-1.5 text-[11px] font-bold text-primary shadow-soft">
-            <Sparkles className="w-3.5 h-3.5" /> Basado en el libro de Ruth Esther
-          </div>
-
-          <h1 className="mt-5 font-display font-extrabold text-[34px] sm:text-6xl lg:text-[68px] leading-[1.02] tracking-tight">
-            Repites lo mismo y no sabes por qué.
-            <span className="block mt-3 text-transparent bg-clip-text bg-brand-gradient">
-              En 3 minutos vas a saberlo.
-            </span>
+    <section className="relative overflow-hidden">
+      <div
+        className="absolute inset-0 -z-10"
+        style={{ background: "radial-gradient(120% 70% at 50% 0%, color-mix(in oklab, var(--primary) 12%, transparent), transparent 70%)" }}
+      />
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 pt-10 pb-14 lg:pt-16 lg:pb-20 grid lg:grid-cols-2 gap-10 items-center">
+        <div className="animate-fade-in">
+          <span className="inline-flex items-center gap-2 h-8 px-3 rounded-full bg-secondary text-primary text-[12px] font-bold">
+            <Sparkles className="w-3.5 h-3.5" /> Basado en el método ORIGEN
+          </span>
+          <h1 className="font-display font-black leading-[1.08] text-[32px] sm:text-[42px] lg:text-[50px] mt-4">
+            Entiende por qué se repite lo mismo{" "}
+            <span className="bg-brand-gradient bg-clip-text text-transparent">en tu historia</span>
           </h1>
-
-          <p className="mt-5 text-[16px] sm:text-lg text-muted-foreground max-w-xl leading-relaxed">
-            No es tu culpa. Es un patrón que heredaste. Con ORIGEN lo descubres, lo entiendes y aprendes a romperlo. Sin religión impuesta. Sin terapia genérica.
+          <p className="mt-4 text-[16px] leading-relaxed text-muted-foreground max-w-[46ch]">
+            ORIGEN te hace las preguntas correctas, ordena tu historia familiar y te devuelve una guía personalizada
+            con pasos de 5 minutos al día. No sustituye terapia: te acompaña todos los días.
           </p>
-
           <div className="mt-6 flex flex-col sm:flex-row gap-3">
-            <StartButton size="lg" className="rounded-full h-14 px-7 btn-primary-gradient font-bold text-[15px]">
-              Descubrir mi patrón gratis <ArrowRight className="ml-2 w-4 h-4" />
+            <StartButton className={CTA_CLASS}>
+              Empezar gratis <ArrowRight className="w-4 h-4 ml-2" />
             </StartButton>
+            <a href="#por-dentro" className="h-[56px] px-6 inline-flex items-center justify-center rounded-[14px] border-2 border-border bg-card text-[15px] font-semibold">
+              Ver la app por dentro
+            </a>
           </div>
-          <p className="mt-3 text-[12px] text-muted-foreground font-semibold flex items-center gap-1.5">
-            <Shield className="w-3.5 h-3.5 text-primary" /> 7 días gratis · cancelas en 1 clic · sin tarjeta al inicio
-          </p>
+          <p className="mt-3 text-[12px] text-muted-foreground">Sin tarjeta. 3 minutos. Puedes quedarte en el plan gratis.</p>
 
-          <div className="mt-7 flex items-center gap-4 flex-wrap">
-            <div className="flex -space-x-2">
-              {["#F58BCB","#7C5CFF","#5AA9FF","#3FBE8F"].map((c, i) => (
-                <span key={i} className="w-8 h-8 rounded-full ring-2 ring-background" style={{ background: c }} />
-              ))}
-            </div>
-            <p className="text-[13px] text-muted-foreground">
-              <span className="font-bold text-foreground">+2,300 personas</span> ya entendieron su origen.
-            </p>
+          <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-[12px] text-muted-foreground">
+            <span className="inline-flex items-center gap-1.5"><Star className="w-3.5 h-3.5 text-[#F7B955]" /> 4.8 / 5 en la comunidad</span>
+            <span className="inline-flex items-center gap-1.5"><Shield className="w-3.5 h-3.5 text-primary" /> Privado y confidencial</span>
+            <span className="inline-flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-primary" /> 5 min al día</span>
           </div>
         </div>
 
-        <HeroCard />
+        <div className="relative">
+          <div className="rounded-[28px] overflow-hidden shadow-[0_30px_70px_-30px_rgba(124,92,255,.55)] border border-border">
+            <img src={heroImg} alt="Mujer en calma iniciando su camino de sanación con ORIGEN" className="w-full h-auto block" />
+          </div>
+          <div className="absolute -bottom-5 left-4 right-4 sm:left-8 sm:right-8 rounded-[20px] bg-card border border-border shadow-soft p-4 flex items-center gap-3">
+            <span className="w-10 h-10 shrink-0 rounded-xl bg-secondary grid place-items-center"><Sparkles className="w-5 h-5 text-primary" /></span>
+            <p className="text-[13px] leading-snug min-w-0">
+              <strong className="font-display">Tu guía se arma con tus respuestas</strong>
+              <span className="block text-muted-foreground">Nada genérico: parte de lo que tú cuentas.</span>
+            </p>
+          </div>
+        </div>
       </div>
+      <div className="h-6" />
     </section>
   );
 }
 
-function HeroCard() {
+/* ───────────────────────── 2. EL PROBLEMA ───────────────────────── */
+
+const PAINS = [
+  { t: "“Vuelvo a caer en lo mismo”", d: "Otra relación, otra deuda, otra promesa rota. Cambian los nombres, no el final." },
+  { t: "“Siento un vacío que no sé explicar”", d: "Tienes motivos para estar bien y aun así algo dentro no termina de encajar." },
+  { t: "“Empiezo con todo y abandono”", d: "El libro, la app, la terapia. Arrancas con fe y a la semana se apaga." },
+  { t: "“Ya probé de todo”", d: "Consejos genéricos que no tocan tu historia real ni de dónde vienes." },
+];
+
+function Problem() {
   return (
-    <div className="relative mx-auto w-full max-w-[380px]">
-      <div className="absolute -inset-10 bg-primary/25 blur-3xl rounded-full -z-10" />
-      <div className="hero-card space-y-3">
-        <div className="flex items-center justify-between">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-primary">Tu mapa ORIGEN</span>
-          <div className="flex items-center gap-1 text-[11px] font-bold text-[#F58BCB]">
-            <Flame className="w-3.5 h-3.5" /> 3 min
-          </div>
-        </div>
-        <h3 className="font-display font-bold text-[19px] leading-tight">
-          Patrón detectado: <span className="text-primary">"Cargo lo que no me toca"</span>
-        </h3>
-        <p className="text-[13px] text-muted-foreground">
-          Vienes de mujeres que aguantaron en silencio. Repites la lealtad invisible sin darte cuenta.
-        </p>
-
-        <div className="rounded-2xl bg-secondary p-3">
-          <div className="text-[10px] font-black uppercase tracking-widest text-primary">Tu primer paso</div>
-          <p className="mt-1.5 text-[13px] font-semibold">
-            Escribir en una hoja lo que tu abuela nunca dijo. Hoy, 5 minutos.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-3 gap-2 pt-1">
-          {[
-            { i: <MessageCircle className="w-4 h-4" />, t: "Mentora" },
-            { i: <HeartHandshake className="w-4 h-4" />, t: "Pareja" },
-            { i: <Users2 className="w-4 h-4" />, t: "Patrón" },
-          ].map((x) => (
-            <div key={x.t} className="rounded-xl bg-white border border-border/60 p-2.5 text-center">
-              <div className="w-8 h-8 mx-auto rounded-lg bg-primary/10 text-primary grid place-items-center">{x.i}</div>
-              <div className="mt-1.5 text-[11px] font-bold">{x.t}</div>
+    <Section id="problema" eyebrow="El problema" title="Si algo se repite, no es falta de voluntad" sub="Es una historia que nadie te ayudó a leer. Ver estas frases y decir “esa soy yo” ya es el primer paso.">
+      <div className="grid sm:grid-cols-2 gap-3">
+        {PAINS.map((p) => (
+          <div key={p.t} className="rounded-[20px] border border-border bg-card p-5 shadow-soft">
+            <div className="w-11 h-11 rounded-2xl bg-secondary grid place-items-center mb-3">
+              <MessageCircle className="w-5 h-5 text-primary" />
             </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ───────────────────────── PAIN ───────────────────────── */
-function Pain() {
-  const items = [
-    { t: "\"Repito los mismos errores\"", d: "Cambias de pareja, de trabajo, de ciudad. El escenario cambia. El dolor no." },
-    { t: "\"Siento un vacío que no sé explicar\"", d: "Tienes lo que pediste. Y por dentro sigues faltándote algo. Ni tú sabes qué." },
-    { t: "\"Empiezo con todo y a los 5 días lo dejo\"", d: "Terapia, libros, apps. Nada te sostuvo. Volviste al mismo lugar." },
-  ];
-  return (
-    <section className="px-4 sm:px-6 py-14 sm:py-20 border-t border-border/40">
-      <div className="mx-auto max-w-4xl text-center">
-        <h2 className="font-display font-extrabold text-[28px] sm:text-5xl tracking-tight leading-tight">
-          ¿Te suena algo de esto?
-        </h2>
-      </div>
-      <div className="mx-auto max-w-5xl mt-10 grid md:grid-cols-3 gap-3">
-        {items.map((it) => (
-          <div key={it.t} className="app-card p-5">
-            <div className="w-11 h-11 rounded-2xl bg-[#F58BCB]/15 text-[#F58BCB] grid place-items-center">
-              <Flame className="w-5 h-5" />
-            </div>
-            <h3 className="mt-3 font-display font-bold text-[17px] leading-snug">{it.t}</h3>
-            <p className="mt-2 text-[13px] text-muted-foreground leading-relaxed">{it.d}</p>
+            <h3 className="font-display font-bold text-[16px]">{p.t}</h3>
+            <p className="text-[14px] text-muted-foreground mt-1 leading-relaxed">{p.d}</p>
           </div>
         ))}
       </div>
-    </section>
+      <p className="mt-5 text-center text-[14px] text-muted-foreground">
+        No es tu culpa. Y tampoco tienes que resolverlo sola.
+      </p>
+    </Section>
   );
 }
 
-/* ───────────────────────── COST ───────────────────────── */
-function Cost() {
-  return (
-    <section className="px-4 sm:px-6 py-14 sm:py-20 bg-secondary/40">
-      <div className="mx-auto max-w-3xl text-center">
-        <div className="inline-flex items-center gap-2 rounded-full bg-white text-primary px-3 py-1.5 text-[11px] font-bold shadow-soft border border-border/60">
-          <Clock className="w-3.5 h-3.5" /> Cada día que pasa
-        </div>
-        <h2 className="mt-5 font-display font-extrabold text-[28px] sm:text-5xl tracking-tight leading-tight">
-          El patrón no espera. <span className="text-primary">Se transmite.</span>
-        </h2>
-        <p className="mt-5 text-muted-foreground leading-relaxed">
-          Lo que no entiendes de tu historia, lo repites. Lo que no rompes, se lo pasas a tus hijos. Y a los suyos.
-        </p>
-        <p className="mt-4 font-display font-bold text-[18px]">
-          No necesitas más fuerza de voluntad. Necesitas entender de dónde viene.
-        </p>
-      </div>
-    </section>
-  );
-}
+/* ───────────────────────── 3. QUÉ DESCUBRIRÁ ───────────────────────── */
 
-/* ───────────────────────── METHOD ───────────────────────── */
-function Method() {
-  const steps = [
-    { n: 1, i: <Users2 className="w-5 h-5" />, t: "Mapeas tu origen", d: "Tu árbol, tu infancia y tus vínculos. 3 minutos guiados." },
-    { n: 2, i: <Sparkles className="w-5 h-5" />, t: "Recibes tu patrón", d: "La mentora te dice qué se está repitiendo y por qué." },
-    { n: 3, i: <Leaf className="w-5 h-5" />, t: "Lo rompes en 5 min al día", d: "Ejercicios, audios y micro-pasos hechos para tu caso." },
-  ];
-  return (
-    <section id="metodo" className="px-4 sm:px-6 py-14 sm:py-20">
-      <div className="mx-auto max-w-5xl">
-        <div className="text-center max-w-2xl mx-auto">
-          <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 text-primary px-3 py-1.5 text-[11px] font-bold">
-            <Sparkles className="w-3.5 h-3.5" /> El método ORIGEN
-          </div>
-          <h2 className="mt-4 font-display font-extrabold text-[28px] sm:text-5xl tracking-tight leading-tight">
-            3 pasos. Nada de teoría.
-          </h2>
-        </div>
-
-        <div className="mt-10 grid md:grid-cols-3 gap-3">
-          {steps.map((s) => (
-            <div key={s.n} className="app-card p-5 relative overflow-hidden">
-              <div className="absolute -top-4 -right-2 font-display font-black text-8xl text-primary/5 select-none">{s.n}</div>
-              <div className="w-11 h-11 rounded-2xl bg-brand-gradient text-white grid place-items-center shadow-glow">{s.i}</div>
-              <div className="mt-3 text-[10px] font-black uppercase tracking-widest text-primary">Paso {s.n}</div>
-              <h3 className="mt-1 font-display font-bold text-[18px] leading-tight">{s.t}</h3>
-              <p className="mt-2 text-[13px] text-muted-foreground leading-relaxed">{s.d}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ───────────────────────── INSIDE ───────────────────────── */
-function Inside() {
-  const feats = [
-    { i: <MessageCircle className="w-5 h-5" />, t: "Mentora Ruth Esther", d: "Chat 24/7 con la voz del libro. Te escucha y te guía sin juzgar.", c: "#7C5CFF" },
-    { i: <HeartHandshake className="w-5 h-5" />, t: "Análisis de pareja", d: "¿Es propósito o deuda ancestral? Descúbrelo en minutos.", c: "#F58BCB" },
-    { i: <Users2 className="w-5 h-5" />, t: "Patrón familiar", d: "Tu árbol + tu historia = qué se repite y cómo romperlo.", c: "#3FBE8F" },
-    { i: <Leaf className="w-5 h-5" />, t: "Camino diario", d: "Etapas, ejercicios, audios y diario. 5 min al día.", c: "#5AA9FF" },
-  ];
-  return (
-    <section className="px-4 sm:px-6 py-14 sm:py-20 bg-secondary/40">
-      <div className="mx-auto max-w-5xl">
-        <div className="text-center max-w-2xl mx-auto">
-          <h2 className="font-display font-extrabold text-[28px] sm:text-5xl tracking-tight leading-tight">
-            Todo en un solo lugar.
-          </h2>
-          <p className="mt-3 text-muted-foreground">Sin apps sueltas. Sin buscar en YouTube. Sin gastar en 10 cosas.</p>
-        </div>
-        <div className="mt-10 grid sm:grid-cols-2 gap-3">
-          {feats.map((f) => (
-            <div key={f.t} className="app-card p-5 flex items-start gap-3">
-              <div className="w-12 h-12 rounded-2xl grid place-items-center text-white shadow-soft shrink-0" style={{ background: f.c }}>
-                {f.i}
-              </div>
-              <div>
-                <h3 className="font-display font-bold text-[16px]">{f.t}</h3>
-                <p className="mt-1 text-[13px] text-muted-foreground leading-relaxed">{f.d}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ───────────────────────── REVIEWS (slider) ───────────────────────── */
-const REVIEWS = [
-  { n: "María, 34", c: "México", t: "Entendí en 3 minutos algo que 2 años de terapia no me habían dicho. Ya no me culpo por lo que traigo de mi mamá." },
-  { n: "Andrés, 41", c: "Colombia", t: "Me sorprendió que no me hablaran de religión. Es directo, honesto y por primera vez sostengo el hábito." },
-  { n: "Lucía, 29", c: "Argentina", t: "Hice el análisis de pareja y solté una relación que llevaba 4 años atrasándome. Nunca lo vi tan claro." },
-  { n: "Rosa, 47", c: "R. Dominicana", t: "Soy escéptica. Pagué el año porque en la primera semana pasó algo dentro de mí que no esperaba." },
-  { n: "Kevin, 26", c: "España", t: "5 minutos al día. Lo estoy haciendo. Nunca sostuve nada tanto tiempo. Eso solo ya me cambió." },
+const DISCOVER = [
+  { icon: TreeDeciduous, color: "#3FBE8F", t: "De dónde viene lo que repites", d: "Ordenamos tu línea materna y paterna para ver el hilo que se hereda." },
+  { icon: Sparkles, color: "#7C5CFF", t: "El nombre de tu patrón", d: "Una lectura clara de tu situación, escrita a partir de tus propias respuestas." },
+  { icon: Layers, color: "#61A8FF", t: "Tu primer paso concreto", d: "Una misión de hoy, corta y realista, no una lista imposible." },
 ];
+
+function Discover() {
+  return (
+    <Section eyebrow="En 3 minutos" title="Qué vas a descubrir hoy mismo" sub="Nada de promesas mágicas: una guía personalizada construida con lo que tú respondes.">
+      <div className="grid sm:grid-cols-3 gap-3">
+        {DISCOVER.map(({ icon: Icon, color, t, d }) => (
+          <div key={t} className="rounded-[20px] border border-border bg-card p-5 shadow-soft">
+            <span className="w-12 h-12 rounded-2xl grid place-items-center" style={{ background: `${color}1F`, color }}>
+              <Icon className="w-5 h-5" />
+            </span>
+            <h3 className="font-display font-bold text-[16px] mt-3">{t}</h3>
+            <p className="text-[14px] text-muted-foreground mt-1 leading-relaxed">{d}</p>
+          </div>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+/* ───────────────────────── 4. CÓMO FUNCIONA ───────────────────────── */
+
+const STEPS = [
+  { n: "1", t: "Cuentas tu historia", d: "Preguntas suaves sobre tu familia, tu infancia y lo que hoy te pesa. Una a la vez." },
+  { n: "2", t: "Recibes tu guía", d: "Te devolvemos una lectura personalizada y tu Camino ORIGEN por etapas." },
+  { n: "3", t: "Practicas 5 min al día", d: "Audio, ejercicio o escritura. Tu racha y tus hojas de sanación se van sumando." },
+];
+
+function HowItWorks() {
+  return (
+    <Section eyebrow="Cómo funciona" title="Tres pasos. Sin complicarte." sub="Diseñado para que lo termines, no para que lo abandones.">
+      <div className="grid sm:grid-cols-3 gap-3">
+        {STEPS.map((s) => (
+          <div key={s.n} className="relative rounded-[20px] border border-border bg-card p-5 shadow-soft">
+            <span className="w-11 h-11 rounded-2xl bg-brand-gradient text-primary-foreground grid place-items-center font-display font-black text-lg">{s.n}</span>
+            <h3 className="font-display font-bold text-[16px] mt-3">{s.t}</h3>
+            <p className="text-[14px] text-muted-foreground mt-1 leading-relaxed">{s.d}</p>
+          </div>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+/* ───────────────────────── 5. BENEFICIOS ───────────────────────── */
+
+const BENEFITS = [
+  { t: "Dejas de improvisar", d: "Cada día sabes exactamente qué hacer y por qué te sirve." },
+  { t: "Te entiendes sin juzgarte", d: "Ver el origen quita culpa y devuelve claridad." },
+  { t: "Avanzas sin abandonar", d: "Sesiones de 5 minutos, racha visible y logros reales." },
+  { t: "No estás sola en el proceso", d: "Una mentora acompañante disponible cuando lo necesites." },
+];
+
+function Benefits() {
+  return (
+    <Section eyebrow="Lo que cambia" title="Cómo se siente tu día con ORIGEN" sub="No son funciones sueltas: es una rutina que sostiene.">
+      <div className="grid sm:grid-cols-2 gap-3">
+        {BENEFITS.map((b) => (
+          <div key={b.t} className="rounded-[20px] border border-border bg-card p-5 shadow-soft flex gap-3">
+            <span className="w-11 h-11 shrink-0 rounded-2xl bg-secondary grid place-items-center">
+              <Check className="w-5 h-5 text-primary" />
+            </span>
+            <div className="min-w-0">
+              <h3 className="font-display font-bold text-[16px]">{b.t}</h3>
+              <p className="text-[14px] text-muted-foreground mt-1 leading-relaxed">{b.d}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+/* ───────────── 6. LA APP POR DENTRO (sin registro, sin slider) ───────────── */
+
+const SCREENS = [
+  { img: pilarMentora.url, t: "Chat con tu mentora", d: "Conversa sobre lo que sientes hoy y recibe una respuesta guiada, con base en el método." },
+  { img: pilarPareja.url, t: "¿Tu pareja es deuda o propósito?", d: "Un análisis honesto del vínculo que estás viviendo y qué toca sanar en ti." },
+  { img: pilarPatron.url, t: "Patrones familiares", d: "Descubre qué se repite en tu linaje y del lado de quién viene." },
+  { img: pilarMinistracion.url, t: "Consulta al Cielo", d: "Escribe tu duda del día y recibe una palabra clara, con un paso para romper el ciclo." },
+];
+
+function InsideApp() {
+  return (
+    <Section id="por-dentro" eyebrow="Mira antes de registrarte" title="Así se ve ORIGEN por dentro" sub="Estas son las secciones que usarás desde el primer día.">
+      <div className="grid sm:grid-cols-2 gap-4">
+        {SCREENS.map((s) => (
+          <article key={s.t} className="rounded-[24px] overflow-hidden border border-border bg-card shadow-soft">
+            <img src={s.img} alt={s.t} loading="lazy" className="w-full h-auto block" />
+            <div className="p-5">
+              <h3 className="font-display font-bold text-[16px]">{s.t}</h3>
+              <p className="text-[14px] text-muted-foreground mt-1 leading-relaxed">{s.d}</p>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <div className="grid sm:grid-cols-2 gap-4 mt-4">
+        <article className="rounded-[24px] overflow-hidden border border-border bg-card shadow-soft">
+          <img src={vivMusic} alt="Visualízalo y Vívelo: playlist guiada de manifestación" loading="lazy" className="w-full h-48 object-cover" />
+          <div className="p-5">
+            <h3 className="font-display font-bold text-[16px]">Visualízalo y Vívelo</h3>
+            <p className="text-[14px] text-muted-foreground mt-1 leading-relaxed">
+              Audios guiados, afirmaciones, juegos y ejercicios por categoría: música, limpieza espiritual, identidad y método 3·6·9.
+            </p>
+          </div>
+        </article>
+        <article className="rounded-[24px] overflow-hidden border border-border bg-card shadow-soft">
+          <img src={vivCamino} alt="Camino ORIGEN por etapas según tu situación" loading="lazy" className="w-full h-48 object-cover" />
+          <div className="p-5">
+            <h3 className="font-display font-bold text-[16px]">Tu Camino por etapas</h3>
+            <p className="text-[14px] text-muted-foreground mt-1 leading-relaxed">
+              Etapas ordenadas según tu situación, con lecciones, quiz, sopa de letras y ejercicios que cambian cada día.
+            </p>
+          </div>
+        </article>
+      </div>
+    </Section>
+  );
+}
+
+/* ───────────────────────── 7. TODO LO QUE INCLUYE ───────────────────────── */
+
+const INCLUDES = [
+  { icon: MessageCircle, t: "Mentora acompañante", d: "Responde tus dudas con el lenguaje del método." },
+  { icon: TreeDeciduous, t: "Árbol familiar", d: "Registra a los tuyos, con foto, y ve el linaje completo." },
+  { icon: HeartHandshake, t: "Análisis de pareja y patrones", d: "Lecturas guardadas y descargables en PDF." },
+  { icon: Headphones, t: "Audios y meditaciones", d: "Playlist guiada para escuchar mientras respiras." },
+  { icon: Dumbbell, t: "Ejercicios diarios", d: "Prácticas cortas que cambian todos los días." },
+  { icon: BookHeart, t: "Diario íntimo", d: "Un lugar privado para escribir lo que no dices." },
+  { icon: Layers, t: "Seguimiento y racha", d: "Tu progreso guardado, día a día, hasta 365." },
+  { icon: Trophy, t: "Hojas de sanación", d: "Puntos canjeables por más consultas y premios." },
+];
+
+function Includes() {
+  return (
+    <Section eyebrow="Todo lo que incluye" title="Un solo lugar para tu proceso" sub="Todo conectado: lo que descubres se refleja en tu camino.">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {INCLUDES.map(({ icon: Icon, t, d }) => (
+          <div key={t} className="rounded-[20px] border border-border bg-card p-4 shadow-soft">
+            <span className="w-11 h-11 rounded-2xl bg-secondary grid place-items-center"><Icon className="w-5 h-5 text-primary" /></span>
+            <h3 className="font-display font-bold text-[14px] mt-3">{t}</h3>
+            <p className="text-[13px] text-muted-foreground mt-1 leading-snug">{d}</p>
+          </div>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+/* ───────────────────────── AUDIO CTA ───────────────────────── */
+
+function AudioInvite() {
+  const ref = useRef<HTMLAudioElement | null>(null);
+  const [playing, setPlaying] = useState(false);
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const a = ref.current;
+    if (!a) return;
+    const onTime = () => setProgress(a.duration ? (a.currentTime / a.duration) * 100 : 0);
+    const onEnd = () => { setPlaying(false); setProgress(0); };
+    a.addEventListener("timeupdate", onTime);
+    a.addEventListener("ended", onEnd);
+    return () => { a.removeEventListener("timeupdate", onTime); a.removeEventListener("ended", onEnd); };
+  }, []);
+
+  function toggle() {
+    const a = ref.current;
+    if (!a) return;
+    if (a.paused) { a.play(); setPlaying(true); } else { a.pause(); setPlaying(false); }
+  }
+
+  return (
+    <section className="mx-auto max-w-6xl px-4 sm:px-6 py-8">
+      <div className="rounded-[28px] p-6 sm:p-8 bg-brand-gradient text-primary-foreground shadow-[0_25px_60px_-25px_rgba(124,92,255,.65)]">
+        <div className="grid lg:grid-cols-[minmax(0,1fr)_auto] gap-6 items-center">
+          <div className="min-w-0">
+            <span className="inline-flex items-center gap-2 h-7 px-3 rounded-full bg-white/20 text-[11px] font-bold uppercase tracking-wider">
+              <Headphones className="w-3.5 h-3.5" /> Audio · 1 minuto
+            </span>
+            <h2 className="font-display font-black text-[24px] sm:text-[30px] leading-tight mt-3">
+              Escucha el cierre del método ORIGEN
+            </h2>
+            <p className="text-[15px] opacity-90 mt-2 max-w-[52ch] leading-relaxed">
+              Un minuto para entender por qué tu pasado explica tu presente… y cómo podemos acompañarte desde hoy.
+            </p>
+
+            <div className="mt-5 flex items-center gap-3">
+              <button
+                onClick={toggle}
+                aria-label={playing ? "Pausar audio" : "Reproducir audio"}
+                className="w-14 h-14 shrink-0 rounded-full bg-card text-primary grid place-items-center shadow-soft active:scale-95 transition"
+              >
+                {playing ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6 ml-0.5" />}
+              </button>
+              <div className="flex-1 min-w-0">
+                <div className="h-2 rounded-full bg-white/25 overflow-hidden">
+                  <div className="h-full bg-card transition-[width] duration-300" style={{ width: `${progress}%` }} />
+                </div>
+                <p className="text-[12px] opacity-85 mt-1.5">Ruth Esther · Invitación del método ORIGEN</p>
+              </div>
+            </div>
+            <audio ref={ref} src={audioCierre.url} preload="none" />
+          </div>
+
+          <StartButton className="w-full lg:w-auto h-[56px] px-8 rounded-[14px] bg-card text-primary hover:bg-card/90 text-[16px] font-bold">
+            Quiero conocer mi origen <ArrowRight className="w-4 h-4 ml-2" />
+          </StartButton>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ───────────────────────── 8. TESTIMONIOS (slider) ───────────────────────── */
+
+const REVIEWS = [
+  { n: "Marielys, 34", c: "Llevaba años diciendo que tenía mala suerte con los hombres. Ver el patrón del lado de mi mamá me cayó como un balde de agua… y por fin entendí." },
+  { n: "Jocelyn, 41", c: "Lo que más me sirvió fue lo corto. Cinco minutos al día sí los tengo. Llevo 26 días seguidos y es la primera vez que no abandono." },
+  { n: "Andrés, 29", c: "Entré escéptico. No me impusieron religión, me hicieron preguntas. La lectura de pareja me dolió, pero era verdad." },
+  { n: "Rosa, 47", c: "El diario y los audios se volvieron mi rato de paz en la noche. Mi casa está igual, yo no." },
+  { n: "Katherine, 38", c: "Armar el árbol con las fotos de mi familia me removió. Verlo ordenado explicó cosas que nadie me había dicho." },
+];
+
 function Reviews() {
   const [i, setI] = useState(0);
   useEffect(() => {
-    const t = setInterval(() => setI((v) => (v + 1) % REVIEWS.length), 5000);
-    return () => clearInterval(t);
+    const id = setInterval(() => setI((v) => (v + 1) % REVIEWS.length), 6000);
+    return () => clearInterval(id);
   }, []);
+  const r = REVIEWS[i];
   return (
-    <section className="px-4 sm:px-6 py-14 sm:py-20">
-      <div className="mx-auto max-w-3xl">
-        <div className="text-center">
-          <div className="inline-flex items-center gap-1.5">
-            {Array.from({ length: 5 }).map((_, k) => <Star key={k} className="w-4 h-4 fill-[#F7B955] text-[#F7B955]" />)}
-            <span className="ml-2 text-[13px] font-bold">4.9 / 5 · +2,300 personas</span>
-          </div>
-          <h2 className="mt-4 font-display font-extrabold text-[28px] sm:text-5xl tracking-tight leading-tight">
-            Lo que dicen quienes empezaron.
-          </h2>
+    <Section eyebrow="Testimonios" title="Lo que cuentan quienes ya empezaron" sub="Historias reales de la comunidad ORIGEN.">
+      <div className="rounded-[24px] border border-border bg-card shadow-soft p-6 sm:p-8">
+        <div className="flex gap-1 mb-3">
+          {Array.from({ length: 5 }).map((_, k) => <Star key={k} className="w-4 h-4 text-[#F7B955] fill-[#F7B955]" />)}
         </div>
+        <p key={r.n} className="text-[16px] sm:text-[18px] leading-relaxed font-display animate-fade-in">“{r.c}”</p>
+        <p className="text-[13px] text-muted-foreground mt-3 font-semibold">{r.n}</p>
 
-        <div className="mt-10 relative">
-          <div className="app-card p-6 sm:p-8 min-h-[220px]">
-            <div className="text-primary text-5xl font-display leading-none">"</div>
-            <p className="mt-2 text-[16px] sm:text-lg leading-relaxed font-medium">{REVIEWS[i].t}</p>
-            <div className="mt-5 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-brand-gradient text-white grid place-items-center font-display font-bold shadow-glow">
-                {REVIEWS[i].n[0]}
-              </div>
-              <div>
-                <div className="font-bold text-[14px]">{REVIEWS[i].n}</div>
-                <div className="text-[12px] text-muted-foreground">{REVIEWS[i].c}</div>
-              </div>
-            </div>
-          </div>
-          <div className="mt-4 flex justify-center gap-2">
+        <div className="mt-5 flex items-center justify-between">
+          <div className="flex gap-1.5">
             {REVIEWS.map((_, k) => (
-              <button key={k} onClick={() => setI(k)}
-                className={"h-2 rounded-full transition-all " + (k === i ? "w-7 bg-primary" : "w-2 bg-border")}
-                aria-label={`Testimonio ${k + 1}`} />
+              <button
+                key={k} onClick={() => setI(k)} aria-label={`Testimonio ${k + 1}`}
+                className={`h-2 rounded-full transition-all ${k === i ? "w-6 bg-primary" : "w-2 bg-border"}`}
+              />
             ))}
           </div>
+          <div className="flex gap-2">
+            <button onClick={() => setI((v) => (v - 1 + REVIEWS.length) % REVIEWS.length)} aria-label="Anterior" className="w-11 h-11 rounded-full border border-border grid place-items-center">
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <button onClick={() => setI((v) => (v + 1) % REVIEWS.length)} aria-label="Siguiente" className="w-11 h-11 rounded-full border border-border grid place-items-center">
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
-    </section>
+    </Section>
   );
 }
 
-/* ───────────────────────── PRICING ───────────────────────── */
+/* ───────────────────────── 9. PLANES ───────────────────────── */
+
+const FREE = [
+  "Diagnóstico completo y tu guía personalizada",
+  "Etapa 1 del Camino ORIGEN",
+  "Visualízalo y Vívelo: primer audio del playlist + afirmaciones, juegos y ejercicios",
+  "1 consulta al día en cada sección: mentora, pareja y patrones familiares",
+  "Diario íntimo (hasta 5 entradas)",
+  "Hojas de sanación canjeables por consultas extra",
+];
+
+const PAID = [
+  "Todo lo del plan Explorador, sin límites diarios",
+  "Las 8 etapas y el Camino 365 completo",
+  "Playlist completa de audios y meditaciones",
+  "Análisis ilimitados de pareja, patrones y Consulta al Cielo",
+  "Árbol familiar con fotos y ejercicios diarios nuevos",
+  "Historial completo y descarga en PDF",
+];
+
 function Pricing() {
-  const [plan, setPlan] = useState<"anual" | "mensual">("anual");
   return (
-    <section id="planes" className="px-4 sm:px-6 py-14 sm:py-20 bg-secondary/40">
-      <div className="mx-auto max-w-3xl">
-        <div className="text-center">
-          <h2 className="font-display font-extrabold text-[28px] sm:text-5xl tracking-tight leading-tight">
-            Elige tu camino.
-          </h2>
-          <p className="mt-3 text-muted-foreground">7 días gratis en ambos planes. Cancelas cuando quieras.</p>
+    <Section id="planes" eyebrow="Planes" title="Empieza gratis. Sube solo si te sirve." sub="Sin letra chica: aquí ves exactamente qué incluye cada plan.">
+      <div className="grid lg:grid-cols-2 gap-4 items-start">
+        {/* Gratis */}
+        <div className="rounded-[24px] border border-border bg-card p-6 shadow-soft">
+          <h3 className="font-display font-bold text-[18px]">Explorador</h3>
+          <p className="text-[13px] text-muted-foreground mt-1">Para conocerte y empezar hoy.</p>
+          <div className="mt-4 flex items-end gap-1">
+            <span className="font-display font-black text-[36px] leading-none">US$0</span>
+            <span className="text-[13px] text-muted-foreground mb-1">para siempre</span>
+          </div>
+          <ul className="mt-5 space-y-2.5">
+            {FREE.map((f) => (
+              <li key={f} className="flex gap-2.5 text-[14px] leading-snug">
+                <span className="w-5 h-5 shrink-0 rounded-full bg-secondary grid place-items-center mt-0.5"><Check className="w-3 h-3 text-primary" /></span>
+                {f}
+              </li>
+            ))}
+          </ul>
+          <StartButton className="mt-6 w-full h-[52px] rounded-[14px] border-2 border-primary bg-transparent text-primary hover:bg-secondary text-[15px] font-bold">
+            Empezar gratis
+          </StartButton>
         </div>
 
-        <div className="mt-8 inline-flex mx-auto rounded-full bg-white p-1 border border-border/60 shadow-soft" style={{ display: "flex", width: "fit-content", marginInline: "auto" }}>
-          <button onClick={() => setPlan("anual")}
-            className={"px-4 h-10 rounded-full text-[13px] font-bold transition " + (plan === "anual" ? "bg-brand-gradient text-white shadow-glow" : "text-muted-foreground")}>
-            Anual · <span className="opacity-80">6 meses gratis</span>
-          </button>
-          <button onClick={() => setPlan("mensual")}
-            className={"px-4 h-10 rounded-full text-[13px] font-bold transition " + (plan === "mensual" ? "bg-brand-gradient text-white shadow-glow" : "text-muted-foreground")}>
-            Mensual
-          </button>
-        </div>
-
-        <div className="mt-8 grid md:grid-cols-2 gap-4">
-          {/* Camino ORIGEN */}
-          <div className={"app-card p-6 relative " + (plan === "anual" ? "ring-2 ring-primary shadow-glow" : "")}>
-            {plan === "anual" && (
-              <span className="absolute -top-3 left-6 text-[10px] font-black uppercase tracking-widest bg-brand-gradient text-white px-3 py-1 rounded-full shadow-glow">
-                Recomendado · 6 meses gratis
-              </span>
-            )}
-            <div className="text-[11px] font-black uppercase tracking-widest text-primary">Camino ORIGEN</div>
-            <h3 className="mt-1 font-display font-extrabold text-[22px]">Todo el método</h3>
-
-            <div className="mt-4 flex items-baseline gap-1.5">
-              <span className="font-display font-black text-5xl tracking-tight">
-                ${plan === "anual" ? "5.99" : "14.99"}
-              </span>
-              <span className="text-muted-foreground text-sm">USD / mes</span>
-            </div>
-            <div className="text-[12px] text-muted-foreground mt-1">
-              {plan === "anual" ? "$71.88 al año · equivale a 6 meses gratis" : "Facturado mensual"}
-            </div>
-
-            <ul className="mt-5 space-y-2.5 text-[14px]">
-              {[
-                "Mentora Ruth Esther ilimitada",
-                "Análisis de pareja y patrón familiar",
-                "Las 8 etapas + audios 3-6-9",
-                "Ejercicios diarios y diario íntimo",
-                "Árbol completo · gemas · premios",
-              ].map((f) => (
-                <li key={f} className="flex items-start gap-2">
-                  <span className="w-5 h-5 rounded-full bg-primary/15 text-primary grid place-items-center shrink-0 mt-0.5">
-                    <Check className="w-3 h-3" />
-                  </span>
-                  <span>{f}</span>
-                </li>
-              ))}
-            </ul>
-
-            <StartButton className="mt-6 w-full h-14 rounded-full btn-primary-gradient font-bold text-[15px]">
-              Empezar mis 7 días gratis
-            </StartButton>
-            <p className="text-[11px] text-center text-muted-foreground mt-2 font-semibold">
-              Te avisamos antes del primer cobro
-            </p>
+        {/* Pago */}
+        <div className="relative rounded-[24px] border-2 border-primary bg-card p-6 shadow-[0_20px_50px_-20px_rgba(124,92,255,.5)]">
+          <span className="absolute -top-3 left-6 h-7 px-3 rounded-full bg-brand-gradient text-primary-foreground text-[11px] font-bold grid place-items-center">
+            6 meses gratis al año
+          </span>
+          <h3 className="font-display font-bold text-[18px]">Camino Origen</h3>
+          <p className="text-[13px] text-muted-foreground mt-1">Para ir hasta el fondo, sin límites.</p>
+          <div className="mt-4 flex items-end gap-1">
+            <span className="font-display font-black text-[36px] leading-none">US$5.99</span>
+            <span className="text-[13px] text-muted-foreground mb-1">/mes (plan anual US$71.88)</span>
           </div>
-
-          {/* Explorador */}
-          <div className="app-card p-6">
-            <div className="text-[11px] font-black uppercase tracking-widest text-muted-foreground">Explorador</div>
-            <h3 className="mt-1 font-display font-extrabold text-[22px]">Empieza sin pagar</h3>
-            <div className="mt-4 flex items-baseline gap-1.5">
-              <span className="font-display font-black text-5xl tracking-tight">$0</span>
-              <span className="text-muted-foreground text-sm">para siempre</span>
-            </div>
-            <div className="text-[12px] text-muted-foreground mt-1">Perfecto para probar el método</div>
-
-            <ul className="mt-5 space-y-2.5 text-[14px]">
-              {[
-                "Diagnóstico completo",
-                "1 mensaje al día con la mentora",
-                "Etapa 1 completa",
-                "Diario íntimo (5 entradas)",
-                "1 ejercicio guiado",
-              ].map((f) => (
-                <li key={f} className="flex items-start gap-2">
-                  <span className="w-5 h-5 rounded-full bg-secondary text-primary grid place-items-center shrink-0 mt-0.5">
-                    <Check className="w-3 h-3" />
-                  </span>
-                  <span className="text-muted-foreground">{f}</span>
-                </li>
-              ))}
-            </ul>
-
-            <StartButton className="mt-6 w-full h-14 rounded-full bg-secondary text-primary hover:bg-secondary/80 font-bold text-[15px]">
-              Explorar gratis
-            </StartButton>
-            <p className="text-[11px] text-center text-muted-foreground mt-2 font-semibold flex items-center justify-center gap-1">
-              <Lock className="w-3 h-3" /> Sin tarjeta
-            </p>
-          </div>
+          <p className="text-[12px] text-muted-foreground mt-1">O US$14.99 al mes si prefieres mes a mes. Cancela cuando quieras.</p>
+          <ul className="mt-5 space-y-2.5">
+            {PAID.map((f) => (
+              <li key={f} className="flex gap-2.5 text-[14px] leading-snug">
+                <span className="w-5 h-5 shrink-0 rounded-full bg-brand-gradient grid place-items-center mt-0.5"><Check className="w-3 h-3 text-primary-foreground" /></span>
+                {f}
+              </li>
+            ))}
+          </ul>
+          <StartButton className="mt-6 w-full h-[56px] rounded-[14px] btn-primary-gradient text-[16px] font-bold">
+            Empezar mis 7 días gratis
+          </StartButton>
+          <p className="text-[12px] text-muted-foreground mt-3 text-center">Te avisamos antes de cualquier cobro.</p>
         </div>
       </div>
-    </section>
-  );
-}
 
-/* ───────────────────────── GUARANTEE ───────────────────────── */
-function Guarantee() {
-  return (
-    <section className="px-4 sm:px-6 py-14 sm:py-20">
-      <div className="mx-auto max-w-3xl app-card p-6 sm:p-10 flex flex-col sm:flex-row items-center gap-5 text-center sm:text-left">
-        <div className="w-16 h-16 rounded-2xl bg-brand-gradient text-white grid place-items-center shadow-glow shrink-0">
-          <Shield className="w-7 h-7" />
-        </div>
+      <div className="mt-4 rounded-[20px] border border-border bg-secondary/50 p-5 flex gap-3">
+        <span className="w-11 h-11 shrink-0 rounded-2xl bg-card grid place-items-center"><Shield className="w-5 h-5 text-primary" /></span>
         <div>
-          <h3 className="font-display font-extrabold text-[22px] leading-tight">Garantía honesta de 7 días</h3>
-          <p className="mt-2 text-[14px] text-muted-foreground leading-relaxed">
-            Prueba todo el método 7 días. Si no sientes algo distinto adentro, cancelas en 1 clic. Sin llamadas, sin explicaciones.
+          <h3 className="font-display font-bold text-[15px]">Garantía humana de 7 días</h3>
+          <p className="text-[14px] text-muted-foreground mt-1 leading-relaxed">
+            Si sientes que ORIGEN no es para ti, escríbenos dentro de los primeros 7 días y te devolvemos tu dinero. Sin preguntas incómodas.
           </p>
         </div>
       </div>
-    </section>
+    </Section>
   );
 }
 
-/* ───────────────────────── FAQ ───────────────────────── */
+/* ───────────────────────── 10. FAQ ───────────────────────── */
+
 const FAQS = [
-  { q: "¿Ya probé terapia, libros y apps. Por qué esto sería distinto?", a: "Porque no te pide fuerza de voluntad. Te muestra el patrón que arrastras y te da un paso pequeño cada día. No es información. Es método." },
-  { q: "¿No tengo tiempo. Cuánto me toma al día?", a: "5 minutos. Un ejercicio, un audio o un mensaje con la mentora. Está diseñado para caber en tu día, no para volverlo más pesado." },
-  { q: "¿Me van a imponer religión?", a: "No. ORIGEN toma la sabiduría del libro de Ruth Esther, pero el método es humano, honesto y directo. Sin credo, sin dogma." },
-  { q: "¿Cuánto cuesta después del trial?", a: "Anual: $71.88 USD ($5.99/mes, 6 meses gratis). Mensual: $14.99 USD. Cancelas cuando quieras desde la app." },
-  { q: "¿Es seguro lo que escribo aquí?", a: "Sí. Todo lo que compartes es privado y solo tú lo ves. No lo compartimos con nadie." },
-  { q: "¿Y si cancelo antes del cobro?", a: "No te cobramos. Te avisamos por correo antes del primer cargo para que decidas con tiempo." },
+  { q: "¿Esto reemplaza la terapia?", a: "No. ORIGEN es acompañamiento y guía espiritual personalizada a partir de tus respuestas. No da diagnósticos clínicos ni sustituye atención psicológica o médica." },
+  { q: "Ya probé apps y libros y siempre abandono. ¿Por qué esto sí?", a: "Porque son sesiones de 5 minutos con un paso concreto al día, con racha y recordatorios. No te pide una hora libre que no tienes." },
+  { q: "¿Me van a imponer una religión?", a: "No. El método usa lenguaje espiritual y bíblico como referencia, pero no exige que creas nada. Puedes usar solo la parte práctica." },
+  { q: "¿Qué pasa con el precio? ¿Y si no puedo pagar ahora?", a: "Puedes quedarte en el plan Explorador gratis para siempre y ganar hojas de sanación para hacer más consultas. Cuando quieras más, subes." },
+  { q: "¿Mi información es privada?", a: "Sí. Tu diario, tu árbol y tus lecturas solo los ves tú desde tu cuenta. Puedes borrar tu contenido cuando quieras." },
+  { q: "¿La app sabe mi patrón antes de que yo responda?", a: "No. Tu lectura se construye con lo que tú compartes en el diagnóstico. Si respondes con honestidad, la guía se ajusta mejor." },
+  { q: "¿Cuánto tardo en empezar?", a: "Unos 3 minutos. Al terminar el diagnóstico ya recibes tu guía y tu primera misión." },
 ];
+
 function FAQ() {
   return (
-    <section className="px-4 sm:px-6 py-14 sm:py-20 bg-secondary/40">
-      <div className="mx-auto max-w-2xl">
-        <div className="text-center">
-          <h2 className="font-display font-extrabold text-[28px] sm:text-5xl tracking-tight leading-tight">
-            Lo que se pregunta la gente.
-          </h2>
-        </div>
-        <div className="mt-8 space-y-2">
-          {FAQS.map((f, i) => <FaqItem key={i} {...f} />)}
-        </div>
+    <Section id="faq" eyebrow="Preguntas frecuentes" title="Lo que suelen preguntarnos antes de empezar">
+      <div className="space-y-2.5">
+        {FAQS.map((f) => (
+          <details key={f.q} className="group rounded-[18px] border border-border bg-card p-4 shadow-soft">
+            <summary className="flex items-center justify-between gap-3 cursor-pointer list-none">
+              <span className="font-display font-bold text-[15px]">{f.q}</span>
+              <ChevronDown className="w-4 h-4 shrink-0 text-primary transition-transform group-open:rotate-180" />
+            </summary>
+            <p className="text-[14px] text-muted-foreground mt-2.5 leading-relaxed">{f.a}</p>
+          </details>
+        ))}
       </div>
-    </section>
-  );
-}
-function FaqItem({ q, a }: { q: string; a: string }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <div className="app-card overflow-hidden">
-      <button onClick={() => setOpen(!open)} className="w-full text-left p-4 sm:p-5 flex items-center gap-3">
-        <span className="font-display font-bold text-[15px] flex-1">{q}</span>
-        <ChevronDown className={"w-5 h-5 text-muted-foreground transition-transform " + (open ? "rotate-180" : "")} />
-      </button>
-      {open && <div className="px-4 sm:px-5 pb-5 text-[14px] text-muted-foreground leading-relaxed">{a}</div>}
-    </div>
+    </Section>
   );
 }
 
-/* ───────────────────────── FINAL CTA ───────────────────────── */
+/* ───────────────────────── CTA FINAL ───────────────────────── */
+
 function FinalCTA() {
   return (
-    <section className="px-4 sm:px-6 py-16 sm:py-24">
-      <div className="mx-auto max-w-3xl text-center relative">
-        <div className="absolute inset-0 -z-10 bg-primary/10 blur-3xl rounded-full" />
-        <h2 className="font-display font-extrabold text-[32px] sm:text-6xl tracking-tight leading-[1.05]">
-          El patrón sigue ahí.
-          <span className="block mt-3 text-transparent bg-clip-text bg-brand-gradient">
-            ¿Lo entiendes hoy o en 5 años?
-          </span>
+    <section className="mx-auto max-w-6xl px-4 sm:px-6 pb-16">
+      <div className="rounded-[28px] border border-border bg-card p-8 sm:p-12 text-center shadow-soft relative overflow-hidden">
+        <div
+          className="absolute inset-0 -z-10"
+          style={{ background: "radial-gradient(90% 70% at 50% 0%, color-mix(in oklab, var(--primary) 10%, transparent), transparent 70%)" }}
+        />
+        <span className="inline-flex items-center gap-2 h-8 px-3 rounded-full bg-secondary text-primary text-[12px] font-bold">
+          <Leaf className="w-3.5 h-3.5" /> Empieza hoy
+        </span>
+        <h2 className="font-display font-black text-[28px] sm:text-[38px] leading-tight mt-4 max-w-[20ch] mx-auto">
+          Lo que sanas en ti, deja de heredarse
         </h2>
-        <div className="mt-8 flex justify-center">
-          <StartButton size="lg" className="rounded-full h-14 px-8 btn-primary-gradient font-bold text-[15px]">
-            Descubrir mi patrón gratis <ArrowRight className="ml-2 w-4 h-4" />
-          </StartButton>
+        <p className="text-[16px] text-muted-foreground mt-3 max-w-[52ch] mx-auto leading-relaxed">
+          No tienes que entenderlo todo hoy. Solo empezar. Tres minutos y verás tu historia con otros ojos.
+        </p>
+        <div className="mt-6 flex justify-center">
+          <StartButton className={CTA_CLASS}>Empezar gratis <ArrowRight className="w-4 h-4 ml-2" /></StartButton>
         </div>
-        <p className="mt-4 text-[13px] text-muted-foreground max-w-lg mx-auto">
-          <span className="font-bold text-foreground">P.D.</span> Lo que no entiendes hoy, lo repites mañana. Y se lo pasas a los que amas. Empieza hoy. 5 minutos. Gratis.
+        <p className="text-[12px] text-muted-foreground mt-3">Sin tarjeta · Plan gratis para siempre · Cancela cuando quieras</p>
+        <p className="text-[13px] text-muted-foreground mt-6 max-w-[54ch] mx-auto italic">
+          P.D. Si llegaste hasta aquí, algo dentro de ti ya sabe que esto se repite. Darle nombre es el principio de romperlo.
         </p>
       </div>
     </section>
   );
 }
 
-/* ───────────────────────── FOOTER ───────────────────────── */
+/* ───────────────────────── FOOTER + STICKY ───────────────────────── */
+
 function Footer() {
   return (
-    <footer className="border-t border-border/40 bg-secondary/30">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 py-10 grid sm:grid-cols-[1.2fr_1fr_1fr] gap-8">
-        <div>
-          <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-2xl bg-brand-gradient grid place-items-center shadow-glow">
-              <Leaf className="w-4 h-4 text-white" />
-            </div>
-            <div className="font-display font-extrabold">ORIGEN</div>
-          </div>
-          <p className="mt-3 text-[13px] text-muted-foreground max-w-sm">
-            Basado en el libro de Ruth Esther. Hecho para romper el patrón que arrastras.
-          </p>
+    <footer className="border-t border-border">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 py-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-xl bg-brand-gradient grid place-items-center"><Leaf className="w-4 h-4 text-primary-foreground" /></div>
+          <span className="font-display font-bold">ORIGEN</span>
         </div>
-        <div>
-          <div className="text-[11px] font-black uppercase tracking-widest text-primary">Legal</div>
-          <ul className="mt-3 space-y-2 text-[13px] text-muted-foreground">
-            <li><a href="/terminos" className="hover:text-foreground">Términos</a></li>
-            <li><a href="/privacidad" className="hover:text-foreground">Privacidad</a></li>
-            <li><a href="/reembolsos" className="hover:text-foreground">Reembolsos</a></li>
-            <li><a href="/disclaimer-ia" className="hover:text-foreground">Uso de IA</a></li>
-          </ul>
-        </div>
-        <div>
-          <div className="text-[11px] font-black uppercase tracking-widest text-primary">Soporte</div>
-          <ul className="mt-3 space-y-2 text-[13px] text-muted-foreground">
-            <li><a href="mailto:infodenegociorm@gmail.com" className="hover:text-foreground">infodenegociorm@gmail.com</a></li>
-            <li><Link to="/auth" className="hover:text-foreground">Iniciar sesión</Link></li>
-          </ul>
+        <div className="flex flex-wrap gap-x-5 gap-y-2 text-[13px] text-muted-foreground">
+          <Link to="/auth">Entrar</Link>
+          <a href="#planes">Planes</a>
+          <a href="#faq">Preguntas</a>
+          <a href="mailto:infodenegociorm@gmail.com">infodenegociorm@gmail.com</a>
         </div>
       </div>
-      <div className="text-center text-[11px] text-muted-foreground pb-8">
-        © {new Date().getFullYear()} ORIGEN · Todos los derechos reservados
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 pb-8 text-[11px] text-muted-foreground leading-relaxed">
+        ORIGEN ofrece acompañamiento espiritual y educativo. No sustituye atención psicológica, médica ni tratamiento profesional.
+        Si atraviesas una crisis, busca ayuda profesional en tu país. © {new Date().getFullYear()} ORIGEN.
       </div>
     </footer>
   );
 }
+
+function StickyCta() {
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setShow(window.scrollY > 700);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  if (!show) return null;
+  return (
+    <div className="sm:hidden fixed bottom-0 inset-x-0 z-40 p-3 bg-background/90 backdrop-blur-xl border-t border-border" style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 12px)" }}>
+      <StartButton className="w-full h-[54px] rounded-[14px] btn-primary-gradient text-[16px] font-bold">
+        Empezar gratis <ArrowRight className="w-4 h-4 ml-2" />
+      </StartButton>
+    </div>
+  );
+}
+
+/* ───────────────────────── SECTION SHELL ───────────────────────── */
+
+function Section({ id, eyebrow, title, sub, children }: { id?: string; eyebrow: string; title: string; sub?: string; children: ReactNode }) {
+  return (
+    <section id={id} className="mx-auto max-w-6xl px-4 sm:px-6 py-10 lg:py-14 scroll-mt-16">
+      <div className="max-w-2xl mb-6">
+        <span className="text-[11px] uppercase tracking-widest font-bold text-primary">{eyebrow}</span>
+        <h2 className="font-display font-black text-[26px] sm:text-[34px] leading-tight mt-2">{title}</h2>
+        {sub && <p className="text-[15px] text-muted-foreground mt-2 leading-relaxed">{sub}</p>}
+        <div className="hairline-brand mt-4" />
+      </div>
+      {children}
+    </section>
+  );
+}
+
+/* deja Lock referenciado para futuras secciones bloqueadas */
+export const _icons = { Lock };
