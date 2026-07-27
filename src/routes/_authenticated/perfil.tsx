@@ -454,8 +454,11 @@ function ProfilePanel({ profile, onEdit }: { profile: any; onEdit: () => void })
   const qc = useQueryClient();
   const sign = useSignedUrls("avatars", [profile.avatar_url]);
   const avatar = sign(profile.avatar_url);
-  const name = (profile.display_name || profile.full_name || "").split(" ")[0] || "amig@";
-  const initials = useMemo(() => (profile.display_name || profile.full_name || "O").slice(0, 1).toUpperCase(), [profile]);
+  const realName = [profile.display_name, profile.full_name].find(
+    (n: string | null) => n && n.trim() && !/^invitado_/i.test(n.trim()),
+  ) as string | undefined;
+  const name = (realName || "").split(" ")[0] || "amig@";
+  const initials = useMemo(() => (realName || "O").slice(0, 1).toUpperCase(), [realName]);
 
   const { data: stats } = useQuery({
     queryKey: ["perfil-stats", user?.id],
