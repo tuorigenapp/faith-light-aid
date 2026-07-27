@@ -89,9 +89,10 @@ function ProfileWizard({ profile, onDone }: { profile: any; onDone: () => void }
   const [saving, setSaving] = useState(false);
   const [photoBlob, setPhotoBlob] = useState<Blob | null>(null);
   const [localPreview, setLocalPreview] = useState<string | null>(null);
+  const clean = (n?: string | null) => (n && n.trim() && !/^invitado_/i.test(n.trim()) ? n.trim() : "");
   const [form, setForm] = useState({
-    display_name: profile.display_name ?? "",
-    full_name: profile.full_name ?? "",
+    display_name: clean(profile.display_name) || clean(profile.full_name),
+    full_name: clean(profile.full_name),
     country: profile.country ?? "",
     age: profile.age ? String(profile.age) : "",
     bio: profile.bio ?? "",
