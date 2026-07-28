@@ -2,17 +2,31 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { ArrowRight, ArrowLeft, Loader2, Lock, User as UserIcon, Heart, DollarSign, Brain, Sprout, Mountain, HandHeart } from "lucide-react";
+import { ArrowRight, ArrowLeft, Loader2, Lock, User as UserIcon, Heart, DollarSign, Brain, Sprout, Mountain, HandHeart, Check } from "lucide-react";
 import { awardGems, GEM_REWARDS } from "@/lib/gems";
 import { cn } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
 
+import logo from "@/assets/logo-origen.png.asset.json";
+import portal from "@/assets/onb-portal.png";
+import eCross from "@/assets/e3d-cross.png.asset.json";
+import eBrain from "@/assets/e3d-brain.png.asset.json";
+import eHeartGem from "@/assets/e3d-heartgem.png.asset.json";
+import eCoin from "@/assets/e3d-coin.png.asset.json";
+import eStar from "@/assets/e3d-star.png.asset.json";
+import eCouple from "@/assets/e3d-couple.png.asset.json";
+import eHeartPurple from "@/assets/e3d-heart-purple.png";
+import eButterfly from "@/assets/e3d-butterfly.png";
+import eClouds from "@/assets/e3d-clouds.png";
+import eHeadphones from "@/assets/e3d-headphones.png";
+import ePractice from "@/assets/e3d-practice.png";
+import eBook from "@/assets/e3d-book.png";
+
 export const Route = createFileRoute("/_authenticated/onboarding")({
-  head: () => ({ meta: [{ title: "Bienvenido — Reconectando" }] }),
+  head: () => ({ meta: [{ title: "Bienvenido — ORIGEN" }] }),
   component: Onboarding,
 });
 
@@ -30,7 +44,38 @@ type AIResult = {
   needs_more: false | string;
 };
 
-const TOTAL_STEPS = 6;
+const TOTAL_STEPS = 9;
+
+const DESEOS = [
+  { id: "sanar", label: "Sanar heridas emocionales", img: eHeartPurple },
+  { id: "dios", label: "Fortalecer mi relación con Dios", img: eCross.url },
+  { id: "abundancia", label: "Manifestar abundancia y propósito", img: eStar.url },
+  { id: "identidad", label: "Renovar mi identidad", img: eButterfly },
+  { id: "todas", label: "Todas las anteriores", img: eClouds },
+];
+
+const AREAS = [
+  { id: "emocional", label: "Emocional", img: eHeartGem.url },
+  { id: "espiritual", label: "Espiritual", img: eCross.url },
+  { id: "mental", label: "Mental", img: eBrain.url },
+  { id: "financiera", label: "Financiera", img: eCoin.url },
+  { id: "relaciones", label: "Relaciones", img: eCouple.url },
+  { id: "proposito", label: "Propósito", img: eStar.url },
+];
+
+const DETONANTES = [
+  "Miedos e inseguridades",
+  "Heridas del pasado",
+  "Falta de disciplina",
+  "Pensamientos negativos",
+  "No tengo claridad",
+];
+
+const GUIAS = [
+  { id: "musica", label: "Con música, audios y afirmaciones", img: eHeadphones },
+  { id: "practica", label: "Con ejercicios prácticos y desafíos", img: ePractice },
+  { id: "fe", label: "Con enseñanzas, fe y reflexión", img: eBook },
+];
 
 function Onboarding() {
   const { user } = useAuth();
@@ -41,12 +86,17 @@ function Onboarding() {
   const [dir, setDir] = useState<1 | -1>(1);
 
   const [name, setName] = useState("");
+  const [deseo, setDeseo] = useState("");
+  const [areas, setAreas] = useState<string[]>([]);
   const [raices, setRaices] = useState("");
+  const [detonantes, setDetonantes] = useState<string[]>([]);
   const [recuerdos, setRecuerdos] = useState("");
+  const [guia, setGuia] = useState("");
 
   const [processing, setProcessing] = useState(false);
   const [ai, setAi] = useState<AIResult | null>(null);
   const [analysisLine, setAnalysisLine] = useState(0);
+  const [showLogo, setShowLogo] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -59,11 +109,16 @@ function Onboarding() {
         navigate({ to: "/dashboard", replace: true });
         return;
       }
-      const g = (intake?.genealogy as Record<string, string>) ?? {};
-      const c = (intake?.childhood as Record<string, string>) ?? {};
-      setRaices(g.raices ?? "");
-      setRecuerdos(c.recuerdos ?? "");
-      setName(profile?.display_name || profile?.full_name || "");
+      const g = (intake?.genealogy as Record<string, unknown>) ?? {};
+      const c = (intake?.childhood as Record<string, unknown>) ?? {};
+      setRaices((g.raices as string) ?? "");
+      setRecuerdos((c.recuerdos as string) ?? "");
+      setDeseo((g.deseo as string) ?? "");
+      setAreas((g.areas as string[]) ?? []);
+      setDetonantes((c.detonantes as string[]) ?? []);
+      setGuia((c.guia as string) ?? "");
+      const raw = profile?.display_name || profile?.full_name || "";
+      setName(raw.startsWith("invitado_") ? "" : raw);
       setLoading(false);
     })();
   }, [user, navigate]);
@@ -78,7 +133,7 @@ function Onboarding() {
   ];
 
   useEffect(() => {
-    if (step !== 4 || !processing) return;
+    if (step !== 9 || !processing) return;
     setAnalysisLine(0);
     const id = setInterval(() => setAnalysisLine((n) => Math.min(n + 1, lines.length - 1)), 1100);
     return () => clearInterval(id);
@@ -89,32 +144,45 @@ function Onboarding() {
     await supabase.from("intake_sessions").upsert({
       user_id: user.id,
       stage: step,
-      genealogy: { raices },
-      childhood: { recuerdos },
+      genealogy: { raices, deseo, areas },
+      childhood: { recuerdos, detonantes, guia },
       ...extra,
     }, { onConflict: "user_id" });
   }
 
+  function next(to: number) { setDir(1); setStep(to); }
+  function back(to: number) { setDir(-1); setStep(to); }
+
   async function goNext() {
-    if (step === 1) {
+    if (step === 1) { next(2); return; }
+    if (step === 2) {
       if (!name.trim()) return toast.error("Escribe cómo quieres que te llamemos");
       await supabase.from("profiles").update({ display_name: name.trim(), full_name: name.trim() }).eq("id", user!.id);
       await awardGems(GEM_REWARDS.onboardingStep, "Paso 1 completado");
-      setDir(1); setStep(2);
-    } else if (step === 2) {
-      if (raices.trim().length < 8) return toast.error("Cuéntanos con al menos una frase");
-      await persist();
-      await awardGems(GEM_REWARDS.onboardingStep, "Paso 2 completado");
-      setDir(1); setStep(3);
+      next(3);
     } else if (step === 3) {
-      if (recuerdos.trim().length < 8) return toast.error("Cuéntanos con al menos una frase");
-      await persist();
-      await awardGems(GEM_REWARDS.onboardingStep, "Paso 3 completado");
-      setDir(1); setStep(4);
-      await runAnalysis();
+      if (!deseo) return toast.error("Elige una opción para continuar");
+      await persist(); next(4);
+    } else if (step === 4) {
+      if (!areas.length) return toast.error("Elige al menos un área");
+      await persist(); await awardGems(GEM_REWARDS.onboardingStep, "Áreas elegidas"); next(5);
     } else if (step === 5) {
-      setDir(1); setStep(6);
+      if (raices.trim().length < 8) return toast.error("Cuéntanos con al menos una frase");
+      await persist(); await awardGems(GEM_REWARDS.onboardingStep, "Tus raíces"); next(6);
     } else if (step === 6) {
+      if (!detonantes.length) return toast.error("Elige al menos una opción");
+      await persist(); next(7);
+    } else if (step === 7) {
+      if (recuerdos.trim().length < 8) return toast.error("Cuéntanos con al menos una frase");
+      await persist(); await awardGems(GEM_REWARDS.onboardingStep, "Tus recuerdos"); next(8);
+    } else if (step === 8) {
+      if (!guia) return toast.error("Elige cómo quieres que te guiemos");
+      await persist();
+      next(9);
+      await runAnalysis();
+    } else if (step === 10) {
+      next(11);
+    } else if (step === 11) {
       await complete();
     }
   }
@@ -122,21 +190,35 @@ function Onboarding() {
   async function runAnalysis() {
     setProcessing(true);
     try {
+      const raicesFull = [
+        raices,
+        deseo ? `Mayor deseo ahora: ${DESEOS.find((d) => d.id === deseo)?.label}` : "",
+        areas.length ? `Áreas a transformar: ${areas.map((a) => AREAS.find((x) => x.id === a)?.label).join(", ")}` : "",
+      ].filter(Boolean).join("\n");
+      const recuerdosFull = [
+        recuerdos,
+        detonantes.length ? `Lo que la detiene hoy: ${detonantes.join(", ")}` : "",
+        guia ? `Prefiere ser guiada: ${GUIAS.find((g) => g.id === guia)?.label}` : "",
+      ].filter(Boolean).join("\n");
+
       const r = await fetch("/api/intake-closure", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, genealogy: { raices }, childhood: { recuerdos } }),
+        body: JSON.stringify({ name, genealogy: { raices: raicesFull }, childhood: { recuerdos: recuerdosFull } }),
       });
       const j = await r.json();
       if (!r.ok) throw new Error(j.error ?? "Error");
-      // ensure minimum time so the analysis screen doesn't flash
       await new Promise((res) => setTimeout(res, 3800));
+      setShowLogo(true);
+      await new Promise((res) => setTimeout(res, 2200));
       setAi(j);
       await persist({ ai_plan: j, ai_summary: j.pattern_summary, primary_focus: j.primary_focus });
-      setDir(1); setStep(5);
+      setShowLogo(false);
+      next(10);
     } catch (e) {
       toast.error((e as Error).message);
-      setDir(-1); setStep(3);
+      setShowLogo(false);
+      back(8);
     } finally {
       setProcessing(false);
     }
@@ -154,55 +236,79 @@ function Onboarding() {
 
   if (loading) {
     return (
-      <div className="min-h-screen grid place-items-center bg-white">
+      <div className="min-h-dvh grid place-items-center bg-white">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
 
-  return (
-    <div className="relative min-h-screen bg-white overflow-hidden">
-      {/* Ambient blurred lights */}
-      <div aria-hidden className="pointer-events-none absolute -top-40 -left-32 w-[34rem] h-[34rem] rounded-full blur-[110px]"
-        style={{ background: "radial-gradient(circle, rgba(124,92,255,0.18), transparent 65%)" }} />
-      <div aria-hidden className="pointer-events-none absolute -bottom-40 -right-32 w-[36rem] h-[36rem] rounded-full blur-[110px]"
-        style={{ background: "radial-gradient(circle, rgba(245,139,203,0.16), transparent 65%)" }} />
-      <div aria-hidden className="pointer-events-none absolute top-1/3 right-1/4 w-[22rem] h-[22rem] rounded-full blur-[110px]"
-        style={{ background: "radial-gradient(circle, rgba(97,168,255,0.10), transparent 65%)" }} />
+  if (showLogo) return <LogoReveal />;
 
-      <div className="relative z-10 mx-auto max-w-lg px-5 pt-10 pb-16 min-h-screen flex flex-col">
-        {/* Progress header (hidden on analysis step) */}
-        {step !== 4 && (
-          <div className="mb-8">
-            <div className="text-center text-[13px] font-medium text-[#64667A]">Paso {step} de {TOTAL_STEPS}</div>
-            <div className="mt-3 flex items-center justify-center gap-1.5">
-              {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
-                <div key={i}
-                  className={cn(
-                    "h-1.5 rounded-full transition-all duration-500",
-                    i + 1 <= step ? "w-8 bg-gradient-primary" : "w-5 bg-[#ECEEF5]"
-                  )} />
-              ))}
+  return (
+    <div className="relative min-h-dvh overflow-hidden"
+      style={{ background: "radial-gradient(120% 90% at 50% 0%, #F3ECFF 0%, #FBFAFF 55%, #FDEEF7 100%)" }}>
+      <div aria-hidden className="pointer-events-none absolute -top-40 -left-32 w-[34rem] h-[34rem] rounded-full blur-[110px]"
+        style={{ background: "radial-gradient(circle, rgba(124,92,255,0.16), transparent 65%)" }} />
+      <div aria-hidden className="pointer-events-none absolute -bottom-40 -right-32 w-[36rem] h-[36rem] rounded-full blur-[110px]"
+        style={{ background: "radial-gradient(circle, rgba(245,139,203,0.14), transparent 65%)" }} />
+
+      <SocialProof />
+
+      <div className="relative z-10 mx-auto w-full max-w-[420px] px-5 pt-8 pb-14 min-h-dvh flex flex-col">
+        {step > 1 && step < 9 && (
+          <div className="mb-6">
+            <div className="flex items-center gap-3">
+              {step > 2 ? (
+                <button onClick={() => back(step - 1)} aria-label="Atrás"
+                  className="w-9 h-9 rounded-full bg-white shadow-soft grid place-items-center text-[#64667A] active:scale-95 transition">
+                  <ArrowLeft className="w-4 h-4" />
+                </button>
+              ) : <div className="w-9 h-9" />}
+              <div className="flex-1 h-2 rounded-full bg-[#ECEEF5] overflow-hidden">
+                <div className="h-full rounded-full bg-gradient-primary transition-all duration-500"
+                  style={{ width: `${Math.round((step / TOTAL_STEPS) * 100)}%` }} />
+              </div>
+              <span className="text-[12px] font-semibold text-[#64667A] tabular-nums">{step}/{TOTAL_STEPS}</span>
             </div>
           </div>
         )}
 
         <div className="flex-1 flex items-start justify-center">
-          <div
-            key={step}
-            className={cn(
-              "w-full",
-              dir === 1
-                ? "animate-in fade-in slide-in-from-right-6 duration-300"
-                : "animate-in fade-in slide-in-from-left-6 duration-300"
-            )}
-          >
-            {step === 1 && <Screen1 name={name} setName={setName} onNext={goNext} />}
-            {step === 2 && <Screen2 value={raices} setValue={setRaices} onNext={goNext} onBack={() => { setDir(-1); setStep(1); }} />}
-            {step === 3 && <Screen3 value={recuerdos} setValue={setRecuerdos} onNext={goNext} onBack={() => { setDir(-1); setStep(2); }} />}
-            {step === 4 && <Screen4 line={lines[analysisLine]} />}
-            {step === 5 && ai && <Screen5 ai={ai} onNext={goNext} />}
-            {step === 6 && ai && <Screen6 ai={ai} onNext={goNext} />}
+          <div key={step}
+            className={cn("w-full", dir === 1
+              ? "animate-in fade-in slide-in-from-right-6 duration-300"
+              : "animate-in fade-in slide-in-from-left-6 duration-300")}>
+            {step === 1 && <ScreenIntro onNext={goNext} />}
+            {step === 2 && <ScreenName name={name} setName={setName} onNext={goNext} />}
+            {step === 3 && <ScreenChoice
+              eyebrow="Tu deseo"
+              title="¿Cuál es tu mayor deseo ahora mismo?"
+              options={DESEOS}
+              value={deseo}
+              onSelect={(id) => { setDeseo(id); setTimeout(goNext, 300); }}
+            />}
+            {step === 4 && <ScreenAreas areas={areas} setAreas={setAreas} onNext={goNext} />}
+            {step === 5 && <ScreenRaices value={raices} setValue={setRaices} onNext={goNext} />}
+            {step === 6 && <ScreenMulti
+              eyebrow="Tus detonantes"
+              title="¿Qué te está deteniendo hoy?"
+              hint="Puedes elegir varias."
+              options={DETONANTES}
+              values={detonantes}
+              setValues={setDetonantes}
+              onNext={goNext}
+            />}
+            {step === 7 && <ScreenRecuerdos value={recuerdos} setValue={setRecuerdos} onNext={goNext} />}
+            {step === 8 && <ScreenChoice
+              eyebrow="Tu estilo"
+              title="¿Cómo prefieres que te guiemos?"
+              options={GUIAS}
+              value={guia}
+              onSelect={(id) => { setGuia(id); setTimeout(goNext, 300); }}
+            />}
+            {step === 9 && <ScreenLoading line={lines[analysisLine]} progress={Math.round(((analysisLine + 1) / lines.length) * 100)} />}
+            {step === 10 && ai && <Screen5 ai={ai} onNext={goNext} />}
+            {step === 11 && ai && <Screen6 ai={ai} onNext={goNext} />}
           </div>
         </div>
       </div>
@@ -212,26 +318,17 @@ function Onboarding() {
 
 /* ────────── Shared building blocks ────────── */
 
-function AuraIcon({ children, tint = "purple" }: { children: React.ReactNode; tint?: "purple" | "blue" | "pink" }) {
-  const bg =
-    tint === "blue"
-      ? "radial-gradient(circle, rgba(97,168,255,0.35), rgba(97,168,255,0) 65%)"
-      : tint === "pink"
-        ? "radial-gradient(circle, rgba(245,139,203,0.38), rgba(245,139,203,0) 65%)"
-        : "radial-gradient(circle, rgba(124,92,255,0.35), rgba(124,92,255,0) 65%)";
+function Emoji({ src, size = 64, className = "" }: { src: string; size?: number; className?: string }) {
   return (
-    <div className="relative mx-auto w-32 h-32 grid place-items-center">
-      <div aria-hidden className="absolute inset-0 rounded-full blur-2xl animate-glow" style={{ background: bg }} />
-      <div className="relative w-24 h-24 rounded-full bg-white shadow-soft grid place-items-center animate-breathe">
-        {children}
-      </div>
-    </div>
+    <img src={src} alt="" aria-hidden loading="lazy" width={size} height={size}
+      className={cn("object-contain drop-shadow-[0_10px_22px_rgba(124,92,255,0.25)]", className)}
+      style={{ width: size, height: size }} />
   );
 }
 
-function ScreenCard({ children }: { children: React.ReactNode }) {
+function ScreenCard({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className="rounded-[2rem] bg-white shadow-soft p-7 md:p-9 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className={cn("rounded-[2rem] bg-white/90 backdrop-blur shadow-soft p-6 animate-in fade-in slide-in-from-bottom-4 duration-500", className)}>
       {children}
     </div>
   );
@@ -239,185 +336,323 @@ function ScreenCard({ children }: { children: React.ReactNode }) {
 
 function PrimaryButton({ children, onClick, disabled }: { children: React.ReactNode; onClick: () => void; disabled?: boolean }) {
   return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className="w-full h-14 rounded-[18px] btn-primary-gradient font-semibold text-[15px] tracking-tight text-white inline-flex items-center justify-center gap-2 disabled:opacity-60"
-    >
+    <button onClick={onClick} disabled={disabled}
+      className="w-full h-14 rounded-[18px] btn-primary-gradient font-semibold text-[16px] tracking-tight text-white inline-flex items-center justify-center gap-2 disabled:opacity-50 active:scale-[.98] transition">
       {children}
-    </button>
-  );
-}
-
-function BackLink({ onBack }: { onBack?: () => void }) {
-  if (!onBack) return null;
-  return (
-    <button onClick={onBack} className="inline-flex items-center gap-1 text-[13px] text-[#64667A] hover:text-[#1B1B27] transition-colors mb-4">
-      <ArrowLeft className="w-4 h-4" /> Atrás
     </button>
   );
 }
 
 function PrivacyNote() {
   return (
-    <div className="mt-3 inline-flex items-center gap-1.5 text-[12px] text-[#64667A]">
+    <div className="inline-flex items-center gap-1.5 text-[12px] text-[#64667A]">
       <Lock className="w-3.5 h-3.5" /> Solo tú podrás leer esto.
     </div>
   );
 }
 
-/* ────────── Screens ────────── */
+function Eyebrow({ children }: { children: React.ReactNode }) {
+  return <p className="text-center text-[11px] tracking-[0.18em] font-bold text-[#7C5CFF] uppercase">{children}</p>;
+}
 
-function Screen1({ name, setName, onNext }: { name: string; setName: (s: string) => void; onNext: () => void }) {
+/* ────────── Social proof ────────── */
+
+const SIGNUPS = [
+  "Valentina de Colombia 🇨🇴", "Miguel de México 🇲🇽", "Rocío de España 🇪🇸",
+  "Camila de Chile 🇨🇱", "Josué de Perú 🇵🇪", "Ana de Argentina 🇦🇷",
+  "Daniela de Ecuador 🇪🇨", "Luis de Guatemala 🇬🇹",
+];
+const REVIEWS = [
+  "“Entendí en 3 minutos lo que llevaba años repitiendo.” — Karla, 34",
+  "“Sentí paz por primera vez en mucho tiempo.” — Andrés, 41",
+  "“No es religión impuesta, es acompañamiento real.” — Paola, 29",
+];
+
+function SocialProof() {
+  const [item, setItem] = useState<{ kind: "signup" | "review"; text: string } | null>(null);
+
+  useEffect(() => {
+    let i = 0;
+    let hide: ReturnType<typeof setTimeout>;
+    const show = () => {
+      const kind = i % 2 === 0 ? "signup" : "review";
+      const text = kind === "signup"
+        ? `${SIGNUPS[(i / 2 | 0) % SIGNUPS.length]} acaba de unirse a ORIGEN`
+        : REVIEWS[((i - 1) / 2 | 0) % REVIEWS.length];
+      setItem({ kind: kind as "signup" | "review", text });
+      hide = setTimeout(() => setItem(null), 4500);
+      i++;
+    };
+    const first = setTimeout(show, 3000);
+    const id = setInterval(show, 12000);
+    return () => { clearTimeout(first); clearTimeout(hide); clearInterval(id); };
+  }, []);
+
+  if (!item) return null;
+  return (
+    <div className="pointer-events-none fixed bottom-5 left-1/2 -translate-x-1/2 z-40 w-[min(92vw,380px)] animate-in fade-in slide-in-from-bottom-4 duration-300">
+      <div className="rounded-[16px] bg-white/95 backdrop-blur border border-[#ECEEF5] shadow-[0_8px_30px_rgba(30,25,20,0.12)] px-4 py-3 flex items-center gap-3">
+        <Emoji src={item.kind === "signup" ? eStar.url : eHeartGem.url} size={32} />
+        <p className="text-[12.5px] leading-snug text-[#1B1B27]">{item.text}</p>
+      </div>
+    </div>
+  );
+}
+
+/* ────────── Screens 1-9 ────────── */
+
+function ScreenIntro({ onNext }: { onNext: () => void }) {
+  return (
+    <div className="pt-2">
+      <Eyebrow>Esto no es casualidad</Eyebrow>
+      <h1 className="mt-3 text-center font-display font-extrabold text-[32px] leading-[1.12] text-[#1B1B27]">
+        Bienvenida a tu<br />transformación
+      </h1>
+      <div className="mt-5 rounded-[28px] overflow-hidden shadow-soft">
+        <img src={portal} alt="Portal de luz con una paloma volando hacia él" width={768} height={1024}
+          className="w-full h-[220px] object-cover" />
+      </div>
+      <p className="mt-5 text-center text-[15px] leading-relaxed text-[#64667A]">
+        ORIGEN fue creado para ayudarte a sanar, renovar tu identidad, fortalecer tu relación con Dios
+        y manifestar una vida con propósito.
+      </p>
+      <div className="mt-5 rounded-[22px] bg-white/90 backdrop-blur shadow-soft p-5 flex items-center gap-4">
+        <Emoji src={eHeartPurple} size={54} />
+        <p className="text-[14px] leading-snug text-[#1B1B27] font-medium">
+          Miles de personas ya están viviendo su mejor versión. <span className="text-[#7C5CFF]">¿Lista para comenzar?</span>
+        </p>
+      </div>
+      <div className="mt-6">
+        <PrimaryButton onClick={onNext}>Sí, quiero comenzar <ArrowRight className="w-4 h-4" /></PrimaryButton>
+      </div>
+      <p className="mt-3 text-center text-[12px] text-[#64667A]">Menos de 3 minutos · Sin respuestas correctas</p>
+    </div>
+  );
+}
+
+function ScreenName({ name, setName, onNext }: { name: string; setName: (s: string) => void; onNext: () => void }) {
   return (
     <ScreenCard>
-      <AuraIcon tint="purple">
-        <svg viewBox="0 0 24 24" className="w-11 h-11" fill="none" stroke="url(#g1)" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-          <defs>
-            <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stopColor="#7C5CFF" /><stop offset="1" stopColor="#F58BCB" />
-            </linearGradient>
-          </defs>
-          <path d="M12 3c1.8 2.5 1.8 5 0 7.5-1.8-2.5-1.8-5 0-7.5Z" />
-          <path d="M4.5 10.5c2.9-.5 5.1.7 6.5 3.2-2.9.5-5.1-.7-6.5-3.2Z" />
-          <path d="M19.5 10.5c-2.9-.5-5.1.7-6.5 3.2 2.9.5 5.1-.7 6.5-3.2Z" />
-          <path d="M8 17c1.4-1.6 3.3-2.2 4-2.2s2.6.6 4 2.2c-1.4 1.7-3.3 2.3-4 2.3s-2.6-.6-4-2.3Z" />
-          <circle cx="12" cy="13.7" r="1.4" />
-        </svg>
-      </AuraIcon>
-      <h1 className="text-center font-display font-extrabold text-[34px] leading-[1.1] mt-6 text-[#1B1B27]">
+      <div className="grid place-items-center">
+        <div className="relative w-28 h-28 grid place-items-center">
+          <div aria-hidden className="absolute inset-0 rounded-full blur-2xl animate-glow"
+            style={{ background: "radial-gradient(circle, rgba(245,139,203,0.38), transparent 65%)" }} />
+          <Emoji src={eHeartGem.url} size={92} className="relative animate-breathe" />
+        </div>
+      </div>
+      <h1 className="text-center font-display font-extrabold text-[30px] leading-[1.12] mt-4 text-[#1B1B27]">
         Bienvenido <span className="text-[#F58BCB]">♡</span>
       </h1>
-      <p className="text-center text-[15px] text-[#64667A] mt-4 leading-relaxed">
-        Este recorrido dura menos de 3 minutos.<br />
-        Cada respuesta nos ayudará a comprender mejor tu historia.
+      <p className="text-center text-[15px] text-[#64667A] mt-3 leading-relaxed">
+        Este recorrido dura menos de 3 minutos.<br />Cada respuesta nos ayuda a comprender tu historia.
       </p>
-      <p className="text-center text-[13px] text-[#7C5CFF] font-medium mt-3">No existen respuestas correctas.</p>
+      <p className="text-center text-[13px] text-[#7C5CFF] font-medium mt-2">No existen respuestas correctas.</p>
 
-      <div className="mt-8 rounded-[18px] border border-[#ECEEF5] bg-white px-4 py-4 shadow-[0_2px_10px_rgba(22,25,45,0.03)]">
+      <div className="mt-6 rounded-[18px] border border-[#ECEEF5] bg-white px-4 py-3">
         <div className="flex items-center gap-2 text-[#7C5CFF]">
           <UserIcon className="w-4 h-4" />
           <span className="text-[13px] font-semibold text-[#1B1B27]">¿Cómo quieres que te llamemos?</span>
         </div>
-        <Input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Escribe tu nombre"
-          className="mt-2 h-11 border-0 shadow-none bg-transparent px-0 text-[16px] focus-visible:ring-0"
-        />
+        <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Escribe tu nombre"
+          className="mt-1 h-11 border-0 shadow-none bg-transparent px-0 text-[16px] focus-visible:ring-0" />
       </div>
 
-      <div className="mt-7">
+      <div className="mt-6">
         <PrimaryButton onClick={onNext}>Continuar <ArrowRight className="w-4 h-4" /></PrimaryButton>
       </div>
     </ScreenCard>
   );
 }
 
-function Screen2({ value, setValue, onNext, onBack }: { value: string; setValue: (s: string) => void; onNext: () => void; onBack?: () => void }) {
+function ScreenChoice({ eyebrow, title, options, value, onSelect }: {
+  eyebrow: string; title: string;
+  options: { id: string; label: string; img: string }[];
+  value: string; onSelect: (id: string) => void;
+}) {
   return (
-    <>
-      <BackLink onBack={onBack} />
-      <ScreenCard>
-        <AuraIcon tint="purple">
-          <svg viewBox="0 0 24 24" className="w-11 h-11" fill="none" stroke="url(#g2)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <defs>
-              <linearGradient id="g2" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stopColor="#7C5CFF" /><stop offset="1" stopColor="#61A8FF" />
-              </linearGradient>
-            </defs>
-            <path d="M12 3v18" />
-            <path d="M12 8c-2-2-5-2-7 0" /><path d="M12 8c2-2 5-2 7 0" />
-            <path d="M12 12c-3-2-6-2-8 0" /><path d="M12 12c3-2 6-2 8 0" />
-            <path d="M9 21h6" />
-          </svg>
-        </AuraIcon>
-        <h2 className="text-center font-display font-extrabold text-[30px] mt-6 text-[#1B1B27]">Tus raíces 🌿</h2>
-        <p className="text-center text-[14px] text-[#64667A] mt-3 leading-relaxed">
-          Las historias familiares pueden influir en cómo vivimos hoy.
-        </p>
-        <p className="text-center font-display font-semibold text-[16px] mt-5 text-[#1B1B27]">
-          ¿Qué patrones has observado repetirse en tu familia o linaje?
-        </p>
-        <Textarea
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          placeholder="Escribe con libertad…"
-          className="mt-5 min-h-36 rounded-[18px] border-[#ECEEF5] bg-white text-[15px] resize-none focus-visible:ring-2 focus-visible:ring-[#7C5CFF]/25 focus-visible:border-[#7C5CFF]"
-        />
-        <div className="mt-5 flex items-center justify-between gap-3">
-          <PrivacyNote />
-          <button onClick={onNext} className="h-12 px-6 rounded-[18px] btn-primary-gradient font-semibold text-[14px] text-white inline-flex items-center gap-2">
-            Continuar <ArrowRight className="w-4 h-4" />
-          </button>
-        </div>
-      </ScreenCard>
-    </>
-  );
-}
-
-function Screen3({ value, setValue, onNext, onBack }: { value: string; setValue: (s: string) => void; onNext: () => void; onBack?: () => void }) {
-  return (
-    <>
-      <BackLink onBack={onBack} />
-      <ScreenCard>
-        <AuraIcon tint="pink">
-          <svg viewBox="0 0 24 24" className="w-11 h-11" fill="none" stroke="url(#g3)" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-            <defs>
-              <linearGradient id="g3" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stopColor="#7C5CFF" /><stop offset="1" stopColor="#F58BCB" />
-              </linearGradient>
-            </defs>
-            <circle cx="12" cy="6.5" r="2" />
-            <path d="M8 21c0-3 1.8-5 4-5s4 2 4 5" />
-            <path d="M5 14c1.5-2 4-3 7-3s5.5 1 7 3" />
-            <path d="M3 20c2-3 6-5 9-5s7 2 9 5" opacity=".3" />
-          </svg>
-        </AuraIcon>
-        <h2 className="text-center font-display font-extrabold text-[30px] mt-6 text-[#1B1B27]">
-          Tus primeros recuerdos <span className="text-[#F58BCB]">♡</span>
-        </h2>
-        <p className="text-center text-[14px] text-[#64667A] mt-3 leading-relaxed">
-          A veces un recuerdo explica más que cientos de palabras.
-        </p>
-        <p className="text-center font-display font-semibold text-[16px] mt-5 text-[#1B1B27]">
-          ¿Qué experiencia marcó tu infancia de manera profunda?
-        </p>
-        <Textarea
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          placeholder="Escribe con libertad…"
-          className="mt-5 min-h-36 rounded-[18px] border-[#ECEEF5] bg-white text-[15px] resize-none focus-visible:ring-2 focus-visible:ring-[#7C5CFF]/25 focus-visible:border-[#7C5CFF]"
-        />
-        <div className="mt-5 flex items-center justify-between gap-3">
-          <PrivacyNote />
-          <button onClick={onNext} className="h-12 px-6 rounded-[18px] btn-primary-gradient font-semibold text-[14px] text-white inline-flex items-center gap-2">
-            Continuar <ArrowRight className="w-4 h-4" />
-          </button>
-        </div>
-      </ScreenCard>
-    </>
-  );
-}
-
-function Screen4({ line }: { line: string }) {
-  return (
-    <div className="pt-14 text-center">
-      <div className="relative mx-auto w-40 h-40 grid place-items-center">
-        <div aria-hidden className="absolute inset-0 rounded-full blur-3xl animate-glow"
-          style={{ background: "radial-gradient(circle, rgba(124,92,255,0.35), rgba(245,139,203,0.25) 40%, transparent 70%)" }} />
-        <div className="relative w-28 h-28 rounded-full bg-white shadow-soft animate-breathe"
-          style={{ background: "radial-gradient(circle at 30% 30%, #ffffff, #F4F6FF 60%, #E9E4FF 100%)" }} />
-      </div>
-      <h2 className="mt-8 font-display font-extrabold text-[26px] text-[#1B1B27]">Analizando tu historia…</h2>
-      <div className="mt-6 h-6">
-        <p key={line} className="text-[14px] text-[#64667A] animate-in fade-in slide-in-from-bottom-2 duration-500">
-          {line}
-        </p>
+    <div>
+      <Eyebrow>{eyebrow}</Eyebrow>
+      <h2 className="mt-3 text-center font-display font-extrabold text-[26px] leading-[1.15] text-[#1B1B27]">{title}</h2>
+      <div className="mt-6 space-y-3">
+        {options.map((o, i) => {
+          const active = value === o.id;
+          return (
+            <button key={o.id} onClick={() => onSelect(o.id)}
+              style={{ animationDelay: `${i * 60}ms` }}
+              className={cn(
+                "w-full min-h-[64px] rounded-[20px] bg-white px-4 py-3 flex items-center gap-3 text-left transition active:scale-[.98] animate-in fade-in slide-in-from-bottom-3 duration-300 fill-mode-both",
+                active ? "border-2 border-[#7C5CFF] shadow-[0_4px_14px_rgba(124,92,255,0.25)]" : "border border-[#ECEEF5] shadow-[0_1px_3px_rgba(30,25,20,0.06)]"
+              )}>
+              <Emoji src={o.img} size={44} />
+              <span className="flex-1 text-[15px] font-semibold text-[#1B1B27] leading-snug">{o.label}</span>
+              <span className={cn("w-6 h-6 rounded-full grid place-items-center shrink-0",
+                active ? "bg-[#7C5CFF] text-white" : "border border-[#E3E5EF]")}>
+                {active && <Check className="w-3.5 h-3.5" />}
+              </span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
 }
+
+function ScreenAreas({ areas, setAreas, onNext }: { areas: string[]; setAreas: (a: string[]) => void; onNext: () => void }) {
+  const toggle = (id: string) => setAreas(areas.includes(id) ? areas.filter((a) => a !== id) : [...areas, id]);
+  return (
+    <div>
+      <Eyebrow>Tus áreas</Eyebrow>
+      <h2 className="mt-3 text-center font-display font-extrabold text-[26px] leading-[1.15] text-[#1B1B27]">
+        ¿Qué área de tu vida quieres transformar primero?
+      </h2>
+      <div className="mt-6 grid grid-cols-2 gap-3">
+        {AREAS.map((a, i) => {
+          const active = areas.includes(a.id);
+          return (
+            <button key={a.id} onClick={() => toggle(a.id)} style={{ animationDelay: `${i * 60}ms` }}
+              className={cn(
+                "rounded-[20px] bg-white p-4 grid place-items-center gap-2 min-h-[124px] transition active:scale-[.98] animate-in fade-in zoom-in-95 duration-300 fill-mode-both",
+                active ? "border-2 border-[#7C5CFF] shadow-[0_4px_14px_rgba(124,92,255,0.25)]" : "border border-[#ECEEF5] shadow-[0_1px_3px_rgba(30,25,20,0.06)]"
+              )}>
+              <Emoji src={a.img} size={52} />
+              <span className="text-[14px] font-semibold text-[#1B1B27]">{a.label}</span>
+            </button>
+          );
+        })}
+      </div>
+      <div className="mt-4 rounded-[18px] bg-[#F1EDFF] px-4 py-3 text-center text-[13px] font-medium text-[#7C5CFF]">
+        ¡Trabajaremos todas estas áreas contigo!
+      </div>
+      <div className="mt-5">
+        <PrimaryButton onClick={onNext} disabled={!areas.length}>Continuar <ArrowRight className="w-4 h-4" /></PrimaryButton>
+      </div>
+    </div>
+  );
+}
+
+function ScreenMulti({ eyebrow, title, hint, options, values, setValues, onNext }: {
+  eyebrow: string; title: string; hint: string; options: string[];
+  values: string[]; setValues: (v: string[]) => void; onNext: () => void;
+}) {
+  const toggle = (o: string) => setValues(values.includes(o) ? values.filter((v) => v !== o) : [...values, o]);
+  return (
+    <div>
+      <Eyebrow>{eyebrow}</Eyebrow>
+      <h2 className="mt-3 text-center font-display font-extrabold text-[26px] leading-[1.15] text-[#1B1B27]">{title}</h2>
+      <p className="mt-2 text-center text-[13px] text-[#64667A]">{hint}</p>
+      <div className="mt-6 space-y-3">
+        {options.map((o, i) => {
+          const active = values.includes(o);
+          return (
+            <button key={o} onClick={() => toggle(o)} style={{ animationDelay: `${i * 60}ms` }}
+              className={cn(
+                "w-full min-h-[56px] rounded-[18px] bg-white px-4 py-3 flex items-center gap-3 text-left transition active:scale-[.98] animate-in fade-in slide-in-from-bottom-3 duration-300 fill-mode-both",
+                active ? "border-2 border-[#7C5CFF] shadow-[0_4px_14px_rgba(124,92,255,0.25)]" : "border border-[#ECEEF5] shadow-[0_1px_3px_rgba(30,25,20,0.06)]"
+              )}>
+              <span className={cn("w-7 h-7 rounded-full grid place-items-center shrink-0",
+                active ? "bg-[#7C5CFF] text-white" : "bg-[#F1EDFF] text-[#7C5CFF]")}>
+                <Check className="w-4 h-4" />
+              </span>
+              <span className="flex-1 text-[15px] font-semibold text-[#1B1B27] leading-snug">{o}</span>
+            </button>
+          );
+        })}
+      </div>
+      <div className="mt-6">
+        <PrimaryButton onClick={onNext} disabled={!values.length}>Continuar <ArrowRight className="w-4 h-4" /></PrimaryButton>
+      </div>
+    </div>
+  );
+}
+
+function ScreenRaices({ value, setValue, onNext }: { value: string; setValue: (s: string) => void; onNext: () => void }) {
+  return (
+    <ScreenCard>
+      <div className="grid place-items-center">
+        <Emoji src={eCouple.url} size={86} className="animate-breathe" />
+      </div>
+      <h2 className="text-center font-display font-extrabold text-[26px] mt-4 text-[#1B1B27]">Tus raíces 🌿</h2>
+      <p className="text-center text-[14px] text-[#64667A] mt-2 leading-relaxed">
+        Las historias familiares influyen en cómo vivimos hoy.
+      </p>
+      <p className="text-center font-display font-semibold text-[16px] mt-4 text-[#1B1B27]">
+        ¿Qué patrones has observado repetirse en tu familia o linaje?
+      </p>
+      <Textarea value={value} onChange={(e) => setValue(e.target.value)} placeholder="Escribe con libertad…"
+        className="mt-4 min-h-32 rounded-[18px] border-[#ECEEF5] bg-white text-[15px] resize-none focus-visible:ring-2 focus-visible:ring-[#7C5CFF]/25 focus-visible:border-[#7C5CFF]" />
+      <div className="mt-3"><PrivacyNote /></div>
+      <div className="mt-4">
+        <PrimaryButton onClick={onNext}>Continuar <ArrowRight className="w-4 h-4" /></PrimaryButton>
+      </div>
+    </ScreenCard>
+  );
+}
+
+function ScreenRecuerdos({ value, setValue, onNext }: { value: string; setValue: (s: string) => void; onNext: () => void }) {
+  return (
+    <ScreenCard>
+      <div className="grid place-items-center">
+        <Emoji src={eClouds} size={86} className="animate-breathe" />
+      </div>
+      <h2 className="text-center font-display font-extrabold text-[26px] mt-4 text-[#1B1B27]">
+        Tus primeros recuerdos <span className="text-[#F58BCB]">♡</span>
+      </h2>
+      <p className="text-center text-[14px] text-[#64667A] mt-2 leading-relaxed">
+        A veces un recuerdo explica más que cientos de palabras.
+      </p>
+      <p className="text-center font-display font-semibold text-[16px] mt-4 text-[#1B1B27]">
+        ¿Qué experiencia marcó tu infancia de manera profunda?
+      </p>
+      <Textarea value={value} onChange={(e) => setValue(e.target.value)} placeholder="Escribe con libertad…"
+        className="mt-4 min-h-32 rounded-[18px] border-[#ECEEF5] bg-white text-[15px] resize-none focus-visible:ring-2 focus-visible:ring-[#7C5CFF]/25 focus-visible:border-[#7C5CFF]" />
+      <div className="mt-3"><PrivacyNote /></div>
+      <div className="mt-4">
+        <PrimaryButton onClick={onNext}>Continuar <ArrowRight className="w-4 h-4" /></PrimaryButton>
+      </div>
+    </ScreenCard>
+  );
+}
+
+function ScreenLoading({ line, progress }: { line: string; progress: number }) {
+  return (
+    <div className="pt-10 text-center">
+      <div className="relative mx-auto w-44 h-44 grid place-items-center">
+        <div aria-hidden className="absolute inset-0 rounded-full blur-3xl animate-glow"
+          style={{ background: "radial-gradient(circle, rgba(124,92,255,0.35), rgba(245,139,203,0.25) 40%, transparent 70%)" }} />
+        <img src={portal} alt="" aria-hidden width={768} height={1024}
+          className="relative w-36 h-36 object-cover rounded-full shadow-soft animate-breathe" />
+      </div>
+      <h2 className="mt-7 font-display font-extrabold text-[26px] text-[#1B1B27]">Preparando tu transformación…</h2>
+      <div className="mt-5 mx-auto w-[220px] h-2 rounded-full bg-[#ECEEF5] overflow-hidden">
+        <div className="h-full rounded-full bg-gradient-primary transition-all duration-700" style={{ width: `${progress}%` }} />
+      </div>
+      <div className="mt-5 h-6">
+        <p key={line} className="text-[14px] text-[#64667A] animate-in fade-in slide-in-from-bottom-2 duration-500">{line}</p>
+      </div>
+    </div>
+  );
+}
+
+function LogoReveal() {
+  return (
+    <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center"
+      style={{ background: "radial-gradient(120% 100% at 50% 0%, #EFE7FF 0%, #FBFAFF 55%, #FDEEF7 100%)" }}>
+      <div className="relative flex items-center justify-center">
+        <span className="splash-ring" />
+        <span className="splash-ring" style={{ animationDelay: "0.6s" }} />
+        <span className="splash-ring" style={{ animationDelay: "1.2s" }} />
+        <img src={logo.url} alt="ORIGEN" width={200} height={200}
+          className="relative z-10 w-[200px] h-[200px] object-contain drop-shadow-[0_20px_60px_rgba(124,92,255,0.35)] splash-breathe" />
+      </div>
+      <div className="mt-8 text-center px-6">
+        <h1 className="font-display text-3xl font-bold tracking-tight text-[#1B1930]">ORIGEN</h1>
+        <p className="mt-2 text-sm text-[#6B6A85] font-medium">Transforma tu alma, vive tu propósito</p>
+      </div>
+    </div>
+  );
+}
+
+/* ────────── Screens 10 & 11 (resultados IA — no modificar el flujo) ────────── */
 
 function Screen5({ ai, onNext }: { ai: AIResult; onNext: () => void }) {
   return (
