@@ -1,11 +1,11 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { ArrowRight, ArrowLeft, Loader2, Lock, User as UserIcon, Heart, DollarSign, Brain, Sprout, Mountain, HandHeart, Check } from "lucide-react";
+import { ArrowRight, ArrowLeft, Loader2, Lock, User as UserIcon, Heart, DollarSign, Brain, Sprout, Mountain, HandHeart, Check, Play, Pause } from "lucide-react";
 import { awardGems, GEM_REWARDS } from "@/lib/gems";
 import { cn } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
@@ -24,6 +24,10 @@ import eClouds from "@/assets/e3d-clouds.png";
 import eHeadphones from "@/assets/e3d-headphones.png";
 import ePractice from "@/assets/e3d-practice.png";
 import eBook from "@/assets/e3d-book.png";
+import icTiktok from "@/assets/social-tiktok.png.asset.json";
+import icInstagram from "@/assets/social-instagram.png.asset.json";
+import icFacebook from "@/assets/social-facebook.png.asset.json";
+import revelacion from "@/assets/origen-revelacion.mp3.asset.json";
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
   head: () => ({ meta: [{ title: "Bienvenido — ORIGEN" }] }),
@@ -357,78 +361,193 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
 
 /* ────────── Social proof ────────── */
 
-const SIGNUPS = [
-  "Valentina de Colombia 🇨🇴", "Miguel de México 🇲🇽", "Rocío de España 🇪🇸",
-  "Camila de Chile 🇨🇱", "Josué de Perú 🇵🇪", "Ana de Argentina 🇦🇷",
-  "Daniela de Ecuador 🇪🇨", "Luis de Guatemala 🇬🇹",
-];
-const REVIEWS = [
-  "“Entendí en 3 minutos lo que llevaba años repitiendo.” — Karla, 34",
-  "“Sentí paz por primera vez en mucho tiempo.” — Andrés, 41",
-  "“No es religión impuesta, es acompañamiento real.” — Paola, 29",
+type Network = "tiktok" | "instagram" | "facebook";
+const NET_ICON: Record<Network, string> = {
+  tiktok: icTiktok.url,
+  instagram: icInstagram.url,
+  facebook: icFacebook.url,
+};
+const NET_LABEL: Record<Network, string> = { tiktok: "TikTok", instagram: "Instagram", facebook: "Facebook" };
+
+const SIGNUPS: { name: string; place: string; net: Network }[] = [
+  { name: "Camila R.", place: "Colombia 🇨🇴", net: "tiktok" },
+  { name: "Miguel A.", place: "México 🇲🇽", net: "facebook" },
+  { name: "Rocío G.", place: "España 🇪🇸", net: "instagram" },
+  { name: "Josué M.", place: "Perú 🇵🇪", net: "tiktok" },
+  { name: "Daniela P.", place: "Ecuador 🇪🇨", net: "instagram" },
+  { name: "Luis F.", place: "Guatemala 🇬🇹", net: "facebook" },
+  { name: "Ana V.", place: "Argentina 🇦🇷", net: "tiktok" },
 ];
 
+const REVIEWS: { name: string; place: string; net: Network; text: string }[] = [
+  { name: "Karla S.", place: "Chile 🇨🇱", net: "instagram", text: "Entendí en 3 minutos lo que llevaba años repitiendo." },
+  { name: "Andrés T.", place: "México 🇲🇽", net: "tiktok", text: "Sentí paz por primera vez en mucho tiempo." },
+  { name: "Paola N.", place: "Colombia 🇨🇴", net: "facebook", text: "No es religión impuesta, es acompañamiento real." },
+  { name: "Ruth E.", place: "Perú 🇵🇪", net: "instagram", text: "Por fin vi de dónde venía el patrón de mi familia." },
+];
+
+function Avatar({ name, net }: { name: string; net: Network }) {
+  return (
+    <div className="relative shrink-0">
+      <div className="w-11 h-11 rounded-full grid place-items-center text-white font-display font-black text-[15px]"
+        style={{ background: "linear-gradient(135deg,#8F6BFF 0%,#F58BCB 100%)" }}>
+        {name.slice(0, 1)}
+      </div>
+      <img src={NET_ICON[net]} alt="" aria-hidden width={64} height={64}
+        className="absolute -bottom-1 -right-1 w-5 h-5 object-contain drop-shadow" />
+    </div>
+  );
+}
+
 function SocialProof() {
-  const [item, setItem] = useState<{ kind: "signup" | "review"; text: string } | null>(null);
+  const [item, setItem] = useState<{ kind: "signup" | "review"; name: string; place: string; net: Network; text: string } | null>(null);
 
   useEffect(() => {
     let i = 0;
     let hide: ReturnType<typeof setTimeout>;
     const show = () => {
-      const kind = i % 2 === 0 ? "signup" : "review";
-      const text = kind === "signup"
-        ? `${SIGNUPS[(i / 2 | 0) % SIGNUPS.length]} acaba de unirse a ORIGEN`
-        : REVIEWS[((i - 1) / 2 | 0) % REVIEWS.length];
-      setItem({ kind: kind as "signup" | "review", text });
-      hide = setTimeout(() => setItem(null), 4500);
+      if (i % 2 === 0) {
+        const s = SIGNUPS[(i / 2 | 0) % SIGNUPS.length];
+        setItem({ kind: "signup", ...s, text: `se acaba de registrar en ORIGEN a través de ${NET_LABEL[s.net]}` });
+      } else {
+        const r = REVIEWS[((i - 1) / 2 | 0) % REVIEWS.length];
+        setItem({ kind: "review", ...r });
+      }
+      hide = setTimeout(() => setItem(null), 5200);
       i++;
     };
-    const first = setTimeout(show, 3000);
-    const id = setInterval(show, 12000);
+    const first = setTimeout(show, 2500);
+    const id = setInterval(show, 11000);
     return () => { clearTimeout(first); clearTimeout(hide); clearInterval(id); };
   }, []);
 
   if (!item) return null;
   return (
     <div className="pointer-events-none fixed bottom-5 left-1/2 -translate-x-1/2 z-40 w-[min(92vw,380px)] animate-in fade-in slide-in-from-bottom-4 duration-300">
-      <div className="rounded-[16px] bg-white/95 backdrop-blur border border-[#ECEEF5] shadow-[0_8px_30px_rgba(30,25,20,0.12)] px-4 py-3 flex items-center gap-3">
-        <Emoji src={item.kind === "signup" ? eStar.url : eHeartGem.url} size={32} />
-        <p className="text-[12.5px] leading-snug text-[#1B1B27]">{item.text}</p>
+      <div className="rounded-[16px] bg-white/95 backdrop-blur border border-[#1B1B27]/[0.08] shadow-[0_8px_30px_rgba(30,25,20,0.12)] px-4 py-3 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3">
+        <Avatar name={item.name} net={item.net} />
+        <div className="min-w-0">
+          {item.kind === "signup" ? (
+            <>
+              <p className="text-[12.5px] leading-snug text-[#1B1B27]">
+                <span className="font-bold">{item.name}</span> {item.text}
+              </p>
+              <p className="text-[11px] text-[#64667A] mt-0.5">{item.place} · hace un momento</p>
+            </>
+          ) : (
+            <>
+              <p className="text-[12.5px] leading-snug text-[#1B1B27] italic">“{item.text}”</p>
+              <p className="text-[11px] text-[#64667A] mt-0.5">
+                <span className="font-semibold">{item.name}</span> · {item.place} · <span className="text-[#F7B955]">★★★★★</span>
+              </p>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
 }
 
+
 /* ────────── Screens 1-9 ────────── */
 
+const REVEAL_AT = 173; // 02:53
+
 function ScreenIntro({ onNext }: { onNext: () => void }) {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [playing, setPlaying] = useState(false);
+  const [t, setT] = useState(0);
+  const [dur, setDur] = useState(REVEAL_AT);
+  const revealed = t >= REVEAL_AT;
+
+  useEffect(() => {
+    const a = audioRef.current;
+    if (!a) return;
+    const onTime = () => setT(a.currentTime);
+    const onMeta = () => setDur(a.duration || REVEAL_AT);
+    const onEnd = () => { setPlaying(false); setT(Math.max(REVEAL_AT, a.duration || REVEAL_AT)); };
+    a.addEventListener("timeupdate", onTime);
+    a.addEventListener("loadedmetadata", onMeta);
+    a.addEventListener("ended", onEnd);
+    a.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
+    return () => {
+      a.removeEventListener("timeupdate", onTime);
+      a.removeEventListener("loadedmetadata", onMeta);
+      a.removeEventListener("ended", onEnd);
+      a.pause();
+    };
+  }, []);
+
+  function toggle() {
+    const a = audioRef.current;
+    if (!a) return;
+    if (a.paused) { a.play().then(() => setPlaying(true)).catch(() => {}); }
+    else { a.pause(); setPlaying(false); }
+  }
+
+  const pct = Math.min(100, (t / Math.min(dur || REVEAL_AT, REVEAL_AT)) * 100);
+  const rest = Math.max(0, Math.ceil(REVEAL_AT - t));
+  const mm = String(Math.floor(rest / 60)).padStart(2, "0");
+  const ss = String(rest % 60).padStart(2, "0");
+
   return (
     <div className="pt-2">
+      <audio ref={audioRef} src={revelacion.url} preload="auto" playsInline />
       <Eyebrow>Esto no es casualidad</Eyebrow>
       <h1 className="mt-3 text-center font-display font-extrabold text-[32px] leading-[1.12] text-[#1B1B27]">
         Bienvenida a tu<br />transformación
       </h1>
-      <div className="mt-5 rounded-[28px] overflow-hidden shadow-soft">
+
+      <div className="mt-5 relative rounded-[28px] overflow-hidden shadow-soft">
         <img src={portal} alt="Portal de luz con una paloma volando hacia él" width={768} height={1024}
           className="w-full h-[220px] object-cover" />
+        <div className="absolute inset-0" style={{ background: "linear-gradient(180deg,rgba(27,27,39,0) 35%,rgba(27,27,39,.72) 100%)" }} />
+        <div className="absolute inset-x-4 bottom-4 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3">
+          <button onClick={toggle} aria-label={playing ? "Pausar audio" : "Reproducir audio"}
+            className="w-12 h-12 shrink-0 rounded-full bg-white/95 grid place-items-center text-[#7C5CFF] active:scale-95 transition">
+            {playing ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+          </button>
+          <div className="min-w-0">
+            <div className="text-[12px] font-semibold text-white truncate">Mensaje de apertura · escúchalo completo</div>
+            <div className="mt-1.5 h-1.5 rounded-full bg-white/25 overflow-hidden">
+              <div className="h-full rounded-full bg-white transition-[width] duration-500" style={{ width: `${pct}%` }} />
+            </div>
+          </div>
+        </div>
       </div>
+
       <p className="mt-5 text-center text-[15px] leading-relaxed text-[#64667A]">
         ORIGEN fue creado para ayudarte a sanar, renovar tu identidad, fortalecer tu relación con Dios
         y manifestar una vida con propósito.
       </p>
+
       <div className="mt-5 rounded-[22px] bg-white/90 backdrop-blur shadow-soft p-5 flex items-center gap-4">
         <Emoji src={eHeartPurple} size={54} />
         <p className="text-[14px] leading-snug text-[#1B1B27] font-medium">
           Miles de personas ya están viviendo su mejor versión. <span className="text-[#7C5CFF]">¿Lista para comenzar?</span>
         </p>
       </div>
-      <div className="mt-6">
-        <PrimaryButton onClick={onNext}>Sí, quiero comenzar <ArrowRight className="w-4 h-4" /></PrimaryButton>
+
+      <div className="mt-6 min-h-[104px]">
+        {revealed ? (
+          <div className="animate-in fade-in slide-in-from-bottom-3 duration-500">
+            <PrimaryButton onClick={onNext}>Sí, quiero comenzar <ArrowRight className="w-4 h-4" /></PrimaryButton>
+            <p className="mt-3 text-center text-[12px] text-[#64667A]">Menos de 3 minutos · Sin respuestas correctas</p>
+          </div>
+        ) : (
+          <div className="rounded-[16px] bg-[#7C5CFF]/[0.08] border border-[#7C5CFF]/15 px-4 py-4 text-center">
+            <p className="text-[13px] font-semibold text-[#7C5CFF] inline-flex items-center gap-2">
+              <Lock className="w-4 h-4" /> Tu camino se revela al terminar el mensaje
+            </p>
+            <p className="mt-1 text-[12px] text-[#64667A]">Faltan {mm}:{ss} · quédate, esto es para ti</p>
+          </div>
+        )}
       </div>
-      <p className="mt-3 text-center text-[12px] text-[#64667A]">Menos de 3 minutos · Sin respuestas correctas</p>
     </div>
   );
 }
+
+
 
 function ScreenName({ name, setName, onNext }: { name: string; setName: (s: string) => void; onNext: () => void }) {
   return (
