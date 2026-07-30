@@ -357,47 +357,93 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
 
 /* ────────── Social proof ────────── */
 
-const SIGNUPS = [
-  "Valentina de Colombia 🇨🇴", "Miguel de México 🇲🇽", "Rocío de España 🇪🇸",
-  "Camila de Chile 🇨🇱", "Josué de Perú 🇵🇪", "Ana de Argentina 🇦🇷",
-  "Daniela de Ecuador 🇪🇨", "Luis de Guatemala 🇬🇹",
-];
-const REVIEWS = [
-  "“Entendí en 3 minutos lo que llevaba años repitiendo.” — Karla, 34",
-  "“Sentí paz por primera vez en mucho tiempo.” — Andrés, 41",
-  "“No es religión impuesta, es acompañamiento real.” — Paola, 29",
+type Network = "tiktok" | "instagram" | "facebook";
+const NET_ICON: Record<Network, string> = {
+  tiktok: icTiktok.url,
+  instagram: icInstagram.url,
+  facebook: icFacebook.url,
+};
+const NET_LABEL: Record<Network, string> = { tiktok: "TikTok", instagram: "Instagram", facebook: "Facebook" };
+
+const SIGNUPS: { name: string; place: string; net: Network }[] = [
+  { name: "Camila R.", place: "Colombia 🇨🇴", net: "tiktok" },
+  { name: "Miguel A.", place: "México 🇲🇽", net: "facebook" },
+  { name: "Rocío G.", place: "España 🇪🇸", net: "instagram" },
+  { name: "Josué M.", place: "Perú 🇵🇪", net: "tiktok" },
+  { name: "Daniela P.", place: "Ecuador 🇪🇨", net: "instagram" },
+  { name: "Luis F.", place: "Guatemala 🇬🇹", net: "facebook" },
+  { name: "Ana V.", place: "Argentina 🇦🇷", net: "tiktok" },
 ];
 
+const REVIEWS: { name: string; place: string; net: Network; text: string }[] = [
+  { name: "Karla S.", place: "Chile 🇨🇱", net: "instagram", text: "Entendí en 3 minutos lo que llevaba años repitiendo." },
+  { name: "Andrés T.", place: "México 🇲🇽", net: "tiktok", text: "Sentí paz por primera vez en mucho tiempo." },
+  { name: "Paola N.", place: "Colombia 🇨🇴", net: "facebook", text: "No es religión impuesta, es acompañamiento real." },
+  { name: "Ruth E.", place: "Perú 🇵🇪", net: "instagram", text: "Por fin vi de dónde venía el patrón de mi familia." },
+];
+
+function Avatar({ name, net }: { name: string; net: Network }) {
+  return (
+    <div className="relative shrink-0">
+      <div className="w-11 h-11 rounded-full grid place-items-center text-white font-display font-black text-[15px]"
+        style={{ background: "linear-gradient(135deg,#8F6BFF 0%,#F58BCB 100%)" }}>
+        {name.slice(0, 1)}
+      </div>
+      <img src={NET_ICON[net]} alt="" aria-hidden width={64} height={64}
+        className="absolute -bottom-1 -right-1 w-5 h-5 object-contain drop-shadow" />
+    </div>
+  );
+}
+
 function SocialProof() {
-  const [item, setItem] = useState<{ kind: "signup" | "review"; text: string } | null>(null);
+  const [item, setItem] = useState<{ kind: "signup" | "review"; name: string; place: string; net: Network; text: string } | null>(null);
 
   useEffect(() => {
     let i = 0;
     let hide: ReturnType<typeof setTimeout>;
     const show = () => {
-      const kind = i % 2 === 0 ? "signup" : "review";
-      const text = kind === "signup"
-        ? `${SIGNUPS[(i / 2 | 0) % SIGNUPS.length]} acaba de unirse a ORIGEN`
-        : REVIEWS[((i - 1) / 2 | 0) % REVIEWS.length];
-      setItem({ kind: kind as "signup" | "review", text });
-      hide = setTimeout(() => setItem(null), 4500);
+      if (i % 2 === 0) {
+        const s = SIGNUPS[(i / 2 | 0) % SIGNUPS.length];
+        setItem({ kind: "signup", ...s, text: `se acaba de registrar en ORIGEN a través de ${NET_LABEL[s.net]}` });
+      } else {
+        const r = REVIEWS[((i - 1) / 2 | 0) % REVIEWS.length];
+        setItem({ kind: "review", ...r });
+      }
+      hide = setTimeout(() => setItem(null), 5200);
       i++;
     };
-    const first = setTimeout(show, 3000);
-    const id = setInterval(show, 12000);
+    const first = setTimeout(show, 2500);
+    const id = setInterval(show, 11000);
     return () => { clearTimeout(first); clearTimeout(hide); clearInterval(id); };
   }, []);
 
   if (!item) return null;
   return (
     <div className="pointer-events-none fixed bottom-5 left-1/2 -translate-x-1/2 z-40 w-[min(92vw,380px)] animate-in fade-in slide-in-from-bottom-4 duration-300">
-      <div className="rounded-[16px] bg-white/95 backdrop-blur border border-[#ECEEF5] shadow-[0_8px_30px_rgba(30,25,20,0.12)] px-4 py-3 flex items-center gap-3">
-        <Emoji src={item.kind === "signup" ? eStar.url : eHeartGem.url} size={32} />
-        <p className="text-[12.5px] leading-snug text-[#1B1B27]">{item.text}</p>
+      <div className="rounded-[16px] bg-white/95 backdrop-blur border border-[#1B1B27]/[0.08] shadow-[0_8px_30px_rgba(30,25,20,0.12)] px-4 py-3 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3">
+        <Avatar name={item.name} net={item.net} />
+        <div className="min-w-0">
+          {item.kind === "signup" ? (
+            <>
+              <p className="text-[12.5px] leading-snug text-[#1B1B27]">
+                <span className="font-bold">{item.name}</span> {item.text}
+              </p>
+              <p className="text-[11px] text-[#64667A] mt-0.5">{item.place} · hace un momento</p>
+            </>
+          ) : (
+            <>
+              <p className="text-[12.5px] leading-snug text-[#1B1B27] italic">“{item.text}”</p>
+              <p className="text-[11px] text-[#64667A] mt-0.5">
+                <span className="font-semibold">{item.name}</span> · {item.place} · <span className="text-[#F7B955]">★★★★★</span>
+              </p>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
 }
+
 
 /* ────────── Screens 1-9 ────────── */
 

@@ -14,6 +14,8 @@ import { uploadPhoto } from "@/lib/photo";
 import { useSignedUrls } from "@/hooks/use-signed-urls";
 import arbolGemas from "@/assets/arbol-gemas.png.asset.json";
 import arbolMini from "@/assets/arbol-mini.png.asset.json";
+import hojasTree from "@/assets/hojas-tree.png";
+import { HOJA_USES } from "@/lib/hojas";
 
 
 export const Route = createFileRoute("/_authenticated/arbol")({
@@ -63,100 +65,105 @@ function TreePage() {
 
 }
 
-/* ═══════════════════════ VIEW 1 · HOME (imagen #1) ═══════════════════════ */
+/* ═══════════════════════ VIEW 1 · MIS HOJAS DE SANACIÓN ═══════════════════════ */
 
 function HomeView({ displayName, avatar, gems, onOpenTree }: { displayName: string; avatar: string | null; gems: number; onOpenTree: () => void }) {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#F1ECFF] via-[#FBFAFF] to-[#E8F4FF]">
-      <div className="max-w-md mx-auto px-4 pt-4 pb-32 space-y-4">
-        {/* Header card — user + gems */}
-        <div className="rounded-[24px] bg-white border-[3px] border-[#3FBE8F] shadow-soft p-3 flex items-center gap-3">
-          <div className="relative shrink-0">
-            {avatar ? (
-              <img src={avatar} alt="" className="w-14 h-14 rounded-full object-cover ring-4 ring-[#3FBE8F]/25" />
-            ) : (
-              <div className="w-14 h-14 rounded-full bg-brand-gradient text-white grid place-items-center font-display font-bold text-lg ring-4 ring-[#3FBE8F]/25">
-                {displayName.slice(0, 1).toUpperCase()}
-              </div>
-            )}
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="font-display font-bold text-[15px] leading-tight">Hola, {displayName}</div>
-            <div className="mt-1 inline-flex items-center gap-1.5 text-primary">
-              <span className="text-[22px] leading-none">💎</span>
-              <span className="font-display font-black text-[22px] leading-none">{gems.toLocaleString()}</span>
+    <div className="min-h-dvh" style={{ background: "radial-gradient(120% 90% at 50% 0%, #F3ECFF 0%, #FBFAFF 55%, #FDEEF7 100%)" }}>
+      <div className="mx-auto w-full max-w-[420px] px-4 pt-4 pb-32">
+        {/* Top bar */}
+        <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
+          {avatar ? (
+            <img src={avatar} alt="" className="w-10 h-10 shrink-0 rounded-full object-cover ring-2 ring-[#7C5CFF]/25" />
+          ) : (
+            <div className="w-10 h-10 shrink-0 rounded-full bg-brand-gradient text-white grid place-items-center font-display font-bold text-[15px]">
+              {displayName.slice(0, 1).toUpperCase()}
             </div>
-            <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">Gemas de Sanación</div>
+          )}
+          <div className="min-w-0">
+            <div className="truncate font-display font-bold text-[15px] text-[#1B1B27]">Hola, {displayName}</div>
+            <div className="text-[11px] font-semibold text-[#64667A]">Tu jardín de sanación</div>
           </div>
-          <Link to="/premios" className="relative w-11 h-11 rounded-full bg-[#F1ECFF] grid place-items-center text-primary" aria-label="Notificaciones">
-            <span className="text-xl">🔔</span>
-            <span className="absolute top-0 right-0 min-w-[18px] h-[18px] px-1 rounded-full bg-[#F5566B] text-white text-[10px] font-black grid place-items-center border-2 border-white">3</span>
+          <Link to="/premios" aria-label="Historial de hojas" className="w-10 h-10 shrink-0 rounded-full bg-white shadow-[0_1px_3px_rgba(30,25,20,.06)] grid place-items-center text-[#7C5CFF] active:scale-95 transition">
+            <Info className="w-5 h-5" />
           </Link>
         </div>
 
         {/* Title */}
-        <div className="text-center pt-2">
-          <h1 className="font-display font-black text-[26px] leading-tight text-foreground">Tu Árbol Genealógico</h1>
-          <p className="text-[13px] text-muted-foreground mt-2 leading-relaxed max-w-[300px] mx-auto">
-            Cada familiar agregado fortalece tu sanación y rompe cadenas generacionales.
-          </p>
+        <div className="mt-5 text-center">
+          <p className="text-[11px] uppercase tracking-[0.18em] font-bold text-[#7C5CFF]">Tu saldo espiritual</p>
+          <h1 className="mt-1 font-display font-extrabold text-[30px] leading-[1.15] text-[#1B1B27]">
+            Mis Hojas <span className="text-[#7C5CFF]">de Sanación</span> 🍃
+          </h1>
         </div>
 
-        {/* Tree PNG */}
-        <button onClick={onOpenTree} className="block w-full mt-2 focus:outline-none active:scale-[0.98] transition-transform" aria-label="Ver mi árbol">
-          <div className="relative aspect-[3/4] w-full max-w-[340px] mx-auto">
-            <div className="absolute inset-x-0 bottom-6 h-24 bg-[#3FBE8F]/25 blur-3xl rounded-full" />
-            <img src={arbolGemas.url} alt="Árbol Genealógico con Gemas" className="relative w-full h-full object-contain animate-[float_6s_ease-in-out_infinite]" />
+        {/* Tree + balance */}
+        <button onClick={onOpenTree} aria-label="Ver mi árbol genealógico" className="mt-3 block w-full active:scale-[.98] transition">
+          <div className="relative">
+            <div className="absolute inset-x-8 bottom-10 h-24 bg-[#7C5CFF]/20 blur-3xl rounded-full" />
+            <img src={hojasTree} alt="Árbol de sanación con hojas moradas" width={1024} height={1024}
+              className="relative mx-auto w-[280px] h-[280px] object-contain animate-[floatTree_6s_ease-in-out_infinite]" />
           </div>
         </button>
 
-        {/* Main CTA */}
-        <button
-          onClick={onOpenTree}
-          className="w-full h-14 rounded-[18px] bg-gradient-to-b from-[#4CD394] to-[#2FA574] text-white font-display font-black text-[17px] shadow-[0_8px_24px_rgba(63,190,143,0.4)] active:scale-[0.98] transition-transform inline-flex items-center justify-center gap-2"
-        >
-          <span className="text-xl">🌳</span> Ver mi árbol
-        </button>
+        <div className="rounded-[16px] bg-white border border-[#1B1B27]/[0.08] p-5 text-center shadow-[0_1px_3px_rgba(30,25,20,.06)]">
+          <div className="text-[12px] font-semibold text-[#64667A]">Hojas disponibles</div>
+          <div className="mt-1 font-display font-black text-[40px] leading-none text-[#7C5CFF] tabular-nums">{gems.toLocaleString()}</div>
+          <div className="mt-1 text-[12px] font-semibold text-[#3FBE8F]">🍃 Cada hoja es un paso de sanación</div>
+        </div>
 
-        {/* Secondary actions */}
-        <Link
-          to="/premios"
-          className="w-full h-14 rounded-[18px] bg-white border-2 border-[#F1ECFF] font-display font-black text-[15px] shadow-soft active:scale-[0.98] transition-transform inline-flex items-center justify-center gap-2"
-        >
-          <span className="w-8 h-8 rounded-full bg-gradient-to-br from-[#F7B955] to-[#E89A2E] grid place-items-center text-white text-sm">🏅</span>
-          Canjear Puntos Acumulados
-        </Link>
-        <Link
-          to="/premios"
-          className="w-full h-14 rounded-[18px] bg-white border-2 border-[#F1ECFF] font-display font-black text-[15px] shadow-soft active:scale-[0.98] transition-transform inline-flex items-center justify-center gap-2"
-        >
-          Premios <Trophy className="w-4 h-4 text-[#F7B955]" />
-        </Link>
+        {/* CTAs */}
+        <div className="mt-4 space-y-3">
+          <Link to="/premios"
+            className="w-full h-14 rounded-[12px] text-white font-display font-bold text-[16px] inline-flex items-center justify-center gap-2 active:scale-[.98] transition"
+            style={{ background: "linear-gradient(180deg,#8F6BFF 0%,#F58BCB 100%)", boxShadow: "0 4px 14px rgba(124,92,255,.30)" }}>
+            <Sparkles className="w-4 h-4" /> Recargar mis hojas
+          </Link>
+          <button onClick={onOpenTree}
+            className="w-full h-12 rounded-[12px] bg-[#7C5CFF]/[0.09] text-[#7C5CFF] font-display font-bold text-[15px] inline-flex items-center justify-center gap-2 active:scale-[.98] transition">
+            🌳 Ver mi árbol genealógico
+          </button>
+        </div>
+
+        {/* Usos de las hojas */}
+        <div className="mt-6">
+          <h2 className="text-[12px] uppercase tracking-[0.18em] font-black text-[#7C5CFF]">¿En qué usas tus hojas?</h2>
+          <div className="mt-3 space-y-3">
+            {HOJA_USES.map((u) => (
+              <Link key={u.to} to={u.to}
+                className="rounded-[16px] bg-white border border-[#1B1B27]/[0.08] p-4 shadow-[0_1px_3px_rgba(30,25,20,.06)] grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 active:scale-[.99] transition">
+                <span className="w-11 h-11 shrink-0 rounded-[10px] bg-[#7C5CFF]/10 grid place-items-center text-[20px]">{u.emoji}</span>
+                <span className="min-w-0">
+                  <span className="block truncate font-display font-bold text-[15px] text-[#1B1B27]">{u.title}</span>
+                  <span className="block text-[12px] text-[#64667A]">{u.cost} hoja por consulta</span>
+                </span>
+                <ChevronRight className="w-5 h-5 shrink-0 text-[#C9C6DA]" />
+              </Link>
+            ))}
+          </div>
+        </div>
 
         {/* Patrones nudge */}
-        <Link
-          to="/patrones"
-          className="mt-2 block rounded-[18px] p-4 bg-gradient-to-r from-[#7C5CFF] to-[#F58BCB] text-white shadow-glow active:scale-[0.99] transition-transform"
-        >
-          <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-full bg-white/20 grid place-items-center backdrop-blur">
+        <Link to="/patrones" className="mt-5 block rounded-[16px] p-4 text-white active:scale-[.99] transition"
+          style={{ background: "linear-gradient(135deg,#8F6BFF 0%,#F58BCB 100%)", boxShadow: "0 4px 14px rgba(124,92,255,.30)" }}>
+          <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
+            <span className="w-11 h-11 shrink-0 rounded-full bg-white/20 grid place-items-center backdrop-blur">
               <Sparkles className="w-5 h-5" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-[10px] uppercase tracking-wider font-bold opacity-90">Nuevo</div>
-              <div className="font-display font-black text-[15px] leading-tight">Analiza tus patrones familiares</div>
-            </div>
-            <ChevronRight className="w-5 h-5" />
+            </span>
+            <span className="min-w-0">
+              <span className="block text-[10px] uppercase tracking-wider font-bold opacity-90">Siguiente paso</span>
+              <span className="block font-display font-bold text-[15px] leading-tight">Analiza tus patrones familiares</span>
+            </span>
+            <ChevronRight className="w-5 h-5 shrink-0" />
           </div>
         </Link>
       </div>
 
-      <style>{`
-        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
-      `}</style>
+      <style>{`@keyframes floatTree{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}`}</style>
     </div>
   );
 }
+
 
 /* ═══════════════════════ VIEW 2 · TREE DETAIL (imagen #2) ═══════════════════════ */
 
