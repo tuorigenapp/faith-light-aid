@@ -24,6 +24,10 @@ import eClouds from "@/assets/e3d-clouds.png";
 import eHeadphones from "@/assets/e3d-headphones.png";
 import ePractice from "@/assets/e3d-practice.png";
 import eBook from "@/assets/e3d-book.png";
+import icTiktok from "@/assets/social-tiktok.png.asset.json";
+import icInstagram from "@/assets/social-instagram.png.asset.json";
+import icFacebook from "@/assets/social-facebook.png.asset.json";
+import revelacion from "@/assets/origen-revelacion.mp3.asset.json";
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
   head: () => ({ meta: [{ title: "Bienvenido — ORIGEN" }] }),
