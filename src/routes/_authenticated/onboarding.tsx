@@ -5,7 +5,7 @@ import { useAuth } from "@/lib/use-auth";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { ArrowRight, ArrowLeft, Loader2, Lock, User as UserIcon, Heart, DollarSign, Brain, Sprout, Mountain, HandHeart, Check } from "lucide-react";
+import { ArrowRight, ArrowLeft, Loader2, Lock, User as UserIcon, Heart, DollarSign, Brain, Sprout, Mountain, HandHeart, Check, Play, Pause } from "lucide-react";
 import { awardGems, GEM_REWARDS } from "@/lib/gems";
 import { cn } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
