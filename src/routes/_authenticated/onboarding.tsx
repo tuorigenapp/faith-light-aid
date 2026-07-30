@@ -451,34 +451,103 @@ function SocialProof() {
 
 /* ────────── Screens 1-9 ────────── */
 
+const REVEAL_AT = 173; // 02:53
+
 function ScreenIntro({ onNext }: { onNext: () => void }) {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [playing, setPlaying] = useState(false);
+  const [t, setT] = useState(0);
+  const [dur, setDur] = useState(REVEAL_AT);
+  const revealed = t >= REVEAL_AT;
+
+  useEffect(() => {
+    const a = audioRef.current;
+    if (!a) return;
+    const onTime = () => setT(a.currentTime);
+    const onMeta = () => setDur(a.duration || REVEAL_AT);
+    const onEnd = () => { setPlaying(false); setT(Math.max(REVEAL_AT, a.duration || REVEAL_AT)); };
+    a.addEventListener("timeupdate", onTime);
+    a.addEventListener("loadedmetadata", onMeta);
+    a.addEventListener("ended", onEnd);
+    a.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
+    return () => {
+      a.removeEventListener("timeupdate", onTime);
+      a.removeEventListener("loadedmetadata", onMeta);
+      a.removeEventListener("ended", onEnd);
+      a.pause();
+    };
+  }, []);
+
+  function toggle() {
+    const a = audioRef.current;
+    if (!a) return;
+    if (a.paused) { a.play().then(() => setPlaying(true)).catch(() => {}); }
+    else { a.pause(); setPlaying(false); }
+  }
+
+  const pct = Math.min(100, (t / Math.min(dur || REVEAL_AT, REVEAL_AT)) * 100);
+  const rest = Math.max(0, Math.ceil(REVEAL_AT - t));
+  const mm = String(Math.floor(rest / 60)).padStart(2, "0");
+  const ss = String(rest % 60).padStart(2, "0");
+
   return (
     <div className="pt-2">
+      <audio ref={audioRef} src={revelacion.url} preload="auto" playsInline />
       <Eyebrow>Esto no es casualidad</Eyebrow>
       <h1 className="mt-3 text-center font-display font-extrabold text-[32px] leading-[1.12] text-[#1B1B27]">
         Bienvenida a tu<br />transformación
       </h1>
-      <div className="mt-5 rounded-[28px] overflow-hidden shadow-soft">
+
+      <div className="mt-5 relative rounded-[28px] overflow-hidden shadow-soft">
         <img src={portal} alt="Portal de luz con una paloma volando hacia él" width={768} height={1024}
           className="w-full h-[220px] object-cover" />
+        <div className="absolute inset-0" style={{ background: "linear-gradient(180deg,rgba(27,27,39,0) 35%,rgba(27,27,39,.72) 100%)" }} />
+        <div className="absolute inset-x-4 bottom-4 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3">
+          <button onClick={toggle} aria-label={playing ? "Pausar audio" : "Reproducir audio"}
+            className="w-12 h-12 shrink-0 rounded-full bg-white/95 grid place-items-center text-[#7C5CFF] active:scale-95 transition">
+            {playing ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+          </button>
+          <div className="min-w-0">
+            <div className="text-[12px] font-semibold text-white truncate">Mensaje de apertura · escúchalo completo</div>
+            <div className="mt-1.5 h-1.5 rounded-full bg-white/25 overflow-hidden">
+              <div className="h-full rounded-full bg-white transition-[width] duration-500" style={{ width: `${pct}%` }} />
+            </div>
+          </div>
+        </div>
       </div>
+
       <p className="mt-5 text-center text-[15px] leading-relaxed text-[#64667A]">
         ORIGEN fue creado para ayudarte a sanar, renovar tu identidad, fortalecer tu relación con Dios
         y manifestar una vida con propósito.
       </p>
+
       <div className="mt-5 rounded-[22px] bg-white/90 backdrop-blur shadow-soft p-5 flex items-center gap-4">
         <Emoji src={eHeartPurple} size={54} />
         <p className="text-[14px] leading-snug text-[#1B1B27] font-medium">
           Miles de personas ya están viviendo su mejor versión. <span className="text-[#7C5CFF]">¿Lista para comenzar?</span>
         </p>
       </div>
-      <div className="mt-6">
-        <PrimaryButton onClick={onNext}>Sí, quiero comenzar <ArrowRight className="w-4 h-4" /></PrimaryButton>
+
+      <div className="mt-6 min-h-[104px]">
+        {revealed ? (
+          <div className="animate-in fade-in slide-in-from-bottom-3 duration-500">
+            <PrimaryButton onClick={onNext}>Sí, quiero comenzar <ArrowRight className="w-4 h-4" /></PrimaryButton>
+            <p className="mt-3 text-center text-[12px] text-[#64667A]">Menos de 3 minutos · Sin respuestas correctas</p>
+          </div>
+        ) : (
+          <div className="rounded-[16px] bg-[#7C5CFF]/[0.08] border border-[#7C5CFF]/15 px-4 py-4 text-center">
+            <p className="text-[13px] font-semibold text-[#7C5CFF] inline-flex items-center gap-2">
+              <Lock className="w-4 h-4" /> Tu camino se revela al terminar el mensaje
+            </p>
+            <p className="mt-1 text-[12px] text-[#64667A]">Faltan {mm}:{ss} · quédate, esto es para ti</p>
+          </div>
+        )}
       </div>
-      <p className="mt-3 text-center text-[12px] text-[#64667A]">Menos de 3 minutos · Sin respuestas correctas</p>
     </div>
   );
 }
+
+
 
 function ScreenName({ name, setName, onNext }: { name: string; setName: (s: string) => void; onNext: () => void }) {
   return (
