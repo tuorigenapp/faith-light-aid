@@ -271,7 +271,7 @@ function Visualiza() {
 
       {/* ETAPA 2 */}
       <section>
-        <StageHeader n={2} title="¿Qué incluye cada programa?" sub="Cada experiencia está diseñada para acompañarte paso a paso en tu transformación." />
+        <StageHeader n={3} title="¿Qué incluye cada programa?" sub="Cada experiencia está diseñada para acompañarte paso a paso en tu transformación." />
         <div className="mt-5 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-12 gap-3">
           {INCLUDES.map(({ Icon, label }) => (
             <div key={label} className="app-card p-3 flex flex-col items-center text-center gap-2 shadow-soft">
@@ -286,7 +286,7 @@ function Visualiza() {
 
       {/* ETAPA 3 */}
       <section>
-        <StageHeader n={3} title="Tu transformación comienza hoy" emoji="💗" />
+        <StageHeader n={4} title="Tu transformación comienza hoy" emoji="💗" />
         <div className="mt-5 grid lg:grid-cols-2 gap-4">
           <div className="relative overflow-hidden rounded-[1.75rem] shadow-soft min-h-[280px]">
             <img src={caminoImg} alt="Tu camino" width={1024} height={1024} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
