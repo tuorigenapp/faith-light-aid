@@ -10,6 +10,8 @@ import stageImg from "@/assets/stage-journey.jpg";
 import dailyImg from "@/assets/daily-devotional.jpg";
 import heroImg from "@/assets/spiritual-hero.jpg";
 import exerciseImg from "@/assets/prayer-exercise.jpg";
+import paisaje from "@/assets/camino-paisaje.png.asset.json";
+
 
 export const Route = createFileRoute("/_authenticated/etapas")({
   head: () => ({ meta: [{ title: "Mis Etapas — Reconectando" }] }),
