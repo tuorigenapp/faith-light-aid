@@ -71,63 +71,95 @@ function Etapas() {
   }
 
   return (
-    <div className="px-4 py-6 md:p-10 max-w-6xl mx-auto mobile-safe-bottom lg:pb-10">
-      <section className="relative overflow-hidden rounded-[2rem] p-6 md:p-8 text-primary-foreground shadow-glow min-h-64 flex items-end">
-        <img src={stageImg} alt="Ruta espiritual" width={1024} height={1024} className="absolute inset-0 h-full w-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-foreground/85 via-foreground/30 to-transparent" />
-        <div className="relative z-10 max-w-2xl">
-          <div className="inline-flex items-center gap-2 rounded-full bg-background/15 border border-primary-foreground/20 backdrop-blur-xl px-3 py-1 text-xs font-bold text-gold"><Compass className="w-3.5 h-3.5" /> Plan según tu onboarding</div>
-          <h1 className="font-display font-extrabold text-4xl md:text-5xl mt-4">Mis etapas de restauración</h1>
-          <p className="mt-2 text-primary-foreground/80">Avanza una etapa a la vez. Las completadas se guardan con check verde y la siguiente se desbloquea automáticamente.</p>
+    <div className="px-4 py-5 md:p-8 max-w-[1100px] mx-auto mobile-safe-bottom lg:pb-10">
+      {/* HERO — mapa del camino */}
+      <section className="relative overflow-hidden rounded-[16px] shadow-soft min-h-[240px] flex items-end">
+        <img src={paisaje.url} alt="Camino de restauración" width={1024} height={1024} className="absolute inset-0 h-full w-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#1B1930]/90 via-[#1B1930]/35 to-transparent" />
+        <div className="relative z-10 p-5 md:p-7 text-white">
+          <div className="inline-flex items-center gap-2 rounded-full bg-white/15 border border-white/25 backdrop-blur px-3 py-1 text-[12px] font-bold">
+            <Compass className="w-3.5 h-3.5" /> {completedCount}/8 etapas
+          </div>
+          <h1 className="font-display font-extrabold text-[28px] md:text-[36px] leading-tight mt-3">Tu camino de restauración</h1>
+          <p className="text-[15px] text-white/85 mt-1 max-w-md">{aiPlan.pattern_name ?? "Plan personalizado según tu onboarding"}</p>
+          <div className="mt-4 h-1.5 w-full max-w-xs rounded-full bg-white/25 overflow-hidden">
+            <div className="h-full bg-gradient-to-r from-primary via-accent-pink to-gold transition-all duration-700" style={{ width: `${Math.round((completedCount / 8) * 100)}%` }} />
+          </div>
         </div>
       </section>
 
-      <Card className="mt-5 p-5 rounded-[1.7rem] flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between shadow-soft">
-        <div>
-          <div className="text-xs uppercase tracking-wider text-primary font-extrabold">Resultado</div>
-          <h2 className="font-display font-bold text-xl">{aiPlan.pattern_name ?? "Camino ORIGEN personalizado"}</h2>
-          <p className="text-sm text-muted-foreground mt-1">Áreas recomendadas: {recommendedFocuses.join(" · ")}</p>
+      <Card className="mt-4 p-4 rounded-[16px] grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 shadow-soft">
+        <div className="min-w-0">
+          <div className="text-[12px] uppercase tracking-widest text-primary font-bold">Áreas recomendadas</div>
+          <p className="text-[14px] text-muted-foreground mt-1">{recommendedFocuses.join(" · ")}</p>
         </div>
-        <div className="rounded-full bg-accent px-4 py-2 text-sm font-bold text-accent-foreground">{completedCount}/8 completadas</div>
+        <div className="shrink-0 rounded-full bg-primary/10 px-3.5 py-1.5 text-[13px] font-bold text-primary">{completedCount}/8</div>
       </Card>
 
-      <div className="mt-6 grid lg:grid-cols-2 gap-4">
-        {orderedStages.map((s: any, i: number) => {
-          const p = progressMap.get(s.id);
-          const completed = p?.status === "completed";
-          const unlocked = i === 0 || completed || completedIds.has(orderedStages[i - 1]?.id);
-          const active = unlocked && !completed;
-          const image = IMAGE_MAP[s.image_key ?? "journey"] ?? stageImg;
-          const recommended = recommendedFocuses.some((f) => (s.focus_area ?? "").toLowerCase().includes(f));
-          const content = (
-            <Card className={cn("overflow-hidden rounded-[1.7rem] shadow-soft transition-all h-full", completed && "border-accent bg-accent/8", active && "border-primary", !unlocked && "opacity-65")}>
-              <div className="relative h-40">
-                <img src={image} alt={s.title} width={1024} height={1024} loading="lazy" className="h-full w-full object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 to-transparent" />
-                <div className="absolute top-3 left-3 rounded-full bg-background/85 backdrop-blur px-3 py-1 text-xs font-bold">Etapa {s.id}</div>
-                {recommended && <div className="absolute top-3 right-3 rounded-full bg-gold text-gold-foreground px-3 py-1 text-xs font-bold flex items-center gap-1"><Sparkles className="w-3 h-3" /> Recomendada</div>}
-                <div className={cn("absolute bottom-3 right-3 w-12 h-12 rounded-2xl grid place-items-center font-bold", completed ? "bg-accent text-accent-foreground" : unlocked ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground")}>
-                  {completed ? <Check className="w-6 h-6" /> : unlocked ? s.id : <Lock className="w-5 h-5" />}
-                </div>
-              </div>
-              <div className="p-5">
-                <div className="text-[11px] uppercase tracking-widest text-primary font-extrabold">{s.focus_area ?? "restauración"}</div>
-                <h3 className="font-display font-bold text-xl mt-1">{s.title}</h3>
-                <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{s.subtitle}</p>
-                <p className="scripture text-xs text-muted-foreground/80 mt-3 line-clamp-2">“{s.scripture}” — {s.scripture_reference}</p>
-                <div className="mt-4 flex items-center justify-between">
-                  <span className={cn("text-xs font-bold", completed ? "text-accent-foreground" : active ? "text-primary" : "text-muted-foreground")}>{completed ? "Completada y guardada" : active ? "Disponible ahora" : "Bloqueada"}</span>
-                  {unlocked && <ArrowRight className="w-4 h-4 text-primary" />}
-                </div>
-              </div>
-            </Card>
-          );
-          return <Link key={s.id} to="/etapas/$stageId" params={{ stageId: String(s.id) }} className="block h-full">{content}</Link>;
-        })}
+      {/* MAPA SERPENTEANTE */}
+      <div className="relative mt-6">
+        <div className="absolute left-1/2 top-0 bottom-0 w-[3px] -translate-x-1/2 bg-gradient-to-b from-primary/35 via-accent-pink/35 to-gold/35 rounded-full" />
+        <div className="relative space-y-4">
+          {orderedStages.map((s: any, i: number) => {
+            const p = progressMap.get(s.id);
+            const completed = p?.status === "completed";
+            const unlocked = i === 0 || completed || completedIds.has(orderedStages[i - 1]?.id);
+            const active = unlocked && !completed;
+            const image = IMAGE_MAP[s.image_key ?? "journey"] ?? stageImg;
+            const recommended = recommendedFocuses.some((f) => (s.focus_area ?? "").toLowerCase().includes(f));
+            const left = i % 2 === 0;
+            return (
+              <Link
+                key={s.id}
+                to="/etapas/$stageId"
+                params={{ stageId: String(s.id) }}
+                className={cn("block relative", left ? "sm:pr-[52%]" : "sm:pl-[52%]")}
+                style={{ animation: `fade-in 0.4s ease-out ${i * 60}ms both` }}
+              >
+                <Card
+                  className={cn(
+                    "overflow-hidden rounded-[16px] shadow-soft transition-all active:scale-[.97]",
+                    completed && "border-accent-green/45",
+                    active && "border-primary",
+                    !unlocked && "opacity-70"
+                  )}
+                >
+                  <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-3 p-4 items-center">
+                    <div className="relative w-16 h-16 shrink-0 rounded-[14px] overflow-hidden">
+                      <img src={image} alt={s.title} width={1024} height={1024} loading="lazy" className={cn("h-full w-full object-cover", !unlocked && "blur-[2px]")} />
+                      <div className={cn("absolute inset-0 grid place-items-center text-white font-bold", completed ? "bg-accent-green/75" : unlocked ? "bg-primary/60" : "bg-foreground/55")}>
+                        {completed ? <Check className="w-6 h-6" /> : unlocked ? <span className="font-display text-lg">{s.id}</span> : <Lock className="w-5 h-5" />}
+                      </div>
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-[11px] uppercase tracking-widest text-primary font-bold">{s.focus_area ?? "restauración"}</span>
+                        {recommended && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-gold/15 text-gold px-2 py-0.5 text-[11px] font-bold">
+                            <Sparkles className="w-3 h-3" /> Recomendada
+                          </span>
+                        )}
+                      </div>
+                      <h3 className="font-display font-bold text-[18px] leading-tight mt-1 truncate">{s.title}</h3>
+                      <p className="text-[13px] text-muted-foreground mt-1 line-clamp-2">{s.subtitle}</p>
+                      <div className="mt-2 flex items-center justify-between gap-2">
+                        <span className={cn("text-[12px] font-bold", completed ? "text-accent-green" : active ? "text-primary" : "text-muted-foreground")}>
+                          {completed ? "Completada" : active ? "Disponible ahora" : "Bloqueada"}
+                        </span>
+                        {unlocked && <ArrowRight className="w-4 h-4 text-primary shrink-0" />}
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              </Link>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
 }
+
 
 function getRecommendedFocuses(intake: any): string[] {
   const plan = intake?.ai_plan ?? {};
