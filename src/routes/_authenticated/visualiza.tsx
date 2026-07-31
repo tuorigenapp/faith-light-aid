@@ -244,6 +244,29 @@ function Visualiza() {
         </div>
       </section>
 
+      {/* PROGRAMAS DE 21 DÍAS */}
+      <section>
+        <StageHeader n={2} title="Nuevos programas de 21 días" emoji="🔥" sub="Semana 1 incluida. Las semanas 2 y 3 se abren con 10 hojas de sanación cada una." />
+        <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+          {PROGRAMAS.map((p) => (
+            <Link key={p.id} to="/programas/$programaId" params={{ programaId: p.id }} className="block">
+              <div className="app-card overflow-hidden h-full flex flex-col shadow-soft hover:shadow-glow transition-all active:scale-[.97]">
+                <img src={p.cover} alt={p.title} width={1024} height={1024} loading="lazy" className="aspect-square w-full object-cover" />
+                <div className="p-5 flex-1 flex flex-col">
+                  <div className={cn("text-[11px] font-bold uppercase tracking-widest", p.tint)}>21 días · {p.emoji}</div>
+                  <h3 className="font-display font-extrabold text-[19px] leading-tight mt-1">{p.title}</h3>
+                  <p className="text-[13px] text-muted-foreground mt-2 leading-relaxed">{p.claim}</p>
+                  <div className={cn("mt-4 h-12 rounded-[12px] grid place-items-center text-[15px] font-semibold text-white bg-gradient-to-r shadow-soft", p.gradient)}>
+                    <span className="inline-flex items-center gap-2">Entrar <ArrowRight className="w-4 h-4" /></span>
+                  </div>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+
       {/* ETAPA 2 */}
       <section>
         <StageHeader n={2} title="¿Qué incluye cada programa?" sub="Cada experiencia está diseñada para acompañarte paso a paso en tu transformación." />
