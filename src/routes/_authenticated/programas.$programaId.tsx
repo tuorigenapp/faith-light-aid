@@ -83,7 +83,7 @@ function ProgramaPage() {
       navigate({ to: "/premios" });
       return;
     }
-    await awardGems(-UNLOCK_COST, `Semana ${w} · ${prog.title}`);
+    await awardGems(-UNLOCK_COST, `Semana ${w} · ${prog!.title}`);
     await supabase.from("daily_activity").insert({
       user_id: user.id,
       activity_type: "programa_semana",
@@ -105,7 +105,7 @@ function ProgramaPage() {
       reference_id: crypto.randomUUID(),
       metadata: { programa: programaId, day, note } as never,
     });
-    await awardGems(40, `Día ${day} · ${prog.title}`);
+    await awardGems(40, `Día ${day} · ${prog!.title}`);
     qc.invalidateQueries({ queryKey: ["programa", programaId] });
     qc.invalidateQueries({ queryKey: ["profile"] });
     setNote("");
