@@ -41,6 +41,7 @@ import { Route as AuthenticatedVisualizaLimpiezaRouteImport } from './routes/_au
 import { Route as AuthenticatedVisualizaIdentidadRouteImport } from './routes/_authenticated/visualiza.identidad'
 import { Route as AuthenticatedVisualizaCristoRouteImport } from './routes/_authenticated/visualiza.cristo'
 import { Route as AuthenticatedVisualizaCategoryIdRouteImport } from './routes/_authenticated/visualiza.$categoryId'
+import { Route as AuthenticatedProgramasProgramaIdRouteImport } from './routes/_authenticated/programas.$programaId'
 import { Route as AuthenticatedEtapasStageIdRouteImport } from './routes/_authenticated/etapas.$stageId'
 import { Route as AuthenticatedVisualizaCategoryIdDayRouteImport } from './routes/_authenticated/visualiza.$categoryId.$day'
 
@@ -209,6 +210,12 @@ const AuthenticatedVisualizaCategoryIdRoute =
     path: '/$categoryId',
     getParentRoute: () => AuthenticatedVisualizaRoute,
   } as any)
+const AuthenticatedProgramasProgramaIdRoute =
+  AuthenticatedProgramasProgramaIdRouteImport.update({
+    id: '/programas/$programaId',
+    path: '/programas/$programaId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedEtapasStageIdRoute =
   AuthenticatedEtapasStageIdRouteImport.update({
     id: '/$stageId',
@@ -251,6 +258,7 @@ export interface FileRoutesByFullPath {
   '/api/pareja': typeof ApiParejaRoute
   '/api/patrones': typeof ApiPatronesRoute
   '/etapas/$stageId': typeof AuthenticatedEtapasStageIdRoute
+  '/programas/$programaId': typeof AuthenticatedProgramasProgramaIdRoute
   '/visualiza/$categoryId': typeof AuthenticatedVisualizaCategoryIdRouteWithChildren
   '/visualiza/cristo': typeof AuthenticatedVisualizaCristoRoute
   '/visualiza/identidad': typeof AuthenticatedVisualizaIdentidadRoute
@@ -286,6 +294,7 @@ export interface FileRoutesByTo {
   '/api/pareja': typeof ApiParejaRoute
   '/api/patrones': typeof ApiPatronesRoute
   '/etapas/$stageId': typeof AuthenticatedEtapasStageIdRoute
+  '/programas/$programaId': typeof AuthenticatedProgramasProgramaIdRoute
   '/visualiza/$categoryId': typeof AuthenticatedVisualizaCategoryIdRouteWithChildren
   '/visualiza/cristo': typeof AuthenticatedVisualizaCristoRoute
   '/visualiza/identidad': typeof AuthenticatedVisualizaIdentidadRoute
@@ -323,6 +332,7 @@ export interface FileRoutesById {
   '/api/pareja': typeof ApiParejaRoute
   '/api/patrones': typeof ApiPatronesRoute
   '/_authenticated/etapas/$stageId': typeof AuthenticatedEtapasStageIdRoute
+  '/_authenticated/programas/$programaId': typeof AuthenticatedProgramasProgramaIdRoute
   '/_authenticated/visualiza/$categoryId': typeof AuthenticatedVisualizaCategoryIdRouteWithChildren
   '/_authenticated/visualiza/cristo': typeof AuthenticatedVisualizaCristoRoute
   '/_authenticated/visualiza/identidad': typeof AuthenticatedVisualizaIdentidadRoute
@@ -360,6 +370,7 @@ export interface FileRouteTypes {
     | '/api/pareja'
     | '/api/patrones'
     | '/etapas/$stageId'
+    | '/programas/$programaId'
     | '/visualiza/$categoryId'
     | '/visualiza/cristo'
     | '/visualiza/identidad'
@@ -395,6 +406,7 @@ export interface FileRouteTypes {
     | '/api/pareja'
     | '/api/patrones'
     | '/etapas/$stageId'
+    | '/programas/$programaId'
     | '/visualiza/$categoryId'
     | '/visualiza/cristo'
     | '/visualiza/identidad'
@@ -431,6 +443,7 @@ export interface FileRouteTypes {
     | '/api/pareja'
     | '/api/patrones'
     | '/_authenticated/etapas/$stageId'
+    | '/_authenticated/programas/$programaId'
     | '/_authenticated/visualiza/$categoryId'
     | '/_authenticated/visualiza/cristo'
     | '/_authenticated/visualiza/identidad'
@@ -677,6 +690,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedVisualizaCategoryIdRouteImport
       parentRoute: typeof AuthenticatedVisualizaRoute
     }
+    '/_authenticated/programas/$programaId': {
+      id: '/_authenticated/programas/$programaId'
+      path: '/programas/$programaId'
+      fullPath: '/programas/$programaId'
+      preLoaderRoute: typeof AuthenticatedProgramasProgramaIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/etapas/$stageId': {
       id: '/_authenticated/etapas/$stageId'
       path: '/$stageId'
@@ -760,6 +780,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
   AuthenticatedPremiosRoute: typeof AuthenticatedPremiosRoute
   AuthenticatedVisualizaRoute: typeof AuthenticatedVisualizaRouteWithChildren
+  AuthenticatedProgramasProgramaIdRoute: typeof AuthenticatedProgramasProgramaIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -781,6 +802,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
   AuthenticatedPremiosRoute: AuthenticatedPremiosRoute,
   AuthenticatedVisualizaRoute: AuthenticatedVisualizaRouteWithChildren,
+  AuthenticatedProgramasProgramaIdRoute: AuthenticatedProgramasProgramaIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
