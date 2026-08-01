@@ -15,6 +15,7 @@ import stageImg from "@/assets/stage-journey.jpg";
 import exerciseImg from "@/assets/prayer-exercise.jpg";
 import { WordSearch } from "@/components/WordSearch";
 import { StageQuiz } from "@/components/StageQuiz";
+import { MemoryPairs, ClassifyEmotions } from "@/components/StageGames";
 import { getStageContent } from "@/lib/stage-content";
 
 export const Route = createFileRoute("/_authenticated/etapas/$stageId")({
@@ -216,7 +217,35 @@ function StageInteractive({ stageId, focusArea }: { stageId: number; focusArea: 
 
       <StageQuiz items={content.quiz} storageKey={`stage-${stageId}`} />
 
+      <MemoryPairs storageKey={`stage-${stageId}`} />
+
+      <ClassifyEmotions />
+
       <WordSearch words={content.words} storageKey={`stage-${stageId}`} />
+
+      {/* Resumen del día */}
+      <div className="app-card p-5 bg-brand-soft">
+        <div className="text-[11px] uppercase tracking-widest font-bold text-primary">Resumen de tu día</div>
+        <h3 className="font-display font-extrabold text-[20px] mt-1 leading-tight">Esto es lo que trabajaste hoy</h3>
+        <ul className="mt-3 space-y-2">
+          {[
+            "Leíste la explicación y el consejo de la etapa",
+            "Respondiste el quiz y uniste tus verdades",
+            "Clasificaste lo que es tuyo y lo heredado",
+            "Guardaste tus notas personales",
+          ].map((t) => (
+            <li key={t} className="grid grid-cols-[auto_minmax(0,1fr)] gap-2.5 items-start">
+              <span className="w-6 h-6 rounded-full bg-primary/12 text-primary grid place-items-center shrink-0">
+                <Check className="w-3.5 h-3.5" />
+              </span>
+              <span className="text-[13.5px] leading-snug">{t}</span>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-4 rounded-[12px] bg-card px-4 py-3 text-[13px] leading-snug">
+          <span className="font-bold text-primary">Tu recompensa:</span> cada etapa completada suma hojas de sanación a tu árbol y desbloquea la siguiente parada de tu camino.
+        </p>
+      </div>
     </section>
   );
 }
