@@ -462,22 +462,27 @@ function ScreenIntro({ onNext }: { onNext: () => void }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [playing, setPlaying] = useState(false);
   const [t, setT] = useState(0);
-  const [dur, setDur] = useState(REVEAL_AT);
   const revealed = t >= REVEAL_AT;
+
+  const CAPTIONS = [
+    "Quédate conmigo.",
+    "Y es la razón.",
+    "Nada de esto es casualidad.",
+    "Lo que se repite, se puede cerrar.",
+    "Hoy empieza tu ORIGEN.",
+  ];
+  const caption = CAPTIONS[Math.min(CAPTIONS.length - 1, Math.floor(t / 35))];
 
   useEffect(() => {
     const a = audioRef.current;
     if (!a) return;
     const onTime = () => setT(a.currentTime);
-    const onMeta = () => setDur(a.duration || REVEAL_AT);
     const onEnd = () => { setPlaying(false); setT(Math.max(REVEAL_AT, a.duration || REVEAL_AT)); };
     a.addEventListener("timeupdate", onTime);
-    a.addEventListener("loadedmetadata", onMeta);
     a.addEventListener("ended", onEnd);
     a.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
     return () => {
       a.removeEventListener("timeupdate", onTime);
-      a.removeEventListener("loadedmetadata", onMeta);
       a.removeEventListener("ended", onEnd);
       a.pause();
     };
@@ -490,46 +495,65 @@ function ScreenIntro({ onNext }: { onNext: () => void }) {
     else { a.pause(); setPlaying(false); }
   }
 
-  const pct = Math.min(100, (t / Math.min(dur || REVEAL_AT, REVEAL_AT)) * 100);
+  const pct = Math.min(100, (t / REVEAL_AT) * 100);
   const rest = Math.max(0, Math.ceil(REVEAL_AT - t));
   const mm = String(Math.floor(rest / 60)).padStart(2, "0");
   const ss = String(rest % 60).padStart(2, "0");
 
   return (
-    <div className="pt-2">
+    <div className="pt-1">
       <audio ref={audioRef} src={revelacion.url} preload="auto" playsInline />
-      <Eyebrow>Esto no es casualidad</Eyebrow>
-      <h1 className="mt-3 text-center font-display font-extrabold text-[32px] leading-[1.12] text-[#1B1B27]">
-        Bienvenida a tu<br />transformación
-      </h1>
 
-      <div className="mt-5 relative rounded-[28px] overflow-hidden shadow-soft">
-        <img src={portal} alt="Portal de luz con una paloma volando hacia él" width={768} height={1024}
-          className="w-full h-[220px] object-cover" />
-        <div className="absolute inset-0" style={{ background: "linear-gradient(180deg,rgba(27,27,39,0) 35%,rgba(27,27,39,.72) 100%)" }} />
-        <div className="absolute inset-x-4 bottom-4 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3">
-          <button onClick={toggle} aria-label={playing ? "Pausar audio" : "Reproducir audio"}
-            className="w-12 h-12 shrink-0 rounded-full bg-white/95 grid place-items-center text-[#7C5CFF] active:scale-95 transition">
-            {playing ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
-          </button>
-          <div className="min-w-0">
-            <div className="text-[12px] font-semibold text-white truncate">Mensaje de apertura · escúchalo completo</div>
-            <div className="mt-1.5 h-1.5 rounded-full bg-white/25 overflow-hidden">
-              <div className="h-full rounded-full bg-white transition-[width] duration-500" style={{ width: `${pct}%` }} />
-            </div>
-          </div>
-        </div>
+      <div className="flex justify-center">
+        <span className="inline-flex items-center rounded-[10px] bg-[#7C2DBF] px-4 py-2.5 text-center text-[12.5px] font-black uppercase tracking-[0.06em] text-white">
+          Cuando el patrón se repite sin explicación
+        </span>
       </div>
 
-      <p className="mt-5 text-center text-[15px] leading-relaxed text-[#64667A]">
+      <h1 className="mt-4 text-center font-display font-extrabold text-[30px] leading-[1.12] text-white">
+        Descubre por qué se repite —{" "}
+        <span className="text-[#E0B25C]">y cómo se cierra hoy</span>
+      </h1>
+
+      {/* Marco de video con play grande */}
+      <button
+        onClick={toggle}
+        aria-label={playing ? "Pausar mensaje" : "Reproducir mensaje"}
+        className="mt-5 relative block w-full overflow-hidden rounded-[16px] border border-white/12 active:scale-[.99] transition"
+      >
+        <img src={mentora} alt="Mentora de ORIGEN grabando tu mensaje de apertura" width={768} height={1024}
+          className={cn("w-full h-[420px] object-cover transition-all duration-700", !playing && "blur-[6px] scale-[1.03]")} />
+        <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(180deg,rgba(12,6,20,.25) 0%,rgba(12,6,20,.15) 55%,rgba(12,6,20,.85) 100%)" }} />
+
+        <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 grid place-items-center w-[132px] h-[132px] rounded-full border-[10px] border-[#8E2FD6]">
+          {playing
+            ? <Pause className="w-14 h-14 text-[#8E2FD6]" fill="#8E2FD6" />
+            : <Play className="w-16 h-16 text-[#8E2FD6] translate-x-1" fill="#8E2FD6" />}
+          {playing && <span aria-hidden className="absolute inset-0 rounded-full border-[10px] border-[#8E2FD6]/40 animate-ping" />}
+        </span>
+
+        <span key={caption} className="absolute left-4 right-4 bottom-16 text-center font-display font-black text-[24px] leading-tight text-[#F7EF3A] animate-in fade-in duration-500"
+          style={{ WebkitTextStroke: "1px rgba(12,6,20,.85)" }}>
+          {caption}
+        </span>
+
+        <span className="absolute left-4 right-4 bottom-5">
+          <span className="block h-1.5 rounded-full bg-white/25 overflow-hidden">
+            <span className="block h-full rounded-full bg-[#E0B25C] transition-[width] duration-500" style={{ width: `${pct}%` }} />
+          </span>
+        </span>
+      </button>
+
+      <p className="mt-5 text-center text-[15px] leading-relaxed text-white/70">
         ORIGEN fue creado para ayudarte a sanar, renovar tu identidad, fortalecer tu relación con Dios
         y manifestar una vida con propósito.
       </p>
 
-      <div className="mt-5 rounded-[22px] bg-white/90 backdrop-blur shadow-soft p-5 flex items-center gap-4">
+      <div className="mt-5 rounded-[16px] bg-white/[0.07] border border-white/10 p-5 flex items-center gap-4">
         <Emoji src={eHeartPurple} size={54} />
-        <p className="text-[14px] leading-snug text-[#1B1B27] font-medium">
-          Miles de personas ya están viviendo su mejor versión. <span className="text-[#7C5CFF]">¿Lista para comenzar?</span>
+        <p className="text-[14px] leading-snug text-white/90 font-medium">
+          Miles de personas ya están viviendo su mejor versión.{" "}
+          <span className="text-[#E0B25C]">¿Lista para comenzar?</span>
         </p>
       </div>
 
@@ -537,14 +561,14 @@ function ScreenIntro({ onNext }: { onNext: () => void }) {
         {revealed ? (
           <div className="animate-in fade-in slide-in-from-bottom-3 duration-500">
             <PrimaryButton onClick={onNext}>Sí, quiero comenzar <ArrowRight className="w-4 h-4" /></PrimaryButton>
-            <p className="mt-3 text-center text-[12px] text-[#64667A]">Menos de 3 minutos · Sin respuestas correctas</p>
+            <p className="mt-3 text-center text-[12px] text-white/55">Menos de 3 minutos · Sin respuestas correctas</p>
           </div>
         ) : (
-          <div className="rounded-[16px] bg-[#7C5CFF]/[0.08] border border-[#7C5CFF]/15 px-4 py-4 text-center">
-            <p className="text-[13px] font-semibold text-[#7C5CFF] inline-flex items-center gap-2">
+          <div className="rounded-[16px] bg-white/[0.06] border border-white/10 px-4 py-4 text-center">
+            <p className="text-[13px] font-semibold text-[#E0B25C] inline-flex items-center gap-2">
               <Lock className="w-4 h-4" /> Tu camino se revela al terminar el mensaje
             </p>
-            <p className="mt-1 text-[12px] text-[#64667A]">Faltan {mm}:{ss} · quédate, esto es para ti</p>
+            <p className="mt-1 text-[12px] text-white/60">Faltan {mm}:{ss} · quédate conmigo, esto es para ti</p>
           </div>
         )}
       </div>
