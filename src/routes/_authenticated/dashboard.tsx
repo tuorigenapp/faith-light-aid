@@ -152,6 +152,9 @@ function Dashboard() {
 
         </div>
 
+        {/* Ejercicios del día — justo debajo del cuadro MI CAMINO */}
+        <DailyExercises />
+
         {/* Palabras para ti Hoy */}
         <PalabrasHoy name={displayName} aiPlan={aiPlan} />
 
