@@ -5,6 +5,8 @@ import { useQuery } from "@tanstack/react-query";
 import { HealingTree } from "@/components/HealingTree";
 import { DailyReflection } from "@/components/DailyReflection";
 import { DailyQuiz } from "@/components/DailyQuiz";
+import { DailyExercises } from "@/components/DailyExercises";
+import { CategoriaSlider } from "@/components/CategoriaSlider";
 import { LockedCard } from "@/components/LockedCard";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
