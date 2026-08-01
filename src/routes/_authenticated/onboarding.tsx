@@ -248,13 +248,18 @@ function Onboarding() {
 
   if (showLogo) return <LogoReveal />;
 
+  const dark = step === 1;
+
   return (
     <div className="relative min-h-dvh overflow-hidden"
-      style={{ background: "radial-gradient(120% 90% at 50% 0%, #F3ECFF 0%, #FBFAFF 55%, #FDEEF7 100%)" }}>
+      style={dark
+        ? { background: "radial-gradient(120% 90% at 50% 0%, #1A0F2B 0%, #12081C 55%, #0C0614 100%)" }
+        : { background: "radial-gradient(120% 90% at 50% 0%, #F3ECFF 0%, #FBFAFF 55%, #FDEEF7 100%)" }}>
       <div aria-hidden className="pointer-events-none absolute -top-40 -left-32 w-[34rem] h-[34rem] rounded-full blur-[110px]"
         style={{ background: "radial-gradient(circle, rgba(124,92,255,0.16), transparent 65%)" }} />
       <div aria-hidden className="pointer-events-none absolute -bottom-40 -right-32 w-[36rem] h-[36rem] rounded-full blur-[110px]"
         style={{ background: "radial-gradient(circle, rgba(245,139,203,0.14), transparent 65%)" }} />
+
 
       <SocialProof />
 
