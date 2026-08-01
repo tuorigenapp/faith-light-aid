@@ -177,6 +177,11 @@ function Dashboard() {
         {/* Quiz diario */}
         <DailyQuiz />
 
+        {/* Nuevas categorías (slider) + ver más */}
+        <CategoriaSlider />
+
+
+
 
         {/* Descubre hoy — mezcla desbloqueado + bloqueado */}
         <section>
