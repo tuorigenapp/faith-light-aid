@@ -381,49 +381,71 @@ const NET_ICON: Record<Network, string> = {
 };
 const NET_LABEL: Record<Network, string> = { tiktok: "TikTok", instagram: "Instagram", facebook: "Facebook" };
 
-const SIGNUPS: { name: string; place: string; net: Network }[] = [
-  { name: "Camila R.", place: "Colombia 🇨🇴", net: "tiktok" },
-  { name: "Miguel A.", place: "México 🇲🇽", net: "facebook" },
-  { name: "Rocío G.", place: "España 🇪🇸", net: "instagram" },
-  { name: "Josué M.", place: "Perú 🇵🇪", net: "tiktok" },
-  { name: "Daniela P.", place: "Ecuador 🇪🇨", net: "instagram" },
-  { name: "Luis F.", place: "Guatemala 🇬🇹", net: "facebook" },
-  { name: "Ana V.", place: "Argentina 🇦🇷", net: "tiktok" },
+const NETS: Network[] = ["tiktok", "instagram", "facebook"];
+
+const F_NAMES = ["Camila", "Daniela", "Rocío", "Ana", "Karla", "Paola", "Mariana", "Lucía", "Valeria", "Gabriela", "Yolanda", "Estefanía", "Noemí", "Andrea", "Sofía", "Milagros", "Keila", "Wendy", "Jazmín", "Ruth"];
+const M_NAMES = ["Miguel", "Josué", "Luis", "Andrés", "Carlos", "Jonathan", "Ezequiel", "Héctor", "Fernando", "Iván", "Elías", "Kevin", "Rubén", "Alejandro", "Diego", "Moisés", "Óscar", "Bryan", "Samuel", "Isaac"];
+const LAST = ["R.", "A.", "G.", "M.", "P.", "S.", "T.", "V.", "L.", "C.", "N.", "B."];
+const PLACES = ["Colombia 🇨🇴", "México 🇲🇽", "España 🇪🇸", "Perú 🇵🇪", "Ecuador 🇪🇨", "Guatemala 🇬🇹", "Argentina 🇦🇷", "Chile 🇨🇱", "Rep. Dominicana 🇩🇴", "Estados Unidos 🇺🇸", "Venezuela 🇻🇪", "Puerto Rico 🇵🇷", "Honduras 🇭🇳", "Costa Rica 🇨🇷", "Panamá 🇵🇦", "Bolivia 🇧🇴"];
+
+const REVIEW_TEXTS = [
+  "Entendí en 3 minutos lo que llevaba años repitiendo.",
+  "Sentí paz por primera vez en mucho tiempo.",
+  "No es religión impuesta, es acompañamiento real.",
+  "Por fin vi de dónde venía el patrón de mi familia.",
+  "Lloré, pero de alivio. Nadie me lo había explicado así.",
+  "Dejé de culparme y empecé a cerrar ciclos.",
+  "Los ejercicios son cortos y sí se sienten en el día.",
+  "Mi relación cambió cuando yo cambié la raíz.",
+  "Llevaba años en terapia y aquí encontré el origen.",
+  "Los audios me sostienen las noches difíciles.",
+  "Me devolvió la esperanza sin sermones.",
+  "Aprendí a poner límites sin sentirme mala hija.",
 ];
 
-const REVIEWS: { name: string; place: string; net: Network; text: string }[] = [
-  { name: "Karla S.", place: "Chile 🇨🇱", net: "instagram", text: "Entendí en 3 minutos lo que llevaba años repitiendo." },
-  { name: "Andrés T.", place: "México 🇲🇽", net: "tiktok", text: "Sentí paz por primera vez en mucho tiempo." },
-  { name: "Paola N.", place: "Colombia 🇨🇴", net: "facebook", text: "No es religión impuesta, es acompañamiento real." },
-  { name: "Ruth E.", place: "Perú 🇵🇪", net: "instagram", text: "Por fin vi de dónde venía el patrón de mi familia." },
-];
+const F_AVATARS = [avF1, avF2, avF3];
+const M_AVATARS = [avM1, avM2, avM3];
 
-function Avatar({ name, net }: { name: string; net: Network }) {
+type Person = { name: string; place: string; net: Network; avatar: string };
+
+/** Genera personas ilimitadas con avatar tipo Pixar según el género del nombre. */
+function makePerson(seed: number): Person {
+  const female = seed % 2 === 0;
+  const pool = female ? F_NAMES : M_NAMES;
+  const first = pool[(seed * 7 + 3) % pool.length];
+  const avatars = female ? F_AVATARS : M_AVATARS;
+  return {
+    name: `${first} ${LAST[(seed * 5) % LAST.length]}`,
+    place: PLACES[(seed * 11 + 2) % PLACES.length],
+    net: NETS[(seed * 3) % NETS.length],
+    avatar: avatars[(seed * 13) % avatars.length],
+  };
+}
+
+function Avatar({ person }: { person: Person }) {
   return (
     <div className="relative shrink-0">
-      <div className="w-11 h-11 rounded-full grid place-items-center text-white font-display font-black text-[15px]"
-        style={{ background: "linear-gradient(135deg,#8F6BFF 0%,#F58BCB 100%)" }}>
-        {name.slice(0, 1)}
+      <div className="w-14 h-14 rounded-full overflow-hidden bg-gradient-to-br from-[#F1EDFF] to-[#FFE9F5] border-2 border-white shadow-[0_2px_10px_rgba(124,92,255,0.25)]">
+        <img src={person.avatar} alt="" aria-hidden loading="lazy" width={512} height={512} className="w-full h-full object-cover object-top" />
       </div>
-      <img src={NET_ICON[net]} alt="" aria-hidden width={64} height={64}
-        className="absolute -bottom-1 -right-1 w-5 h-5 object-contain drop-shadow" />
+      <img src={NET_ICON[person.net]} alt="" aria-hidden width={64} height={64}
+        className="absolute -bottom-1 -right-1 w-6 h-6 object-contain drop-shadow" />
     </div>
   );
 }
 
 function SocialProof() {
-  const [item, setItem] = useState<{ kind: "signup" | "review"; name: string; place: string; net: Network; text: string } | null>(null);
+  const [item, setItem] = useState<{ kind: "signup" | "review"; person: Person; text: string } | null>(null);
 
   useEffect(() => {
     let i = 0;
     let hide: ReturnType<typeof setTimeout>;
     const show = () => {
+      const person = makePerson(i + 1);
       if (i % 2 === 0) {
-        const s = SIGNUPS[(i / 2 | 0) % SIGNUPS.length];
-        setItem({ kind: "signup", ...s, text: `se acaba de registrar en ORIGEN a través de ${NET_LABEL[s.net]}` });
+        setItem({ kind: "signup", person, text: `se acaba de registrar en ORIGEN a través de ${NET_LABEL[person.net]}` });
       } else {
-        const r = REVIEWS[((i - 1) / 2 | 0) % REVIEWS.length];
-        setItem({ kind: "review", ...r });
+        setItem({ kind: "review", person, text: REVIEW_TEXTS[i % REVIEW_TEXTS.length] });
       }
       hide = setTimeout(() => setItem(null), 5200);
       i++;
@@ -437,20 +459,20 @@ function SocialProof() {
   return (
     <div className="pointer-events-none fixed bottom-5 left-1/2 -translate-x-1/2 z-40 w-[min(92vw,380px)] animate-in fade-in slide-in-from-bottom-4 duration-300">
       <div className="rounded-[16px] bg-white/95 backdrop-blur border border-[#1B1B27]/[0.08] shadow-[0_8px_30px_rgba(30,25,20,0.12)] px-4 py-3 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3">
-        <Avatar name={item.name} net={item.net} />
+        <Avatar person={item.person} />
         <div className="min-w-0">
           {item.kind === "signup" ? (
             <>
               <p className="text-[12.5px] leading-snug text-[#1B1B27]">
-                <span className="font-bold">{item.name}</span> {item.text}
+                <span className="font-bold">{item.person.name}</span> {item.text}
               </p>
-              <p className="text-[11px] text-[#64667A] mt-0.5">{item.place} · hace un momento</p>
+              <p className="text-[11px] text-[#64667A] mt-0.5">{item.person.place} · hace un momento</p>
             </>
           ) : (
             <>
               <p className="text-[12.5px] leading-snug text-[#1B1B27] italic">“{item.text}”</p>
               <p className="text-[11px] text-[#64667A] mt-0.5">
-                <span className="font-semibold">{item.name}</span> · {item.place} · <span className="text-[#F7B955]">★★★★★</span>
+                <span className="font-semibold">{item.person.name}</span> · {item.person.place} · <span className="text-[#F7B955]">★★★★★</span>
               </p>
             </>
           )}
@@ -459,6 +481,7 @@ function SocialProof() {
     </div>
   );
 }
+
 
 
 /* ────────── Screens 1-9 ────────── */
