@@ -146,6 +146,7 @@ function ProfileWizard({ profile, onDone }: { profile: any; onDone: () => void }
       toast.success(`¡Listo, ${form.display_name.split(" ")[0]}! Tu perfil está guardado ✨`);
       onDone();
       setStep(1);
+      navigate({ to: "/dashboard" });
     } catch (e: any) {
       toast.error(e?.message ?? "No pudimos guardar tu perfil");
     } finally {
