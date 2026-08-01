@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -85,6 +85,7 @@ function PerfilPage() {
 function ProfileWizard({ profile, onDone }: { profile: any; onDone: () => void }) {
   const { user } = useAuth();
   const qc = useQueryClient();
+  const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [saving, setSaving] = useState(false);
   const [photoBlob, setPhotoBlob] = useState<Blob | null>(null);
@@ -145,6 +146,7 @@ function ProfileWizard({ profile, onDone }: { profile: any; onDone: () => void }
       toast.success(`¡Listo, ${form.display_name.split(" ")[0]}! Tu perfil está guardado ✨`);
       onDone();
       setStep(1);
+      navigate({ to: "/dashboard" });
     } catch (e: any) {
       toast.error(e?.message ?? "No pudimos guardar tu perfil");
     } finally {

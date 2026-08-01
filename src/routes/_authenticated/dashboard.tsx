@@ -5,6 +5,8 @@ import { useQuery } from "@tanstack/react-query";
 import { HealingTree } from "@/components/HealingTree";
 import { DailyReflection } from "@/components/DailyReflection";
 import { DailyQuiz } from "@/components/DailyQuiz";
+import { DailyExercises } from "@/components/DailyExercises";
+import { CategoriaSlider } from "@/components/CategoriaSlider";
 import { LockedCard } from "@/components/LockedCard";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -150,6 +152,9 @@ function Dashboard() {
 
         </div>
 
+        {/* Ejercicios del día — justo debajo del cuadro MI CAMINO */}
+        <DailyExercises />
+
         {/* Palabras para ti Hoy */}
         <PalabrasHoy name={displayName} aiPlan={aiPlan} />
 
@@ -171,6 +176,11 @@ function Dashboard() {
 
         {/* Quiz diario */}
         <DailyQuiz />
+
+        {/* Nuevas categorías (slider) + ver más */}
+        <CategoriaSlider />
+
+
 
 
         {/* Descubre hoy — mezcla desbloqueado + bloqueado */}

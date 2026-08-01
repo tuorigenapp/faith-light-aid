@@ -28,6 +28,13 @@ import icTiktok from "@/assets/social-tiktok.png.asset.json";
 import icInstagram from "@/assets/social-instagram.png.asset.json";
 import icFacebook from "@/assets/social-facebook.png.asset.json";
 import revelacion from "@/assets/origen-revelacion.mp3.asset.json";
+import mentora from "@/assets/onb-mentora.jpg";
+import avF1 from "@/assets/av-f1.png";
+import avF2 from "@/assets/av-f2.png";
+import avF3 from "@/assets/av-f3.png";
+import avM1 from "@/assets/av-m1.png";
+import avM2 from "@/assets/av-m2.png";
+import avM3 from "@/assets/av-m3.png";
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
   head: () => ({ meta: [{ title: "Bienvenido — ORIGEN" }] }),
@@ -248,13 +255,18 @@ function Onboarding() {
 
   if (showLogo) return <LogoReveal />;
 
+  const dark = step === 1;
+
   return (
     <div className="relative min-h-dvh overflow-hidden"
-      style={{ background: "radial-gradient(120% 90% at 50% 0%, #F3ECFF 0%, #FBFAFF 55%, #FDEEF7 100%)" }}>
+      style={dark
+        ? { background: "radial-gradient(120% 90% at 50% 0%, #1A0F2B 0%, #12081C 55%, #0C0614 100%)" }
+        : { background: "radial-gradient(120% 90% at 50% 0%, #F3ECFF 0%, #FBFAFF 55%, #FDEEF7 100%)" }}>
       <div aria-hidden className="pointer-events-none absolute -top-40 -left-32 w-[34rem] h-[34rem] rounded-full blur-[110px]"
         style={{ background: "radial-gradient(circle, rgba(124,92,255,0.16), transparent 65%)" }} />
       <div aria-hidden className="pointer-events-none absolute -bottom-40 -right-32 w-[36rem] h-[36rem] rounded-full blur-[110px]"
         style={{ background: "radial-gradient(circle, rgba(245,139,203,0.14), transparent 65%)" }} />
+
 
       <SocialProof />
 
@@ -369,49 +381,71 @@ const NET_ICON: Record<Network, string> = {
 };
 const NET_LABEL: Record<Network, string> = { tiktok: "TikTok", instagram: "Instagram", facebook: "Facebook" };
 
-const SIGNUPS: { name: string; place: string; net: Network }[] = [
-  { name: "Camila R.", place: "Colombia 🇨🇴", net: "tiktok" },
-  { name: "Miguel A.", place: "México 🇲🇽", net: "facebook" },
-  { name: "Rocío G.", place: "España 🇪🇸", net: "instagram" },
-  { name: "Josué M.", place: "Perú 🇵🇪", net: "tiktok" },
-  { name: "Daniela P.", place: "Ecuador 🇪🇨", net: "instagram" },
-  { name: "Luis F.", place: "Guatemala 🇬🇹", net: "facebook" },
-  { name: "Ana V.", place: "Argentina 🇦🇷", net: "tiktok" },
+const NETS: Network[] = ["tiktok", "instagram", "facebook"];
+
+const F_NAMES = ["Camila", "Daniela", "Rocío", "Ana", "Karla", "Paola", "Mariana", "Lucía", "Valeria", "Gabriela", "Yolanda", "Estefanía", "Noemí", "Andrea", "Sofía", "Milagros", "Keila", "Wendy", "Jazmín", "Ruth"];
+const M_NAMES = ["Miguel", "Josué", "Luis", "Andrés", "Carlos", "Jonathan", "Ezequiel", "Héctor", "Fernando", "Iván", "Elías", "Kevin", "Rubén", "Alejandro", "Diego", "Moisés", "Óscar", "Bryan", "Samuel", "Isaac"];
+const LAST = ["R.", "A.", "G.", "M.", "P.", "S.", "T.", "V.", "L.", "C.", "N.", "B."];
+const PLACES = ["Colombia 🇨🇴", "México 🇲🇽", "España 🇪🇸", "Perú 🇵🇪", "Ecuador 🇪🇨", "Guatemala 🇬🇹", "Argentina 🇦🇷", "Chile 🇨🇱", "Rep. Dominicana 🇩🇴", "Estados Unidos 🇺🇸", "Venezuela 🇻🇪", "Puerto Rico 🇵🇷", "Honduras 🇭🇳", "Costa Rica 🇨🇷", "Panamá 🇵🇦", "Bolivia 🇧🇴"];
+
+const REVIEW_TEXTS = [
+  "Entendí en 3 minutos lo que llevaba años repitiendo.",
+  "Sentí paz por primera vez en mucho tiempo.",
+  "No es religión impuesta, es acompañamiento real.",
+  "Por fin vi de dónde venía el patrón de mi familia.",
+  "Lloré, pero de alivio. Nadie me lo había explicado así.",
+  "Dejé de culparme y empecé a cerrar ciclos.",
+  "Los ejercicios son cortos y sí se sienten en el día.",
+  "Mi relación cambió cuando yo cambié la raíz.",
+  "Llevaba años en terapia y aquí encontré el origen.",
+  "Los audios me sostienen las noches difíciles.",
+  "Me devolvió la esperanza sin sermones.",
+  "Aprendí a poner límites sin sentirme mala hija.",
 ];
 
-const REVIEWS: { name: string; place: string; net: Network; text: string }[] = [
-  { name: "Karla S.", place: "Chile 🇨🇱", net: "instagram", text: "Entendí en 3 minutos lo que llevaba años repitiendo." },
-  { name: "Andrés T.", place: "México 🇲🇽", net: "tiktok", text: "Sentí paz por primera vez en mucho tiempo." },
-  { name: "Paola N.", place: "Colombia 🇨🇴", net: "facebook", text: "No es religión impuesta, es acompañamiento real." },
-  { name: "Ruth E.", place: "Perú 🇵🇪", net: "instagram", text: "Por fin vi de dónde venía el patrón de mi familia." },
-];
+const F_AVATARS = [avF1, avF2, avF3];
+const M_AVATARS = [avM1, avM2, avM3];
 
-function Avatar({ name, net }: { name: string; net: Network }) {
+type Person = { name: string; place: string; net: Network; avatar: string };
+
+/** Genera personas ilimitadas con avatar tipo Pixar según el género del nombre. */
+function makePerson(seed: number): Person {
+  const female = seed % 2 === 0;
+  const pool = female ? F_NAMES : M_NAMES;
+  const first = pool[(seed * 7 + 3) % pool.length];
+  const avatars = female ? F_AVATARS : M_AVATARS;
+  return {
+    name: `${first} ${LAST[(seed * 5) % LAST.length]}`,
+    place: PLACES[(seed * 11 + 2) % PLACES.length],
+    net: NETS[(seed * 3) % NETS.length],
+    avatar: avatars[(seed * 13) % avatars.length],
+  };
+}
+
+function Avatar({ person }: { person: Person }) {
   return (
     <div className="relative shrink-0">
-      <div className="w-11 h-11 rounded-full grid place-items-center text-white font-display font-black text-[15px]"
-        style={{ background: "linear-gradient(135deg,#8F6BFF 0%,#F58BCB 100%)" }}>
-        {name.slice(0, 1)}
+      <div className="w-14 h-14 rounded-full overflow-hidden bg-gradient-to-br from-[#F1EDFF] to-[#FFE9F5] border-2 border-white shadow-[0_2px_10px_rgba(124,92,255,0.25)]">
+        <img src={person.avatar} alt="" aria-hidden loading="lazy" width={512} height={512} className="w-full h-full object-cover object-top" />
       </div>
-      <img src={NET_ICON[net]} alt="" aria-hidden width={64} height={64}
-        className="absolute -bottom-1 -right-1 w-5 h-5 object-contain drop-shadow" />
+      <img src={NET_ICON[person.net]} alt="" aria-hidden width={64} height={64}
+        className="absolute -bottom-1 -right-1 w-6 h-6 object-contain drop-shadow" />
     </div>
   );
 }
 
 function SocialProof() {
-  const [item, setItem] = useState<{ kind: "signup" | "review"; name: string; place: string; net: Network; text: string } | null>(null);
+  const [item, setItem] = useState<{ kind: "signup" | "review"; person: Person; text: string } | null>(null);
 
   useEffect(() => {
     let i = 0;
     let hide: ReturnType<typeof setTimeout>;
     const show = () => {
+      const person = makePerson(i + 1);
       if (i % 2 === 0) {
-        const s = SIGNUPS[(i / 2 | 0) % SIGNUPS.length];
-        setItem({ kind: "signup", ...s, text: `se acaba de registrar en ORIGEN a través de ${NET_LABEL[s.net]}` });
+        setItem({ kind: "signup", person, text: `se acaba de registrar en ORIGEN a través de ${NET_LABEL[person.net]}` });
       } else {
-        const r = REVIEWS[((i - 1) / 2 | 0) % REVIEWS.length];
-        setItem({ kind: "review", ...r });
+        setItem({ kind: "review", person, text: REVIEW_TEXTS[i % REVIEW_TEXTS.length] });
       }
       hide = setTimeout(() => setItem(null), 5200);
       i++;
@@ -425,20 +459,20 @@ function SocialProof() {
   return (
     <div className="pointer-events-none fixed bottom-5 left-1/2 -translate-x-1/2 z-40 w-[min(92vw,380px)] animate-in fade-in slide-in-from-bottom-4 duration-300">
       <div className="rounded-[16px] bg-white/95 backdrop-blur border border-[#1B1B27]/[0.08] shadow-[0_8px_30px_rgba(30,25,20,0.12)] px-4 py-3 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3">
-        <Avatar name={item.name} net={item.net} />
+        <Avatar person={item.person} />
         <div className="min-w-0">
           {item.kind === "signup" ? (
             <>
               <p className="text-[12.5px] leading-snug text-[#1B1B27]">
-                <span className="font-bold">{item.name}</span> {item.text}
+                <span className="font-bold">{item.person.name}</span> {item.text}
               </p>
-              <p className="text-[11px] text-[#64667A] mt-0.5">{item.place} · hace un momento</p>
+              <p className="text-[11px] text-[#64667A] mt-0.5">{item.person.place} · hace un momento</p>
             </>
           ) : (
             <>
               <p className="text-[12.5px] leading-snug text-[#1B1B27] italic">“{item.text}”</p>
               <p className="text-[11px] text-[#64667A] mt-0.5">
-                <span className="font-semibold">{item.name}</span> · {item.place} · <span className="text-[#F7B955]">★★★★★</span>
+                <span className="font-semibold">{item.person.name}</span> · {item.person.place} · <span className="text-[#F7B955]">★★★★★</span>
               </p>
             </>
           )}
@@ -449,6 +483,7 @@ function SocialProof() {
 }
 
 
+
 /* ────────── Screens 1-9 ────────── */
 
 const REVEAL_AT = 173; // 02:53
@@ -457,22 +492,27 @@ function ScreenIntro({ onNext }: { onNext: () => void }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [playing, setPlaying] = useState(false);
   const [t, setT] = useState(0);
-  const [dur, setDur] = useState(REVEAL_AT);
   const revealed = t >= REVEAL_AT;
+
+  const CAPTIONS = [
+    "Quédate conmigo.",
+    "Y es la razón.",
+    "Nada de esto es casualidad.",
+    "Lo que se repite, se puede cerrar.",
+    "Hoy empieza tu ORIGEN.",
+  ];
+  const caption = CAPTIONS[Math.min(CAPTIONS.length - 1, Math.floor(t / 35))];
 
   useEffect(() => {
     const a = audioRef.current;
     if (!a) return;
     const onTime = () => setT(a.currentTime);
-    const onMeta = () => setDur(a.duration || REVEAL_AT);
     const onEnd = () => { setPlaying(false); setT(Math.max(REVEAL_AT, a.duration || REVEAL_AT)); };
     a.addEventListener("timeupdate", onTime);
-    a.addEventListener("loadedmetadata", onMeta);
     a.addEventListener("ended", onEnd);
     a.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
     return () => {
       a.removeEventListener("timeupdate", onTime);
-      a.removeEventListener("loadedmetadata", onMeta);
       a.removeEventListener("ended", onEnd);
       a.pause();
     };
@@ -485,46 +525,65 @@ function ScreenIntro({ onNext }: { onNext: () => void }) {
     else { a.pause(); setPlaying(false); }
   }
 
-  const pct = Math.min(100, (t / Math.min(dur || REVEAL_AT, REVEAL_AT)) * 100);
+  const pct = Math.min(100, (t / REVEAL_AT) * 100);
   const rest = Math.max(0, Math.ceil(REVEAL_AT - t));
   const mm = String(Math.floor(rest / 60)).padStart(2, "0");
   const ss = String(rest % 60).padStart(2, "0");
 
   return (
-    <div className="pt-2">
+    <div className="pt-1">
       <audio ref={audioRef} src={revelacion.url} preload="auto" playsInline />
-      <Eyebrow>Esto no es casualidad</Eyebrow>
-      <h1 className="mt-3 text-center font-display font-extrabold text-[32px] leading-[1.12] text-[#1B1B27]">
-        Bienvenida a tu<br />transformación
-      </h1>
 
-      <div className="mt-5 relative rounded-[28px] overflow-hidden shadow-soft">
-        <img src={portal} alt="Portal de luz con una paloma volando hacia él" width={768} height={1024}
-          className="w-full h-[220px] object-cover" />
-        <div className="absolute inset-0" style={{ background: "linear-gradient(180deg,rgba(27,27,39,0) 35%,rgba(27,27,39,.72) 100%)" }} />
-        <div className="absolute inset-x-4 bottom-4 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3">
-          <button onClick={toggle} aria-label={playing ? "Pausar audio" : "Reproducir audio"}
-            className="w-12 h-12 shrink-0 rounded-full bg-white/95 grid place-items-center text-[#7C5CFF] active:scale-95 transition">
-            {playing ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
-          </button>
-          <div className="min-w-0">
-            <div className="text-[12px] font-semibold text-white truncate">Mensaje de apertura · escúchalo completo</div>
-            <div className="mt-1.5 h-1.5 rounded-full bg-white/25 overflow-hidden">
-              <div className="h-full rounded-full bg-white transition-[width] duration-500" style={{ width: `${pct}%` }} />
-            </div>
-          </div>
-        </div>
+      <div className="flex justify-center">
+        <span className="inline-flex items-center rounded-[10px] bg-[#7C2DBF] px-4 py-2.5 text-center text-[12.5px] font-black uppercase tracking-[0.06em] text-white">
+          Cuando el patrón se repite sin explicación
+        </span>
       </div>
 
-      <p className="mt-5 text-center text-[15px] leading-relaxed text-[#64667A]">
+      <h1 className="mt-4 text-center font-display font-extrabold text-[30px] leading-[1.12] text-white">
+        Descubre por qué se repite —{" "}
+        <span className="text-[#E0B25C]">y cómo se cierra hoy</span>
+      </h1>
+
+      {/* Marco de video con play grande */}
+      <button
+        onClick={toggle}
+        aria-label={playing ? "Pausar mensaje" : "Reproducir mensaje"}
+        className="mt-5 relative block w-full overflow-hidden rounded-[16px] border border-white/12 active:scale-[.99] transition"
+      >
+        <img src={mentora} alt="Mentora de ORIGEN grabando tu mensaje de apertura" width={768} height={1024}
+          className={cn("w-full h-[420px] object-cover transition-all duration-700", !playing && "blur-[6px] scale-[1.03]")} />
+        <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(180deg,rgba(12,6,20,.25) 0%,rgba(12,6,20,.15) 55%,rgba(12,6,20,.85) 100%)" }} />
+
+        <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 grid place-items-center w-[132px] h-[132px] rounded-full border-[10px] border-[#8E2FD6]">
+          {playing
+            ? <Pause className="w-14 h-14 text-[#8E2FD6]" fill="#8E2FD6" />
+            : <Play className="w-16 h-16 text-[#8E2FD6] translate-x-1" fill="#8E2FD6" />}
+          {playing && <span aria-hidden className="absolute inset-0 rounded-full border-[10px] border-[#8E2FD6]/40 animate-ping" />}
+        </span>
+
+        <span key={caption} className="absolute left-4 right-4 bottom-16 text-center font-display font-black text-[24px] leading-tight text-[#F7EF3A] animate-in fade-in duration-500"
+          style={{ WebkitTextStroke: "1px rgba(12,6,20,.85)" }}>
+          {caption}
+        </span>
+
+        <span className="absolute left-4 right-4 bottom-5">
+          <span className="block h-1.5 rounded-full bg-white/25 overflow-hidden">
+            <span className="block h-full rounded-full bg-[#E0B25C] transition-[width] duration-500" style={{ width: `${pct}%` }} />
+          </span>
+        </span>
+      </button>
+
+      <p className="mt-5 text-center text-[15px] leading-relaxed text-white/70">
         ORIGEN fue creado para ayudarte a sanar, renovar tu identidad, fortalecer tu relación con Dios
         y manifestar una vida con propósito.
       </p>
 
-      <div className="mt-5 rounded-[22px] bg-white/90 backdrop-blur shadow-soft p-5 flex items-center gap-4">
+      <div className="mt-5 rounded-[16px] bg-white/[0.07] border border-white/10 p-5 flex items-center gap-4">
         <Emoji src={eHeartPurple} size={54} />
-        <p className="text-[14px] leading-snug text-[#1B1B27] font-medium">
-          Miles de personas ya están viviendo su mejor versión. <span className="text-[#7C5CFF]">¿Lista para comenzar?</span>
+        <p className="text-[14px] leading-snug text-white/90 font-medium">
+          Miles de personas ya están viviendo su mejor versión.{" "}
+          <span className="text-[#E0B25C]">¿Lista para comenzar?</span>
         </p>
       </div>
 
@@ -532,14 +591,14 @@ function ScreenIntro({ onNext }: { onNext: () => void }) {
         {revealed ? (
           <div className="animate-in fade-in slide-in-from-bottom-3 duration-500">
             <PrimaryButton onClick={onNext}>Sí, quiero comenzar <ArrowRight className="w-4 h-4" /></PrimaryButton>
-            <p className="mt-3 text-center text-[12px] text-[#64667A]">Menos de 3 minutos · Sin respuestas correctas</p>
+            <p className="mt-3 text-center text-[12px] text-white/55">Menos de 3 minutos · Sin respuestas correctas</p>
           </div>
         ) : (
-          <div className="rounded-[16px] bg-[#7C5CFF]/[0.08] border border-[#7C5CFF]/15 px-4 py-4 text-center">
-            <p className="text-[13px] font-semibold text-[#7C5CFF] inline-flex items-center gap-2">
+          <div className="rounded-[16px] bg-white/[0.06] border border-white/10 px-4 py-4 text-center">
+            <p className="text-[13px] font-semibold text-[#E0B25C] inline-flex items-center gap-2">
               <Lock className="w-4 h-4" /> Tu camino se revela al terminar el mensaje
             </p>
-            <p className="mt-1 text-[12px] text-[#64667A]">Faltan {mm}:{ss} · quédate, esto es para ti</p>
+            <p className="mt-1 text-[12px] text-white/60">Faltan {mm}:{ss} · quédate conmigo, esto es para ti</p>
           </div>
         )}
       </div>

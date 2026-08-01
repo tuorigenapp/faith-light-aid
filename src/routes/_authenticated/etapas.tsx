@@ -10,7 +10,8 @@ import stageImg from "@/assets/stage-journey.jpg";
 import dailyImg from "@/assets/daily-devotional.jpg";
 import heroImg from "@/assets/spiritual-hero.jpg";
 import exerciseImg from "@/assets/prayer-exercise.jpg";
-import paisaje from "@/assets/camino-paisaje.png.asset.json";
+import paisaje from "@/assets/fondo-mistico.png.asset.json";
+import mapaCamino from "@/assets/mapa-camino.png.asset.json";
 
 
 export const Route = createFileRoute("/_authenticated/etapas")({
@@ -98,10 +99,18 @@ function Etapas() {
         <div className="shrink-0 rounded-full bg-primary/10 px-3.5 py-1.5 text-[13px] font-bold text-primary">{completedCount}/8</div>
       </Card>
 
-      {/* MAPA SERPENTEANTE */}
-      <div className="relative mt-6">
-        <div className="absolute left-1/2 top-0 bottom-0 w-[3px] -translate-x-1/2 bg-gradient-to-b from-primary/35 via-accent-pink/35 to-gold/35 rounded-full" />
-        <div className="relative space-y-4">
+      {/* MAPA SERPENTEANTE — sobre el camino animado */}
+      <div className="relative mt-6 rounded-[16px] overflow-hidden">
+        <img
+          src={mapaCamino.url}
+          alt=""
+          aria-hidden
+          className="absolute inset-0 h-full w-full object-cover opacity-[0.22]"
+        />
+        <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/55 to-background/80" />
+        <div aria-hidden className="absolute left-1/2 top-0 bottom-0 w-[3px] -translate-x-1/2 bg-gradient-to-b from-primary/45 via-accent-pink/45 to-gold/45 rounded-full animate-pulse" />
+        <div className="relative space-y-4 p-3">
+
           {orderedStages.map((s: any, i: number) => {
             const p = progressMap.get(s.id);
             const completed = p?.status === "completed";
