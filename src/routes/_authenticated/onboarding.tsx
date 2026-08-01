@@ -28,6 +28,13 @@ import icTiktok from "@/assets/social-tiktok.png.asset.json";
 import icInstagram from "@/assets/social-instagram.png.asset.json";
 import icFacebook from "@/assets/social-facebook.png.asset.json";
 import revelacion from "@/assets/origen-revelacion.mp3.asset.json";
+import mentora from "@/assets/onb-mentora.jpg";
+import avF1 from "@/assets/av-f1.png";
+import avF2 from "@/assets/av-f2.png";
+import avF3 from "@/assets/av-f3.png";
+import avM1 from "@/assets/av-m1.png";
+import avM2 from "@/assets/av-m2.png";
+import avM3 from "@/assets/av-m3.png";
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
   head: () => ({ meta: [{ title: "Bienvenido — ORIGEN" }] }),
