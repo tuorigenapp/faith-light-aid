@@ -85,6 +85,7 @@ function PerfilPage() {
 function ProfileWizard({ profile, onDone }: { profile: any; onDone: () => void }) {
   const { user } = useAuth();
   const qc = useQueryClient();
+  const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [saving, setSaving] = useState(false);
   const [photoBlob, setPhotoBlob] = useState<Blob | null>(null);
