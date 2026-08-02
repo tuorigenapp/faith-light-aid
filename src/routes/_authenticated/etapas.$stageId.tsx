@@ -4,13 +4,15 @@ import { useAuth } from "@/lib/use-auth";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Check, Lock, X, Leaf, RefreshCw, Sparkles, Flame } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ArrowRight, Check, Lock, X, Leaf, RefreshCw, Sparkles, Flame, PenLine, HandHeart, ListChecks, Loader2 } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { WordSearch } from "@/components/WordSearch";
 import { getStageContent } from "@/lib/stage-content";
 import { awardGems } from "@/lib/gems";
+import { useStagePack, stageVariant, type StagePack } from "@/lib/stage-pack";
 import heartCrystal from "@/assets/st-heart-crystal.png";
 import chest from "@/assets/st-chest.png";
 import robot from "@/assets/st-robot.png";
@@ -35,6 +37,16 @@ export const Route = createFileRoute("/_authenticated/etapas/$stageId")({
 });
 
 const TOTAL_STEPS = 13;
+const STAGE_XP = 120;
+
+export type StepEntry = {
+  step_key: string;
+  kind: string;
+  title: string | null;
+  response: string | null;
+  answers: Record<string, string>;
+  confirmed: boolean;
+};
 
 function StageFlow() {
   const { stageId } = useParams({ from: "/_authenticated/etapas/$stageId" });
@@ -48,7 +60,7 @@ function StageFlow() {
   const [mood, setMood] = useState<string | null>(null);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [doneTasks, setDoneTasks] = useState<number[]>([]);
-  const [openSteps, setOpenSteps] = useState<number[]>([0]);
+  const [openSteps, setOpenSteps] = useState<number[]>([]);
   const [earned, setEarned] = useState(0);
   const started = useMemo(() => Date.now(), []);
 
@@ -56,14 +68,24 @@ function StageFlow() {
     queryKey: ["stage", id, user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const [stage, progress, stages] = await Promise.all([
+      const [stage, progress, stages, entries] = await Promise.all([
         supabase.from("stages").select("*").eq("id", id).maybeSingle(),
         supabase.from("stage_progress").select("*").eq("user_id", user!.id).eq("stage_id", id).maybeSingle(),
         supabase.from("stages").select("id").order("id"),
+        supabase.from("stage_step_entries").select("*").eq("user_id", user!.id).eq("stage_id", id),
       ]);
-      return { stage: stage.data, progress: progress.data, total: (stages.data ?? []).length || 7 };
+      const ids = (stages.data ?? []).map((s: any) => s.id);
+      return {
+        stage: stage.data,
+        progress: progress.data,
+        total: ids.length || 8,
+        position: Math.max(1, ids.indexOf(id) + 1),
+        entries: (entries.data ?? []) as any[],
+      };
     },
   });
+
+  const pack = useStagePack(id, data?.stage?.title, data?.stage?.focus_area);
 
   useEffect(() => {
     if (data?.progress) {
@@ -90,7 +112,8 @@ function StageFlow() {
   const content = getStageContent(stage.focus_area, id);
   const tasks = ((stage.tasks as string[]) ?? []).filter(Boolean);
   const solutionSteps = ((stage.solution_steps as string[]) ?? []).filter(Boolean);
-  const stageIndex = id;
+  const position = data.position;
+  const entries: any[] = data.entries;
 
   function reward(amount: number, reason: string) {
     setEarned((e) => e + amount);
@@ -98,6 +121,37 @@ function StageFlow() {
       qc.invalidateQueries({ queryKey: ["profile"] });
       qc.invalidateQueries({ queryKey: ["dashboard"] });
     });
+  }
+
+  async function saveEntry(entry: { step_key: string; kind: string; title: string; response?: string; answers?: Record<string, string>; confirmed: boolean }) {
+    if (!user) return;
+    const { error } = await supabase.from("stage_step_entries").upsert({
+      user_id: user.id,
+      stage_id: id,
+      step_key: entry.step_key,
+      kind: entry.kind,
+      title: entry.title,
+      response: entry.response ?? null,
+      answers: (entry.answers ?? {}) as never,
+      confirmed: entry.confirmed,
+    }, { onConflict: "user_id,stage_id,step_key" });
+    if (error) return toast.error("No pudimos guardar: " + error.message);
+    qc.invalidateQueries({ queryKey: ["stage", id] });
+    toast.success("Registro guardado");
+  }
+
+  async function saveReward() {
+    if (!user) return;
+    await supabase.from("stage_rewards").upsert({
+      user_id: user.id,
+      stage_id: id,
+      xp: STAGE_XP,
+      leaves: Math.max(earned, 0),
+      insignia: insigniaFor(stage.title, position),
+    }, { onConflict: "user_id,stage_id" });
+    qc.invalidateQueries({ queryKey: ["stage-rewards"] });
+    qc.invalidateQueries({ queryKey: ["etapas"] });
+    qc.invalidateQueries({ queryKey: ["perfil"] });
   }
 
   async function finish() {
@@ -126,9 +180,10 @@ function StageFlow() {
 
   const next = () => setStep((s) => Math.min(s + 1, TOTAL_STEPS));
   const minutes = Math.max(1, Math.round((Date.now() - started) / 60000));
+  const p: StagePack | undefined = pack.data;
 
   const shell = (node: React.ReactNode, opts?: { dark?: boolean }) => (
-    <StepShell step={step} stageIndex={stageIndex} total={data.total} dark={opts?.dark} onClose={() => navigate({ to: "/etapas" })}>
+    <StepShell step={step} position={position} total={data.total} dark={opts?.dark} onClose={() => navigate({ to: "/etapas" })}>
       {node}
     </StepShell>
   );
@@ -137,36 +192,41 @@ function StageFlow() {
     case 1:
       return shell(<Step1 stage={stage} onNext={next} />);
     case 2:
-      return shell(<Step2 steps={solutionSteps} open={openSteps} setOpen={setOpenSteps} onNext={next} />);
+      return shell(<Step2 steps={solutionSteps} open={openSteps} setOpen={setOpenSteps} entries={entries} onSave={saveEntry} onNext={next} />);
     case 3:
-      return shell(<Step3 tasks={tasks} done={doneTasks} setDone={setDoneTasks} reward={reward} onNext={next} />);
+      return shell(<Step3 tasks={tasks} done={doneTasks} setDone={setDoneTasks} entries={entries} onSave={saveEntry} reward={reward} onNext={next} />);
     case 4:
       return shell(<Step4 mood={mood} setMood={setMood} notes={notes} setNotes={setNotes} answers={answers} setAnswers={setAnswers} onNext={next} />);
     case 5:
       return shell(<Step5 items={content.quiz} reward={reward} onNext={next} />);
     case 6:
-      return shell(<Step6 reward={reward} onNext={next} />, { dark: true });
+      return shell(<Step6 cargas={p?.cargas} loading={pack.isLoading} reward={reward} onNext={next} />);
     case 7:
-      return shell(<Step7 words={content.words} stageId={id} onNext={next} />);
+      return shell(<Step7 words={p?.words?.length ? p.words : content.words} loading={pack.isLoading} stageId={id} onNext={next} />);
     case 8:
-      return shell(<Step8 reward={reward} onNext={next} />);
+      return shell(<Step8 promesas={p?.promesas} loading={pack.isLoading} reward={reward} onNext={next} />);
     case 9:
-      return shell(<Step9 reward={reward} onNext={next} />, { dark: true });
+      return shell(<Step9 questions={p?.fe} loading={pack.isLoading} reward={reward} onNext={next} />);
     case 10:
-      return shell(<Step10 reward={reward} onNext={next} />);
+      return shell(<Step10 bienestar={p?.bienestar} reward={reward} onNext={next} />);
     case 11:
       return shell(<Step11 minutes={minutes} tasksDone={doneTasks.length >= Math.max(tasks.length, 1)} onNext={next} />);
     case 12:
-      return shell(<Step12 earned={earned} onNext={next} />);
+      return shell(<Step12 earned={earned} insignia={insigniaFor(stage.title, position)} onSave={saveReward} onNext={next} />);
     default:
-      return shell(<Step13 stage={stage} stageIndex={stageIndex} total={data.total} onFinish={finish} />);
+      return shell(<Step13 stage={stage} position={position} total={data.total} onFinish={finish} />);
   }
+}
+
+function insigniaFor(title: string | null, position: number) {
+  const map = ["Corazón que sana", "Raíz liberada", "Alma en paz", "Identidad restaurada", "Perdón vivo", "Fe firme", "Propósito claro", "Linaje bendecido"];
+  return map[(position - 1) % map.length] || title || "Corazón que sana";
 }
 
 /* ───────────────────────── Shell común ───────────────────────── */
 
-function StepShell({ step, stageIndex, total, dark, onClose, children }: {
-  step: number; stageIndex: number; total: number; dark?: boolean; onClose: () => void; children: React.ReactNode;
+function StepShell({ step, position, total, dark, onClose, children }: {
+  step: number; position: number; total: number; dark?: boolean; onClose: () => void; children: React.ReactNode;
 }) {
   return (
     <div
@@ -177,8 +237,11 @@ function StepShell({ step, stageIndex, total, dark, onClose, children }: {
     >
       <div className="max-w-[520px] mx-auto px-4 py-4 mobile-safe-bottom lg:pb-10">
         <header className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
-          <span className="w-9 h-9 shrink-0 rounded-full bg-gradient-to-br from-accent-pink to-primary text-white grid place-items-center font-display font-extrabold text-[15px] shadow-soft">{step}</span>
-          <span className={cn("text-center text-[12px] font-bold", dark ? "text-white/75" : "text-primary")}>Etapa {stageIndex} de {total}</span>
+          <span className="w-9 h-9 shrink-0 rounded-full bg-gradient-to-br from-accent-pink to-primary text-white grid place-items-center font-display font-extrabold text-[15px] shadow-soft">{position}</span>
+          <span className={cn("text-center text-[12px] font-bold leading-tight", dark ? "text-white/75" : "text-primary")}>
+            Etapa {position} de {total}
+            <span className={cn("block text-[11px] font-semibold", dark ? "text-white/50" : "text-muted-foreground")}>Paso {step} de {TOTAL_STEPS}</span>
+          </span>
           <button onClick={onClose} aria-label="Cerrar etapa" className={cn("w-11 h-11 shrink-0 grid place-items-center rounded-full transition active:scale-95", dark ? "text-white/80 hover:bg-white/10" : "text-muted-foreground hover:bg-primary/8")}>
             <X className="w-5 h-5" />
           </button>
@@ -212,6 +275,15 @@ function Cta({ children, onClick, disabled }: { children: React.ReactNode; onCli
 function Hojas({ n }: { n: number }) {
   return (
     <span className="inline-flex items-center gap-1 text-[12.5px] font-extrabold text-[#3FBE8F] shrink-0">+{n} <Leaf className="w-3.5 h-3.5" /></span>
+  );
+}
+
+function LoadingPack({ label }: { label: string }) {
+  return (
+    <div className="rounded-[16px] bg-white p-6 text-center shadow-soft">
+      <Loader2 className="w-6 h-6 mx-auto animate-spin text-primary" />
+      <p className="mt-2 text-[13px] text-muted-foreground">{label}</p>
+    </div>
   );
 }
 
@@ -262,31 +334,64 @@ function Step1({ stage, onNext }: { stage: any; onNext: () => void }) {
 
 /* ───────────────────── 2 · Soluciones paso a paso ───────────────────── */
 
-function Step2({ steps, open, setOpen, onNext }: { steps: string[]; open: number[]; setOpen: (v: number[]) => void; onNext: () => void }) {
-  const list = steps.length ? steps : [
-    "Reconoce la herida. Acepta lo que pasó sin negarlo.",
-    "Comprende el origen. Entiende cómo esa herida se formó.",
-    "Perdona y suelta. Decide liberar el dolor y el rencor.",
-    "Declara la verdad. Habla la verdad de Dios sobre tu vida.",
-    "Ora por sanidad. Entrega la situación a Dios.",
-    "Agradece y descansa. Confía en que Dios ya está obrando.",
-  ];
-  const maxOpen = Math.max(...open, 0);
+const DEFAULT_SOLUTIONS = [
+  "Reconoce la herida. Acepta lo que pasó sin negarlo.",
+  "Comprende el origen. Entiende cómo esa herida se formó.",
+  "Perdona y suelta. Decide liberar el dolor y el rencor.",
+  "Declara la verdad. Habla la verdad de Dios sobre tu vida.",
+  "Ora por sanidad. Entrega la situación a Dios.",
+  "Agradece y descansa. Confía en que Dios ya está obrando.",
+];
+
+type SaveFn = (e: { step_key: string; kind: string; title: string; response?: string; answers?: Record<string, string>; confirmed: boolean }) => Promise<void>;
+
+function Step2({ steps, open, setOpen, entries, onSave, onNext }: {
+  steps: string[]; open: number[]; setOpen: (v: number[]) => void; entries: any[]; onSave: SaveFn; onNext: () => void;
+}) {
+  const list = steps.length ? steps : DEFAULT_SOLUTIONS;
+  const [active, setActive] = useState<number | null>(null);
+  const [text, setText] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const savedKeys = new Set(entries.filter((e) => e.confirmed).map((e) => e.step_key));
+  const doneIdx = list.map((_, i) => i).filter((i) => open.includes(i) || savedKeys.has(`sol-${i}`));
+  const maxUnlocked = doneIdx.length;
+  const allDone = doneIdx.length >= list.length;
+
+  function openStep(i: number) {
+    const prev = entries.find((e) => e.step_key === `sol-${i}`);
+    setText(prev?.response ?? "");
+    setActive(i);
+  }
+
+  async function confirm() {
+    if (active === null) return;
+    setSaving(true);
+    const [title] = list[active].split(/[.·:]\s*/);
+    await onSave({ step_key: `sol-${active}`, kind: "solucion", title, response: text.trim(), confirmed: true });
+    setSaving(false);
+    setOpen(Array.from(new Set([...open, active])));
+    setActive(null);
+    setText("");
+  }
+
   return (
     <div>
       <h1 className="font-display font-extrabold text-[26px] leading-tight text-center">Soluciones paso a paso 🚀</h1>
+      <p className="text-center text-[13px] text-muted-foreground mt-1">Abre cada paso, complétalo y guarda tu registro.</p>
+
       <div className="mt-5 space-y-3">
         {list.map((s, i) => {
           const [title, ...rest] = s.split(/[.·:]\s*/);
           const desc = rest.join(". ");
-          const unlocked = i <= maxOpen;
-          const done = open.includes(i) && i < maxOpen;
-          const current = i === maxOpen;
+          const done = doneIdx.includes(i);
+          const unlocked = i <= maxUnlocked;
+          const current = unlocked && !done;
           return (
             <button
               key={i}
               disabled={!unlocked}
-              onClick={() => setOpen(Array.from(new Set([...open, i + 1])))}
+              onClick={() => openStep(i)}
               className={cn(
                 "w-full text-left rounded-[16px] bg-white p-4 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 shadow-soft transition active:scale-[.98]",
                 current && "border-2 border-primary",
@@ -299,53 +404,200 @@ function Step2({ steps, open, setOpen, onNext }: { steps: string[]; open: number
                 <span className={cn("block font-display font-bold text-[15px] leading-tight", current && "text-primary")}>{title}</span>
                 {desc && <span className="block text-[12.5px] text-muted-foreground leading-snug mt-0.5">{desc}</span>}
               </span>
-              {done ? <Check className="w-5 h-5 shrink-0 text-[#3FBE8F]" /> : unlocked ? <span className="w-5 shrink-0" /> : <Lock className="w-4 h-4 shrink-0 text-muted-foreground" />}
+              {done ? <Check className="w-5 h-5 shrink-0 text-[#3FBE8F]" /> : unlocked ? <PenLine className="w-4 h-4 shrink-0 text-primary" /> : <Lock className="w-4 h-4 shrink-0 text-muted-foreground" />}
             </button>
           );
         })}
       </div>
-      <Cta onClick={onNext}>Continuar con el paso 3</Cta>
+
+      <Dialog open={active !== null} onOpenChange={(o) => !o && setActive(null)}>
+        <DialogContent className="max-w-[440px] rounded-[16px]">
+          <DialogHeader>
+            <DialogTitle className="font-display text-[19px] leading-tight text-left">
+              {active !== null ? list[active].split(/[.·:]\s*/)[0] : ""}
+            </DialogTitle>
+          </DialogHeader>
+          <p className="text-[13.5px] text-muted-foreground leading-snug">
+            {active !== null ? list[active] : ""}
+          </p>
+          <Textarea
+            value={text}
+            onChange={(e) => setText(e.target.value.slice(0, 400))}
+            placeholder="Escribe aquí cómo lo aplicaste hoy, con tus palabras…"
+            className="min-h-[110px] rounded-[10px] text-[13.5px]"
+          />
+          <div className="text-right text-[11px] text-muted-foreground -mt-2">{text.length}/400</div>
+          <Button onClick={confirm} disabled={saving || text.trim().length < 3}
+            className="h-[52px] rounded-[12px] text-[15px] font-semibold bg-gradient-to-r from-accent-pink to-primary text-white">
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Confirmar y guardar <Check className="w-4 h-4 ml-1.5" /></>}
+          </Button>
+        </DialogContent>
+      </Dialog>
+
+      <Cta onClick={onNext} disabled={!allDone}>{allDone ? "Continuar con el paso 3" : `Te faltan ${list.length - doneIdx.length} pasos`}</Cta>
     </div>
   );
 }
 
 /* ───────────────────── 3 · Tareas espirituales ───────────────────── */
 
-function Step3({ tasks, done, setDone, reward, onNext }: { tasks: string[]; done: number[]; setDone: (v: number[]) => void; reward: (n: number, r: string) => void; onNext: () => void }) {
-  const list = tasks.length ? tasks : [
-    "Escribe una carta de liberación (no se la entregas)",
-    "Identifica 1 herida emocional y llévala a oración",
-    "Ora la oración de sanidad del alma",
-    "Declara en voz alta 3 verdades de Dios sobre ti",
-    "Escucha la oración guiada de sanidad",
-    "Respiración consciente 3 minutos con la presencia de Dios",
-  ];
-  const EMOJIS = ["📝", "⭐", "🙏", "📖", "🎧", "💜"];
-  const all = done.length >= list.length;
+const DEFAULT_TASKS = [
+  "Escribe una carta de liberación (no se la entregas)",
+  "Identifica 1 herida emocional y llévala a oración",
+  "Ora la oración de sanidad del alma",
+  "Declara en voz alta 3 verdades de Dios sobre ti",
+  "Escucha la oración guiada de sanidad",
+  "Respiración consciente 3 minutos con la presencia de Dios",
+];
 
-  function toggle(i: number) {
-    if (done.includes(i)) return setDone(done.filter((x) => x !== i));
-    setDone([...done, i]);
-    reward(25, "stage_task");
+const ORACION_LIBERACION = `Padre, hoy me presento delante de ti con mi historia completa.
+Reconozco las cargas que vienen de mi línea familiar: lo que se repitió en mi casa, lo que dolió y nadie nombró.
+Hoy decido soltar el rencor, la culpa y el miedo que no me pertenecen.
+Devuelvo con respeto lo que fue de mis padres y de mis abuelos, y me quedo solo con la bendición.
+Corto todo pacto y toda deuda que me ata al pasado, y elijo caminar libre.
+Te entrego mi mente, mis emociones y mis relaciones. Sáname donde solo tú puedes llegar.
+Gracias porque desde hoy mi vida escribe una historia nueva. Amén.`;
+
+const IDENTIFICA_QS = [
+  { key: "q1", q: "¿En qué parte de tu cuerpo sientes esta herida?", options: ["Pecho", "Estómago", "Garganta", "Cabeza"] },
+  { key: "q2", q: "¿A qué edad recuerdas haberla sentido por primera vez?", options: ["Niñez", "Adolescencia", "Adultez", "No lo sé"] },
+  { key: "q3", q: "¿De qué lado de tu familia crees que viene?", options: ["Materno", "Paterno", "Ambos", "No lo sé"] },
+];
+
+type TaskKind = "nota" | "identificar" | "oracion" | "confirmar";
+
+function taskKind(t: string): TaskKind {
+  const s = t.toLowerCase();
+  if (/(escrib|carta|diario|anota|redacta)/.test(s)) return "nota";
+  if (/(identific|reconoc|detect|descubr)/.test(s)) return "identificar";
+  if (/(ora|oración|oracion|declara|libera)/.test(s)) return "oracion";
+  return "confirmar";
+}
+
+function Step3({ tasks, done, setDone, entries, onSave, reward, onNext }: {
+  tasks: string[]; done: number[]; setDone: (v: number[]) => void; entries: any[]; onSave: SaveFn;
+  reward: (n: number, r: string) => void; onNext: () => void;
+}) {
+  const list = tasks.length ? tasks : DEFAULT_TASKS;
+  const EMOJIS = ["📝", "⭐", "🙏", "📖", "🎧", "💜"];
+  const [active, setActive] = useState<number | null>(null);
+  const [text, setText] = useState("");
+  const [quiz, setQuiz] = useState<Record<string, string>>({});
+  const [saving, setSaving] = useState(false);
+
+  const savedKeys = new Set(entries.filter((e) => e.confirmed).map((e) => e.step_key));
+  const doneIdx = Array.from(new Set([...done, ...list.map((_, i) => i).filter((i) => savedKeys.has(`task-${i}`))]));
+  const all = doneIdx.length >= list.length;
+  const kind = active !== null ? taskKind(list[active]) : "confirmar";
+
+  function openTask(i: number) {
+    const prev = entries.find((e) => e.step_key === `task-${i}`);
+    setText(prev?.response ?? "");
+    setQuiz((prev?.answers as Record<string, string>) ?? {});
+    setActive(i);
   }
+
+  const canConfirm =
+    kind === "nota" ? text.trim().length >= 5
+      : kind === "identificar" ? IDENTIFICA_QS.every((q) => quiz[q.key]) && text.trim().length >= 3
+        : true;
+
+  async function confirm() {
+    if (active === null) return;
+    setSaving(true);
+    await onSave({
+      step_key: `task-${active}`,
+      kind,
+      title: list[active],
+      response: text.trim(),
+      answers: quiz,
+      confirmed: true,
+    });
+    setSaving(false);
+    if (!doneIdx.includes(active)) {
+      setDone([...doneIdx, active]);
+      reward(25, "stage_task");
+    }
+    setActive(null);
+    setText("");
+    setQuiz({});
+  }
+
+  const kindIcon = { nota: PenLine, identificar: ListChecks, oracion: HandHeart, confirmar: Check }[kind];
+  const KindIcon = kindIcon;
 
   return (
     <div>
       <h1 className="font-display font-extrabold text-[26px] leading-tight text-center">Tareas espirituales 📋</h1>
-      <p className="text-center text-[13px] text-muted-foreground mt-1">¡Completa todas y recibe tu recompensa!</p>
+      <p className="text-center text-[13px] text-muted-foreground mt-1">Toca cada tarea, complétala en su ventana y guárdala.</p>
 
       <div className="mt-5 space-y-2.5">
         {list.map((t, i) => (
-          <button key={i} onClick={() => toggle(i)} className="w-full text-left rounded-[16px] bg-white p-3.5 grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-2.5 shadow-soft transition active:scale-[.98]">
+          <button key={i} onClick={() => openTask(i)} className="w-full text-left rounded-[16px] bg-white p-3.5 grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-2.5 shadow-soft transition active:scale-[.98]">
             <span className="w-9 h-9 shrink-0 rounded-[10px] bg-primary/8 grid place-items-center text-[18px]">{EMOJIS[i % EMOJIS.length]}</span>
-            <span className={cn("min-w-0 text-[13.5px] leading-snug font-medium", done.includes(i) && "text-muted-foreground line-through")}>{t}</span>
+            <span className={cn("min-w-0 text-[13.5px] leading-snug font-medium", doneIdx.includes(i) && "text-muted-foreground line-through")}>{t}</span>
             <Hojas n={25} />
-            <span className={cn("w-6 h-6 shrink-0 rounded-full grid place-items-center border-2", done.includes(i) ? "bg-[#3FBE8F] border-[#3FBE8F] text-white" : "border-primary/25")}>
-              {done.includes(i) && <Check className="w-3.5 h-3.5" />}
+            <span className={cn("w-6 h-6 shrink-0 rounded-full grid place-items-center border-2", doneIdx.includes(i) ? "bg-[#3FBE8F] border-[#3FBE8F] text-white" : "border-primary/25")}>
+              {doneIdx.includes(i) && <Check className="w-3.5 h-3.5" />}
             </span>
           </button>
         ))}
       </div>
+
+      <Dialog open={active !== null} onOpenChange={(o) => !o && setActive(null)}>
+        <DialogContent className="max-w-[440px] rounded-[16px] max-h-[86dvh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-display text-[18px] leading-tight text-left inline-flex items-start gap-2">
+              <span className="w-8 h-8 shrink-0 rounded-[10px] bg-primary/10 text-primary grid place-items-center"><KindIcon className="w-4 h-4" /></span>
+              <span className="min-w-0">{active !== null ? list[active] : ""}</span>
+            </DialogTitle>
+          </DialogHeader>
+
+          {kind === "oracion" && (
+            <div className="rounded-[12px] bg-primary/8 p-4">
+              <p className="scripture text-[13.5px] leading-relaxed whitespace-pre-line">{ORACION_LIBERACION}</p>
+            </div>
+          )}
+
+          {kind === "identificar" && (
+            <div className="space-y-3">
+              {IDENTIFICA_QS.map((q) => (
+                <div key={q.key}>
+                  <p className="text-[13px] font-bold">{q.q}</p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {q.options.map((o) => (
+                      <button key={o} onClick={() => setQuiz((a) => ({ ...a, [q.key]: o }))}
+                        className={cn("h-9 rounded-[10px] px-3 text-[12.5px] font-semibold transition active:scale-95",
+                          quiz[q.key] === o ? "bg-primary text-white" : "bg-primary/8 text-foreground")}>{o}</button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {kind !== "confirmar" && (
+            <>
+              <Textarea
+                value={text}
+                onChange={(e) => setText(e.target.value.slice(0, 500))}
+                placeholder={kind === "nota" ? "Escribe aquí tu carta o tu nota…" : "Escribe tu conclusión: ¿qué herida identificaste?"}
+                className="min-h-[110px] rounded-[10px] text-[13.5px]"
+              />
+              <div className="text-right text-[11px] text-muted-foreground -mt-2">{text.length}/500</div>
+            </>
+          )}
+
+          {kind === "confirmar" && (
+            <p className="text-[13.5px] text-muted-foreground leading-snug">Cuando la hayas realizado, confirma abajo para guardar tu registro.</p>
+          )}
+
+          <Button onClick={confirm} disabled={saving || !canConfirm}
+            className="h-[52px] rounded-[12px] text-[15px] font-semibold bg-gradient-to-r from-accent-pink to-primary text-white">
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <>{kind === "oracion" ? "Confirmo que la realicé" : "Guardar y confirmar"} <Check className="w-4 h-4 ml-1.5" /></>}
+          </Button>
+        </DialogContent>
+      </Dialog>
 
       {all && (
         <div className="relative mt-4 overflow-hidden rounded-[16px] p-4 pr-28 text-white" style={{ background: "linear-gradient(135deg,#7C5CFF 0%,#A855F7 55%,#F58BCB 100%)", animation: "scale-in .35s ease-out both" }}>
@@ -489,56 +741,64 @@ function Step5({ items, reward, onNext }: { items: { q: string; options: string[
 
 /* ─────────────── 6 · Juego interactivo: cargas al cofre ─────────────── */
 
-const CARGAS = ["Culpa", "Rencor", "Tristeza", "Dolor", "Enojo"];
-
-function Step6({ reward, onNext }: { reward: (n: number, r: string) => void; onNext: () => void }) {
+function Step6({ cargas, loading, reward, onNext }: { cargas?: string[]; loading: boolean; reward: (n: number, r: string) => void; onNext: () => void }) {
+  const list = useMemo(() => (cargas?.length ? cargas.slice(0, 15) : []), [cargas]);
   const [freed, setFreed] = useState<string[]>([]);
-  const done = freed.length === CARGAS.length;
+  const done = list.length > 0 && freed.length === list.length;
 
   function free(c: string) {
     if (freed.includes(c)) return;
     const next = [...freed, c];
     setFreed(next);
-    if (next.length === CARGAS.length) reward(30, "stage_game_cargas");
+    if (next.length === list.length) reward(45, "stage_game_cargas");
   }
 
   return (
-    <div className="text-white">
+    <div>
       <h1 className="font-display font-extrabold text-[26px] leading-tight text-center">Juego interactivo 🎮</h1>
-      <p className="text-center text-[13px] text-white/75 mt-1">Toca las cargas para soltarlas en el cofre de liberación</p>
+      <p className="text-center text-[13px] text-muted-foreground mt-1">Toca las 15 cargas para soltarlas en el cofre de liberación</p>
 
-      <div className="relative mt-6 min-h-[300px]">
-        {CARGAS.map((c, i) => {
-          const pos = [
-            { left: "6%", top: "12%" }, { left: "48%", top: "0%" }, { left: "62%", top: "22%" },
-            { left: "2%", top: "42%" }, { left: "64%", top: "50%" },
-          ][i];
-          const gone = freed.includes(c);
-          return (
-            <button
-              key={c}
-              onClick={() => free(c)}
-              className={cn("absolute rounded-full bg-white/95 text-foreground px-4 py-2.5 text-[13px] font-bold shadow-soft transition-all duration-500 active:scale-95",
-                gone && "opacity-0 translate-y-32 scale-50 pointer-events-none")}
-              style={{ ...pos, animation: gone ? undefined : "fade-in 2.6s ease-in-out infinite alternate" }}
-            >
-              {c}
-            </button>
-          );
-        })}
-        <img src={chest} alt="Cofre de liberación" width={1024} height={1024} className="absolute left-1/2 bottom-0 -translate-x-1/2 w-44 object-contain drop-shadow-2xl" />
-      </div>
-
-      <div className="mt-4 rounded-[16px] bg-white/10 border border-white/15 backdrop-blur p-4">
-        <p className="text-[13.5px] font-bold">{done ? "¡Muy bien! Has liberado todas las cargas 🎉" : "¡Muy bien! Sigue así, tu corazón se hace ligero"}</p>
-        <div className="mt-2 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
-          <div className="h-2 rounded-full bg-white/20 overflow-hidden">
-            <div className="h-full rounded-full bg-[#3FBE8F] transition-all duration-500" style={{ width: `${(freed.length / CARGAS.length) * 100}%` }} />
+      {loading || !list.length ? (
+        <div className="mt-5"><LoadingPack label="Preparando tus cargas de hoy…" /></div>
+      ) : (
+        <>
+          <div
+            className="relative mt-5 overflow-hidden rounded-[16px] p-4 pb-40 min-h-[420px]"
+            style={{ background: "linear-gradient(180deg,#EFE6FF 0%,#F7EDFF 45%,#FFF1F9 100%)" }}
+          >
+            <div aria-hidden className="absolute inset-0 opacity-70" style={{ background: "radial-gradient(60% 40% at 50% 95%, rgba(124,92,255,0.18) 0%, transparent 70%)" }} />
+            <div className="relative flex flex-wrap justify-center gap-2.5">
+              {list.map((c) => {
+                const gone = freed.includes(c);
+                return (
+                  <button
+                    key={c}
+                    onClick={() => free(c)}
+                    className={cn(
+                      "rounded-full bg-white text-foreground px-4 py-2.5 text-[13px] font-bold shadow-soft border border-primary/12 transition-all duration-500 active:scale-95",
+                      gone && "opacity-0 translate-y-24 scale-50 pointer-events-none",
+                    )}
+                  >
+                    {c}
+                  </button>
+                );
+              })}
+            </div>
+            <img src={chest} alt="Cofre de liberación" width={1024} height={1024} className="absolute left-1/2 bottom-0 -translate-x-1/2 w-40 object-contain drop-shadow-xl" />
           </div>
-          <span className="text-[12px] font-bold shrink-0">{freed.length}/{CARGAS.length} liberadas</span>
-        </div>
-        {done && <p className="mt-2 text-[13px] font-extrabold text-[#7DE8C0] inline-flex items-center gap-1">+30 hojas <Leaf className="w-3.5 h-3.5" /></p>}
-      </div>
+
+          <div className="mt-4 rounded-[16px] bg-white p-4 shadow-soft">
+            <p className="text-[13.5px] font-bold">{done ? "¡Muy bien! Has liberado todas las cargas 🎉" : "Sigue así, tu corazón se hace ligero"}</p>
+            <div className="mt-2 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+              <div className="h-2 rounded-full bg-primary/12 overflow-hidden">
+                <div className="h-full rounded-full bg-[#3FBE8F] transition-all duration-500" style={{ width: `${(freed.length / list.length) * 100}%` }} />
+              </div>
+              <span className="text-[12px] font-bold shrink-0">{freed.length}/{list.length} liberadas</span>
+            </div>
+            {done && <p className="mt-2 text-[13px] font-extrabold text-[#2F9A73] inline-flex items-center gap-1">+45 hojas <Leaf className="w-3.5 h-3.5" /></p>}
+          </div>
+        </>
+      )}
 
       <Cta onClick={onNext} disabled={!done}>Continuar</Cta>
     </div>
@@ -547,12 +807,16 @@ function Step6({ reward, onNext }: { reward: (n: number, r: string) => void; onN
 
 /* ───────────────────── 7 · Sopa de letras ───────────────────── */
 
-function Step7({ words, stageId, onNext }: { words: string[]; stageId: number; onNext: () => void }) {
+function Step7({ words, loading, stageId, onNext }: { words: string[]; loading: boolean; stageId: number; onNext: () => void }) {
   return (
     <div>
       <h1 className="font-display font-extrabold text-[26px] leading-tight text-center">Sopa de letras espiritual 🔍</h1>
-      <p className="text-center text-[13px] text-muted-foreground mt-1">Encuentra las palabras que te ayudarán a sanar.</p>
-      <div className="mt-4"><WordSearch words={words} storageKey={`stage-${stageId}`} /></div>
+      <p className="text-center text-[13px] text-muted-foreground mt-1">Palabras nuevas cada día, según el tema de tu etapa.</p>
+      {loading ? (
+        <div className="mt-4"><LoadingPack label="Creando tu sopa de letras original…" /></div>
+      ) : (
+        <div className="mt-4"><WordSearch words={words} storageKey={`stage-${stageVariant(stageId)}`} /></div>
+      )}
       <div className="relative mt-3 overflow-hidden rounded-[16px] bg-[#3FBE8F]/10 p-4 pr-24">
         <p className="text-[13.5px] font-bold">¡Excelente! Cada palabra que encuentras se graba en tu memoria.</p>
         <p className="mt-1 font-extrabold text-[14px] text-[#2F9A73] inline-flex items-center gap-1">+30 hojas <Leaf className="w-4 h-4" /></p>
@@ -565,18 +829,24 @@ function Step7({ words, stageId, onNext }: { words: string[]; stageId: number; o
 
 /* ───────────────── 8 · Memoria de promesas ───────────────── */
 
-const PROMESAS = ["Dios me ama", "No temas, yo estoy contigo", "Eres mi hijo amado"];
+const PAIRS_COUNT = 10;
 
-function Step8({ reward, onNext }: { reward: (n: number, r: string) => void; onNext: () => void }) {
-  const [cards, setCards] = useState(() => shuffleCards());
+function Step8({ promesas, loading, reward, onNext }: { promesas?: string[]; loading: boolean; reward: (n: number, r: string) => void; onNext: () => void }) {
+  const pool = promesas?.length ? promesas : [];
+  const [round, setRound] = useState(0);
+  const cards = useMemo(() => {
+    if (!pool.length) return [] as { pair: number; text: string }[];
+    const uniq = Array.from(new Set(pool));
+    const picked = [...uniq].sort(() => Math.random() - 0.5).slice(0, Math.min(PAIRS_COUNT, uniq.length));
+    return picked
+      .flatMap((p, i) => [{ pair: i, text: p }, { pair: i, text: p }])
+      .sort(() => Math.random() - 0.5);
+  }, [pool, round]);
+
+  const pairsTotal = cards.length / 2;
   const [open, setOpen] = useState<number[]>([]);
   const [found, setFound] = useState<number[]>([]);
-  const done = found.length === PROMESAS.length;
-
-  function shuffleCards() {
-    const list = PROMESAS.flatMap((p, i) => [{ id: i * 2, pair: i, text: p }, { id: i * 2 + 1, pair: i, text: p }]);
-    return list.sort(() => Math.random() - 0.5);
-  }
+  const done = pairsTotal > 0 && found.length === pairsTotal;
 
   function tap(idx: number, pair: number) {
     if (found.includes(pair) || open.includes(idx) || open.length === 2) return;
@@ -588,42 +858,58 @@ function Step8({ reward, onNext }: { reward: (n: number, r: string) => void; onN
         if (same) {
           const nf = [...found, cards[nextOpen[0]].pair];
           setFound(nf);
-          if (nf.length === PROMESAS.length) reward(30, "stage_memory_pairs");
+          if (nf.length === pairsTotal) reward(50, "stage_memory_pairs");
         }
         setOpen([]);
       }, same ? 320 : 720);
     }
   }
 
+  if (loading || !cards.length) {
+    return (
+      <div>
+        <h1 className="font-display font-extrabold text-[24px] leading-tight text-center">Memoria de promesas 🌸</h1>
+        <div className="mt-4"><LoadingPack label="Buscando promesas nuevas para ti…" /></div>
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
         <h1 className="font-display font-extrabold text-[24px] leading-tight">Juego: Memoria de promesas 🌸</h1>
-        <button onClick={() => { setCards(shuffleCards()); setOpen([]); setFound([]); }} aria-label="Reiniciar juego"
+        <button onClick={() => { setRound((r) => r + 1); setOpen([]); setFound([]); }} aria-label="Nuevas promesas"
           className="w-11 h-11 shrink-0 rounded-full bg-primary/10 text-primary grid place-items-center active:scale-95 transition">
           <RefreshCw className="w-4 h-4" />
         </button>
       </div>
-      <p className="text-[13px] text-muted-foreground mt-1">Encuentra los pares de promesas de Dios.</p>
+      <p className="text-[13px] text-muted-foreground mt-1">{pairsTotal} pares nuevos, tomados de {new Set(pool).size} promesas de esta etapa.</p>
 
-      <div className="mt-4 grid grid-cols-3 gap-2.5">
+      <div className="mt-4 grid grid-cols-4 gap-2">
         {cards.map((c, idx) => {
           const shown = open.includes(idx) || found.includes(c.pair);
           return (
             <button key={idx} onClick={() => tap(idx, c.pair)}
-              className={cn("min-h-[92px] rounded-[16px] p-2.5 text-[11.5px] font-bold leading-snug grid place-items-center text-center transition active:scale-[.97] shadow-soft",
+              className={cn("min-h-[76px] rounded-[14px] p-1.5 text-[9.5px] font-bold leading-tight grid place-items-center text-center transition active:scale-[.97] shadow-soft",
                 found.includes(c.pair) ? "bg-accent-pink/15 border-2 border-accent-pink" : shown ? "bg-primary/10 border-2 border-primary" : "bg-primary/5 border border-primary/15 text-primary/40")}>
-              {shown ? <span>{c.text}</span> : <span className="text-[24px]">❓</span>}
+              {shown ? <span>{c.text}</span> : <span className="text-[20px]">❓</span>}
             </button>
           );
         })}
+      </div>
+
+      <div className="mt-3 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+        <div className="h-2 rounded-full bg-primary/12 overflow-hidden">
+          <div className="h-full rounded-full bg-accent-pink transition-all duration-500" style={{ width: `${(found.length / pairsTotal) * 100}%` }} />
+        </div>
+        <span className="text-[12px] font-bold shrink-0">{found.length}/{pairsTotal}</span>
       </div>
 
       {done && (
         <div className="relative mt-4 overflow-hidden rounded-[16px] bg-accent-pink/12 p-4 pr-24" style={{ animation: "scale-in .3s ease-out both" }}>
           <p className="font-display font-extrabold text-[17px] text-primary">¡Excelente! ✨</p>
           <p className="text-[13px] mt-1">Has encontrado todos los pares.</p>
-          <p className="mt-1 font-extrabold text-[14px] text-[#2F9A73] inline-flex items-center gap-1">+30 hojas <Leaf className="w-4 h-4" /></p>
+          <p className="mt-1 font-extrabold text-[14px] text-[#2F9A73] inline-flex items-center gap-1">+50 hojas <Leaf className="w-4 h-4" /></p>
           <img src={brain3d.url} alt="" aria-hidden width={512} height={512} loading="lazy" className="pointer-events-none absolute right-1 bottom-0 w-20 object-contain" />
         </div>
       )}
@@ -635,49 +921,56 @@ function Step8({ reward, onNext }: { reward: (n: number, r: string) => void; onN
 
 /* ───────────────────── 9 · Camino de fe ───────────────────── */
 
-const FE_QS = [
-  { q: "¿Quién sana las heridas del alma?", options: ["Yo mismo", "Dios", "El tiempo"], correct: 1 },
-  { q: "¿Qué necesita una herida para sanar?", options: ["Ser negada", "Ser reconocida", "Ser olvidada"], correct: 1 },
-  { q: "¿Qué haces con lo que no puedes controlar?", options: ["Lo entrego", "Lo cargo", "Lo repito"], correct: 0 },
-];
-
-function Step9({ reward, onNext }: { reward: (n: number, r: string) => void; onNext: () => void }) {
+function Step9({ questions, loading, reward, onNext }: {
+  questions?: { q: string; options: string[]; correct: number }[]; loading: boolean; reward: (n: number, r: string) => void; onNext: () => void;
+}) {
+  const list = questions?.length ? questions.slice(0, 10) : [];
   const [i, setI] = useState(0);
   const [picked, setPicked] = useState<number | null>(null);
-  const it = FE_QS[i];
-  const last = i >= FE_QS.length - 1;
-  const letters = ["A", "B", "C"];
+  const letters = ["A", "B", "C", "D"];
+
+  if (loading || !list.length) {
+    return (
+      <div>
+        <h1 className="font-display font-extrabold text-[26px] leading-tight text-center">Camino de fe 🌈</h1>
+        <div className="mt-4"><LoadingPack label="Trazando tu camino de hoy…" /></div>
+      </div>
+    );
+  }
+
+  const it = list[i];
+  const last = i >= list.length - 1;
 
   return (
-    <div className="text-white">
+    <div>
       <h1 className="font-display font-extrabold text-[26px] leading-tight text-center">Camino de fe 🌈</h1>
-      <p className="text-center text-[13px] text-white/75 mt-1">Responde correctamente y avanza por el camino</p>
+      <p className="text-center text-[13px] text-muted-foreground mt-1">Responde y avanza por el camino · {list.length} pasos</p>
 
       <div className="relative mt-4 overflow-hidden rounded-[16px]">
         <img src={caminoFe} alt="Camino de fe hacia la luz" width={768} height={1024} className="w-full h-[230px] object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#150C24]/85 to-transparent" />
-        <div className="absolute inset-x-0 bottom-3 flex justify-center gap-2">
-          {FE_QS.map((_, k) => (
-            <span key={k} className={cn("w-3 h-3 rounded-full border-2 border-white/60", k <= i ? "bg-gold" : "bg-white/20")} />
+        <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-white/95 to-transparent" />
+        <div className="absolute inset-x-0 bottom-3 flex flex-wrap justify-center gap-1.5">
+          {list.map((_, k) => (
+            <span key={k} className={cn("w-2.5 h-2.5 rounded-full border-2 border-primary/40", k <= i ? "bg-primary" : "bg-white")} />
           ))}
         </div>
       </div>
 
-      <div className="mt-4 rounded-[16px] bg-white/10 border border-white/15 backdrop-blur p-4">
-        <p className="text-[12px] font-bold text-white/70">Pregunta {i + 1}:</p>
+      <div className="mt-4 rounded-[16px] bg-white p-4 shadow-soft">
+        <p className="text-[12px] font-bold text-primary">Pregunta {i + 1} de {list.length}</p>
         <p className="font-display font-extrabold text-[17px] mt-1 leading-tight">{it.q}</p>
         <div className="mt-3 flex flex-wrap gap-2">
           {it.options.map((op, oi) => (
             <button key={oi} disabled={picked !== null}
               onClick={() => { setPicked(oi); if (oi === it.correct) reward(15, "stage_camino_fe"); }}
-              className={cn("h-10 rounded-full px-4 text-[13px] font-semibold transition active:scale-95 inline-flex items-center gap-1.5",
-                picked === null ? "bg-white/12 text-white" : oi === it.correct ? "bg-[#3FBE8F] text-white" : picked === oi ? "bg-white/12 text-white/50" : "bg-white/8 text-white/40")}>
-              <span className="opacity-70">{letters[oi]}</span> {op}
+              className={cn("min-h-[42px] rounded-full px-4 text-[13px] font-semibold transition active:scale-95 inline-flex items-center gap-1.5",
+                picked === null ? "bg-primary/8 text-foreground" : oi === it.correct ? "bg-[#3FBE8F] text-white" : picked === oi ? "bg-[#F87171]/12 text-[#B91C1C]" : "bg-primary/5 text-muted-foreground")}>
+              <span className="opacity-60">{letters[oi]}</span> {op}
             </button>
           ))}
         </div>
         {picked !== null && (
-          <p className={cn("mt-3 text-[13px] font-bold", picked === it.correct ? "text-[#7DE8C0]" : "text-white/70")}>
+          <p className={cn("mt-3 text-[13px] font-bold", picked === it.correct ? "text-[#2F9A73]" : "text-muted-foreground")}>
             {picked === it.correct ? "¡Correcto! Avanzas al siguiente paso." : "Respira. La verdad es que Dios sana lo que le entregas."}
           </p>
         )}
@@ -697,18 +990,29 @@ const EMO = [
   { e: "❤️", g: "sanan" }, { e: "😊", g: "sanan" }, { e: "😌", g: "sanan" },
 ];
 
-function Step10({ reward, onNext }: { reward: (n: number, r: string) => void; onNext: () => void }) {
+const BIENESTAR_FALLBACK = [
+  { q: "¿Con qué frecuencia te sentiste sin ganas de nada esta semana?", options: ["Casi nunca", "Algunos días", "Casi todos los días"] },
+  { q: "¿Cómo has dormido últimamente?", options: ["Bien", "Regular", "Muy mal"] },
+  { q: "¿Sientes que puedes hablar con alguien de lo que te pasa?", options: ["Sí, tengo con quién", "A veces", "Me siento sola/o"] },
+  { q: "¿Has tenido pensamientos de hacerte daño?", options: ["No", "Pensamientos pasajeros", "Sí, con frecuencia"] },
+];
+
+function Step10({ bienestar, reward, onNext }: { bienestar?: { q: string; options: string[] }[]; reward: (n: number, r: string) => void; onNext: () => void }) {
+  const qs = bienestar?.length ? bienestar : BIENESTAR_FALLBACK;
   const [placed, setPlaced] = useState<Record<number, "pesan" | "sanan">>({});
+  const [sel, setSel] = useState<number | null>(null);
+  const [wb, setWb] = useState<Record<number, number>>({});
   const pool = EMO.map((_, i) => i).filter((i) => placed[i] === undefined);
-  const done = pool.length === 0;
+  const emoDone = pool.length === 0;
+  const wbDone = qs.every((_, i) => wb[i] !== undefined);
+  const done = emoDone && wbDone;
+  const alerta = Object.values(wb).filter((v) => v === 2).length;
 
   function place(i: number, g: "pesan" | "sanan") {
     const next = { ...placed, [i]: g };
     setPlaced(next);
     if (Object.keys(next).length === EMO.length) reward(25, "stage_classify");
   }
-
-  const [sel, setSel] = useState<number | null>(null);
 
   return (
     <div>
@@ -739,6 +1043,35 @@ function Step10({ reward, onNext }: { reward: (n: number, r: string) => void; on
             </div>
           </button>
         ))}
+      </div>
+
+      {/* Cuestionario de bienestar */}
+      <div className="mt-4 rounded-[16px] bg-white p-4 shadow-soft">
+        <div className="text-[11px] uppercase tracking-widest font-bold text-primary">Cómo estás de verdad</div>
+        <h2 className="font-display font-extrabold text-[18px] mt-1 leading-tight">Cuestionario de ánimo</h2>
+        <p className="text-[12.5px] text-muted-foreground mt-1">Responde con honestidad. Nadie más lo ve; nos ayuda a acompañarte mejor.</p>
+        <div className="mt-3 space-y-3">
+          {qs.map((q, i) => (
+            <div key={i} className="rounded-[14px] border border-border p-3">
+              <p className="text-[13.5px] font-semibold leading-snug">{q.q}</p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {q.options.map((o, oi) => (
+                  <button key={oi} onClick={() => setWb((w) => ({ ...w, [i]: oi }))}
+                    className={cn("h-9 rounded-[10px] px-3 text-[12.5px] font-semibold transition active:scale-95",
+                      wb[i] === oi ? "bg-primary text-white" : "bg-primary/8 text-foreground")}>{o}</button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {wbDone && (
+          <div className={cn("mt-3 rounded-[12px] p-4 text-[13px] leading-snug font-medium", alerta >= 2 ? "bg-[#F58BCB]/12 text-foreground" : "bg-[#3FBE8F]/10 text-foreground")}>
+            {alerta >= 2
+              ? "Gracias por tu honestidad. Lo que sientes es real y no tienes que cargarlo sola/o: habla hoy con alguien de confianza y, si el dolor aprieta, busca ayuda profesional o llama a una línea de apoyo de tu país. Aquí seguimos contigo, paso a paso."
+              : "Gracias por responder. Tu ánimo está sostenido: sigue cuidando tu descanso, tu oración y las personas que te hacen bien."}
+          </div>
+        )}
       </div>
 
       {done && (
@@ -794,7 +1127,8 @@ function Step11({ minutes, tasksDone, onNext }: { minutes: number; tasksDone: bo
 
 /* ───────────────────── 12 · Recompensa del día ───────────────────── */
 
-function Step12({ earned, onNext }: { earned: number; onNext: () => void }) {
+function Step12({ earned, insignia, onSave, onNext }: { earned: number; insignia: string; onSave: () => Promise<void>; onNext: () => void }) {
+  useEffect(() => { onSave(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, []);
   return (
     <div>
       <h1 className="font-display font-extrabold text-[26px] leading-tight text-center">Recompensa del día 🏆</h1>
@@ -805,9 +1139,9 @@ function Step12({ earned, onNext }: { earned: number; onNext: () => void }) {
 
       <div className="mt-4 grid grid-cols-3 gap-3">
         {[
-          { top: "🌿", big: `+${Math.max(earned, 500)}`, label: "Hojas de sanación" },
-          { top: "⭐", big: "+120", label: "XP" },
-          { top: "🛡️", big: "Insignia", label: "Corazón que sana" },
+          { top: "🌿", big: `+${Math.max(earned, 0)}`, label: "Hojas de sanación" },
+          { top: "⭐", big: `+${STAGE_XP}`, label: "XP" },
+          { top: "🛡️", big: "Insignia", label: insignia },
         ].map((c) => (
           <div key={c.label} className="rounded-[16px] bg-white p-3 text-center shadow-soft">
             <div className="text-[24px] leading-none">{c.top}</div>
@@ -817,6 +1151,8 @@ function Step12({ earned, onNext }: { earned: number; onNext: () => void }) {
         ))}
       </div>
 
+      <p className="mt-3 text-center text-[12px] text-muted-foreground">Tu XP y tu insignia quedan guardadas en tu camino y en tu perfil.</p>
+
       <Cta onClick={onNext}>Continuar</Cta>
     </div>
   );
@@ -824,10 +1160,10 @@ function Step12({ earned, onNext }: { earned: number; onNext: () => void }) {
 
 /* ───────────────────── 13 · Día completado ───────────────────── */
 
-function Step13({ stage, stageIndex, total, onFinish }: { stage: any; stageIndex: number; total: number; onFinish: () => void }) {
+function Step13({ stage, position, total, onFinish }: { stage: any; position: number; total: number; onFinish: () => void }) {
   return (
     <div>
-      <h1 className="font-display font-extrabold text-[26px] leading-tight text-center">¡Etapa {stageIndex} completada! 🎉</h1>
+      <h1 className="font-display font-extrabold text-[26px] leading-tight text-center">¡Etapa {position} completada! 🎉</h1>
       <p className="text-center text-[13px] text-muted-foreground mt-1">Mañana desbloquearás la siguiente parada de tu camino</p>
 
       <div className="relative mt-4 overflow-hidden rounded-[16px] bg-white p-4 pr-28 shadow-soft">
@@ -835,10 +1171,10 @@ function Step13({ stage, stageIndex, total, onFinish }: { stage: any; stageIndex
           <Flame className="w-4 h-4 text-[#FF7A3C]" />
           <span className="text-[12.5px] font-extrabold">Racha activa</span>
         </div>
-        <p className="font-display font-extrabold text-[19px] mt-3 leading-tight">{stageIndex} de {total} etapas<br />completadas</p>
+        <p className="font-display font-extrabold text-[19px] mt-3 leading-tight">{position} de {total} etapas<br />completadas</p>
         <div className="mt-3 flex items-center gap-1.5 max-w-[190px]">
           {Array.from({ length: total }).map((_, i) => (
-            <span key={i} className={cn("h-2.5 w-2.5 rounded-full", i < stageIndex ? "bg-primary" : "bg-primary/15")} />
+            <span key={i} className={cn("h-2.5 w-2.5 rounded-full", i < position ? "bg-primary" : "bg-primary/15")} />
           ))}
         </div>
         <img src={tree} alt="" aria-hidden width={512} height={512} loading="lazy" className="pointer-events-none absolute right-0 bottom-0 w-24 object-contain" />
