@@ -49,12 +49,13 @@ function Etapas() {
     queryKey: ["etapas", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const [stages, progress, intake] = await Promise.all([
+      const [stages, progress, intake, rewards] = await Promise.all([
         supabase.from("stages").select("*").order("id"),
         supabase.from("stage_progress").select("*").eq("user_id", user!.id),
         supabase.from("intake_sessions").select("status, primary_focus, ai_plan").eq("user_id", user!.id).maybeSingle(),
+        supabase.from("stage_rewards").select("stage_id, xp, insignia").eq("user_id", user!.id),
       ]);
-      return { stages: stages.data ?? [], progress: progress.data ?? [], intake: intake.data };
+      return { stages: stages.data ?? [], progress: progress.data ?? [], intake: intake.data, rewards: rewards.data ?? [] };
     },
   });
 
@@ -66,7 +67,10 @@ function Etapas() {
   const pct = Math.round((completedCount / total) * 100);
   const firstName = (profile?.display_name || profile?.full_name || "Alma").split(" ")[0];
   const gems = profile?.gems ?? 0;
-  const logros = completedCount * 3 + Math.floor(gems / 250);
+  const rewards = data?.rewards ?? [];
+  const totalXp = rewards.reduce((a: number, r: any) => a + (r.xp ?? 0), 0);
+  const insignias = Array.from(new Set(rewards.map((r: any) => r.insignia).filter(Boolean))) as string[];
+  const logros = insignias.length;
 
   if (isDetailRoute) return <Outlet />;
 
@@ -199,6 +203,31 @@ function Etapas() {
           <StatCard label="Hojas de sanación" value={String(gems)} icon={<Leaf className="w-4 h-4 text-[#3FBE8F]" />} />
           <StatCard label="Logros" value={String(logros)} icon={<Award className="w-4 h-4 text-gold" />} />
         </div>
+
+        {/* XP e insignias ganadas */}
+        <Card className="mt-4 p-4 rounded-[16px] border-white/15 bg-white/95 shadow-soft">
+          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+            <div className="min-w-0">
+              <div className="text-[11px] uppercase tracking-widest font-bold text-primary">Tus recompensas</div>
+              <p className="font-display font-extrabold text-[19px] leading-tight mt-1">{totalXp} XP acumulados</p>
+            </div>
+            <span className="shrink-0 inline-flex items-center gap-1.5 rounded-full bg-gold/12 px-3 py-2">
+              <Award className="w-4 h-4 text-gold" />
+              <span className="font-display font-extrabold text-[14px]">{insignias.length}</span>
+            </span>
+          </div>
+          {insignias.length ? (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {insignias.map((b) => (
+                <span key={b} className="inline-flex items-center gap-1.5 rounded-full bg-primary/8 px-3 py-1.5 text-[12px] font-bold text-primary">
+                  <Award className="w-3.5 h-3.5" /> {b}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <p className="mt-2 text-[12.5px] text-muted-foreground leading-snug">Completa tu primera etapa para ganar tu primera insignia y tus primeros XP.</p>
+          )}
+        </Card>
 
         {/* Escritura */}
         <Card className="relative overflow-hidden mt-4 p-4 pr-24 rounded-[16px] border-white/15 bg-white/92 shadow-soft">
