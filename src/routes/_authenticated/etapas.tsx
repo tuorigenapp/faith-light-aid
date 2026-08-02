@@ -1,25 +1,33 @@
 import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
+import { useProfile } from "@/hooks/use-profile";
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Check, Lock, ArrowRight, Compass, Sparkles, AlertCircle } from "lucide-react";
+import { Check, Lock, AlertCircle, Flame, Award, Leaf } from "lucide-react";
 import { cn } from "@/lib/utils";
 import stageImg from "@/assets/stage-journey.jpg";
-import dailyImg from "@/assets/daily-devotional.jpg";
-import heroImg from "@/assets/spiritual-hero.jpg";
-import exerciseImg from "@/assets/prayer-exercise.jpg";
 import paisaje from "@/assets/fondo-mistico.png.asset.json";
 import mapaCamino from "@/assets/mapa-camino.png.asset.json";
-
+import arbolIsla from "@/assets/hojas-tree.png";
+import portal from "@/assets/onb-portal.png";
+import heartGem from "@/assets/e3d-heartgem.png.asset.json";
 
 export const Route = createFileRoute("/_authenticated/etapas")({
-  head: () => ({ meta: [{ title: "Mis Etapas — Reconectando" }] }),
+  head: () => ({
+    meta: [
+      { title: "Mi camino ORIGEN — Mapa de etapas" },
+      { name: "description", content: "Avanza por tu mapa de restauración: cada etapa desbloquea la siguiente parada de tu camino." },
+      { property: "og:title", content: "Mi camino ORIGEN — Mapa de etapas" },
+      { property: "og:description", content: "Tu mapa de restauración paso a paso, con hojas de sanación y logros." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   component: Etapas,
 });
 
-const IMAGE_MAP: Record<string, string> = { journey: stageImg, daily: dailyImg, hero: heroImg, exercise: exerciseImg };
 const KEY_TO_FOCUS: Record<string, string> = {
   familia: "restauración familiar",
   autoestima: "identidad",
@@ -33,8 +41,10 @@ const KEY_TO_FOCUS: Record<string, string> = {
 
 function Etapas() {
   const { user } = useAuth();
+  const { data: profile } = useProfile();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const isDetailRoute = /^\/etapas\/[^/]+$/.test(pathname);
+
   const { data } = useQuery({
     queryKey: ["etapas", user?.id],
     enabled: !!user,
@@ -42,31 +52,34 @@ function Etapas() {
       const [stages, progress, intake] = await Promise.all([
         supabase.from("stages").select("*").order("id"),
         supabase.from("stage_progress").select("*").eq("user_id", user!.id),
-        supabase.from("intake_sessions").select("status, primary_focus, ai_plan, ai_summary, genealogy, childhood").eq("user_id", user!.id).maybeSingle(),
+        supabase.from("intake_sessions").select("status, primary_focus, ai_plan").eq("user_id", user!.id).maybeSingle(),
       ]);
       return { stages: stages.data ?? [], progress: progress.data ?? [], intake: intake.data };
     },
   });
 
-  const progressMap = new Map((data?.progress ?? []).map((p: any) => [p.stage_id, p]));
   const completedIds = new Set((data?.progress ?? []).filter((p: any) => p.status === "completed").map((p: any) => p.stage_id));
-  const completedCount = completedIds.size;
   const recommendedFocuses = getRecommendedFocuses(data?.intake);
   const orderedStages = orderStages(data?.stages ?? [], recommendedFocuses);
-  const aiPlan = (data?.intake?.ai_plan ?? {}) as { pattern_name?: string; recommended_categories?: string[] };
+  const total = orderedStages.length || 7;
+  const completedCount = completedIds.size;
+  const pct = Math.round((completedCount / total) * 100);
+  const firstName = (profile?.display_name || profile?.full_name || "Alma").split(" ")[0];
+  const gems = profile?.gems ?? 0;
+  const logros = completedCount * 3 + Math.floor(gems / 250);
 
   if (isDetailRoute) return <Outlet />;
 
   if (data && data.intake?.status !== "completed") {
     return (
-      <div className="px-4 py-6 md:p-10 max-w-5xl mx-auto mobile-safe-bottom lg:pb-10">
-        <Card className="overflow-hidden rounded-[2rem] shadow-soft">
-          <img src={stageImg} alt="Camino espiritual" className="h-64 w-full object-cover" />
-          <div className="p-6 md:p-8 text-center">
-            <div className="w-14 h-14 rounded-3xl bg-primary/10 text-primary grid place-items-center mx-auto"><AlertCircle className="w-6 h-6" /></div>
-            <h1 className="font-display font-extrabold text-3xl mt-4">Primero completa tu onboarding</h1>
-            <p className="text-muted-foreground mt-2 max-w-xl mx-auto">Ruth Esther usa tus respuestas iniciales para adaptar el Camino ORIGEN a tu historia real.</p>
-            <Link to="/onboarding"><Button className="mt-6 rounded-full bg-primary">Completar onboarding</Button></Link>
+      <div className="px-4 py-6 md:p-10 max-w-[1100px] mx-auto mobile-safe-bottom lg:pb-10">
+        <Card className="overflow-hidden rounded-[16px] shadow-soft">
+          <img src={stageImg} alt="Camino espiritual" className="h-56 w-full object-cover" />
+          <div className="p-6 text-center">
+            <div className="w-12 h-12 rounded-[16px] bg-primary/10 text-primary grid place-items-center mx-auto"><AlertCircle className="w-6 h-6" /></div>
+            <h1 className="font-display font-extrabold text-[28px] mt-4 leading-tight">Primero completa tu onboarding</h1>
+            <p className="text-muted-foreground mt-2 max-w-xl mx-auto text-[15px]">Usamos tus respuestas iniciales para adaptar tu camino a tu historia real.</p>
+            <Link to="/onboarding"><Button className="mt-6 h-[52px] w-full rounded-[12px] bg-primary text-[16px] font-semibold">Completar onboarding</Button></Link>
           </div>
         </Card>
       </div>
@@ -74,103 +87,162 @@ function Etapas() {
   }
 
   return (
-    <div className="px-4 py-5 md:p-8 max-w-[1100px] mx-auto mobile-safe-bottom lg:pb-10">
-      {/* HERO — mapa del camino */}
-      <section className="relative overflow-hidden rounded-[16px] shadow-soft min-h-[240px] flex items-end">
-        <img src={paisaje.url} alt="Camino de restauración" width={1024} height={1024} className="absolute inset-0 h-full w-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#1B1930]/90 via-[#1B1930]/35 to-transparent" />
-        <div className="relative z-10 p-5 md:p-7 text-white">
-          <div className="inline-flex items-center gap-2 rounded-full bg-white/15 border border-white/25 backdrop-blur px-3 py-1 text-[12px] font-bold">
-            <Compass className="w-3.5 h-3.5" /> {completedCount}/8 etapas
+    <div className="relative min-h-dvh">
+      {/* Fondo místico animado */}
+      <img src={paisaje.url} alt="" aria-hidden width={1024} height={1024} className="fixed inset-0 h-full w-full object-cover" />
+      <img src={mapaCamino.url} alt="" aria-hidden width={1024} height={1024} className="fixed inset-0 h-full w-full object-cover opacity-30 mix-blend-screen" />
+      <div aria-hidden className="fixed inset-0 bg-gradient-to-b from-[#2A1B45]/72 via-[#241539]/78 to-[#150C24]/92" />
+      <div aria-hidden className="fixed inset-0 pointer-events-none">
+        {[12, 34, 58, 76, 90].map((l, i) => (
+          <span
+            key={l}
+            className="absolute w-1.5 h-1.5 rounded-full bg-white/70"
+            style={{ left: `${l}%`, top: `${18 + i * 14}%`, animation: `fade-in 2.4s ease-in-out ${i * 420}ms infinite alternate` }}
+          />
+        ))}
+      </div>
+
+      <div className="relative z-10 px-4 py-5 md:px-6 max-w-[520px] mx-auto mobile-safe-bottom lg:pb-10">
+        {/* Saludo + saldo */}
+        <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+          <div className="min-w-0">
+            <h1 className="font-display font-extrabold text-[26px] leading-tight text-white truncate">¡Hola, {firstName} hermosa! 💜</h1>
+            <p className="text-[13.5px] text-white/75 mt-1 leading-snug">Tu transformación espiritual es un viaje, no una carrera.</p>
           </div>
-          <h1 className="font-display font-extrabold text-[28px] md:text-[36px] leading-tight mt-3">Tu camino de restauración</h1>
-          <p className="text-[15px] text-white/85 mt-1 max-w-md">{aiPlan.pattern_name ?? "Plan personalizado según tu onboarding"}</p>
-          <div className="mt-4 h-1.5 w-full max-w-xs rounded-full bg-white/25 overflow-hidden">
-            <div className="h-full bg-gradient-to-r from-primary via-accent-pink to-gold transition-all duration-700" style={{ width: `${Math.round((completedCount / 8) * 100)}%` }} />
+          <div className="shrink-0 inline-flex items-center gap-1.5 rounded-full bg-white px-3.5 py-2 shadow-soft">
+            <span className="font-display font-extrabold text-[15px] text-foreground">{gems}</span>
+            <Leaf className="w-4 h-4 text-[#3FBE8F]" />
           </div>
-        </div>
-      </section>
+        </header>
 
-      <Card className="mt-4 p-4 rounded-[16px] grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 shadow-soft">
-        <div className="min-w-0">
-          <div className="text-[12px] uppercase tracking-widest text-primary font-bold">Áreas recomendadas</div>
-          <p className="text-[14px] text-muted-foreground mt-1">{recommendedFocuses.join(" · ")}</p>
-        </div>
-        <div className="shrink-0 rounded-full bg-primary/10 px-3.5 py-1.5 text-[13px] font-bold text-primary">{completedCount}/8</div>
-      </Card>
+        {/* Progreso general */}
+        <Card className="relative overflow-hidden mt-4 p-4 rounded-[16px] border-white/15 bg-white/95 shadow-soft">
+          <div className="text-[13px] font-bold text-primary">Tu progreso general</div>
+          <div className="mt-3 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-4">
+            <Donut pct={pct} />
+            <div className="min-w-0">
+              <p className="font-display font-extrabold text-[19px] leading-tight">
+                {completedCount} de {total} etapas
+                <br />completadas
+              </p>
+              <div className="mt-2.5 h-2 w-full rounded-full bg-primary/12 overflow-hidden">
+                <div className="h-full rounded-full bg-gradient-to-r from-primary via-accent-pink to-gold transition-all duration-1000" style={{ width: `${Math.max(pct, 4)}%` }} />
+              </div>
+            </div>
+          </div>
+          <img src={arbolIsla} alt="" aria-hidden width={512} height={512} loading="lazy" className="pointer-events-none absolute -right-3 -top-2 w-24 opacity-95" />
+        </Card>
 
-      {/* MAPA SERPENTEANTE — sobre el camino animado */}
-      <div className="relative mt-6 rounded-[16px] overflow-hidden">
-        <img
-          src={mapaCamino.url}
-          alt=""
-          aria-hidden
-          className="absolute inset-0 h-full w-full object-cover opacity-[0.22]"
-        />
-        <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/55 to-background/80" />
-        <div aria-hidden className="absolute left-1/2 top-0 bottom-0 w-[3px] -translate-x-1/2 bg-gradient-to-b from-primary/45 via-accent-pink/45 to-gold/45 rounded-full animate-pulse" />
-        <div className="relative space-y-4 p-3">
+        {/* MAPA SERPENTEANTE */}
+        <div className="relative mt-6">
+          <div aria-hidden className="absolute left-[27px] top-6 bottom-6 w-[3px] rounded-full bg-gradient-to-b from-[#3FBE8F]/70 via-accent-pink/60 to-white/20" />
+          <ol className="relative space-y-3.5">
+            {orderedStages.map((s: any, i: number) => {
+              const completed = completedIds.has(s.id);
+              const unlocked = i === 0 || completed || completedIds.has(orderedStages[i - 1]?.id);
+              const active = unlocked && !completed;
+              const shift = i % 2 === 0 ? "ml-0" : "ml-6";
+              const inner = (
+                <div className={cn("grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3", shift)}>
+                  <span
+                    className={cn(
+                      "relative w-[54px] h-[54px] shrink-0 rounded-full grid place-items-center border-[3px] transition",
+                      completed && "bg-[#3FBE8F] border-white/70 text-white",
+                      active && "bg-gradient-to-br from-accent-pink to-primary border-white text-white",
+                      !unlocked && "bg-primary/35 border-white/25 text-white/70 backdrop-blur",
+                    )}
+                    style={active ? { boxShadow: "0 0 0 8px rgba(245,139,203,0.22), 0 8px 22px rgba(245,139,203,0.45)" } : undefined}
+                  >
+                    {completed ? (
+                      <Check className="w-7 h-7" />
+                    ) : active ? (
+                      <img src={heartGem.url} alt="" aria-hidden width={128} height={128} className="w-8 h-8 object-contain drop-shadow" />
+                    ) : (
+                      <span className="font-display font-extrabold text-[17px]">{i + 1}</span>
+                    )}
+                  </span>
 
-          {orderedStages.map((s: any, i: number) => {
-            const p = progressMap.get(s.id);
-            const completed = p?.status === "completed";
-            const unlocked = i === 0 || completed || completedIds.has(orderedStages[i - 1]?.id);
-            const active = unlocked && !completed;
-            const image = IMAGE_MAP[s.image_key ?? "journey"] ?? stageImg;
-            const recommended = recommendedFocuses.some((f) => (s.focus_area ?? "").toLowerCase().includes(f));
-            const left = i % 2 === 0;
-            return (
-              <Link
-                key={s.id}
-                to="/etapas/$stageId"
-                params={{ stageId: String(s.id) }}
-                className={cn("block relative", left ? "sm:pr-[52%]" : "sm:pl-[52%]")}
-                style={{ animation: `fade-in 0.4s ease-out ${i * 60}ms both` }}
-              >
-                <Card
-                  className={cn(
-                    "overflow-hidden rounded-[16px] shadow-soft transition-all active:scale-[.97]",
-                    completed && "border-accent-green/45",
-                    active && "border-primary",
-                    !unlocked && "opacity-70"
-                  )}
-                >
-                  <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-3 p-4 items-center">
-                    <div className="relative w-16 h-16 shrink-0 rounded-[14px] overflow-hidden">
-                      <img src={image} alt={s.title} width={1024} height={1024} loading="lazy" className={cn("h-full w-full object-cover", !unlocked && "blur-[2px]")} />
-                      <div className={cn("absolute inset-0 grid place-items-center text-white font-bold", completed ? "bg-accent-green/75" : unlocked ? "bg-primary/60" : "bg-foreground/55")}>
-                        {completed ? <Check className="w-6 h-6" /> : unlocked ? <span className="font-display text-lg">{s.id}</span> : <Lock className="w-5 h-5" />}
-                      </div>
-                    </div>
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-[11px] uppercase tracking-widest text-primary font-bold">{s.focus_area ?? "restauración"}</span>
-                        {recommended && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-gold/15 text-gold px-2 py-0.5 text-[11px] font-bold">
-                            <Sparkles className="w-3 h-3" /> Recomendada
-                          </span>
-                        )}
-                      </div>
-                      <h3 className="font-display font-bold text-[18px] leading-tight mt-1 truncate">{s.title}</h3>
-                      <p className="text-[13px] text-muted-foreground mt-1 line-clamp-2">{s.subtitle}</p>
-                      <div className="mt-2 flex items-center justify-between gap-2">
-                        <span className={cn("text-[12px] font-bold", completed ? "text-accent-green" : active ? "text-primary" : "text-muted-foreground")}>
-                          {completed ? "Completada" : active ? "Disponible ahora" : "Bloqueada"}
-                        </span>
-                        {unlocked && <ArrowRight className="w-4 h-4 text-primary shrink-0" />}
-                      </div>
-                    </div>
+                  <div
+                    className={cn(
+                      "min-w-0 rounded-full pl-4 pr-3 py-3 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 transition active:scale-[.98]",
+                      completed && "bg-white/92",
+                      active && "bg-white border-2 border-accent-pink",
+                      !unlocked && "bg-white/12 border border-white/18 backdrop-blur",
+                    )}
+                    style={active ? { boxShadow: "0 4px 14px rgba(245,139,203,0.28)" } : undefined}
+                  >
+                    <span className={cn("truncate font-display font-bold text-[15px]", unlocked ? "text-foreground" : "text-white/80")}>
+                      {s.title}
+                    </span>
+                    {active && <span className="shrink-0 rounded-full bg-accent-pink px-2 py-0.5 text-[10px] font-extrabold tracking-wide text-white">HOY</span>}
+                    {!unlocked && <Lock className="w-4 h-4 shrink-0 text-white/70" />}
                   </div>
-                </Card>
-              </Link>
-            );
-          })}
+                </div>
+              );
+
+              return (
+                <li key={s.id} style={{ animation: `fade-in .45s ease-out ${i * 70}ms both` }}>
+                  {unlocked ? (
+                    <Link to="/etapas/$stageId" params={{ stageId: String(s.id) }} className="block">{inner}</Link>
+                  ) : (
+                    <div aria-disabled className="opacity-95">{inner}</div>
+                  )}
+                </li>
+              );
+            })}
+          </ol>
         </div>
+
+        {/* Stats */}
+        <div className="mt-6 grid grid-cols-3 gap-3">
+          <StatCard label="Racha actual" value={`${profile?.consecutive_days ?? 0} días`} icon={<Flame className="w-4 h-4 text-[#FF7A3C]" />} />
+          <StatCard label="Hojas de sanación" value={String(gems)} icon={<Leaf className="w-4 h-4 text-[#3FBE8F]" />} />
+          <StatCard label="Logros" value={String(logros)} icon={<Award className="w-4 h-4 text-gold" />} />
+        </div>
+
+        {/* Escritura */}
+        <Card className="relative overflow-hidden mt-4 p-4 pr-24 rounded-[16px] border-white/15 bg-white/92 shadow-soft">
+          <p className="scripture text-[14px] leading-snug">
+            “Venid a mí todos los que estáis trabajados y cargados, y yo os haré descansar.”
+          </p>
+          <p className="text-[12px] font-bold text-primary mt-2">— Mateo 11:28</p>
+          <img src={portal} alt="" aria-hidden width={512} height={512} loading="lazy" className="pointer-events-none absolute -right-2 bottom-0 w-24 object-contain" />
+        </Card>
       </div>
     </div>
   );
 }
 
+function Donut({ pct }: { pct: number }) {
+  const r = 30;
+  const c = 2 * Math.PI * r;
+  return (
+    <div className="relative w-[78px] h-[78px] shrink-0">
+      <svg viewBox="0 0 72 72" className="w-full h-full -rotate-90">
+        <circle cx="36" cy="36" r={r} fill="none" strokeWidth="8" className="stroke-primary/12" />
+        <circle
+          cx="36" cy="36" r={r} fill="none" strokeWidth="8" strokeLinecap="round"
+          className="stroke-primary transition-all duration-1000"
+          strokeDasharray={c}
+          strokeDashoffset={c - (c * Math.min(pct, 100)) / 100}
+        />
+      </svg>
+      <span className="absolute inset-0 grid place-items-center font-display font-extrabold text-[17px]">{pct}%</span>
+    </div>
+  );
+}
+
+function StatCard({ label, value, icon }: { label: string; value: string; icon: React.ReactNode }) {
+  return (
+    <div className="rounded-[16px] bg-white/92 p-3 text-center shadow-soft">
+      <div className="text-[11px] font-semibold text-muted-foreground leading-tight">{label}</div>
+      <div className="mt-1 inline-flex items-center gap-1.5">
+        <span className="font-display font-extrabold text-[16px] text-foreground">{value}</span>
+        {icon}
+      </div>
+    </div>
+  );
+}
 
 function getRecommendedFocuses(intake: any): string[] {
   const plan = intake?.ai_plan ?? {};
