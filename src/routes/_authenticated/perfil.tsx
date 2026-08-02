@@ -506,6 +506,11 @@ function ProfilePanel({ profile, onEdit }: { profile: any; onEdit: () => void })
     enabled: !!user,
     queryFn: async () => (await supabase.from("pareja_lecturas").select("*").eq("user_id", user!.id).order("created_at", { ascending: false }).limit(5)).data ?? [],
   });
+  const { data: stageRewards = [] } = useQuery({
+    queryKey: ["stage-rewards", user?.id],
+    enabled: !!user,
+    queryFn: async () => (await supabase.from("stage_rewards").select("stage_id, xp, leaves, insignia").eq("user_id", user!.id)).data ?? [],
+  });
   const { data: recentJournal } = useQuery({
     queryKey: ["journal-recent", user?.id],
     enabled: !!user,
@@ -517,6 +522,8 @@ function ProfilePanel({ profile, onEdit }: { profile: any; onEdit: () => void })
   const completed = progress.filter((p: any) => p.status === "completed").length;
   const pct = Math.round((completed / totalStages) * 100) || Math.round(((currentStage - 1) / totalStages) * 100);
   const message = MESSAGES[new Date().getDate() % MESSAGES.length];
+  const totalXp = stageRewards.reduce((a: number, r: any) => a + (r.xp ?? 0), 0);
+  const insignias = Array.from(new Set(stageRewards.map((r: any) => r.insignia).filter(Boolean))) as string[];
 
   function downloadMinistracion(m: any) {
     printMinistracion({
@@ -567,6 +574,33 @@ function ProfilePanel({ profile, onEdit }: { profile: any; onEdit: () => void })
             Editar mi perfil
           </button>
         </div>
+
+        {/* XP E INSIGNIAS */}
+        <Card className="rounded-[20px] p-4">
+          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+            <div className="min-w-0">
+              <div className="text-[11px] uppercase tracking-widest font-bold text-primary">Mi camino ORIGEN</div>
+              <p className="font-display font-black text-[20px] leading-tight mt-1">{totalXp} XP · {insignias.length} insignias</p>
+              <p className="text-[12.5px] text-muted-foreground mt-1">Ganados al completar tus etapas.</p>
+            </div>
+            <span className="shrink-0 w-12 h-12 rounded-[16px] bg-gold/12 grid place-items-center">
+              <Trophy className="w-6 h-6 text-gold" />
+            </span>
+          </div>
+          {insignias.length ? (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {insignias.map((b) => (
+                <span key={b} className="inline-flex items-center gap-1.5 rounded-full bg-primary/8 px-3 py-1.5 text-[12px] font-bold text-primary">
+                  <Trophy className="w-3.5 h-3.5" /> {b}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <Link to="/etapas" className="mt-3 block">
+              <Button className="h-11 w-full rounded-[12px] text-[14px] font-semibold">Ir a mi camino y ganar mi primera insignia</Button>
+            </Link>
+          )}
+        </Card>
 
         {/* RESUMEN RÁPIDO */}
         <div>
