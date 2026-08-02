@@ -888,6 +888,78 @@ export type Database = {
           },
         ]
       }
+      stage_rewards: {
+        Row: {
+          created_at: string
+          id: string
+          insignia: string | null
+          leaves: number
+          stage_id: number
+          user_id: string
+          xp: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          insignia?: string | null
+          leaves?: number
+          stage_id: number
+          user_id: string
+          xp?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          insignia?: string | null
+          leaves?: number
+          stage_id?: number
+          user_id?: string
+          xp?: number
+        }
+        Relationships: []
+      }
+      stage_step_entries: {
+        Row: {
+          answers: Json
+          confirmed: boolean
+          created_at: string
+          id: string
+          kind: string
+          response: string | null
+          stage_id: number
+          step_key: string
+          title: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          answers?: Json
+          confirmed?: boolean
+          created_at?: string
+          id?: string
+          kind?: string
+          response?: string | null
+          stage_id: number
+          step_key: string
+          title?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          answers?: Json
+          confirmed?: boolean
+          created_at?: string
+          id?: string
+          kind?: string
+          response?: string | null
+          stage_id?: number
+          step_key?: string
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       stages: {
         Row: {
           created_at: string
