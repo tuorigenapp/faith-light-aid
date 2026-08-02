@@ -85,7 +85,7 @@ function StageFlow() {
     },
   });
 
-  const pack = useStagePack(id, data?.stage?.title, data?.stage?.focus_area);
+  const pack = useStagePack(id, data?.stage?.title ?? undefined, data?.stage?.focus_area ?? undefined);
 
   useEffect(() => {
     if (data?.progress) {
@@ -135,9 +135,13 @@ function StageFlow() {
       answers: (entry.answers ?? {}) as never,
       confirmed: entry.confirmed,
     }, { onConflict: "user_id,stage_id,step_key" });
-    if (error) return toast.error("No pudimos guardar: " + error.message);
+    if (error) {
+      toast.error("No pudimos guardar: " + error.message);
+      return;
+    }
     qc.invalidateQueries({ queryKey: ["stage", id] });
     toast.success("Registro guardado");
+    return;
   }
 
   async function saveReward() {
