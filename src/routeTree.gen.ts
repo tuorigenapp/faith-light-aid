@@ -14,6 +14,7 @@ import { Route as EstilosRouteImport } from './routes/estilos'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiStagePackRouteImport } from './routes/api/stage-pack'
 import { Route as ApiPatronesRouteImport } from './routes/api/patrones'
 import { Route as ApiParejaRouteImport } from './routes/api/pareja'
 import { Route as ApiMinistracionRouteImport } from './routes/api/ministracion'
@@ -68,6 +69,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiStagePackRoute = ApiStagePackRouteImport.update({
+  id: '/api/stage-pack',
+  path: '/api/stage-pack',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPatronesRoute = ApiPatronesRouteImport.update({
@@ -264,6 +270,7 @@ export interface FileRoutesByFullPath {
   '/api/ministracion': typeof ApiMinistracionRoute
   '/api/pareja': typeof ApiParejaRoute
   '/api/patrones': typeof ApiPatronesRoute
+  '/api/stage-pack': typeof ApiStagePackRoute
   '/etapas/$stageId': typeof AuthenticatedEtapasStageIdRoute
   '/programas/$programaId': typeof AuthenticatedProgramasProgramaIdRoute
   '/visualiza/$categoryId': typeof AuthenticatedVisualizaCategoryIdRouteWithChildren
@@ -301,6 +308,7 @@ export interface FileRoutesByTo {
   '/api/ministracion': typeof ApiMinistracionRoute
   '/api/pareja': typeof ApiParejaRoute
   '/api/patrones': typeof ApiPatronesRoute
+  '/api/stage-pack': typeof ApiStagePackRoute
   '/etapas/$stageId': typeof AuthenticatedEtapasStageIdRoute
   '/programas/$programaId': typeof AuthenticatedProgramasProgramaIdRoute
   '/visualiza/$categoryId': typeof AuthenticatedVisualizaCategoryIdRouteWithChildren
@@ -340,6 +348,7 @@ export interface FileRoutesById {
   '/api/ministracion': typeof ApiMinistracionRoute
   '/api/pareja': typeof ApiParejaRoute
   '/api/patrones': typeof ApiPatronesRoute
+  '/api/stage-pack': typeof ApiStagePackRoute
   '/_authenticated/etapas/$stageId': typeof AuthenticatedEtapasStageIdRoute
   '/_authenticated/programas/$programaId': typeof AuthenticatedProgramasProgramaIdRoute
   '/_authenticated/visualiza/$categoryId': typeof AuthenticatedVisualizaCategoryIdRouteWithChildren
@@ -379,6 +388,7 @@ export interface FileRouteTypes {
     | '/api/ministracion'
     | '/api/pareja'
     | '/api/patrones'
+    | '/api/stage-pack'
     | '/etapas/$stageId'
     | '/programas/$programaId'
     | '/visualiza/$categoryId'
@@ -416,6 +426,7 @@ export interface FileRouteTypes {
     | '/api/ministracion'
     | '/api/pareja'
     | '/api/patrones'
+    | '/api/stage-pack'
     | '/etapas/$stageId'
     | '/programas/$programaId'
     | '/visualiza/$categoryId'
@@ -454,6 +465,7 @@ export interface FileRouteTypes {
     | '/api/ministracion'
     | '/api/pareja'
     | '/api/patrones'
+    | '/api/stage-pack'
     | '/_authenticated/etapas/$stageId'
     | '/_authenticated/programas/$programaId'
     | '/_authenticated/visualiza/$categoryId'
@@ -474,6 +486,7 @@ export interface RootRouteChildren {
   ApiMinistracionRoute: typeof ApiMinistracionRoute
   ApiParejaRoute: typeof ApiParejaRoute
   ApiPatronesRoute: typeof ApiPatronesRoute
+  ApiStagePackRoute: typeof ApiStagePackRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -511,6 +524,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/stage-pack': {
+      id: '/api/stage-pack'
+      path: '/api/stage-pack'
+      fullPath: '/api/stage-pack'
+      preLoaderRoute: typeof ApiStagePackRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/patrones': {
@@ -840,17 +860,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiMinistracionRoute: ApiMinistracionRoute,
   ApiParejaRoute: ApiParejaRoute,
   ApiPatronesRoute: ApiPatronesRoute,
+  ApiStagePackRoute: ApiStagePackRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
