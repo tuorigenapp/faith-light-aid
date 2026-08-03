@@ -161,6 +161,9 @@ function Dashboard() {
         {/* Árbol de Sanación */}
         <HealingTree />
 
+        {/* Transformación diaria — categorías (una etapa por día) */}
+        <CategoriaSlider />
+
         {/* Banner Visualízalo y Vívelo */}
         <Link
           to="/visualiza"
@@ -177,8 +180,6 @@ function Dashboard() {
         {/* Quiz diario */}
         <DailyQuiz />
 
-        {/* Nuevas categorías (slider) + ver más */}
-        <CategoriaSlider />
 
 
 
