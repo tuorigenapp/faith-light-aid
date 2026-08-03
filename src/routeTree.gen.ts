@@ -20,6 +20,7 @@ import { Route as ApiParejaRouteImport } from './routes/api/pareja'
 import { Route as ApiMinistracionRouteImport } from './routes/api/ministracion'
 import { Route as ApiIntakeClosureRouteImport } from './routes/api/intake-closure'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as ApiCaminoPackRouteImport } from './routes/api/camino-pack'
 import { Route as AuthenticatedVisualizaRouteImport } from './routes/_authenticated/visualiza'
 import { Route as AuthenticatedPremiosRouteImport } from './routes/_authenticated/premios'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
@@ -99,6 +100,11 @@ const ApiIntakeClosureRoute = ApiIntakeClosureRouteImport.update({
 const ApiChatRoute = ApiChatRouteImport.update({
   id: '/api/chat',
   path: '/api/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCaminoPackRoute = ApiCaminoPackRouteImport.update({
+  id: '/api/camino-pack',
+  path: '/api/camino-pack',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedVisualizaRoute = AuthenticatedVisualizaRouteImport.update({
@@ -265,6 +271,7 @@ export interface FileRoutesByFullPath {
   '/perfil': typeof AuthenticatedPerfilRoute
   '/premios': typeof AuthenticatedPremiosRoute
   '/visualiza': typeof AuthenticatedVisualizaRouteWithChildren
+  '/api/camino-pack': typeof ApiCaminoPackRoute
   '/api/chat': typeof ApiChatRoute
   '/api/intake-closure': typeof ApiIntakeClosureRoute
   '/api/ministracion': typeof ApiMinistracionRoute
@@ -303,6 +310,7 @@ export interface FileRoutesByTo {
   '/perfil': typeof AuthenticatedPerfilRoute
   '/premios': typeof AuthenticatedPremiosRoute
   '/visualiza': typeof AuthenticatedVisualizaRouteWithChildren
+  '/api/camino-pack': typeof ApiCaminoPackRoute
   '/api/chat': typeof ApiChatRoute
   '/api/intake-closure': typeof ApiIntakeClosureRoute
   '/api/ministracion': typeof ApiMinistracionRoute
@@ -343,6 +351,7 @@ export interface FileRoutesById {
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
   '/_authenticated/premios': typeof AuthenticatedPremiosRoute
   '/_authenticated/visualiza': typeof AuthenticatedVisualizaRouteWithChildren
+  '/api/camino-pack': typeof ApiCaminoPackRoute
   '/api/chat': typeof ApiChatRoute
   '/api/intake-closure': typeof ApiIntakeClosureRoute
   '/api/ministracion': typeof ApiMinistracionRoute
@@ -383,6 +392,7 @@ export interface FileRouteTypes {
     | '/perfil'
     | '/premios'
     | '/visualiza'
+    | '/api/camino-pack'
     | '/api/chat'
     | '/api/intake-closure'
     | '/api/ministracion'
@@ -421,6 +431,7 @@ export interface FileRouteTypes {
     | '/perfil'
     | '/premios'
     | '/visualiza'
+    | '/api/camino-pack'
     | '/api/chat'
     | '/api/intake-closure'
     | '/api/ministracion'
@@ -460,6 +471,7 @@ export interface FileRouteTypes {
     | '/_authenticated/perfil'
     | '/_authenticated/premios'
     | '/_authenticated/visualiza'
+    | '/api/camino-pack'
     | '/api/chat'
     | '/api/intake-closure'
     | '/api/ministracion'
@@ -481,6 +493,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   EstilosRoute: typeof EstilosRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  ApiCaminoPackRoute: typeof ApiCaminoPackRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiIntakeClosureRoute: typeof ApiIntakeClosureRoute
   ApiMinistracionRoute: typeof ApiMinistracionRoute
@@ -566,6 +579,13 @@ declare module '@tanstack/react-router' {
       path: '/api/chat'
       fullPath: '/api/chat'
       preLoaderRoute: typeof ApiChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/camino-pack': {
+      id: '/api/camino-pack'
+      path: '/api/camino-pack'
+      fullPath: '/api/camino-pack'
+      preLoaderRoute: typeof ApiCaminoPackRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/visualiza': {
@@ -855,6 +875,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   EstilosRoute: EstilosRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  ApiCaminoPackRoute: ApiCaminoPackRoute,
   ApiChatRoute: ApiChatRoute,
   ApiIntakeClosureRoute: ApiIntakeClosureRoute,
   ApiMinistracionRoute: ApiMinistracionRoute,
@@ -865,13 +886,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
