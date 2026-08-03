@@ -20,6 +20,7 @@ import { Route as ApiParejaRouteImport } from './routes/api/pareja'
 import { Route as ApiMinistracionRouteImport } from './routes/api/ministracion'
 import { Route as ApiIntakeClosureRouteImport } from './routes/api/intake-closure'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as ApiCaminoPackRouteImport } from './routes/api/camino-pack'
 import { Route as AuthenticatedVisualizaRouteImport } from './routes/_authenticated/visualiza'
 import { Route as AuthenticatedPremiosRouteImport } from './routes/_authenticated/premios'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
@@ -45,7 +46,10 @@ import { Route as AuthenticatedVisualizaCristoRouteImport } from './routes/_auth
 import { Route as AuthenticatedVisualizaCategoryIdRouteImport } from './routes/_authenticated/visualiza.$categoryId'
 import { Route as AuthenticatedProgramasProgramaIdRouteImport } from './routes/_authenticated/programas.$programaId'
 import { Route as AuthenticatedEtapasStageIdRouteImport } from './routes/_authenticated/etapas.$stageId'
+import { Route as AuthenticatedCaminosCaminoIdRouteImport } from './routes/_authenticated/caminos.$caminoId'
+import { Route as AuthenticatedCaminosCaminoIdIndexRouteImport } from './routes/_authenticated/caminos.$caminoId.index'
 import { Route as AuthenticatedVisualizaCategoryIdDayRouteImport } from './routes/_authenticated/visualiza.$categoryId.$day'
+import { Route as AuthenticatedCaminosCaminoIdDayRouteImport } from './routes/_authenticated/caminos.$caminoId.$day'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -99,6 +103,11 @@ const ApiIntakeClosureRoute = ApiIntakeClosureRouteImport.update({
 const ApiChatRoute = ApiChatRouteImport.update({
   id: '/api/chat',
   path: '/api/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCaminoPackRoute = ApiCaminoPackRouteImport.update({
+  id: '/api/camino-pack',
+  path: '/api/camino-pack',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedVisualizaRoute = AuthenticatedVisualizaRouteImport.update({
@@ -234,11 +243,29 @@ const AuthenticatedEtapasStageIdRoute =
     path: '/$stageId',
     getParentRoute: () => AuthenticatedEtapasRoute,
   } as any)
+const AuthenticatedCaminosCaminoIdRoute =
+  AuthenticatedCaminosCaminoIdRouteImport.update({
+    id: '/caminos/$caminoId',
+    path: '/caminos/$caminoId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedCaminosCaminoIdIndexRoute =
+  AuthenticatedCaminosCaminoIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedCaminosCaminoIdRoute,
+  } as any)
 const AuthenticatedVisualizaCategoryIdDayRoute =
   AuthenticatedVisualizaCategoryIdDayRouteImport.update({
     id: '/$day',
     path: '/$day',
     getParentRoute: () => AuthenticatedVisualizaCategoryIdRoute,
+  } as any)
+const AuthenticatedCaminosCaminoIdDayRoute =
+  AuthenticatedCaminosCaminoIdDayRouteImport.update({
+    id: '/$day',
+    path: '/$day',
+    getParentRoute: () => AuthenticatedCaminosCaminoIdRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -265,19 +292,23 @@ export interface FileRoutesByFullPath {
   '/perfil': typeof AuthenticatedPerfilRoute
   '/premios': typeof AuthenticatedPremiosRoute
   '/visualiza': typeof AuthenticatedVisualizaRouteWithChildren
+  '/api/camino-pack': typeof ApiCaminoPackRoute
   '/api/chat': typeof ApiChatRoute
   '/api/intake-closure': typeof ApiIntakeClosureRoute
   '/api/ministracion': typeof ApiMinistracionRoute
   '/api/pareja': typeof ApiParejaRoute
   '/api/patrones': typeof ApiPatronesRoute
   '/api/stage-pack': typeof ApiStagePackRoute
+  '/caminos/$caminoId': typeof AuthenticatedCaminosCaminoIdRouteWithChildren
   '/etapas/$stageId': typeof AuthenticatedEtapasStageIdRoute
   '/programas/$programaId': typeof AuthenticatedProgramasProgramaIdRoute
   '/visualiza/$categoryId': typeof AuthenticatedVisualizaCategoryIdRouteWithChildren
   '/visualiza/cristo': typeof AuthenticatedVisualizaCristoRoute
   '/visualiza/identidad': typeof AuthenticatedVisualizaIdentidadRoute
   '/visualiza/limpieza': typeof AuthenticatedVisualizaLimpiezaRoute
+  '/caminos/$caminoId/$day': typeof AuthenticatedCaminosCaminoIdDayRoute
   '/visualiza/$categoryId/$day': typeof AuthenticatedVisualizaCategoryIdDayRoute
+  '/caminos/$caminoId/': typeof AuthenticatedCaminosCaminoIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -303,6 +334,7 @@ export interface FileRoutesByTo {
   '/perfil': typeof AuthenticatedPerfilRoute
   '/premios': typeof AuthenticatedPremiosRoute
   '/visualiza': typeof AuthenticatedVisualizaRouteWithChildren
+  '/api/camino-pack': typeof ApiCaminoPackRoute
   '/api/chat': typeof ApiChatRoute
   '/api/intake-closure': typeof ApiIntakeClosureRoute
   '/api/ministracion': typeof ApiMinistracionRoute
@@ -315,7 +347,9 @@ export interface FileRoutesByTo {
   '/visualiza/cristo': typeof AuthenticatedVisualizaCristoRoute
   '/visualiza/identidad': typeof AuthenticatedVisualizaIdentidadRoute
   '/visualiza/limpieza': typeof AuthenticatedVisualizaLimpiezaRoute
+  '/caminos/$caminoId/$day': typeof AuthenticatedCaminosCaminoIdDayRoute
   '/visualiza/$categoryId/$day': typeof AuthenticatedVisualizaCategoryIdDayRoute
+  '/caminos/$caminoId': typeof AuthenticatedCaminosCaminoIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -343,19 +377,23 @@ export interface FileRoutesById {
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
   '/_authenticated/premios': typeof AuthenticatedPremiosRoute
   '/_authenticated/visualiza': typeof AuthenticatedVisualizaRouteWithChildren
+  '/api/camino-pack': typeof ApiCaminoPackRoute
   '/api/chat': typeof ApiChatRoute
   '/api/intake-closure': typeof ApiIntakeClosureRoute
   '/api/ministracion': typeof ApiMinistracionRoute
   '/api/pareja': typeof ApiParejaRoute
   '/api/patrones': typeof ApiPatronesRoute
   '/api/stage-pack': typeof ApiStagePackRoute
+  '/_authenticated/caminos/$caminoId': typeof AuthenticatedCaminosCaminoIdRouteWithChildren
   '/_authenticated/etapas/$stageId': typeof AuthenticatedEtapasStageIdRoute
   '/_authenticated/programas/$programaId': typeof AuthenticatedProgramasProgramaIdRoute
   '/_authenticated/visualiza/$categoryId': typeof AuthenticatedVisualizaCategoryIdRouteWithChildren
   '/_authenticated/visualiza/cristo': typeof AuthenticatedVisualizaCristoRoute
   '/_authenticated/visualiza/identidad': typeof AuthenticatedVisualizaIdentidadRoute
   '/_authenticated/visualiza/limpieza': typeof AuthenticatedVisualizaLimpiezaRoute
+  '/_authenticated/caminos/$caminoId/$day': typeof AuthenticatedCaminosCaminoIdDayRoute
   '/_authenticated/visualiza/$categoryId/$day': typeof AuthenticatedVisualizaCategoryIdDayRoute
+  '/_authenticated/caminos/$caminoId/': typeof AuthenticatedCaminosCaminoIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -383,19 +421,23 @@ export interface FileRouteTypes {
     | '/perfil'
     | '/premios'
     | '/visualiza'
+    | '/api/camino-pack'
     | '/api/chat'
     | '/api/intake-closure'
     | '/api/ministracion'
     | '/api/pareja'
     | '/api/patrones'
     | '/api/stage-pack'
+    | '/caminos/$caminoId'
     | '/etapas/$stageId'
     | '/programas/$programaId'
     | '/visualiza/$categoryId'
     | '/visualiza/cristo'
     | '/visualiza/identidad'
     | '/visualiza/limpieza'
+    | '/caminos/$caminoId/$day'
     | '/visualiza/$categoryId/$day'
+    | '/caminos/$caminoId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -421,6 +463,7 @@ export interface FileRouteTypes {
     | '/perfil'
     | '/premios'
     | '/visualiza'
+    | '/api/camino-pack'
     | '/api/chat'
     | '/api/intake-closure'
     | '/api/ministracion'
@@ -433,7 +476,9 @@ export interface FileRouteTypes {
     | '/visualiza/cristo'
     | '/visualiza/identidad'
     | '/visualiza/limpieza'
+    | '/caminos/$caminoId/$day'
     | '/visualiza/$categoryId/$day'
+    | '/caminos/$caminoId'
   id:
     | '__root__'
     | '/'
@@ -460,19 +505,23 @@ export interface FileRouteTypes {
     | '/_authenticated/perfil'
     | '/_authenticated/premios'
     | '/_authenticated/visualiza'
+    | '/api/camino-pack'
     | '/api/chat'
     | '/api/intake-closure'
     | '/api/ministracion'
     | '/api/pareja'
     | '/api/patrones'
     | '/api/stage-pack'
+    | '/_authenticated/caminos/$caminoId'
     | '/_authenticated/etapas/$stageId'
     | '/_authenticated/programas/$programaId'
     | '/_authenticated/visualiza/$categoryId'
     | '/_authenticated/visualiza/cristo'
     | '/_authenticated/visualiza/identidad'
     | '/_authenticated/visualiza/limpieza'
+    | '/_authenticated/caminos/$caminoId/$day'
     | '/_authenticated/visualiza/$categoryId/$day'
+    | '/_authenticated/caminos/$caminoId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -481,6 +530,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   EstilosRoute: typeof EstilosRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  ApiCaminoPackRoute: typeof ApiCaminoPackRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiIntakeClosureRoute: typeof ApiIntakeClosureRoute
   ApiMinistracionRoute: typeof ApiMinistracionRoute
@@ -566,6 +616,13 @@ declare module '@tanstack/react-router' {
       path: '/api/chat'
       fullPath: '/api/chat'
       preLoaderRoute: typeof ApiChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/camino-pack': {
+      id: '/api/camino-pack'
+      path: '/api/camino-pack'
+      fullPath: '/api/camino-pack'
+      preLoaderRoute: typeof ApiCaminoPackRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/visualiza': {
@@ -743,12 +800,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEtapasStageIdRouteImport
       parentRoute: typeof AuthenticatedEtapasRoute
     }
+    '/_authenticated/caminos/$caminoId': {
+      id: '/_authenticated/caminos/$caminoId'
+      path: '/caminos/$caminoId'
+      fullPath: '/caminos/$caminoId'
+      preLoaderRoute: typeof AuthenticatedCaminosCaminoIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/caminos/$caminoId/': {
+      id: '/_authenticated/caminos/$caminoId/'
+      path: '/'
+      fullPath: '/caminos/$caminoId/'
+      preLoaderRoute: typeof AuthenticatedCaminosCaminoIdIndexRouteImport
+      parentRoute: typeof AuthenticatedCaminosCaminoIdRoute
+    }
     '/_authenticated/visualiza/$categoryId/$day': {
       id: '/_authenticated/visualiza/$categoryId/$day'
       path: '/$day'
       fullPath: '/visualiza/$categoryId/$day'
       preLoaderRoute: typeof AuthenticatedVisualizaCategoryIdDayRouteImport
       parentRoute: typeof AuthenticatedVisualizaCategoryIdRoute
+    }
+    '/_authenticated/caminos/$caminoId/$day': {
+      id: '/_authenticated/caminos/$caminoId/$day'
+      path: '/$day'
+      fullPath: '/caminos/$caminoId/$day'
+      preLoaderRoute: typeof AuthenticatedCaminosCaminoIdDayRouteImport
+      parentRoute: typeof AuthenticatedCaminosCaminoIdRoute
     }
   }
 }
@@ -800,6 +878,23 @@ const AuthenticatedVisualizaRouteWithChildren =
     AuthenticatedVisualizaRouteChildren,
   )
 
+interface AuthenticatedCaminosCaminoIdRouteChildren {
+  AuthenticatedCaminosCaminoIdDayRoute: typeof AuthenticatedCaminosCaminoIdDayRoute
+  AuthenticatedCaminosCaminoIdIndexRoute: typeof AuthenticatedCaminosCaminoIdIndexRoute
+}
+
+const AuthenticatedCaminosCaminoIdRouteChildren: AuthenticatedCaminosCaminoIdRouteChildren =
+  {
+    AuthenticatedCaminosCaminoIdDayRoute: AuthenticatedCaminosCaminoIdDayRoute,
+    AuthenticatedCaminosCaminoIdIndexRoute:
+      AuthenticatedCaminosCaminoIdIndexRoute,
+  }
+
+const AuthenticatedCaminosCaminoIdRouteWithChildren =
+  AuthenticatedCaminosCaminoIdRoute._addFileChildren(
+    AuthenticatedCaminosCaminoIdRouteChildren,
+  )
+
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedArbolRoute: typeof AuthenticatedArbolRoute
@@ -820,6 +915,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
   AuthenticatedPremiosRoute: typeof AuthenticatedPremiosRoute
   AuthenticatedVisualizaRoute: typeof AuthenticatedVisualizaRouteWithChildren
+  AuthenticatedCaminosCaminoIdRoute: typeof AuthenticatedCaminosCaminoIdRouteWithChildren
   AuthenticatedProgramasProgramaIdRoute: typeof AuthenticatedProgramasProgramaIdRoute
 }
 
@@ -843,6 +939,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
   AuthenticatedPremiosRoute: AuthenticatedPremiosRoute,
   AuthenticatedVisualizaRoute: AuthenticatedVisualizaRouteWithChildren,
+  AuthenticatedCaminosCaminoIdRoute:
+    AuthenticatedCaminosCaminoIdRouteWithChildren,
   AuthenticatedProgramasProgramaIdRoute: AuthenticatedProgramasProgramaIdRoute,
 }
 
@@ -855,6 +953,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   EstilosRoute: EstilosRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  ApiCaminoPackRoute: ApiCaminoPackRoute,
   ApiChatRoute: ApiChatRoute,
   ApiIntakeClosureRoute: ApiIntakeClosureRoute,
   ApiMinistracionRoute: ApiMinistracionRoute,

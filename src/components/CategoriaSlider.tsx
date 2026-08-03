@@ -1,13 +1,13 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, Eye, Flame, LayoutGrid } from "lucide-react";
+import { Eye, Flame, LayoutGrid, ArrowRight } from "lucide-react";
+import { CAMINOS } from "@/lib/caminos";
 import { CATEGORIAS, watching } from "@/lib/categorias";
-import { cn } from "@/lib/utils";
 
 /**
- * Slider horizontal de las nuevas categorías con alerta de fuego
- * y prueba social ("X personas están viendo esto ahora").
+ * Slider horizontal de las categorías (caminos de 8 etapas diarias).
+ * Solo el banner es visible y clicable — la imagen ya trae su propio botón.
  */
-export function CategoriaSlider({ title = "Nuevas categorías 🔥", showMore = true }: { title?: string; showMore?: boolean }) {
+export function CategoriaSlider({ title = "Transformación diaria 🔥", showMore = true }: { title?: string; showMore?: boolean }) {
   return (
     <section>
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 mb-2">
@@ -20,50 +20,49 @@ export function CategoriaSlider({ title = "Nuevas categorías 🔥", showMore = 
 
       <div className="-mx-4 px-4 overflow-x-auto no-scrollbar">
         <ul className="flex gap-3 w-max pb-1">
-          {CATEGORIAS.map((c, i) => {
-            const w = watching(c);
+          {CAMINOS.map((c, i) => {
+            const cat = CATEGORIAS.find((x) => x.id === c.id) ?? CATEGORIAS[0];
+            const w = watching(cat);
             return (
               <li key={c.id} className="w-[264px] shrink-0" style={{ animation: `fade-in .4s ease-out ${i * 70}ms both` }}>
                 <Link
-                  to="/programas/$programaId"
-                  params={{ programaId: c.programaId }}
+                  to="/caminos/$caminoId"
+                  params={{ caminoId: c.id }}
                   aria-label={c.title}
-                  className="block rounded-[16px] overflow-hidden bg-card border border-border shadow-soft active:scale-[.97] transition-transform"
+                  className="relative block rounded-[16px] overflow-hidden shadow-soft active:scale-[.97] transition-transform"
                 >
-                  <div className="relative">
-                    <img src={c.banner} alt={c.title} loading="lazy" className="w-full h-auto block" />
-                    <span className="absolute top-2.5 left-2.5 inline-flex items-center gap-1 rounded-full bg-[#1B1930]/75 backdrop-blur px-2.5 py-1 text-[11px] font-bold text-white">
-                      <Flame className="w-3.5 h-3.5 text-[#F7B955]" /> {w.now} viendo ahora
-                    </span>
-                  </div>
-                  <div className="p-3.5">
-                    <h4 className="font-display font-bold text-[15px] leading-tight truncate">{c.title}</h4>
-                    <p className="text-[12px] text-muted-foreground mt-1 inline-flex items-center gap-1.5">
-                      <Eye className="w-3.5 h-3.5 shrink-0" />
-                      {w.total.toLocaleString()} personas {c.hook}
-                    </p>
-                    <span className="mt-3 h-11 rounded-[12px] btn-primary-gradient text-white text-[13px] font-semibold inline-flex w-full items-center justify-center gap-1.5">
-                      Comenzar ahora <ArrowRight className="w-4 h-4" />
-                    </span>
-                  </div>
+                  <img src={c.banner} alt={c.title} loading="lazy" className="w-full h-auto block" />
+                  <span className="absolute top-2.5 left-2.5 inline-flex items-center gap-1 rounded-full bg-[#1B1930]/75 backdrop-blur px-2.5 py-1 text-[11px] font-bold text-white">
+                    <Flame className="w-3.5 h-3.5 text-[#F7B955]" /> {w.now} viendo ahora
+                  </span>
+                  <span className="absolute bottom-2.5 left-2.5 right-2.5 inline-flex items-center gap-1.5 rounded-full bg-[#1B1930]/70 backdrop-blur px-2.5 py-1 text-[10.5px] font-semibold text-white">
+                    <Eye className="w-3 h-3 shrink-0" /> {w.total.toLocaleString()} personas {cat.hook}
+                  </span>
                 </Link>
               </li>
             );
           })}
+
+          {showMore && (
+            <li className="w-[168px] shrink-0">
+              <Link
+                to="/categorias"
+                className="h-full app-card p-4 flex flex-col justify-between active:scale-[.97] transition-transform"
+              >
+                <span className="w-11 h-11 rounded-[12px] bg-primary/10 text-primary grid place-items-center">
+                  <LayoutGrid className="w-5 h-5" />
+                </span>
+                <div>
+                  <h4 className="font-display font-bold text-[14.5px] leading-tight mt-3">Ver más categorías</h4>
+                  <span className="mt-2 inline-flex items-center gap-1 text-[12.5px] font-semibold text-primary">
+                    Explorar <ArrowRight className="w-3.5 h-3.5" />
+                  </span>
+                </div>
+              </Link>
+            </li>
+          )}
         </ul>
       </div>
-
-      {showMore && (
-        <Link
-          to="/categorias"
-          className={cn(
-            "mt-3 w-full h-12 rounded-[12px] inline-flex items-center justify-center gap-2",
-            "bg-primary/10 text-primary text-[14px] font-semibold active:scale-[.98] transition",
-          )}
-        >
-          <LayoutGrid className="w-4 h-4" /> Ver más categorías
-        </Link>
-      )}
     </section>
   );
 }
