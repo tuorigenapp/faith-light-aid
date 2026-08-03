@@ -46,6 +46,7 @@ import { Route as AuthenticatedVisualizaCristoRouteImport } from './routes/_auth
 import { Route as AuthenticatedVisualizaCategoryIdRouteImport } from './routes/_authenticated/visualiza.$categoryId'
 import { Route as AuthenticatedProgramasProgramaIdRouteImport } from './routes/_authenticated/programas.$programaId'
 import { Route as AuthenticatedEtapasStageIdRouteImport } from './routes/_authenticated/etapas.$stageId'
+import { Route as AuthenticatedCaminosCaminoIdRouteImport } from './routes/_authenticated/caminos.$caminoId'
 import { Route as AuthenticatedVisualizaCategoryIdDayRouteImport } from './routes/_authenticated/visualiza.$categoryId.$day'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -240,6 +241,12 @@ const AuthenticatedEtapasStageIdRoute =
     path: '/$stageId',
     getParentRoute: () => AuthenticatedEtapasRoute,
   } as any)
+const AuthenticatedCaminosCaminoIdRoute =
+  AuthenticatedCaminosCaminoIdRouteImport.update({
+    id: '/caminos/$caminoId',
+    path: '/caminos/$caminoId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedVisualizaCategoryIdDayRoute =
   AuthenticatedVisualizaCategoryIdDayRouteImport.update({
     id: '/$day',
@@ -278,6 +285,7 @@ export interface FileRoutesByFullPath {
   '/api/pareja': typeof ApiParejaRoute
   '/api/patrones': typeof ApiPatronesRoute
   '/api/stage-pack': typeof ApiStagePackRoute
+  '/caminos/$caminoId': typeof AuthenticatedCaminosCaminoIdRoute
   '/etapas/$stageId': typeof AuthenticatedEtapasStageIdRoute
   '/programas/$programaId': typeof AuthenticatedProgramasProgramaIdRoute
   '/visualiza/$categoryId': typeof AuthenticatedVisualizaCategoryIdRouteWithChildren
@@ -317,6 +325,7 @@ export interface FileRoutesByTo {
   '/api/pareja': typeof ApiParejaRoute
   '/api/patrones': typeof ApiPatronesRoute
   '/api/stage-pack': typeof ApiStagePackRoute
+  '/caminos/$caminoId': typeof AuthenticatedCaminosCaminoIdRoute
   '/etapas/$stageId': typeof AuthenticatedEtapasStageIdRoute
   '/programas/$programaId': typeof AuthenticatedProgramasProgramaIdRoute
   '/visualiza/$categoryId': typeof AuthenticatedVisualizaCategoryIdRouteWithChildren
@@ -358,6 +367,7 @@ export interface FileRoutesById {
   '/api/pareja': typeof ApiParejaRoute
   '/api/patrones': typeof ApiPatronesRoute
   '/api/stage-pack': typeof ApiStagePackRoute
+  '/_authenticated/caminos/$caminoId': typeof AuthenticatedCaminosCaminoIdRoute
   '/_authenticated/etapas/$stageId': typeof AuthenticatedEtapasStageIdRoute
   '/_authenticated/programas/$programaId': typeof AuthenticatedProgramasProgramaIdRoute
   '/_authenticated/visualiza/$categoryId': typeof AuthenticatedVisualizaCategoryIdRouteWithChildren
@@ -399,6 +409,7 @@ export interface FileRouteTypes {
     | '/api/pareja'
     | '/api/patrones'
     | '/api/stage-pack'
+    | '/caminos/$caminoId'
     | '/etapas/$stageId'
     | '/programas/$programaId'
     | '/visualiza/$categoryId'
@@ -438,6 +449,7 @@ export interface FileRouteTypes {
     | '/api/pareja'
     | '/api/patrones'
     | '/api/stage-pack'
+    | '/caminos/$caminoId'
     | '/etapas/$stageId'
     | '/programas/$programaId'
     | '/visualiza/$categoryId'
@@ -478,6 +490,7 @@ export interface FileRouteTypes {
     | '/api/pareja'
     | '/api/patrones'
     | '/api/stage-pack'
+    | '/_authenticated/caminos/$caminoId'
     | '/_authenticated/etapas/$stageId'
     | '/_authenticated/programas/$programaId'
     | '/_authenticated/visualiza/$categoryId'
@@ -763,6 +776,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEtapasStageIdRouteImport
       parentRoute: typeof AuthenticatedEtapasRoute
     }
+    '/_authenticated/caminos/$caminoId': {
+      id: '/_authenticated/caminos/$caminoId'
+      path: '/caminos/$caminoId'
+      fullPath: '/caminos/$caminoId'
+      preLoaderRoute: typeof AuthenticatedCaminosCaminoIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/visualiza/$categoryId/$day': {
       id: '/_authenticated/visualiza/$categoryId/$day'
       path: '/$day'
@@ -840,6 +860,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
   AuthenticatedPremiosRoute: typeof AuthenticatedPremiosRoute
   AuthenticatedVisualizaRoute: typeof AuthenticatedVisualizaRouteWithChildren
+  AuthenticatedCaminosCaminoIdRoute: typeof AuthenticatedCaminosCaminoIdRoute
   AuthenticatedProgramasProgramaIdRoute: typeof AuthenticatedProgramasProgramaIdRoute
 }
 
@@ -863,6 +884,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
   AuthenticatedPremiosRoute: AuthenticatedPremiosRoute,
   AuthenticatedVisualizaRoute: AuthenticatedVisualizaRouteWithChildren,
+  AuthenticatedCaminosCaminoIdRoute: AuthenticatedCaminosCaminoIdRoute,
   AuthenticatedProgramasProgramaIdRoute: AuthenticatedProgramasProgramaIdRoute,
 }
 
