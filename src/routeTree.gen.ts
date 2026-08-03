@@ -49,6 +49,7 @@ import { Route as AuthenticatedEtapasStageIdRouteImport } from './routes/_authen
 import { Route as AuthenticatedCaminosCaminoIdRouteImport } from './routes/_authenticated/caminos.$caminoId'
 import { Route as AuthenticatedCaminosCaminoIdIndexRouteImport } from './routes/_authenticated/caminos.$caminoId.index'
 import { Route as AuthenticatedVisualizaCategoryIdDayRouteImport } from './routes/_authenticated/visualiza.$categoryId.$day'
+import { Route as AuthenticatedCaminosCaminoIdDayRouteImport } from './routes/_authenticated/caminos.$caminoId.$day'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -260,6 +261,12 @@ const AuthenticatedVisualizaCategoryIdDayRoute =
     path: '/$day',
     getParentRoute: () => AuthenticatedVisualizaCategoryIdRoute,
   } as any)
+const AuthenticatedCaminosCaminoIdDayRoute =
+  AuthenticatedCaminosCaminoIdDayRouteImport.update({
+    id: '/$day',
+    path: '/$day',
+    getParentRoute: () => AuthenticatedCaminosCaminoIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -299,6 +306,7 @@ export interface FileRoutesByFullPath {
   '/visualiza/cristo': typeof AuthenticatedVisualizaCristoRoute
   '/visualiza/identidad': typeof AuthenticatedVisualizaIdentidadRoute
   '/visualiza/limpieza': typeof AuthenticatedVisualizaLimpiezaRoute
+  '/caminos/$caminoId/$day': typeof AuthenticatedCaminosCaminoIdDayRoute
   '/visualiza/$categoryId/$day': typeof AuthenticatedVisualizaCategoryIdDayRoute
   '/caminos/$caminoId/': typeof AuthenticatedCaminosCaminoIdIndexRoute
 }
@@ -339,6 +347,7 @@ export interface FileRoutesByTo {
   '/visualiza/cristo': typeof AuthenticatedVisualizaCristoRoute
   '/visualiza/identidad': typeof AuthenticatedVisualizaIdentidadRoute
   '/visualiza/limpieza': typeof AuthenticatedVisualizaLimpiezaRoute
+  '/caminos/$caminoId/$day': typeof AuthenticatedCaminosCaminoIdDayRoute
   '/visualiza/$categoryId/$day': typeof AuthenticatedVisualizaCategoryIdDayRoute
   '/caminos/$caminoId': typeof AuthenticatedCaminosCaminoIdIndexRoute
 }
@@ -382,6 +391,7 @@ export interface FileRoutesById {
   '/_authenticated/visualiza/cristo': typeof AuthenticatedVisualizaCristoRoute
   '/_authenticated/visualiza/identidad': typeof AuthenticatedVisualizaIdentidadRoute
   '/_authenticated/visualiza/limpieza': typeof AuthenticatedVisualizaLimpiezaRoute
+  '/_authenticated/caminos/$caminoId/$day': typeof AuthenticatedCaminosCaminoIdDayRoute
   '/_authenticated/visualiza/$categoryId/$day': typeof AuthenticatedVisualizaCategoryIdDayRoute
   '/_authenticated/caminos/$caminoId/': typeof AuthenticatedCaminosCaminoIdIndexRoute
 }
@@ -425,6 +435,7 @@ export interface FileRouteTypes {
     | '/visualiza/cristo'
     | '/visualiza/identidad'
     | '/visualiza/limpieza'
+    | '/caminos/$caminoId/$day'
     | '/visualiza/$categoryId/$day'
     | '/caminos/$caminoId/'
   fileRoutesByTo: FileRoutesByTo
@@ -465,6 +476,7 @@ export interface FileRouteTypes {
     | '/visualiza/cristo'
     | '/visualiza/identidad'
     | '/visualiza/limpieza'
+    | '/caminos/$caminoId/$day'
     | '/visualiza/$categoryId/$day'
     | '/caminos/$caminoId'
   id:
@@ -507,6 +519,7 @@ export interface FileRouteTypes {
     | '/_authenticated/visualiza/cristo'
     | '/_authenticated/visualiza/identidad'
     | '/_authenticated/visualiza/limpieza'
+    | '/_authenticated/caminos/$caminoId/$day'
     | '/_authenticated/visualiza/$categoryId/$day'
     | '/_authenticated/caminos/$caminoId/'
   fileRoutesById: FileRoutesById
@@ -808,6 +821,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedVisualizaCategoryIdDayRouteImport
       parentRoute: typeof AuthenticatedVisualizaCategoryIdRoute
     }
+    '/_authenticated/caminos/$caminoId/$day': {
+      id: '/_authenticated/caminos/$caminoId/$day'
+      path: '/$day'
+      fullPath: '/caminos/$caminoId/$day'
+      preLoaderRoute: typeof AuthenticatedCaminosCaminoIdDayRouteImport
+      parentRoute: typeof AuthenticatedCaminosCaminoIdRoute
+    }
   }
 }
 
@@ -859,11 +879,13 @@ const AuthenticatedVisualizaRouteWithChildren =
   )
 
 interface AuthenticatedCaminosCaminoIdRouteChildren {
+  AuthenticatedCaminosCaminoIdDayRoute: typeof AuthenticatedCaminosCaminoIdDayRoute
   AuthenticatedCaminosCaminoIdIndexRoute: typeof AuthenticatedCaminosCaminoIdIndexRoute
 }
 
 const AuthenticatedCaminosCaminoIdRouteChildren: AuthenticatedCaminosCaminoIdRouteChildren =
   {
+    AuthenticatedCaminosCaminoIdDayRoute: AuthenticatedCaminosCaminoIdDayRoute,
     AuthenticatedCaminosCaminoIdIndexRoute:
       AuthenticatedCaminosCaminoIdIndexRoute,
   }
