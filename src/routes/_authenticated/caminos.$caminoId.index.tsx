@@ -135,7 +135,7 @@ function CaminoMapa() {
           <div className="mt-3 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-4">
             <Donut pct={pct} />
             <div className="min-w-0">
-              <p className="font-display font-extrabold text-[19px] leading-tight">{completedCount} de {CAMINO_TOTAL_DAYS} etapas<br />completadas</p>
+              <p className="font-display font-extrabold text-[19px] leading-tight">{completedCount} días<br />completados</p>
               <div className="mt-2.5 h-2 w-full rounded-full bg-primary/12 overflow-hidden">
                 <div className={cn("h-full rounded-full bg-gradient-to-r transition-all duration-1000", camino.gradient)} style={{ width: `${Math.max(pct, 4)}%` }} />
               </div>
