@@ -243,9 +243,9 @@ function StepShell({ step, position, total, dark, onClose, children }: {
         <header className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
           <span className="w-9 h-9 shrink-0 rounded-full bg-gradient-to-br from-accent-pink to-primary text-white grid place-items-center font-display font-extrabold text-[15px] shadow-soft">{position}</span>
           <span className={cn("text-center text-[12px] font-bold leading-tight", dark ? "text-white/75" : "text-primary")}>
-            Etapa {position} de {total}
-            <span className={cn("block text-[11px] font-semibold", dark ? "text-white/50" : "text-muted-foreground")}>Paso {step} de {TOTAL_STEPS}</span>
+            Paso {step} de {TOTAL_STEPS}
           </span>
+
           <button onClick={onClose} aria-label="Cerrar etapa" className={cn("w-11 h-11 shrink-0 grid place-items-center rounded-full transition active:scale-95", dark ? "text-white/80 hover:bg-white/10" : "text-muted-foreground hover:bg-primary/8")}>
             <X className="w-5 h-5" />
           </button>
@@ -1167,7 +1167,7 @@ function Step12({ earned, insignia, onSave, onNext }: { earned: number; insignia
 function Step13({ stage, position, total, onFinish }: { stage: any; position: number; total: number; onFinish: () => void }) {
   return (
     <div>
-      <h1 className="font-display font-extrabold text-[26px] leading-tight text-center">¡Etapa {position} completada! 🎉</h1>
+      <h1 className="font-display font-extrabold text-[26px] leading-tight text-center">¡Día completado! 🎉</h1>
       <p className="text-center text-[13px] text-muted-foreground mt-1">Mañana desbloquearás la siguiente parada de tu camino</p>
 
       <div className="relative mt-4 overflow-hidden rounded-[16px] bg-white p-4 pr-28 shadow-soft">
@@ -1175,7 +1175,7 @@ function Step13({ stage, position, total, onFinish }: { stage: any; position: nu
           <Flame className="w-4 h-4 text-[#FF7A3C]" />
           <span className="text-[12.5px] font-extrabold">Racha activa</span>
         </div>
-        <p className="font-display font-extrabold text-[19px] mt-3 leading-tight">{position} de {total} etapas<br />completadas</p>
+        <p className="font-display font-extrabold text-[19px] mt-3 leading-tight">{position} días<br />completados</p>
         <div className="mt-3 flex items-center gap-1.5 max-w-[190px]">
           {Array.from({ length: total }).map((_, i) => (
             <span key={i} className={cn("h-2.5 w-2.5 rounded-full", i < position ? "bg-primary" : "bg-primary/15")} />

@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PROGRAMAS } from "@/lib/programas";
+import { DailyGames } from "@/components/games/DailyGames";
 
 import heroImg from "@/assets/viv-hero.jpg";
 import musicImg from "@/assets/viv-music.jpg";
@@ -329,6 +330,13 @@ function Visualiza() {
               </div>
             </div>
           </div>
+        </div>
+
+        <div className="mt-6">
+          <DailyGames
+            title="Juegos del día"
+            subtitle={`Diez juegos mentales alineados con ${selectedCatTitle ?? "tu método"}.`}
+          />
         </div>
 
         {firstCatId && (

@@ -89,7 +89,7 @@ Devuelve SOLO JSON estricto con este shape exacto:
 Todo debe ser NUEVO para la variante indicada y coherente con el tema y el sexo/enfoque del camino.`;
 
         const userMsg = `Camino: "${body.caminoTitle ?? "Sanar la raíz"}" (id: ${body.camino ?? "general"})
-Etapa diaria ${body.day ?? 1} de 8: "${body.dayTitle ?? "Primer paso"}"
+Día ${body.day ?? 1}: "${body.dayTitle ?? "Primer paso"}"
 Enfoque del día: ${body.focus ?? "sanidad emocional"}
 Variante única: ${body.variant ?? new Date().toISOString().slice(0, 10)}`;
 

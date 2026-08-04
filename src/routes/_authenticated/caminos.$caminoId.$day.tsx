@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/use-auth";
 import { useProfile } from "@/hooks/use-profile";
 import { awardGems } from "@/lib/gems";
 import { CAMINO_TOTAL_DAYS, getCamino, getEtapa } from "@/lib/caminos";
+import { DailyGames } from "@/components/games/DailyGames";
 import { useCaminoPack, caminoVariant } from "@/lib/camino-pack";
 import { WordSearch } from "@/components/WordSearch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -157,7 +158,13 @@ function CaminoDia() {
     /^ora|oraci|ora\b|orar/i.test(t) ? "oracion" : /identific|reconoce|detecta/i.test(t) ? "identificar" : /escrib|anota|carta|diario/i.test(t) ? "escribir" : "accion";
 
   return (
-    <div className="min-h-dvh bg-gradient-to-b from-[#F7F3FF] via-[#FDF6FB] to-[#F4F8FF]">
+    <div className="relative min-h-dvh bg-gradient-to-b from-[#F7F3FF] via-[#FDF6FB] to-[#F4F8FF]">
+      {/* Fondo temático del camino */}
+      <div aria-hidden className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+        <img src={camino.banner} alt="" className="absolute -top-10 left-1/2 -translate-x-1/2 w-[140%] max-w-none opacity-[0.13] blur-[2px]" />
+        <div className={cn("absolute inset-0 bg-gradient-to-b opacity-[0.10]", camino.gradient)} />
+        <div className="absolute inset-0 bg-gradient-to-b from-white/70 via-white/80 to-white/95" />
+      </div>
       {/* Header */}
       <header className="sticky top-0 z-20 bg-white/85 backdrop-blur border-b border-border">
         <div className="max-w-[520px] mx-auto px-4 py-3 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
@@ -166,8 +173,9 @@ function CaminoDia() {
           </Link>
           <div className="min-w-0">
             <div className="text-[11px] font-bold uppercase tracking-widest text-primary truncate">
-              Etapa {dayNum} de {CAMINO_TOTAL_DAYS} · Paso {step} de {TOTAL_STEPS}
+              Paso {step} de {TOTAL_STEPS}
             </div>
+
             <div className="mt-1.5 h-1.5 rounded-full bg-primary/12 overflow-hidden">
               <div className={cn("h-full rounded-full bg-gradient-to-r transition-all duration-500", camino.gradient)} style={{ width: `${(step / TOTAL_STEPS) * 100}%` }} />
             </div>
@@ -178,7 +186,7 @@ function CaminoDia() {
         </div>
       </header>
 
-      <main className="max-w-[520px] mx-auto px-4 py-5 pb-32">
+      <main className="relative z-10 max-w-[520px] mx-auto px-4 py-5 pb-32">
         {pack.isLoading && (
           <div className="app-card p-8 text-center">
             <Loader2 className="w-8 h-8 mx-auto animate-spin text-primary" />
@@ -539,7 +547,7 @@ function CaminoDia() {
         {p && step === 12 && (
           <section className="text-center" style={{ animation: "fade-in .4s ease-out both" }}>
             <img src={star3d.url} alt="" aria-hidden width={192} height={192} className="w-24 h-24 mx-auto object-contain animate-[float_4s_ease-in-out_infinite]" />
-            <h2 className="font-display font-extrabold text-[26px] leading-tight mt-2">¡Etapa {dayNum} completada!</h2>
+            <h2 className="font-display font-extrabold text-[26px] leading-tight mt-2">¡Día completado!</h2>
             <div className="mt-4 grid grid-cols-3 gap-3">
               <Podium label="Hojas" value={`+${earned || 60}`} icon={<Leaf className="w-4 h-4 text-[#3FBE8F]" />} />
               <Podium label="XP" value={`+${DAY_XP}`} icon={<Sparkles className="w-4 h-4 text-primary" />} />
@@ -553,10 +561,18 @@ function CaminoDia() {
           <section className="text-center" style={{ animation: "fade-in .4s ease-out both" }}>
             <img src={tree} alt="" aria-hidden width={256} height={256} className="w-28 h-28 mx-auto object-contain" />
             <h2 className="font-display font-extrabold text-[26px] leading-tight mt-2">Tu racha sigue activa</h2>
-            <p className="text-[15px] text-muted-foreground mt-2">{dayNum < CAMINO_TOTAL_DAYS ? "Mañana se abre tu siguiente etapa. Un día a la vez." : "Completaste este camino entero. Sigue con otro tema cuando quieras."}</p>
+            <p className="text-[15px] text-muted-foreground mt-2">{dayNum < CAMINO_TOTAL_DAYS ? "Mañana se abre tu siguiente día. Un paso a la vez." : "Completaste este camino entero. Sigue con otro tema cuando quieras."}</p>
             <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#FF7A3C]/12 px-4 py-2 text-[14px] font-bold text-[#D9541B]">
               <Flame className="w-4 h-4" /> {profile?.consecutive_days ?? 1} días de racha
             </div>
+            <div className="mt-6 text-left">
+              <DailyGames
+                words={[...(p.words ?? []), etapa.focus]}
+                title="Juegos del día"
+                subtitle={`Diez juegos mentales pensados para ${etapa.title.toLowerCase()}.`}
+              />
+            </div>
+
             <Link to="/caminos/$caminoId" params={{ caminoId }} className="mt-6 w-full h-14 rounded-[12px] btn-primary-gradient text-white text-[17px] font-semibold inline-flex items-center justify-center gap-2">
               Volver a mi mapa <ArrowRight className="w-5 h-5" />
             </Link>

@@ -18,9 +18,9 @@ export const Route = createFileRoute("/_authenticated/caminos/$caminoId/")({
   head: () => ({
     meta: [
       { title: "Mi transformación diaria — Caminos ORIGEN" },
-      { name: "description", content: "Una etapa por día: mapa guiado de 8 etapas con lección, tareas, juegos y recompensas para tu tema." },
+      { name: "description", content: "Una lección por día: mapa guiado con lección, tareas, juegos y recompensas para tu tema." },
       { property: "og:title", content: "Mi transformación diaria — Caminos ORIGEN" },
-      { property: "og:description", content: "8 etapas diarias con lección, tareas espirituales, quiz y juegos." },
+      { property: "og:description", content: "Lección diaria con tareas espirituales, quiz y juegos." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -135,7 +135,7 @@ function CaminoMapa() {
           <div className="mt-3 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-4">
             <Donut pct={pct} />
             <div className="min-w-0">
-              <p className="font-display font-extrabold text-[19px] leading-tight">{completedCount} de {CAMINO_TOTAL_DAYS} etapas<br />completadas</p>
+              <p className="font-display font-extrabold text-[19px] leading-tight">{completedCount} días<br />completados</p>
               <div className="mt-2.5 h-2 w-full rounded-full bg-primary/12 overflow-hidden">
                 <div className={cn("h-full rounded-full bg-gradient-to-r transition-all duration-1000", camino.gradient)} style={{ width: `${Math.max(pct, 4)}%` }} />
               </div>
