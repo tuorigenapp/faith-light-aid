@@ -1175,7 +1175,7 @@ function Step13({ stage, position, total, onFinish }: { stage: any; position: nu
           <Flame className="w-4 h-4 text-[#FF7A3C]" />
           <span className="text-[12.5px] font-extrabold">Racha activa</span>
         </div>
-        <p className="font-display font-extrabold text-[19px] mt-3 leading-tight">{position} de {total} etapas<br />completadas</p>
+        <p className="font-display font-extrabold text-[19px] mt-3 leading-tight">{position} días<br />completados</p>
         <div className="mt-3 flex items-center gap-1.5 max-w-[190px]">
           {Array.from({ length: total }).map((_, i) => (
             <span key={i} className={cn("h-2.5 w-2.5 rounded-full", i < position ? "bg-primary" : "bg-primary/15")} />
