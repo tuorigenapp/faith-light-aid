@@ -243,9 +243,9 @@ function StepShell({ step, position, total, dark, onClose, children }: {
         <header className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
           <span className="w-9 h-9 shrink-0 rounded-full bg-gradient-to-br from-accent-pink to-primary text-white grid place-items-center font-display font-extrabold text-[15px] shadow-soft">{position}</span>
           <span className={cn("text-center text-[12px] font-bold leading-tight", dark ? "text-white/75" : "text-primary")}>
-            Etapa {position} de {total}
-            <span className={cn("block text-[11px] font-semibold", dark ? "text-white/50" : "text-muted-foreground")}>Paso {step} de {TOTAL_STEPS}</span>
+            Paso {step} de {TOTAL_STEPS}
           </span>
+
           <button onClick={onClose} aria-label="Cerrar etapa" className={cn("w-11 h-11 shrink-0 grid place-items-center rounded-full transition active:scale-95", dark ? "text-white/80 hover:bg-white/10" : "text-muted-foreground hover:bg-primary/8")}>
             <X className="w-5 h-5" />
           </button>
