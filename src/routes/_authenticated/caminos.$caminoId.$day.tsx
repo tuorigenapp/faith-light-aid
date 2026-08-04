@@ -166,8 +166,9 @@ function CaminoDia() {
           </Link>
           <div className="min-w-0">
             <div className="text-[11px] font-bold uppercase tracking-widest text-primary truncate">
-              Etapa {dayNum} de {CAMINO_TOTAL_DAYS} · Paso {step} de {TOTAL_STEPS}
+              Paso {step} de {TOTAL_STEPS}
             </div>
+
             <div className="mt-1.5 h-1.5 rounded-full bg-primary/12 overflow-hidden">
               <div className={cn("h-full rounded-full bg-gradient-to-r transition-all duration-500", camino.gradient)} style={{ width: `${(step / TOTAL_STEPS) * 100}%` }} />
             </div>
