@@ -164,7 +164,10 @@ function Dashboard() {
         {/* Transformación diaria — categorías (una etapa por día) */}
         <CategoriaSlider />
 
-        {/* Banner Visualízalo y Vívelo */}
+        {/* Reflexión del día */}
+        <DailyReflection />
+
+        {/* Banner Visualízalo y Vívelo — justo arriba del quiz */}
         <Link
           to="/visualiza"
           aria-label="Visualízalo y Vívelo — descubre todas nuestras categorías"
@@ -173,12 +176,13 @@ function Dashboard() {
           <img src={visualizaBanner.url} alt="Descubre todas nuestras categorías — Visualízalo y Vívelo" loading="lazy" className="w-full h-auto block" />
         </Link>
 
-
-        {/* Reflexión del día */}
-        <DailyReflection />
-
         {/* Quiz diario */}
         <DailyQuiz />
+
+        {/* Juegos del día */}
+        <DailyGames words={[aiPlan.pattern_name ?? "", ...(data?.intake?.primary_focus ? [data.intake.primary_focus] : [])].filter(Boolean)} />
+
+
 
 
 
