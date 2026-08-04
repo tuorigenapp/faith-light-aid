@@ -1167,7 +1167,7 @@ function Step12({ earned, insignia, onSave, onNext }: { earned: number; insignia
 function Step13({ stage, position, total, onFinish }: { stage: any; position: number; total: number; onFinish: () => void }) {
   return (
     <div>
-      <h1 className="font-display font-extrabold text-[26px] leading-tight text-center">¡Etapa {position} completada! 🎉</h1>
+      <h1 className="font-display font-extrabold text-[26px] leading-tight text-center">¡Día completado! 🎉</h1>
       <p className="text-center text-[13px] text-muted-foreground mt-1">Mañana desbloquearás la siguiente parada de tu camino</p>
 
       <div className="relative mt-4 overflow-hidden rounded-[16px] bg-white p-4 pr-28 shadow-soft">
