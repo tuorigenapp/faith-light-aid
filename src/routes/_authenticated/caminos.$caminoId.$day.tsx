@@ -540,7 +540,7 @@ function CaminoDia() {
         {p && step === 12 && (
           <section className="text-center" style={{ animation: "fade-in .4s ease-out both" }}>
             <img src={star3d.url} alt="" aria-hidden width={192} height={192} className="w-24 h-24 mx-auto object-contain animate-[float_4s_ease-in-out_infinite]" />
-            <h2 className="font-display font-extrabold text-[26px] leading-tight mt-2">¡Etapa {dayNum} completada!</h2>
+            <h2 className="font-display font-extrabold text-[26px] leading-tight mt-2">¡Día completado!</h2>
             <div className="mt-4 grid grid-cols-3 gap-3">
               <Podium label="Hojas" value={`+${earned || 60}`} icon={<Leaf className="w-4 h-4 text-[#3FBE8F]" />} />
               <Podium label="XP" value={`+${DAY_XP}`} icon={<Sparkles className="w-4 h-4 text-primary" />} />
@@ -554,7 +554,7 @@ function CaminoDia() {
           <section className="text-center" style={{ animation: "fade-in .4s ease-out both" }}>
             <img src={tree} alt="" aria-hidden width={256} height={256} className="w-28 h-28 mx-auto object-contain" />
             <h2 className="font-display font-extrabold text-[26px] leading-tight mt-2">Tu racha sigue activa</h2>
-            <p className="text-[15px] text-muted-foreground mt-2">{dayNum < CAMINO_TOTAL_DAYS ? "Mañana se abre tu siguiente etapa. Un día a la vez." : "Completaste este camino entero. Sigue con otro tema cuando quieras."}</p>
+            <p className="text-[15px] text-muted-foreground mt-2">{dayNum < CAMINO_TOTAL_DAYS ? "Mañana se abre tu siguiente día. Un paso a la vez." : "Completaste este camino entero. Sigue con otro tema cuando quieras."}</p>
             <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#FF7A3C]/12 px-4 py-2 text-[14px] font-bold text-[#D9541B]">
               <Flame className="w-4 h-4" /> {profile?.consecutive_days ?? 1} días de racha
             </div>

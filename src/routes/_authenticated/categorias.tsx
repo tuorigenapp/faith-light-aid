@@ -8,9 +8,9 @@ export const Route = createFileRoute("/_authenticated/categorias")({
   head: () => ({
     meta: [
       { title: "Categorías ORIGEN — Una transformación por día" },
-      { name: "description", content: "Elige tu tema: niño interior, glow up mujer u hombre, magnetismo o dejar de pedir permiso. 8 etapas diarias guiadas por cada camino." },
+      { name: "description", content: "Elige tu tema: niño interior, glow up mujer u hombre, magnetismo o dejar de pedir permiso. Una lección diaria guiada en cada camino." },
       { property: "og:title", content: "Categorías ORIGEN — Una transformación por día" },
-      { property: "og:description", content: "Mapas guiados de 8 etapas diarias con lección, tareas, juegos y recompensas." },
+      { property: "og:description", content: "Mapas guiados con lección diaria, tareas, juegos y recompensas." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -29,7 +29,7 @@ function CategoriasPage() {
           </div>
           <h1 className="font-display font-extrabold text-[28px] leading-tight mt-2">Elige por dónde quieres empezar a transformarte</h1>
           <p className="text-[14px] text-muted-foreground mt-2">
-            Cada categoría es un mapa de 8 etapas: una transformación por día con lección, tareas, juegos y recompensas.
+            Cada categoría es un mapa diario: una transformación por día con lección, tareas, juegos y recompensas.
           </p>
         </header>
 
