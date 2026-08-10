@@ -680,23 +680,26 @@ export function DailyGames({
       <div className="hairline-brand mb-3" />
       <p className="text-[13px] text-muted-foreground mb-3">{subtitle}</p>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="space-y-3">
         {GAMES.map((g, i) => (
-          <button key={g.id} onClick={() => setOpenId(g.id)}
-            className="app-card p-4 text-left active:scale-[.97] transition-transform"
+          <button key={g.id} onClick={() => setOpenId(g.id)} aria-label={`Jugar ${g.title}`}
+            className="block w-full overflow-hidden rounded-[16px] border border-border/60 bg-card shadow-soft text-left active:scale-[.98] transition-transform"
             style={{ animation: `fade-in .35s ease-out ${i * 45}ms both` }}>
-            <span className={cn("w-12 h-12 rounded-[14px] grid place-items-center text-white shadow-soft bg-gradient-to-br", g.tint)}>
-              {g.icon}
-            </span>
-            <h4 className="font-display font-bold text-[14.5px] leading-tight mt-3">{g.title}</h4>
-            <p className="text-[12px] text-muted-foreground mt-1 leading-snug">{g.desc}</p>
-            <span className={cn("mt-2 inline-flex items-center gap-1 text-[12px] font-bold",
-              wonToday.includes(g.id) ? "text-[#2F9C74]" : "text-primary")}>
-              {wonToday.includes(g.id) ? <><Check className="w-3.5 h-3.5" /> Completado</> : <><Leaf className="w-3.5 h-3.5" /> +{g.gems} hojas</>}
+            <img src={g.cover} alt={g.title} loading="lazy" className="w-full h-auto block" />
+            <span className="flex items-center justify-between gap-2 px-4 py-3">
+              <span className="min-w-0">
+                <span className="block font-display font-bold text-[14.5px] leading-tight truncate">{g.title}</span>
+                <span className="block text-[12px] text-muted-foreground leading-snug truncate">{g.desc}</span>
+              </span>
+              <span className={cn("shrink-0 inline-flex items-center gap-1 text-[12px] font-bold",
+                wonToday.includes(g.id) ? "text-[#2F9C74]" : "text-primary")}>
+                {wonToday.includes(g.id) ? <><Check className="w-3.5 h-3.5" /> Completado</> : <><Leaf className="w-3.5 h-3.5" /> +{g.gems}</>}
+              </span>
             </span>
           </button>
         ))}
       </div>
+
 
       <Dialog open={!!game} onOpenChange={(o) => !o && setOpenId(null)}>
         <DialogContent className="max-w-[440px] max-h-[92dvh] overflow-y-auto rounded-[20px]">
