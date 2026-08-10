@@ -7,6 +7,8 @@ import { DailyReflection } from "@/components/DailyReflection";
 import { DailyQuiz } from "@/components/DailyQuiz";
 import { DailyExercises } from "@/components/DailyExercises";
 import { CategoriaSlider } from "@/components/CategoriaSlider";
+import { BibliotecaSlider } from "@/components/BibliotecaSlider";
+
 import { DailyGames } from "@/components/games/DailyGames";
 import { LockedCard } from "@/components/LockedCard";
 import { format } from "date-fns";
