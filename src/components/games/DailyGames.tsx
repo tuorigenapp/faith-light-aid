@@ -625,21 +625,25 @@ type GameDef = {
   gems: number;
   icon: React.ReactNode;
   tint: string;
+  cover: string;
   render: (p: GameProps) => React.ReactNode;
 };
 
+const C = (p: string) => `https://i.ibb.co/${p}`;
+
 const GAMES: GameDef[] = [
-  { id: "sopa", title: "Encuentra la palabra", desc: "Sopa de letras de tu tema de hoy", gems: 60, tint: "from-[#7C4DFF] to-[#B18CFF]", icon: <Search className="w-6 h-6" />, render: (p) => <WordFind {...p} /> },
-  { id: "memoria", title: "Memoria del alma", desc: "Empareja las palabras que te sostienen", gems: 60, tint: "from-[#F58BCB] to-[#FFB3DC]", icon: <Brain className="w-6 h-6" />, render: (p) => <Memory {...p} /> },
-  { id: "escribe", title: "Escríbelo y créelo", desc: "Escribe tu declaración completa", gems: 50, tint: "from-[#3FBE8F] to-[#7FE0BC]", icon: <PenLine className="w-6 h-6" />, render: (p) => <TypeIt {...p} /> },
-  { id: "hojas", title: "Come-hojas", desc: "Recoge todas las hojas sin que te atrape la culpa", gems: 70, tint: "from-[#F7B955] to-[#FFD79A]", icon: <Ghost className="w-6 h-6" />, render: (p) => <LeafEater {...p} /> },
-  { id: "bloques", title: "Ordena tu caos", desc: "Completa 3 líneas y ordena lo que pesa", gems: 70, tint: "from-[#4C86C6] to-[#9BC6F0]", icon: <Blocks className="w-6 h-6" />, render: (p) => <TetrisLite {...p} /> },
-  { id: "aros", title: "Aros de verdad", desc: "Adivina la palabra y coloca cada aro", gems: 60, tint: "from-[#7C4DFF] to-[#F58BCB]", icon: <Circle className="w-6 h-6" />, render: (p) => <RingWord {...p} /> },
-  { id: "globo", title: "Globo de afirmaciones", desc: "Pulsa y llénalo de palabras que sí son tuyas", gems: 50, tint: "from-[#F58BCB] to-[#F7B955]", icon: <Wind className="w-6 h-6" />, render: (p) => <Balloon {...p} /> },
-  { id: "pez", title: "Pez de sanación", desc: "Navega y atrapa solo lo que te hace bien", gems: 60, tint: "from-[#4C86C6] to-[#3FBE8F]", icon: <Fish className="w-6 h-6" />, render: (p) => <HealingFish {...p} /> },
-  { id: "ardilla", title: "Escapa del control", desc: "La ardilla corre y esquiva a quien la quiere atrapar", gems: 70, tint: "from-[#C9743A] to-[#F7B955]", icon: <Rabbit className="w-6 h-6" />, render: (p) => <SquirrelRun {...p} /> },
-  { id: "respira", title: "Respiración 4·4·6", desc: "Cuatro rondas para bajar el cuerpo a la calma", gems: 40, tint: "from-[#7FE0BC] to-[#BFE7FF]", icon: <HeartPulse className="w-6 h-6" />, render: (p) => <Breathe {...p} /> },
+  { id: "sopa", title: "Encuentra la palabra", desc: "Sopa de letras de tu tema de hoy", gems: 60, tint: "from-[#7C4DFF] to-[#B18CFF]", cover: C("GQGKDcRy/file-00000000302c820c9bcc0ef622bbb95f.png"), icon: <Search className="w-6 h-6" />, render: (p) => <WordFind {...p} /> },
+  { id: "memoria", title: "Memoria del alma", desc: "Empareja las palabras que te sostienen", gems: 60, tint: "from-[#F58BCB] to-[#FFB3DC]", cover: C("tMdjP53T/file-000000000968822fb55558196d3bfa85.png"), icon: <Brain className="w-6 h-6" />, render: (p) => <Memory {...p} /> },
+  { id: "escribe", title: "Escríbelo y créelo", desc: "Escribe tu declaración completa", gems: 50, tint: "from-[#3FBE8F] to-[#7FE0BC]", cover: C("d4WZhL5y/file-000000005f9881f68651918204d94946.png"), icon: <PenLine className="w-6 h-6" />, render: (p) => <TypeIt {...p} /> },
+  { id: "hojas", title: "Come-hojas", desc: "Recoge todas las hojas sin que te atrape la culpa", gems: 70, tint: "from-[#F7B955] to-[#FFD79A]", cover: C("5X90QnfG/file-00000000c560822fa9626d7a57de661f.png"), icon: <Ghost className="w-6 h-6" />, render: (p) => <LeafEater {...p} /> },
+  { id: "bloques", title: "Ordena tu caos", desc: "Completa 3 líneas y ordena lo que pesa", gems: 70, tint: "from-[#4C86C6] to-[#9BC6F0]", cover: C("9HdTG5zJ/file-00000000241881f9a4ca43617619c673.png"), icon: <Blocks className="w-6 h-6" />, render: (p) => <TetrisLite {...p} /> },
+  { id: "aros", title: "Aros de verdad", desc: "Adivina la palabra y coloca cada aro", gems: 60, tint: "from-[#7C4DFF] to-[#F58BCB]", cover: C("PsFpT5wj/file-000000008b4c820dbbb18f04e6dae500.png"), icon: <Circle className="w-6 h-6" />, render: (p) => <RingWord {...p} /> },
+  { id: "globo", title: "Globo de afirmaciones", desc: "Pulsa y llénalo de palabras que sí son tuyas", gems: 50, tint: "from-[#F58BCB] to-[#F7B955]", cover: C("0y0rQjNR/file-00000000531881f6a38f2295738d74fb.png"), icon: <Wind className="w-6 h-6" />, render: (p) => <Balloon {...p} /> },
+  { id: "pez", title: "Pez de sanación", desc: "Navega y atrapa solo lo que te hace bien", gems: 60, tint: "from-[#4C86C6] to-[#3FBE8F]", cover: C("8nnY77dN/file-00000000c7f881f78ffc3a13efd5225f.png"), icon: <Fish className="w-6 h-6" />, render: (p) => <HealingFish {...p} /> },
+  { id: "ardilla", title: "Escapa del control", desc: "La ardilla corre y esquiva a quien la quiere atrapar", gems: 70, tint: "from-[#C9743A] to-[#F7B955]", cover: C("HLg6TJ48/file-00000000f1cc822fad2f6a5fe48a329e.png"), icon: <Rabbit className="w-6 h-6" />, render: (p) => <SquirrelRun {...p} /> },
+  { id: "respira", title: "Respiración 4·4·6", desc: "Cuatro rondas para bajar el cuerpo a la calma", gems: 40, tint: "from-[#7FE0BC] to-[#BFE7FF]", cover: C("ycL9N1Rf/file-000000008488820c838483738952c2ee.png"), icon: <HeartPulse className="w-6 h-6" />, render: (p) => <Breathe {...p} /> },
 ];
+
 
 /**
  * Centro de juegos del día: 10 juegos mentales adaptados al tema de la persona.
