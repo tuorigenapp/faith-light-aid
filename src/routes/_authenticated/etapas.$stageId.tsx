@@ -1225,3 +1225,47 @@ function Step13({ stage, position, total, onFinish }: { stage: any; position: nu
     </div>
   );
 }
+
+/* ───────────── Estados de bloqueo / completada ───────────── */
+
+function CompletedStageView({ stage, position, total, onBack }: { stage: any; position: number; total: number; onBack: () => void }) {
+  return (
+    <div className="min-h-dvh grid place-items-center px-4 py-8" style={{ background: "radial-gradient(120% 80% at 50% 0%, #F6EFFF 0%, #FDFBFF 55%, #FFF0F8 100%)" }}>
+      <Card className="w-full max-w-sm rounded-[16px] p-6 text-center shadow-soft">
+        <div className="w-14 h-14 mx-auto rounded-full bg-[#3FBE8F] text-white grid place-items-center"><Check className="w-7 h-7" /></div>
+        <span className="mt-3 inline-block rounded-full bg-[#3FBE8F]/12 px-3 py-1 text-[12px] font-extrabold text-[#2F9A73]">Completada</span>
+        <h1 className="font-display font-extrabold text-[22px] mt-3 leading-tight">{stage.title}</h1>
+        <p className="text-[13.5px] text-muted-foreground mt-2 leading-snug">
+          Ya completaste esta etapa (Día {position} de {total}). Queda guardada como parte de tu camino, solo en modo lectura.
+        </p>
+        <p className="mt-3 text-[12.5px] text-muted-foreground leading-snug">
+          Son 7 etapas por semana: una lección por día hasta completarla, con 365 lecciones al año en total.
+        </p>
+        <Button onClick={onBack} className="mt-5 h-[52px] w-full rounded-[12px] text-[15px] font-semibold bg-gradient-to-r from-accent-pink to-primary text-white">
+          Volver a mi camino
+        </Button>
+      </Card>
+    </div>
+  );
+}
+
+function LockedStageView({ tomorrow, onBack }: { tomorrow: boolean; onBack: () => void }) {
+  return (
+    <div className="min-h-dvh grid place-items-center px-4 py-8" style={{ background: "radial-gradient(120% 80% at 50% 0%, #2E1A4D 0%, #1E1033 60%, #150C24 100%)" }}>
+      <Card className="w-full max-w-sm rounded-[16px] p-6 text-center shadow-soft bg-white/95">
+        <div className="w-14 h-14 mx-auto rounded-full bg-primary/10 text-primary grid place-items-center"><Lock className="w-7 h-7" /></div>
+        <h1 className="font-display font-extrabold text-[22px] mt-3 leading-tight">
+          {tomorrow ? "Se desbloquea mañana" : "Etapa bloqueada"}
+        </h1>
+        <p className="text-[13.5px] text-muted-foreground mt-2 leading-snug">
+          {tomorrow
+            ? "Ya completaste tu lección de hoy. Vuelve mañana para continuar tu camino: una lección por día, 7 etapas por semana."
+            : "Primero completa la etapa anterior de tu camino para desbloquear esta."}
+        </p>
+        <Button onClick={onBack} className="mt-5 h-[52px] w-full rounded-[12px] text-[15px] font-semibold bg-gradient-to-r from-accent-pink to-primary text-white">
+          Volver a mi camino
+        </Button>
+      </Card>
+    </div>
+  );
+}
