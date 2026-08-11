@@ -270,14 +270,5 @@ function PilarBanner({ to, image, alt }: { to: string; image: string; alt: strin
 }
 
 
-const PALABRAS = [
-  "Hoy tu linaje respira contigo. Cada paso que das aquí también sana a los que vinieron antes.",
-  "Lo que sentiste no fue debilidad: fue la memoria de tu familia pidiendo ser vista.",
-  "No estás repitiendo por gusto. Estás repitiendo porque nadie te enseñó a cerrar. Hoy empiezas a cerrar.",
-  "El amor que no recibiste puedes darlo. Y al darlo, se rompe el patrón.",
-  "Tu paz de hoy es la oración que tu abuela nunca pudo terminar.",
-  "No tienes que cargar lo que no es tuyo. Devuélvelo con respeto y sigue liviana.",
-  "Cada vez que eliges responderte con ternura, tu niña interior confía un poco más.",
-];
 
 
