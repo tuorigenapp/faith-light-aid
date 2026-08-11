@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Eye, Flame, Sparkles, ArrowRight } from "lucide-react";
+import { Sparkles, ArrowRight } from "lucide-react";
 import { CAMINOS } from "@/lib/caminos";
-import { watching, CATEGORIAS } from "@/lib/categorias";
 import fondo from "@/assets/fondo-mistico.png.asset.json";
 
 export const Route = createFileRoute("/_authenticated/categorias")({

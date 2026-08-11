@@ -893,6 +893,9 @@ function ProfilePanel({ profile, onEdit }: { profile: any; onEdit: () => void })
           )}
         </Card>
 
+        {/* NOTIFICACIONES */}
+        <NotificationsBlock />
+
         <div className="rounded-[20px] border border-border bg-white/70 p-4 flex items-center gap-3">
           <span className="w-10 h-10 rounded-xl bg-[#F1ECFF] grid place-items-center shrink-0"><Bell className="w-5 h-5 text-[#7C5CFF]" /></span>
           <div className="min-w-0 flex-1">
@@ -902,6 +905,80 @@ function ProfilePanel({ profile, onEdit }: { profile: any; onEdit: () => void })
         </div>
       </div>
     </div>
+  );
+}
+
+function NotificationsBlock() {
+  const { user } = useAuth();
+  const qc = useQueryClient();
+
+  const { data: prefs, isLoading } = useQuery({
+    queryKey: ["notification_prefs", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase.from("notification_prefs").select("email_enabled, push_enabled").eq("user_id", user!.id).maybeSingle();
+      return data ?? { email_enabled: true, push_enabled: true };
+    },
+  });
+
+  async function update(patch: Partial<{ email_enabled: boolean; push_enabled: boolean }>) {
+    if (!user) return;
+    const next = { email_enabled: prefs?.email_enabled ?? true, push_enabled: prefs?.push_enabled ?? true, ...patch };
+    qc.setQueryData(["notification_prefs", user.id], next);
+    const { error } = await supabase.from("notification_prefs").upsert({ user_id: user.id, ...next });
+    if (error) toast.error("No pudimos guardar tu preferencia");
+    else qc.invalidateQueries({ queryKey: ["notification_prefs"] });
+  }
+
+  useEffect(() => {
+    if (!user || !prefs?.push_enabled) return;
+    const key = `push_lesson_${user.id}_${new Date().toISOString().slice(0, 10)}`;
+    if (localStorage.getItem(key)) return;
+    (async () => {
+      const today = new Date().toISOString().slice(0, 10);
+      const { count } = await supabase
+        .from("daily_activity")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("activity_type", "camino_dia")
+        .eq("activity_date", today);
+      if ((count ?? 0) > 0) {
+        localStorage.setItem(key, "1");
+        toast("Tu lección de hoy ya está desbloqueada", {
+          description: "Continúa tu camino de sanación.",
+          action: { label: "Ir a etapas", onClick: () => { window.location.href = "/etapas"; } },
+        });
+      }
+    })();
+  }, [user, prefs?.push_enabled]);
+
+  return (
+    <Card className="p-5">
+      <div className="flex items-center gap-2 mb-3">
+        <span className="w-9 h-9 rounded-xl bg-[#F1ECFF] grid place-items-center shrink-0"><Bell className="w-4 h-4 text-[#7C5CFF]" /></span>
+        <h2 className="font-display font-bold text-[15px]">Notificaciones</h2>
+      </div>
+      {isLoading ? (
+        <div className="h-16 rounded-2xl bg-muted animate-pulse" />
+      ) : (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between rounded-2xl border border-border p-3">
+            <div>
+              <div className="text-[13px] font-semibold">Correo electrónico</div>
+              <div className="text-[11.5px] text-muted-foreground">Recibe novedades y avisos por correo.</div>
+            </div>
+            <Switch checked={prefs?.email_enabled ?? true} onCheckedChange={(v) => update({ email_enabled: v })} />
+          </div>
+          <div className="flex items-center justify-between rounded-2xl border border-border p-3">
+            <div>
+              <div className="text-[13px] font-semibold">Avisos dentro de la app</div>
+              <div className="text-[11.5px] text-muted-foreground">Muestra avisos emergentes cuando algo nuevo se desbloquea.</div>
+            </div>
+            <Switch checked={prefs?.push_enabled ?? true} onCheckedChange={(v) => update({ push_enabled: v })} />
+          </div>
+        </div>
+      )}
+    </Card>
   );
 }
 
