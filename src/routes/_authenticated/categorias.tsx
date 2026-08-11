@@ -34,28 +34,19 @@ function CategoriasPage() {
         </header>
 
         <div className="mt-4 grid gap-4 lg:grid-cols-2">
-          {CAMINOS.map((c, i) => {
-            const cat = CATEGORIAS.find((x) => x.id === c.id) ?? CATEGORIAS[0];
-            const w = watching(cat);
-            return (
-              <Link
-                key={c.id}
-                to="/caminos/$caminoId"
-                params={{ caminoId: c.id }}
-                aria-label={c.title}
-                style={{ animation: `fade-in .4s ease-out ${i * 70}ms both` }}
-                className="relative block rounded-[16px] overflow-hidden shadow-soft active:scale-[.98] transition-transform"
-              >
-                <img src={c.banner} alt={c.title} loading="lazy" className="w-full h-auto block" />
-                <span className="absolute top-3 left-3 inline-flex items-center gap-1 rounded-full bg-[#1B1930]/75 backdrop-blur px-2.5 py-1 text-[11px] font-bold text-white">
-                  <Flame className="w-3.5 h-3.5 text-[#F7B955]" /> {w.now} viendo ahora
-                </span>
-                <span className="absolute bottom-3 left-3 right-3 inline-flex items-center gap-1.5 rounded-full bg-[#1B1930]/70 backdrop-blur px-3 py-1.5 text-[11.5px] font-semibold text-white">
-                  <Eye className="w-3.5 h-3.5 shrink-0" /> {w.total.toLocaleString()} personas {cat.hook}
-                </span>
-              </Link>
-            );
-          })}
+          {CAMINOS.map((c, i) => (
+            <Link
+              key={c.id}
+              to="/caminos/$caminoId"
+              params={{ caminoId: c.id }}
+              aria-label={c.title}
+              style={{ animation: `fade-in .4s ease-out ${i * 70}ms both` }}
+              className="block rounded-[16px] overflow-hidden shadow-soft active:scale-[.98] transition-transform"
+            >
+              <img src={c.banner} alt={c.title} loading="lazy" className="w-full h-auto block" />
+            </Link>
+          ))}
+
 
           <Link
             to="/visualiza"

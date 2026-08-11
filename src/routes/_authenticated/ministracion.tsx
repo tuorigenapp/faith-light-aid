@@ -1,13 +1,24 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  ArrowLeft, ArrowRight, Sparkles, Lock, Download,
+  ArrowLeft, ArrowRight, Sparkles, Lock, Leaf,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import heroImg from "@/assets/ministracion-hero.jpg";
+import ministracionHero from "@/assets/ministracion-hero.jpg.asset.json";
+import e3dCross from "@/assets/e3d-cross.png.asset.json";
+import e3dStar from "@/assets/e3d-star.png.asset.json";
+import e3dHeartgem from "@/assets/e3d-heartgem.png.asset.json";
+import e3dCoin from "@/assets/e3d-coin.png.asset.json";
+import e3dBrain from "@/assets/e3d-brain.png.asset.json";
+import e3dCouple from "@/assets/e3d-couple.png.asset.json";
+import { getUserPlan } from "@/lib/plan";
+import { awardGems } from "@/lib/gems";
+import { printConsulta } from "@/lib/print-pdf";
+import { ConsultaHistorial, type ConsultaHistorialItem } from "@/components/ConsultaHistorial";
+import { ConsultaPDFButton } from "@/components/ConsultaPDFButton";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { printMinistracion } from "@/lib/print-pdf";
@@ -35,16 +46,74 @@ const LOADING_LINES = [
   "Preparando tu ministración...",
 ];
 
+const CONSULTA_COST_HOJAS = 1;
+
+type MinistracionRow = {
+  id: string; created_at: string; name: string | null; question: string | null;
+  headline: string | null; dictamen: string | null; linea_tiempo: string | null;
+  senales: string[] | null; ministracion: string | null; versiculo: string | null; rompe_ciclo: string | null;
+};
+
 function MinistracionPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({ name: "", dob: "", question: "" });
+  const [errors, setErrors] = useState<{ name?: string; dob?: string }>({});
   const [line, setLine] = useState(0);
   const [progress, setProgress] = useState(0);
   const [result, setResult] = useState<Result | null>(null);
+  const [gems, setGems] = useState<number | null>(null);
+  const [plan, setPlan] = useState("Explorador");
+  const [userMeta, setUserMeta] = useState({ name: "", email: "" });
+  const [history, setHistory] = useState<MinistracionRow[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(true);
+  const [historyError, setHistoryError] = useState<string | null>(null);
+  const [pdfLoading, setPdfLoading] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const [{ data: profile }, tier] = await Promise.all([
+        supabase.from("profiles").select("gems, display_name, full_name, email").eq("id", user.id).maybeSingle(),
+        getUserPlan(user.id),
+      ]);
+      setGems(profile?.gems ?? 0);
+      setPlan(tier === "camino" ? "Camino Origen" : "Explorador");
+      setUserMeta({ name: profile?.display_name || profile?.full_name || "", email: profile?.email || user.email || "" });
+      await loadHistory();
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  async function loadHistory() {
+    if (!user) return;
+    setHistoryLoading(true);
+    setHistoryError(null);
+    const { data, error } = await supabase
+      .from("ministracion_lecturas")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(10);
+    if (error) setHistoryError("No pudimos cargar tu historial de consultas.");
+    setHistory((data as unknown as MinistracionRow[]) ?? []);
+    setHistoryLoading(false);
+  }
+
+  const hasEnoughGems = (gems ?? 0) >= CONSULTA_COST_HOJAS * 100;
+
+  function validate() {
+    const e: { name?: string; dob?: string } = {};
+    if (!form.name.trim()) e.name = "Escribe tu nombre completo.";
+    if (!form.dob) e.dob = "Selecciona tu fecha de nacimiento.";
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  }
 
   async function begin() {
+    if (!validate()) return toast.error("Completa tu nombre y fecha de nacimiento para continuar.");
+    if (!hasEnoughGems) return toast.error("No tienes suficientes hojas de sanación para esta consulta.");
     setStep(2); setLine(0); setProgress(0);
 
     const timer = setInterval(() => {
@@ -67,9 +136,8 @@ function MinistracionPage() {
       setProgress(100);
       setResult(j);
       setStep(3);
-      // Persist the ministración for user's history
       if (user) {
-        supabase.from("ministracion_lecturas").insert({
+        await supabase.from("ministracion_lecturas").insert({
           user_id: user.id,
           name: form.name || null,
           dob: form.dob || null,
@@ -81,7 +149,10 @@ function MinistracionPage() {
           ministracion: j.ministracion ?? null,
           versiculo: j.versiculo ?? null,
           rompe_ciclo: j.rompe_ciclo ?? null,
-        }).then(({ error }) => { if (error) console.warn("save ministracion:", error.message); });
+        });
+        const newBalance = await awardGems(-CONSULTA_COST_HOJAS * 100, "ministracion:consulta");
+        setGems(newBalance ?? Math.max(0, (gems ?? 0) - CONSULTA_COST_HOJAS * 100));
+        await loadHistory();
       }
     } catch (e) {
       clearInterval(timer);
@@ -92,20 +163,55 @@ function MinistracionPage() {
 
   function downloadPdf() {
     if (!result) return;
-    printMinistracion({
-      title: result.headline,
-      subtitle: form.question ? `Consulta: ${form.question}` : undefined,
-      meta: new Date().toLocaleString("es", { dateStyle: "long", timeStyle: "short" }),
+    setPdfLoading(true);
+    try {
+      printConsulta({
+        kind: "Consulta de Ministración",
+        title: result.headline,
+        subtitle: form.question ? `Consulta: ${form.question}` : undefined,
+        userName: userMeta.name,
+        userEmail: userMeta.email,
+        plan,
+        sections: [
+          { icon: "⚖️", title: "Dictamen de la Corte Celestial", body: result.dictamen },
+          { icon: "⏳", title: "Línea de tiempo", body: result.linea_tiempo },
+          { icon: "🕊️", title: "Señales de confirmación", body: (result.senales ?? []).map((s, i) => `${i+1}. ${s}`).join("\n") },
+          { icon: "💫", title: "Ministración para tu vida", body: result.ministracion },
+          ...(result.rompe_ciclo ? [{ icon: "⛓️", title: "Consejo del Cielo: Rompe el ciclo", body: result.rompe_ciclo }] : []),
+          ...(result.versiculo ? [{ icon: "📖", title: "Palabra que respalda el decreto", body: result.versiculo }] : []),
+        ],
+      });
+    } finally {
+      setPdfLoading(false);
+    }
+  }
+
+  function downloadHistoryItem(id: string) {
+    const row = history.find((h) => h.id === id);
+    if (!row) return;
+    printConsulta({
+      kind: "Consulta de Ministración",
+      title: row.headline ?? "Consulta de Ministración",
+      subtitle: row.question ? `Consulta: ${row.question}` : undefined,
+      userName: userMeta.name,
+      userEmail: userMeta.email,
+      plan,
       sections: [
-        { emoji: "⚖️", title: "Dictamen de la Corte Celestial", body: result.dictamen },
-        { emoji: "⏳", title: "Línea de tiempo", body: result.linea_tiempo },
-        { emoji: "🕊️", title: "Señales de confirmación", body: (result.senales ?? []).map((s, i) => `${i+1}. ${s}`).join("\n") },
-        { emoji: "💫", title: "Ministración para tu vida", body: result.ministracion },
-        ...(result.rompe_ciclo ? [{ emoji: "⛓️‍💥", title: "Consejo del Cielo: Rompe el ciclo", body: result.rompe_ciclo }] : []),
-        ...(result.versiculo ? [{ emoji: "📖", title: "Palabra que respalda el decreto", body: result.versiculo }] : []),
+        { icon: "⚖️", title: "Dictamen de la Corte Celestial", body: row.dictamen ?? "" },
+        { icon: "⏳", title: "Línea de tiempo", body: row.linea_tiempo ?? "" },
+        { icon: "🕊️", title: "Señales de confirmación", body: (row.senales ?? []).map((s, i) => `${i+1}. ${s}`).join("\n") },
+        { icon: "💫", title: "Ministración para tu vida", body: row.ministracion ?? "" },
+        ...(row.rompe_ciclo ? [{ icon: "⛓️", title: "Consejo del Cielo: Rompe el ciclo", body: row.rompe_ciclo }] : []),
+        ...(row.versiculo ? [{ icon: "📖", title: "Palabra que respalda el decreto", body: row.versiculo }] : []),
       ],
     });
   }
+
+  const historyItems: ConsultaHistorialItem[] = history.map((h) => ({
+    id: h.id,
+    created_at: h.created_at,
+    title: h.question?.trim() ? h.question : (h.headline ?? "Consulta de ministración"),
+  }));
 
 
   return (
@@ -129,7 +235,7 @@ function MinistracionPage() {
           <div className="animate-in fade-in slide-in-from-right-6 duration-300">
             <div className="hero-card p-0 overflow-hidden relative shadow-[0_20px_60px_-15px_rgba(255,255,255,0.9),0_0_0_1px_rgba(255,255,255,0.6)] ring-1 ring-white/70">
               <div className="relative">
-                <img src={heroImg} alt="Dios te dice hoy — Corte Celestial" className="w-full h-auto block" />
+                <img src={ministracionHero.url} alt="Consulta de Ministración — ORIGEN" width={1280} height={720} loading="lazy" className="w-full h-auto rounded-[16px] block" />
                 <div className="absolute inset-0 pointer-events-none" style={{ boxShadow: "inset 0 0 40px rgba(255,255,255,0.4)" }} />
               </div>
               <div className="p-5 text-center">
@@ -143,11 +249,11 @@ function MinistracionPage() {
             </div>
 
             <div className="mt-5 space-y-3">
-              <Field label="Nombre">
+              <Field label="Nombre completo" error={errors.name}>
                 <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  placeholder="Tu nombre" className="h-12 rounded-[14px] bg-white" />
+                  placeholder="Tu nombre completo" className="h-12 rounded-[14px] bg-white" />
               </Field>
-              <Field label="Fecha de nacimiento">
+              <Field label="Fecha de nacimiento" error={errors.dob}>
                 <Input type="date" value={form.dob} onChange={(e) => setForm({ ...form, dob: e.target.value })}
                   className="h-12 rounded-[14px] bg-white" />
               </Field>
@@ -158,13 +264,27 @@ function MinistracionPage() {
               </Field>
             </div>
 
-            <button onClick={begin}
-              className="mt-5 btn-primary-gradient w-full h-14 rounded-[16px] inline-flex items-center justify-center gap-2 text-[15px]">
+            <div className="mt-4 flex items-center justify-between rounded-[14px] bg-brand-soft px-4 py-3">
+              <div className="flex items-center gap-2 text-[13px] font-semibold text-primary">
+                <Leaf className="w-4 h-4" /> Costo de esta consulta
+              </div>
+              <div className="text-[13px] font-bold text-primary">{CONSULTA_COST_HOJAS} hoja de sanación</div>
+            </div>
+            {!hasEnoughGems && gems !== null && (
+              <p className="mt-2 text-[12px] text-destructive text-center">
+                No tienes hojas de sanación suficientes. Sigue avanzando en tu camino para ganar más.
+              </p>
+            )}
+
+            <button onClick={begin} disabled={!form.name.trim() || !form.dob || !hasEnoughGems}
+              className="mt-5 btn-primary-gradient w-full h-14 rounded-[16px] inline-flex items-center justify-center gap-2 text-[15px] disabled:opacity-60 disabled:cursor-not-allowed">
               <Sparkles className="w-4 h-4" /> Ver qué Dios me dice hoy <ArrowRight className="w-4 h-4" />
             </button>
             <div className="mt-3 inline-flex items-center gap-1.5 text-[11px] text-muted-foreground w-full justify-center">
               <Lock className="w-3 h-3" /> Información privada y encriptada
             </div>
+
+            <ConsultaHistorial className="mt-8" items={historyItems} loading={historyLoading} error={historyError} onDownload={downloadHistoryItem} />
           </div>
         )}
 
@@ -207,15 +327,15 @@ function MinistracionPage() {
               </h2>
             </div>
 
-            <ResultBlock emoji="⚖️" title="Dictamen de la Corte Celestial" color="violet">
+            <ResultBlock image={e3dCross.url} title="Dictamen de la Corte Celestial" color="violet">
               <p className="whitespace-pre-line">{result.dictamen}</p>
             </ResultBlock>
 
-            <ResultBlock emoji="⏳" title="Línea de tiempo" color="blue">
+            <ResultBlock image={e3dStar.url} title="Línea de tiempo" color="blue">
               <p className="whitespace-pre-line">{result.linea_tiempo}</p>
             </ResultBlock>
 
-            <ResultBlock emoji="🕊️" title="Señales de confirmación" color="pink">
+            <ResultBlock image={e3dHeartgem.url} title="Señales de confirmación" color="pink">
               <ul className="space-y-2">
                 {result.senales?.map((s, i) => (
                   <li key={i} className="flex gap-2">
@@ -226,12 +346,12 @@ function MinistracionPage() {
               </ul>
             </ResultBlock>
 
-            <ResultBlock emoji="💫" title="Ministración para tu vida" color="gold">
+            <ResultBlock image={e3dCoin.url} title="Ministración para tu vida" color="gold">
               <p className="whitespace-pre-line font-medium">{result.ministracion}</p>
             </ResultBlock>
 
             {result.rompe_ciclo && (
-              <ResultBlock emoji="⛓️‍💥" title="Consejo del Cielo: Rompe el Ciclo en tu vida" color="coral">
+              <ResultBlock image={e3dBrain.url} title="Consejo del Cielo: Rompe el Ciclo en tu vida" color="coral">
                 <p className="text-[11px] uppercase tracking-widest font-bold text-[#E05A6B] mb-2">
                   Deuda generacional que se repite en tu vida
                 </p>
@@ -240,25 +360,24 @@ function MinistracionPage() {
             )}
 
             {result.versiculo && (
-              <ResultBlock emoji="📖" title="Palabra que respalda el decreto" color="green">
+              <ResultBlock image={e3dCouple.url} title="Palabra que respalda el decreto" color="green">
                 <p className="text-sm italic leading-relaxed">"{result.versiculo}"</p>
               </ResultBlock>
             )}
 
-            <button onClick={downloadPdf}
-              className="w-full h-12 rounded-[14px] btn-primary-gradient text-sm inline-flex items-center justify-center gap-2">
-              <Download className="w-4 h-4" /> Descargar mi ministración en PDF
-            </button>
+            <ConsultaPDFButton loading={pdfLoading} onClick={downloadPdf} label="Descargar consulta en PDF" />
             <div className="grid grid-cols-2 gap-2 pt-1">
               <button onClick={() => { setResult(null); setStep(1); }}
                 className="h-12 rounded-[14px] border border-border bg-white font-semibold text-sm">
-                Recibir nueva
+                Nueva consulta
               </button>
               <button onClick={() => navigate({ to: "/perfil" })}
                 className="h-12 rounded-[14px] border border-border bg-white font-semibold text-sm">
                 Ver mi historial
               </button>
             </div>
+
+            <ConsultaHistorial className="mt-2" items={historyItems} loading={historyLoading} error={historyError} onDownload={downloadHistoryItem} />
           </div>
         )}
       </div>
@@ -276,14 +395,14 @@ const COLOR_MAP = {
 } as const;
 
 function ResultBlock({
-  emoji, title, children, color,
-}: { emoji: string; title: string; children: React.ReactNode; color: keyof typeof COLOR_MAP }) {
+  image, title, children, color,
+}: { image: string; title: string; children: React.ReactNode; color: keyof typeof COLOR_MAP }) {
   const c = COLOR_MAP[color];
   return (
     <div className={cn("rounded-[20px] border-2 p-5 shadow-soft", c.border, c.bg)}>
       <div className="flex items-center gap-2.5">
-        <div className={cn("w-11 h-11 rounded-2xl grid place-items-center text-2xl shadow-soft bg-white")}>
-          <span className="drop-shadow-[0_2px_4px_rgba(0,0,0,0.15)]">{emoji}</span>
+        <div className={cn("w-11 h-11 rounded-2xl grid place-items-center shadow-soft bg-white")}>
+          <img src={image} className="w-10 h-10" alt="" />
         </div>
         <div className={cn("text-[11px] uppercase tracking-widest font-bold px-2.5 py-1 rounded-full", c.chip)}>
           {title}
@@ -294,11 +413,12 @@ function ResultBlock({
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, children, error }: { label: string; children: React.ReactNode; error?: string }) {
   return (
     <div>
       <label className="text-[13px] font-semibold text-foreground">{label}</label>
       <div className="mt-1.5">{children}</div>
+      {error && <p className="mt-1 text-[11.5px] text-destructive">{error}</p>}
     </div>
   );
 }
