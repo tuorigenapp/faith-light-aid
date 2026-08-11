@@ -83,10 +83,10 @@ function HomeView({ displayName, avatar, gems, onOpenTree }: { displayName: stri
             </div>
           )}
           <div className="min-w-0">
-            <div className="truncate font-display font-bold text-[15px] text-[#1B1B27]">Hola, {displayName}</div>
-            <div className="text-[11px] font-semibold text-[#64667A]">Tu jardín de sanación</div>
+            <div className="truncate font-display font-bold text-[15px] text-foreground">Hola, {displayName}</div>
+            <div className="text-[11px] font-semibold text-muted-foreground">Tu jardín de sanación</div>
           </div>
-          <Link to="/premios" aria-label="Historial de hojas" className="w-10 h-10 shrink-0 rounded-full bg-white shadow-[0_1px_3px_rgba(30,25,20,.06)] grid place-items-center text-[#7C5CFF] active:scale-95 transition">
+          <Link to="/premios" aria-label="Historial de hojas" className="w-10 h-10 shrink-0 rounded-full bg-card shadow-soft grid place-items-center text-[#7C5CFF] active:scale-95 transition">
             <Info className="w-5 h-5" />
           </Link>
         </div>
@@ -94,7 +94,7 @@ function HomeView({ displayName, avatar, gems, onOpenTree }: { displayName: stri
         {/* Title */}
         <div className="mt-5 text-center">
           <p className="text-[11px] uppercase tracking-[0.18em] font-bold text-[#7C5CFF]">Tu saldo espiritual</p>
-          <h1 className="mt-1 font-display font-extrabold text-[30px] leading-[1.15] text-[#1B1B27]">
+          <h1 className="mt-1 font-display font-extrabold text-[30px] leading-[1.15] text-foreground">
             Mis Hojas <span className="text-[#7C5CFF]">de Sanación</span> 🍃
           </h1>
         </div>
@@ -108,8 +108,8 @@ function HomeView({ displayName, avatar, gems, onOpenTree }: { displayName: stri
           </div>
         </button>
 
-        <div className="rounded-[16px] bg-white border border-[#1B1B27]/[0.08] p-5 text-center shadow-[0_1px_3px_rgba(30,25,20,.06)]">
-          <div className="text-[12px] font-semibold text-[#64667A]">Hojas disponibles</div>
+        <div className="rounded-[16px] bg-card border border-border p-5 text-center shadow-soft">
+          <div className="text-[12px] font-semibold text-muted-foreground">Hojas disponibles</div>
           <div className="mt-1 font-display font-black text-[40px] leading-none text-[#7C5CFF] tabular-nums">{formatHojas(gems)}</div>
           <div className="mt-1 text-[12px] font-semibold text-[#3FBE8F]">🍃 Cada hoja es un paso de sanación</div>
         </div>
@@ -133,11 +133,11 @@ function HomeView({ displayName, avatar, gems, onOpenTree }: { displayName: stri
           <div className="mt-3 space-y-3">
             {HOJA_USES.map((u) => (
               <Link key={u.to} to={u.to}
-                className="rounded-[16px] bg-white border border-[#1B1B27]/[0.08] p-4 shadow-[0_1px_3px_rgba(30,25,20,.06)] grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 active:scale-[.99] transition">
+                className="rounded-[16px] bg-card border border-border p-4 shadow-soft grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 active:scale-[.99] transition">
                 <span className="w-11 h-11 shrink-0 rounded-[10px] bg-[#7C5CFF]/10 grid place-items-center text-[20px]">{u.emoji}</span>
                 <span className="min-w-0">
-                  <span className="block truncate font-display font-bold text-[15px] text-[#1B1B27]">{u.title}</span>
-                  <span className="block text-[12px] text-[#64667A]">{u.cost} hoja por consulta</span>
+                  <span className="block truncate font-display font-bold text-[15px] text-foreground">{u.title}</span>
+                  <span className="block text-[12px] text-muted-foreground">{u.cost} hoja por consulta</span>
                 </span>
                 <ChevronRight className="w-5 h-5 shrink-0 text-[#C9C6DA]" />
               </Link>
@@ -189,11 +189,11 @@ function TreeDetailView({
       <div className="max-w-md mx-auto px-4 pt-4 pb-32">
         {/* Top bar */}
         <div className="flex items-center justify-between gap-3">
-          <button onClick={onBack} aria-label="Volver" className="w-10 h-10 rounded-full bg-white shadow-soft grid place-items-center active:scale-95 transition">
+          <button onClick={onBack} aria-label="Volver" className="w-10 h-10 rounded-full bg-card shadow-soft grid place-items-center active:scale-95 transition">
             <ArrowLeft className="w-5 h-5" />
           </button>
           <h1 className="font-display font-black text-[18px]">Mi Árbol Genealógico</h1>
-          <button aria-label="Información" className="w-10 h-10 rounded-full bg-white shadow-soft grid place-items-center text-primary">
+          <button aria-label="Información" className="w-10 h-10 rounded-full bg-card shadow-soft grid place-items-center text-primary">
             <Info className="w-5 h-5" />
           </button>
         </div>
@@ -282,7 +282,7 @@ function PersonNode({ color, avatar, label, name, initial }: { color: string; av
           )}
         </div>
       </div>
-      <div className="mt-1.5 px-2.5 py-0.5 rounded-full bg-white shadow-soft text-[11px] font-black" style={{ color }}>
+      <div className="mt-1.5 px-2.5 py-0.5 rounded-full bg-card shadow-soft text-[11px] font-black" style={{ color }}>
         {label}
       </div>
       {name && <div className="text-[10px] text-muted-foreground mt-0.5 truncate max-w-[80px]">{name}</div>}
@@ -421,7 +421,7 @@ function AddFamilyView({ onBack }: { onBack: () => void }) {
     <div className="min-h-screen bg-gradient-to-b from-[#F1ECFF] via-[#FBFAFF] to-[#E8F4FF]">
       <div className="max-w-md mx-auto px-4 pt-4 pb-40">
         <div className="flex items-center gap-3">
-          <button onClick={onBack} aria-label="Volver" className="w-10 h-10 rounded-full bg-white shadow-soft grid place-items-center active:scale-95 transition">
+          <button onClick={onBack} aria-label="Volver" className="w-10 h-10 rounded-full bg-card shadow-soft grid place-items-center active:scale-95 transition">
             <ArrowLeft className="w-5 h-5" />
           </button>
           <h1 className="flex-1 text-center font-display font-black text-[18px] pr-10">Agregar Familiar</h1>
@@ -437,7 +437,7 @@ function AddFamilyView({ onBack }: { onBack: () => void }) {
         </p>
 
         {/* Form card */}
-        <div className="mt-5 rounded-[24px] bg-white shadow-soft p-5 space-y-5">
+        <div className="mt-5 rounded-[24px] bg-card shadow-soft p-5 space-y-5">
           {/* Foto */}
           <div>
             <label className="flex items-center gap-2 font-display font-bold text-[14px] mb-2">
@@ -467,7 +467,7 @@ function AddFamilyView({ onBack }: { onBack: () => void }) {
               value={form.full_name}
               onChange={(e) => setForm({ ...form, full_name: e.target.value })}
               placeholder="Ingresa el nombre"
-              className="h-12 rounded-[14px] bg-white border-2 border-[#F1ECFF] text-[15px] px-4"
+              className="h-12 rounded-[14px] bg-card border-2 border-border text-[15px] px-4"
             />
           </div>
 
@@ -478,7 +478,7 @@ function AddFamilyView({ onBack }: { onBack: () => void }) {
               Parentesco <span className="text-[#F5566B]">*</span>
             </label>
             <Select value={form.relationship} onValueChange={(v) => setForm({ ...form, relationship: v })} disabled={!lineage}>
-              <SelectTrigger className="h-12 rounded-[14px] bg-white border-2 border-[#F1ECFF] text-[15px] px-4">
+              <SelectTrigger className="h-12 rounded-[14px] bg-card border-2 border-border text-[15px] px-4">
                 <SelectValue placeholder={lineage ? "Ej: Madre, Padre, Abuela…" : "Elige primero el linaje"} />
               </SelectTrigger>
               <SelectContent>
@@ -497,7 +497,7 @@ function AddFamilyView({ onBack }: { onBack: () => void }) {
               value={form.materno}
               onValueChange={(v) => setForm({ ...form, materno: v, paterno: "", relationship: "" })}
             >
-              <SelectTrigger className="h-12 rounded-[14px] bg-white border-2 border-[#F1ECFF] text-[15px] px-4">
+              <SelectTrigger className="h-12 rounded-[14px] bg-card border-2 border-border text-[15px] px-4">
                 <SelectValue placeholder="Selecciona" />
               </SelectTrigger>
               <SelectContent>
@@ -517,7 +517,7 @@ function AddFamilyView({ onBack }: { onBack: () => void }) {
               value={form.paterno}
               onValueChange={(v) => setForm({ ...form, paterno: v, materno: "", relationship: "" })}
             >
-              <SelectTrigger className="h-12 rounded-[14px] bg-white border-2 border-[#F1ECFF] text-[15px] px-4">
+              <SelectTrigger className="h-12 rounded-[14px] bg-card border-2 border-border text-[15px] px-4">
                 <SelectValue placeholder="Selecciona" />
               </SelectTrigger>
               <SelectContent>
@@ -571,21 +571,21 @@ function LeafRulesBlock() {
   const pct = progress ? Math.min(100, Math.round((progress.dailyPoints / progress.dailyCap) * 100)) : 0;
 
   return (
-    <div className="mt-6 rounded-[16px] bg-white border border-[#1B1B27]/[0.08] p-4 shadow-[0_1px_3px_rgba(30,25,20,.06)]">
+    <div className="mt-6 rounded-[16px] bg-card border border-border p-4 shadow-soft">
       <div className="flex items-center gap-2">
         <span className="w-9 h-9 rounded-[10px] bg-[#3FBE8F]/10 grid place-items-center text-[#3FBE8F] shrink-0"><Leaf className="w-4 h-4" /></span>
-        <h2 className="font-display font-bold text-[15px] text-[#1B1B27]">Cómo se ganan las hojas</h2>
+        <h2 className="font-display font-bold text-[15px] text-foreground">Cómo se ganan las hojas</h2>
       </div>
       <ul className="mt-3 space-y-2">
         {LEAF_RULES_TEXT.map((t, i) => (
-          <li key={i} className="text-[12.5px] leading-snug text-[#64667A] flex gap-2">
+          <li key={i} className="text-[12.5px] leading-snug text-muted-foreground flex gap-2">
             <span className="text-[#7C5CFF] mt-0.5">•</span>
             <span>{t}</span>
           </li>
         ))}
       </ul>
       <div className="mt-3">
-        <div className="flex items-center justify-between text-[11px] font-semibold text-[#64667A] mb-1">
+        <div className="flex items-center justify-between text-[11px] font-semibold text-muted-foreground mb-1">
           <span>Progreso de hoy</span>
           <span>{progress ? formatHojas(progress.dailyPoints) : "0.00"} / {formatHojas(progress?.dailyCap ?? 33)} hojas</span>
         </div>
@@ -665,13 +665,13 @@ function TransferSection({ gems }: { gems: number }) {
   return (
     <div className="mt-6">
       <h2 className="text-[12px] uppercase tracking-[0.18em] font-black text-[#7C5CFF]">Transferir Balance</h2>
-      <div className="mt-3 rounded-[16px] bg-white border border-[#1B1B27]/[0.08] p-4 shadow-[0_1px_3px_rgba(30,25,20,.06)] space-y-3">
+      <div className="mt-3 rounded-[16px] bg-card border border-border p-4 shadow-soft space-y-3">
         <div>
-          <label className="text-[12px] font-semibold text-[#1B1B27]">Correo electrónico del destinatario</label>
+          <label className="text-[12px] font-semibold text-foreground">Correo electrónico del destinatario</label>
           <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="correo@ejemplo.com" className="mt-1.5 h-12 rounded-[12px]" />
         </div>
         <div>
-          <label className="text-[12px] font-semibold text-[#1B1B27]">Cantidad de hojas</label>
+          <label className="text-[12px] font-semibold text-foreground">Cantidad de hojas</label>
           <Select value={amount} onValueChange={setAmount} disabled={max < 1}>
             <SelectTrigger className="mt-1.5 h-12 rounded-[12px]">
               <SelectValue placeholder={max < 1 ? "No tienes hojas enteras disponibles" : "Elige una cantidad"} />
@@ -704,16 +704,16 @@ function TransferSection({ gems }: { gems: number }) {
           </>
         )}
         {histError && (
-          <div className="rounded-[14px] bg-white border border-[#1B1B27]/[0.08] p-4 text-[13px] text-[#64667A]">No pudimos cargar tu historial.</div>
+          <div className="rounded-[14px] bg-card border border-border p-4 text-[13px] text-muted-foreground">No pudimos cargar tu historial.</div>
         )}
         {!loadingHist && !histError && transfers.length === 0 && (
-          <div className="rounded-[14px] bg-white border border-[#1B1B27]/[0.08] p-4 text-[13px] text-[#64667A]">Aún no has hecho transferencias.</div>
+          <div className="rounded-[14px] bg-card border border-border p-4 text-[13px] text-muted-foreground">Aún no has hecho transferencias.</div>
         )}
         {transfers.map((t: any) => (
-          <div key={t.id} className="rounded-[14px] bg-white border border-[#1B1B27]/[0.08] p-3.5 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
+          <div key={t.id} className="rounded-[14px] bg-card border border-border p-3.5 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
             <span className="w-9 h-9 rounded-[10px] bg-[#7C5CFF]/10 grid place-items-center text-[#7C5CFF] shrink-0"><MailIcon className="w-4 h-4" /></span>
             <div className="min-w-0">
-              <div className="text-[13px] font-bold text-[#1B1B27] truncate">{t.to_email}</div>
+              <div className="text-[13px] font-bold text-foreground truncate">{t.to_email}</div>
               <div className="text-[11px] text-[#9A97AC]">{new Date(t.created_at).toLocaleDateString("es-ES", { day: "2-digit", month: "short", year: "numeric" })} · {formatHojas(t.points)} hojas</div>
             </div>
             <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-black ${statusColor[t.status] ?? "bg-[#7C5CFF]/10 text-[#7C5CFF]"}`}>
