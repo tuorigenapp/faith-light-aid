@@ -16,6 +16,8 @@ import arbolGemas from "@/assets/arbol-gemas.png.asset.json";
 import arbolMini from "@/assets/arbol-mini.png.asset.json";
 import hojasTree from "@/assets/hojas-tree.png";
 import { HOJA_USES } from "@/lib/hojas";
+import { formatHojas, wholeHojas, LEAF_RULES_TEXT, awardGems as spendGems, getLeafDayProgress } from "@/lib/gems";
+import { Leaf, Send, Clock as ClockIcon, Mail as MailIcon } from "lucide-react";
 
 
 export const Route = createFileRoute("/_authenticated/arbol")({
@@ -108,7 +110,7 @@ function HomeView({ displayName, avatar, gems, onOpenTree }: { displayName: stri
 
         <div className="rounded-[16px] bg-white border border-[#1B1B27]/[0.08] p-5 text-center shadow-[0_1px_3px_rgba(30,25,20,.06)]">
           <div className="text-[12px] font-semibold text-[#64667A]">Hojas disponibles</div>
-          <div className="mt-1 font-display font-black text-[40px] leading-none text-[#7C5CFF] tabular-nums">{gems.toLocaleString()}</div>
+          <div className="mt-1 font-display font-black text-[40px] leading-none text-[#7C5CFF] tabular-nums">{formatHojas(gems)}</div>
           <div className="mt-1 text-[12px] font-semibold text-[#3FBE8F]">🍃 Cada hoja es un paso de sanación</div>
         </div>
 

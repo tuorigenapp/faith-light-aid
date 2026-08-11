@@ -6,6 +6,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, ArrowRight, Check, Clock, Hourglass, Lock, Mail, Send, ShieldCheck, ShoppingBag, Sparkles, UserCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { HOJA_PACKS, HOJA_PACK_HERO, PAY_METHODS, usd, type HojaPack } from "@/lib/hojas";
+import { formatHojas } from "@/lib/gems";
 import crystals from "@/assets/hojas-crystals.png";
 import treePng from "@/assets/hojas-tree.png";
 
@@ -41,7 +42,7 @@ function HojasFlow() {
       return data;
     },
   });
-  const hojas = profile?.gems ?? 0;
+  const hojas = formatHojas(profile?.gems);
 
   const { data: tx = [], refetch } = useQuery({
     queryKey: ["hoja-tx", user?.id],
@@ -85,7 +86,7 @@ function HojasFlow() {
           </button>
           <div className="min-w-0 text-center">
             <div className="text-[10px] uppercase tracking-[0.18em] font-bold text-[#7C5CFF]">Hojas de Sanación</div>
-            <div className="truncate font-display font-bold text-[15px] text-[#1B1B27]">{hojas.toLocaleString()} hojas 🍃</div>
+            <div className="truncate font-display font-bold text-[15px] text-[#1B1B27]">{hojas} hojas 🍃</div>
           </div>
           <button onClick={() => setStep(6)} aria-label="Historial" className={cn("w-10 h-10 shrink-0 rounded-full grid place-items-center transition active:scale-95", step === 6 ? "bg-[#7C5CFF] text-white" : "bg-white text-[#7C5CFF] shadow-[0_1px_3px_rgba(30,25,20,.06)]")}>
             <Clock className="w-5 h-5" />

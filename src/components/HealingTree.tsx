@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { awardGems } from "@/lib/gems";
+import { awardGems, formatHojas } from "@/lib/gems";
 import { Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -100,7 +100,7 @@ export function HealingTree() {
 
         {reward !== null && (
           <div className="absolute top-2 right-2 rounded-full bg-success text-white text-xs font-bold px-3 py-1 shadow-glow animate-in fade-in slide-in-from-top-2">
-            +{reward} 🍃
+            +{formatHojas(reward)} 🍃
           </div>
         )}
       </div>
