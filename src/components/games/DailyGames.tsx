@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
-import { awardGems } from "@/lib/gems";
+import { awardLeaf } from "@/lib/gems";
 import { toast } from "sonner";
 import {
   Search, Brain, PenLine, Ghost, Blocks, Circle, Wind,
