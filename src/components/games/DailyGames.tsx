@@ -680,24 +680,23 @@ export function DailyGames({
       <div className="hairline-brand mb-3" />
       <p className="text-[13px] text-muted-foreground mb-3">{subtitle}</p>
 
-      <div className="space-y-3">
+      <div className="grid grid-cols-2 gap-3">
         {GAMES.map((g, i) => (
           <button key={g.id} onClick={() => setOpenId(g.id)} aria-label={`Jugar ${g.title}`}
             className="block w-full overflow-hidden rounded-[16px] border border-border/60 bg-card shadow-soft text-left active:scale-[.98] transition-transform"
             style={{ animation: `fade-in .35s ease-out ${i * 45}ms both` }}>
             <img src={g.cover} alt={g.title} loading="lazy" className="w-full h-auto block" />
-            <span className="flex items-center justify-between gap-2 px-4 py-3">
-              <span className="min-w-0">
-                <span className="block font-display font-bold text-[14.5px] leading-tight truncate">{g.title}</span>
-                <span className="block text-[12px] text-muted-foreground leading-snug truncate">{g.desc}</span>
-              </span>
-              <span className={cn("shrink-0 inline-flex items-center gap-1 text-[12px] font-bold",
+            <span className="block px-3 py-2.5">
+              <span className="block font-display font-bold text-[13.5px] leading-tight truncate">{g.title}</span>
+              <span className="block text-[11.5px] text-muted-foreground leading-snug line-clamp-2">{g.desc}</span>
+              <span className={cn("mt-1.5 inline-flex items-center gap-1 text-[11.5px] font-bold",
                 wonToday.includes(g.id) ? "text-[#2F9C74]" : "text-primary")}>
-                {wonToday.includes(g.id) ? <><Check className="w-3.5 h-3.5" /> Completado</> : <><Leaf className="w-3.5 h-3.5" /> +{g.gems}</>}
+                {wonToday.includes(g.id) ? <><Check className="w-3.5 h-3.5" /> Completado</> : <><Leaf className="w-3.5 h-3.5" /> +0.05 hoja</>}
               </span>
             </span>
           </button>
         ))}
+
       </div>
 
 
