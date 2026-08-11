@@ -13,12 +13,14 @@ import { toast } from "sonner";
 import {
   Flame, Gem, Trophy, BookHeart, Sparkles, HeartHandshake, Layers, ChevronRight,
   Calendar, ArrowLeft, Check, Shield, Mail, Heart, User as UserIcon, Globe, Cake,
-  Dumbbell, Target, Bell, Lock, PenLine,
+  Dumbbell, Target, Bell, Lock, PenLine, AlertTriangle,
 } from "lucide-react";
 import { printMinistracion } from "@/lib/print-pdf";
 import { PhotoPicker } from "@/components/PhotoPicker";
 import { uploadPhoto, removePhoto } from "@/lib/photo";
 import { useSignedUrls } from "@/hooks/use-signed-urls";
+import { Switch } from "@/components/ui/switch";
+import { formatHojas } from "@/lib/gems";
 
 export const Route = createFileRoute("/_authenticated/perfil")({
   head: () => ({
@@ -74,8 +76,11 @@ function PerfilPage() {
     );
   }
 
-  if (!profile.profile_completed_at || forceEdit) {
-    return <ProfileWizard profile={profile} onDone={() => setForceEdit(false)} />;
+  if (!profile.profile_completed_at) {
+    return <ProfileWizard profile={profile} onDone={() => setForceEdit(false)} blockExit />;
+  }
+  if (forceEdit) {
+    return <EditProfileLimited profile={profile} onDone={() => setForceEdit(false)} />;
   }
   return <ProfilePanel profile={profile} onEdit={() => setForceEdit(true)} />;
 }
