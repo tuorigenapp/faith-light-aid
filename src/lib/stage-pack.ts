@@ -6,6 +6,8 @@ export type StagePack = {
   promesas: string[];
   fe: { q: string; options: string[]; correct: number }[];
   bienestar: { q: string; options: string[] }[];
+  solutions?: string[];
+  tasks?: string[];
 };
 
 export function stageVariant(stageId: number) {
