@@ -218,7 +218,7 @@ function MinistracionPage() {
     <div className="relative min-h-[calc(100vh-4rem)] bg-aura-top">
       <div className="relative z-10 mx-auto max-w-lg px-5 pt-6 pb-16">
         <div className="flex items-center justify-between mb-6">
-          <Link to="/dashboard" className="w-10 h-10 rounded-full bg-white shadow-soft grid place-items-center">
+          <Link to="/dashboard" className="w-10 h-10 rounded-full bg-card shadow-soft grid place-items-center">
             <ArrowLeft className="w-4 h-4" />
           </Link>
           <div className="text-[13px] font-medium text-muted-foreground">Paso {step} de 3</div>
@@ -233,10 +233,10 @@ function MinistracionPage() {
 
         {step === 1 && (
           <div className="animate-in fade-in slide-in-from-right-6 duration-300">
-            <div className="hero-card p-0 overflow-hidden relative shadow-[0_20px_60px_-15px_rgba(255,255,255,0.9),0_0_0_1px_rgba(255,255,255,0.6)] ring-1 ring-white/70">
+            <div className="hero-card p-0 overflow-hidden relative shadow-elev ring-1 ring-border">
               <div className="relative">
                 <img src={ministracionHero.url} alt="Consulta de Ministración — ORIGEN" width={1280} height={720} loading="lazy" className="w-full h-auto rounded-[16px] block" />
-                <div className="absolute inset-0 pointer-events-none" style={{ boxShadow: "inset 0 0 40px rgba(255,255,255,0.4)" }} />
+                <div className="absolute inset-0 pointer-events-none" style={{ boxShadow: "inset 0 0 40px rgba(255,255,255,0.12)" }} />
               </div>
               <div className="p-5 text-center">
                 <div className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-widest font-bold text-primary bg-brand-soft px-3 py-1 rounded-full">
@@ -251,16 +251,16 @@ function MinistracionPage() {
             <div className="mt-5 space-y-3">
               <Field label="Nombre completo" error={errors.name}>
                 <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  placeholder="Tu nombre completo" className="h-12 rounded-[14px] bg-white" />
+                  placeholder="Tu nombre completo" className="h-12 rounded-[14px] bg-card" />
               </Field>
               <Field label="Fecha de nacimiento" error={errors.dob}>
                 <Input type="date" value={form.dob} onChange={(e) => setForm({ ...form, dob: e.target.value })}
-                  className="h-12 rounded-[14px] bg-white" />
+                  className="h-12 rounded-[14px] bg-card" />
               </Field>
               <Field label="¿Qué deseas preguntarle al Cielo hoy? (Opcional)">
                 <Textarea value={form.question} onChange={(e) => setForm({ ...form, question: e.target.value })}
                   placeholder="Describe la situación o pregunta que deseas presentar ante la Corte Celestial..."
-                  className="min-h-24 rounded-[14px] bg-white resize-none" />
+                  className="min-h-24 rounded-[14px] bg-card resize-none" />
               </Field>
             </div>
 
@@ -368,11 +368,11 @@ function MinistracionPage() {
             <ConsultaPDFButton loading={pdfLoading} onClick={downloadPdf} label="Descargar consulta en PDF" />
             <div className="grid grid-cols-2 gap-2 pt-1">
               <button onClick={() => { setResult(null); setStep(1); }}
-                className="h-12 rounded-[14px] border border-border bg-white font-semibold text-sm">
+                className="h-12 rounded-[14px] border border-border bg-card font-semibold text-sm">
                 Nueva consulta
               </button>
               <button onClick={() => navigate({ to: "/perfil" })}
-                className="h-12 rounded-[14px] border border-border bg-white font-semibold text-sm">
+                className="h-12 rounded-[14px] border border-border bg-card font-semibold text-sm">
                 Ver mi historial
               </button>
             </div>
@@ -401,7 +401,7 @@ function ResultBlock({
   return (
     <div className={cn("rounded-[20px] border-2 p-5 shadow-soft", c.border, c.bg)}>
       <div className="flex items-center gap-2.5">
-        <div className={cn("w-11 h-11 rounded-2xl grid place-items-center shadow-soft bg-white")}>
+        <div className={cn("w-11 h-11 rounded-2xl grid place-items-center shadow-soft bg-card")}>
           <img src={image} className="w-10 h-10" alt="" />
         </div>
         <div className={cn("text-[11px] uppercase tracking-widest font-bold px-2.5 py-1 rounded-full", c.chip)}>

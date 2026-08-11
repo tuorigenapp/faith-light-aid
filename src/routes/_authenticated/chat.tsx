@@ -88,7 +88,7 @@ function ChatPage() {
   return (
     <div className="flex h-[calc(100vh-4rem)] md:h-screen bg-aura-top">
       {/* Sidebar */}
-      <aside className="hidden lg:flex w-72 border-r border-border flex-col bg-white/70 backdrop-blur">
+      <aside className="hidden lg:flex w-72 border-r border-border flex-col bg-card/70 backdrop-blur">
         <div className="p-4 border-b border-border">
           <button onClick={newConversation} className="w-full h-11 rounded-[12px] btn-primary-gradient inline-flex items-center justify-center gap-2 text-sm">
             <Plus className="w-4 h-4" />Nueva conversación
@@ -111,7 +111,7 @@ function ChatPage() {
 
       <main className="flex-1 flex flex-col min-w-0">
         {/* Ruth Esther header */}
-        <div className="border-b border-border bg-white/70 backdrop-blur px-4 py-3 flex items-center gap-3">
+        <div className="border-b border-border bg-card/70 backdrop-blur px-4 py-3 flex items-center gap-3">
           <div className="w-11 h-11 rounded-2xl bg-brand-gradient shadow-glow grid place-items-center text-white">
             <HeartHandshake className="w-5 h-5" />
           </div>
@@ -163,7 +163,7 @@ function ChatPage() {
 function LockedComposer({ limit }: { limit?: number }) {
   const countdown = useCountdownToMidnight();
   return (
-    <div className="absolute inset-0 z-10 backdrop-blur-md bg-white/60 flex flex-col items-center justify-center px-4 py-3 pointer-events-none">
+    <div className="absolute inset-0 z-10 backdrop-blur-md bg-background/70 flex flex-col items-center justify-center px-4 py-3 pointer-events-none">
       <div className="app-card p-4 max-w-sm w-full text-center pointer-events-auto">
         <div className="mx-auto w-11 h-11 rounded-2xl bg-secondary grid place-items-center text-primary">
           <Clock className="w-5 h-5" />
@@ -302,7 +302,7 @@ function ChatWindow({
               <div className={cn("rounded-2xl px-4 py-3 max-w-[82%] text-sm leading-relaxed",
                 m.role === "user"
                   ? "bg-primary text-primary-foreground rounded-tr-md"
-                  : "bg-white border border-border rounded-tl-md shadow-soft"
+                  : "bg-card border border-border rounded-tl-md shadow-soft"
               )}>
                 {m.parts.map((p, i) => p.type === "text" ? <span key={i} className="whitespace-pre-wrap">{p.text}</span> : null)}
                 {m.role === "assistant" && (
@@ -316,12 +316,12 @@ function ChatWindow({
           {loading && (
             <div className="flex gap-2.5">
               <div className="shrink-0 w-8 h-8 rounded-full bg-brand-gradient grid place-items-center text-white text-xs font-bold">R</div>
-              <div className="rounded-2xl px-4 py-3 bg-white border border-border text-sm text-muted-foreground italic">Escribiendo...</div>
+              <div className="rounded-2xl px-4 py-3 bg-card border border-border text-sm text-muted-foreground italic">Escribiendo...</div>
             </div>
           )}
         </div>
       </div>
-      <div className="relative border-t border-border bg-white/85 backdrop-blur p-3">
+      <div className="relative border-t border-border bg-card/85 backdrop-blur p-3">
         {locked && <LockedComposer limit={gateLimit} />}
         <div className={cn("max-w-2xl mx-auto flex gap-2 items-end", locked && "pointer-events-none opacity-40 blur-[1px]")}>
           <Textarea ref={inputRef} value={input} onChange={(e) => setInput(e.target.value)}

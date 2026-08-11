@@ -192,7 +192,7 @@ function ParejaPage() {
     <div className="relative min-h-[calc(100vh-4rem)] bg-aura-top">
       <div className="relative z-10 mx-auto max-w-lg px-5 pt-6 pb-16">
         <div className="flex items-center justify-between mb-6">
-          <Link to="/dashboard" className="w-10 h-10 rounded-full bg-white shadow-soft grid place-items-center">
+          <Link to="/dashboard" className="w-10 h-10 rounded-full bg-card shadow-soft grid place-items-center">
             <ArrowLeft className="w-4 h-4" />
           </Link>
           <div className="text-[13px] font-medium text-muted-foreground">Paso {step} de 3</div>
@@ -230,24 +230,24 @@ function ParejaPage() {
             <div className="mt-5 space-y-3">
               <Field label="Tu nombre">
                 <Input value={form.self_name} onChange={(e) => setForm({ ...form, self_name: e.target.value })}
-                  placeholder="Escribe tu nombre" className="h-12 rounded-[14px] bg-white" />
+                  placeholder="Escribe tu nombre" className="h-12 rounded-[14px] bg-card" />
               </Field>
               <Field label="Tu fecha de nacimiento">
                 <Input type="date" value={form.self_dob} onChange={(e) => setForm({ ...form, self_dob: e.target.value })}
-                  className="h-12 rounded-[14px] bg-white" />
+                  className="h-12 rounded-[14px] bg-card" />
               </Field>
               <Field label="Nombre de tu pareja">
                 <Input value={form.partner_name} onChange={(e) => setForm({ ...form, partner_name: e.target.value })}
-                  placeholder="Su nombre" className="h-12 rounded-[14px] bg-white" />
+                  placeholder="Su nombre" className="h-12 rounded-[14px] bg-card" />
               </Field>
               <Field label="Fecha de nacimiento de tu pareja">
                 <Input type="date" value={form.partner_dob} onChange={(e) => setForm({ ...form, partner_dob: e.target.value })}
-                  className="h-12 rounded-[14px] bg-white" />
+                  className="h-12 rounded-[14px] bg-card" />
               </Field>
               <Field label="¿Qué necesitas comprender? (opcional)">
                 <Textarea value={form.question} onChange={(e) => setForm({ ...form, question: e.target.value })}
                   placeholder="Ej: ¿Es una relación que debo cuidar o soltar?"
-                  className="min-h-24 rounded-[14px] bg-white resize-none" />
+                  className="min-h-24 rounded-[14px] bg-card resize-none" />
               </Field>
             </div>
 
@@ -329,7 +329,7 @@ function ParejaPage() {
 
             <div className="grid grid-cols-2 gap-2 pt-2">
               <button onClick={() => { setResult(null); setStep(1); }}
-                className="h-12 rounded-[14px] border border-border bg-white font-semibold text-sm">
+                className="h-12 rounded-[14px] border border-border bg-card font-semibold text-sm">
                 Nueva consulta
               </button>
               <button onClick={() => navigate({ to: "/dashboard" })}
