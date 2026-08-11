@@ -311,7 +311,7 @@ function Hojas({ n }: { n: number }) {
 
 function LoadingPack({ label }: { label: string }) {
   return (
-    <div className="rounded-[16px] bg-card p-6 text-center shadow-soft">
+    <div className="rounded-[16px] bg-card border border-border p-6 text-center shadow-soft">
       <Loader2 className="w-6 h-6 mx-auto animate-spin text-primary" />
       <p className="mt-2 text-[13px] text-muted-foreground">{label}</p>
     </div>
@@ -344,7 +344,7 @@ function Step1({ stage, onNext }: { stage: any; onNext: () => void }) {
 
       <div className="mt-4 grid grid-cols-3 gap-3">
         {minis.map((m) => (
-          <div key={m.t} className="rounded-[16px] bg-card p-3 text-center shadow-soft">
+          <div key={m.t} className="rounded-[16px] bg-card border border-border p-3 text-center shadow-soft">
             <div className="text-[26px] leading-none">{m.emoji}</div>
             <div className="mt-1.5 text-[12px] font-bold leading-snug">{m.t}</div>
           </div>
@@ -424,7 +424,7 @@ function Step2({ steps, open, setOpen, entries, onSave, onNext }: {
               disabled={!unlocked}
               onClick={() => openStep(i)}
               className={cn(
-                "w-full text-left rounded-[16px] bg-card p-4 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 shadow-soft transition active:scale-[.98]",
+                "w-full text-left rounded-[16px] bg-card border border-border p-4 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 shadow-soft transition active:scale-[.98]",
                 current && "border-2 border-primary",
                 !unlocked && "opacity-70",
               )}
@@ -564,7 +564,7 @@ function Step3({ tasks, done, setDone, entries, onSave, reward, onNext }: {
 
       <div className="mt-5 space-y-2.5">
         {list.map((t, i) => (
-          <button key={i} onClick={() => openTask(i)} className="w-full text-left rounded-[16px] bg-card p-3.5 grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-2.5 shadow-soft transition active:scale-[.98]">
+          <button key={i} onClick={() => openTask(i)} className="w-full text-left rounded-[16px] bg-card border border-border p-3.5 grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-2.5 shadow-soft transition active:scale-[.98]">
             <span className="w-9 h-9 shrink-0 rounded-[10px] bg-primary/8 grid place-items-center text-[18px]">{EMOJIS[i % EMOJIS.length]}</span>
             <span className={cn("min-w-0 text-[13.5px] leading-snug font-medium", doneIdx.includes(i) && "text-muted-foreground line-through")}>{t}</span>
             <Hojas n={25} />
@@ -661,7 +661,7 @@ function Step4({ mood, setMood, notes, setNotes, answers, setAnswers, onNext }: 
     <div>
       <h1 className="font-display font-extrabold text-[26px] leading-tight text-center">Notas personales 💗</h1>
 
-      <div className="mt-5 rounded-[16px] bg-card p-4 shadow-soft">
+      <div className="mt-5 rounded-[16px] bg-card border border-border p-4 shadow-soft">
         <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-2 items-center">
           <span className="w-6 h-6 rounded-full bg-accent-pink text-white grid place-items-center text-[11px] font-extrabold">1</span>
           <span className="text-[14px] font-bold">¿Cómo te sentiste hoy?</span>
@@ -676,7 +676,7 @@ function Step4({ mood, setMood, notes, setNotes, answers, setAnswers, onNext }: 
       </div>
 
       {fields.map((f) => (
-        <div key={f.key} className="mt-3 rounded-[16px] bg-card p-4 shadow-soft">
+        <div key={f.key} className="mt-3 rounded-[16px] bg-card border border-border p-4 shadow-soft">
           <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] gap-2 items-center">
             <span className="w-6 h-6 rounded-full bg-accent-pink text-white grid place-items-center text-[11px] font-extrabold">{f.n}</span>
             <span className="min-w-0 truncate text-[14px] font-bold">{f.q}</span>
@@ -733,7 +733,7 @@ function Step5({ items, reward, onNext }: { items: { q: string; options: string[
           const revealed = picked !== null;
           return (
             <button key={oi} onClick={() => pick(oi)}
-              className={cn("w-full text-left rounded-[12px] bg-card p-3.5 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2.5 shadow-soft text-[13.5px] font-medium transition active:scale-[.98]",
+              className={cn("w-full text-left rounded-[12px] bg-card border border-border p-3.5 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2.5 shadow-soft text-[13.5px] font-medium transition active:scale-[.98]",
                 revealed && isCorrect && "bg-[#3FBE8F] text-white",
                 revealed && !isCorrect && picked === oi && "bg-[#F87171]/15 text-[#B91C1C]",
                 revealed && !isCorrect && picked !== oi && "opacity-60")}>
@@ -818,7 +818,7 @@ function Step6({ cargas, loading, reward, onNext }: { cargas?: string[]; loading
             <img src={chest} alt="Cofre de liberación" width={1024} height={1024} className="absolute left-1/2 bottom-0 -translate-x-1/2 w-40 object-contain drop-shadow-xl" />
           </div>
 
-          <div className="mt-4 rounded-[16px] bg-card p-4 shadow-soft">
+          <div className="mt-4 rounded-[16px] bg-card border border-border p-4 shadow-soft">
             <p className="text-[13.5px] font-bold">{done ? "¡Muy bien! Has liberado todas las cargas 🎉" : "Sigue así, tu corazón se hace ligero"}</p>
             <div className="mt-2 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
               <div className="h-2 rounded-full bg-primary/12 overflow-hidden">
@@ -987,7 +987,7 @@ function Step9({ questions, loading, reward, onNext }: {
         </div>
       </div>
 
-      <div className="mt-4 rounded-[16px] bg-card p-4 shadow-soft">
+      <div className="mt-4 rounded-[16px] bg-card border border-border p-4 shadow-soft">
         <p className="text-[12px] font-bold text-primary">Pregunta {i + 1} de {list.length}</p>
         <p className="font-display font-extrabold text-[17px] mt-1 leading-tight">{it.q}</p>
         <div className="mt-3 flex flex-wrap gap-2">
@@ -1050,7 +1050,7 @@ function Step10({ bienestar, reward, onNext }: { bienestar?: { q: string; option
       <h1 className="font-display font-extrabold text-[26px] leading-tight text-center">Clasifica tus emociones 🎯</h1>
       <p className="text-center text-[13px] text-muted-foreground mt-1">Toca una emoción y colócala donde corresponde.</p>
 
-      <div className="mt-4 min-h-[64px] rounded-[16px] bg-card p-3 flex flex-wrap justify-center gap-2.5 shadow-soft">
+      <div className="mt-4 min-h-[64px] rounded-[16px] bg-card border border-border p-3 flex flex-wrap justify-center gap-2.5 shadow-soft">
         {pool.length === 0 ? <span className="text-[13px] text-muted-foreground py-2">Todas colocadas 🎉</span> : pool.map((i) => (
           <button key={i} onClick={() => setSel(i)}
             className={cn("w-12 h-12 rounded-[12px] grid place-items-center text-[24px] transition active:scale-95", sel === i ? "bg-primary/15 ring-2 ring-primary" : "bg-primary/6")}>
@@ -1069,7 +1069,7 @@ function Step10({ bienestar, reward, onNext }: { bienestar?: { q: string; option
             </span>
             <div className="mt-2 flex flex-wrap gap-2">
               {EMO.map((x, i) => placed[i] === g && (
-                <span key={i} className="w-10 h-10 rounded-[10px] bg-card grid place-items-center text-[20px] shadow-soft">{x.e}</span>
+                <span key={i} className="w-10 h-10 rounded-[10px] bg-card border border-border grid place-items-center text-[20px] shadow-soft">{x.e}</span>
               ))}
             </div>
           </button>
@@ -1077,7 +1077,7 @@ function Step10({ bienestar, reward, onNext }: { bienestar?: { q: string; option
       </div>
 
       {/* Cuestionario de bienestar */}
-      <div className="mt-4 rounded-[16px] bg-card p-4 shadow-soft">
+      <div className="mt-4 rounded-[16px] bg-card border border-border p-4 shadow-soft">
         <div className="text-[11px] uppercase tracking-widest font-bold text-primary">Cómo estás de verdad</div>
         <h2 className="font-display font-extrabold text-[18px] mt-1 leading-tight">Cuestionario de ánimo</h2>
         <p className="text-[12.5px] text-muted-foreground mt-1">Responde con honestidad. Nadie más lo ve; nos ayuda a acompañarte mejor.</p>
@@ -1136,7 +1136,7 @@ function Step11({ minutes, tasksDone, onNext }: { minutes: number; tasksDone: bo
         <p className="text-[13px] leading-snug">Hoy diste pasos importantes en tu sanidad emocional. Reconociste heridas, las llevaste a Dios y completaste todas las actividades.</p>
       </div>
 
-      <div className="mt-3 rounded-[16px] bg-card p-2 shadow-soft">
+      <div className="mt-3 rounded-[16px] bg-card border border-border p-2 shadow-soft">
         {rows.map(([label, val]) => (
           <div key={label} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-3 py-3 border-b border-border last:border-0">
             <span className="min-w-0 text-[13.5px] font-medium truncate">{label}</span>
@@ -1174,7 +1174,7 @@ function Step12({ earned, insignia, onSave, onNext }: { earned: number; insignia
           { top: "⭐", big: `+${STAGE_XP}`, label: "XP" },
           { top: "🛡️", big: "Insignia", label: insignia },
         ].map((c) => (
-          <div key={c.label} className="rounded-[16px] bg-card p-3 text-center shadow-soft">
+          <div key={c.label} className="rounded-[16px] bg-card border border-border p-3 text-center shadow-soft">
             <div className="text-[24px] leading-none">{c.top}</div>
             <div className="mt-1 font-display font-extrabold text-[15px] leading-tight">{c.big}</div>
             <div className="text-[11px] text-muted-foreground leading-snug mt-0.5">{c.label}</div>
@@ -1197,7 +1197,7 @@ function Step13({ stage, position, total, onFinish }: { stage: any; position: nu
       <h1 className="font-display font-extrabold text-[26px] leading-tight text-center">¡Día completado! 🎉</h1>
       <p className="text-center text-[13px] text-muted-foreground mt-1">Mañana desbloquearás la siguiente parada de tu camino</p>
 
-      <div className="relative mt-4 overflow-hidden rounded-[16px] bg-card p-4 pr-28 shadow-soft">
+      <div className="relative mt-4 overflow-hidden rounded-[16px] bg-card border border-border p-4 pr-28 shadow-soft">
         <div className="inline-flex items-center gap-2 rounded-full bg-[#FF7A3C]/10 px-3 py-1.5">
           <Flame className="w-4 h-4 text-[#FF7A3C]" />
           <span className="text-[12.5px] font-extrabold">Racha activa</span>
@@ -1252,7 +1252,7 @@ function CompletedStageView({ stage, position, total, onBack }: { stage: any; po
 function LockedStageView({ tomorrow, onBack }: { tomorrow: boolean; onBack: () => void }) {
   return (
     <div className="min-h-dvh grid place-items-center px-4 py-8" style={{ background: "radial-gradient(120% 80% at 50% 0%, #2E1A4D 0%, #1E1033 60%, #150C24 100%)" }}>
-      <Card className="w-full max-w-sm rounded-[16px] p-6 text-center shadow-soft bg-white/95">
+      <Card className="w-full max-w-sm rounded-[16px] p-6 text-center shadow-soft bg-card/95">
         <div className="w-14 h-14 mx-auto rounded-full bg-primary/10 text-primary grid place-items-center"><Lock className="w-7 h-7" /></div>
         <h1 className="font-display font-extrabold text-[22px] mt-3 leading-tight">
           {tomorrow ? "Se desbloquea mañana" : "Etapa bloqueada"}
