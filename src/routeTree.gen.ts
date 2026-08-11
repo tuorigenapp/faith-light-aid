@@ -26,6 +26,7 @@ import { Route as AuthenticatedPremiosRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedPatronesRouteImport } from './routes/_authenticated/patrones'
 import { Route as AuthenticatedParejaRouteImport } from './routes/_authenticated/pareja'
+import { Route as AuthenticatedPalabraRouteImport } from './routes/_authenticated/palabra'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedMinistracionRouteImport } from './routes/_authenticated/ministracion'
 import { Route as AuthenticatedMembresiaRouteImport } from './routes/_authenticated/membresia'
@@ -133,6 +134,11 @@ const AuthenticatedPatronesRoute = AuthenticatedPatronesRouteImport.update({
 const AuthenticatedParejaRoute = AuthenticatedParejaRouteImport.update({
   id: '/pareja',
   path: '/pareja',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPalabraRoute = AuthenticatedPalabraRouteImport.update({
+  id: '/palabra',
+  path: '/palabra',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
@@ -287,6 +293,7 @@ export interface FileRoutesByFullPath {
   '/membresia': typeof AuthenticatedMembresiaRoute
   '/ministracion': typeof AuthenticatedMinistracionRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/palabra': typeof AuthenticatedPalabraRoute
   '/pareja': typeof AuthenticatedParejaRoute
   '/patrones': typeof AuthenticatedPatronesRoute
   '/perfil': typeof AuthenticatedPerfilRoute
@@ -329,6 +336,7 @@ export interface FileRoutesByTo {
   '/membresia': typeof AuthenticatedMembresiaRoute
   '/ministracion': typeof AuthenticatedMinistracionRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/palabra': typeof AuthenticatedPalabraRoute
   '/pareja': typeof AuthenticatedParejaRoute
   '/patrones': typeof AuthenticatedPatronesRoute
   '/perfil': typeof AuthenticatedPerfilRoute
@@ -372,6 +380,7 @@ export interface FileRoutesById {
   '/_authenticated/membresia': typeof AuthenticatedMembresiaRoute
   '/_authenticated/ministracion': typeof AuthenticatedMinistracionRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
+  '/_authenticated/palabra': typeof AuthenticatedPalabraRoute
   '/_authenticated/pareja': typeof AuthenticatedParejaRoute
   '/_authenticated/patrones': typeof AuthenticatedPatronesRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
@@ -416,6 +425,7 @@ export interface FileRouteTypes {
     | '/membresia'
     | '/ministracion'
     | '/onboarding'
+    | '/palabra'
     | '/pareja'
     | '/patrones'
     | '/perfil'
@@ -458,6 +468,7 @@ export interface FileRouteTypes {
     | '/membresia'
     | '/ministracion'
     | '/onboarding'
+    | '/palabra'
     | '/pareja'
     | '/patrones'
     | '/perfil'
@@ -500,6 +511,7 @@ export interface FileRouteTypes {
     | '/_authenticated/membresia'
     | '/_authenticated/ministracion'
     | '/_authenticated/onboarding'
+    | '/_authenticated/palabra'
     | '/_authenticated/pareja'
     | '/_authenticated/patrones'
     | '/_authenticated/perfil'
@@ -658,6 +670,13 @@ declare module '@tanstack/react-router' {
       path: '/pareja'
       fullPath: '/pareja'
       preLoaderRoute: typeof AuthenticatedParejaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/palabra': {
+      id: '/_authenticated/palabra'
+      path: '/palabra'
+      fullPath: '/palabra'
+      preLoaderRoute: typeof AuthenticatedPalabraRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/onboarding': {
@@ -910,6 +929,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedMembresiaRoute: typeof AuthenticatedMembresiaRoute
   AuthenticatedMinistracionRoute: typeof AuthenticatedMinistracionRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
+  AuthenticatedPalabraRoute: typeof AuthenticatedPalabraRoute
   AuthenticatedParejaRoute: typeof AuthenticatedParejaRoute
   AuthenticatedPatronesRoute: typeof AuthenticatedPatronesRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
@@ -934,6 +954,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMembresiaRoute: AuthenticatedMembresiaRoute,
   AuthenticatedMinistracionRoute: AuthenticatedMinistracionRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
+  AuthenticatedPalabraRoute: AuthenticatedPalabraRoute,
   AuthenticatedParejaRoute: AuthenticatedParejaRoute,
   AuthenticatedPatronesRoute: AuthenticatedPatronesRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,

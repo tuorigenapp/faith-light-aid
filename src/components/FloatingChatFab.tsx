@@ -17,7 +17,7 @@ export function FloatingChatFab() {
       style={{ bottom: "calc(env(safe-area-inset-bottom) + 84px)" }}
     >
       <MessageCircle className="w-6 h-6" />
-      <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-[#F58BCB] border-2 border-white" />
+      <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-[#F58BCB] border-2 border-background" />
     </Link>
   );
 }

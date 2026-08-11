@@ -188,3 +188,100 @@ export function getStageContent(focusArea: string | null | undefined, stageId: n
   ];
   return { ...base, challenge: variants[stageId % variants.length] };
 }
+
+/* ───────────── Soluciones (exactamente 4) y tareas en tiempo real ───────────── */
+
+type StepsByFocus = Record<string, string[]>;
+
+const SOLUTIONS_BY_FOCUS: StepsByFocus = {
+  "restauración familiar": [
+    "Observa. Piensa en una escena familiar que aún te pesa y obsérvala sin juzgarte.",
+    "Escribe. Pon en palabras qué sentiste y qué te hubiera gustado que pasara distinto.",
+    "Habla. Di en voz alta lo que necesitabas decirle a esa persona de tu familia.",
+    "Decide. Elige hoy soltar esa carga y devolver lo que no te pertenece.",
+  ],
+  "sanidad emocional": [
+    "Observa. Identifica qué emoción está presente en tu cuerpo ahora mismo.",
+    "Escribe. Describe en pocas frases qué la originó y desde cuándo la sientes.",
+    "Habla. Nombra en voz alta esa emoción: 'Siento ___ y está bien sentirlo'.",
+    "Decide. Elige una acción pequeña de autocuidado para hacer hoy mismo.",
+  ],
+  "identidad": [
+    "Observa. Reconoce un pensamiento crítico que tienes sobre ti.",
+    "Escribe. Anota de dónde crees que aprendiste esa voz crítica.",
+    "Habla. Repite en voz alta una verdad que la reemplace, mirándote si puedes.",
+    "Decide. Elige una acción de hoy que demuestre que crees en tu valor.",
+  ],
+  "reconexión": [
+    "Observa. Nota en silencio cómo está tu relación con lo espiritual hoy.",
+    "Escribe. Anota una gratitud concreta del día de hoy.",
+    "Habla. Di en voz alta una oración corta y sincera con tus propias palabras.",
+    "Decide. Elige un momento fijo de tu día para volver a este silencio.",
+  ],
+  "propósito": [
+    "Observa. Recuerda un momento reciente donde te sentiste plenamente vivo.",
+    "Escribe. Anota qué don o talento estaba presente en ese momento.",
+    "Habla. Declara en voz alta un paso concreto que darás esta semana.",
+    "Decide. Elige la acción más pequeña posible y date un plazo de hoy.",
+  ],
+  "disciplina espiritual": [
+    "Observa. Revisa cómo ha ido tu constancia esta semana, sin culpa.",
+    "Escribe. Anota el mejor momento del día para tu práctica diaria.",
+    "Habla. Comprométete en voz alta con una frase: 'Hoy vuelvo a empezar'.",
+    "Decide. Elige tu práctica mínima de hoy y complétala ahora.",
+  ],
+};
+
+const TASKS_BY_FOCUS: StepsByFocus = {
+  "restauración familiar": [
+    "Escribe ahora una carta breve a un familiar (no se la envías) y guárdala aquí.",
+    "Identifica una carga familiar que cargas y marca la casilla al reconocerla.",
+    "Ora ahora la oración de liberación familiar y confirma cuando termines.",
+    "Declara en voz alta: 'Devuelvo con amor lo que no es mío' y confírmalo.",
+  ],
+  "sanidad emocional": [
+    "Escribe ahora cómo te sientes en este momento, sin corregirte.",
+    "Identifica en tu cuerpo dónde sientes esa emoción y descríbelo.",
+    "Ora ahora pidiendo paz para esta emoción y confirma cuando termines.",
+    "Respira profundo 3 veces con la mano en el pecho y confírmalo aquí.",
+  ],
+  "identidad": [
+    "Escribe ahora 3 cualidades tuyas que no dependen de tus logros.",
+    "Identifica la voz crítica que más repites contigo y nómbrala.",
+    "Declara en voz alta una verdad sobre tu valor y confírmalo.",
+    "Ora ahora agradeciendo por cómo fuiste creada/o y confírmalo.",
+  ],
+  "reconexión": [
+    "Escribe ahora 3 cosas por las que puedes agradecer hoy.",
+    "Identifica qué te ha alejado últimamente de tu momento de silencio.",
+    "Ora ahora en silencio 1 minuto y confirma cuando termines.",
+    "Declara en voz alta: 'Hoy elijo confiar' y confírmalo.",
+  ],
+  "propósito": [
+    "Escribe ahora un momento donde te sentiste plenamente vivo.",
+    "Identifica un don tuyo que hoy puedes usar para servir a alguien.",
+    "Declara en voz alta el paso pequeño que darás hoy.",
+    "Ora ahora pidiendo claridad para tu camino y confírmalo.",
+  ],
+  "disciplina espiritual": [
+    "Escribe ahora la hora exacta en la que harás tu práctica diaria.",
+    "Identifica el hábito existente al que unirás tu nueva práctica.",
+    "Ora ahora 3 respiraciones con gratitud y confírmalo.",
+    "Declara en voz alta tu compromiso de hoy y confírmalo.",
+  ],
+};
+
+function focusKey(focusArea: string | null | undefined) {
+  const key = (focusArea ?? "").toLowerCase();
+  return SOLUTIONS_BY_FOCUS[key] ? key : "reconexión";
+}
+
+/** Exactamente 4 soluciones simples y accionables, coherentes con el tema de la etapa. */
+export function getSolutionSteps(focusArea: string | null | undefined): string[] {
+  return SOLUTIONS_BY_FOCUS[focusKey(focusArea)];
+}
+
+/** Tareas espirituales que se completan ahora mismo dentro de la app (checkbox + registro). */
+export function getStageTasks(focusArea: string | null | undefined): string[] {
+  return TASKS_BY_FOCUS[focusKey(focusArea)];
+}

@@ -334,3 +334,16 @@
   scrollbar-width: none;
   &::-webkit-scrollbar { display: none; }
 }
+
+@utility animate-pulse-soft {
+  animation: pulse-soft 2.4s ease-in-out infinite;
+}
+
+@keyframes pulse-soft {
+  0%, 100% { transform: scale(1); box-shadow: 0 4px 14px rgba(124, 92, 255, 0.28); }
+  50% { transform: scale(1.015); box-shadow: 0 8px 26px rgba(124, 92, 255, 0.38); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse-soft { animation: none !important; }
+}

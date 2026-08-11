@@ -367,6 +367,36 @@ export type Database = {
         }
         Relationships: []
       }
+      hoja_transfers: {
+        Row: {
+          created_at: string
+          id: string
+          note: string | null
+          points: number
+          status: string
+          to_email: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          points: number
+          status?: string
+          to_email: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          points?: number
+          status?: string
+          to_email?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       intake_sessions: {
         Row: {
           ai_plan: Json | null
@@ -697,6 +727,27 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_prefs: {
+        Row: {
+          email_enabled: boolean
+          push_enabled: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          email_enabled?: boolean
+          push_enabled?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          email_enabled?: boolean
+          push_enabled?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       pareja_lecturas: {
         Row: {
           advice: string | null
@@ -742,6 +793,45 @@ export type Database = {
           summary?: string | null
           user_id?: string
           verdict?: string | null
+        }
+        Relationships: []
+      }
+      patrones_consultas: {
+        Row: {
+          birthdate: string | null
+          created_at: string
+          id: string
+          name: string | null
+          observation: string | null
+          patterns: Json | null
+          question: string | null
+          recommendations: Json | null
+          reflection: string | null
+          user_id: string
+        }
+        Insert: {
+          birthdate?: string | null
+          created_at?: string
+          id?: string
+          name?: string | null
+          observation?: string | null
+          patterns?: Json | null
+          question?: string | null
+          recommendations?: Json | null
+          reflection?: string | null
+          user_id: string
+        }
+        Update: {
+          birthdate?: string | null
+          created_at?: string
+          id?: string
+          name?: string | null
+          observation?: string | null
+          patterns?: Json | null
+          question?: string | null
+          recommendations?: Json | null
+          reflection?: string | null
+          user_id?: string
         }
         Relationships: []
       }

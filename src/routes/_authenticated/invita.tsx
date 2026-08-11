@@ -50,7 +50,7 @@ function InvitaPage() {
     <div className="min-h-[calc(100vh-4rem)] bg-aura-top">
       <div className="max-w-lg mx-auto px-5 pt-6 pb-16">
         <div className="flex items-center gap-3 mb-6">
-          <Link to="/dashboard" className="w-10 h-10 rounded-full bg-white shadow-soft grid place-items-center">
+          <Link to="/dashboard" className="w-10 h-10 rounded-full bg-card shadow-soft grid place-items-center">
             <ArrowLeft className="w-4 h-4" />
           </Link>
           <h1 className="font-display font-bold text-[22px]">Invita y gana</h1>
@@ -76,7 +76,7 @@ function InvitaPage() {
             <div className="flex-1 h-14 rounded-[14px] bg-secondary grid place-items-center font-display font-black text-2xl tracking-widest text-primary">
               {code || "•••••"}
             </div>
-            <button onClick={() => copy(code, "Código")} className="h-14 w-14 rounded-[14px] bg-white border border-border grid place-items-center">
+            <button onClick={() => copy(code, "Código")} className="h-14 w-14 rounded-[14px] bg-card border border-border grid place-items-center">
               <Copy className="w-5 h-5" />
             </button>
           </div>
@@ -84,7 +84,7 @@ function InvitaPage() {
             <div className="text-xs font-semibold text-muted-foreground mb-1">Tu enlace</div>
             <div className="flex items-center gap-2">
               <div className="flex-1 h-11 rounded-[12px] bg-secondary/60 px-3 text-xs grid items-center truncate">{link}</div>
-              <button onClick={() => copy(link, "Enlace")} className="h-11 w-11 rounded-[12px] bg-white border border-border grid place-items-center">
+              <button onClick={() => copy(link, "Enlace")} className="h-11 w-11 rounded-[12px] bg-card border border-border grid place-items-center">
                 <Copy className="w-4 h-4" />
               </button>
             </div>

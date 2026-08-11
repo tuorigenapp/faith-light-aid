@@ -166,7 +166,7 @@ function CaminoDia() {
         <div className="absolute inset-0 bg-gradient-to-b from-white/70 via-white/80 to-white/95" />
       </div>
       {/* Header */}
-      <header className="sticky top-0 z-20 bg-white/85 backdrop-blur border-b border-border">
+      <header className="sticky top-0 z-20 bg-card/85 backdrop-blur border-b border-border">
         <div className="max-w-[520px] mx-auto px-4 py-3 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
           <Link to="/caminos/$caminoId" params={{ caminoId }} aria-label="Volver al mapa" className="w-11 h-11 rounded-[12px] bg-secondary grid place-items-center">
             <ArrowLeft className="w-5 h-5" />
@@ -391,7 +391,7 @@ function CaminoDia() {
                       key={c}
                       onClick={() => setCargas((v) => (sel ? v.filter((x) => x !== c) : [...v, c]))}
                       className={cn("h-10 rounded-full px-4 text-[13.5px] font-semibold transition active:scale-[.97]",
-                        sel ? "bg-primary text-white line-through" : "bg-white text-foreground shadow-soft")}
+                        sel ? "bg-primary text-white line-through" : "bg-card text-foreground shadow-soft")}
                     >
                       {c}
                     </button>
@@ -440,7 +440,7 @@ function CaminoDia() {
                       }
                     }}
                     className={cn("aspect-square rounded-[12px] p-1 text-[9.5px] font-bold leading-tight grid place-items-center text-center transition",
-                      open ? "bg-white text-foreground shadow-soft" : cn("text-white bg-gradient-to-br", camino.gradient))}
+                      open ? "bg-card text-foreground shadow-soft" : cn("text-white bg-gradient-to-br", camino.gradient))}
                   >
                     {open ? card.text : <Sparkles className="w-4 h-4" />}
                   </button>

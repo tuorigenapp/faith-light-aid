@@ -5,17 +5,37 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Send, Trash2, MessageCircle, HeartHandshake, Lock } from "lucide-react";
+import { Plus, Send, Trash2, MessageCircle, HeartHandshake, Lock, Clock, Leaf } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { getUserPlan, getDailyUsage, PLAN_LIMITS } from "@/lib/plan";
+import { awardGems, formatHojas, LEAF_COSTS, HOJA_POINTS } from "@/lib/gems";
 import { Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_authenticated/chat")({
   head: () => ({ meta: [{ title: "Conversa con Ruth Esther — ORIGEN" }] }),
   component: ChatPage,
 });
+
+function useCountdownToMidnight() {
+  const [remaining, setRemaining] = useState(getMs());
+  function getMs() {
+    const now = new Date();
+    const next = new Date(now);
+    next.setHours(24, 0, 0, 0);
+    return Math.max(0, next.getTime() - now.getTime());
+  }
+  useEffect(() => {
+    const t = setInterval(() => setRemaining(getMs()), 1000);
+    return () => clearInterval(t);
+  }, []);
+  const totalSec = Math.floor(remaining / 1000);
+  const h = String(Math.floor(totalSec / 3600)).padStart(2, "0");
+  const m = String(Math.floor((totalSec % 3600) / 60)).padStart(2, "0");
+  const s = String(totalSec % 60).padStart(2, "0");
+  return `${h}:${m}:${s}`;
+}
 
 function ChatPage() {
   const { user } = useAuth();
@@ -39,6 +59,12 @@ function ChatPage() {
     },
   });
 
+  const { data: profile } = useQuery({
+    queryKey: ["profile-hojas-chat", user?.id],
+    enabled: !!user,
+    queryFn: async () => (await supabase.from("profiles").select("gems").eq("id", user!.id).maybeSingle()).data,
+  });
+
   useEffect(() => {
     if (!activeId && conversations && conversations.length > 0) setActiveId(conversations[0].id);
   }, [conversations, activeId]);
@@ -57,10 +83,12 @@ function ChatPage() {
     qc.invalidateQueries({ queryKey: ["conversations"] });
   }
 
+  const locked = !!gate && gate.remaining === 0;
+
   return (
     <div className="flex h-[calc(100vh-4rem)] md:h-screen bg-aura-top">
       {/* Sidebar */}
-      <aside className="hidden lg:flex w-72 border-r border-border flex-col bg-white/70 backdrop-blur">
+      <aside className="hidden lg:flex w-72 border-r border-border flex-col bg-card/70 backdrop-blur">
         <div className="p-4 border-b border-border">
           <button onClick={newConversation} className="w-full h-11 rounded-[12px] btn-primary-gradient inline-flex items-center justify-center gap-2 text-sm">
             <Plus className="w-4 h-4" />Nueva conversación
@@ -83,7 +111,7 @@ function ChatPage() {
 
       <main className="flex-1 flex flex-col min-w-0">
         {/* Ruth Esther header */}
-        <div className="border-b border-border bg-white/70 backdrop-blur px-4 py-3 flex items-center gap-3">
+        <div className="border-b border-border bg-card/70 backdrop-blur px-4 py-3 flex items-center gap-3">
           <div className="w-11 h-11 rounded-2xl bg-brand-gradient shadow-glow grid place-items-center text-white">
             <HeartHandshake className="w-5 h-5" />
           </div>
@@ -91,15 +119,26 @@ function ChatPage() {
             <p className="font-display font-bold text-[15px] leading-none">Ruth Esther</p>
             <p className="text-[11px] text-muted-foreground mt-0.5">Mentora · método ORIGEN</p>
           </div>
-          <button onClick={newConversation} className="ml-auto lg:hidden text-xs font-bold text-primary">
-            + Nueva
-          </button>
+          <div className="ml-auto flex items-center gap-2">
+            <span className="inline-flex items-center gap-1 text-xs font-bold text-primary bg-brand-soft px-2.5 py-1 rounded-full">
+              <Leaf className="w-3.5 h-3.5" />{formatHojas(profile?.gems)}
+            </span>
+            <button onClick={newConversation} className="lg:hidden text-xs font-bold text-primary">
+              + Nueva
+            </button>
+          </div>
         </div>
 
-        {gate && gate.remaining === 0 ? (
-          <FreePlanLimit used={gate.used} limit={gate.limit as number} />
-        ) : activeId ? (
-          <ChatWindow key={activeId} conversationId={activeId} onSent={() => qc.invalidateQueries({ queryKey: ["chat-gate"] })} />
+        {activeId ? (
+          <ChatWindow
+            key={activeId}
+            conversationId={activeId}
+            locked={locked}
+            gateLimit={gate?.limit as number | undefined}
+            gateUsed={gate?.used}
+            onSent={() => qc.invalidateQueries({ queryKey: ["chat-gate"] })}
+            onSpend={() => qc.invalidateQueries({ queryKey: ["profile-hojas-chat"] })}
+          />
         ) : (
           <div className="flex-1 grid place-items-center p-6 text-center">
             <div>
@@ -121,34 +160,44 @@ function ChatPage() {
   );
 }
 
-function FreePlanLimit({ used, limit }: { used: number; limit: number }) {
+function LockedComposer({ limit }: { limit?: number }) {
+  const countdown = useCountdownToMidnight();
   return (
-    <div className="flex-1 grid place-items-center p-6">
-      <div className="app-card p-6 max-w-sm text-center">
-        <div className="mx-auto w-14 h-14 rounded-2xl bg-secondary grid place-items-center text-primary">
-          <Lock className="w-6 h-6" />
+    <div className="absolute inset-0 z-10 backdrop-blur-md bg-background/70 flex flex-col items-center justify-center px-4 py-3 pointer-events-none">
+      <div className="app-card p-4 max-w-sm w-full text-center pointer-events-auto">
+        <div className="mx-auto w-11 h-11 rounded-2xl bg-secondary grid place-items-center text-primary">
+          <Clock className="w-5 h-5" />
         </div>
-        <h3 className="font-display font-bold text-lg mt-3">Ya usaste tu conversación de hoy</h3>
-        <p className="text-sm text-muted-foreground mt-2">
-          En el plan Explorador tienes {limit} conversación al día. Vuelve mañana o desbloquea el chat ilimitado con Camino ORIGEN.
+        <p className="font-display font-bold text-sm mt-2">Ya usaste tu {limit ?? 1} conversación de hoy</p>
+        <p className="text-xs text-muted-foreground mt-1">
+          En el plan Explorador el chat se renueva cada 24 horas. Vuelve en:
         </p>
-        <p className="text-xs text-muted-foreground mt-2">Mensajes de hoy: {used} / {limit}</p>
-        <Link to="/membresia" className="mt-4 btn-primary-gradient w-full h-12 rounded-[14px] inline-flex items-center justify-center gap-2 text-sm">
-          Desbloquear ahora
+        <p className="font-mono font-bold text-lg text-primary mt-1 tabular-nums">{countdown}</p>
+        <Link to="/membresia" className="mt-3 btn-primary-gradient w-full h-11 rounded-[12px] inline-flex items-center justify-center gap-2 text-sm">
+          <Lock className="w-3.5 h-3.5" />Desbloquear con Camino Origen
         </Link>
       </div>
     </div>
   );
 }
 
-function ChatWindow({ conversationId, onSent }: { conversationId: string; onSent: () => void }) {
+function ChatWindow({
+  conversationId, locked, gateLimit, onSent, onSpend,
+}: {
+  conversationId: string;
+  locked: boolean;
+  gateLimit?: number;
+  gateUsed?: number;
+  onSent: () => void;
+  onSpend: () => void;
+}) {
   const { user } = useAuth();
   const qc = useQueryClient();
   const [input, setInput] = useState("");
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const { data: initialMessages } = useQuery({
+  const { data: initialMessages, isLoading: loadingHistory } = useQuery({
     queryKey: ["messages", conversationId],
     queryFn: async () => {
       const { data } = await supabase.from("messages").select("*").eq("conversation_id", conversationId).order("created_at");
@@ -172,9 +221,13 @@ function ChatWindow({ conversationId, onSent }: { conversationId: string; onSent
         conversation_id: conversationId, user_id: user.id,
         role: "assistant", content: message.parts as never,
       });
+      // Cobra 1 hoja de sanación por respuesta recibida.
+      await awardGems(-LEAF_COSTS.chatReply * HOJA_POINTS, "chat_respuesta", { conversation_id: conversationId });
+      onSpend();
       qc.invalidateQueries({ queryKey: ["messages", conversationId] });
     },
     onError: async (e) => {
+      toast.error("No pude responderte ahora. Tu mensaje quedó guardado.");
       const text = e.message.includes("402")
         ? "Perdona, en este momento no puedo responderte. Tu mensaje quedó guardado, vuelve en un rato."
         : "No pude responderte ahora. Tu mensaje quedó guardado; intentemos de nuevo en unos minutos.";
@@ -192,7 +245,7 @@ function ChatWindow({ conversationId, onSent }: { conversationId: string; onSent
   useEffect(() => { scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" }); }, [messages]);
 
   async function handleSend() {
-    if (!input.trim() || !user) return;
+    if (!input.trim() || !user || locked) return;
     const text = input.trim();
     setInput("");
     await supabase.from("messages").insert({
@@ -222,7 +275,13 @@ function ChatWindow({ conversationId, onSent }: { conversationId: string; onSent
     <>
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-5">
         <div className="max-w-2xl mx-auto space-y-4">
-          {messages.length === 0 && (
+          {loadingHistory && (
+            <div className="space-y-3 animate-pulse">
+              <div className="h-16 rounded-2xl bg-secondary/60 w-2/3" />
+              <div className="h-12 rounded-2xl bg-secondary/40 w-1/2 ml-auto" />
+            </div>
+          )}
+          {!loadingHistory && messages.length === 0 && (
             <div className="app-card p-5 bg-brand-soft">
               <div className="flex items-start gap-3">
                 <HeartHandshake className="w-5 h-5 text-primary mt-0.5" />
@@ -243,32 +302,38 @@ function ChatWindow({ conversationId, onSent }: { conversationId: string; onSent
               <div className={cn("rounded-2xl px-4 py-3 max-w-[82%] text-sm leading-relaxed",
                 m.role === "user"
                   ? "bg-primary text-primary-foreground rounded-tr-md"
-                  : "bg-white border border-border rounded-tl-md shadow-soft"
+                  : "bg-card border border-border rounded-tl-md shadow-soft"
               )}>
                 {m.parts.map((p, i) => p.type === "text" ? <span key={i} className="whitespace-pre-wrap">{p.text}</span> : null)}
+                {m.role === "assistant" && (
+                  <p className="mt-1.5 text-[10px] text-muted-foreground/70 flex items-center gap-1">
+                    <Leaf className="w-3 h-3" />1 hoja de sanación
+                  </p>
+                )}
               </div>
             </div>
           ))}
           {loading && (
             <div className="flex gap-2.5">
               <div className="shrink-0 w-8 h-8 rounded-full bg-brand-gradient grid place-items-center text-white text-xs font-bold">R</div>
-              <div className="rounded-2xl px-4 py-3 bg-white border border-border text-sm text-muted-foreground italic">Escribiendo...</div>
+              <div className="rounded-2xl px-4 py-3 bg-card border border-border text-sm text-muted-foreground italic">Escribiendo...</div>
             </div>
           )}
         </div>
       </div>
-      <div className="border-t border-border bg-white/85 backdrop-blur p-3">
-        <div className="max-w-2xl mx-auto flex gap-2 items-end">
+      <div className="relative border-t border-border bg-card/85 backdrop-blur p-3">
+        {locked && <LockedComposer limit={gateLimit} />}
+        <div className={cn("max-w-2xl mx-auto flex gap-2 items-end", locked && "pointer-events-none opacity-40 blur-[1px]")}>
           <Textarea ref={inputRef} value={input} onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
             placeholder="Comparte lo que sientes hoy..."
-            className="min-h-12 max-h-40 resize-none rounded-[14px] bg-secondary/40 border-border" disabled={loading} />
-          <button onClick={handleSend} disabled={loading || !input.trim()}
+            className="min-h-12 max-h-40 resize-none rounded-[14px] bg-secondary/40 border-border" disabled={loading || locked} />
+          <button onClick={handleSend} disabled={loading || locked || !input.trim()}
             className="h-12 w-12 rounded-[14px] btn-primary-gradient grid place-items-center disabled:opacity-40">
             <Send className="w-4 h-4" />
           </button>
         </div>
-        <p className="text-[10px] text-muted-foreground mt-2 text-center max-w-2xl mx-auto">
+        <p className={cn("text-[10px] text-muted-foreground mt-2 text-center max-w-2xl mx-auto", locked && "opacity-40 blur-[1px]")}>
           Esta conversación no reemplaza apoyo psicológico profesional cuando lo necesites.
         </p>
       </div>

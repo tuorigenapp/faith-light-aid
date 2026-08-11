@@ -73,7 +73,7 @@ export function DailyReflection() {
             <button
               key={o.key}
               onClick={() => pick(o)}
-              className="w-full text-left px-4 py-3 rounded-[14px] border border-border bg-white hover:border-primary/40 hover:bg-secondary/40 transition text-sm font-medium"
+              className="w-full text-left px-4 py-3 rounded-[14px] border border-border bg-card hover:border-primary/40 hover:bg-secondary/40 transition text-sm font-medium"
             >
               {o.label}
             </button>

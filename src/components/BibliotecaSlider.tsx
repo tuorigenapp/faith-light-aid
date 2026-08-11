@@ -40,7 +40,7 @@ export function BibliotecaSlider() {
           >
             <img
               src={b.cover}
-              alt="Portada de libro de la Biblioteca Digital ORIGEN"
+              alt={`Portada de ${b.title}`}
               loading="lazy"
               className="w-full aspect-[3/4] object-cover"
             />

@@ -7,6 +7,8 @@ import { DailyReflection } from "@/components/DailyReflection";
 import { DailyQuiz } from "@/components/DailyQuiz";
 import { DailyExercises } from "@/components/DailyExercises";
 import { CategoriaSlider } from "@/components/CategoriaSlider";
+import { ManifestacionSlider } from "@/components/ManifestacionSlider";
+import { PalabrasHoy } from "@/components/PalabrasHoy";
 import { BibliotecaSlider } from "@/components/BibliotecaSlider";
 
 import { DailyGames } from "@/components/games/DailyGames";
@@ -162,14 +164,18 @@ function Dashboard() {
         <BibliotecaSlider />
 
         {/* Palabras para ti Hoy */}
-        <PalabrasHoy name={displayName} aiPlan={aiPlan} />
+        <PalabrasHoy name={displayName} />
 
 
         {/* Árbol de Sanación */}
         <HealingTree />
 
-        {/* Transformación diaria — categorías (una etapa por día) */}
+        {/* Lo nuevo de ORIGEN — categorías verticales (una lección por día) */}
         <CategoriaSlider />
+
+        {/* Manifestación con mentor + música + ejercicios */}
+        <ManifestacionSlider />
+
 
         {/* Reflexión del día */}
         <DailyReflection />
@@ -264,32 +270,5 @@ function PilarBanner({ to, image, alt }: { to: string; image: string; alt: strin
 }
 
 
-const PALABRAS = [
-  "Hoy tu linaje respira contigo. Cada paso que das aquí también sana a los que vinieron antes.",
-  "Lo que sentiste no fue debilidad: fue la memoria de tu familia pidiendo ser vista.",
-  "No estás repitiendo por gusto. Estás repitiendo porque nadie te enseñó a cerrar. Hoy empiezas a cerrar.",
-  "El amor que no recibiste puedes darlo. Y al darlo, se rompe el patrón.",
-  "Tu paz de hoy es la oración que tu abuela nunca pudo terminar.",
-  "No tienes que cargar lo que no es tuyo. Devuélvelo con respeto y sigue liviana.",
-  "Cada vez que eliges responderte con ternura, tu niña interior confía un poco más.",
-];
 
-function PalabrasHoy({ name, aiPlan }: { name: string; aiPlan: { pattern_name?: string; welcome_message?: string } }) {
-  const day = Math.floor(Date.now() / 86400000);
-  const msg = PALABRAS[day % PALABRAS.length];
-  const personalized = aiPlan.welcome_message || (aiPlan.pattern_name ? `Hoy trabaja con suavidad el patrón “${aiPlan.pattern_name}”. No lo pelees: obsérvalo, nómbralo y da un paso pequeño distinto.` : msg);
-  return (
-    <section className="app-card p-5 bg-brand-soft relative overflow-hidden">
-      <div className="absolute -right-6 -top-6 text-7xl opacity-10">✨</div>
-      <div className="relative">
-        <div className="text-[11px] uppercase tracking-widest font-bold text-primary flex items-center gap-1.5">
-          <Sparkles className="w-3.5 h-3.5" /> Palabras para ti hoy
-        </div>
-        <h3 className="font-display font-bold text-[17px] mt-2 leading-snug">{name}, esto es lo que necesitas escuchar</h3>
-        <p className="mt-2 text-sm leading-relaxed text-foreground/85">"{personalized}"</p>
-        <p className="mt-3 text-[11px] text-muted-foreground italic">— Ruth Esther, desde el método ORIGEN</p>
-      </div>
-    </section>
-  );
-}
 

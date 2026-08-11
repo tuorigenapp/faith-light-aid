@@ -22,7 +22,7 @@ export function LockedCard({
         className
       )}
     >
-      <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] z-10" />
+      <div className="absolute inset-0 bg-card/60 backdrop-blur-[2px] z-10" />
       <div className="absolute top-3 right-3 z-20 w-9 h-9 rounded-full bg-brand-gradient text-white grid place-items-center shadow-glow">
         <Lock className="w-4 h-4" />
       </div>

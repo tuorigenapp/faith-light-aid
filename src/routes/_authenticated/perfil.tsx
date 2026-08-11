@@ -13,12 +13,14 @@ import { toast } from "sonner";
 import {
   Flame, Gem, Trophy, BookHeart, Sparkles, HeartHandshake, Layers, ChevronRight,
   Calendar, ArrowLeft, Check, Shield, Mail, Heart, User as UserIcon, Globe, Cake,
-  Dumbbell, Target, Bell, Lock, PenLine,
+  Dumbbell, Target, Bell, Lock, PenLine, AlertTriangle,
 } from "lucide-react";
 import { printMinistracion } from "@/lib/print-pdf";
 import { PhotoPicker } from "@/components/PhotoPicker";
 import { uploadPhoto, removePhoto } from "@/lib/photo";
 import { useSignedUrls } from "@/hooks/use-signed-urls";
+import { Switch } from "@/components/ui/switch";
+import { formatHojas } from "@/lib/gems";
 
 export const Route = createFileRoute("/_authenticated/perfil")({
   head: () => ({
@@ -74,15 +76,18 @@ function PerfilPage() {
     );
   }
 
-  if (!profile.profile_completed_at || forceEdit) {
-    return <ProfileWizard profile={profile} onDone={() => setForceEdit(false)} />;
+  if (!profile.profile_completed_at) {
+    return <ProfileWizard profile={profile} onDone={() => setForceEdit(false)} blockExit />;
+  }
+  if (forceEdit) {
+    return <EditProfileLimited profile={profile} onDone={() => setForceEdit(false)} />;
   }
   return <ProfilePanel profile={profile} onEdit={() => setForceEdit(true)} />;
 }
 
 /* ══════════════════ WIZARD 6 PASOS ══════════════════ */
 
-function ProfileWizard({ profile, onDone }: { profile: any; onDone: () => void }) {
+function ProfileWizard({ profile, onDone, blockExit }: { profile: any; onDone: () => void; blockExit?: boolean }) {
   const { user } = useAuth();
   const qc = useQueryClient();
   const navigate = useNavigate();
@@ -100,6 +105,7 @@ function ProfileWizard({ profile, onDone }: { profile: any; onDone: () => void }
     intention: profile.intention ?? "",
     interests: (profile.interests as string[]) ?? [],
     content_pref: profile.content_pref ?? "Notificaciones",
+    email: (() => { const e = (profile.email ?? user?.email ?? "").trim(); return /invitado|@temp/i.test(e) ? "" : e; })(),
   });
 
   const sign = useSignedUrls("avatars", [profile.avatar_url]);
@@ -128,6 +134,11 @@ function ProfileWizard({ profile, onDone }: { profile: any; onDone: () => void }
         await removePhoto("avatars", avatar_url);
         avatar_url = await uploadPhoto("avatars", user.id, photoBlob);
       }
+      const emailTrim = form.email.trim();
+      if (emailTrim && emailTrim !== (user.email ?? "")) {
+        const { error: authErr } = await supabase.auth.updateUser({ email: emailTrim });
+        if (authErr) throw authErr;
+      }
       const { error } = await supabase.from("profiles").update({
         display_name: form.display_name.trim(),
         full_name: form.full_name.trim() || form.display_name.trim(),
@@ -138,6 +149,7 @@ function ProfileWizard({ profile, onDone }: { profile: any; onDone: () => void }
         interests: form.interests,
         content_pref: form.content_pref,
         avatar_url,
+        email: emailTrim || null,
         profile_completed_at: new Date().toISOString(),
       }).eq("id", user.id);
       if (error) throw error;
@@ -169,13 +181,17 @@ function ProfileWizard({ profile, onDone }: { profile: any; onDone: () => void }
       <div className="mx-auto max-w-md px-4 pt-4 pb-28">
         {/* progreso */}
         <div className="flex items-center gap-3">
-          <button
-            onClick={() => (step === 1 ? onDone() : setStep(step - 1))}
-            aria-label="Volver"
-            className="w-10 h-10 rounded-full bg-white shadow-soft grid place-items-center active:scale-95 transition"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
+          {blockExit && step === 1 ? (
+            <div className="w-10 h-10" />
+          ) : (
+            <button
+              onClick={() => (step === 1 ? onDone() : setStep(step - 1))}
+              aria-label="Volver"
+              className="w-10 h-10 rounded-full bg-white shadow-soft grid place-items-center active:scale-95 transition"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+          )}
           <div className="flex-1">
             <div className="text-center text-[12px] font-bold text-muted-foreground mb-1.5">{step}/{total}</div>
             <div className="flex gap-1.5">
@@ -312,7 +328,10 @@ function ProfileWizard({ profile, onDone }: { profile: any; onDone: () => void }
             <div className="rounded-[24px] bg-white shadow-soft p-5 space-y-4">
               <div>
                 <Label className="text-[13px] font-semibold">Correo electrónico</Label>
-                <Input value={user?.email ?? ""} disabled className="mt-1.5 h-12 rounded-[12px] opacity-70" />
+                <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="tucorreo@ejemplo.com" className="mt-1.5 h-12 rounded-[12px]" />
+                {!form.email && (
+                  <p className="mt-1.5 flex items-center gap-1.5 text-[11.5px] text-[#B77B12] font-semibold"><AlertTriangle className="w-3.5 h-3.5 shrink-0" /> Agrega tu correo real para poder contactarte y proteger tu cuenta.</p>
+                )}
               </div>
               <ChangePassword />
               <div className="rounded-2xl bg-[#EAF3FF] p-4 flex gap-3">
@@ -334,7 +353,7 @@ function ProfileWizard({ profile, onDone }: { profile: any; onDone: () => void }
                   <SummaryRow icon={<Globe className="w-4 h-4" />} label="País" value={form.country || "—"} />
                   <SummaryRow icon={<Cake className="w-4 h-4" />} label="Edad" value={form.age ? `${form.age} años` : "—"} />
                   <SummaryRow icon={<Heart className="w-4 h-4" />} label="Intención" value={form.intention || "—"} />
-                  <SummaryRow icon={<Mail className="w-4 h-4" />} label="Correo" value={user?.email ?? "—"} />
+                  <SummaryRow icon={<Mail className="w-4 h-4" />} label="Correo" value={form.email || "—"} />
                 </div>
               </div>
               <div className="rounded-[20px] bg-[#FDEFF7] p-4 flex gap-3">
@@ -368,6 +387,123 @@ function ProfileWizard({ profile, onDone }: { profile: any; onDone: () => void }
           <PrivacyNote icon={<Lock className="w-4 h-4 text-[#61A8FF]" />} title="Información protegida" text="Tus datos están encriptados y seguros." />
           <PrivacyNote icon={<UserIcon className="w-4 h-4 text-[#9B7CFF]" />} title="Tú tienes el control" text="Puedes editar tu información cuando quieras." />
         </div>
+      </div>
+    </div>
+  );
+}
+
+function EditProfileLimited({ profile, onDone }: { profile: any; onDone: () => void }) {
+  const { user } = useAuth();
+  const qc = useQueryClient();
+  const [photoBlob, setPhotoBlob] = useState<Blob | null>(null);
+  const [localPreview, setLocalPreview] = useState<string | null>(null);
+  const isTemp = (e?: string | null) => !e || /invitado|@temp/i.test(e);
+  const [email, setEmail] = useState(isTemp(profile.email ?? user?.email) ? "" : (profile.email ?? user?.email ?? ""));
+  const [saving, setSaving] = useState(false);
+  const sign = useSignedUrls("avatars", [profile.avatar_url]);
+  const currentAvatar = localPreview ?? sign(profile.avatar_url) ?? null;
+
+  const LOCKED_FIELDS: { label: string; value: string }[] = [
+    { label: "Nombre para hablarte", value: profile.display_name || "—" },
+    { label: "Nombre completo", value: profile.full_name || "—" },
+    { label: "País", value: profile.country || "—" },
+    { label: "Edad", value: profile.age ? `${profile.age} años` : "—" },
+    { label: "Intención principal", value: profile.intention || "—" },
+    { label: "¿Qué buscas sanar?", value: profile.bio || "—" },
+  ];
+
+  async function save() {
+    if (!user) return;
+    const emailTrim = email.trim();
+    setSaving(true);
+    try {
+      let avatar_url = profile.avatar_url as string | null;
+      if (photoBlob) {
+        await removePhoto("avatars", avatar_url);
+        avatar_url = await uploadPhoto("avatars", user.id, photoBlob);
+      }
+      if (emailTrim && emailTrim !== (user.email ?? "")) {
+        const { error: authErr } = await supabase.auth.updateUser({ email: emailTrim });
+        if (authErr) throw authErr;
+      }
+      const { error } = await supabase.from("profiles").update({
+        avatar_url,
+        email: emailTrim || null,
+      }).eq("id", user.id);
+      if (error) throw error;
+      await qc.invalidateQueries({ queryKey: ["profile"] });
+      qc.invalidateQueries();
+      toast.success("Perfil actualizado");
+      onDone();
+    } catch (e: any) {
+      toast.error(e?.message ?? "No pudimos guardar los cambios");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-b from-[#F4F0FF] via-[#FBFAFF] to-[#EEF6FF]">
+      <div className="mx-auto max-w-md px-4 pt-4 pb-28">
+        <div className="flex items-center gap-3">
+          <button onClick={onDone} aria-label="Volver" className="w-10 h-10 rounded-full bg-white shadow-soft grid place-items-center active:scale-95 transition">
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <h1 className="flex-1 text-center font-display font-black text-[18px] pr-10">Editar perfil</h1>
+        </div>
+
+        <div className="mt-5 rounded-[24px] bg-white shadow-soft p-6 text-center space-y-4">
+          <div className="flex justify-center">
+            <PhotoPicker
+              value={currentAvatar}
+              size={120}
+              label=""
+              onCropped={(blob, url) => { setPhotoBlob(blob); setLocalPreview(url); }}
+              onRemove={async () => {
+                setPhotoBlob(null); setLocalPreview(null);
+                if (profile.avatar_url && user) {
+                  await removePhoto("avatars", profile.avatar_url);
+                  await supabase.from("profiles").update({ avatar_url: null }).eq("id", user.id);
+                  qc.invalidateQueries({ queryKey: ["profile"] });
+                  toast.success("Foto eliminada");
+                }
+              }}
+            />
+          </div>
+          <p className="text-[13px] text-muted-foreground">Foto de perfil</p>
+        </div>
+
+        <div className="mt-4 rounded-[24px] bg-white shadow-soft p-5 space-y-4">
+          <div>
+            <Label className="text-[13px] font-semibold">Correo electrónico</Label>
+            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tucorreo@ejemplo.com" className="mt-1.5 h-12 rounded-[12px]" />
+            {!email && (
+              <p className="mt-1.5 flex items-center gap-1.5 text-[11.5px] text-[#B77B12] font-semibold"><AlertTriangle className="w-3.5 h-3.5 shrink-0" /> Agrega tu correo real para poder contactarte.</p>
+            )}
+          </div>
+          <ChangePassword />
+        </div>
+
+        <div className="mt-4 rounded-[24px] bg-white shadow-soft p-5 space-y-3">
+          <div className="flex items-center gap-2 mb-1">
+            <Lock className="w-4 h-4 text-muted-foreground" />
+            <div className="font-display font-bold text-[14px]">Datos que no se pueden cambiar</div>
+          </div>
+          {LOCKED_FIELDS.map((f) => (
+            <div key={f.label} className="rounded-[12px] bg-muted/50 border border-border p-3 opacity-70">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] uppercase tracking-wider text-muted-foreground">{f.label}</span>
+                <Lock className="w-3.5 h-3.5 text-muted-foreground" />
+              </div>
+              <div className="text-[13px] font-semibold mt-0.5">{f.value}</div>
+              <div className="text-[10.5px] text-muted-foreground mt-1">Este dato no se puede cambiar</div>
+            </div>
+          ))}
+        </div>
+
+        <Button onClick={save} disabled={saving} className="mt-5 w-full h-14 rounded-[14px] btn-primary-gradient text-[16px] font-bold">
+          {saving ? "Guardando…" : "Guardar cambios"}
+        </Button>
       </div>
     </div>
   );
@@ -757,6 +893,9 @@ function ProfilePanel({ profile, onEdit }: { profile: any; onEdit: () => void })
           )}
         </Card>
 
+        {/* NOTIFICACIONES */}
+        <NotificationsBlock />
+
         <div className="rounded-[20px] border border-border bg-white/70 p-4 flex items-center gap-3">
           <span className="w-10 h-10 rounded-xl bg-[#F1ECFF] grid place-items-center shrink-0"><Bell className="w-5 h-5 text-[#7C5CFF]" /></span>
           <div className="min-w-0 flex-1">
@@ -766,6 +905,80 @@ function ProfilePanel({ profile, onEdit }: { profile: any; onEdit: () => void })
         </div>
       </div>
     </div>
+  );
+}
+
+function NotificationsBlock() {
+  const { user } = useAuth();
+  const qc = useQueryClient();
+
+  const { data: prefs, isLoading } = useQuery({
+    queryKey: ["notification_prefs", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase.from("notification_prefs").select("email_enabled, push_enabled").eq("user_id", user!.id).maybeSingle();
+      return data ?? { email_enabled: true, push_enabled: true };
+    },
+  });
+
+  async function update(patch: Partial<{ email_enabled: boolean; push_enabled: boolean }>) {
+    if (!user) return;
+    const next = { email_enabled: prefs?.email_enabled ?? true, push_enabled: prefs?.push_enabled ?? true, ...patch };
+    qc.setQueryData(["notification_prefs", user.id], next);
+    const { error } = await supabase.from("notification_prefs").upsert({ user_id: user.id, ...next });
+    if (error) toast.error("No pudimos guardar tu preferencia");
+    else qc.invalidateQueries({ queryKey: ["notification_prefs"] });
+  }
+
+  useEffect(() => {
+    if (!user || !prefs?.push_enabled) return;
+    const key = `push_lesson_${user.id}_${new Date().toISOString().slice(0, 10)}`;
+    if (localStorage.getItem(key)) return;
+    (async () => {
+      const today = new Date().toISOString().slice(0, 10);
+      const { count } = await supabase
+        .from("daily_activity")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("activity_type", "camino_dia")
+        .eq("activity_date", today);
+      if ((count ?? 0) > 0) {
+        localStorage.setItem(key, "1");
+        toast("Tu lección de hoy ya está desbloqueada", {
+          description: "Continúa tu camino de sanación.",
+          action: { label: "Ir a etapas", onClick: () => { window.location.href = "/etapas"; } },
+        });
+      }
+    })();
+  }, [user, prefs?.push_enabled]);
+
+  return (
+    <Card className="p-5">
+      <div className="flex items-center gap-2 mb-3">
+        <span className="w-9 h-9 rounded-xl bg-[#F1ECFF] grid place-items-center shrink-0"><Bell className="w-4 h-4 text-[#7C5CFF]" /></span>
+        <h2 className="font-display font-bold text-[15px]">Notificaciones</h2>
+      </div>
+      {isLoading ? (
+        <div className="h-16 rounded-2xl bg-muted animate-pulse" />
+      ) : (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between rounded-2xl border border-border p-3">
+            <div>
+              <div className="text-[13px] font-semibold">Correo electrónico</div>
+              <div className="text-[11.5px] text-muted-foreground">Recibe novedades y avisos por correo.</div>
+            </div>
+            <Switch checked={prefs?.email_enabled ?? true} onCheckedChange={(v) => update({ email_enabled: v })} />
+          </div>
+          <div className="flex items-center justify-between rounded-2xl border border-border p-3">
+            <div>
+              <div className="text-[13px] font-semibold">Avisos dentro de la app</div>
+              <div className="text-[11.5px] text-muted-foreground">Muestra avisos emergentes cuando algo nuevo se desbloquea.</div>
+            </div>
+            <Switch checked={prefs?.push_enabled ?? true} onCheckedChange={(v) => update({ push_enabled: v })} />
+          </div>
+        </div>
+      )}
+    </Card>
   );
 }
 
