@@ -328,7 +328,10 @@ function ProfileWizard({ profile, onDone, blockExit }: { profile: any; onDone: (
             <div className="rounded-[24px] bg-white shadow-soft p-5 space-y-4">
               <div>
                 <Label className="text-[13px] font-semibold">Correo electrónico</Label>
-                <Input value={user?.email ?? ""} disabled className="mt-1.5 h-12 rounded-[12px] opacity-70" />
+                <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="tucorreo@ejemplo.com" className="mt-1.5 h-12 rounded-[12px]" />
+                {!form.email && (
+                  <p className="mt-1.5 flex items-center gap-1.5 text-[11.5px] text-[#B77B12] font-semibold"><AlertTriangle className="w-3.5 h-3.5 shrink-0" /> Agrega tu correo real para poder contactarte y proteger tu cuenta.</p>
+                )}
               </div>
               <ChangePassword />
               <div className="rounded-2xl bg-[#EAF3FF] p-4 flex gap-3">
@@ -350,7 +353,7 @@ function ProfileWizard({ profile, onDone, blockExit }: { profile: any; onDone: (
                   <SummaryRow icon={<Globe className="w-4 h-4" />} label="País" value={form.country || "—"} />
                   <SummaryRow icon={<Cake className="w-4 h-4" />} label="Edad" value={form.age ? `${form.age} años` : "—"} />
                   <SummaryRow icon={<Heart className="w-4 h-4" />} label="Intención" value={form.intention || "—"} />
-                  <SummaryRow icon={<Mail className="w-4 h-4" />} label="Correo" value={user?.email ?? "—"} />
+                  <SummaryRow icon={<Mail className="w-4 h-4" />} label="Correo" value={form.email || "—"} />
                 </div>
               </div>
               <div className="rounded-[20px] bg-[#FDEFF7] p-4 flex gap-3">
