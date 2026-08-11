@@ -7,6 +7,7 @@ import { DailyReflection } from "@/components/DailyReflection";
 import { DailyQuiz } from "@/components/DailyQuiz";
 import { DailyExercises } from "@/components/DailyExercises";
 import { CategoriaSlider } from "@/components/CategoriaSlider";
+import { ManifestacionSlider } from "@/components/ManifestacionSlider";
 import { BibliotecaSlider } from "@/components/BibliotecaSlider";
 
 import { DailyGames } from "@/components/games/DailyGames";
