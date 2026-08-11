@@ -145,6 +145,12 @@ function HomeView({ displayName, avatar, gems, onOpenTree }: { displayName: stri
           </div>
         </div>
 
+        {/* Cómo se ganan las hojas */}
+        <LeafRulesBlock />
+
+        {/* Transferir Balance */}
+        <TransferSection gems={gems} />
+
         {/* Patrones nudge */}
         <Link to="/patrones" className="mt-5 block rounded-[16px] p-4 text-white active:scale-[.99] transition"
           style={{ background: "linear-gradient(135deg,#8F6BFF 0%,#F58BCB 100%)", boxShadow: "0 4px 14px rgba(124,92,255,.30)" }}>
@@ -549,6 +555,173 @@ function AddFamilyView({ onBack }: { onBack: () => void }) {
       <style>{`
         @keyframes floatMini { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
       `}</style>
+    </div>
+  );
+}
+
+
+/* ═══════════════════════ CÓMO SE GANAN LAS HOJAS ═══════════════════════ */
+
+function LeafRulesBlock() {
+  const { data: progress } = useQuery({
+    queryKey: ["leaf-day-progress"],
+    queryFn: () => getLeafDayProgress("arbol"),
+    refetchInterval: 20000,
+  });
+  const pct = progress ? Math.min(100, Math.round((progress.dailyPoints / progress.dailyCap) * 100)) : 0;
+
+  return (
+    <div className="mt-6 rounded-[16px] bg-white border border-[#1B1B27]/[0.08] p-4 shadow-[0_1px_3px_rgba(30,25,20,.06)]">
+      <div className="flex items-center gap-2">
+        <span className="w-9 h-9 rounded-[10px] bg-[#3FBE8F]/10 grid place-items-center text-[#3FBE8F] shrink-0"><Leaf className="w-4 h-4" /></span>
+        <h2 className="font-display font-bold text-[15px] text-[#1B1B27]">Cómo se ganan las hojas</h2>
+      </div>
+      <ul className="mt-3 space-y-2">
+        {LEAF_RULES_TEXT.map((t, i) => (
+          <li key={i} className="text-[12.5px] leading-snug text-[#64667A] flex gap-2">
+            <span className="text-[#7C5CFF] mt-0.5">•</span>
+            <span>{t}</span>
+          </li>
+        ))}
+      </ul>
+      <div className="mt-3">
+        <div className="flex items-center justify-between text-[11px] font-semibold text-[#64667A] mb-1">
+          <span>Progreso de hoy</span>
+          <span>{progress ? formatHojas(progress.dailyPoints) : "0.00"} / {formatHojas(progress?.dailyCap ?? 33)} hojas</span>
+        </div>
+        <div className="h-2.5 rounded-full bg-[#7C5CFF]/10 overflow-hidden">
+          <div className="h-full rounded-full bg-gradient-to-r from-[#7C5CFF] to-[#F58BCB] transition-all" style={{ width: `${pct}%` }} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════ TRANSFERIR BALANCE ═══════════════════════ */
+
+function isValidEmail(v: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
+}
+
+function TransferSection({ gems }: { gems: number }) {
+  const { user } = useAuth();
+  const qc = useQueryClient();
+  const [email, setEmail] = useState("");
+  const [amount, setAmount] = useState<string>("");
+  const [sending, setSending] = useState(false);
+  const max = wholeHojas(gems);
+
+  const { data: transfers = [], isLoading: loadingHist, isError: histError } = useQuery({
+    queryKey: ["hoja_transfers", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("hoja_transfers")
+        .select("id, to_email, points, status, created_at")
+        .eq("user_id", user!.id)
+        .order("created_at", { ascending: false })
+        .limit(20);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  async function send() {
+    if (!user) return;
+    const emailTrim = email.trim().toLowerCase();
+    const qty = Number(amount);
+    if (!isValidEmail(emailTrim)) return toast.error("Ingresa un correo válido");
+    if (user.email && emailTrim === user.email.toLowerCase()) return toast.error("No puedes transferirte hojas a ti mismo");
+    if (!qty || qty <= 0) return toast.error("Elige una cantidad válida de hojas");
+    if (qty > max) return toast.error("No tienes suficiente saldo disponible");
+
+    setSending(true);
+    try {
+      const points = qty * 100;
+      const { error } = await supabase.from("hoja_transfers").insert({
+        user_id: user.id,
+        to_email: emailTrim,
+        points,
+        status: "pending",
+        note: `Transferencia a ${emailTrim}`,
+      });
+      if (error) throw error;
+      await spendGems(-points, `Transferencia a ${emailTrim}`);
+      qc.invalidateQueries({ queryKey: ["hoja_transfers"] });
+      qc.invalidateQueries({ queryKey: ["profile-arbol"] });
+      qc.invalidateQueries({ queryKey: ["profile"] });
+      setEmail(""); setAmount("");
+      toast.success("Transferencia enviada. Está pendiente de revisión.");
+    } catch (e: any) {
+      toast.error(e?.message ?? "No pudimos enviar la transferencia");
+    } finally {
+      setSending(false);
+    }
+  }
+
+  const statusLabel: Record<string, string> = { pending: "Pendiente", approved: "Aprobada", rejected: "Rechazada" };
+  const statusColor: Record<string, string> = { pending: "bg-[#F7B955]/15 text-[#B77B12]", approved: "bg-[#3FBE8F]/15 text-[#2FA574]", rejected: "bg-[#F5566B]/15 text-[#C23B4C]" };
+
+  return (
+    <div className="mt-6">
+      <h2 className="text-[12px] uppercase tracking-[0.18em] font-black text-[#7C5CFF]">Transferir Balance</h2>
+      <div className="mt-3 rounded-[16px] bg-white border border-[#1B1B27]/[0.08] p-4 shadow-[0_1px_3px_rgba(30,25,20,.06)] space-y-3">
+        <div>
+          <label className="text-[12px] font-semibold text-[#1B1B27]">Correo electrónico del destinatario</label>
+          <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="correo@ejemplo.com" className="mt-1.5 h-12 rounded-[12px]" />
+        </div>
+        <div>
+          <label className="text-[12px] font-semibold text-[#1B1B27]">Cantidad de hojas</label>
+          <Select value={amount} onValueChange={setAmount} disabled={max < 1}>
+            <SelectTrigger className="mt-1.5 h-12 rounded-[12px]">
+              <SelectValue placeholder={max < 1 ? "No tienes hojas enteras disponibles" : "Elige una cantidad"} />
+            </SelectTrigger>
+            <SelectContent>
+              {Array.from({ length: max }, (_, i) => i + 1).map((n) => (
+                <SelectItem key={n} value={String(n)}>{n} hoja{n > 1 ? "s" : ""}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="mt-1 text-[11px] text-[#9A97AC]">Disponibles: {max} hoja{max === 1 ? "" : "s"} enteras ({formatHojas(gems)} hojas en total)</p>
+        </div>
+        <button onClick={send} disabled={sending || max < 1}
+          className="w-full h-12 rounded-[12px] text-white font-display font-bold text-[15px] inline-flex items-center justify-center gap-2 disabled:opacity-50 active:scale-[.98] transition"
+          style={{ background: "linear-gradient(180deg,#8F6BFF 0%,#F58BCB 100%)" }}>
+          <Send className="w-4 h-4" /> {sending ? "Enviando…" : "Enviar transferencia"}
+        </button>
+        <div className="rounded-[12px] bg-[#7C5CFF]/[0.07] border border-[#7C5CFF]/15 px-3 py-2.5 flex items-start gap-2 text-[12px] leading-snug font-semibold text-[#7C5CFF]">
+          <ClockIcon className="w-4 h-4 mt-0.5 shrink-0" />
+          La administración revisa cada transferencia. Suele tardar 24 horas o menos; en días feriados puede tomar hasta 72 horas.
+        </div>
+      </div>
+
+      <h3 className="mt-5 text-[12px] uppercase tracking-[0.18em] font-black text-[#7C5CFF]">Historial de transferencias</h3>
+      <div className="mt-3 space-y-2.5">
+        {loadingHist && (
+          <>
+            <div className="h-16 rounded-[14px] bg-[#7C5CFF]/[0.06] animate-pulse" />
+            <div className="h-16 rounded-[14px] bg-[#7C5CFF]/[0.06] animate-pulse" />
+          </>
+        )}
+        {histError && (
+          <div className="rounded-[14px] bg-white border border-[#1B1B27]/[0.08] p-4 text-[13px] text-[#64667A]">No pudimos cargar tu historial.</div>
+        )}
+        {!loadingHist && !histError && transfers.length === 0 && (
+          <div className="rounded-[14px] bg-white border border-[#1B1B27]/[0.08] p-4 text-[13px] text-[#64667A]">Aún no has hecho transferencias.</div>
+        )}
+        {transfers.map((t: any) => (
+          <div key={t.id} className="rounded-[14px] bg-white border border-[#1B1B27]/[0.08] p-3.5 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
+            <span className="w-9 h-9 rounded-[10px] bg-[#7C5CFF]/10 grid place-items-center text-[#7C5CFF] shrink-0"><MailIcon className="w-4 h-4" /></span>
+            <div className="min-w-0">
+              <div className="text-[13px] font-bold text-[#1B1B27] truncate">{t.to_email}</div>
+              <div className="text-[11px] text-[#9A97AC]">{new Date(t.created_at).toLocaleDateString("es-ES", { day: "2-digit", month: "short", year: "numeric" })} · {formatHojas(t.points)} hojas</div>
+            </div>
+            <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-black ${statusColor[t.status] ?? "bg-[#7C5CFF]/10 text-[#7C5CFF]"}`}>
+              {statusLabel[t.status] ?? t.status}
+            </span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
