@@ -59,7 +59,12 @@ function Etapas() {
     },
   });
 
-  const completedIds = new Set((data?.progress ?? []).filter((p: any) => p.status === "completed").map((p: any) => p.stage_id));
+  const progressList = data?.progress ?? [];
+  const completedIds = new Set(progressList.filter((p: any) => p.status === "completed").map((p: any) => p.stage_id));
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const completedTodayIds = new Set(
+    progressList.filter((p: any) => p.status === "completed" && String(p.completed_at ?? "").slice(0, 10) === todayStr).map((p: any) => p.stage_id),
+  );
   const recommendedFocuses = getRecommendedFocuses(data?.intake);
   const orderedStages = orderStages(data?.stages ?? [], recommendedFocuses);
   const total = orderedStages.length || 7;
@@ -129,6 +134,9 @@ function Etapas() {
                 {completedCount} de {total} etapas
                 <br />completadas
               </p>
+              <p className="mt-1.5 text-[11.5px] text-muted-foreground leading-snug">
+                7 etapas por semana, una lección por día · 365 lecciones al año
+              </p>
               <div className="mt-2.5 h-2 w-full rounded-full bg-primary/12 overflow-hidden">
                 <div className="h-full rounded-full bg-gradient-to-r from-primary via-accent-pink to-gold transition-all duration-1000" style={{ width: `${Math.max(pct, 4)}%` }} />
               </div>
@@ -143,8 +151,10 @@ function Etapas() {
           <ol className="relative space-y-3.5">
             {orderedStages.map((s: any, i: number) => {
               const completed = completedIds.has(s.id);
-              const unlocked = i === 0 || completed || completedIds.has(orderedStages[i - 1]?.id);
-              const active = unlocked && !completed;
+              const prevCompleted = i === 0 || completedIds.has(orderedStages[i - 1]?.id);
+              const lockedTomorrow = !completed && i > 0 && prevCompleted && completedTodayIds.has(orderedStages[i - 1]?.id);
+              const unlocked = !completed && prevCompleted && !lockedTomorrow;
+              const active = unlocked;
               const shift = i % 2 === 0 ? "ml-0" : "ml-6";
               const inner = (
                 <div className={cn("grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3", shift)}>
@@ -161,6 +171,8 @@ function Etapas() {
                       <Check className="w-7 h-7" />
                     ) : active ? (
                       <img src={heartGem.url} alt="" aria-hidden width={128} height={128} className="w-8 h-8 object-contain drop-shadow" />
+                    ) : lockedTomorrow ? (
+                      <Lock className="w-6 h-6" />
                     ) : (
                       <span className="font-display font-extrabold text-[17px]">{i + 1}</span>
                     )}
@@ -171,22 +183,24 @@ function Etapas() {
                       "min-w-0 rounded-full pl-4 pr-3 py-3 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 transition active:scale-[.98]",
                       completed && "bg-white/92",
                       active && "bg-white border-2 border-accent-pink",
-                      !unlocked && "bg-white/12 border border-white/18 backdrop-blur",
+                      !unlocked && !completed && "bg-white/12 border border-white/18 backdrop-blur",
                     )}
                     style={active ? { boxShadow: "0 4px 14px rgba(245,139,203,0.28)" } : undefined}
                   >
-                    <span className={cn("truncate font-display font-bold text-[15px]", unlocked ? "text-foreground" : "text-white/80")}>
-                      {s.title}
+                    <span className={cn("min-w-0", unlocked || completed ? "text-foreground" : "text-white/80")}>
+                      <span className="block truncate font-display font-bold text-[15px]">{s.title}</span>
+                      {lockedTomorrow && <span className="block text-[11px] font-semibold text-white/75">Se desbloquea mañana</span>}
                     </span>
+                    {completed && <span className="shrink-0 rounded-full bg-[#3FBE8F]/15 px-2 py-0.5 text-[10px] font-extrabold tracking-wide text-[#2F9A73]">Completada</span>}
                     {active && <span className="shrink-0 rounded-full bg-accent-pink px-2 py-0.5 text-[10px] font-extrabold tracking-wide text-white">HOY</span>}
-                    {!unlocked && <Lock className="w-4 h-4 shrink-0 text-white/70" />}
+                    {!unlocked && !completed && <Lock className="w-4 h-4 shrink-0 text-white/70" />}
                   </div>
                 </div>
               );
 
               return (
                 <li key={s.id} style={{ animation: `fade-in .45s ease-out ${i * 70}ms both` }}>
-                  {unlocked ? (
+                  {unlocked || completed ? (
                     <Link to="/etapas/$stageId" params={{ stageId: String(s.id) }} className="block">{inner}</Link>
                   ) : (
                     <div aria-disabled className="opacity-95">{inner}</div>
