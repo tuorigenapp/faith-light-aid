@@ -663,11 +663,14 @@ export function DailyGames({
   const win = async (g: GameDef) => {
     if (wonToday.includes(g.id)) return;
     setWonToday((w) => [...w, g.id]);
-    await awardGems(g.gems, `game_${g.id}`, { game: g.id });
+    const r = await awardLeaf("juegos", "major", g.title, { game: g.id });
     qc.invalidateQueries({ queryKey: ["profile"] });
     qc.invalidateQueries({ queryKey: ["dashboard"] });
-    toast.success(`+${g.gems} hojas · ${g.title}`);
+    if (r.granted > 0) toast.success(`+${(r.granted / 100).toFixed(2)} hojas · ${g.title}`);
+    else if (r.capped === "daily") toast.info("Ya llegaste a tu tope de 0.333 hojas de hoy. Mañana sigues sumando.");
+    else toast.info("Tope de esta sección alcanzado hoy. Prueba otra sección de la app.");
   };
+
 
   return (
     <section>
