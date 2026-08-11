@@ -373,8 +373,6 @@ function Step1({
   );
 }
 
-const CONSULTA_COST_HOJAS = 1;
-
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
