@@ -62,7 +62,7 @@ export function ConsultaHistorial({
                 {onOpen && (
                   <button
                     onClick={() => onOpen(it.id)}
-                    className="h-9 px-3 rounded-[10px] border border-border bg-white text-xs font-semibold"
+                    className="h-9 px-3 rounded-[10px] border border-border bg-card text-xs font-semibold"
                   >
                     Abrir
                   </button>
@@ -71,7 +71,7 @@ export function ConsultaHistorial({
                   <button
                     onClick={() => onDownload(it.id)}
                     aria-label="Descargar PDF"
-                    className="h-9 w-9 rounded-[10px] border border-border bg-white grid place-items-center"
+                    className="h-9 w-9 rounded-[10px] border border-border bg-card grid place-items-center"
                   >
                     <FileDown className="w-4 h-4" />
                   </button>

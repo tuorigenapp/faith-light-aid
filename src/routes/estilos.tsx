@@ -26,7 +26,7 @@ function EstilosPreview() {
 
 function PhoneFrame() {
   return (
-    <div className="mx-auto w-[375px] rounded-[40px] border-[10px] border-white shadow-modal overflow-hidden bg-white">
+    <div className="mx-auto w-[375px] rounded-[40px] border-[10px] border-card shadow-modal overflow-hidden bg-card">
       <div className="relative bg-aura-top min-h-[780px] flex flex-col">
         {/* Header */}
         <header className="pt-10 px-5 pb-4 relative z-10">
@@ -44,7 +44,7 @@ function PhoneFrame() {
                 </h1>
               </div>
             </div>
-            <div className="shrink-0 flex items-center gap-1.5 rounded-full pl-2.5 pr-3 h-9 bg-white border border-border shadow-soft">
+            <div className="shrink-0 flex items-center gap-1.5 rounded-full pl-2.5 pr-3 h-9 bg-card border border-border shadow-soft">
               <Gem className="w-4 h-4 text-primary" />
               <span className="font-semibold text-sm">1,240</span>
             </div>
@@ -146,7 +146,7 @@ function PhoneFrame() {
 
         {/* Bottom nav */}
         <nav
-          className="sticky bottom-0 mt-6 bg-white/90 backdrop-blur-md border-t border-border pt-2 relative z-10"
+          className="sticky bottom-0 mt-6 bg-card/90 backdrop-blur-md border-t border-border pt-2 relative z-10"
           style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 8px)" }}
         >
           <div className="grid grid-cols-5 h-[56px]">

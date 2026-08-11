@@ -1,7 +1,10 @@
 /** Biblioteca Digital ORIGEN — portadas + enlaces de descarga */
 export type Ebook = {
   id: string;
+  title: string;
   cover: string;
+  /** texto de referencia (tema, sinónimos) usado para la búsqueda */
+  keywords: string;
   /** uno o varios ebooks del mismo tema */
   files: string[];
 };
@@ -9,8 +12,31 @@ export type Ebook = {
 const IBB = "https://i.ibb.co/";
 const drive = (id: string) => `https://drive.google.com/uc?export=download&id=${id}`;
 
-function book(id: string, cover: string, ...fileIds: string[]): Ebook {
-  return { id, cover: IBB + cover, files: fileIds.map(drive) };
+/** Quita acentos y normaliza a minúsculas para comparar texto sin distinción de mayúsculas/tildes */
+export function normalizeText(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
+/** true si el libro coincide con la búsqueda por título o palabras clave de la portada */
+export function matchesQuery(book: Ebook, query: string): boolean {
+  const q = normalizeText(query);
+  if (!q) return true;
+  const haystack = normalizeText(`${book.title} ${book.keywords}`);
+  return haystack.includes(q);
+}
+
+function book(id: string, title: string, cover: string, ...fileIds: string[]): Ebook {
+  return {
+    id,
+    title,
+    cover: IBB + cover,
+    keywords: `${title} sanacion emocional autoestima crecimiento personal biblioteca origen`,
+    files: fileIds.map(drive),
+  };
 }
 
 export const EBOOKS: Ebook[] = [
@@ -91,12 +117,14 @@ export const EBOOKS: Ebook[] = [
   book("b75", "Recuperar la Alegría de Vivir", "Y7F4ccpS/Screenshot-20260810-003840-999.png", "1upVjQlnYlBCkokXcAWVFffLuOdOdDxuf"),
   book(
     "b76",
+    "El Eco de las Palabras No Dichas",
     "ccJ4zvbb/Screenshot-20260810-003928-505.png",
     "1pLxchnKiwlRcnX4qBnUvG0B0YdZfguFt",
     "11pL8gAZ1LahFjo4K2obEIRV9M6S7R2t3",
   ),
   book(
     "b77",
+    "Volver a Empezar sin Miedo",
     "NgLKwtXw/Screenshot-20260810-003954-676.png",
     "1EA_3IvRfLPGvQJu57o_7yM8SmQLWWdjZ",
     "1EA_3IvRfLPGvQJu57o_7yM8SmQLWWdjZ",

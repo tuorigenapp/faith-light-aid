@@ -82,7 +82,7 @@ export function PhotoPicker({ value, onCropped, onRemove, size = 96, shape = "ci
               <div className="text-[9px] font-bold text-[#7C5CFF] mt-1">Subir</div>
             </div>
           )}
-          <span className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-[#7C5CFF] grid place-items-center border-2 border-white">
+          <span className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-[#7C5CFF] grid place-items-center border-2 border-background">
             <Camera className="w-3.5 h-3.5 text-white" />
           </span>
         </button>

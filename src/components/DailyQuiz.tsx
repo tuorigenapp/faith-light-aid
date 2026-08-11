@@ -107,10 +107,10 @@ export function DailyQuiz() {
               disabled={alreadyDone || !!picked}
               className={cn(
                 "w-full text-left rounded-2xl border-2 px-4 py-3 text-[14px] font-medium transition flex items-center gap-3",
-                state === "idle" && "border-[#F1ECFF] bg-white hover:border-[#7C5CFF]/40 active:scale-[0.99]",
+                state === "idle" && "border-secondary bg-card hover:border-[#7C5CFF]/40 active:scale-[0.99]",
                 state === "correct" && "border-[#3FBE8F] bg-[#3FBE8F]/10 text-[#1e7a53]",
                 state === "wrong" && "border-[#F5566B] bg-[#F5566B]/10 text-[#a12a3a]",
-                state === "muted" && "border-[#F1ECFF] bg-white opacity-60",
+                state === "muted" && "border-secondary bg-card opacity-60",
               )}
             >
               <span className="flex-1">{o.label}</span>
