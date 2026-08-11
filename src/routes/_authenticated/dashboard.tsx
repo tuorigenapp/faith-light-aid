@@ -168,8 +168,12 @@ function Dashboard() {
         {/* Árbol de Sanación */}
         <HealingTree />
 
-        {/* Transformación diaria — categorías (una etapa por día) */}
+        {/* Lo nuevo de ORIGEN — categorías verticales (una lección por día) */}
         <CategoriaSlider />
+
+        {/* Manifestación con mentor + música + ejercicios */}
+        <ManifestacionSlider />
+
 
         {/* Reflexión del día */}
         <DailyReflection />
