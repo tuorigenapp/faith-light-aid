@@ -37,6 +37,18 @@ const FALLBACK = {
     { q: "¿Sientes que puedes hablar con alguien de lo que te pasa?", options: ["Sí, tengo con quién", "A veces", "Me siento sola/o"] },
     { q: "¿Has tenido pensamientos de hacerte daño?", options: ["No", "Pensamientos pasajeros", "Sí, con frecuencia"] },
   ],
+  solutions: [
+    "Observa. Reconoce con calma lo que sientes respecto al tema de hoy.",
+    "Escribe. Pon en palabras concretas lo que descubriste.",
+    "Habla. Dilo en voz alta como una declaración o una oración corta.",
+    "Decide. Elige una acción pequeña y concreta para hoy.",
+  ],
+  tasks: [
+    "Escribe ahora una nota breve sobre cómo te sientes con este tema.",
+    "Identifica una situación concreta relacionada y descríbela.",
+    "Ora ahora una oración corta sobre esto y confirma cuando termines.",
+    "Declara en voz alta una frase que refuerce lo trabajado hoy.",
+  ],
 };
 
 export const Route = createFileRoute("/api/stage-pack")({
@@ -54,10 +66,15 @@ Devuelve SOLO JSON estricto con este shape:
   "words": ["8 palabras de 3 a 9 letras, SIN acentos ni espacios, MAYÚSCULAS, relacionadas al tema de la etapa (para sopa de letras)"],
   "promesas": ["32 promesas bíblicas cortas (máx 5 palabras) en primera persona, distintas entre sí, alineadas al tema"],
   "fe": [{"q":"pregunta","options":["a","b","c"],"correct":0}],
-  "bienestar": [{"q":"pregunta de bienestar emocional","options":["opción sana","opción intermedia","opción de alerta"]}]
+  "bienestar": [{"q":"pregunta de bienestar emocional","options":["opción sana","opción intermedia","opción de alerta"]}],
+  "solutions": ["4 pasos de solución, ver instrucciones abajo"],
+  "tasks": ["4 tareas realizables ahora mismo, ver instrucciones abajo"]
 }
 "fe" debe tener EXACTAMENTE 10 preguntas distintas del tema de la etapa, con 3 opciones y el índice correcto.
 "bienestar" debe tener 4 preguntas suaves y respetuosas para detectar ánimo bajo (sueño, ganas, soledad, pensamientos de daño), de menor a mayor alerta.
+Agrega también:
+"solutions": EXACTAMENTE 4 pasos de solución simples, concretos y accionables sobre el tema de la etapa, en este orden de tipo de acción: 1) observar/reconocer, 2) escribir, 3) hablar en voz alta, 4) decidir/actuar. Cada uno con formato "Verbo. Frase corta." Deben ser coherentes entre sí, sin contradicciones ni frases absurdas (prohibido pedir repetir una acción que ya se hizo, como "ora una oración que ya oraste").
+"tasks": EXACTAMENTE 4 tareas espirituales que el usuario pueda completar AHORA MISMO dentro de la app marcando una casilla (nunca asignes tareas "para mañana" ni "para el día X"; todo se hace en este momento).
 Todo el contenido debe ser NUEVO y distinto para la variante indicada; no repitas listas típicas.`;
 
         const userMsg = `Etapa ${body.stageId ?? 1}: "${body.title ?? "Sanidad emocional"}"
@@ -80,12 +97,20 @@ Variante única (no repetir contenido de otras variantes): ${body.variant ?? new
           const words = (Array.isArray(p.words) ? p.words : [])
             .map((w: string) => String(w).toUpperCase().normalize("NFD").replace(/[^A-Z]/g, ""))
             .filter((w: string) => w.length >= 3 && w.length <= 9);
+          const isCoherentList = (arr: unknown, n: number) =>
+            Array.isArray(arr) &&
+            arr.length === n &&
+            arr.every((x) => typeof x === "string" && x.trim().length >= 8 && !/ya (or[ée]|hice|dije)/i.test(x)) &&
+            !/(día|dia)\s*\d/i.test(JSON.stringify(arr));
+
           return Response.json({
             cargas: Array.isArray(p.cargas) && p.cargas.length >= 8 ? p.cargas.slice(0, 15) : FALLBACK.cargas,
             words: words.length >= 5 ? words.slice(0, 8) : FALLBACK.words,
             promesas: Array.isArray(p.promesas) && p.promesas.length >= 20 ? p.promesas.slice(0, 32) : FALLBACK.promesas,
             fe: Array.isArray(p.fe) && p.fe.length >= 5 ? p.fe.slice(0, 10) : FALLBACK.fe,
             bienestar: Array.isArray(p.bienestar) && p.bienestar.length >= 3 ? p.bienestar.slice(0, 4) : FALLBACK.bienestar,
+            solutions: isCoherentList(p.solutions, 4) ? p.solutions : FALLBACK.solutions,
+            tasks: isCoherentList(p.tasks, 4) ? p.tasks : FALLBACK.tasks,
           });
         } catch {
           return Response.json(FALLBACK);

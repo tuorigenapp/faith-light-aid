@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Textarea } from "@/components/ui/textarea";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ArrowRight, Check, Lock, X, Leaf, RefreshCw, Sparkles, Flame, PenLine, HandHeart, ListChecks, Loader2 } from "lucide-react";
@@ -10,7 +11,7 @@ import { useState, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { WordSearch } from "@/components/WordSearch";
-import { getStageContent } from "@/lib/stage-content";
+import { getStageContent, getSolutionSteps, getStageTasks } from "@/lib/stage-content";
 import { awardGems } from "@/lib/gems";
 import { useStagePack, stageVariant, type StagePack } from "@/lib/stage-pack";
 import heartCrystal from "@/assets/st-heart-crystal.png";
@@ -68,19 +69,31 @@ function StageFlow() {
     queryKey: ["stage", id, user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const [stage, progress, stages, entries] = await Promise.all([
+      const [stage, progress, stages, entries, allProgress] = await Promise.all([
         supabase.from("stages").select("*").eq("id", id).maybeSingle(),
         supabase.from("stage_progress").select("*").eq("user_id", user!.id).eq("stage_id", id).maybeSingle(),
         supabase.from("stages").select("id").order("id"),
         supabase.from("stage_step_entries").select("*").eq("user_id", user!.id).eq("stage_id", id),
+        supabase.from("stage_progress").select("stage_id, status, completed_at").eq("user_id", user!.id),
       ]);
       const ids = (stages.data ?? []).map((s: any) => s.id);
+      const idx = ids.indexOf(id);
+      const progressMap = new Map((allProgress.data ?? []).map((p: any) => [p.stage_id, p]));
+      const today = new Date().toISOString().slice(0, 10);
+      const prevId = idx > 0 ? ids[idx - 1] : null;
+      const prevProgress = prevId !== null ? progressMap.get(prevId) : null;
+      const prevCompleted = idx === 0 || prevProgress?.status === "completed";
+      const prevCompletedToday = !!prevProgress?.completed_at && String(prevProgress.completed_at).slice(0, 10) === today;
+      const lockedTomorrow = idx > 0 && prevCompleted && prevCompletedToday;
+      const lockedSequential = idx > 0 && !prevCompleted;
       return {
         stage: stage.data,
         progress: progress.data,
-        total: ids.length || 8,
-        position: Math.max(1, ids.indexOf(id) + 1),
+        total: ids.length || 7,
+        position: Math.max(1, idx + 1),
         entries: (entries.data ?? []) as any[],
+        lockedTomorrow,
+        lockedSequential,
       };
     },
   });
@@ -110,10 +123,24 @@ function StageFlow() {
 
   const stage = data.stage;
   const content = getStageContent(stage.focus_area, id);
-  const tasks = ((stage.tasks as string[]) ?? []).filter(Boolean);
-  const solutionSteps = ((stage.solution_steps as string[]) ?? []).filter(Boolean);
+  const p0: StagePack | undefined = pack.data;
+  const tasks = p0?.tasks?.length === 4 ? p0.tasks : getStageTasks(stage.focus_area);
+  const solutionSteps = p0?.solutions?.length === 4 ? p0.solutions : getSolutionSteps(stage.focus_area);
   const position = data.position;
   const entries: any[] = data.entries;
+
+  if (data.progress?.status === "completed") {
+    return <CompletedStageView stage={stage} position={position} total={data.total} onBack={() => navigate({ to: "/etapas" })} />;
+  }
+
+  if (data.lockedTomorrow || data.lockedSequential) {
+    return (
+      <LockedStageView
+        tomorrow={data.lockedTomorrow}
+        onBack={() => navigate({ to: "/etapas" })}
+      />
+    );
+  }
 
   function reward(amount: number, reason: string) {
     setEarned((e) => e + amount);
