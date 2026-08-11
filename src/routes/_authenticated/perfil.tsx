@@ -392,6 +392,123 @@ function ProfileWizard({ profile, onDone, blockExit }: { profile: any; onDone: (
   );
 }
 
+function EditProfileLimited({ profile, onDone }: { profile: any; onDone: () => void }) {
+  const { user } = useAuth();
+  const qc = useQueryClient();
+  const [photoBlob, setPhotoBlob] = useState<Blob | null>(null);
+  const [localPreview, setLocalPreview] = useState<string | null>(null);
+  const isTemp = (e?: string | null) => !e || /invitado|@temp/i.test(e);
+  const [email, setEmail] = useState(isTemp(profile.email ?? user?.email) ? "" : (profile.email ?? user?.email ?? ""));
+  const [saving, setSaving] = useState(false);
+  const sign = useSignedUrls("avatars", [profile.avatar_url]);
+  const currentAvatar = localPreview ?? sign(profile.avatar_url) ?? null;
+
+  const LOCKED_FIELDS: { label: string; value: string }[] = [
+    { label: "Nombre para hablarte", value: profile.display_name || "—" },
+    { label: "Nombre completo", value: profile.full_name || "—" },
+    { label: "País", value: profile.country || "—" },
+    { label: "Edad", value: profile.age ? `${profile.age} años` : "—" },
+    { label: "Intención principal", value: profile.intention || "—" },
+    { label: "¿Qué buscas sanar?", value: profile.bio || "—" },
+  ];
+
+  async function save() {
+    if (!user) return;
+    const emailTrim = email.trim();
+    setSaving(true);
+    try {
+      let avatar_url = profile.avatar_url as string | null;
+      if (photoBlob) {
+        await removePhoto("avatars", avatar_url);
+        avatar_url = await uploadPhoto("avatars", user.id, photoBlob);
+      }
+      if (emailTrim && emailTrim !== (user.email ?? "")) {
+        const { error: authErr } = await supabase.auth.updateUser({ email: emailTrim });
+        if (authErr) throw authErr;
+      }
+      const { error } = await supabase.from("profiles").update({
+        avatar_url,
+        email: emailTrim || null,
+      }).eq("id", user.id);
+      if (error) throw error;
+      await qc.invalidateQueries({ queryKey: ["profile"] });
+      qc.invalidateQueries();
+      toast.success("Perfil actualizado");
+      onDone();
+    } catch (e: any) {
+      toast.error(e?.message ?? "No pudimos guardar los cambios");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-b from-[#F4F0FF] via-[#FBFAFF] to-[#EEF6FF]">
+      <div className="mx-auto max-w-md px-4 pt-4 pb-28">
+        <div className="flex items-center gap-3">
+          <button onClick={onDone} aria-label="Volver" className="w-10 h-10 rounded-full bg-white shadow-soft grid place-items-center active:scale-95 transition">
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <h1 className="flex-1 text-center font-display font-black text-[18px] pr-10">Editar perfil</h1>
+        </div>
+
+        <div className="mt-5 rounded-[24px] bg-white shadow-soft p-6 text-center space-y-4">
+          <div className="flex justify-center">
+            <PhotoPicker
+              value={currentAvatar}
+              size={120}
+              label=""
+              onCropped={(blob, url) => { setPhotoBlob(blob); setLocalPreview(url); }}
+              onRemove={async () => {
+                setPhotoBlob(null); setLocalPreview(null);
+                if (profile.avatar_url && user) {
+                  await removePhoto("avatars", profile.avatar_url);
+                  await supabase.from("profiles").update({ avatar_url: null }).eq("id", user.id);
+                  qc.invalidateQueries({ queryKey: ["profile"] });
+                  toast.success("Foto eliminada");
+                }
+              }}
+            />
+          </div>
+          <p className="text-[13px] text-muted-foreground">Foto de perfil</p>
+        </div>
+
+        <div className="mt-4 rounded-[24px] bg-white shadow-soft p-5 space-y-4">
+          <div>
+            <Label className="text-[13px] font-semibold">Correo electrónico</Label>
+            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tucorreo@ejemplo.com" className="mt-1.5 h-12 rounded-[12px]" />
+            {!email && (
+              <p className="mt-1.5 flex items-center gap-1.5 text-[11.5px] text-[#B77B12] font-semibold"><AlertTriangle className="w-3.5 h-3.5 shrink-0" /> Agrega tu correo real para poder contactarte.</p>
+            )}
+          </div>
+          <ChangePassword />
+        </div>
+
+        <div className="mt-4 rounded-[24px] bg-white shadow-soft p-5 space-y-3">
+          <div className="flex items-center gap-2 mb-1">
+            <Lock className="w-4 h-4 text-muted-foreground" />
+            <div className="font-display font-bold text-[14px]">Datos que no se pueden cambiar</div>
+          </div>
+          {LOCKED_FIELDS.map((f) => (
+            <div key={f.label} className="rounded-[12px] bg-muted/50 border border-border p-3 opacity-70">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] uppercase tracking-wider text-muted-foreground">{f.label}</span>
+                <Lock className="w-3.5 h-3.5 text-muted-foreground" />
+              </div>
+              <div className="text-[13px] font-semibold mt-0.5">{f.value}</div>
+              <div className="text-[10.5px] text-muted-foreground mt-1">Este dato no se puede cambiar</div>
+            </div>
+          ))}
+        </div>
+
+        <Button onClick={save} disabled={saving} className="mt-5 w-full h-14 rounded-[14px] btn-primary-gradient text-[16px] font-bold">
+          {saving ? "Guardando…" : "Guardar cambios"}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 function ChangePassword() {
   const [pw, setPw] = useState("");
   const [pw2, setPw2] = useState("");

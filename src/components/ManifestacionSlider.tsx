@@ -9,11 +9,10 @@ import imgCristo from "@/assets/manifesta-cristo.png.asset.json";
 import imgLimpieza from "@/assets/manifesta-limpieza.png.asset.json";
 import imgMagnetico from "@/assets/manifesta-magnetico.png.asset.json";
 
-type Item = { id: string; alt: string; img: string; link: React.ReactNode };
-
-function Card({ img, alt, children }: { img: string; alt: string; children?: never }) {
+function Card({ img, alt }: { img: string; alt: string }) {
   return <img src={img} alt={alt} loading="lazy" className="w-full h-auto block" />;
 }
+
 
 const CLS =
   "block rounded-[20px] overflow-hidden shadow-soft hover:shadow-glow transition-all active:scale-[.98]";
