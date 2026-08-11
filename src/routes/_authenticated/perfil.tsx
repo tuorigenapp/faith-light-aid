@@ -87,7 +87,7 @@ function PerfilPage() {
 
 /* ══════════════════ WIZARD 6 PASOS ══════════════════ */
 
-function ProfileWizard({ profile, onDone }: { profile: any; onDone: () => void }) {
+function ProfileWizard({ profile, onDone, blockExit }: { profile: any; onDone: () => void; blockExit?: boolean }) {
   const { user } = useAuth();
   const qc = useQueryClient();
   const navigate = useNavigate();
@@ -105,6 +105,7 @@ function ProfileWizard({ profile, onDone }: { profile: any; onDone: () => void }
     intention: profile.intention ?? "",
     interests: (profile.interests as string[]) ?? [],
     content_pref: profile.content_pref ?? "Notificaciones",
+    email: (() => { const e = (profile.email ?? user?.email ?? "").trim(); return /invitado|@temp/i.test(e) ? "" : e; })(),
   });
 
   const sign = useSignedUrls("avatars", [profile.avatar_url]);
@@ -133,6 +134,11 @@ function ProfileWizard({ profile, onDone }: { profile: any; onDone: () => void }
         await removePhoto("avatars", avatar_url);
         avatar_url = await uploadPhoto("avatars", user.id, photoBlob);
       }
+      const emailTrim = form.email.trim();
+      if (emailTrim && emailTrim !== (user.email ?? "")) {
+        const { error: authErr } = await supabase.auth.updateUser({ email: emailTrim });
+        if (authErr) throw authErr;
+      }
       const { error } = await supabase.from("profiles").update({
         display_name: form.display_name.trim(),
         full_name: form.full_name.trim() || form.display_name.trim(),
@@ -143,6 +149,7 @@ function ProfileWizard({ profile, onDone }: { profile: any; onDone: () => void }
         interests: form.interests,
         content_pref: form.content_pref,
         avatar_url,
+        email: emailTrim || null,
         profile_completed_at: new Date().toISOString(),
       }).eq("id", user.id);
       if (error) throw error;
@@ -174,13 +181,17 @@ function ProfileWizard({ profile, onDone }: { profile: any; onDone: () => void }
       <div className="mx-auto max-w-md px-4 pt-4 pb-28">
         {/* progreso */}
         <div className="flex items-center gap-3">
-          <button
-            onClick={() => (step === 1 ? onDone() : setStep(step - 1))}
-            aria-label="Volver"
-            className="w-10 h-10 rounded-full bg-white shadow-soft grid place-items-center active:scale-95 transition"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
+          {blockExit && step === 1 ? (
+            <div className="w-10 h-10" />
+          ) : (
+            <button
+              onClick={() => (step === 1 ? onDone() : setStep(step - 1))}
+              aria-label="Volver"
+              className="w-10 h-10 rounded-full bg-white shadow-soft grid place-items-center active:scale-95 transition"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+          )}
           <div className="flex-1">
             <div className="text-center text-[12px] font-bold text-muted-foreground mb-1.5">{step}/{total}</div>
             <div className="flex gap-1.5">
