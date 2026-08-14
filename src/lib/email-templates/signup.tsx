@@ -9,6 +9,7 @@ import {
   Html,
   Link,
   Preview,
+  Section,
   Text,
 } from '@react-email/components'
 
@@ -25,31 +26,38 @@ export const SignupEmail = ({
   recipient,
   confirmationUrl,
 }: SignupEmailProps) => (
-  <Html lang="en" dir="ltr">
+  <Html lang="es" dir="ltr">
     <Head />
-    <Preview>Confirm your email for {siteName}</Preview>
+    <Preview>Confirma tu correo y empieza tu camino en {siteName}</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Heading style={h1}>Confirm your email</Heading>
+        <Section style={brandBar}>
+          <Text style={brand}>{siteName}</Text>
+        </Section>
+        <Heading style={h1}>Confirma tu correo</Heading>
         <Text style={text}>
-          Thanks for signing up for{' '}
+          Gracias por crear tu cuenta en{' '}
           <Link href={siteUrl} style={link}>
             <strong>{siteName}</strong>
           </Link>
-          !
+          . Un paso más y tu camino empieza.
         </Text>
         <Text style={text}>
-          Please confirm your email address (
-          <Link href={`mailto:${recipient}`} style={link}>
-            {recipient}
-          </Link>
-          ) by clicking the button below:
+          Confirma tu correo (<strong>{recipient}</strong>) con el botón de
+          abajo:
         </Text>
         <Button style={button} href={confirmationUrl}>
-          Verify Email
+          Confirmar mi correo
         </Button>
+        <Text style={muted}>
+          Si el botón no funciona, copia y pega este enlace en tu navegador:
+          <br />
+          <Link href={confirmationUrl} style={link}>
+            {confirmationUrl}
+          </Link>
+        </Text>
         <Text style={footer}>
-          If you didn't create an account, you can safely ignore this email.
+          Si no creaste esta cuenta, puedes ignorar este mensaje.
         </Text>
       </Container>
     </Body>
@@ -58,27 +66,63 @@ export const SignupEmail = ({
 
 export default SignupEmail
 
-const main = { backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif' }
-const container = { padding: '20px 25px' }
-const h1 = {
-  fontSize: '22px',
-  fontWeight: 'bold' as const,
-  color: '#000000',
-  margin: '0 0 20px',
+export const main = {
+  backgroundColor: '#ffffff',
+  fontFamily:
+    "-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif",
+  color: '#1B1930',
 }
-const text = {
-  fontSize: '14px',
-  color: '#55575d',
+export const container = {
+  padding: '24px',
+  maxWidth: '560px',
+  margin: '0 auto',
+}
+export const brandBar = { paddingBottom: '16px' }
+export const brand = {
+  fontSize: '15px',
+  fontWeight: 700 as const,
+  letterSpacing: '2px',
+  color: '#7C5CFF',
+  margin: '0',
+  textTransform: 'uppercase' as const,
+}
+export const h1 = {
+  fontSize: '26px',
+  lineHeight: '1.2',
+  fontWeight: 700 as const,
+  color: '#1B1930',
+  margin: '0 0 16px',
+}
+export const text = {
+  fontSize: '16px',
   lineHeight: '1.5',
-  margin: '0 0 25px',
+  color: '#1B1930',
+  margin: '0 0 16px',
 }
-const link = { color: 'inherit', textDecoration: 'underline' }
-const button = {
-  backgroundColor: '#000000',
-  color: '#ffffff',
-  fontSize: '14px',
-  borderRadius: '8px',
-  padding: '12px 20px',
+export const muted = {
+  fontSize: '13px',
+  lineHeight: '1.5',
+  color: '#6B6A85',
+  margin: '24px 0 0',
+  wordBreak: 'break-all' as const,
+}
+export const link = { color: '#7C5CFF', textDecoration: 'underline' }
+export const button = {
+  backgroundColor: '#7C5CFF',
+  color: '#FFFFFF',
+  fontSize: '16px',
+  fontWeight: 600 as const,
+  borderRadius: '12px',
+  padding: '16px 28px',
   textDecoration: 'none',
+  display: 'inline-block',
+  textAlign: 'center' as const,
 }
-const footer = { fontSize: '12px', color: '#999999', margin: '30px 0 0' }
+export const footer = {
+  fontSize: '13px',
+  lineHeight: '1.5',
+  color: '#6B6A85',
+  margin: '24px 0 0',
+  borderTop: '1px solid #EDEAF7',
+  paddingTop: '16px',
+}
