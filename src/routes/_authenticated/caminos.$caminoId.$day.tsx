@@ -7,7 +7,7 @@ import { useProfile } from "@/hooks/use-profile";
 import { awardGems , wholeHojas} from "@/lib/gems";
 import { CAMINO_TOTAL_DAYS, getCamino, getEtapa } from "@/lib/caminos";
 import { DailyGames } from "@/components/games/DailyGames";
-import { useCaminoPack, caminoVariant } from "@/lib/camino-pack";
+import { useCaminoPack, caminoVariant, CAMINO_PACK_BASE } from "@/lib/camino-pack";
 import { WordSearch } from "@/components/WordSearch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
@@ -98,7 +98,7 @@ function CaminoDia() {
   });
 
   const memoryCards = useMemo(() => {
-    const src = (pack.data?.promesas ?? []).slice();
+    const src = (pack.data?.promesas ?? CAMINO_PACK_BASE.promesas).slice();
     const seed = caminoVariant(caminoId, dayNum).split("").reduce((a, c) => a + c.charCodeAt(0), 0);
     let s = seed;
     const rnd = () => ((s = (s * 9301 + 49297) % 233280) / 233280);
@@ -121,7 +121,8 @@ function CaminoDia() {
     );
   }
 
-  const p = pack.data;
+  // Contenido base al instante; se refresca cuando llega el del día.
+  const p = pack.data ?? CAMINO_PACK_BASE;
   const alreadyDone = (state?.done ?? []).some((d) => d.day === dayNum);
 
   async function reward(amount: number, reason: string) {
@@ -187,10 +188,9 @@ function CaminoDia() {
       </header>
 
       <main className="relative z-10 max-w-[520px] mx-auto px-4 py-5 pb-32">
-        {pack.isLoading && (
-          <div className="app-card p-8 text-center">
-            <Loader2 className="w-8 h-8 mx-auto animate-spin text-primary" />
-            <p className="mt-3 text-[14px] text-muted-foreground">Preparando tu etapa de hoy…</p>
+        {pack.isFetching && (
+          <div className="mb-3 flex items-center justify-center gap-2 text-[12px] text-muted-foreground">
+            <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" /> Personalizando tu etapa de hoy…
           </div>
         )}
 
