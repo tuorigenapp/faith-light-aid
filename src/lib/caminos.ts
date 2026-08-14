@@ -6,7 +6,7 @@ import bMagnetico from "@/assets/banner-magnetico.png";
 
 export const CAMINO_TOTAL_DAYS = 8;
 /** Costo en hojas para abrir la semana completa (los 7 días restantes). */
-export const WEEK_UNLOCK_COST = 10;
+export const WEEK_UNLOCK_COST = 1;
 
 export type CaminoEtapa = {
   day: number;
