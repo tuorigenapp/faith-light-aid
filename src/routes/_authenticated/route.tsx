@@ -118,7 +118,9 @@ function AuthLayout() {
       try { return localStorage.getItem("origen_pending_onboarding") === "1"; } catch { return false; }
     })();
     if (pending && location.pathname !== "/onboarding") {
-      navigate({ to: "/onboarding", replace: true });
+      // Se envía una sola vez: después queda libre para navegar por la app.
+      try { localStorage.removeItem("origen_pending_onboarding"); } catch { /* noop */ }
+      navigate({ to: "/onboarding", search: {}, replace: true });
     }
   }, [intake, user, location.pathname, navigate]);
 
