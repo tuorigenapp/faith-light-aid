@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
-  Flame, Gem, Trophy, BookHeart, Sparkles, HeartHandshake, Layers, ChevronRight,
+  Flame, Gem, Leaf, Trophy, BookHeart, Sparkles, HeartHandshake, Layers, ChevronRight,
   Calendar, ArrowLeft, Check, Shield, Mail, Heart, User as UserIcon, Globe, Cake,
   Dumbbell, Target, Bell, Lock, PenLine, AlertTriangle,
 } from "lucide-react";
