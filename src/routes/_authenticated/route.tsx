@@ -106,9 +106,18 @@ function AuthLayout() {
   const avatarUrl = signAvatar(profile?.avatar_url);
 
 
+  // Solo los usuarios que ACABAN de registrarse van al onboarding.
+  // Quien inicia sesión entra directo al Home y nunca vuelve al onboarding.
   useEffect(() => {
     if (!user || intake === undefined) return;
-    if (intake !== "completed" && location.pathname !== "/onboarding") {
+    if (intake === "completed") {
+      try { localStorage.removeItem("origen_pending_onboarding"); } catch { /* noop */ }
+      return;
+    }
+    const pending = (() => {
+      try { return localStorage.getItem("origen_pending_onboarding") === "1"; } catch { return false; }
+    })();
+    if (pending && location.pathname !== "/onboarding") {
       navigate({ to: "/onboarding", replace: true });
     }
   }, [intake, user, location.pathname, navigate]);
