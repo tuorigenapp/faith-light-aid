@@ -21,8 +21,8 @@ import heartCrystal from "@/assets/st-heart-crystal.png";
 import chest from "@/assets/st-chest.png";
 import robot from "@/assets/st-robot.png";
 import caminoFe from "@/assets/st-camino-fe.png";
-import star3d from "@/assets/e3d-star.png.asset.json";
-import brain3d from "@/assets/e3d-brain.png.asset.json";
+import star3d from "@/assets/e3d-star.png";
+import brain3d from "@/assets/e3d-brain.png";
 import tree from "@/assets/hojas-tree.png";
 
 export const Route = createFileRoute("/_authenticated/caminos/$caminoId/$day")({
@@ -357,7 +357,7 @@ function CaminoDia() {
           <section style={{ animation: "fade-in .4s ease-out both" }}>
             <H title="Mini quiz del día" sub="Una pregunta para fijar la lección." />
             <div className="app-card p-5 mt-3">
-              <img src={brain3d.url} alt="" aria-hidden width={128} height={128} className="w-16 h-16 object-contain" />
+              <img src={brain3d} alt="" aria-hidden width={128} height={128} className="w-16 h-16 object-contain" />
               <p className="font-display font-bold text-[18px] leading-snug mt-2">{p.fe[0]?.q}</p>
               <div className="mt-3 space-y-2">
                 {(p.fe[0]?.options ?? []).map((o, i) => (
@@ -546,7 +546,7 @@ function CaminoDia() {
 
         {p && step === 12 && (
           <section className="text-center" style={{ animation: "fade-in .4s ease-out both" }}>
-            <img src={star3d.url} alt="" aria-hidden width={192} height={192} className="w-24 h-24 mx-auto object-contain animate-[float_4s_ease-in-out_infinite]" />
+            <img src={star3d} alt="" aria-hidden width={192} height={192} className="w-24 h-24 mx-auto object-contain animate-[float_4s_ease-in-out_infinite]" />
             <h2 className="font-display font-extrabold text-[26px] leading-tight mt-2">¡Día completado!</h2>
             <div className="mt-4 grid grid-cols-3 gap-3">
               <Podium label="Hojas" value={`+${earned || 60}`} icon={<Leaf className="w-4 h-4 text-[#3FBE8F]" />} />

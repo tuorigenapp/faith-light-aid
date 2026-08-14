@@ -5,7 +5,7 @@ import { Share2, Download, Sparkles, Leaf } from "lucide-react";
 import { getPalabraHoy, palabraShareText, type Palabra } from "@/lib/palabra365";
 import { awardLeaf } from "@/lib/gems";
 import { useAuth } from "@/lib/use-auth";
-import heroImg from "@/assets/camino-paisaje.png.asset.json";
+import heroImg from "@/assets/camino-paisaje.png";
 
 const APP_URL = "https://faith-light-aid.lovable.app";
 
@@ -124,7 +124,7 @@ function PalabraPage() {
   return (
     <div className="min-h-screen bg-background pb-28">
       <div className="relative h-56 w-full overflow-hidden">
-        <img src={heroImg.url} alt="" className="absolute inset-0 h-full w-full object-cover" />
+        <img src={heroImg} alt="" className="absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-black/20" />
         <div className="absolute inset-x-0 bottom-3 px-5">
           <div className="text-[11px] uppercase tracking-widest font-bold text-white/90 flex items-center gap-1.5 drop-shadow">

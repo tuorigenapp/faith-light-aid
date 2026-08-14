@@ -18,9 +18,9 @@ import heartCrystal from "@/assets/st-heart-crystal.png";
 import chest from "@/assets/st-chest.png";
 import robot from "@/assets/st-robot.png";
 import caminoFe from "@/assets/st-camino-fe.png";
-import heartGem from "@/assets/e3d-heartgem.png.asset.json";
-import star3d from "@/assets/e3d-star.png.asset.json";
-import brain3d from "@/assets/e3d-brain.png.asset.json";
+import heartGem from "@/assets/e3d-heartgem.png";
+import star3d from "@/assets/e3d-star.png";
+import brain3d from "@/assets/e3d-brain.png";
 import tree from "@/assets/hojas-tree.png";
 
 export const Route = createFileRoute("/_authenticated/etapas/$stageId")({
@@ -941,7 +941,7 @@ function Step8({ promesas, loading, reward, onNext }: { promesas?: string[]; loa
           <p className="font-display font-extrabold text-[17px] text-primary">¡Excelente! ✨</p>
           <p className="text-[13px] mt-1">Has encontrado todos los pares.</p>
           <p className="mt-1 font-extrabold text-[14px] text-[#2F9A73] inline-flex items-center gap-1">+50 hojas <Leaf className="w-4 h-4" /></p>
-          <img src={brain3d.url} alt="" aria-hidden width={512} height={512} loading="lazy" className="pointer-events-none absolute right-1 bottom-0 w-20 object-contain" />
+          <img src={brain3d} alt="" aria-hidden width={512} height={512} loading="lazy" className="pointer-events-none absolute right-1 bottom-0 w-20 object-contain" />
         </div>
       )}
 
@@ -1109,7 +1109,7 @@ function Step10({ bienestar, reward, onNext }: { bienestar?: { q: string; option
         <div className="relative mt-4 overflow-hidden rounded-[16px] bg-primary/8 p-4 pr-24" style={{ animation: "scale-in .3s ease-out both" }}>
           <p className="text-[13.5px] font-bold">¡Muy bien! Reconoces y eliges lo que te acerca a la sanidad.</p>
           <p className="mt-1 font-extrabold text-[14px] text-[#2F9A73] inline-flex items-center gap-1">+25 hojas <Leaf className="w-4 h-4" /></p>
-          <img src={star3d.url} alt="" aria-hidden width={512} height={512} loading="lazy" className="pointer-events-none absolute right-1 bottom-0 w-20 object-contain" />
+          <img src={star3d} alt="" aria-hidden width={512} height={512} loading="lazy" className="pointer-events-none absolute right-1 bottom-0 w-20 object-contain" />
         </div>
       )}
 
@@ -1165,7 +1165,7 @@ function Step12({ earned, insignia, onSave, onNext }: { earned: number; insignia
       <h1 className="font-display font-extrabold text-[26px] leading-tight text-center">Recompensa del día 🏆</h1>
 
       <div className="relative mt-4 grid place-items-center rounded-[16px] min-h-[210px] overflow-hidden" style={{ background: "radial-gradient(70% 70% at 50% 45%, #F3E4FF 0%, #EADAFB 60%, #FBF3FF 100%)" }}>
-        <img src={heartGem.url} alt="Gema del corazón que sana" width={512} height={512} className="w-[52%] max-w-[190px] object-contain" style={{ animation: "scale-in .5s ease-out both" }} />
+        <img src={heartGem} alt="Gema del corazón que sana" width={512} height={512} className="w-[52%] max-w-[190px] object-contain" style={{ animation: "scale-in .5s ease-out both" }} />
       </div>
 
       <div className="mt-4 grid grid-cols-3 gap-3">

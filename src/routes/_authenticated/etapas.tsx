@@ -8,11 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Check, Lock, AlertCircle, Flame, Award, Leaf } from "lucide-react";
 import { cn } from "@/lib/utils";
 import stageImg from "@/assets/stage-journey.jpg";
-import paisaje from "@/assets/fondo-mistico.png.asset.json";
-import mapaCamino from "@/assets/mapa-camino.png.asset.json";
+import paisaje from "@/assets/fondo-mistico.png";
+import mapaCamino from "@/assets/mapa-camino.png";
 import arbolIsla from "@/assets/hojas-tree.png";
 import portal from "@/assets/onb-portal.png";
-import heartGem from "@/assets/e3d-heartgem.png.asset.json";
+import heartGem from "@/assets/e3d-heartgem.png";
 
 export const Route = createFileRoute("/_authenticated/etapas")({
   head: () => ({
@@ -98,8 +98,8 @@ function Etapas() {
   return (
     <div className="relative min-h-dvh">
       {/* Fondo místico animado */}
-      <img src={paisaje.url} alt="" aria-hidden width={1024} height={1024} className="fixed inset-0 h-full w-full object-cover" />
-      <img src={mapaCamino.url} alt="" aria-hidden width={1024} height={1024} className="fixed inset-0 h-full w-full object-cover opacity-30 mix-blend-screen" />
+      <img src={paisaje} alt="" aria-hidden width={1024} height={1024} className="fixed inset-0 h-full w-full object-cover" />
+      <img src={mapaCamino} alt="" aria-hidden width={1024} height={1024} className="fixed inset-0 h-full w-full object-cover opacity-30 mix-blend-screen" />
       <div aria-hidden className="fixed inset-0 bg-gradient-to-b from-[#2A1B45]/72 via-[#241539]/78 to-[#150C24]/92" />
       <div aria-hidden className="fixed inset-0 pointer-events-none">
         {[12, 34, 58, 76, 90].map((l, i) => (
@@ -170,7 +170,7 @@ function Etapas() {
                     {completed ? (
                       <Check className="w-7 h-7" />
                     ) : active ? (
-                      <img src={heartGem.url} alt="" aria-hidden width={128} height={128} className="w-8 h-8 object-contain drop-shadow" />
+                      <img src={heartGem} alt="" aria-hidden width={128} height={128} className="w-8 h-8 object-contain drop-shadow" />
                     ) : lockedTomorrow ? (
                       <Lock className="w-6 h-6" />
                     ) : (

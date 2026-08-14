@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import logo from "@/assets/logo-origen.png.asset.json";
+import logo from "@/assets/logo-origen.png";
 
 export function SplashScreen() {
   const [mounted, setMounted] = useState(false);
@@ -39,7 +39,7 @@ export function SplashScreen() {
         <span className="splash-ring" style={{ animationDelay: "1.2s" }} />
         {/* Logo */}
         <img
-          src={logo.url}
+          src={logo}
           alt="ORIGEN"
           width={200}
           height={200}

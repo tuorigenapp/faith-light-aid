@@ -1,13 +1,13 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
-import imgMusica from "@/assets/manifesta-musica.png.asset.json";
-import imgPermisoMujer from "@/assets/manifesta-permiso-mujer.png.asset.json";
-import imgPermisoHombre from "@/assets/manifesta-permiso-hombre.png.asset.json";
-import imgNino from "@/assets/manifesta-nino.png.asset.json";
-import imgGlowMujer from "@/assets/manifesta-glowup-mujer.png.asset.json";
-import imgCristo from "@/assets/manifesta-cristo.png.asset.json";
-import imgLimpieza from "@/assets/manifesta-limpieza.png.asset.json";
-import imgMagnetico from "@/assets/manifesta-magnetico.png.asset.json";
+import imgMusica from "@/assets/manifesta-musica.png";
+import imgPermisoMujer from "@/assets/manifesta-permiso-mujer.png";
+import imgPermisoHombre from "@/assets/manifesta-permiso-hombre.png";
+import imgNino from "@/assets/manifesta-nino.png";
+import imgGlowMujer from "@/assets/manifesta-glowup-mujer.png";
+import imgCristo from "@/assets/manifesta-cristo.png";
+import imgLimpieza from "@/assets/manifesta-limpieza.png";
+import imgMagnetico from "@/assets/manifesta-magnetico.png";
 
 function Card({ img, alt }: { img: string; alt: string }) {
   return <img src={img} alt={alt} loading="lazy" className="w-full h-auto block" />;
@@ -18,17 +18,17 @@ const CLS =
   "block rounded-[20px] overflow-hidden shadow-soft hover:shadow-glow transition-all active:scale-[.98]";
 
 const GRUPO_1 = [
-  { key: "musica", alt: "Manifestar con música", img: imgMusica.url, to: "/visualiza" as const },
-  { key: "permiso-mujer", alt: "Deja de pedir permiso para existir — Mujer", img: imgPermisoMujer.url, camino: "permiso" },
-  { key: "permiso-hombre", alt: "Deja de pedir permiso para existir — Hombre", img: imgPermisoHombre.url, programa: "permiso-hombre" },
-  { key: "nino", alt: "Sana a tu niño interior", img: imgNino.url, camino: "nino-interior" },
+  { key: "musica", alt: "Manifestar con música", img: imgMusica, to: "/visualiza" as const },
+  { key: "permiso-mujer", alt: "Deja de pedir permiso para existir — Mujer", img: imgPermisoMujer, camino: "permiso" },
+  { key: "permiso-hombre", alt: "Deja de pedir permiso para existir — Hombre", img: imgPermisoHombre, programa: "permiso-hombre" },
+  { key: "nino", alt: "Sana a tu niño interior", img: imgNino, camino: "nino-interior" },
 ];
 
 const GRUPO_2 = [
-  { key: "glowup-mujer", alt: "Glow Up: mujer de alto valor", img: imgGlowMujer.url, camino: "glowup-mujer" },
-  { key: "cristo", alt: "Método de Cristo 3·6·9", img: imgCristo.url, to: "/visualiza/cristo" as const },
-  { key: "limpieza", alt: "Limpieza espiritual", img: imgLimpieza.url, to: "/visualiza/limpieza" as const },
-  { key: "magnetico", alt: "Vuélvete magnético o magnética", img: imgMagnetico.url, camino: "magnetico" },
+  { key: "glowup-mujer", alt: "Glow Up: mujer de alto valor", img: imgGlowMujer, camino: "glowup-mujer" },
+  { key: "cristo", alt: "Método de Cristo 3·6·9", img: imgCristo, to: "/visualiza/cristo" as const },
+  { key: "limpieza", alt: "Limpieza espiritual", img: imgLimpieza, to: "/visualiza/limpieza" as const },
+  { key: "magnetico", alt: "Vuélvete magnético o magnética", img: imgMagnetico, camino: "magnetico" },
 ];
 
 type Slide = (typeof GRUPO_1)[number] & { camino?: string; programa?: string; to?: string };

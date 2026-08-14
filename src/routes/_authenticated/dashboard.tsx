@@ -19,12 +19,12 @@ import {
   ArrowRight, BookHeart, Flame, Headphones,
   Layers, Sparkles, TreeDeciduous, Trophy, HeartPulse,
 } from "lucide-react";
-import pilarMentora from "@/assets/pilar-mentora.png.asset.json";
-import pilarPareja from "@/assets/pilar-pareja.png.asset.json";
-import pilarPatron from "@/assets/pilar-patron.png.asset.json";
-import pilarMinistracion from "@/assets/dios-te-dice-hoy.png.asset.json";
-import visualizaBanner from "@/assets/visualiza-banner-home-v2.png.asset.json";
-import afiliacionBanner from "@/assets/afiliacion-origen-home.png.asset.json";
+import pilarMentora from "@/assets/pilar-mentora.png";
+import pilarPareja from "@/assets/pilar-pareja.png";
+import pilarPatron from "@/assets/pilar-patron.png";
+import pilarMinistracion from "@/assets/dios-te-dice-hoy.png";
+import visualizaBanner from "@/assets/visualiza-banner-home-v2.png";
+import afiliacionBanner from "@/assets/afiliacion-origen-home.png";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Hoy — ORIGEN" }] }),
@@ -113,10 +113,10 @@ function Dashboard() {
           <div className="hairline-brand mb-3" />
 
           <div className="space-y-3">
-            <PilarBanner to="/chat" image={pilarMentora.url} alt="Conversa con Ruth Esther" />
-            <PilarBanner to="/pareja" image={pilarPareja.url} alt="¿Tu pareja es deuda o propósito?" />
-            <PilarBanner to="/patrones" image={pilarPatron.url} alt="Encuentra tu patrón familiar" />
-            <PilarBanner to="/ministracion" image={pilarMinistracion.url} alt="Dios te dice hoy — Ministración desde la Corte Celestial" />
+            <PilarBanner to="/chat" image={pilarMentora} alt="Conversa con Ruth Esther" />
+            <PilarBanner to="/pareja" image={pilarPareja} alt="¿Tu pareja es deuda o propósito?" />
+            <PilarBanner to="/patrones" image={pilarPatron} alt="Encuentra tu patrón familiar" />
+            <PilarBanner to="/ministracion" image={pilarMinistracion} alt="Dios te dice hoy — Ministración desde la Corte Celestial" />
           </div>
         </section>
 
@@ -186,7 +186,7 @@ function Dashboard() {
           aria-label="Visualízalo y Vívelo — descubre todas nuestras categorías"
           className="block rounded-[24px] overflow-hidden shadow-soft hover:shadow-glow transition-all hover-scale"
         >
-          <img src={visualizaBanner.url} alt="Descubre todas nuestras categorías — Visualízalo y Vívelo" loading="lazy" className="w-full h-auto block" />
+          <img src={visualizaBanner} alt="Descubre todas nuestras categorías — Visualízalo y Vívelo" loading="lazy" className="w-full h-auto block" />
         </Link>
 
         {/* Quiz diario */}
@@ -242,7 +242,7 @@ function Dashboard() {
           aria-label="Afiliación ORIGEN — gana el 70% al compartir"
           className="block rounded-[24px] overflow-hidden shadow-soft hover:shadow-glow transition-all hover-scale"
         >
-          <img src={afiliacionBanner.url} alt="Afiliación ORIGEN — Gana el 70% de ganancias al compartir ORIGEN" loading="lazy" className="w-full h-auto block" />
+          <img src={afiliacionBanner} alt="Afiliación ORIGEN — Gana el 70% de ganancias al compartir ORIGEN" loading="lazy" className="w-full h-auto block" />
         </Link>
 
         {/* Premios */}

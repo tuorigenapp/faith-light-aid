@@ -8,10 +8,10 @@ import { CAMINO_TOTAL_DAYS, WEEK_UNLOCK_COST, getCamino } from "@/lib/caminos";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { ArrowLeft, Award, Check, Flame, Leaf, Lock, Sparkles } from "lucide-react";
-import paisaje from "@/assets/fondo-mistico.png.asset.json";
-import mapaCamino from "@/assets/mapa-camino.png.asset.json";
+import paisaje from "@/assets/fondo-mistico.png";
+import mapaCamino from "@/assets/mapa-camino.png";
 import arbolIsla from "@/assets/hojas-tree.png";
-import heartGem from "@/assets/e3d-heartgem.png.asset.json";
+import heartGem from "@/assets/e3d-heartgem.png";
 import portal from "@/assets/onb-portal.png";
 
 export const Route = createFileRoute("/_authenticated/caminos/$caminoId/")({
@@ -102,8 +102,8 @@ function CaminoMapa() {
 
   return (
     <div className="relative min-h-dvh">
-      <img src={paisaje.url} alt="" aria-hidden width={1024} height={1024} className="fixed inset-0 h-full w-full object-cover" />
-      <img src={mapaCamino.url} alt="" aria-hidden width={1024} height={1024} className="fixed inset-0 h-full w-full object-cover opacity-30 mix-blend-screen" />
+      <img src={paisaje} alt="" aria-hidden width={1024} height={1024} className="fixed inset-0 h-full w-full object-cover" />
+      <img src={mapaCamino} alt="" aria-hidden width={1024} height={1024} className="fixed inset-0 h-full w-full object-cover opacity-30 mix-blend-screen" />
       <div aria-hidden className="fixed inset-0 bg-gradient-to-b from-[#2A1B45]/72 via-[#241539]/78 to-[#150C24]/92" />
 
       <div className="relative z-10 px-4 py-5 max-w-[520px] mx-auto mobile-safe-bottom lg:pb-10">
@@ -178,7 +178,7 @@ function CaminoMapa() {
                     style={active ? { boxShadow: "0 0 0 8px rgba(245,139,203,0.22), 0 8px 22px rgba(245,139,203,0.45)" } : undefined}
                   >
                     {completed ? <Check className="w-7 h-7" /> : active ? (
-                      <img src={heartGem.url} alt="" aria-hidden width={128} height={128} className="w-8 h-8 object-contain drop-shadow" />
+                      <img src={heartGem} alt="" aria-hidden width={128} height={128} className="w-8 h-8 object-contain drop-shadow" />
                     ) : <span className="font-display font-extrabold text-[17px]">{e.day}</span>}
                   </span>
                   <div

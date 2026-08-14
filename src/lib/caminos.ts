@@ -1,8 +1,8 @@
-import bNino from "@/assets/banner-nino.png.asset.json";
-import bGlowHombre from "@/assets/banner-glow-hombre.png.asset.json";
-import bGlowMujer from "@/assets/banner-glow-mujer.png.asset.json";
-import bPermiso from "@/assets/banner-permiso.png.asset.json";
-import bMagnetico from "@/assets/banner-magnetico.png.asset.json";
+import bNino from "@/assets/banner-nino.png";
+import bGlowHombre from "@/assets/banner-glow-hombre.png";
+import bGlowMujer from "@/assets/banner-glow-mujer.png";
+import bPermiso from "@/assets/banner-permiso.png";
+import bMagnetico from "@/assets/banner-magnetico.png";
 
 export const CAMINO_TOTAL_DAYS = 8;
 /** Costo en hojas para abrir la semana completa (los 7 días restantes). */
@@ -33,7 +33,7 @@ export const CAMINOS: Camino[] = [
     title: "Sanar al niño o niña interior",
     short: "Sana a mamá, sana a papá",
     claim: "El adulto que eres se calma cuando el niño que fuiste se siente visto.",
-    banner: bNino.url,
+    banner: bNino,
     gradient: "from-primary via-accent-pink to-gold",
     tint: "text-primary",
     scripture: { text: "Dejad a los niños venir a mí.", ref: "Mateo 19:14" },
@@ -53,7 +53,7 @@ export const CAMINOS: Camino[] = [
     title: "Glow Up: mujer de alto valor",
     short: "Alto valor desde adentro",
     claim: "El verdadero glow up empieza cuando dejas de mendigar lo que ya eres.",
-    banner: bGlowMujer.url,
+    banner: bGlowMujer,
     gradient: "from-accent-pink via-primary to-gold",
     tint: "text-accent-pink",
     scripture: { text: "Mujer virtuosa, ¿quién la hallará?", ref: "Proverbios 31:10" },
@@ -73,7 +73,7 @@ export const CAMINOS: Camino[] = [
     title: "Glow Up: hombre de alto valor",
     short: "Carácter antes que imagen",
     claim: "Un hombre de alto valor no se impone: se sostiene.",
-    banner: bGlowHombre.url,
+    banner: bGlowHombre,
     gradient: "from-[#61A8FF] via-primary to-gold",
     tint: "text-[#3F7FD1]",
     scripture: { text: "Esfuérzate y sé valiente.", ref: "Josué 1:9" },
@@ -93,7 +93,7 @@ export const CAMINOS: Camino[] = [
     title: "Vuélvete magnético/a",
     short: "Atrae lo que quieras",
     claim: "Dejas de perseguir el día que empiezas a elegir.",
-    banner: bMagnetico.url,
+    banner: bMagnetico,
     gradient: "from-gold via-accent-pink to-primary",
     tint: "text-gold",
     scripture: { text: "Deléitate en el Señor y él te dará los deseos de tu corazón.", ref: "Salmo 37:4" },
@@ -113,7 +113,7 @@ export const CAMINOS: Camino[] = [
     title: "Deja de pedir permiso para existir",
     short: "Tu primer no sin culpa",
     claim: "No naciste para pedir permiso: naciste para ocupar tu lugar.",
-    banner: bPermiso.url,
+    banner: bPermiso,
     gradient: "from-primary via-[#61A8FF] to-accent-pink",
     tint: "text-primary",
     scripture: { text: "Para libertad fuiste llamado.", ref: "Gálatas 5:1" },

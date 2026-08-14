@@ -14,7 +14,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { FloatingChatFab } from "@/components/FloatingChatFab";
 import { useSignedUrls } from "@/hooks/use-signed-urls";
-import origenIcon from "@/assets/origen-o-icon.png.asset.json";
+import origenIcon from "@/assets/origen-o-icon.png";
 
 
 
@@ -319,7 +319,7 @@ function AuthLayout() {
               className="absolute left-1/2 -translate-x-1/2 -top-8 w-20 h-20 grid place-items-center active:scale-95 transition-transform"
             >
               <img
-                src={origenIcon.url}
+                src={origenIcon}
                 alt=""
                 className="w-full h-full object-contain drop-shadow-[0_12px_20px_rgba(124,92,255,0.55)]"
               />

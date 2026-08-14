@@ -12,8 +12,8 @@ import { toast } from "sonner";
 import { PhotoPicker } from "@/components/PhotoPicker";
 import { uploadPhoto } from "@/lib/photo";
 import { useSignedUrls } from "@/hooks/use-signed-urls";
-import arbolGemas from "@/assets/arbol-gemas.png.asset.json";
-import arbolMini from "@/assets/arbol-mini.png.asset.json";
+import arbolGemas from "@/assets/arbol-gemas.png";
+import arbolMini from "@/assets/arbol-mini.png";
 import hojasTree from "@/assets/hojas-tree.png";
 import { HOJA_USES } from "@/lib/hojas";
 import { formatHojas, wholeHojas, LEAF_RULES_TEXT, awardGems as spendGems, getLeafDayProgress } from "@/lib/gems";
@@ -430,7 +430,7 @@ function AddFamilyView({ onBack }: { onBack: () => void }) {
         {/* Hero mini tree */}
         <div className="mt-3 relative aspect-square w-[220px] mx-auto">
           <div className="absolute inset-x-6 bottom-6 h-16 bg-[#7C5CFF]/25 blur-3xl rounded-full" />
-          <img src={arbolMini.url} alt="Árbol" className="relative w-full h-full object-contain animate-[floatMini_5s_ease-in-out_infinite]" />
+          <img src={arbolMini} alt="Árbol" className="relative w-full h-full object-contain animate-[floatMini_5s_ease-in-out_infinite]" />
         </div>
         <p className="text-center font-display font-black text-[20px] leading-tight -mt-2">
           Cada familiar cuenta<br />para tu sanación

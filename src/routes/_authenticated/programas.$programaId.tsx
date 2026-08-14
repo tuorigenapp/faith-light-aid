@@ -12,8 +12,8 @@ import {
   ArrowLeft, ArrowRight, Sparkles, Lock, Check, Play, Pause, Headphones,
   PenLine, Heart, CalendarDays, Leaf, ChevronRight, ShieldCheck,
 } from "lucide-react";
-import audioAsset from "@/assets/origen-cierre.mp3.asset.json";
-import hojaImg from "@/assets/arbol-mini.png.asset.json";
+import audioAsset from "@/assets/origen-cierre.mp3";
+import hojaImg from "@/assets/arbol-mini.png";
 
 export const Route = createFileRoute("/_authenticated/programas/$programaId")({
   head: () => ({
@@ -163,7 +163,7 @@ function ProgramaPage() {
               <div className="font-display font-extrabold text-[22px]">{done.size}/21 días</div>
             </div>
             <div className="shrink-0 inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1.5 text-[13px] font-bold text-primary">
-              <img src={hojaImg.url} alt="" width={20} height={20} className="w-5 h-5 object-contain" />
+              <img src={hojaImg} alt="" width={20} height={20} className="w-5 h-5 object-contain" />
               {profile?.gems ?? 0}
             </div>
           </div>
@@ -256,7 +256,7 @@ function ProgramaPage() {
             <div className="font-semibold text-[16px] truncate">Sesión del día {day}</div>
           </div>
         </div>
-        <audio id="prog-audio" src={audioAsset.url} onEnded={() => setPlaying(false)} className="hidden" />
+        <audio id="prog-audio" src={audioAsset} onEnded={() => setPlaying(false)} className="hidden" />
       </div>
 
       {/* Afirmación */}

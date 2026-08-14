@@ -1,7 +1,7 @@
-import ninoCover from "@/assets/prog-nino-interior.png.asset.json";
-import glowMujerCover from "@/assets/prog-glowup-mujer.png.asset.json";
-import magneticoCover from "@/assets/prog-magnetico.png.asset.json";
-import permisoCover from "@/assets/prog-permiso.png.asset.json";
+import ninoCover from "@/assets/prog-nino-interior.png";
+import glowMujerCover from "@/assets/prog-glowup-mujer.png";
+import magneticoCover from "@/assets/prog-magnetico.png";
+import permisoCover from "@/assets/prog-permiso.png";
 import glowHombreCover from "@/assets/prog-glowup-hombre.jpg";
 
 export type Programa = {
@@ -50,7 +50,7 @@ export const PROGRAMAS: Programa[] = [
     title: "Sanar a tu niño o niña interior",
     subtitle: "Sana a mamá, sana a papá, sánate tú",
     claim: "El adulto que eres se calma cuando el niño que fuiste se siente visto.",
-    cover: ninoCover.url,
+    cover: ninoCover,
     emoji: "🧒",
     gradient: "from-primary via-accent-pink to-gold",
     tint: "text-primary",
@@ -74,7 +74,7 @@ export const PROGRAMAS: Programa[] = [
     title: "Glow Up: Mujer de alto valor",
     subtitle: "Belleza, carácter y propósito",
     claim: "No se trata de gustar más, se trata de habitarte mejor.",
-    cover: glowMujerCover.url,
+    cover: glowMujerCover,
     emoji: "👑",
     gradient: "from-accent-pink via-primary to-gold",
     tint: "text-accent-pink",
@@ -122,7 +122,7 @@ export const PROGRAMAS: Programa[] = [
     title: "Vuélvete magnético o magnética",
     subtitle: "Presencia, energía y atracción sana",
     claim: "Atraes lo que eres, no lo que persigues.",
-    cover: magneticoCover.url,
+    cover: magneticoCover,
     emoji: "✨",
     gradient: "from-gold via-accent-pink to-primary",
     tint: "text-gold",
@@ -146,7 +146,7 @@ export const PROGRAMAS: Programa[] = [
     title: "Deja de pedir permiso para existir (Mujer)",
     subtitle: "Tu voz, tu espacio, tu decisión",
     claim: "No naciste para pedir permiso: naciste para ocupar tu lugar.",
-    cover: permisoCover.url,
+    cover: permisoCover,
     emoji: "🕊️",
     gradient: "from-accent-pink via-gold to-primary",
     tint: "text-accent-pink",
@@ -170,7 +170,7 @@ export const PROGRAMAS: Programa[] = [
     title: "Deja de pedir permiso para existir (Hombre)",
     subtitle: "Deja de fingir fuerza y empieza a tener paz",
     claim: "Ser hombre no es callar: es hablar con verdad.",
-    cover: permisoCover.url,
+    cover: permisoCover,
     emoji: "🛡️",
     gradient: "from-accent-blue via-primary to-gold",
     tint: "text-accent-blue",

@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import logo from "@/assets/logo-origen.png.asset.json";
+import logo from "@/assets/logo-origen.png";
 
 export const Route = createFileRoute("/")({
   ssr: false,
@@ -49,7 +49,7 @@ function Entry() {
         <div className="relative flex items-center justify-center">
           <span className="splash-ring" />
           <span className="splash-ring" style={{ animationDelay: "0.6s" }} />
-          <img src={logo.url} alt="ORIGEN" width={160} height={160} className="relative z-10 w-40 h-40 object-contain splash-breathe" />
+          <img src={logo} alt="ORIGEN" width={160} height={160} className="relative z-10 w-40 h-40 object-contain splash-breathe" />
         </div>
         <h1 className="mt-6 font-display text-2xl font-bold text-[#1B1930]">Preparando tu espacio…</h1>
         <p className="mt-2 text-sm text-[#6B6A85]">Tu camino comienza en unos segundos</p>
