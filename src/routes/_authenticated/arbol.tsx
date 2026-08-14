@@ -587,7 +587,7 @@ function LeafRulesBlock() {
       <div className="mt-3">
         <div className="flex items-center justify-between text-[11px] font-semibold text-muted-foreground mb-1">
           <span>Progreso de hoy</span>
-          <span>{progress ? formatHojas(progress.dailyPoints) : "0.00"} / {formatHojas(progress?.dailyCap ?? 33)} hojas</span>
+          <span>{progress?.dailyPoints ?? 0} / {progress?.dailyCap ?? 33} de tu próxima hoja</span>
         </div>
         <div className="h-2.5 rounded-full bg-[#7C5CFF]/10 overflow-hidden">
           <div className="h-full rounded-full bg-gradient-to-r from-[#7C5CFF] to-[#F58BCB] transition-all" style={{ width: `${pct}%` }} />
@@ -682,7 +682,7 @@ function TransferSection({ gems }: { gems: number }) {
               ))}
             </SelectContent>
           </Select>
-          <p className="mt-1 text-[11px] text-[#9A97AC]">Disponibles: {max} hoja{max === 1 ? "" : "s"} enteras ({formatHojas(gems)} hojas en total)</p>
+          <p className="mt-1 text-[11px] text-[#9A97AC]">Disponibles: {max} hoja{max === 1 ? "" : "s"} para transferir</p>
         </div>
         <button onClick={send} disabled={sending || max < 1}
           className="w-full h-12 rounded-[12px] text-white font-display font-bold text-[15px] inline-flex items-center justify-center gap-2 disabled:opacity-50 active:scale-[.98] transition"
@@ -714,7 +714,7 @@ function TransferSection({ gems }: { gems: number }) {
             <span className="w-9 h-9 rounded-[10px] bg-[#7C5CFF]/10 grid place-items-center text-[#7C5CFF] shrink-0"><MailIcon className="w-4 h-4" /></span>
             <div className="min-w-0">
               <div className="text-[13px] font-bold text-foreground truncate">{t.to_email}</div>
-              <div className="text-[11px] text-[#9A97AC]">{new Date(t.created_at).toLocaleDateString("es-ES", { day: "2-digit", month: "short", year: "numeric" })} · {formatHojas(t.points)} hojas</div>
+              <div className="text-[11px] text-[#9A97AC]">{new Date(t.created_at).toLocaleDateString("es-ES", { day: "2-digit", month: "short", year: "numeric" })} · {wholeHojas(t.points)} hojas</div>
             </div>
             <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-black ${statusColor[t.status] ?? "bg-[#7C5CFF]/10 text-[#7C5CFF]"}`}>
               {statusLabel[t.status] ?? t.status}

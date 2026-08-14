@@ -252,7 +252,7 @@ function Dashboard() {
           </div>
           <div className="flex-1">
             <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Tus hojas de sanación</p>
-            <p className="font-display font-bold text-base">{(data?.profile?.gems ?? 0).toLocaleString()} 🍃</p>
+            <p className="font-display font-bold text-base">{wholeHojas(data?.profile?.gems)} 🍃</p>
           </div>
           <span className="text-xs font-bold text-primary">Canjear</span>
         </Link>

@@ -181,7 +181,7 @@ function CaminoDia() {
             </div>
           </div>
           <span className="shrink-0 inline-flex items-center gap-1.5 rounded-full bg-[#3FBE8F]/12 px-3 py-1.5 text-[13px] font-bold text-[#2F9C74]">
-            <Leaf className="w-4 h-4" /> {profile?.gems ?? 0}
+            <Leaf className="w-4 h-4" /> {wholeHojas(profile?.gems)}
           </span>
         </div>
       </header>

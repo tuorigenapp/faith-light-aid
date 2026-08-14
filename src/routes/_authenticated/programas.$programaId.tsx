@@ -164,7 +164,7 @@ function ProgramaPage() {
             </div>
             <div className="shrink-0 inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1.5 text-[13px] font-bold text-primary">
               <img src={hojaImg} alt="" width={20} height={20} className="w-5 h-5 object-contain" />
-              {profile?.gems ?? 0}
+              {wholeHojas(profile?.gems)}
             </div>
           </div>
           <div className="mt-3 h-1.5 rounded-full bg-muted overflow-hidden">
