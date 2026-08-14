@@ -208,10 +208,10 @@ function TreeDetailView({
           </div>
           <div className="text-right">
             <div className="inline-flex items-center gap-1 bg-white/10 backdrop-blur rounded-2xl px-3 py-1.5">
-              <span className="text-lg">💎</span>
+              <span className="text-lg">🍃</span>
               <span className="font-display font-black text-lg leading-none">+{gemsFromMembers.toLocaleString()}</span>
             </div>
-            <div className="text-[10px] text-white/70 font-semibold mt-1">Gemas obtenidas</div>
+            <div className="text-[10px] text-white/70 font-semibold mt-1">Hojas obtenidas</div>
           </div>
         </div>
 
@@ -406,7 +406,7 @@ function AddFamilyView({ onBack }: { onBack: () => void }) {
       qc.invalidateQueries({ queryKey: ["profile"] });
       qc.invalidateQueries({ queryKey: ["profile-arbol"] });
       qc.invalidateQueries({ queryKey: ["profile-gems"] });
-      toast.success(`+${GEM_REWARDS.familyMember} 💎 Gemas de Sanación`);
+      toast.success("Sumaste progreso hacia tu próxima hoja de sanación 🍃");
       onBack();
     } catch (e: any) {
       toast.error(e?.message ?? "No se pudo guardar");
@@ -547,7 +547,7 @@ function AddFamilyView({ onBack }: { onBack: () => void }) {
             disabled={!canSave || saving}
             className="w-full h-14 rounded-[18px] bg-gradient-to-b from-[#4CD394] to-[#2FA574] text-white font-display font-black text-[16px] shadow-[0_8px_24px_rgba(63,190,143,0.45)] disabled:opacity-50"
           >
-            {uploading ? "Subiendo foto…" : saving ? "Guardando…" : `Guardar Familiar  (+${GEM_REWARDS.familyMember} 💎)`}
+            {uploading ? "Subiendo foto…" : saving ? "Guardando…" : "Guardar Familiar 🍃"}
           </Button>
         </div>
       </div>
