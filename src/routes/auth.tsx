@@ -36,6 +36,7 @@ function AuthPage() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) return toast.error(error.message);
+    try { localStorage.removeItem("origen_pending_onboarding"); } catch { /* noop */ }
     toast.success("¡Bienvenido de vuelta!");
     navigate({ to: "/dashboard" });
   }
@@ -53,13 +54,15 @@ function AuthPage() {
     setLoading(false);
     if (error) return toast.error(error.message);
     if (data.session) {
-      toast.success("Cuenta creada. Comienza tu onboarding ORIGEN.");
-      navigate({ to: "/onboarding" });
+      toast.success("Cuenta creada. Comienza tu camino ORIGEN.");
+      try { localStorage.setItem("origen_pending_onboarding", "1"); } catch { /* noop */ }
+      navigate({ to: "/onboarding", search: { skipIntro: true } });
     } else {
       const signin = await supabase.auth.signInWithPassword({ email, password });
       if (!signin.error) {
-        toast.success("Cuenta creada. Comienza tu onboarding ORIGEN.");
-        navigate({ to: "/onboarding" });
+        toast.success("Cuenta creada. Comienza tu camino ORIGEN.");
+        try { localStorage.setItem("origen_pending_onboarding", "1"); } catch { /* noop */ }
+        navigate({ to: "/onboarding", search: { skipIntro: true } });
       } else {
         toast.success("Cuenta creada. Revisa tu correo para confirmar el acceso.");
       }

@@ -38,6 +38,9 @@ import avM3 from "@/assets/av-m3.png";
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
   head: () => ({ meta: [{ title: "Bienvenido — ORIGEN" }] }),
+  validateSearch: (search: Record<string, unknown>) => ({
+    skipIntro: search["skipIntro"] === true || search["skipIntro"] === "true",
+  }),
   component: Onboarding,
 });
 
@@ -93,7 +96,10 @@ function Onboarding() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [loading, setLoading] = useState(true);
-  const [step, setStep] = useState(1);
+  const { skipIntro } = Route.useSearch();
+  // Quien se registra desde la pantalla de acceso ya escuchó la bienvenida:
+  // arranca directamente en la pregunta 2 en adelante.
+  const [step, setStep] = useState(skipIntro ? 2 : 1);
   const [dir, setDir] = useState<1 | -1>(1);
 
   const [name, setName] = useState("");

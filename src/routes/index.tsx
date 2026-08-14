@@ -36,6 +36,7 @@ function Entry() {
         const { error: sErr } = await supabase.auth.signInWithPassword({ email, password });
         if (sErr) { navigate({ to: "/auth", replace: true }); return; }
       }
+      try { localStorage.setItem("origen_pending_onboarding", "1"); } catch { /* noop */ }
       navigate({ to: "/onboarding", replace: true });
     })();
   }, [navigate]);
