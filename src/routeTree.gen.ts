@@ -49,6 +49,8 @@ import { Route as AuthenticatedProgramasProgramaIdRouteImport } from './routes/_
 import { Route as AuthenticatedEtapasStageIdRouteImport } from './routes/_authenticated/etapas.$stageId'
 import { Route as AuthenticatedCaminosCaminoIdRouteImport } from './routes/_authenticated/caminos.$caminoId'
 import { Route as AuthenticatedCaminosCaminoIdIndexRouteImport } from './routes/_authenticated/caminos.$caminoId.index'
+import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
+import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as AuthenticatedVisualizaCategoryIdDayRouteImport } from './routes/_authenticated/visualiza.$categoryId.$day'
 import { Route as AuthenticatedCaminosCaminoIdDayRouteImport } from './routes/_authenticated/caminos.$caminoId.$day'
 
@@ -261,6 +263,16 @@ const AuthenticatedCaminosCaminoIdIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedCaminosCaminoIdRoute,
   } as any)
+const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
+  id: '/lovable/email/auth/webhook',
+  path: '/lovable/email/auth/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
+  id: '/lovable/email/auth/preview',
+  path: '/lovable/email/auth/preview',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedVisualizaCategoryIdDayRoute =
   AuthenticatedVisualizaCategoryIdDayRouteImport.update({
     id: '/$day',
@@ -315,6 +327,8 @@ export interface FileRoutesByFullPath {
   '/visualiza/limpieza': typeof AuthenticatedVisualizaLimpiezaRoute
   '/caminos/$caminoId/$day': typeof AuthenticatedCaminosCaminoIdDayRoute
   '/visualiza/$categoryId/$day': typeof AuthenticatedVisualizaCategoryIdDayRoute
+  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
+  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/caminos/$caminoId/': typeof AuthenticatedCaminosCaminoIdIndexRoute
 }
 export interface FileRoutesByTo {
@@ -357,6 +371,8 @@ export interface FileRoutesByTo {
   '/visualiza/limpieza': typeof AuthenticatedVisualizaLimpiezaRoute
   '/caminos/$caminoId/$day': typeof AuthenticatedCaminosCaminoIdDayRoute
   '/visualiza/$categoryId/$day': typeof AuthenticatedVisualizaCategoryIdDayRoute
+  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
+  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/caminos/$caminoId': typeof AuthenticatedCaminosCaminoIdIndexRoute
 }
 export interface FileRoutesById {
@@ -402,6 +418,8 @@ export interface FileRoutesById {
   '/_authenticated/visualiza/limpieza': typeof AuthenticatedVisualizaLimpiezaRoute
   '/_authenticated/caminos/$caminoId/$day': typeof AuthenticatedCaminosCaminoIdDayRoute
   '/_authenticated/visualiza/$categoryId/$day': typeof AuthenticatedVisualizaCategoryIdDayRoute
+  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
+  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/_authenticated/caminos/$caminoId/': typeof AuthenticatedCaminosCaminoIdIndexRoute
 }
 export interface FileRouteTypes {
@@ -447,6 +465,8 @@ export interface FileRouteTypes {
     | '/visualiza/limpieza'
     | '/caminos/$caminoId/$day'
     | '/visualiza/$categoryId/$day'
+    | '/lovable/email/auth/preview'
+    | '/lovable/email/auth/webhook'
     | '/caminos/$caminoId/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -489,6 +509,8 @@ export interface FileRouteTypes {
     | '/visualiza/limpieza'
     | '/caminos/$caminoId/$day'
     | '/visualiza/$categoryId/$day'
+    | '/lovable/email/auth/preview'
+    | '/lovable/email/auth/webhook'
     | '/caminos/$caminoId'
   id:
     | '__root__'
@@ -533,6 +555,8 @@ export interface FileRouteTypes {
     | '/_authenticated/visualiza/limpieza'
     | '/_authenticated/caminos/$caminoId/$day'
     | '/_authenticated/visualiza/$categoryId/$day'
+    | '/lovable/email/auth/preview'
+    | '/lovable/email/auth/webhook'
     | '/_authenticated/caminos/$caminoId/'
   fileRoutesById: FileRoutesById
 }
@@ -549,6 +573,8 @@ export interface RootRouteChildren {
   ApiParejaRoute: typeof ApiParejaRoute
   ApiPatronesRoute: typeof ApiPatronesRoute
   ApiStagePackRoute: typeof ApiStagePackRoute
+  LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
+  LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -833,6 +859,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCaminosCaminoIdIndexRouteImport
       parentRoute: typeof AuthenticatedCaminosCaminoIdRoute
     }
+    '/lovable/email/auth/webhook': {
+      id: '/lovable/email/auth/webhook'
+      path: '/lovable/email/auth/webhook'
+      fullPath: '/lovable/email/auth/webhook'
+      preLoaderRoute: typeof LovableEmailAuthWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/auth/preview': {
+      id: '/lovable/email/auth/preview'
+      path: '/lovable/email/auth/preview'
+      fullPath: '/lovable/email/auth/preview'
+      preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/visualiza/$categoryId/$day': {
       id: '/_authenticated/visualiza/$categoryId/$day'
       path: '/$day'
@@ -981,6 +1021,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiParejaRoute: ApiParejaRoute,
   ApiPatronesRoute: ApiPatronesRoute,
   ApiStagePackRoute: ApiStagePackRoute,
+  LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
+  LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
