@@ -38,8 +38,8 @@ import avM3 from "@/assets/av-m3.png";
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
   head: () => ({ meta: [{ title: "Bienvenido — ORIGEN" }] }),
-  validateSearch: (search: Record<string, unknown>) => ({
-    skipIntro: search["skipIntro"] === true || search["skipIntro"] === "true",
+  validateSearch: (search: Record<string, unknown>): { skipIntro?: boolean } => ({
+    ...(search["skipIntro"] === true || search["skipIntro"] === "true" ? { skipIntro: true } : {}),
   }),
   component: Onboarding,
 });
