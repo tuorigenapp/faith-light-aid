@@ -1,117 +1,118 @@
+# Plan de cierre total — ORÍGEN
 
-## Etapa 2 — Aplicar identidad "Amanecer ORIGEN" a toda la app + nuevas funciones
+Todo lo pedido, agrupado en 8 bloques. Se construye completo en una sola tanda tras tu OK.
 
-Aplico la dirección visual aprobada (`/estilos`) a toda la app y agrego lo pedido, sin popups de gemas, sin mencionar IA (siempre "la mentora Ruth Esther / el método ORIGEN") y respetando el gating de planes.
+---
 
-### A. Identidad visual global (aplicar tokens actuales)
-- Reescribo Landing (`/`), Auth, Onboarding, Home, Chat, Etapas, Diario, Árbol, Patrones, Visualiza, Premios, Perfil con: `bg-aura`, `hero-card`, `btn-primary-gradient`, radios 20/14/12, Sora+Manrope, degradé marca en CTAs, blobs vivos, checks verdes, racha rosa. Mobile-first 375px, desktop centrado max 1100px.
-- Bottom-nav renovado (5 destinos, activo morado): Inicio · Camino · Mentora · Vívelo · Yo.
+## Bloque 1 — Arreglos críticos (primero)
 
-### B. HOME renovado — 3 pilares al frente
-Orden fijo:
-1. Header: avatar con inicial + saludo "Hola, {nombre}" + fecha real + chip **Árbol de Sanación** con total de gemas (sin popups).
-2. Card héroe: próxima misión del día + CTA degradé.
-3. **3 pilares destacados** (cards grandes, imagen + título + CTA):
-   - 💬 **Conversa con Ruth Esther** (Mentora) — pilar 1
-   - 💞 **¿Tu pareja es Deuda Ancestral o Propósito?** (nuevo) — pilar 2
-   - 🌳 **Encuentra tu patrón familiar** — pilar 3
-4. Racha (7 puntos) + progreso de etapa actual.
-5. **Árbol de Sanación diario**: card animada con árbol/corazón; al tocar "Agitar árbol" da 10-30💎 gratis (1 vez/día real, guardado en `daily_activity`).
-6. **Descubre hoy**: sección con secciones bloqueadas 🔒 (Visualiza avanzado, Meditaciones, Círculo de mujeres, etc.) y desbloqueadas atractivas — antojo controlado.
-7. **Invita y gana** (afiliados): card educada, no presiva.
-8. Devocional del día + versículo.
+**Conteo de hojas (error grave).** Hoy 1 hoja = 100 puntos internos y se muestra "1.000". Se cambia a conteo entero real: 1, 2, 3, 4… Las micro-acciones acumulan progreso hacia la siguiente hoja, pero el saldo visible siempre es un número entero sin comas ni decimales. Tope diario sigue siendo el mismo ritmo (una hoja completa toma ~3 días), solo cambia cómo se cuenta y se muestra.
 
-### C. Nueva sección: "¿Tu pareja es Deuda Ancestral o Propósito?"
-Ruta `/pareja`. Flujo 3 pasos:
-1. Formulario: tu nombre + fecha de nacimiento, nombre pareja + fecha de nacimiento, pregunta abierta corta.
-2. Animación de dos corazones entrelazándose (8-10s).
-3. Resultado en tarjeta: veredicto (Propósito / Deuda ancestral / Aprendizaje kármico traducido a "lección de alma"), qué observamos, patrón, lo que Ruth Esther aconseja, próximo paso.
-Backend: endpoint `src/routes/api/pareja.ts` que arma prompt con datos + book-context + numerología suave de fechas; llama a Lovable AI Gateway con **`google/gemini-3.1-pro-preview`** para respuestas más humanas. Guarda en tabla `pareja_lecturas`. Nunca menciona IA; firma "análisis del método ORIGEN — Ruth Esther Paredes Sufrán".
+**Fuera la palabra "GEMAS".** Se reemplaza por "Hojas" en Perfil, Árbol generacional, Premios y en todo texto visible de la app (incluido el nombre de la imagen del árbol).
 
-### D. Árbol de Sanación (reemplaza narrativa de "gemas")
-- Renombro en UI toda mención a "gemas" → **"hojas de sanación 🍃"** (mantenemos columna DB `gems` internamente).
-- Card en HOME con árbol SVG animado + botón "Agitar hoy" → +10-30 hojas aleatorio (1/día, `daily_activity.action='shake_tree'`).
-- Corazón latiendo secundario (en `/arbol` genealógico): agitar = +5 hojas (cooldown 6h).
-- Sin toasts al ganar; solo se actualiza el número del header con transición.
+**Etapas nuevas que no cargan.** Las categorías (Niño interior, Glow Up, Magnético, Deja de pedir permiso) se alinean al mismo motor de carga y estados que "Camino ORÍGEN": mismo mapa, mismo generador de contenido, mismos estados de carga/error/bloqueo. Se corrige la causa raíz de por qué no cargan, no un parche visual.
 
-### E. Afiliados
-Ruta `/invita`. Copy educado y motivador ("Si alguien que amas está atravesando lo mismo…"). Genera código único por usuario (nueva tabla `referrals` con `code`, `owner_id`, `invited_email`, `status`, `reward_paid`). Muestra: enlace copiable, mensaje sugerido para WhatsApp, "ganas 20% del primer mes" + panel de invitados/estado. Sin presión, opt-in.
+**Imágenes y audios que no cargan en GitHub/publicado.** Se revisan todos los recursos (ícono del loading, redes sociales del popup, audios del onboarding, banners) y se pasan al sistema de assets con URL absoluta y estable, verificando cada uno cargue en producción.
 
-### F. Gating por plan (respetar a toda costa)
-Middleware simple `usePlan()`:
-- **Explorador (free)**: 1 conversación/día con mentora, 1 lectura de pareja/mes, 1 análisis de patrón/mes, etapa 1 completa, resto 🔒.
-- **Camino ORIGEN (premium)**: chat ilimitado, lecturas ilimitadas, todas las etapas, todo Vívelo, afiliados avanzados.
-- Contador diario en `daily_activity` (`action='chat_message'`). Al llegar al límite: card elegante "Volvió mañana a las HH:MM" + CTA "Desbloquea ahora" al paywall — nunca popup.
-- Secciones bloqueadas se ven con overlay difuminado + 🔒 + "Desbloquea con Camino ORIGEN".
+**Login vs onboarding.**
+- Usuario que **inicia sesión** → va directo al Home. Nunca ve onboarding.
+- Usuario que **se registra** → salta el audio inicial y arranca desde la pregunta 2 en adelante.
+- Se elimina el re-render/recarga que devuelve al onboarding.
 
-### G. Chat mentora — mantener siempre visible
-- Botón flotante inferior derecha (56px, degradé, glow) presente en TODA la app excepto durante onboarding y splash. Al tocar → `/chat`.
-- Reforzar system prompt: nunca menciona IA/modelo; siempre "Ruth Esther / método ORIGEN". Fuente = libro. Toca respetar límite diario (contador incrementa por mensaje del usuario).
+---
 
-### H. Quizzes / micro-desafíos únicos (diferenciación)
-Añado en Home rotativo "Reflexión del día" (1 pregunta, 3 opciones, respuesta amable de la mentora + 5🍃). Guardado en `daily_activity`.
+## Bloque 2 — Panel de administración (solo dueña)
 
-### I. Base de datos (migraciones nuevas)
-```sql
-create table public.pareja_lecturas (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) on delete cascade,
-  self_name text, self_dob date,
-  partner_name text, partner_dob date,
-  question text,
-  verdict text,       -- 'proposito' | 'deuda' | 'leccion'
-  summary text,
-  pattern text,
-  advice text,
-  next_step text,
-  created_at timestamptz default now()
-);
--- grants + RLS (owner-only) + policies
+Ruta `/admin`, protegida en el **servidor** (rol admin verificado en base de datos, no solo ruta oculta) + reglas de acceso que impiden que cualquier usuario normal lea estos datos. Si un dato no existe: **"Sin datos"**, nunca inventado.
 
-create table public.referrals (
-  id uuid primary key default gen_random_uuid(),
-  owner_id uuid not null references auth.users(id) on delete cascade,
-  code text unique not null,
-  invited_email text,
-  status text default 'pending', -- pending|joined|paid
-  reward_gems int default 0,
-  created_at timestamptz default now()
-);
--- grants + RLS + policies
+**Secciones:**
 
-create table public.daily_reflections (
-  id uuid primary key default gen_random_uuid(),
-  day date not null,
-  question text not null,
-  options jsonb not null,     -- [{key,label,response}]
-  created_at timestamptz default now()
-);
-grant select on public.daily_reflections to authenticated, anon;
-alter table public.daily_reflections enable row level security;
-create policy "public read" on public.daily_reflections for select using (true);
--- seed 30 días
-```
-- Extender `daily_activity` para acciones: `shake_tree`, `chat_message`, `pareja_read`, `patron_read`, `reflection_done` (usar columna existente).
-- Añadir `profiles.referral_code` (texto único) generado en signup.
+1. **Avisos al dueño** (banner arriba, lenguaje simple: qué pasó → por qué importa → qué hacer). Se dispara con: IA cara (>20% de ingresos), webhook de pagos fallando, cancelaciones por pago fallido altas, canal que pierde dinero, margen negativo. Si todo bien: "✅ Todo en orden este mes".
+2. **Ventas**: ingresos, compras, cancelaciones (voluntarias vs por pago fallido), MRR, suscripciones activas, pruebas iniciadas.
+3. **Ganancia real**: ingresos − Hotmart − afiliados − impuestos − IA (costo real registrado por llamada) − infra − email, con % de margen. Frase clara: "Facturaste $X y te quedaron $Y limpios".
+4. **Usuarios**: totales, activos 1/3/7/30 días, activación real, retención D1/D7/D30.
+5. **Uso**: acciones más usadas (desde el registro de eventos), embudo del onboarding paso a paso.
+6. **Origen de usuarios (por canal/sección/etapa)**: registros, activación, uso, prueba iniciada, pago real, cancelación y retención **por canal**. Así se ve qué sección trae curiosos y cuál trae pagos. Incluye LTV, CAC, ganancia por canal, ratio LTV:CAC y payback.
+7. **IA**: costo real por función y por usuario, gasto del día.
+8. **Motivos de cancelación**: conteo y tendencia.
+9. **Errores**: resumen de fallos y alertas abiertas.
+10. **Gestión de usuarios**: alta manual con solo **nombre + correo** (genera acceso y lo envía), ver/otorgar plan, y **excluir cuentas internas o de prueba** de todas las métricas con un switch.
 
-### J. Endpoints
-- `src/routes/api/pareja.ts`: server route público protegido con auth; usa `google/gemini-3.1-pro-preview`; devuelve JSON estructurado.
-- `src/routes/api/chat.ts`: revisar system prompt (nunca IA, siempre Ruth Esther), enforcar límite diario para plan free.
-- `src/lib/plan.ts`: helper `getPlan()`, `getRemaining(action)`.
+**Base técnica:** tabla de registro de eventos (fuente única de verdad), tabla de costos de IA por llamada, tabla de pagos/suscripciones alimentada por el webhook de Hotmart, y campo de origen en el perfil. Gráficos limpios, sin adornos.
 
-### K. Splash + logo
-Ya vivo. Verifico que `SplashScreen` no bloquee rutas protegidas.
+---
 
-### L. Reglas transversales
-- Cero popups por gemas/hojas.
-- Cero mención de IA en UI/copy.
-- Todas las secciones bloqueadas con 🔒 y CTA a paywall.
-- Nombre del usuario visible en header y saludo, siempre.
-- Botón chat mentora flotante siempre visible en app.
+## Bloque 3 — Encuesta de cancelación
 
-### Detalles técnicos
-- Modelo IA: `google/gemini-3.1-pro-preview` para pareja y patrones (más humano y matizado); mentora en chat mantiene `openai/gpt-5.5`.
-- Sin cambios en Splash ni en `/estilos`.
-- Todo mobile-first 375px con desktop max-w 1100px.
+Al cancelar (y al bajar de plan), pantalla con motivos: no era lo que esperaba · el plan gratis me basta · no entendí cómo usarla · me dio miedo el cobro · no tengo tiempo · es muy caro · otro (texto libre). Se guarda y alimenta el panel.
 
-Aprueba y ejecuto todo en la próxima generación.
+---
+
+## Bloque 4 — Freemium reordenado (moderación profesional)
+
+**Gratis (engancha, no satisface):** diagnóstico completo, Día 1 de un solo camino, Palabra del día completa con quiz, 1 libro, 3 mensajes con la mentora, diario hasta 5 entradas, juegos diarios, árbol con hasta 4 familiares.
+
+**Pro (Camino ORÍGEN):** los 365 días de todos los caminos, playlists completas de 21 días, consultas (Pareja, Patrones, Dios te dice hoy) con PDF e historial, biblioteca completa, chat sin límite, diario ilimitado, descargables.
+
+**Explorador (US$2,99):** puente — desbloquea 1 camino completo + 1 consulta al mes.
+
+**Momentos de upgrade** (no invasivos): al terminar el Día 1, al intentar el día 2 de una playlist, al agotar mensajes, al querer el PDF, al llegar a 5 entradas del diario, al ver un libro bloqueado. Siempre con el valor concreto delante, no con muro seco.
+
+---
+
+## Bloque 5 — Auditoría Head of Product + acciones aplicadas
+
+Diagnóstico honesto y corto (propuesta de valor, onboarding, activación, gratis vs Pro, momentos de paywall, retención D1/D3/D7, claridad de la landing, métricas, riesgos de abandono) y aplico en el mismo trabajo las mejoras de mayor impacto: promesa única en el primer frame, activación en menos pasos, recompensa visible el día 1, regreso al día 2 y 3, y paywall con fecha real de cobro.
+
+---
+
+## Bloque 6 — /palabra como experiencia, no texto
+
+Cada día trae, con emoji 3D por bloque:
+1. Enseñanza principal
+2. Reflexión para ti
+3. Reflexión para la familia
+4. **Para pensar** — quiz de 3 preguntas con 3 opciones, ligado a la palabra del día, otorga hojas del día
+5. Consejo espiritual
+
+Reescritura del tono: narración humana, con textura y diálogo, como alguien que te cuenta la historia bíblica y te acompaña — no informe.
+
+**Descarga imprimible:** fondo de pantalla a página completa (sin cortar arriba ni abajo), texto centrado, con degradado/opacidad para que todo se lea, siempre sincronizado con la palabra real del día, e incluye nombre + ícono de ORÍGEN y la dirección de la app. Rota entre 5 fondos distintos.
+*Nota: las 5 imágenes de fondo no llegaron adjuntas en el mensaje. Si me las envías las uso tal cual; si no, genero 5 fondos de naturaleza/cielo en la estética ORÍGEN y luego las puedes reemplazar.*
+
+**Compartir:** menú con WhatsApp, Facebook, Instagram, X, Telegram y copiar enlace (ya no solo correo), siempre con nombre, enlace e ícono de la app.
+
+---
+
+## Bloque 7 — Planes y afiliados
+
+Enlaces de pago reales en Membresía:
+- Explorador US$2,99 → `pay.hotmart.com/U107110586N?off=ys5ahbh8`
+- Mensual US$14,99 → `...?off=h24bbhc6`
+- Anual US$89,99 → `...?off=oi4xqwda` (recomendado, mostrado como $/mes)
+
+Página de afiliados rehecha con la información de las imágenes (comisiones 50% primera venta + 10% recurrente, planes, reglas, materiales) y botón de registro a `affiliate.hotmart.com/affiliate-recruiting/view/4091O107110607`.
+
+---
+
+## Bloque 8 — Primeros pasos + Notificaciones
+
+**Checklist "Primeros pasos"** solo para usuarios nuevos, 5 acciones: completar diagnóstico · abrir la Palabra de hoy · agregar 1 familiar al árbol · hacer el Día 1 de tu camino · escribir tu primera entrada del diario. Se marcan solas al cumplirse, se puede minimizar o cerrar sin perder progreso. No toca nada más.
+
+**Notificaciones push web.** Nota técnica: esta app no es Next.js, así que se implementa con el equivalente correcto de esta arquitectura (misma tabla de suscripciones con reglas de acceso, service worker propio, endpoints de suscripción y envío, botón "Activar notificaciones" en Perfil). Notificaciones propuestas (confirmas cuáles activar dentro del mismo trabajo, quedan todas listas y se pueden apagar):
+1. Palabra del día lista (mañana) — Alta
+2. Tu día siguiente del camino te espera — Alta
+3. Racha en riesgo hoy — Alta
+4. Tu consulta está lista — Alta
+5. Mensajes de la mentora disponibles otra vez — Media
+6. Nueva hoja de sanación disponible — Media
+7. Semana desbloqueada / libro nuevo disponible — Media
+8. Aviso antes del cobro del trial — Alta
+9. Te extrañamos (3 días sin entrar) — Baja
+10. Logro alcanzado (7/30/100 días) — Baja
+
+---
+
+## Cierre
+
+Al terminar: verificación de compilación, revisión visual a 375px de cada pantalla nueva y reporte de cierre en ESTADO.md.
