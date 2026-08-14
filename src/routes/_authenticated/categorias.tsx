@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Sparkles, ArrowRight } from "lucide-react";
 import { CAMINOS } from "@/lib/caminos";
-import fondo from "@/assets/fondo-mistico.png.asset.json";
+import fondo from "@/assets/fondo-mistico.png";
 
 export const Route = createFileRoute("/_authenticated/categorias")({
   head: () => ({
@@ -20,7 +20,7 @@ export const Route = createFileRoute("/_authenticated/categorias")({
 function CategoriasPage() {
   return (
     <div className="relative min-h-[calc(100vh-4rem)]">
-      <img src={fondo.url} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover opacity-[0.18]" />
+      <img src={fondo} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover opacity-[0.18]" />
       <div className="relative z-10 mx-auto max-w-lg lg:max-w-[1100px] px-4 pt-4 pb-12">
         <header className="rounded-[16px] bg-card border border-border shadow-soft p-5">
           <div className="text-[11px] uppercase tracking-widest font-bold text-primary inline-flex items-center gap-1.5">

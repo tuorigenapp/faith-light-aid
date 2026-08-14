@@ -10,24 +10,24 @@ import { awardGems, GEM_REWARDS } from "@/lib/gems";
 import { cn } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
 
-import logo from "@/assets/logo-origen.png.asset.json";
+import logo from "@/assets/logo-origen.png";
 import portal from "@/assets/onb-portal.png";
-import eCross from "@/assets/e3d-cross.png.asset.json";
-import eBrain from "@/assets/e3d-brain.png.asset.json";
-import eHeartGem from "@/assets/e3d-heartgem.png.asset.json";
-import eCoin from "@/assets/e3d-coin.png.asset.json";
-import eStar from "@/assets/e3d-star.png.asset.json";
-import eCouple from "@/assets/e3d-couple.png.asset.json";
+import eCross from "@/assets/e3d-cross.png";
+import eBrain from "@/assets/e3d-brain.png";
+import eHeartGem from "@/assets/e3d-heartgem.png";
+import eCoin from "@/assets/e3d-coin.png";
+import eStar from "@/assets/e3d-star.png";
+import eCouple from "@/assets/e3d-couple.png";
 import eHeartPurple from "@/assets/e3d-heart-purple.png";
 import eButterfly from "@/assets/e3d-butterfly.png";
 import eClouds from "@/assets/e3d-clouds.png";
 import eHeadphones from "@/assets/e3d-headphones.png";
 import ePractice from "@/assets/e3d-practice.png";
 import eBook from "@/assets/e3d-book.png";
-import icTiktok from "@/assets/social-tiktok.png.asset.json";
-import icInstagram from "@/assets/social-instagram.png.asset.json";
-import icFacebook from "@/assets/social-facebook.png.asset.json";
-import revelacion from "@/assets/origen-revelacion.mp3.asset.json";
+import icTiktok from "@/assets/social-tiktok.png";
+import icInstagram from "@/assets/social-instagram.png";
+import icFacebook from "@/assets/social-facebook.png";
+import revelacion from "@/assets/origen-revelacion.mp3";
 import mentora from "@/assets/onb-mentora.jpg";
 import avF1 from "@/assets/av-f1.png";
 import avF2 from "@/assets/av-f2.png";
@@ -38,6 +38,9 @@ import avM3 from "@/assets/av-m3.png";
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
   head: () => ({ meta: [{ title: "Bienvenido — ORIGEN" }] }),
+  validateSearch: (search: Record<string, unknown>): { skipIntro?: boolean } => ({
+    ...(search["skipIntro"] === true || search["skipIntro"] === "true" ? { skipIntro: true } : {}),
+  }),
   component: Onboarding,
 });
 
@@ -59,19 +62,19 @@ const TOTAL_STEPS = 9;
 
 const DESEOS = [
   { id: "sanar", label: "Sanar heridas emocionales", img: eHeartPurple },
-  { id: "dios", label: "Fortalecer mi relación con Dios", img: eCross.url },
-  { id: "abundancia", label: "Manifestar abundancia y propósito", img: eStar.url },
+  { id: "dios", label: "Fortalecer mi relación con Dios", img: eCross },
+  { id: "abundancia", label: "Manifestar abundancia y propósito", img: eStar },
   { id: "identidad", label: "Renovar mi identidad", img: eButterfly },
   { id: "todas", label: "Todas las anteriores", img: eClouds },
 ];
 
 const AREAS = [
-  { id: "emocional", label: "Emocional", img: eHeartGem.url },
-  { id: "espiritual", label: "Espiritual", img: eCross.url },
-  { id: "mental", label: "Mental", img: eBrain.url },
-  { id: "financiera", label: "Financiera", img: eCoin.url },
-  { id: "relaciones", label: "Relaciones", img: eCouple.url },
-  { id: "proposito", label: "Propósito", img: eStar.url },
+  { id: "emocional", label: "Emocional", img: eHeartGem },
+  { id: "espiritual", label: "Espiritual", img: eCross },
+  { id: "mental", label: "Mental", img: eBrain },
+  { id: "financiera", label: "Financiera", img: eCoin },
+  { id: "relaciones", label: "Relaciones", img: eCouple },
+  { id: "proposito", label: "Propósito", img: eStar },
 ];
 
 const DETONANTES = [
@@ -93,7 +96,10 @@ function Onboarding() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [loading, setLoading] = useState(true);
-  const [step, setStep] = useState(1);
+  const { skipIntro } = Route.useSearch();
+  // Quien se registra desde la pantalla de acceso ya escuchó la bienvenida:
+  // arranca directamente en la pregunta 2 en adelante.
+  const [step, setStep] = useState(skipIntro ? 2 : 1);
   const [dir, setDir] = useState<1 | -1>(1);
 
   const [name, setName] = useState("");
@@ -375,9 +381,9 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
 
 type Network = "tiktok" | "instagram" | "facebook";
 const NET_ICON: Record<Network, string> = {
-  tiktok: icTiktok.url,
-  instagram: icInstagram.url,
-  facebook: icFacebook.url,
+  tiktok: icTiktok,
+  instagram: icInstagram,
+  facebook: icFacebook,
 };
 const NET_LABEL: Record<Network, string> = { tiktok: "TikTok", instagram: "Instagram", facebook: "Facebook" };
 
@@ -532,7 +538,7 @@ function ScreenIntro({ onNext }: { onNext: () => void }) {
 
   return (
     <div className="pt-1">
-      <audio ref={audioRef} src={revelacion.url} preload="auto" playsInline />
+      <audio ref={audioRef} src={revelacion} preload="auto" playsInline />
 
       <div className="flex justify-center">
         <span className="inline-flex items-center rounded-[10px] bg-[#7C2DBF] px-4 py-2.5 text-center text-[12.5px] font-black uppercase tracking-[0.06em] text-white">
@@ -615,7 +621,7 @@ function ScreenName({ name, setName, onNext }: { name: string; setName: (s: stri
         <div className="relative w-28 h-28 grid place-items-center">
           <div aria-hidden className="absolute inset-0 rounded-full blur-2xl animate-glow"
             style={{ background: "radial-gradient(circle, rgba(245,139,203,0.38), transparent 65%)" }} />
-          <Emoji src={eHeartGem.url} size={92} className="relative animate-breathe" />
+          <Emoji src={eHeartGem} size={92} className="relative animate-breathe" />
         </div>
       </div>
       <h1 className="text-center font-display font-extrabold text-[30px] leading-[1.12] mt-4 text-[#1B1B27]">
@@ -747,7 +753,7 @@ function ScreenRaices({ value, setValue, onNext }: { value: string; setValue: (s
   return (
     <ScreenCard>
       <div className="grid place-items-center">
-        <Emoji src={eCouple.url} size={86} className="animate-breathe" />
+        <Emoji src={eCouple} size={86} className="animate-breathe" />
       </div>
       <h2 className="text-center font-display font-extrabold text-[26px] mt-4 text-[#1B1B27]">Tus raíces 🌿</h2>
       <p className="text-center text-[14px] text-[#64667A] mt-2 leading-relaxed">
@@ -819,7 +825,7 @@ function LogoReveal() {
         <span className="splash-ring" />
         <span className="splash-ring" style={{ animationDelay: "0.6s" }} />
         <span className="splash-ring" style={{ animationDelay: "1.2s" }} />
-        <img src={logo.url} alt="ORIGEN" width={200} height={200}
+        <img src={logo} alt="ORIGEN" width={200} height={200}
           className="relative z-10 w-[200px] h-[200px] object-contain drop-shadow-[0_20px_60px_rgba(124,92,255,0.35)] splash-breathe" />
       </div>
       <div className="mt-8 text-center px-6">

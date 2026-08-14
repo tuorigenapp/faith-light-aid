@@ -1,8 +1,8 @@
-import bNino from "@/assets/banner-nino.png.asset.json";
-import bGlowHombre from "@/assets/banner-glow-hombre.png.asset.json";
-import bGlowMujer from "@/assets/banner-glow-mujer.png.asset.json";
-import bPermiso from "@/assets/banner-permiso.png.asset.json";
-import bMagnetico from "@/assets/banner-magnetico.png.asset.json";
+import bNino from "@/assets/banner-nino.png";
+import bGlowHombre from "@/assets/banner-glow-hombre.png";
+import bGlowMujer from "@/assets/banner-glow-mujer.png";
+import bPermiso from "@/assets/banner-permiso.png";
+import bMagnetico from "@/assets/banner-magnetico.png";
 
 export type Categoria = {
   id: string;
@@ -20,7 +20,7 @@ export const CATEGORIAS: Categoria[] = [
     programaId: "nino-interior",
     title: "Sanar al niño o niña interior",
     hook: "ya descubrieron a quién estaban esperando",
-    banner: bNino.url,
+    banner: bNino,
     base: 1284,
   },
   {
@@ -28,7 +28,7 @@ export const CATEGORIAS: Categoria[] = [
     programaId: "glowup-mujer",
     title: "Glow Up Mujer",
     hook: "ya empezaron su glow up real",
-    banner: bGlowMujer.url,
+    banner: bGlowMujer,
     base: 2071,
   },
   {
@@ -36,7 +36,7 @@ export const CATEGORIAS: Categoria[] = [
     programaId: "glowup-hombre",
     title: "Glow Up Hombre",
     hook: "hombres ya trabajan su carácter",
-    banner: bGlowHombre.url,
+    banner: bGlowHombre,
     base: 942,
   },
   {
@@ -44,7 +44,7 @@ export const CATEGORIAS: Categoria[] = [
     programaId: "magnetico",
     title: "Vuélvete Magnético/a",
     hook: "dejaron de perseguir y empezaron a elegir",
-    banner: bMagnetico.url,
+    banner: bMagnetico,
     base: 1657,
   },
   {
@@ -52,7 +52,7 @@ export const CATEGORIAS: Categoria[] = [
     programaId: "permiso-mujer",
     title: "Deja de pedir permiso",
     hook: "ya dijeron su primer no sin culpa",
-    banner: bPermiso.url,
+    banner: bPermiso,
     base: 1329,
   },
 ];

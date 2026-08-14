@@ -84,7 +84,7 @@ export function DailyQuiz() {
         </div>
         <span className="text-[11px] uppercase tracking-widest font-bold text-primary">Quiz de hoy</span>
         <span className="ml-auto text-[10px] font-bold text-[#7C5CFF] bg-[#7C5CFF]/10 rounded-full px-2 py-0.5">
-          +15 💎
+          🍃
         </span>
       </div>
       <h3 className="font-display font-bold text-[17px] leading-snug mb-4">{quiz.question}</h3>

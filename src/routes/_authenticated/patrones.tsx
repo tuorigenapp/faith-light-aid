@@ -12,12 +12,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, ArrowRight, Lock, Sparkles, Heart, TreeDeciduous, Users, MessageCircle, RefreshCw, Home, BookOpen, PenLine, Headphones, GraduationCap, Leaf } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import step1Asset from "@/assets/patrones-step1.png.asset.json";
-import step2Asset from "@/assets/patrones-step2.png.asset.json";
-import e3dBrain from "@/assets/e3d-brain.png.asset.json";
-import e3dStar from "@/assets/e3d-star.png.asset.json";
-import e3dHeartgem from "@/assets/e3d-heartgem.png.asset.json";
-import e3dCross from "@/assets/e3d-cross.png.asset.json";
+import step1Asset from "@/assets/patrones-step1.png";
+import step2Asset from "@/assets/patrones-step2.png";
+import e3dBrain from "@/assets/e3d-brain.png";
+import e3dStar from "@/assets/e3d-star.png";
+import e3dHeartgem from "@/assets/e3d-heartgem.png";
+import e3dCross from "@/assets/e3d-cross.png";
 
 export const Route = createFileRoute("/_authenticated/patrones")({
   head: () => ({ meta: [{ title: "Explora tus Patrones Familiares — ORIGEN" }] }),
@@ -310,7 +310,7 @@ function Step1({
     <div>
       {/* Hero illustration */}
       <div className="relative rounded-[2rem] overflow-hidden bg-gradient-to-b from-[#F5F0FF] to-white shadow-soft">
-        <img src={step1Asset.url} alt="Consulta de patrones familiares — ORIGEN" className="w-full h-auto object-cover" />
+        <img src={step1Asset} alt="Consulta de patrones familiares — ORIGEN" className="w-full h-auto object-cover" />
       </div>
 
       <h1 className="text-center font-display font-extrabold text-[28px] leading-tight mt-6 text-[#1B1B27]">
@@ -386,7 +386,7 @@ function Step2({ line, progress }: { line: string; progress: number }) {
   return (
     <div className="text-center pt-2">
       <div className="relative mx-auto w-full max-w-[280px]">
-        <img src={step2Asset.url} alt="Corazón y árbol" className="w-full h-auto animate-breathe" />
+        <img src={step2Asset} alt="Corazón y árbol" className="w-full h-auto animate-breathe" />
         <div aria-hidden className="absolute inset-0 rounded-full blur-3xl -z-10"
           style={{ background: "radial-gradient(circle at 50% 60%, rgba(245,139,203,0.35), transparent 65%)" }} />
       </div>
@@ -430,14 +430,14 @@ function Step3({
       <div className="mt-1 mx-auto w-12 h-0.5 rounded-full bg-gradient-to-r from-[#7C5CFF] to-[#F58BCB]" />
 
       {/* Lo que observamos */}
-      <ResultCard image={e3dBrain.url} title="Lo que observamos">
+      <ResultCard image={e3dBrain} title="Lo que observamos">
         <p>{result.observation}</p>
       </ResultCard>
 
       {/* Patrones */}
       <div className="mt-4 rounded-[20px] bg-white border-2 border-[#ECEEF5] shadow-soft p-5">
         <div className="flex items-center gap-2.5">
-          <img src={e3dCross.url} className="w-10 h-10" alt="" />
+          <img src={e3dCross} className="w-10 h-10" alt="" />
           <div className="text-[11px] uppercase tracking-widest font-bold text-primary">Posibles patrones identificados</div>
         </div>
         <div className="mt-3 grid grid-cols-2 gap-2">
@@ -456,14 +456,14 @@ function Step3({
       </div>
 
       {/* Reflexión */}
-      <ResultCard image={e3dHeartgem.url} title="Reflexión personalizada" tint>
+      <ResultCard image={e3dHeartgem} title="Reflexión personalizada" tint>
         <p className="whitespace-pre-line">{result.reflection}</p>
       </ResultCard>
 
       {/* Recomendaciones */}
       <div className="mt-4 rounded-[20px] bg-white border-2 border-[#ECEEF5] shadow-soft p-5">
         <div className="flex items-center gap-2.5">
-          <img src={e3dStar.url} className="w-10 h-10" alt="" />
+          <img src={e3dStar} className="w-10 h-10" alt="" />
           <div className="text-[11px] uppercase tracking-widest font-bold text-primary">Recursos recomendados</div>
         </div>
         <div className="mt-3 grid grid-cols-2 gap-2">

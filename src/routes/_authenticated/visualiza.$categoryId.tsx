@@ -10,7 +10,7 @@ import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { getUserPlan } from "@/lib/plan";
 import { awardGems } from "@/lib/gems";
-import heroAsset from "@/assets/manifest-music-hero.jpg.asset.json";
+import heroAsset from "@/assets/manifest-music-hero.jpg";
 import { cn } from "@/lib/utils";
 import { WordSearch } from "@/components/WordSearch";
 import { StageQuiz, type QuizItem } from "@/components/StageQuiz";
@@ -167,7 +167,7 @@ function CategoryPage() {
     return (
       <div className="pb-24">
         <section className="relative overflow-hidden rounded-b-[2.5rem] min-h-[92vh] flex flex-col">
-          <img src={heroAsset.url} alt="" className="absolute inset-0 h-full w-full object-cover" />
+          <img src={heroAsset} alt="" className="absolute inset-0 h-full w-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-b from-white/30 via-white/70 to-white dark:from-black/40 dark:via-black/70 dark:to-background" />
           <div className="relative px-5 pt-6 pb-8 max-w-2xl mx-auto text-center flex-1 flex flex-col">
             <Link to="/visualiza" className="inline-flex items-center gap-1 text-xs text-primary font-bold mb-3 self-start">

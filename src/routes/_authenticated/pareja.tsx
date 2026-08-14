@@ -12,11 +12,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, ArrowRight, HeartHandshake, Lock, Sparkles, Compass, Route as RouteIcon, Leaf } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import parejaHero from "@/assets/pareja-hero.jpg.asset.json";
-import e3dCouple from "@/assets/e3d-couple.png.asset.json";
-import e3dBrain from "@/assets/e3d-brain.png.asset.json";
-import e3dStar from "@/assets/e3d-star.png.asset.json";
-import e3dHeartgem from "@/assets/e3d-heartgem.png.asset.json";
+import parejaHero from "@/assets/pareja-hero.jpg";
+import e3dCouple from "@/assets/e3d-couple.png";
+import e3dBrain from "@/assets/e3d-brain.png";
+import e3dStar from "@/assets/e3d-star.png";
+import e3dHeartgem from "@/assets/e3d-heartgem.png";
 
 export const Route = createFileRoute("/_authenticated/pareja")({
   head: () => ({ meta: [{ title: "¿Deuda ancestral o propósito? — ORIGEN" }] }),
@@ -208,7 +208,7 @@ function ParejaPage() {
         {step === 1 && (
           <div className="animate-in fade-in slide-in-from-right-6 duration-300">
             <img
-              src={parejaHero.url}
+              src={parejaHero}
               alt="Consulta de pareja — ORIGEN"
               width={1280}
               height={720}
@@ -315,13 +315,13 @@ function ParejaPage() {
               <p className="mt-3 text-sm text-foreground/85 leading-relaxed">{result.summary}</p>
             </div>
 
-            <ResultCard image={e3dBrain.url} title="Patrón observado">
+            <ResultCard image={e3dBrain} title="Patrón observado">
               <p>{result.pattern}</p>
             </ResultCard>
-            <ResultCard image={e3dStar.url} title="Consejo de Ruth Esther">
+            <ResultCard image={e3dStar} title="Consejo de Ruth Esther">
               <p>{result.advice}</p>
             </ResultCard>
-            <ResultCard image={e3dHeartgem.url} title="Tu próximo paso" tint>
+            <ResultCard image={e3dHeartgem} title="Tu próximo paso" tint>
               <p className="font-medium">{result.next_step}</p>
             </ResultCard>
 

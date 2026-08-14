@@ -27,21 +27,29 @@ export const ACTION_POINTS: Record<ActionLevel, number> = {
 };
 
 export const LEAF_RULES_TEXT = [
-  "Meta: 1.00 hoja de sanación.",
-  "Máximo 0.333 hoja por día (se reinicia cada 24 h).",
-  "Máximo 0.10 hoja por sección al día: interactúa en distintas secciones.",
-  "Acciones pequeñas 0.01 · intermedias 0.02 · principales 0.05.",
+  "Las hojas se cuentan de una en una: 1, 2, 3, 4…",
+  "Cada acción dentro de la app suma progreso hacia tu próxima hoja.",
+  "Al día puedes avanzar como máximo un tercio de una hoja.",
+  "Por sección hay un límite: interactúa en distintas secciones.",
   "Por eso completar 1 hoja toma al menos 3 días.",
 ] as const;
 
-/** Formatea puntos internos como hojas (2 decimales). */
+/**
+ * Saldo visible de hojas: SIEMPRE un número entero (1, 2, 3…).
+ * Nunca se muestra con coma ni decimales.
+ */
 export function formatHojas(points: number | null | undefined) {
-  return ((points ?? 0) / HOJA_POINTS).toFixed(2);
+  return String(Math.floor((points ?? 0) / HOJA_POINTS));
 }
 
 /** Hojas enteras disponibles (para gastar). */
 export function wholeHojas(points: number | null | undefined) {
   return Math.floor((points ?? 0) / HOJA_POINTS);
+}
+
+/** Progreso 0-100 hacia la próxima hoja. */
+export function hojaProgressPct(points: number | null | undefined) {
+  return Math.round((((points ?? 0) % HOJA_POINTS) / HOJA_POINTS) * 100);
 }
 
 function todayIso() {

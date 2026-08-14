@@ -100,7 +100,7 @@ export function HealingTree() {
 
         {reward !== null && (
           <div className="absolute top-2 right-2 rounded-full bg-success text-white text-xs font-bold px-3 py-1 shadow-glow animate-in fade-in slide-in-from-top-2">
-            +{formatHojas(reward)} 🍃
+            +{reward >= 100 ? Math.floor(reward / 100) + " hojas" : "progreso"} 🍃
           </div>
         )}
       </div>

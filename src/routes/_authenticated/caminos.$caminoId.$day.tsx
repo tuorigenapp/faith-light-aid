@@ -4,10 +4,10 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { useProfile } from "@/hooks/use-profile";
-import { awardGems } from "@/lib/gems";
+import { awardGems , wholeHojas} from "@/lib/gems";
 import { CAMINO_TOTAL_DAYS, getCamino, getEtapa } from "@/lib/caminos";
 import { DailyGames } from "@/components/games/DailyGames";
-import { useCaminoPack, caminoVariant } from "@/lib/camino-pack";
+import { useCaminoPack, caminoVariant, CAMINO_PACK_BASE } from "@/lib/camino-pack";
 import { WordSearch } from "@/components/WordSearch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
@@ -21,8 +21,8 @@ import heartCrystal from "@/assets/st-heart-crystal.png";
 import chest from "@/assets/st-chest.png";
 import robot from "@/assets/st-robot.png";
 import caminoFe from "@/assets/st-camino-fe.png";
-import star3d from "@/assets/e3d-star.png.asset.json";
-import brain3d from "@/assets/e3d-brain.png.asset.json";
+import star3d from "@/assets/e3d-star.png";
+import brain3d from "@/assets/e3d-brain.png";
 import tree from "@/assets/hojas-tree.png";
 
 export const Route = createFileRoute("/_authenticated/caminos/$caminoId/$day")({
@@ -98,7 +98,7 @@ function CaminoDia() {
   });
 
   const memoryCards = useMemo(() => {
-    const src = (pack.data?.promesas ?? []).slice();
+    const src = (pack.data?.promesas ?? CAMINO_PACK_BASE.promesas).slice();
     const seed = caminoVariant(caminoId, dayNum).split("").reduce((a, c) => a + c.charCodeAt(0), 0);
     let s = seed;
     const rnd = () => ((s = (s * 9301 + 49297) % 233280) / 233280);
@@ -121,7 +121,8 @@ function CaminoDia() {
     );
   }
 
-  const p = pack.data;
+  // Contenido base al instante; se refresca cuando llega el del día.
+  const p = pack.data ?? CAMINO_PACK_BASE;
   const alreadyDone = (state?.done ?? []).some((d) => d.day === dayNum);
 
   async function reward(amount: number, reason: string) {
@@ -181,16 +182,15 @@ function CaminoDia() {
             </div>
           </div>
           <span className="shrink-0 inline-flex items-center gap-1.5 rounded-full bg-[#3FBE8F]/12 px-3 py-1.5 text-[13px] font-bold text-[#2F9C74]">
-            <Leaf className="w-4 h-4" /> {profile?.gems ?? 0}
+            <Leaf className="w-4 h-4" /> {wholeHojas(profile?.gems)}
           </span>
         </div>
       </header>
 
       <main className="relative z-10 max-w-[520px] mx-auto px-4 py-5 pb-32">
-        {pack.isLoading && (
-          <div className="app-card p-8 text-center">
-            <Loader2 className="w-8 h-8 mx-auto animate-spin text-primary" />
-            <p className="mt-3 text-[14px] text-muted-foreground">Preparando tu etapa de hoy…</p>
+        {pack.isFetching && (
+          <div className="mb-3 flex items-center justify-center gap-2 text-[12px] text-muted-foreground">
+            <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" /> Personalizando tu etapa de hoy…
           </div>
         )}
 
@@ -357,7 +357,7 @@ function CaminoDia() {
           <section style={{ animation: "fade-in .4s ease-out both" }}>
             <H title="Mini quiz del día" sub="Una pregunta para fijar la lección." />
             <div className="app-card p-5 mt-3">
-              <img src={brain3d.url} alt="" aria-hidden width={128} height={128} className="w-16 h-16 object-contain" />
+              <img src={brain3d} alt="" aria-hidden width={128} height={128} className="w-16 h-16 object-contain" />
               <p className="font-display font-bold text-[18px] leading-snug mt-2">{p.fe[0]?.q}</p>
               <div className="mt-3 space-y-2">
                 {(p.fe[0]?.options ?? []).map((o, i) => (
@@ -546,7 +546,7 @@ function CaminoDia() {
 
         {p && step === 12 && (
           <section className="text-center" style={{ animation: "fade-in .4s ease-out both" }}>
-            <img src={star3d.url} alt="" aria-hidden width={192} height={192} className="w-24 h-24 mx-auto object-contain animate-[float_4s_ease-in-out_infinite]" />
+            <img src={star3d} alt="" aria-hidden width={192} height={192} className="w-24 h-24 mx-auto object-contain animate-[float_4s_ease-in-out_infinite]" />
             <h2 className="font-display font-extrabold text-[26px] leading-tight mt-2">¡Día completado!</h2>
             <div className="mt-4 grid grid-cols-3 gap-3">
               <Podium label="Hojas" value={`+${earned || 60}`} icon={<Leaf className="w-4 h-4 text-[#3FBE8F]" />} />

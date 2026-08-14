@@ -12,8 +12,8 @@ import { toast } from "sonner";
 import { PhotoPicker } from "@/components/PhotoPicker";
 import { uploadPhoto } from "@/lib/photo";
 import { useSignedUrls } from "@/hooks/use-signed-urls";
-import arbolGemas from "@/assets/arbol-gemas.png.asset.json";
-import arbolMini from "@/assets/arbol-mini.png.asset.json";
+import arbolGemas from "@/assets/arbol-gemas.png";
+import arbolMini from "@/assets/arbol-mini.png";
 import hojasTree from "@/assets/hojas-tree.png";
 import { HOJA_USES } from "@/lib/hojas";
 import { formatHojas, wholeHojas, LEAF_RULES_TEXT, awardGems as spendGems, getLeafDayProgress } from "@/lib/gems";
@@ -208,10 +208,10 @@ function TreeDetailView({
           </div>
           <div className="text-right">
             <div className="inline-flex items-center gap-1 bg-white/10 backdrop-blur rounded-2xl px-3 py-1.5">
-              <span className="text-lg">💎</span>
+              <span className="text-lg">🍃</span>
               <span className="font-display font-black text-lg leading-none">+{gemsFromMembers.toLocaleString()}</span>
             </div>
-            <div className="text-[10px] text-white/70 font-semibold mt-1">Gemas obtenidas</div>
+            <div className="text-[10px] text-white/70 font-semibold mt-1">Hojas obtenidas</div>
           </div>
         </div>
 
@@ -406,7 +406,7 @@ function AddFamilyView({ onBack }: { onBack: () => void }) {
       qc.invalidateQueries({ queryKey: ["profile"] });
       qc.invalidateQueries({ queryKey: ["profile-arbol"] });
       qc.invalidateQueries({ queryKey: ["profile-gems"] });
-      toast.success(`+${GEM_REWARDS.familyMember} 💎 Gemas de Sanación`);
+      toast.success("Sumaste progreso hacia tu próxima hoja de sanación 🍃");
       onBack();
     } catch (e: any) {
       toast.error(e?.message ?? "No se pudo guardar");
@@ -430,7 +430,7 @@ function AddFamilyView({ onBack }: { onBack: () => void }) {
         {/* Hero mini tree */}
         <div className="mt-3 relative aspect-square w-[220px] mx-auto">
           <div className="absolute inset-x-6 bottom-6 h-16 bg-[#7C5CFF]/25 blur-3xl rounded-full" />
-          <img src={arbolMini.url} alt="Árbol" className="relative w-full h-full object-contain animate-[floatMini_5s_ease-in-out_infinite]" />
+          <img src={arbolMini} alt="Árbol" className="relative w-full h-full object-contain animate-[floatMini_5s_ease-in-out_infinite]" />
         </div>
         <p className="text-center font-display font-black text-[20px] leading-tight -mt-2">
           Cada familiar cuenta<br />para tu sanación
@@ -547,7 +547,7 @@ function AddFamilyView({ onBack }: { onBack: () => void }) {
             disabled={!canSave || saving}
             className="w-full h-14 rounded-[18px] bg-gradient-to-b from-[#4CD394] to-[#2FA574] text-white font-display font-black text-[16px] shadow-[0_8px_24px_rgba(63,190,143,0.45)] disabled:opacity-50"
           >
-            {uploading ? "Subiendo foto…" : saving ? "Guardando…" : `Guardar Familiar  (+${GEM_REWARDS.familyMember} 💎)`}
+            {uploading ? "Subiendo foto…" : saving ? "Guardando…" : "Guardar Familiar 🍃"}
           </Button>
         </div>
       </div>
@@ -587,7 +587,7 @@ function LeafRulesBlock() {
       <div className="mt-3">
         <div className="flex items-center justify-between text-[11px] font-semibold text-muted-foreground mb-1">
           <span>Progreso de hoy</span>
-          <span>{progress ? formatHojas(progress.dailyPoints) : "0.00"} / {formatHojas(progress?.dailyCap ?? 33)} hojas</span>
+          <span>{progress?.dailyPoints ?? 0} / {progress?.dailyCap ?? 33} de tu próxima hoja</span>
         </div>
         <div className="h-2.5 rounded-full bg-[#7C5CFF]/10 overflow-hidden">
           <div className="h-full rounded-full bg-gradient-to-r from-[#7C5CFF] to-[#F58BCB] transition-all" style={{ width: `${pct}%` }} />
@@ -682,7 +682,7 @@ function TransferSection({ gems }: { gems: number }) {
               ))}
             </SelectContent>
           </Select>
-          <p className="mt-1 text-[11px] text-[#9A97AC]">Disponibles: {max} hoja{max === 1 ? "" : "s"} enteras ({formatHojas(gems)} hojas en total)</p>
+          <p className="mt-1 text-[11px] text-[#9A97AC]">Disponibles: {max} hoja{max === 1 ? "" : "s"} para transferir</p>
         </div>
         <button onClick={send} disabled={sending || max < 1}
           className="w-full h-12 rounded-[12px] text-white font-display font-bold text-[15px] inline-flex items-center justify-center gap-2 disabled:opacity-50 active:scale-[.98] transition"
@@ -714,7 +714,7 @@ function TransferSection({ gems }: { gems: number }) {
             <span className="w-9 h-9 rounded-[10px] bg-[#7C5CFF]/10 grid place-items-center text-[#7C5CFF] shrink-0"><MailIcon className="w-4 h-4" /></span>
             <div className="min-w-0">
               <div className="text-[13px] font-bold text-foreground truncate">{t.to_email}</div>
-              <div className="text-[11px] text-[#9A97AC]">{new Date(t.created_at).toLocaleDateString("es-ES", { day: "2-digit", month: "short", year: "numeric" })} · {formatHojas(t.points)} hojas</div>
+              <div className="text-[11px] text-[#9A97AC]">{new Date(t.created_at).toLocaleDateString("es-ES", { day: "2-digit", month: "short", year: "numeric" })} · {wholeHojas(t.points)} hojas</div>
             </div>
             <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-black ${statusColor[t.status] ?? "bg-[#7C5CFF]/10 text-[#7C5CFF]"}`}>
               {statusLabel[t.status] ?? t.status}

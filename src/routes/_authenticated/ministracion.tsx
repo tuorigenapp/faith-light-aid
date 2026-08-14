@@ -7,13 +7,13 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import ministracionHero from "@/assets/ministracion-hero.jpg.asset.json";
-import e3dCross from "@/assets/e3d-cross.png.asset.json";
-import e3dStar from "@/assets/e3d-star.png.asset.json";
-import e3dHeartgem from "@/assets/e3d-heartgem.png.asset.json";
-import e3dCoin from "@/assets/e3d-coin.png.asset.json";
-import e3dBrain from "@/assets/e3d-brain.png.asset.json";
-import e3dCouple from "@/assets/e3d-couple.png.asset.json";
+import ministracionHero from "@/assets/ministracion-hero.jpg";
+import e3dCross from "@/assets/e3d-cross.png";
+import e3dStar from "@/assets/e3d-star.png";
+import e3dHeartgem from "@/assets/e3d-heartgem.png";
+import e3dCoin from "@/assets/e3d-coin.png";
+import e3dBrain from "@/assets/e3d-brain.png";
+import e3dCouple from "@/assets/e3d-couple.png";
 import { getUserPlan } from "@/lib/plan";
 import { awardGems } from "@/lib/gems";
 import { printConsulta } from "@/lib/print-pdf";
@@ -235,7 +235,7 @@ function MinistracionPage() {
           <div className="animate-in fade-in slide-in-from-right-6 duration-300">
             <div className="hero-card p-0 overflow-hidden relative shadow-elev ring-1 ring-border">
               <div className="relative">
-                <img src={ministracionHero.url} alt="Consulta de Ministración — ORIGEN" width={1280} height={720} loading="lazy" className="w-full h-auto rounded-[16px] block" />
+                <img src={ministracionHero} alt="Consulta de Ministración — ORIGEN" width={1280} height={720} loading="lazy" className="w-full h-auto rounded-[16px] block" />
                 <div className="absolute inset-0 pointer-events-none" style={{ boxShadow: "inset 0 0 40px rgba(255,255,255,0.12)" }} />
               </div>
               <div className="p-5 text-center">
@@ -327,15 +327,15 @@ function MinistracionPage() {
               </h2>
             </div>
 
-            <ResultBlock image={e3dCross.url} title="Dictamen de la Corte Celestial" color="violet">
+            <ResultBlock image={e3dCross} title="Dictamen de la Corte Celestial" color="violet">
               <p className="whitespace-pre-line">{result.dictamen}</p>
             </ResultBlock>
 
-            <ResultBlock image={e3dStar.url} title="Línea de tiempo" color="blue">
+            <ResultBlock image={e3dStar} title="Línea de tiempo" color="blue">
               <p className="whitespace-pre-line">{result.linea_tiempo}</p>
             </ResultBlock>
 
-            <ResultBlock image={e3dHeartgem.url} title="Señales de confirmación" color="pink">
+            <ResultBlock image={e3dHeartgem} title="Señales de confirmación" color="pink">
               <ul className="space-y-2">
                 {result.senales?.map((s, i) => (
                   <li key={i} className="flex gap-2">
@@ -346,12 +346,12 @@ function MinistracionPage() {
               </ul>
             </ResultBlock>
 
-            <ResultBlock image={e3dCoin.url} title="Ministración para tu vida" color="gold">
+            <ResultBlock image={e3dCoin} title="Ministración para tu vida" color="gold">
               <p className="whitespace-pre-line font-medium">{result.ministracion}</p>
             </ResultBlock>
 
             {result.rompe_ciclo && (
-              <ResultBlock image={e3dBrain.url} title="Consejo del Cielo: Rompe el Ciclo en tu vida" color="coral">
+              <ResultBlock image={e3dBrain} title="Consejo del Cielo: Rompe el Ciclo en tu vida" color="coral">
                 <p className="text-[11px] uppercase tracking-widest font-bold text-[#E05A6B] mb-2">
                   Deuda generacional que se repite en tu vida
                 </p>
@@ -360,7 +360,7 @@ function MinistracionPage() {
             )}
 
             {result.versiculo && (
-              <ResultBlock image={e3dCouple.url} title="Palabra que respalda el decreto" color="green">
+              <ResultBlock image={e3dCouple} title="Palabra que respalda el decreto" color="green">
                 <p className="text-sm italic leading-relaxed">"{result.versiculo}"</p>
               </ResultBlock>
             )}
