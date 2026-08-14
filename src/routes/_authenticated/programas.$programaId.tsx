@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { useProfile } from "@/hooks/use-profile";
-import { awardGems } from "@/lib/gems";
+import { awardGems , wholeHojas} from "@/lib/gems";
 import { getPrograma, UNLOCK_COST, weekOfDay } from "@/lib/programas";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";

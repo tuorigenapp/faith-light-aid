@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { useProfile } from "@/hooks/use-profile";
-import { awardGems } from "@/lib/gems";
+import { awardGems , wholeHojas} from "@/lib/gems";
 import { CAMINO_TOTAL_DAYS, getCamino, getEtapa } from "@/lib/caminos";
 import { DailyGames } from "@/components/games/DailyGames";
 import { useCaminoPack, caminoVariant } from "@/lib/camino-pack";
