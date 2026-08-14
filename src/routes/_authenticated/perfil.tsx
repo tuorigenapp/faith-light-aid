@@ -20,7 +20,7 @@ import { PhotoPicker } from "@/components/PhotoPicker";
 import { uploadPhoto, removePhoto } from "@/lib/photo";
 import { useSignedUrls } from "@/hooks/use-signed-urls";
 import { Switch } from "@/components/ui/switch";
-import { formatHojas } from "@/lib/gems";
+import { wholeHojas } from "@/lib/gems";
 
 export const Route = createFileRoute("/_authenticated/perfil")({
   head: () => ({
@@ -704,7 +704,7 @@ function ProfilePanel({ profile, onEdit }: { profile: any; onEdit: () => void })
           <div className="mt-4 grid grid-cols-3 gap-2">
             <MiniStat icon={<Calendar className="w-3.5 h-3.5" />} label="Días activos" value={stats?.activeDays ?? 0} />
             <MiniStat icon={<Flame className="w-3.5 h-3.5" />} label="Racha" value={`${profile.consecutive_days ?? 0}d`} />
-            <MiniStat icon={<Gem className="w-3.5 h-3.5" />} label="Gemas" value={profile.gems ?? 0} />
+            <MiniStat icon={<Leaf className="w-3.5 h-3.5" />} label="Hojas" value={wholeHojas(profile.gems)} />
           </div>
           <button onClick={onEdit} className="mt-4 w-full h-11 rounded-[14px] bg-white/20 backdrop-blur text-white font-bold text-[14px] active:scale-[.98] transition">
             Editar mi perfil
@@ -831,7 +831,7 @@ function ProfilePanel({ profile, onEdit }: { profile: any; onEdit: () => void })
             <MetricCard color="#F58BCB" icon={<Dumbbell className="w-4 h-4" />} label="Ejercicios" value={stats?.exercises ?? 0} to="/ejercicios" />
             <MetricCard color="#5AA9FF" icon={<BookHeart className="w-4 h-4" />} label="Diario" value={stats?.journals ?? 0} to="/diario" />
             <MetricCard color="#3FBE8F" icon={<HeartHandshake className="w-4 h-4" />} label="Lecturas de pareja" value={stats?.parejas ?? 0} to="/pareja" />
-            <MetricCard color="#F7B955" icon={<Trophy className="w-4 h-4" />} label="Premios" value={profile.gems ?? 0} to="/premios" />
+            <MetricCard color="#F7B955" icon={<Trophy className="w-4 h-4" />} label="Hojas" value={wholeHojas(profile.gems)} to="/premios" />
             <MetricCard color="#E05A6B" icon={<Target className="w-4 h-4" />} label="Familiares" value={stats?.familiares ?? 0} to="/arbol" />
           </div>
         </div>
