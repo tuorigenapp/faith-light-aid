@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { useProfile } from "@/hooks/use-profile";
-import { awardGems } from "@/lib/gems";
+import { hasHojas, spendHojas, wholeHojas } from "@/lib/gems";
 import { CAMINO_TOTAL_DAYS, WEEK_UNLOCK_COST, getCamino } from "@/lib/caminos";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -70,7 +70,7 @@ function CaminoMapa() {
   const doneToday = done.some((d) => d.date === todayIso());
   const completedCount = doneDays.size;
   const pct = Math.round((completedCount / CAMINO_TOTAL_DAYS) * 100);
-  const gems = profile?.gems ?? 0;
+  const gems = wholeHojas(profile?.gems);
   const firstName = (profile?.display_name || profile?.full_name || "Alma").split(" ")[0];
 
   const isUnlocked = (day: number) => {
@@ -82,12 +82,13 @@ function CaminoMapa() {
 
   async function unlockWeek() {
     if (!user) return;
-    if (gems < WEEK_UNLOCK_COST) {
+    if (!hasHojas(profile?.gems, WEEK_UNLOCK_COST)) {
       toast.error(`Necesitas ${WEEK_UNLOCK_COST} hojas para abrir la semana completa.`);
       navigate({ to: "/premios" });
       return;
     }
-    await awardGems(-WEEK_UNLOCK_COST, `Semana completa · ${camino!.title}`);
+    const nb = await spendHojas(WEEK_UNLOCK_COST, `Semana completa · ${camino!.title}`, { camino: caminoId });
+    if (nb === null) { toast.error("No pudimos cobrar tus hojas. Intenta de nuevo."); return; }
     await supabase.from("daily_activity").insert({
       user_id: user.id,
       activity_type: "camino_semana",

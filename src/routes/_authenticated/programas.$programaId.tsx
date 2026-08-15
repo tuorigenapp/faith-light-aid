@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { useProfile } from "@/hooks/use-profile";
-import { awardGems , wholeHojas} from "@/lib/gems";
+import { awardGems, wholeHojas, hasHojas, spendHojas } from "@/lib/gems";
 import { getPrograma, UNLOCK_COST, weekOfDay } from "@/lib/programas";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -78,12 +78,13 @@ function ProgramaPage() {
 
   async function unlockWeek(w: number) {
     if (!user) return;
-    if ((profile?.gems ?? 0) < UNLOCK_COST) {
+    if (!hasHojas(profile?.gems, UNLOCK_COST)) {
       toast.error(`Necesitas ${UNLOCK_COST} hojas para abrir la semana ${w}.`);
       navigate({ to: "/premios" });
       return;
     }
-    await awardGems(-UNLOCK_COST, `Semana ${w} · ${prog!.title}`);
+    const nb = await spendHojas(UNLOCK_COST, `Semana ${w} · ${prog!.title}`, { programa: programaId, week: w });
+    if (nb === null) { toast.error("No pudimos cobrar tus hojas. Intenta de nuevo."); return; }
     await supabase.from("daily_activity").insert({
       user_id: user.id,
       activity_type: "programa_semana",

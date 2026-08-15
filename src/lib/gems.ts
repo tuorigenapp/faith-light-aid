@@ -218,3 +218,21 @@ export const REWARDS = [
     tier: 1,
   },
 ];
+
+/* ─────────────────────────────────────────────────────────────
+ * Gasto en HOJAS (unidades enteras visibles para el usuario).
+ * El saldo interno está en puntos: 1 hoja = HOJA_POINTS puntos.
+ * Usa siempre estos helpers al cobrar; nunca restes hojas al
+ * saldo en puntos directamente (era la causa del cobro fallido).
+ * ───────────────────────────────────────────────────────────── */
+
+/** ¿El saldo en puntos alcanza para `hojas` hojas enteras? */
+export function hasHojas(points: number | null | undefined, hojas: number) {
+  return wholeHojas(points) >= hojas;
+}
+
+/** Cobra `hojas` hojas enteras. Devuelve el nuevo saldo en puntos o null si falla. */
+export async function spendHojas(hojas: number, reason: string, meta?: Record<string, unknown>) {
+  if (hojas <= 0) return null;
+  return awardGems(-Math.round(hojas * HOJA_POINTS), reason, meta);
+}
