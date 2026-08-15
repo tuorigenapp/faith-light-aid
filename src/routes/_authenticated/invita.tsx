@@ -130,26 +130,66 @@ function InvitaPage() {
           )}
         </div>
 
-        <a
-          href="https://hotmart.com/es/affiliate-market"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="app-card p-5 mt-4 block relative overflow-hidden"
-        >
+        <section className="app-card p-5 mt-4 relative overflow-hidden">
           <div className="absolute -right-6 -bottom-6 text-6xl opacity-10">💰</div>
           <div className="relative">
             <div className="text-[11px] uppercase tracking-widest font-bold text-primary flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5" /> Programa de afiliados Hotmart
+              <Sparkles className="w-3.5 h-3.5" /> Programa oficial de afiliados
             </div>
-            <h3 className="font-display font-bold text-[17px] mt-2">Gana hasta 40% recomendando ORIGEN</h3>
-            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-              Únete a nuestro programa oficial en Hotmart. Recibe tus comisiones cada 15 días directo a tu cuenta.
+            <h3 className="font-display font-extrabold text-[20px] mt-2 leading-tight">
+              Cobra hasta <span className="text-primary">40,29 US$</span> por cada venta
+            </h3>
+            <p className="text-[13.5px] text-muted-foreground mt-2 leading-relaxed">
+              Comisionado por último clic, con cookies de duración permanente. Buscamos personas apasionadas por la
+              espiritualidad, el crecimiento interior y el propósito, que quieran recomendar ORÍGEN.
             </p>
-            <span className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-primary">
-              Registrarme como afiliada <ArrowLeft className="w-3 h-3 rotate-180" />
-            </span>
+
+            <div className="mt-4 space-y-2.5">
+              {[
+                { e: "🔥", t: "50% de comisión", d: "en la primera venta generada con tu enlace." },
+                { e: "🔄", t: "10% recurrente", d: "en las renovaciones, mientras la suscripción siga activa." },
+                { e: "🎁", t: "Período de prueba", d: "tus referidos conocen ORÍGEN antes de continuar." },
+                { e: "📱", t: "Producto digital", d: "fácil de promocionar en redes, blogs, YouTube y TikTok." },
+              ].map((b) => (
+                <div key={b.t} className="flex items-start gap-3 rounded-[12px] bg-secondary/50 p-3">
+                  <span className="w-10 h-10 shrink-0 rounded-[10px] bg-primary/10 grid place-items-center text-lg">{b.e}</span>
+                  <div className="min-w-0">
+                    <div className="font-semibold text-[14px]">{b.t}</div>
+                    <p className="text-[13px] text-muted-foreground leading-snug">{b.d}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-4">
+              <div className="text-[11px] uppercase tracking-widest font-bold text-primary">📦 Planes disponibles</div>
+              <ul className="mt-2 space-y-1 text-[13.5px]">
+                <li className="flex justify-between"><span>Explorador</span><b>US$2,99</b></li>
+                <li className="flex justify-between"><span>Camino ORÍGEN Mensual</span><b>US$14,99</b></li>
+                <li className="flex justify-between"><span>Camino ORÍGEN Anual</span><b>US$89,99</b></li>
+              </ul>
+            </div>
+
+            <div className="mt-4">
+              <div className="text-[11px] uppercase tracking-widest font-bold text-primary">🚦 Reglas</div>
+              <p className="text-[13px] text-muted-foreground mt-1.5 leading-relaxed">
+                Promoción ética y transparente, respetando las políticas de Hotmart. No se permiten afirmaciones
+                engañosas sobre resultados espirituales, financieros, médicos o personales, ni spam o publicidad
+                engañosa.
+              </p>
+            </div>
+
+            <a
+              href="https://affiliate.hotmart.com/affiliate-recruiting/view/4091O107110607"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-primary-gradient mt-5 flex h-[52px] items-center justify-center gap-2 rounded-[12px] text-[15px] font-semibold text-white active:scale-[.97] transition"
+            >
+              Registrarme como afiliado <ArrowLeft className="w-4 h-4 rotate-180" />
+            </a>
           </div>
-        </a>
+        </section>
+
 
       </div>
     </div>
