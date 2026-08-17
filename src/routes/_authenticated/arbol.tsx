@@ -697,33 +697,10 @@ function TransferSection({ gems }: { gems: number }) {
         </div>
       </div>
 
-      <h3 className="mt-5 text-[12px] uppercase tracking-[0.18em] font-black text-[#7C5CFF]">Historial de transferencias</h3>
-      <div className="mt-3 space-y-2.5">
-        {loadingHist && (
-          <>
-            <div className="h-16 rounded-[14px] bg-[#7C5CFF]/[0.06] animate-pulse" />
-            <div className="h-16 rounded-[14px] bg-[#7C5CFF]/[0.06] animate-pulse" />
-          </>
-        )}
-        {histError && (
-          <div className="rounded-[14px] bg-card border border-border p-4 text-[13px] text-muted-foreground">No pudimos cargar tu historial.</div>
-        )}
-        {!loadingHist && !histError && transfers.length === 0 && (
-          <div className="rounded-[14px] bg-card border border-border p-4 text-[13px] text-muted-foreground">Aún no has hecho transferencias.</div>
-        )}
-        {transfers.map((t: any) => (
-          <div key={t.id} className="rounded-[14px] bg-card border border-border p-3.5 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
-            <span className="w-9 h-9 rounded-[10px] bg-[#7C5CFF]/10 grid place-items-center text-[#7C5CFF] shrink-0"><MailIcon className="w-4 h-4" /></span>
-            <div className="min-w-0">
-              <div className="text-[13px] font-bold text-foreground truncate">{t.to_email}</div>
-              <div className="text-[11px] text-[#9A97AC]">{new Date(t.created_at).toLocaleDateString("es-ES", { day: "2-digit", month: "short", year: "numeric" })} · {wholeHojas(t.points)} hojas</div>
-            </div>
-            <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-black ${statusColor[t.status] ?? "bg-[#7C5CFF]/10 text-[#7C5CFF]"}`}>
-              {statusLabel[t.status] ?? t.status}
-            </span>
-          </div>
-        ))}
-      </div>
+      <Link to="/historial" className="mt-4 flex items-center justify-between rounded-[14px] bg-card border border-border px-4 py-3.5 active:scale-[.99] transition">
+        <span className="text-[13px] font-bold text-foreground">Historial de transferencias</span>
+        <span className="text-[12px] font-bold text-[#7C5CFF]">Ver todo →</span>
+      </Link>
     </div>
   );
 }
