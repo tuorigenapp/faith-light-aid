@@ -1,5 +1,6 @@
 import { createFileRoute, useParams, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
+import { getRecommendedFocuses, orderStages, resolveStageStates } from "@/lib/stage-order";
 import { useAuth } from "@/lib/use-auth";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Textarea } from "@/components/ui/textarea";
@@ -1254,7 +1255,7 @@ function LockedStageView({ tomorrow, onBack }: { tomorrow: boolean; onBack: () =
       <Card className="w-full max-w-sm rounded-[16px] p-6 text-center shadow-soft bg-card/95">
         <div className="w-14 h-14 mx-auto rounded-full bg-primary/10 text-primary grid place-items-center"><Lock className="w-7 h-7" /></div>
         <h1 className="font-display font-extrabold text-[22px] mt-3 leading-tight">
-          {tomorrow ? "Se desbloquea mañana" : "Etapa bloqueada"}
+          {tomorrow ? "Se abre a las 12:00 PM" : "Etapa bloqueada"}
         </h1>
         <p className="text-[13.5px] text-muted-foreground mt-2 leading-snug">
           {tomorrow
