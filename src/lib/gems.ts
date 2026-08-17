@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { appDayKey, appDayStartIso } from "@/lib/app-day";
 
 /**
  * Sistema de Hojas de Sanación (balanceo por micro-acciones + ponderación por sección).
@@ -53,13 +54,12 @@ export function hojaProgressPct(points: number | null | undefined) {
 }
 
 function todayIso() {
-  return new Date().toISOString().slice(0, 10);
+  return appDayKey();
 }
 
 function startOfDayIso() {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  return d.toISOString();
+  // El día de la app arranca a las 12:00 PM.
+  return appDayStartIso();
 }
 
 function slug(s: string) {
