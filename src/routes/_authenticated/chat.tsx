@@ -10,8 +10,9 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { getUserPlan, getDailyUsage, PLAN_LIMITS } from "@/lib/plan";
-import { awardGems, formatHojas, LEAF_COSTS, HOJA_POINTS } from "@/lib/gems";
+import { formatHojas, spendDailyAccess } from "@/lib/gems";
 import { Link } from "@tanstack/react-router";
+import { msUntilAppDayReset, formatCountdown } from "@/lib/app-day";
 
 export const Route = createFileRoute("/_authenticated/chat")({
   head: () => ({ meta: [{ title: "Conversa con Ruth Esther — ORIGEN" }] }),
@@ -19,22 +20,12 @@ export const Route = createFileRoute("/_authenticated/chat")({
 });
 
 function useCountdownToMidnight() {
-  const [remaining, setRemaining] = useState(getMs());
-  function getMs() {
-    const now = new Date();
-    const next = new Date(now);
-    next.setHours(24, 0, 0, 0);
-    return Math.max(0, next.getTime() - now.getTime());
-  }
+  const [remaining, setRemaining] = useState(() => msUntilAppDayReset());
   useEffect(() => {
-    const t = setInterval(() => setRemaining(getMs()), 1000);
+    const t = setInterval(() => setRemaining(msUntilAppDayReset()), 1000);
     return () => clearInterval(t);
   }, []);
-  const totalSec = Math.floor(remaining / 1000);
-  const h = String(Math.floor(totalSec / 3600)).padStart(2, "0");
-  const m = String(Math.floor((totalSec % 3600) / 60)).padStart(2, "0");
-  const s = String(totalSec % 60).padStart(2, "0");
-  return `${h}:${m}:${s}`;
+  return formatCountdown(remaining);
 }
 
 function ChatPage() {
@@ -170,7 +161,7 @@ function LockedComposer({ limit }: { limit?: number }) {
         </div>
         <p className="font-display font-bold text-sm mt-2">Ya usaste tu {limit ?? 1} conversación de hoy</p>
         <p className="text-xs text-muted-foreground mt-1">
-          En el plan Explorador el chat se renueva cada 24 horas. Vuelve en:
+          En el plan Explorador el chat se renueva cada día a las 12:00 PM. Vuelve en:
         </p>
         <p className="font-mono font-bold text-lg text-primary mt-1 tabular-nums">{countdown}</p>
         <Link to="/membresia" className="mt-3 btn-primary-gradient w-full h-11 rounded-[12px] inline-flex items-center justify-center gap-2 text-sm">
@@ -221,8 +212,8 @@ function ChatWindow({
         conversation_id: conversationId, user_id: user.id,
         role: "assistant", content: message.parts as never,
       });
-      // Cobra 1 hoja de sanación por respuesta recibida.
-      await awardGems(-LEAF_COSTS.chatReply * HOJA_POINTS, "chat_respuesta", { conversation_id: conversationId });
+      // Cobra 1 hoja por el DÍA de acceso al chat (no por respuesta).
+      await spendDailyAccess("chat", 1, { conversation_id: conversationId });
       onSpend();
       qc.invalidateQueries({ queryKey: ["messages", conversationId] });
     },

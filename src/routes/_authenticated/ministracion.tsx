@@ -15,7 +15,7 @@ import e3dCoin from "@/assets/e3d-coin.png";
 import e3dBrain from "@/assets/e3d-brain.png";
 import e3dCouple from "@/assets/e3d-couple.png";
 import { getUserPlan } from "@/lib/plan";
-import { awardGems } from "@/lib/gems";
+import { awardGems, hasHojas, wholeHojas } from "@/lib/gems";
 import { printConsulta } from "@/lib/print-pdf";
 import { ConsultaHistorial, type ConsultaHistorialItem } from "@/components/ConsultaHistorial";
 import { ConsultaPDFButton } from "@/components/ConsultaPDFButton";
@@ -101,7 +101,7 @@ function MinistracionPage() {
     setHistoryLoading(false);
   }
 
-  const hasEnoughGems = (gems ?? 0) >= CONSULTA_COST_HOJAS * 100;
+  const hasEnoughGems = hasHojas(gems, CONSULTA_COST_HOJAS);
 
   function validate() {
     const e: { name?: string; dob?: string } = {};
@@ -272,7 +272,7 @@ function MinistracionPage() {
             </div>
             {!hasEnoughGems && gems !== null && (
               <p className="mt-2 text-[12px] text-destructive text-center">
-                No tienes hojas de sanación suficientes. Sigue avanzando en tu camino para ganar más.
+                Tienes {wholeHojas(gems)} hojas y esta consulta cuesta {CONSULTA_COST_HOJAS}. Sigue avanzando en tu camino para ganar más.
               </p>
             )}
 
