@@ -1,3 +1,4 @@
+import coverFallback from "@/assets/e3d-book.png";
 import { Link } from "@tanstack/react-router";
 import { EBOOKS } from "@/lib/biblioteca";
 import { BookOpen, ChevronLeft, ChevronRight, Library } from "lucide-react";
@@ -42,7 +43,13 @@ export function BibliotecaSlider() {
               src={b.cover}
               alt={`Portada de ${b.title}`}
               loading="lazy"
-              className="w-full aspect-[3/4] object-cover"
+              className="w-full aspect-[3/4] object-cover bg-secondary"
+              onError={(e) => {
+                const el = e.currentTarget;
+                if (el.dataset["fallback"]) return;
+                el.dataset["fallback"] = "1";
+                el.src = coverFallback;
+              }}
             />
           </Link>
         ))}

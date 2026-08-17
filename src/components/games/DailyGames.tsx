@@ -2,11 +2,13 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
-import { awardLeaf } from "@/lib/gems";
+import { awardLeaf, HOJA_POINTS } from "@/lib/gems";
+
+export const MAX_LEVEL = 10000;
 import { toast } from "sonner";
 import {
   Search, Brain, PenLine, Ghost, Blocks, Circle, Wind,
-  Fish, Rabbit, HeartPulse, Trophy, Leaf, RotateCcw, Check, Sparkles,
+  Fish, Rabbit, HeartPulse, Trophy, Leaf, Check, Sparkles, ArrowRight,
 } from "lucide-react";
 
 /* ---------------------------------------------------------------- utils */
@@ -22,17 +24,30 @@ function clean(w: string) {
   return w.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^A-Z]/g, "");
 }
 
-type GameProps = { words: string[]; onWin: (gems: number) => void };
+type GameProps = { words: string[]; onWin: (gems: number) => void; level: number };
+
+/** Dificultad creciente: cada nivel sube un poco la exigencia (sin techo). */
+export function levelScale(level: number, base: number, step = 1, max = 999999) {
+  return Math.min(max, base + Math.floor((Math.max(1, level) - 1) / step));
+}
+
+/** Rota el banco de palabras para que nunca se repita el mismo set. */
+function rotate<T>(arr: T[], by: number): T[] {
+  if (arr.length === 0) return arr;
+  const k = ((by % arr.length) + arr.length) % arr.length;
+  return [...arr.slice(k), ...arr.slice(0, k)];
+}
 
 /* ---------------------------------------------------------- 1. Sopa      */
 
 const SIZE = 8;
-function WordFind({ words, onWin }: GameProps) {
+function WordFind({ words, onWin, level }: GameProps) {
+  const count = levelScale(level, 3, 2, 7);
   const list = useMemo(
-    () => words.map(clean).filter((w) => w.length >= 3 && w.length <= SIZE).slice(0, 4),
-    [words],
+    () => rotate(words.map(clean).filter((w) => w.length >= 3 && w.length <= SIZE), level * 3).slice(0, count),
+    [words, level, count],
   );
-  const [seed, setSeed] = useState(1);
+  const [seed] = useState(1);
   const { grid, placed } = useMemo(() => {
     const g: string[][] = Array.from({ length: SIZE }, () => Array(SIZE).fill(""));
     const ps: { word: string; cells: string[] }[] = [];
@@ -97,19 +112,20 @@ function WordFind({ words, onWin }: GameProps) {
             found.includes(p.word) ? "bg-[#3FBE8F]/15 text-[#2F9C74] line-through" : "bg-secondary text-primary")}>{p.word}</span>
         ))}
       </div>
-      <GameFooter onReset={() => { setSeed((s) => s + 1); setFound([]); setSel([]); }} />
+      <GameFooter hint={`Nivel ${level} · ${count} palabras escondidas`} />
     </div>
   );
 }
 
 /* ---------------------------------------------------------- 2. Memoria   */
 
-function Memory({ words, onWin }: GameProps) {
+function Memory({ words, onWin, level }: GameProps) {
+  const pairs = levelScale(level, 4, 2, 10);
   const base = useMemo(() => {
-    const src = [...words.map(clean).filter((w) => w.length > 2), ...POSITIVAS.map(clean)].slice(0, 6);
+    const src = rotate([...words.map(clean).filter((w) => w.length > 2), ...POSITIVAS.map(clean)], level * 2).slice(0, pairs);
     return [...src, ...src].map((w, i) => ({ id: i, w })).sort(() => Math.random() - 0.5);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [words]);
+  }, [words, level, pairs]);
   const [cards, setCards] = useState(base);
   const [open, setOpen] = useState<number[]>([]);
   const [done, setDone] = useState<string[]>([]);
@@ -144,14 +160,14 @@ function Memory({ words, onWin }: GameProps) {
           );
         })}
       </div>
-      <GameFooter onReset={() => { setCards([...base].sort(() => Math.random() - 0.5)); setDone([]); setOpen([]); }} />
+      <GameFooter hint={`Nivel ${level} · ${pairs} parejas`} />
     </div>
   );
 }
 
 /* ---------------------------------------------------------- 3. Escribir  */
 
-function TypeIt({ words, onWin }: GameProps) {
+function TypeIt({ words, onWin, level }: GameProps) {
   const frase = useMemo(() => {
     const w = words.map((x) => x.toLowerCase()).filter(Boolean)[0] ?? "paz";
     return `Hoy elijo ${w} y suelto lo que no me pertenece.`;
@@ -216,7 +232,7 @@ function Pad({ onDir }: { onDir: (dx: number, dy: number) => void }) {
 
 /* ---------------------------------------------------------- 4. Come-hojas */
 
-function LeafEater({ onWin }: GameProps) {
+function LeafEater({ onWin, level }: GameProps) {
   const G = 11;
   const state = useRef({
     p: { x: 1, y: 1 }, e: { x: 9, y: 9 },
@@ -282,7 +298,7 @@ function LeafEater({ onWin }: GameProps) {
       <canvas ref={ref} className="w-full aspect-square rounded-[16px] shadow-soft" />
       {msg && <p className="mt-2 text-center text-[13.5px] font-bold text-primary">{msg}</p>}
       <Pad onDir={move} />
-      <GameFooter onReset={reset} />
+      <GameFooter />
     </div>
   );
 }
@@ -294,7 +310,8 @@ const SHAPES = [
   [[1, 1, 1, 1]], [[1, 1], [1, 1]], [[0, 1, 0], [1, 1, 1]],
   [[1, 0, 0], [1, 1, 1]], [[0, 0, 1], [1, 1, 1]],
 ];
-function TetrisLite({ onWin }: GameProps) {
+function TetrisLite({ onWin, level }: GameProps) {
+  const lineGoal = levelScale(level, 3, 1, 40);
   const st = useRef({
     board: Array.from({ length: ROWS }, () => Array(COLS).fill(0)) as number[][],
     shape: SHAPES[0] as number[][], x: 3, y: 0, lines: 0, over: false, acc: 0, last: 0,
@@ -325,7 +342,7 @@ function TetrisLite({ onWin }: GameProps) {
     while (s.board.length < ROWS) s.board.unshift(Array(COLS).fill(0));
     if (cleared) {
       s.lines += cleared; setLines(s.lines);
-      if (s.lines >= 3) onWin(70);
+      if (s.lines >= lineGoal) onWin(70);
     }
     spawn();
   };
@@ -369,14 +386,14 @@ function TetrisLite({ onWin }: GameProps) {
       <canvas ref={ref} className="w-full aspect-[8/14] max-h-[46vh] mx-auto rounded-[16px] shadow-soft" />
       {over && <p className="mt-2 text-center text-[13px] font-bold text-primary">Se llenó. Empieza otra vez con calma.</p>}
       <Pad onDir={move} />
-      <GameFooter onReset={reset} hint="▲ gira la pieza" />
+      <GameFooter hint="▲ gira la pieza" />
     </div>
   );
 }
 
 /* ---------------------------------------------------------- 6. Aros       */
 
-function RingWord({ words, onWin }: GameProps) {
+function RingWord({ words, onWin, level }: GameProps) {
   const target = useMemo(() => clean(words.map(clean).filter((w) => w.length >= 4)[0] ?? "LIBERTAD"), [words]);
   const [guessed, setGuessed] = useState<string[]>([]);
   const [fails, setFails] = useState(0);
@@ -410,16 +427,16 @@ function RingWord({ words, onWin }: GameProps) {
         ))}
       </div>
       {won && <p className="mt-3 text-center text-[13.5px] font-bold text-[#2F9C74]">¡Completaste la palabra y todos los aros!</p>}
-      <GameFooter onReset={() => { setGuessed([]); setFails(0); }} />
+      <GameFooter />
     </div>
   );
 }
 
 /* ---------------------------------------------------------- 7. Globo      */
 
-function Balloon({ onWin }: GameProps) {
+function Balloon({ onWin, level }: GameProps) {
   const [n, setN] = useState(0);
-  const goal = 12;
+  const goal = levelScale(level, 12, 1, 120);
   const word = POSITIVAS[n % POSITIVAS.length];
   const done = n >= goal;
   useEffect(() => { if (done) onWin(50); /* eslint-disable-next-line */ }, [done]);
@@ -435,21 +452,21 @@ function Balloon({ onWin }: GameProps) {
       </div>
       <p className="text-[13px] text-muted-foreground">Pulsa para llenar tu globo de palabras que sí son tuyas.</p>
       <p className="text-[12.5px] font-bold text-primary mt-1">{Math.min(n, goal)} / {goal}</p>
-      <GameFooter onReset={() => setN(0)} />
+      <GameFooter />
     </div>
   );
 }
 
 /* ---------------------------------------------------------- 8. Pez        */
 
-function HealingFish({ onWin }: GameProps) {
+function HealingFish({ onWin, level }: GameProps) {
   const st = useRef({
     y: 0.5, items: [] as { x: number; y: number; w: string; good: boolean }[],
     score: 0, spawn: 0,
   });
   const [score, setScore] = useState(0);
   const [msg, setMsg] = useState("");
-  const goal = 6;
+  const goal = levelScale(level, 6, 1, 80);
 
   const ref = useCanvasLoop((ctx, w, h, t) => {
     const s = st.current;
@@ -495,18 +512,18 @@ function HealingFish({ onWin }: GameProps) {
       <canvas ref={ref} className="w-full aspect-[4/3] rounded-[16px] shadow-soft" />
       {msg && <p className="mt-2 text-center text-[13.5px] font-bold text-[#2F9C74]">{msg}</p>}
       <Pad onDir={(_, dy) => swim(dy)} />
-      <GameFooter onReset={() => { st.current.items = []; st.current.score = 0; setScore(0); setMsg(""); }} hint="Esquiva las cargas oscuras" />
+      <GameFooter hint="Esquiva las cargas oscuras" />
     </div>
   );
 }
 
 /* ---------------------------------------------------------- 9. Ardilla    */
 
-function SquirrelRun({ onWin }: GameProps) {
+function SquirrelRun({ onWin, level }: GameProps) {
   const st = useRef({ lane: 1, obs: [] as { x: number; lane: number }[], dist: 0, over: false, spawn: 0 });
   const [dist, setDist] = useState(0);
   const [over, setOver] = useState(false);
-  const goal = 100;
+  const goal = levelScale(level, 100, 1, 2000) ;
 
   const ref = useCanvasLoop((ctx, w, h, t) => {
     const s = st.current;
@@ -545,7 +562,7 @@ function SquirrelRun({ onWin }: GameProps) {
       <canvas ref={ref} className="w-full aspect-[4/3] rounded-[16px] shadow-soft" />
       {over && <p className="mt-2 text-center text-[13.5px] font-bold text-primary">{dist >= goal ? "¡Escapaste! Nadie decide por ti." : "Te atraparon. Respira y vuelve a correr."}</p>}
       <Pad onDir={(_, dy) => { const s = st.current; if (!s.over) s.lane = Math.max(0, Math.min(2, s.lane + dy)); }} />
-      <GameFooter onReset={() => { const s = st.current; s.obs = []; s.dist = 0; s.over = false; s.lane = 1; setDist(0); setOver(false); }} />
+      <GameFooter />
     </div>
   );
 }
@@ -556,10 +573,10 @@ function setDistThrottled(v: number, set: (n: number) => void) {
 
 /* ---------------------------------------------------------- 10. Respira   */
 
-function Breathe({ onWin }: GameProps) {
+function Breathe({ onWin, level }: GameProps) {
   const [cycle, setCycle] = useState(0);
   const [phase, setPhase] = useState<"in" | "hold" | "out">("in");
-  const goal = 4;
+  const goal = levelScale(level, 4, 2, 24);
   useEffect(() => {
     const seq: { p: "in" | "hold" | "out"; ms: number }[] = [{ p: "in", ms: 4000 }, { p: "hold", ms: 4000 }, { p: "out", ms: 6000 }];
     let i = 0; let stop = false;
@@ -605,15 +622,10 @@ function Breathe({ onWin }: GameProps) {
 
 /* ---------------------------------------------------------- shell         */
 
-function GameFooter({ onReset, hint }: { onReset?: () => void; hint?: string }) {
+function GameFooter({ hint }: { hint?: string }) {
   return (
-    <div className="mt-4 flex items-center justify-between gap-3">
+    <div className="mt-4 flex items-center gap-3">
       <span className="text-[11.5px] text-muted-foreground">{hint ?? "Sin prisa: esto también es sanar."}</span>
-      {onReset && (
-        <button onClick={onReset} className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-2 text-[12.5px] font-bold text-primary active:scale-95 transition">
-          <RotateCcw className="w-3.5 h-3.5" /> Reiniciar
-        </button>
-      )}
     </div>
   );
 }
@@ -655,20 +667,39 @@ export function DailyGames({
 }: { words?: string[]; title?: string; subtitle?: string }) {
   const [openId, setOpenId] = useState<string | null>(null);
   const [wonToday, setWonToday] = useState<string[]>([]);
+  const [levels, setLevels] = useState<Record<string, number>>({});
+  const [lastGranted, setLastGranted] = useState<Record<string, number>>({});
   const qc = useQueryClient();
   const game = GAMES.find((g) => g.id === openId) ?? null;
+
+  useEffect(() => {
+    const next: Record<string, number> = {};
+    for (const g of GAMES) {
+      const raw = Number(localStorage.getItem(`origen_game_level_${g.id}`) ?? "1");
+      next[g.id] = Number.isFinite(raw) && raw >= 1 ? Math.min(raw, MAX_LEVEL) : 1;
+    }
+    setLevels(next);
+  }, []);
 
   const pool = words.length ? words : POSITIVAS;
 
   const win = async (g: GameDef) => {
     if (wonToday.includes(g.id)) return;
     setWonToday((w) => [...w, g.id]);
-    const r = await awardLeaf("juegos", "major", g.title, { game: g.id });
+    const r = await awardLeaf("juegos", "medium", g.title, { game: g.id, level: levels[g.id] ?? 1 });
+    setLastGranted((m) => ({ ...m, [g.id]: r.granted }));
     qc.invalidateQueries({ queryKey: ["profile"] });
     qc.invalidateQueries({ queryKey: ["dashboard"] });
-    if (r.granted > 0) toast.success(`+${(r.granted / 100).toFixed(2)} hojas · ${g.title}`);
-    else if (r.capped === "daily") toast.info("Ya llegaste a tu tope de 0.333 hojas de hoy. Mañana sigues sumando.");
+    if (r.granted > 0) toast.success(`+${(r.granted / HOJA_POINTS).toFixed(3)} hojas · ${g.title}`);
+    else if (r.capped === "daily") toast.info("Ya llegaste a tu tope de hojas de hoy. Después de las 12:00 PM sigues sumando.");
     else toast.info("Tope de esta sección alcanzado hoy. Prueba otra sección de la app.");
+  };
+
+  const nextLevel = (g: GameDef) => {
+    const lvl = Math.min(MAX_LEVEL, (levels[g.id] ?? 1) + 1);
+    localStorage.setItem(`origen_game_level_${g.id}`, String(lvl));
+    setLevels((m) => ({ ...m, [g.id]: lvl }));
+    setWonToday((w) => w.filter((id) => id !== g.id));
   };
 
 
@@ -694,7 +725,9 @@ export function DailyGames({
               <span className="block text-[11.5px] text-muted-foreground leading-snug line-clamp-2">{g.desc}</span>
               <span className={cn("mt-1.5 inline-flex items-center gap-1 text-[11.5px] font-bold",
                 wonToday.includes(g.id) ? "text-[#2F9C74]" : "text-primary")}>
-                {wonToday.includes(g.id) ? <><Check className="w-3.5 h-3.5" /> Completado</> : <><Leaf className="w-3.5 h-3.5" /> +0.05 hoja</>}
+                {wonToday.includes(g.id)
+                  ? <><Check className="w-3.5 h-3.5" /> Nivel {levels[g.id] ?? 1} logrado</>
+                  : <><Leaf className="w-3.5 h-3.5" /> Nivel {levels[g.id] ?? 1} · suma hojas</>}
               </span>
             </span>
           </button>
@@ -716,11 +749,24 @@ export function DailyGames({
                   <span className="block text-[12px] font-medium text-muted-foreground">{game.desc}</span>
                 </span>
               </DialogTitle>
-              <div className="mt-1">{game.render({ words: pool, onWin: () => win(game) })}</div>
+              <div className="mt-1" key={`${game.id}-${levels[game.id] ?? 1}`}>
+                {game.render({ words: pool, onWin: () => win(game), level: levels[game.id] ?? 1 })}
+              </div>
               {wonToday.includes(game.id) && (
-                <p className="mt-3 rounded-[12px] bg-[#3FBE8F]/12 px-3 py-2.5 text-[13px] font-bold text-[#2F9C74] flex items-center gap-2">
-                  <Sparkles className="w-4 h-4" /> Ganaste {game.gems} hojas de sanación.
-                </p>
+                <div className="mt-3 rounded-[12px] bg-[#3FBE8F]/12 px-3 py-2.5">
+                  <p className="text-[13px] font-bold text-[#2F9C74] flex items-center gap-2">
+                    <Sparkles className="w-4 h-4" />
+                    {(lastGranted[game.id] ?? 0) > 0
+                      ? `Sumaste ${((lastGranted[game.id] ?? 0) / HOJA_POINTS).toFixed(3)} hojas de sanación.`
+                      : "Hoy ya llegaste a tu tope de hojas. El nivel igual queda guardado."}
+                  </p>
+                  <button
+                    onClick={() => nextLevel(game)}
+                    className="mt-2.5 inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2.5 text-[13px] font-bold text-primary-foreground active:scale-95 transition"
+                  >
+                    Nivel {Math.min(MAX_LEVEL, (levels[game.id] ?? 1) + 1)} <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
               )}
             </>
           )}

@@ -1,5 +1,6 @@
 import { createFileRoute, useParams, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
+import { getRecommendedFocuses, orderStages, resolveStageStates } from "@/lib/stage-order";
 import { useAuth } from "@/lib/use-auth";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Textarea } from "@/components/ui/textarea";
@@ -69,23 +70,22 @@ function StageFlow() {
     queryKey: ["stage", id, user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const [stage, progress, stages, entries, allProgress] = await Promise.all([
+      const [stage, progress, stages, entries, allProgress, intake] = await Promise.all([
         supabase.from("stages").select("*").eq("id", id).maybeSingle(),
         supabase.from("stage_progress").select("*").eq("user_id", user!.id).eq("stage_id", id).maybeSingle(),
-        supabase.from("stages").select("id").order("id"),
+        supabase.from("stages").select("id, focus_area").order("id"),
         supabase.from("stage_step_entries").select("*").eq("user_id", user!.id).eq("stage_id", id),
         supabase.from("stage_progress").select("stage_id, status, completed_at").eq("user_id", user!.id),
+        supabase.from("intake_sessions").select("primary_focus, ai_plan").eq("user_id", user!.id).maybeSingle(),
       ]);
-      const ids = (stages.data ?? []).map((s: any) => s.id);
+      const focuses = getRecommendedFocuses(intake.data);
+      const ordered = orderStages((stages.data ?? []) as any[], focuses);
+      const ids = ordered.map((s: any) => s.id);
       const idx = ids.indexOf(id);
-      const progressMap = new Map((allProgress.data ?? []).map((p: any) => [p.stage_id, p]));
-      const today = new Date().toISOString().slice(0, 10);
-      const prevId = idx > 0 ? ids[idx - 1] : null;
-      const prevProgress = prevId !== null ? progressMap.get(prevId) : null;
-      const prevCompleted = idx === 0 || prevProgress?.status === "completed";
-      const prevCompletedToday = !!prevProgress?.completed_at && String(prevProgress.completed_at).slice(0, 10) === today;
-      const lockedTomorrow = idx > 0 && prevCompleted && prevCompletedToday;
-      const lockedSequential = idx > 0 && !prevCompleted;
+      const states = resolveStageStates(ids, (allProgress.data ?? []) as any);
+      const state = states.get(id) ?? "open";
+      const lockedTomorrow = state === "locked-today";
+      const lockedSequential = state === "locked-sequential";
       return {
         stage: stage.data,
         progress: progress.data,
@@ -1255,7 +1255,7 @@ function LockedStageView({ tomorrow, onBack }: { tomorrow: boolean; onBack: () =
       <Card className="w-full max-w-sm rounded-[16px] p-6 text-center shadow-soft bg-card/95">
         <div className="w-14 h-14 mx-auto rounded-full bg-primary/10 text-primary grid place-items-center"><Lock className="w-7 h-7" /></div>
         <h1 className="font-display font-extrabold text-[22px] mt-3 leading-tight">
-          {tomorrow ? "Se desbloquea mañana" : "Etapa bloqueada"}
+          {tomorrow ? "Se abre a las 12:00 PM" : "Etapa bloqueada"}
         </h1>
         <p className="text-[13.5px] text-muted-foreground mt-2 leading-snug">
           {tomorrow

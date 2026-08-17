@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import coverFallback from "@/assets/e3d-book.png";
 import { EBOOKS, LIBRARY_RULES, matchesQuery } from "@/lib/biblioteca";
 import { useBiblioteca } from "@/hooks/use-biblioteca";
 import { Download, Lock, Search, Sparkles, X } from "lucide-react";
@@ -174,7 +175,13 @@ function Biblioteca() {
                     src={b.cover}
                     alt={`Portada de ${b.title}`}
                     loading="lazy"
-                    className="w-full aspect-[3/4] object-cover"
+                    className="w-full aspect-[3/4] object-cover bg-secondary"
+                    onError={(e) => {
+                      const el = e.currentTarget;
+                      if (el.dataset["fallback"]) return;
+                      el.dataset["fallback"] = "1";
+                      el.src = coverFallback;
+                    }}
                   />
                   <div className="p-2.5 space-y-2">
                     <p className="text-[12.5px] font-semibold leading-snug line-clamp-2 min-h-[32px]">{b.title}</p>

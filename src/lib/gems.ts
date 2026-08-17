@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { appDayKey, appDayStartIso } from "@/lib/app-day";
 
 /**
  * Sistema de Hojas de Sanación (balanceo por micro-acciones + ponderación por sección).
@@ -53,13 +54,12 @@ export function hojaProgressPct(points: number | null | undefined) {
 }
 
 function todayIso() {
-  return new Date().toISOString().slice(0, 10);
+  return appDayKey();
 }
 
 function startOfDayIso() {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  return d.toISOString();
+  // El día de la app arranca a las 12:00 PM.
+  return appDayStartIso();
 }
 
 function slug(s: string) {
@@ -235,4 +235,44 @@ export function hasHojas(points: number | null | undefined, hojas: number) {
 export async function spendHojas(hojas: number, reason: string, meta?: Record<string, unknown>) {
   if (hojas <= 0) return null;
   return awardGems(-Math.round(hojas * HOJA_POINTS), reason, meta);
+}
+
+/* ─────────────────────────────────────────────────────────────
+ * Cobro UNA sola vez por día de la app (reseteo 12:00 PM).
+ * Ej: la sección /chat cuesta 1 hoja por día, no por respuesta.
+ * ───────────────────────────────────────────────────────────── */
+
+export type DaySpendResult = { charged: boolean; alreadyPaid: boolean; insufficient: boolean; balance: number | null };
+
+/** ¿Ya se pagó hoy esta sección? */
+export async function hasPaidToday(section: string) {
+  const tag = `day:${slug(section)}`;
+  const { data } = await supabase
+    .from("gem_transactions")
+    .select("id")
+    .lt("amount", 0)
+    .like("reason", `${tag}%`)
+    .gte("created_at", startOfDayIso())
+    .limit(1);
+  return (data ?? []).length > 0;
+}
+
+/**
+ * Cobra `hojas` hojas por el día de la app en esta sección.
+ * Si ya se cobró hoy, no vuelve a cobrar (acceso libre el resto del día).
+ */
+export async function spendDailyAccess(
+  section: string,
+  hojas = 1,
+  meta?: Record<string, unknown>,
+): Promise<DaySpendResult> {
+  if (await hasPaidToday(section)) {
+    return { charged: false, alreadyPaid: true, insufficient: false, balance: null };
+  }
+  const { data: prof } = await supabase.from("profiles").select("gems").eq("id", (await supabase.auth.getUser()).data.user?.id ?? "").maybeSingle();
+  if (!hasHojas(prof?.gems, hojas)) {
+    return { charged: false, alreadyPaid: false, insufficient: true, balance: prof?.gems ?? 0 };
+  }
+  const balance = await spendHojas(hojas, `day:${slug(section)} · ${appDayKey()}`, { ...(meta ?? {}), section: slug(section), day: appDayKey() });
+  return { charged: balance !== null, alreadyPaid: false, insufficient: false, balance };
 }

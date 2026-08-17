@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { getUserPlan } from "@/lib/plan";
-import { awardGems } from "@/lib/gems";
+import { awardGems, hasHojas, wholeHojas } from "@/lib/gems";
 import { printConsulta } from "@/lib/print-pdf";
 import { ConsultaHistorial, type ConsultaHistorialItem } from "@/components/ConsultaHistorial";
 import { ConsultaPDFButton } from "@/components/ConsultaPDFButton";
@@ -103,7 +103,7 @@ function ParejaPage() {
     setHistoryLoading(false);
   }
 
-  const hasEnoughGems = (gems ?? 0) >= CONSULTA_COST_HOJAS * 100;
+  const hasEnoughGems = hasHojas(gems, CONSULTA_COST_HOJAS);
 
   async function begin() {
     if (!form.self_name.trim() || !form.partner_name.trim()) return toast.error("Escribe ambos nombres");
@@ -259,7 +259,7 @@ function ParejaPage() {
             </div>
             {!hasEnoughGems && gems !== null && (
               <p className="mt-2 text-[12px] text-destructive text-center">
-                No tienes hojas de sanación suficientes. Sigue avanzando en tu camino para ganar más.
+                Tienes {wholeHojas(gems)} hojas y esta consulta cuesta {CONSULTA_COST_HOJAS}. Sigue avanzando en tu camino para ganar más.
               </p>
             )}
 
