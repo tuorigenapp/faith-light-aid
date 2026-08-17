@@ -6,7 +6,7 @@ import { awardLeaf } from "@/lib/gems";
 import { toast } from "sonner";
 import {
   Search, Brain, PenLine, Ghost, Blocks, Circle, Wind,
-  Fish, Rabbit, HeartPulse, Trophy, Leaf, RotateCcw, Check, Sparkles,
+  Fish, Rabbit, HeartPulse, Trophy, Leaf, Check, Sparkles, ArrowRight,
 } from "lucide-react";
 
 /* ---------------------------------------------------------------- utils */
@@ -22,17 +22,30 @@ function clean(w: string) {
   return w.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^A-Z]/g, "");
 }
 
-type GameProps = { words: string[]; onWin: (gems: number) => void };
+type GameProps = { words: string[]; onWin: (gems: number) => void; level: number };
+
+/** Dificultad creciente: cada nivel sube un poco la exigencia (sin techo). */
+export function levelScale(level: number, base: number, step = 1, max = 999999) {
+  return Math.min(max, base + Math.floor((Math.max(1, level) - 1) / step));
+}
+
+/** Rota el banco de palabras para que nunca se repita el mismo set. */
+function rotate<T>(arr: T[], by: number): T[] {
+  if (arr.length === 0) return arr;
+  const k = ((by % arr.length) + arr.length) % arr.length;
+  return [...arr.slice(k), ...arr.slice(0, k)];
+}
 
 /* ---------------------------------------------------------- 1. Sopa      */
 
 const SIZE = 8;
-function WordFind({ words, onWin }: GameProps) {
+function WordFind({ words, onWin, level }: GameProps) {
+  const count = levelScale(level, 3, 2, 7);
   const list = useMemo(
-    () => words.map(clean).filter((w) => w.length >= 3 && w.length <= SIZE).slice(0, 4),
-    [words],
+    () => rotate(words.map(clean).filter((w) => w.length >= 3 && w.length <= SIZE), level * 3).slice(0, count),
+    [words, level, count],
   );
-  const [seed, setSeed] = useState(1);
+  const [seed] = useState(1);
   const { grid, placed } = useMemo(() => {
     const g: string[][] = Array.from({ length: SIZE }, () => Array(SIZE).fill(""));
     const ps: { word: string; cells: string[] }[] = [];
@@ -97,19 +110,20 @@ function WordFind({ words, onWin }: GameProps) {
             found.includes(p.word) ? "bg-[#3FBE8F]/15 text-[#2F9C74] line-through" : "bg-secondary text-primary")}>{p.word}</span>
         ))}
       </div>
-      <GameFooter onReset={() => { setSeed((s) => s + 1); setFound([]); setSel([]); }} />
+      <GameFooter hint={`Nivel ${level} · ${count} palabras escondidas`} />
     </div>
   );
 }
 
 /* ---------------------------------------------------------- 2. Memoria   */
 
-function Memory({ words, onWin }: GameProps) {
+function Memory({ words, onWin, level }: GameProps) {
+  const pairs = levelScale(level, 4, 2, 10);
   const base = useMemo(() => {
-    const src = [...words.map(clean).filter((w) => w.length > 2), ...POSITIVAS.map(clean)].slice(0, 6);
+    const src = rotate([...words.map(clean).filter((w) => w.length > 2), ...POSITIVAS.map(clean)], level * 2).slice(0, pairs);
     return [...src, ...src].map((w, i) => ({ id: i, w })).sort(() => Math.random() - 0.5);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [words]);
+  }, [words, level, pairs]);
   const [cards, setCards] = useState(base);
   const [open, setOpen] = useState<number[]>([]);
   const [done, setDone] = useState<string[]>([]);
@@ -144,7 +158,7 @@ function Memory({ words, onWin }: GameProps) {
           );
         })}
       </div>
-      <GameFooter onReset={() => { setCards([...base].sort(() => Math.random() - 0.5)); setDone([]); setOpen([]); }} />
+      <GameFooter hint={`Nivel ${level} · ${pairs} parejas`} />
     </div>
   );
 }
@@ -282,7 +296,7 @@ function LeafEater({ onWin }: GameProps) {
       <canvas ref={ref} className="w-full aspect-square rounded-[16px] shadow-soft" />
       {msg && <p className="mt-2 text-center text-[13.5px] font-bold text-primary">{msg}</p>}
       <Pad onDir={move} />
-      <GameFooter onReset={reset} />
+      <GameFooter />
     </div>
   );
 }
@@ -369,7 +383,7 @@ function TetrisLite({ onWin }: GameProps) {
       <canvas ref={ref} className="w-full aspect-[8/14] max-h-[46vh] mx-auto rounded-[16px] shadow-soft" />
       {over && <p className="mt-2 text-center text-[13px] font-bold text-primary">Se llenó. Empieza otra vez con calma.</p>}
       <Pad onDir={move} />
-      <GameFooter onReset={reset} hint="▲ gira la pieza" />
+      <GameFooter hint="▲ gira la pieza" />
     </div>
   );
 }
@@ -410,7 +424,7 @@ function RingWord({ words, onWin }: GameProps) {
         ))}
       </div>
       {won && <p className="mt-3 text-center text-[13.5px] font-bold text-[#2F9C74]">¡Completaste la palabra y todos los aros!</p>}
-      <GameFooter onReset={() => { setGuessed([]); setFails(0); }} />
+      <GameFooter} />
     </div>
   );
 }
@@ -435,7 +449,7 @@ function Balloon({ onWin }: GameProps) {
       </div>
       <p className="text-[13px] text-muted-foreground">Pulsa para llenar tu globo de palabras que sí son tuyas.</p>
       <p className="text-[12.5px] font-bold text-primary mt-1">{Math.min(n, goal)} / {goal}</p>
-      <GameFooter onReset={() => setN(0)} />
+      <GameFooter />
     </div>
   );
 }
@@ -495,7 +509,7 @@ function HealingFish({ onWin }: GameProps) {
       <canvas ref={ref} className="w-full aspect-[4/3] rounded-[16px] shadow-soft" />
       {msg && <p className="mt-2 text-center text-[13.5px] font-bold text-[#2F9C74]">{msg}</p>}
       <Pad onDir={(_, dy) => swim(dy)} />
-      <GameFooter onReset={() => { st.current.items = []; st.current.score = 0; setScore(0); setMsg(""); }} hint="Esquiva las cargas oscuras" />
+      <GameFooter} hint="Esquiva las cargas oscuras" />
     </div>
   );
 }
@@ -545,7 +559,7 @@ function SquirrelRun({ onWin }: GameProps) {
       <canvas ref={ref} className="w-full aspect-[4/3] rounded-[16px] shadow-soft" />
       {over && <p className="mt-2 text-center text-[13.5px] font-bold text-primary">{dist >= goal ? "¡Escapaste! Nadie decide por ti." : "Te atraparon. Respira y vuelve a correr."}</p>}
       <Pad onDir={(_, dy) => { const s = st.current; if (!s.over) s.lane = Math.max(0, Math.min(2, s.lane + dy)); }} />
-      <GameFooter onReset={() => { const s = st.current; s.obs = []; s.dist = 0; s.over = false; s.lane = 1; setDist(0); setOver(false); }} />
+      <GameFooter} />
     </div>
   );
 }
@@ -605,15 +619,10 @@ function Breathe({ onWin }: GameProps) {
 
 /* ---------------------------------------------------------- shell         */
 
-function GameFooter({ onReset, hint }: { onReset?: () => void; hint?: string }) {
+function GameFooter({ hint }: { hint?: string }) {
   return (
-    <div className="mt-4 flex items-center justify-between gap-3">
+    <div className="mt-4 flex items-center gap-3">
       <span className="text-[11.5px] text-muted-foreground">{hint ?? "Sin prisa: esto también es sanar."}</span>
-      {onReset && (
-        <button onClick={onReset} className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-2 text-[12.5px] font-bold text-primary active:scale-95 transition">
-          <RotateCcw className="w-3.5 h-3.5" /> Reiniciar
-        </button>
-      )}
     </div>
   );
 }
