@@ -426,7 +426,7 @@ function RingWord({ words, onWin }: GameProps) {
         ))}
       </div>
       {won && <p className="mt-3 text-center text-[13.5px] font-bold text-[#2F9C74]">¡Completaste la palabra y todos los aros!</p>}
-      <GameFooter} />
+      <GameFooter />
     </div>
   );
 }
@@ -511,7 +511,7 @@ function HealingFish({ onWin }: GameProps) {
       <canvas ref={ref} className="w-full aspect-[4/3] rounded-[16px] shadow-soft" />
       {msg && <p className="mt-2 text-center text-[13.5px] font-bold text-[#2F9C74]">{msg}</p>}
       <Pad onDir={(_, dy) => swim(dy)} />
-      <GameFooter} hint="Esquiva las cargas oscuras" />
+      <GameFooter hint="Esquiva las cargas oscuras" />
     </div>
   );
 }
@@ -561,7 +561,7 @@ function SquirrelRun({ onWin }: GameProps) {
       <canvas ref={ref} className="w-full aspect-[4/3] rounded-[16px] shadow-soft" />
       {over && <p className="mt-2 text-center text-[13.5px] font-bold text-primary">{dist >= goal ? "¡Escapaste! Nadie decide por ti." : "Te atraparon. Respira y vuelve a correr."}</p>}
       <Pad onDir={(_, dy) => { const s = st.current; if (!s.over) s.lane = Math.max(0, Math.min(2, s.lane + dy)); }} />
-      <GameFooter} />
+      <GameFooter />
     </div>
   );
 }
