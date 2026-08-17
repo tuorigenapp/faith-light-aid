@@ -167,7 +167,7 @@ function Memory({ words, onWin, level }: GameProps) {
 
 /* ---------------------------------------------------------- 3. Escribir  */
 
-function TypeIt({ words, onWin }: GameProps) {
+function TypeIt({ words, onWin, level }: GameProps) {
   const frase = useMemo(() => {
     const w = words.map((x) => x.toLowerCase()).filter(Boolean)[0] ?? "paz";
     return `Hoy elijo ${w} y suelto lo que no me pertenece.`;
@@ -232,7 +232,7 @@ function Pad({ onDir }: { onDir: (dx: number, dy: number) => void }) {
 
 /* ---------------------------------------------------------- 4. Come-hojas */
 
-function LeafEater({ onWin }: GameProps) {
+function LeafEater({ onWin, level }: GameProps) {
   const G = 11;
   const state = useRef({
     p: { x: 1, y: 1 }, e: { x: 9, y: 9 },
@@ -310,7 +310,8 @@ const SHAPES = [
   [[1, 1, 1, 1]], [[1, 1], [1, 1]], [[0, 1, 0], [1, 1, 1]],
   [[1, 0, 0], [1, 1, 1]], [[0, 0, 1], [1, 1, 1]],
 ];
-function TetrisLite({ onWin }: GameProps) {
+function TetrisLite({ onWin, level }: GameProps) {
+  const lineGoal = levelScale(level, 3, 1, 40);
   const st = useRef({
     board: Array.from({ length: ROWS }, () => Array(COLS).fill(0)) as number[][],
     shape: SHAPES[0] as number[][], x: 3, y: 0, lines: 0, over: false, acc: 0, last: 0,
@@ -341,7 +342,7 @@ function TetrisLite({ onWin }: GameProps) {
     while (s.board.length < ROWS) s.board.unshift(Array(COLS).fill(0));
     if (cleared) {
       s.lines += cleared; setLines(s.lines);
-      if (s.lines >= 3) onWin(70);
+      if (s.lines >= lineGoal) onWin(70);
     }
     spawn();
   };
@@ -392,7 +393,7 @@ function TetrisLite({ onWin }: GameProps) {
 
 /* ---------------------------------------------------------- 6. Aros       */
 
-function RingWord({ words, onWin }: GameProps) {
+function RingWord({ words, onWin, level }: GameProps) {
   const target = useMemo(() => clean(words.map(clean).filter((w) => w.length >= 4)[0] ?? "LIBERTAD"), [words]);
   const [guessed, setGuessed] = useState<string[]>([]);
   const [fails, setFails] = useState(0);
@@ -433,9 +434,9 @@ function RingWord({ words, onWin }: GameProps) {
 
 /* ---------------------------------------------------------- 7. Globo      */
 
-function Balloon({ onWin }: GameProps) {
+function Balloon({ onWin, level }: GameProps) {
   const [n, setN] = useState(0);
-  const goal = 12;
+  const goal = levelScale(level, 12, 1, 120);
   const word = POSITIVAS[n % POSITIVAS.length];
   const done = n >= goal;
   useEffect(() => { if (done) onWin(50); /* eslint-disable-next-line */ }, [done]);
@@ -458,14 +459,14 @@ function Balloon({ onWin }: GameProps) {
 
 /* ---------------------------------------------------------- 8. Pez        */
 
-function HealingFish({ onWin }: GameProps) {
+function HealingFish({ onWin, level }: GameProps) {
   const st = useRef({
     y: 0.5, items: [] as { x: number; y: number; w: string; good: boolean }[],
     score: 0, spawn: 0,
   });
   const [score, setScore] = useState(0);
   const [msg, setMsg] = useState("");
-  const goal = 6;
+  const goal = levelScale(level, 6, 1, 80);
 
   const ref = useCanvasLoop((ctx, w, h, t) => {
     const s = st.current;
@@ -518,11 +519,11 @@ function HealingFish({ onWin }: GameProps) {
 
 /* ---------------------------------------------------------- 9. Ardilla    */
 
-function SquirrelRun({ onWin }: GameProps) {
+function SquirrelRun({ onWin, level }: GameProps) {
   const st = useRef({ lane: 1, obs: [] as { x: number; lane: number }[], dist: 0, over: false, spawn: 0 });
   const [dist, setDist] = useState(0);
   const [over, setOver] = useState(false);
-  const goal = 100;
+  const goal = levelScale(level, 100, 1, 2000) ;
 
   const ref = useCanvasLoop((ctx, w, h, t) => {
     const s = st.current;
@@ -572,10 +573,10 @@ function setDistThrottled(v: number, set: (n: number) => void) {
 
 /* ---------------------------------------------------------- 10. Respira   */
 
-function Breathe({ onWin }: GameProps) {
+function Breathe({ onWin, level }: GameProps) {
   const [cycle, setCycle] = useState(0);
   const [phase, setPhase] = useState<"in" | "hold" | "out">("in");
-  const goal = 4;
+  const goal = levelScale(level, 4, 2, 24);
   useEffect(() => {
     const seq: { p: "in" | "hold" | "out"; ms: number }[] = [{ p: "in", ms: 4000 }, { p: "hold", ms: 4000 }, { p: "out", ms: 6000 }];
     let i = 0; let stop = false;
