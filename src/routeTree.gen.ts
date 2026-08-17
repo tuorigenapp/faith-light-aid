@@ -31,6 +31,7 @@ import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authentic
 import { Route as AuthenticatedMinistracionRouteImport } from './routes/_authenticated/ministracion'
 import { Route as AuthenticatedMembresiaRouteImport } from './routes/_authenticated/membresia'
 import { Route as AuthenticatedInvitaRouteImport } from './routes/_authenticated/invita'
+import { Route as AuthenticatedHistorialRouteImport } from './routes/_authenticated/historial'
 import { Route as AuthenticatedEtapasRouteImport } from './routes/_authenticated/etapas'
 import { Route as AuthenticatedEjerciciosRouteImport } from './routes/_authenticated/ejercicios'
 import { Route as AuthenticatedDiarioRouteImport } from './routes/_authenticated/diario'
@@ -162,6 +163,11 @@ const AuthenticatedMembresiaRoute = AuthenticatedMembresiaRouteImport.update({
 const AuthenticatedInvitaRoute = AuthenticatedInvitaRouteImport.update({
   id: '/invita',
   path: '/invita',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedHistorialRoute = AuthenticatedHistorialRouteImport.update({
+  id: '/historial',
+  path: '/historial',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedEtapasRoute = AuthenticatedEtapasRouteImport.update({
@@ -301,6 +307,7 @@ export interface FileRoutesByFullPath {
   '/diario': typeof AuthenticatedDiarioRoute
   '/ejercicios': typeof AuthenticatedEjerciciosRoute
   '/etapas': typeof AuthenticatedEtapasRouteWithChildren
+  '/historial': typeof AuthenticatedHistorialRoute
   '/invita': typeof AuthenticatedInvitaRoute
   '/membresia': typeof AuthenticatedMembresiaRoute
   '/ministracion': typeof AuthenticatedMinistracionRoute
@@ -346,6 +353,7 @@ export interface FileRoutesByTo {
   '/diario': typeof AuthenticatedDiarioRoute
   '/ejercicios': typeof AuthenticatedEjerciciosRoute
   '/etapas': typeof AuthenticatedEtapasRouteWithChildren
+  '/historial': typeof AuthenticatedHistorialRoute
   '/invita': typeof AuthenticatedInvitaRoute
   '/membresia': typeof AuthenticatedMembresiaRoute
   '/ministracion': typeof AuthenticatedMinistracionRoute
@@ -392,6 +400,7 @@ export interface FileRoutesById {
   '/_authenticated/diario': typeof AuthenticatedDiarioRoute
   '/_authenticated/ejercicios': typeof AuthenticatedEjerciciosRoute
   '/_authenticated/etapas': typeof AuthenticatedEtapasRouteWithChildren
+  '/_authenticated/historial': typeof AuthenticatedHistorialRoute
   '/_authenticated/invita': typeof AuthenticatedInvitaRoute
   '/_authenticated/membresia': typeof AuthenticatedMembresiaRoute
   '/_authenticated/ministracion': typeof AuthenticatedMinistracionRoute
@@ -439,6 +448,7 @@ export interface FileRouteTypes {
     | '/diario'
     | '/ejercicios'
     | '/etapas'
+    | '/historial'
     | '/invita'
     | '/membresia'
     | '/ministracion'
@@ -484,6 +494,7 @@ export interface FileRouteTypes {
     | '/diario'
     | '/ejercicios'
     | '/etapas'
+    | '/historial'
     | '/invita'
     | '/membresia'
     | '/ministracion'
@@ -529,6 +540,7 @@ export interface FileRouteTypes {
     | '/_authenticated/diario'
     | '/_authenticated/ejercicios'
     | '/_authenticated/etapas'
+    | '/_authenticated/historial'
     | '/_authenticated/invita'
     | '/_authenticated/membresia'
     | '/_authenticated/ministracion'
@@ -731,6 +743,13 @@ declare module '@tanstack/react-router' {
       path: '/invita'
       fullPath: '/invita'
       preLoaderRoute: typeof AuthenticatedInvitaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/historial': {
+      id: '/_authenticated/historial'
+      path: '/historial'
+      fullPath: '/historial'
+      preLoaderRoute: typeof AuthenticatedHistorialRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/etapas': {
@@ -965,6 +984,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDiarioRoute: typeof AuthenticatedDiarioRoute
   AuthenticatedEjerciciosRoute: typeof AuthenticatedEjerciciosRoute
   AuthenticatedEtapasRoute: typeof AuthenticatedEtapasRouteWithChildren
+  AuthenticatedHistorialRoute: typeof AuthenticatedHistorialRoute
   AuthenticatedInvitaRoute: typeof AuthenticatedInvitaRoute
   AuthenticatedMembresiaRoute: typeof AuthenticatedMembresiaRoute
   AuthenticatedMinistracionRoute: typeof AuthenticatedMinistracionRoute
@@ -990,6 +1010,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDiarioRoute: AuthenticatedDiarioRoute,
   AuthenticatedEjerciciosRoute: AuthenticatedEjerciciosRoute,
   AuthenticatedEtapasRoute: AuthenticatedEtapasRouteWithChildren,
+  AuthenticatedHistorialRoute: AuthenticatedHistorialRoute,
   AuthenticatedInvitaRoute: AuthenticatedInvitaRoute,
   AuthenticatedMembresiaRoute: AuthenticatedMembresiaRoute,
   AuthenticatedMinistracionRoute: AuthenticatedMinistracionRoute,

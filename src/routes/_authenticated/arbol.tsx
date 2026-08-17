@@ -86,7 +86,7 @@ function HomeView({ displayName, avatar, gems, onOpenTree }: { displayName: stri
             <div className="truncate font-display font-bold text-[15px] text-foreground">Hola, {displayName}</div>
             <div className="text-[11px] font-semibold text-muted-foreground">Tu jardín de sanación</div>
           </div>
-          <Link to="/premios" aria-label="Historial de hojas" className="w-10 h-10 shrink-0 rounded-full bg-card shadow-soft grid place-items-center text-[#7C5CFF] active:scale-95 transition">
+          <Link to="/historial" aria-label="Historial de hojas" className="w-10 h-10 shrink-0 rounded-full bg-card shadow-soft grid place-items-center text-[#7C5CFF] active:scale-95 transition">
             <Info className="w-5 h-5" />
           </Link>
         </div>
@@ -121,6 +121,11 @@ function HomeView({ displayName, avatar, gems, onOpenTree }: { displayName: stri
             style={{ background: "linear-gradient(180deg,#8F6BFF 0%,#F58BCB 100%)", boxShadow: "0 4px 14px rgba(124,92,255,.30)" }}>
             <Sparkles className="w-4 h-4" /> Recargar mis hojas
           </Link>
+          <TransferSection gems={gems} />
+          <Link to="/historial"
+            className="w-full h-12 rounded-[12px] bg-card border border-border text-[#7C5CFF] font-display font-bold text-[15px] inline-flex items-center justify-center gap-2 active:scale-[.98] transition">
+            📜 Ver mi historial de transacciones
+          </Link>
           <button onClick={onOpenTree}
             className="w-full h-12 rounded-[12px] bg-[#7C5CFF]/[0.09] text-[#7C5CFF] font-display font-bold text-[15px] inline-flex items-center justify-center gap-2 active:scale-[.98] transition">
             🌳 Ver mi árbol genealógico
@@ -147,9 +152,6 @@ function HomeView({ displayName, avatar, gems, onOpenTree }: { displayName: stri
 
         {/* Cómo se ganan las hojas */}
         <LeafRulesBlock />
-
-        {/* Transferir Balance */}
-        <TransferSection gems={gems} />
 
         {/* Patrones nudge */}
         <Link to="/patrones" className="mt-5 block rounded-[16px] p-4 text-white active:scale-[.99] transition"
