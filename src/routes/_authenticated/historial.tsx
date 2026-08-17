@@ -47,6 +47,21 @@ function HistorialPage() {
     },
   });
 
+  const { data: transfers } = useQuery({
+    queryKey: ["hoja_transfers_full", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("hoja_transfers")
+        .select("id, to_email, points, status, created_at")
+        .eq("user_id", user!.id)
+        .order("created_at", { ascending: false })
+        .limit(100);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
   const rows = (tx ?? [])
     .map((t) => {
       const meta = (t.meta ?? {}) as Record<string, unknown>;
@@ -160,6 +175,43 @@ function HistorialPage() {
             </div>
           ))}
         </div>
+
+        <section className="mt-7">
+          <h2 className="text-[12px] uppercase tracking-[0.18em] font-black text-[#7C5CFF]">Transferencias enviadas</h2>
+          <div className="mt-3 space-y-2.5">
+            {(transfers ?? []).length === 0 && (
+              <div className="rounded-[14px] bg-card border border-border p-4 text-[13px] text-muted-foreground">
+                Aún no has enviado hojas a nadie. Puedes hacerlo desde tu árbol de sanación.
+              </div>
+            )}
+            {(transfers ?? []).map((t) => (
+              <div key={t.id} className="rounded-[14px] bg-card border border-border p-3.5 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
+                <span className="w-9 h-9 rounded-[10px] bg-[#7C5CFF]/10 grid place-items-center text-[#7C5CFF] shrink-0">
+                  <Send className="w-4 h-4" />
+                </span>
+                <div className="min-w-0">
+                  <div className="text-[13px] font-bold text-foreground truncate">{t.to_email}</div>
+                  <div className="text-[11px] text-muted-foreground">
+                    {new Date(t.created_at).toLocaleDateString("es-ES", { day: "2-digit", month: "short", year: "numeric" })} ·{" "}
+                    {Math.floor(t.points / 100)} hojas
+                  </div>
+                </div>
+                <span
+                  className={cn(
+                    "shrink-0 rounded-full px-2.5 py-1 text-[11px] font-black",
+                    t.status === "pending"
+                      ? "bg-[#F7B955]/15 text-[#B77B12]"
+                      : t.status === "rejected"
+                        ? "bg-[#F5566B]/15 text-[#C23B4C]"
+                        : "bg-[#3FBE8F]/15 text-[#2FA574]",
+                  )}
+                >
+                  {t.status === "pending" ? "Pendiente" : t.status === "rejected" ? "Rechazada" : "Aprobada"}
+                </span>
+              </div>
+            ))}
+          </div>
+        </section>
 
         <div className="mt-4 rounded-[12px] bg-[#7C5CFF]/[0.07] border border-[#7C5CFF]/15 px-4 py-3 flex items-center gap-3 text-[13px] font-semibold text-[#7C5CFF]">
           <Mail className="w-4 h-4 shrink-0" /> Las transferencias se revisan manualmente antes de aprobarse.
