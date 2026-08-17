@@ -13,6 +13,7 @@ import mapaCamino from "@/assets/mapa-camino.png";
 import arbolIsla from "@/assets/hojas-tree.png";
 import portal from "@/assets/onb-portal.png";
 import heartGem from "@/assets/e3d-heartgem.png";
+import { getRecommendedFocuses, orderStages, resolveStageStates } from "@/lib/stage-order";
 
 export const Route = createFileRoute("/_authenticated/etapas")({
   head: () => ({
@@ -27,17 +28,6 @@ export const Route = createFileRoute("/_authenticated/etapas")({
   }),
   component: Etapas,
 });
-
-const KEY_TO_FOCUS: Record<string, string> = {
-  familia: "restauración familiar",
-  autoestima: "identidad",
-  ansiedad: "sanidad emocional",
-  espiritual: "reconexión",
-  fe: "reconexión",
-  habitos: "disciplina espiritual",
-  proposito: "propósito",
-  emocional: "sanidad emocional",
-};
 
 function Etapas() {
   const { user } = useAuth();
@@ -61,12 +51,9 @@ function Etapas() {
 
   const progressList = data?.progress ?? [];
   const completedIds = new Set(progressList.filter((p: any) => p.status === "completed").map((p: any) => p.stage_id));
-  const todayStr = new Date().toISOString().slice(0, 10);
-  const completedTodayIds = new Set(
-    progressList.filter((p: any) => p.status === "completed" && String(p.completed_at ?? "").slice(0, 10) === todayStr).map((p: any) => p.stage_id),
-  );
   const recommendedFocuses = getRecommendedFocuses(data?.intake);
   const orderedStages = orderStages(data?.stages ?? [], recommendedFocuses);
+  const stageStates = resolveStageStates(orderedStages.map((s: any) => s.id), progressList as any);
   const total = orderedStages.length || 7;
   const completedCount = completedIds.size;
   const pct = Math.round((completedCount / total) * 100);
@@ -150,10 +137,10 @@ function Etapas() {
           <div aria-hidden className="absolute left-[27px] top-6 bottom-6 w-[3px] rounded-full bg-gradient-to-b from-[#3FBE8F]/70 via-accent-pink/60 to-white/20" />
           <ol className="relative space-y-3.5">
             {orderedStages.map((s: any, i: number) => {
-              const completed = completedIds.has(s.id);
-              const prevCompleted = i === 0 || completedIds.has(orderedStages[i - 1]?.id);
-              const lockedTomorrow = !completed && i > 0 && prevCompleted && completedTodayIds.has(orderedStages[i - 1]?.id);
-              const unlocked = !completed && prevCompleted && !lockedTomorrow;
+              const state = stageStates.get(s.id) ?? "locked-sequential";
+              const completed = state === "completed";
+              const lockedTomorrow = state === "locked-today";
+              const unlocked = state === "open";
               const active = unlocked;
               const shift = i % 2 === 0 ? "ml-0" : "ml-6";
               const inner = (
@@ -189,7 +176,7 @@ function Etapas() {
                   >
                     <span className={cn("min-w-0", unlocked || completed ? "text-foreground" : "text-white/80")}>
                       <span className="block truncate font-display font-bold text-[15px]">{s.title}</span>
-                      {lockedTomorrow && <span className="block text-[11px] font-semibold text-white/75">Se desbloquea mañana</span>}
+                      {lockedTomorrow && <span className="block text-[11px] font-semibold text-white/75">Se abre a las 12:00 PM</span>}
                     </span>
                     {completed && <span className="shrink-0 rounded-full bg-[#3FBE8F]/15 px-2 py-0.5 text-[10px] font-extrabold tracking-wide text-[#2F9A73]">Completada</span>}
                     {active && <span className="shrink-0 rounded-full bg-accent-pink px-2 py-0.5 text-[10px] font-extrabold tracking-wide text-white">HOY</span>}
@@ -287,19 +274,3 @@ function StatCard({ label, value, icon }: { label: string; value: string; icon: 
   );
 }
 
-function getRecommendedFocuses(intake: any): string[] {
-  const plan = intake?.ai_plan ?? {};
-  const raw = [intake?.primary_focus, ...(plan.recommended_categories ?? [])].filter(Boolean).map((x: string) => x.toLowerCase());
-  const focuses = raw.flatMap((k: string) => [KEY_TO_FOCUS[k], ...Object.entries(KEY_TO_FOCUS).filter(([key]) => k.includes(key)).map(([, value]) => value)]).filter(Boolean);
-  return Array.from(new Set(focuses.length ? focuses : ["reconexión", "sanidad emocional", "identidad"])).slice(0, 4);
-}
-
-function orderStages(stages: any[], focuses: string[]) {
-  return [...stages].sort((a, b) => {
-    const af = focuses.findIndex((f) => (a.focus_area ?? "").toLowerCase().includes(f));
-    const bf = focuses.findIndex((f) => (b.focus_area ?? "").toLowerCase().includes(f));
-    const ar = af === -1 ? 99 : af;
-    const br = bf === -1 ? 99 : bf;
-    return ar - br || a.id - b.id;
-  });
-}
