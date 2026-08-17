@@ -2,7 +2,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
-import { awardLeaf } from "@/lib/gems";
+import { awardLeaf, HOJA_POINTS } from "@/lib/gems";
+
+export const MAX_LEVEL = 10000;
 import { toast } from "sonner";
 import {
   Search, Brain, PenLine, Ghost, Blocks, Circle, Wind,
@@ -664,20 +666,39 @@ export function DailyGames({
 }: { words?: string[]; title?: string; subtitle?: string }) {
   const [openId, setOpenId] = useState<string | null>(null);
   const [wonToday, setWonToday] = useState<string[]>([]);
+  const [levels, setLevels] = useState<Record<string, number>>({});
+  const [lastGranted, setLastGranted] = useState<Record<string, number>>({});
   const qc = useQueryClient();
   const game = GAMES.find((g) => g.id === openId) ?? null;
+
+  useEffect(() => {
+    const next: Record<string, number> = {};
+    for (const g of GAMES) {
+      const raw = Number(localStorage.getItem(`origen_game_level_${g.id}`) ?? "1");
+      next[g.id] = Number.isFinite(raw) && raw >= 1 ? Math.min(raw, MAX_LEVEL) : 1;
+    }
+    setLevels(next);
+  }, []);
 
   const pool = words.length ? words : POSITIVAS;
 
   const win = async (g: GameDef) => {
     if (wonToday.includes(g.id)) return;
     setWonToday((w) => [...w, g.id]);
-    const r = await awardLeaf("juegos", "major", g.title, { game: g.id });
+    const r = await awardLeaf("juegos", "medium", g.title, { game: g.id, level: levels[g.id] ?? 1 });
+    setLastGranted((m) => ({ ...m, [g.id]: r.granted }));
     qc.invalidateQueries({ queryKey: ["profile"] });
     qc.invalidateQueries({ queryKey: ["dashboard"] });
-    if (r.granted > 0) toast.success(`+${(r.granted / 100).toFixed(2)} hojas · ${g.title}`);
-    else if (r.capped === "daily") toast.info("Ya llegaste a tu tope de 0.333 hojas de hoy. Mañana sigues sumando.");
+    if (r.granted > 0) toast.success(`+${(r.granted / HOJA_POINTS).toFixed(3)} hojas · ${g.title}`);
+    else if (r.capped === "daily") toast.info("Ya llegaste a tu tope de hojas de hoy. Después de las 12:00 PM sigues sumando.");
     else toast.info("Tope de esta sección alcanzado hoy. Prueba otra sección de la app.");
+  };
+
+  const nextLevel = (g: GameDef) => {
+    const lvl = Math.min(MAX_LEVEL, (levels[g.id] ?? 1) + 1);
+    localStorage.setItem(`origen_game_level_${g.id}`, String(lvl));
+    setLevels((m) => ({ ...m, [g.id]: lvl }));
+    setWonToday((w) => w.filter((id) => id !== g.id));
   };
 
 
@@ -703,7 +724,9 @@ export function DailyGames({
               <span className="block text-[11.5px] text-muted-foreground leading-snug line-clamp-2">{g.desc}</span>
               <span className={cn("mt-1.5 inline-flex items-center gap-1 text-[11.5px] font-bold",
                 wonToday.includes(g.id) ? "text-[#2F9C74]" : "text-primary")}>
-                {wonToday.includes(g.id) ? <><Check className="w-3.5 h-3.5" /> Completado</> : <><Leaf className="w-3.5 h-3.5" /> +0.05 hoja</>}
+                {wonToday.includes(g.id)
+                  ? <><Check className="w-3.5 h-3.5" /> Nivel {levels[g.id] ?? 1} logrado</>
+                  : <><Leaf className="w-3.5 h-3.5" /> Nivel {levels[g.id] ?? 1} · suma hojas</>}
               </span>
             </span>
           </button>
@@ -725,11 +748,24 @@ export function DailyGames({
                   <span className="block text-[12px] font-medium text-muted-foreground">{game.desc}</span>
                 </span>
               </DialogTitle>
-              <div className="mt-1">{game.render({ words: pool, onWin: () => win(game) })}</div>
+              <div className="mt-1" key={`${game.id}-${levels[game.id] ?? 1}`}>
+                {game.render({ words: pool, onWin: () => win(game), level: levels[game.id] ?? 1 })}
+              </div>
               {wonToday.includes(game.id) && (
-                <p className="mt-3 rounded-[12px] bg-[#3FBE8F]/12 px-3 py-2.5 text-[13px] font-bold text-[#2F9C74] flex items-center gap-2">
-                  <Sparkles className="w-4 h-4" /> Ganaste {game.gems} hojas de sanación.
-                </p>
+                <div className="mt-3 rounded-[12px] bg-[#3FBE8F]/12 px-3 py-2.5">
+                  <p className="text-[13px] font-bold text-[#2F9C74] flex items-center gap-2">
+                    <Sparkles className="w-4 h-4" />
+                    {(lastGranted[game.id] ?? 0) > 0
+                      ? `Sumaste ${((lastGranted[game.id] ?? 0) / HOJA_POINTS).toFixed(3)} hojas de sanación.`
+                      : "Hoy ya llegaste a tu tope de hojas. El nivel igual queda guardado."}
+                  </p>
+                  <button
+                    onClick={() => nextLevel(game)}
+                    className="mt-2.5 inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2.5 text-[13px] font-bold text-primary-foreground active:scale-95 transition"
+                  >
+                    Nivel {Math.min(MAX_LEVEL, (levels[game.id] ?? 1) + 1)} <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
               )}
             </>
           )}
