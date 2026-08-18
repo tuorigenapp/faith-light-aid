@@ -48,34 +48,28 @@ export function completedInAppDay(completedAt?: string | null) {
 }
 
 /**
- * Estado de cada etapa según el orden personalizado y el día de la app.
+ * Estado de cada etapa según el día de la app (reseteo 12:00 de la noche).
  *
  * Reglas:
  *  - Una etapa completada queda completada.
- *  - Si ya completaste una etapa en este día de la app, la siguiente se abre
- *    en el próximo reseteo (12:00 PM).
- *  - Si no, la primera etapa sin completar está abierta HOY.
+ *  - Si ya completaste una etapa en este día de la app, las demás quedan
+ *    en espera hasta la medianoche.
+ *  - Si no, TODAS las etapas sin completar están abiertas hoy: el usuario
+ *    elige cuál vivir (una por día).
  */
 export function resolveStageStates(orderedIds: number[], progress: ProgressRow[]): Map<number, StageState> {
-  const byId = new Map(progress.map((p) => [p.stage_id, p]));
   const completed = new Set(progress.filter((p) => p.status === "completed").map((p) => p.stage_id));
-  const doneTodayCount = progress.filter((p) => p.status === "completed" && completedInAppDay(p.completed_at)).length;
+  const doneToday = progress.some((p) => p.status === "completed" && completedInAppDay(p.completed_at));
   const states = new Map<number, StageState>();
-  let openAssigned = false;
   for (const id of orderedIds) {
     if (completed.has(id)) {
       states.set(id, "completed");
       continue;
     }
-    if (!openAssigned) {
-      openAssigned = true;
-      states.set(id, doneTodayCount > 0 ? "locked-today" : "open");
-      continue;
-    }
-    states.set(id, "locked-sequential");
+    states.set(id, doneToday ? "locked-today" : "open");
   }
-  void byId;
   return states;
 }
+
 
 export const currentAppDayKey = appDayKey;
