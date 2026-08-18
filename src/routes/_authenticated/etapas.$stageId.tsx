@@ -13,7 +13,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { WordSearch } from "@/components/WordSearch";
 import { getStageContent, getSolutionSteps, getStageTasks } from "@/lib/stage-content";
-import { awardGems } from "@/lib/gems";
+import { awardLeaf, ACTION_POINTS, type ActionLevel } from "@/lib/gems";
 import { useStagePack, stageVariant, type StagePack } from "@/lib/stage-pack";
 import heartCrystal from "@/assets/st-heart-crystal.png";
 import chest from "@/assets/st-chest.png";
@@ -507,7 +507,7 @@ function taskKind(t: string): TaskKind {
 
 function Step3({ tasks, done, setDone, entries, onSave, reward, onNext }: {
   tasks: string[]; done: number[]; setDone: (v: number[]) => void; entries: any[]; onSave: SaveFn;
-  reward: (n: number, r: string) => void; onNext: () => void;
+  reward: (level: ActionLevel, r: string) => void; onNext: () => void;
 }) {
   const list = tasks.length ? tasks : DEFAULT_TASKS;
   const EMOJIS = ["📝", "⭐", "🙏", "📖", "🎧", "💜"];
@@ -547,7 +547,7 @@ function Step3({ tasks, done, setDone, entries, onSave, reward, onNext }: {
     setSaving(false);
     if (!doneIdx.includes(active)) {
       setDone([...doneIdx, active]);
-      reward(25, "stage_task");
+      reward("medium", "stage_task");
     }
     setActive(null);
     setText("");
@@ -567,7 +567,7 @@ function Step3({ tasks, done, setDone, entries, onSave, reward, onNext }: {
           <button key={i} onClick={() => openTask(i)} className="w-full text-left rounded-[16px] bg-card border border-border p-3.5 grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-2.5 shadow-soft transition active:scale-[.98]">
             <span className="w-9 h-9 shrink-0 rounded-[10px] bg-primary/8 grid place-items-center text-[18px]">{EMOJIS[i % EMOJIS.length]}</span>
             <span className={cn("min-w-0 text-[13.5px] leading-snug font-medium", doneIdx.includes(i) && "text-muted-foreground line-through")}>{t}</span>
-            <Hojas n={25} />
+            <Hojas level="medium" />
             <span className={cn("w-6 h-6 shrink-0 rounded-full grid place-items-center border-2", doneIdx.includes(i) ? "bg-[#3FBE8F] border-[#3FBE8F] text-white" : "border-primary/25")}>
               {doneIdx.includes(i) && <Check className="w-3.5 h-3.5" />}
             </span>
@@ -707,7 +707,7 @@ function Step4({ mood, setMood, notes, setNotes, answers, setAnswers, onNext }: 
 
 /* ───────────────────────── 5 · Mini quiz ───────────────────────── */
 
-function Step5({ items, reward, onNext }: { items: { q: string; options: string[]; correct: number; tip: string }[]; reward: (n: number, r: string) => void; onNext: () => void }) {
+function Step5({ items, reward, onNext }: { items: { q: string; options: string[]; correct: number; tip: string }[]; reward: (level: ActionLevel, r: string) => void; onNext: () => void }) {
   const [i, setI] = useState(0);
   const [picked, setPicked] = useState<number | null>(null);
   const it = items[i];
@@ -717,7 +717,7 @@ function Step5({ items, reward, onNext }: { items: { q: string; options: string[
   function pick(oi: number) {
     if (picked !== null) return;
     setPicked(oi);
-    if (oi === it.correct) reward(20, "stage_quiz_correct");
+    if (oi === it.correct) reward("medium", "stage_quiz_correct");
   }
 
   return (
@@ -772,7 +772,7 @@ function Step5({ items, reward, onNext }: { items: { q: string; options: string[
 
 /* ─────────────── 6 · Juego interactivo: cargas al cofre ─────────────── */
 
-function Step6({ cargas, loading, reward, onNext }: { cargas?: string[]; loading: boolean; reward: (n: number, r: string) => void; onNext: () => void }) {
+function Step6({ cargas, loading, reward, onNext }: { cargas?: string[]; loading: boolean; reward: (level: ActionLevel, r: string) => void; onNext: () => void }) {
   const list = useMemo(() => (cargas?.length ? cargas.slice(0, 15) : []), [cargas]);
   const [freed, setFreed] = useState<string[]>([]);
   const done = list.length > 0 && freed.length === list.length;
@@ -781,7 +781,7 @@ function Step6({ cargas, loading, reward, onNext }: { cargas?: string[]; loading
     if (freed.includes(c)) return;
     const next = [...freed, c];
     setFreed(next);
-    if (next.length === list.length) reward(45, "stage_game_cargas");
+    if (next.length === list.length) reward("major", "stage_game_cargas");
   }
 
   return (
@@ -862,7 +862,7 @@ function Step7({ words, loading, stageId, onNext }: { words: string[]; loading: 
 
 const PAIRS_COUNT = 10;
 
-function Step8({ promesas, loading, reward, onNext }: { promesas?: string[]; loading: boolean; reward: (n: number, r: string) => void; onNext: () => void }) {
+function Step8({ promesas, loading, reward, onNext }: { promesas?: string[]; loading: boolean; reward: (level: ActionLevel, r: string) => void; onNext: () => void }) {
   const pool = promesas?.length ? promesas : [];
   const [round, setRound] = useState(0);
   const cards = useMemo(() => {
@@ -889,7 +889,7 @@ function Step8({ promesas, loading, reward, onNext }: { promesas?: string[]; loa
         if (same) {
           const nf = [...found, cards[nextOpen[0]].pair];
           setFound(nf);
-          if (nf.length === pairsTotal) reward(50, "stage_memory_pairs");
+          if (nf.length === pairsTotal) reward("major", "stage_memory_pairs");
         }
         setOpen([]);
       }, same ? 320 : 720);
@@ -953,7 +953,7 @@ function Step8({ promesas, loading, reward, onNext }: { promesas?: string[]; loa
 /* ───────────────────── 9 · Camino de fe ───────────────────── */
 
 function Step9({ questions, loading, reward, onNext }: {
-  questions?: { q: string; options: string[]; correct: number }[]; loading: boolean; reward: (n: number, r: string) => void; onNext: () => void;
+  questions?: { q: string; options: string[]; correct: number }[]; loading: boolean; reward: (level: ActionLevel, r: string) => void; onNext: () => void;
 }) {
   const list = questions?.length ? questions.slice(0, 10) : [];
   const [i, setI] = useState(0);
@@ -993,7 +993,7 @@ function Step9({ questions, loading, reward, onNext }: {
         <div className="mt-3 flex flex-wrap gap-2">
           {it.options.map((op, oi) => (
             <button key={oi} disabled={picked !== null}
-              onClick={() => { setPicked(oi); if (oi === it.correct) reward(15, "stage_camino_fe"); }}
+              onClick={() => { setPicked(oi); if (oi === it.correct) reward("minor", "stage_camino_fe"); }}
               className={cn("min-h-[42px] rounded-full px-4 text-[13px] font-semibold transition active:scale-95 inline-flex items-center gap-1.5",
                 picked === null ? "bg-primary/8 text-foreground" : oi === it.correct ? "bg-[#3FBE8F] text-white" : picked === oi ? "bg-[#F87171]/12 text-[#B91C1C]" : "bg-primary/5 text-muted-foreground")}>
               <span className="opacity-60">{letters[oi]}</span> {op}
@@ -1028,7 +1028,7 @@ const BIENESTAR_FALLBACK = [
   { q: "¿Has tenido pensamientos de hacerte daño?", options: ["No", "Pensamientos pasajeros", "Sí, con frecuencia"] },
 ];
 
-function Step10({ bienestar, reward, onNext }: { bienestar?: { q: string; options: string[] }[]; reward: (n: number, r: string) => void; onNext: () => void }) {
+function Step10({ bienestar, reward, onNext }: { bienestar?: { q: string; options: string[] }[]; reward: (level: ActionLevel, r: string) => void; onNext: () => void }) {
   const qs = bienestar?.length ? bienestar : BIENESTAR_FALLBACK;
   const [placed, setPlaced] = useState<Record<number, "pesan" | "sanan">>({});
   const [sel, setSel] = useState<number | null>(null);
@@ -1042,7 +1042,7 @@ function Step10({ bienestar, reward, onNext }: { bienestar?: { q: string; option
   function place(i: number, g: "pesan" | "sanan") {
     const next = { ...placed, [i]: g };
     setPlaced(next);
-    if (Object.keys(next).length === EMO.length) reward(25, "stage_classify");
+    if (Object.keys(next).length === EMO.length) reward("medium", "stage_classify");
   }
 
   return (
