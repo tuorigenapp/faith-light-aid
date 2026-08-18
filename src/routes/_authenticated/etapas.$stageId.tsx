@@ -304,11 +304,14 @@ function Cta({ children, onClick, disabled }: { children: React.ReactNode; onCli
   );
 }
 
-function Hojas({ n }: { n: number }) {
+function Hojas({ level }: { level: ActionLevel }) {
   return (
-    <span className="inline-flex items-center gap-1 text-[12.5px] font-extrabold text-[#3FBE8F] shrink-0">+{n} <Leaf className="w-3.5 h-3.5" /></span>
+    <span className="inline-flex items-center gap-1 text-[12px] font-extrabold text-[#3FBE8F] shrink-0">
+      +{ACTION_POINTS[level]}% <Leaf className="w-3.5 h-3.5" />
+    </span>
   );
 }
+
 
 function LoadingPack({ label }: { label: string }) {
   return (
