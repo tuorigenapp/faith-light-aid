@@ -714,6 +714,7 @@ function Step4({ mood, setMood, notes, setNotes, answers, setAnswers, onNext }: 
 function Step5({ items, reward, onNext }: { items: { q: string; options: string[]; correct: number; tip: string }[]; reward: (level: ActionLevel, r: string) => void; onNext: () => void }) {
   const [i, setI] = useState(0);
   const [picked, setPicked] = useState<number | null>(null);
+  const [feedback, setFeedback] = useState<"ok" | "fail" | null>(null);
   const it = items[i];
   const letters = ["A", "B", "C", "D"];
   const last = i >= items.length - 1;
@@ -721,11 +722,17 @@ function Step5({ items, reward, onNext }: { items: { q: string; options: string[
   function pick(oi: number) {
     if (picked !== null) return;
     setPicked(oi);
-    if (oi === it.correct) reward("medium", "stage_quiz_correct");
+    if (oi === it.correct) {
+      reward("medium", "stage_quiz_correct");
+      setFeedback("ok");
+    } else {
+      setFeedback("fail");
+    }
   }
 
   return (
     <div>
+      <AnswerFeedback state={feedback} message={it.tip} onClose={() => setFeedback(null)} />
       <h1 className="font-display font-extrabold text-[26px] leading-tight text-center">Mini quiz 🧠</h1>
       <p className="text-center text-[12.5px] text-muted-foreground mt-1">Pregunta {i + 1} de {items.length}</p>
 
@@ -738,13 +745,14 @@ function Step5({ items, reward, onNext }: { items: { q: string; options: string[
           return (
             <button key={oi} onClick={() => pick(oi)}
               className={cn("w-full text-left rounded-[12px] bg-card border border-border p-3.5 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2.5 shadow-soft text-[13.5px] font-medium transition active:scale-[.98]",
-                revealed && isCorrect && "bg-[#3FBE8F] text-white",
-                revealed && !isCorrect && picked === oi && "bg-[#F87171]/15 text-[#B91C1C]",
+                revealed && isCorrect && "bg-[#2F9A73] text-white border-[#2F9A73]",
+                revealed && !isCorrect && picked === oi && "bg-[#D64545]/12 text-[#B91C1C] border-[#D64545]/40",
                 revealed && !isCorrect && picked !== oi && "opacity-60")}>
               <span className={cn("w-6 h-6 shrink-0 rounded-full grid place-items-center text-[11px] font-extrabold",
                 revealed && isCorrect ? "bg-white/25 text-white" : "bg-primary/10 text-primary")}>{letters[oi]}</span>
               <span className="min-w-0">{op}</span>
               {revealed && isCorrect && <Check className="w-4 h-4 shrink-0" />}
+              {revealed && !isCorrect && picked === oi && <X className="w-4 h-4 shrink-0" />}
             </button>
           );
         })}
@@ -753,11 +761,12 @@ function Step5({ items, reward, onNext }: { items: { q: string; options: string[
       {picked !== null && (
         <div className="relative mt-4 overflow-hidden rounded-[16px] bg-primary/8 p-4 pl-24" style={{ animation: "scale-in .3s ease-out both" }}>
           <img src={robot} alt="" aria-hidden width={1024} height={1024} loading="lazy" className="pointer-events-none absolute left-0 bottom-0 w-20 object-contain" />
-          <div className="text-[13px] font-extrabold text-[#3FBE8F]">{picked === it.correct ? "¡Correcto! 🎉" : "Casi… mira esto 💜"}</div>
+          <div className={cn("text-[13px] font-extrabold", picked === it.correct ? "text-[#2F9A73]" : "text-[#B91C1C]")}>{picked === it.correct ? "¡Correcto! 🎉" : "Respuesta incorrecta 💜"}</div>
           <p className="text-[12.5px] leading-snug mt-1">{it.tip}</p>
-          {picked === it.correct && <p className="mt-1.5 font-extrabold text-[13px] text-[#3FBE8F] inline-flex items-center gap-1">+20 hojas <Leaf className="w-3.5 h-3.5" /></p>}
+          {picked === it.correct && <p className="mt-1.5 font-extrabold text-[13px] text-[#3FBE8F] inline-flex items-center gap-1">+{ACTION_POINTS.medium}% de tu próxima hoja <Leaf className="w-3.5 h-3.5" /></p>}
         </div>
       )}
+
 
       <div className="mt-4 h-1.5 rounded-full bg-primary/12 overflow-hidden">
         <div className="h-full rounded-full bg-gradient-to-r from-primary to-accent-pink transition-all duration-500" style={{ width: `${((i + (picked !== null ? 1 : 0)) / items.length) * 100}%` }} />
