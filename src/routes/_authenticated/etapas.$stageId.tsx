@@ -142,13 +142,14 @@ function StageFlow() {
     );
   }
 
-  function reward(amount: number, reason: string) {
-    setEarned((e) => e + amount);
-    awardGems(amount, reason, { stage: id }).then(() => {
+  function reward(level: ActionLevel, reason: string) {
+    awardLeaf("etapas", level, reason, { stage: id }).then((r) => {
+      setEarned((e) => e + r.granted);
       qc.invalidateQueries({ queryKey: ["profile"] });
       qc.invalidateQueries({ queryKey: ["dashboard"] });
     });
   }
+
 
   async function saveEntry(entry: { step_key: string; kind: string; title: string; response?: string; answers?: Record<string, string>; confirmed: boolean }) {
     if (!user) return;
