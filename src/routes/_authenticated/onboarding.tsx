@@ -117,28 +117,39 @@ function Onboarding() {
 
   useEffect(() => {
     if (!user) return;
+    let alive = true;
     (async () => {
-      const [{ data: intake }, { data: profile }] = await Promise.all([
-        supabase.from("intake_sessions").select("*").eq("user_id", user.id).maybeSingle(),
-        supabase.from("profiles").select("full_name, display_name").eq("id", user.id).maybeSingle(),
-      ]);
-      if (intake?.status === "completed") {
-        navigate({ to: "/dashboard", replace: true });
-        return;
+      try {
+        const [{ data: intake }, { data: profile }] = await Promise.all([
+          supabase.from("intake_sessions").select("*").eq("user_id", user.id).maybeSingle(),
+          supabase.from("profiles").select("full_name, display_name").eq("id", user.id).maybeSingle(),
+        ]);
+        if (!alive) return;
+        if (intake?.status === "completed") {
+          navigate({ to: "/dashboard", replace: true });
+          return;
+        }
+        const g = (intake?.genealogy as Record<string, unknown>) ?? {};
+        const c = (intake?.childhood as Record<string, unknown>) ?? {};
+        setRaices((g.raices as string) ?? "");
+        setRecuerdos((c.recuerdos as string) ?? "");
+        setDeseo((g.deseo as string) ?? "");
+        setAreas((g.areas as string[]) ?? []);
+        setDetonantes((c.detonantes as string[]) ?? []);
+        setGuia((c.guia as string) ?? "");
+        const raw = profile?.display_name || profile?.full_name || "";
+        setName(raw.startsWith("invitado_") ? "" : raw);
+      } catch {
+        // Si la lectura falla, el onboarding igual debe abrirse en blanco.
+      } finally {
+        if (alive) setLoading(false);
       }
-      const g = (intake?.genealogy as Record<string, unknown>) ?? {};
-      const c = (intake?.childhood as Record<string, unknown>) ?? {};
-      setRaices((g.raices as string) ?? "");
-      setRecuerdos((c.recuerdos as string) ?? "");
-      setDeseo((g.deseo as string) ?? "");
-      setAreas((g.areas as string[]) ?? []);
-      setDetonantes((c.detonantes as string[]) ?? []);
-      setGuia((c.guia as string) ?? "");
-      const raw = profile?.display_name || profile?.full_name || "";
-      setName(raw.startsWith("invitado_") ? "" : raw);
-      setLoading(false);
     })();
+    return () => {
+      alive = false;
+    };
   }, [user, navigate]);
+
 
   const lines = [
     "Leyendo tus respuestas…",
