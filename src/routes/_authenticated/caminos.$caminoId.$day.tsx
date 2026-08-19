@@ -168,10 +168,7 @@ function CaminoDia() {
       </div>
       {/* Header */}
       <header className="sticky top-0 z-20 bg-card/85 backdrop-blur border-b border-border">
-        <div className="max-w-[520px] mx-auto px-4 py-3 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
-          <Link to="/caminos/$caminoId" params={{ caminoId }} aria-label="Volver al mapa" className="w-11 h-11 rounded-[12px] bg-secondary grid place-items-center">
-            <ArrowLeft className="w-5 h-5" />
-          </Link>
+        <div className="max-w-[520px] mx-auto px-4 py-3 grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-3">
           <div className="min-w-0">
             <div className="text-[11px] font-bold uppercase tracking-widest text-primary truncate">
               Paso {step} de {TOTAL_STEPS}
@@ -184,8 +181,12 @@ function CaminoDia() {
           <span className="shrink-0 inline-flex items-center gap-1.5 rounded-full bg-[#3FBE8F]/12 px-3 py-1.5 text-[13px] font-bold text-[#2F9C74]">
             <Leaf className="w-4 h-4" /> {wholeHojas(profile?.gems)}
           </span>
+          <Link to="/caminos/$caminoId" params={{ caminoId }} aria-label="Cerrar y volver al mapa" className="w-11 h-11 shrink-0 rounded-full grid place-items-center text-muted-foreground hover:bg-primary/8 transition active:scale-95">
+            <X className="w-5 h-5" />
+          </Link>
         </div>
       </header>
+
 
       <main className="relative z-10 max-w-[520px] mx-auto px-4 py-5 pb-32">
         {pack.isFetching && (
