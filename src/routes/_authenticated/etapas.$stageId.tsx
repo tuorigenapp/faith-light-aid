@@ -1192,7 +1192,7 @@ function Step12({ earned, insignia, onSave, onNext }: { earned: number; insignia
 
       <div className="mt-4 grid grid-cols-3 gap-3">
         {[
-          { top: "🌿", big: `+${Math.max(earned, 0)}`, label: "Hojas de sanación" },
+          { top: "🌿", big: `+${Math.max(earned, 0)}%`, label: "Progreso de tu hoja" },
           { top: "⭐", big: `+${STAGE_XP}`, label: "XP" },
           { top: "🛡️", big: "Insignia", label: insignia },
         ].map((c) => (
@@ -1277,7 +1277,7 @@ function LockedStageView({ tomorrow, onBack }: { tomorrow: boolean; onBack: () =
       <Card className="w-full max-w-sm rounded-[16px] p-6 text-center shadow-soft bg-card/95">
         <div className="w-14 h-14 mx-auto rounded-full bg-primary/10 text-primary grid place-items-center"><Lock className="w-7 h-7" /></div>
         <h1 className="font-display font-extrabold text-[22px] mt-3 leading-tight">
-          {tomorrow ? "Se abre a las 12:00 PM" : "Etapa bloqueada"}
+          {tomorrow ? "Se abre a medianoche" : "Etapa bloqueada"}
         </h1>
         <p className="text-[13.5px] text-muted-foreground mt-2 leading-snug">
           {tomorrow
