@@ -109,7 +109,7 @@ function PatronesPage() {
     setHistoryLoading(false);
   }
 
-  const hasEnoughGems = hasHojas(gems, CONSULTA_COST_HOJAS);
+  const hasEnoughGems = gems === null || hasHojas(gems, CONSULTA_COST_HOJAS);
 
   async function beginAnalysis() {
     if (!name.trim()) return toast.error("Escribe tu nombre");

@@ -103,7 +103,7 @@ function ParejaPage() {
     setHistoryLoading(false);
   }
 
-  const hasEnoughGems = hasHojas(gems, CONSULTA_COST_HOJAS);
+  const hasEnoughGems = gems === null || hasHojas(gems, CONSULTA_COST_HOJAS);
 
   async function begin() {
     if (!form.self_name.trim() || !form.partner_name.trim()) return toast.error("Escribe ambos nombres");

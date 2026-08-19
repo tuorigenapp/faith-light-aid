@@ -101,7 +101,7 @@ function MinistracionPage() {
     setHistoryLoading(false);
   }
 
-  const hasEnoughGems = hasHojas(gems, CONSULTA_COST_HOJAS);
+  const hasEnoughGems = gems === null || hasHojas(gems, CONSULTA_COST_HOJAS);
 
   function validate() {
     const e: { name?: string; dob?: string } = {};
