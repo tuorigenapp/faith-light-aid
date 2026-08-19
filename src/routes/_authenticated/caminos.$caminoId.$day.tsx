@@ -366,16 +366,19 @@ const [feedback, setFeedback] = useState<"ok" | "fail" | null>(null);
                 {(p.fe[0]?.options ?? []).map((o, i) => (
                   <button
                     key={i}
+                    disabled={quizPick !== null}
                     onClick={async () => {
                       setQuizPick(i);
-                      if (i === p.fe[0]?.correct) { await reward(15, "Quiz del día"); toast.success("¡Correcto!"); }
+                      if (i === p.fe[0]?.correct) { setFeedback("ok"); await reward("medium", "Quiz del día"); }
+                      else setFeedback("fail");
                     }}
-                    className={cn("w-full h-[52px] rounded-[12px] px-4 text-left text-[15px] font-medium transition",
-                      quizPick === null ? "bg-secondary" : i === p.fe[0]?.correct ? "bg-[#3FBE8F]/18 text-[#2F9C74] font-bold" : quizPick === i ? "bg-destructive/12" : "bg-secondary/70")}
+                    className={cn("w-full min-h-[52px] rounded-[12px] px-4 py-3 text-left text-[15px] font-medium transition",
+                      quizPick === null ? "bg-secondary" : i === p.fe[0]?.correct ? "bg-[#2F9A73] text-white font-bold" : quizPick === i ? "bg-[#D64545]/14 text-[#B91C1C] font-bold" : "bg-secondary/70 opacity-60")}
                   >
                     {o}
                   </button>
                 ))}
+
               </div>
             </div>
             <Cta disabled={quizPick === null} onClick={next}>Continuar</Cta>
