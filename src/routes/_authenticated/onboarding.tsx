@@ -253,14 +253,20 @@ function Onboarding() {
   }
 
   async function complete() {
-    if (!user || !ai) return;
-    await persist({ status: "completed", closure_completed_at: new Date().toISOString(), ai_plan: ai });
-    await awardGems(500, "Onboarding completo");
+    if (!user) return;
+    // El plan de IA es opcional: si falló, el onboarding igual debe poder cerrarse.
+    await persist({
+      status: "completed",
+      closure_completed_at: new Date().toISOString(),
+      ...(ai ? { ai_plan: ai } : {}),
+    });
+    await awardGems(HOJA_POINTS, "Onboarding completo · 1 hoja");
     await qc.invalidateQueries({ queryKey: ["intake-status"] });
     await qc.refetchQueries({ queryKey: ["intake-status"] });
     toast.success(`¡Bienvenido${name ? ", " + name : ""}!`);
     navigate({ to: "/dashboard", replace: true });
   }
+
 
   if (loading) {
     return (
