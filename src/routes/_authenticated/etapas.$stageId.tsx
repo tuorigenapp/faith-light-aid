@@ -972,7 +972,9 @@ function Step9({ questions, loading, reward, onNext }: {
   const list = questions?.length ? questions.slice(0, 10) : [];
   const [i, setI] = useState(0);
   const [picked, setPicked] = useState<number | null>(null);
+  const [feedback, setFeedback] = useState<"ok" | "fail" | null>(null);
   const letters = ["A", "B", "C", "D"];
+
 
   if (loading || !list.length) {
     return (
