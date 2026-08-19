@@ -580,11 +580,6 @@ function CaminoDia() {
           </section>
         )}
 
-        {p && step > 1 && step < 12 && (
-          <button onClick={back} className="mt-4 w-full h-12 rounded-[12px] bg-secondary text-[14px] font-semibold text-muted-foreground inline-flex items-center justify-center gap-2">
-            <X className="w-4 h-4" /> Volver al paso anterior
-          </button>
-        )}
       </main>
     </div>
   );
