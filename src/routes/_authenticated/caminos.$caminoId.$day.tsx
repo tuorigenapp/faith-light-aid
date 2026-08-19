@@ -64,6 +64,7 @@ function CaminoDia() {
   const [notes, setNotes] = useState("");
   const [mood, setMood] = useState<string | null>(null);
   const [quizPick, setQuizPick] = useState<number | null>(null);
+const [feedback, setFeedback] = useState<"ok" | "fail" | null>(null);
   const [cargas, setCargas] = useState<string[]>([]);
   const [flipped, setFlipped] = useState<number[]>([]);
   const [matched, setMatched] = useState<number[]>([]);
@@ -249,7 +250,7 @@ function CaminoDia() {
                   disabled={draft.trim().length < 3}
                   onClick={async () => {
                     const i = openSol ?? 0;
-                    if (!solDone.includes(i)) { setSolDone((d) => [...d, i]); await reward(10, `Paso ${i + 1} · ${etapa.title}`); }
+                    if (!solDone.includes(i)) { setSolDone((d) => [...d, i]); await reward("medium", `Paso ${i + 1} · ${etapa.title}`); }
                     setOpenSol(null);
                   }}
                   className="h-[52px] rounded-[12px] btn-primary-gradient text-white text-[16px] font-semibold disabled:opacity-50"
@@ -325,7 +326,7 @@ function CaminoDia() {
                     const i = openTask ?? 0;
                     const kind = taskKind(tasks[i] ?? "");
                     if (kind !== "oracion" && draft.trim().length < 3) { toast.error("Escribe tu respuesta para guardarla."); return; }
-                    if (!taskDone.includes(i)) { setTaskDone((d) => [...d, i]); await reward(10, `Tarea ${i + 1} · ${etapa.title}`); }
+                    if (!taskDone.includes(i)) { setTaskDone((d) => [...d, i]); await reward("medium", `Tarea ${i + 1} · ${etapa.title}`); }
                     setOpenTask(null);
                   }}
                   className="h-[52px] rounded-[12px] btn-primary-gradient text-white text-[16px] font-semibold"
@@ -403,7 +404,7 @@ function CaminoDia() {
               <img src={chest} alt="" aria-hidden width={192} height={192} className="w-24 h-24 mx-auto mt-4 object-contain" />
               <p className="text-center text-[13px] text-muted-foreground">{cargas.length} de {p.cargas.length} entregadas al cofre</p>
             </div>
-            <Cta disabled={cargas.length < 3} onClick={async () => { await reward(15, "Cargas entregadas"); next(); }}>
+            <Cta disabled={cargas.length < 3} onClick={async () => { await reward("medium", "Cargas entregadas"); next(); }}>
               {cargas.length < 3 ? "Elige al menos 3" : "Entregar y continuar"}
             </Cta>
           </section>
@@ -437,7 +438,7 @@ function CaminoDia() {
                         if (memoryCards[a].text === memoryCards[b].text) {
                           setMatched((m) => [...m, a, b]);
                           setFlipped([]);
-                          if (matched.length + 2 >= memoryCards.length) void reward(40, "Memoria de promesas");
+                          if (matched.length + 2 >= memoryCards.length) void reward("major", "Memoria de promesas");
                         } else setTimeout(() => setFlipped([]), 700);
                       }
                     }}
@@ -520,7 +521,7 @@ function CaminoDia() {
             )}
             <Cta
               disabled={Object.keys(emo).length < 6 || Object.keys(bienestar).length < p.bienestar.length}
-              onClick={async () => { await reward(15, "Clasificación emocional"); next(); }}
+              onClick={async () => { await reward("medium", "Clasificación emocional"); next(); }}
             >
               Continuar
             </Cta>
