@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { ArrowRight, ArrowLeft, Loader2, Lock, User as UserIcon, Heart, DollarSign, Brain, Sprout, Mountain, HandHeart, Check, Play, Pause } from "lucide-react";
-import { awardGems, GEM_REWARDS } from "@/lib/gems";
+import { awardGems, GEM_REWARDS, HOJA_POINTS } from "@/lib/gems";
 import { cn } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -117,28 +117,39 @@ function Onboarding() {
 
   useEffect(() => {
     if (!user) return;
+    let alive = true;
     (async () => {
-      const [{ data: intake }, { data: profile }] = await Promise.all([
-        supabase.from("intake_sessions").select("*").eq("user_id", user.id).maybeSingle(),
-        supabase.from("profiles").select("full_name, display_name").eq("id", user.id).maybeSingle(),
-      ]);
-      if (intake?.status === "completed") {
-        navigate({ to: "/dashboard", replace: true });
-        return;
+      try {
+        const [{ data: intake }, { data: profile }] = await Promise.all([
+          supabase.from("intake_sessions").select("*").eq("user_id", user.id).maybeSingle(),
+          supabase.from("profiles").select("full_name, display_name").eq("id", user.id).maybeSingle(),
+        ]);
+        if (!alive) return;
+        if (intake?.status === "completed") {
+          navigate({ to: "/dashboard", replace: true });
+          return;
+        }
+        const g = (intake?.genealogy as Record<string, unknown>) ?? {};
+        const c = (intake?.childhood as Record<string, unknown>) ?? {};
+        setRaices((g.raices as string) ?? "");
+        setRecuerdos((c.recuerdos as string) ?? "");
+        setDeseo((g.deseo as string) ?? "");
+        setAreas((g.areas as string[]) ?? []);
+        setDetonantes((c.detonantes as string[]) ?? []);
+        setGuia((c.guia as string) ?? "");
+        const raw = profile?.display_name || profile?.full_name || "";
+        setName(raw.startsWith("invitado_") ? "" : raw);
+      } catch {
+        // Si la lectura falla, el onboarding igual debe abrirse en blanco.
+      } finally {
+        if (alive) setLoading(false);
       }
-      const g = (intake?.genealogy as Record<string, unknown>) ?? {};
-      const c = (intake?.childhood as Record<string, unknown>) ?? {};
-      setRaices((g.raices as string) ?? "");
-      setRecuerdos((c.recuerdos as string) ?? "");
-      setDeseo((g.deseo as string) ?? "");
-      setAreas((g.areas as string[]) ?? []);
-      setDetonantes((c.detonantes as string[]) ?? []);
-      setGuia((c.guia as string) ?? "");
-      const raw = profile?.display_name || profile?.full_name || "";
-      setName(raw.startsWith("invitado_") ? "" : raw);
-      setLoading(false);
     })();
+    return () => {
+      alive = false;
+    };
   }, [user, navigate]);
+
 
   const lines = [
     "Leyendo tus respuestas…",
@@ -242,14 +253,20 @@ function Onboarding() {
   }
 
   async function complete() {
-    if (!user || !ai) return;
-    await persist({ status: "completed", closure_completed_at: new Date().toISOString(), ai_plan: ai });
-    await awardGems(500, "Onboarding completo");
+    if (!user) return;
+    // El plan de IA es opcional: si falló, el onboarding igual debe poder cerrarse.
+    await persist({
+      status: "completed",
+      closure_completed_at: new Date().toISOString(),
+      ...(ai ? { ai_plan: ai } : {}),
+    });
+    await awardGems(HOJA_POINTS, "Onboarding completo · 1 hoja");
     await qc.invalidateQueries({ queryKey: ["intake-status"] });
     await qc.refetchQueries({ queryKey: ["intake-status"] });
     toast.success(`¡Bienvenido${name ? ", " + name : ""}!`);
     navigate({ to: "/dashboard", replace: true });
   }
+
 
   if (loading) {
     return (

@@ -276,3 +276,30 @@ export async function spendDailyAccess(
   const balance = await spendHojas(hojas, `day:${slug(section)} · ${appDayKey()}`, { ...(meta ?? {}), section: slug(section), day: appDayKey() });
   return { charged: balance !== null, alreadyPaid: false, insufficient: false, balance };
 }
+
+/* ─────────────────────────────────────────────────────────────
+ * Consultas premium (Pareja, Patrones, Dios te dice hoy).
+ * Cuestan 1 hoja entera. El saldo se lee SIEMPRE fresco del
+ * servidor al momento de cobrar: antes se usaba un estado local
+ * que llegaba vacío y decía "no tienes hojas" aunque sí hubiera.
+ * ───────────────────────────────────────────────────────────── */
+
+export async function readBalancePoints(): Promise<number> {
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth.user) return 0;
+  const { data } = await supabase.from("profiles").select("gems").eq("id", auth.user.id).maybeSingle();
+  return data?.gems ?? 0;
+}
+
+export type ConsultaCharge = { ok: boolean; balance: number; hojas: number };
+
+/** Cobra `hojas` hojas por una consulta. Devuelve ok=false solo si de verdad no alcanza. */
+export async function chargeConsulta(section: string, hojas = 1): Promise<ConsultaCharge> {
+  const points = await readBalancePoints();
+  if (!hasHojas(points, hojas)) {
+    return { ok: false, balance: points, hojas: wholeHojas(points) };
+  }
+  const balance = await spendHojas(hojas, `consulta:${slug(section)} · ${appDayKey()}`, { section: slug(section) });
+  const finalPoints = balance ?? points - hojas * HOJA_POINTS;
+  return { ok: true, balance: finalPoints, hojas: wholeHojas(finalPoints) };
+}

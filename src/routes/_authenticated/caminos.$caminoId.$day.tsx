@@ -4,7 +4,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { useProfile } from "@/hooks/use-profile";
-import { awardGems , wholeHojas} from "@/lib/gems";
+import { awardLeaf, wholeHojas, type ActionLevel } from "@/lib/gems";
+import { AnswerFeedback } from "@/components/AnswerFeedback";
 import { CAMINO_TOTAL_DAYS, getCamino, getEtapa } from "@/lib/caminos";
 import { DailyGames } from "@/components/games/DailyGames";
 import { useCaminoPack, caminoVariant, CAMINO_PACK_BASE } from "@/lib/camino-pack";
@@ -14,7 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import {
-  ArrowLeft, ArrowRight, Award, Check, Flame, HandHeart, Leaf, ListChecks,
+  ArrowRight, Award, Check, Flame, HandHeart, Leaf, ListChecks,
   Loader2, PenLine, Sparkles, X,
 } from "lucide-react";
 import heartCrystal from "@/assets/st-heart-crystal.png";
@@ -63,6 +64,7 @@ function CaminoDia() {
   const [notes, setNotes] = useState("");
   const [mood, setMood] = useState<string | null>(null);
   const [quizPick, setQuizPick] = useState<number | null>(null);
+const [feedback, setFeedback] = useState<"ok" | "fail" | null>(null);
   const [cargas, setCargas] = useState<string[]>([]);
   const [flipped, setFlipped] = useState<number[]>([]);
   const [matched, setMatched] = useState<number[]>([]);
@@ -125,9 +127,9 @@ function CaminoDia() {
   const p = pack.data ?? CAMINO_PACK_BASE;
   const alreadyDone = (state?.done ?? []).some((d) => d.day === dayNum);
 
-  async function reward(amount: number, reason: string) {
-    setEarned((e) => e + amount);
-    await awardGems(amount, reason);
+  async function reward(level: ActionLevel, reason: string) {
+    const r = await awardLeaf("caminos", level, reason, { camino: caminoId, day: dayNum });
+    setEarned((e) => e + r.granted);
     qc.invalidateQueries({ queryKey: ["profile"] });
   }
 
@@ -144,14 +146,14 @@ function CaminoDia() {
           mood, notes, quiz_ok: feOk,
         } as never,
       });
-      await reward(60, `Día ${dayNum} · ${camino!.title}`);
+      await reward("major", `Día ${dayNum} · ${camino!.title}`);
     }
     qc.invalidateQueries({ queryKey: ["camino", caminoId] });
     setStep(13);
   }
 
   const next = () => setStep((s) => Math.min(s + 1, TOTAL_STEPS));
-  const back = () => setStep((s) => Math.max(s - 1, 1));
+
 
   const solutions = p?.soluciones ?? [];
   const tasks = p?.tareas ?? [];
@@ -168,10 +170,7 @@ function CaminoDia() {
       </div>
       {/* Header */}
       <header className="sticky top-0 z-20 bg-card/85 backdrop-blur border-b border-border">
-        <div className="max-w-[520px] mx-auto px-4 py-3 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
-          <Link to="/caminos/$caminoId" params={{ caminoId }} aria-label="Volver al mapa" className="w-11 h-11 rounded-[12px] bg-secondary grid place-items-center">
-            <ArrowLeft className="w-5 h-5" />
-          </Link>
+        <div className="max-w-[520px] mx-auto px-4 py-3 grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-3">
           <div className="min-w-0">
             <div className="text-[11px] font-bold uppercase tracking-widest text-primary truncate">
               Paso {step} de {TOTAL_STEPS}
@@ -184,10 +183,15 @@ function CaminoDia() {
           <span className="shrink-0 inline-flex items-center gap-1.5 rounded-full bg-[#3FBE8F]/12 px-3 py-1.5 text-[13px] font-bold text-[#2F9C74]">
             <Leaf className="w-4 h-4" /> {wholeHojas(profile?.gems)}
           </span>
+          <Link to="/caminos/$caminoId" params={{ caminoId }} aria-label="Cerrar y volver al mapa" className="w-11 h-11 shrink-0 rounded-full grid place-items-center text-muted-foreground hover:bg-primary/8 transition active:scale-95">
+            <X className="w-5 h-5" />
+          </Link>
         </div>
       </header>
 
+
       <main className="relative z-10 max-w-[520px] mx-auto px-4 py-5 pb-32">
+      <AnswerFeedback state={feedback} onClose={() => setFeedback(null)} />
         {pack.isFetching && (
           <div className="mb-3 flex items-center justify-center gap-2 text-[12px] text-muted-foreground">
             <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" /> Personalizando tu etapa de hoy…
@@ -247,7 +251,7 @@ function CaminoDia() {
                   disabled={draft.trim().length < 3}
                   onClick={async () => {
                     const i = openSol ?? 0;
-                    if (!solDone.includes(i)) { setSolDone((d) => [...d, i]); await reward(10, `Paso ${i + 1} · ${etapa.title}`); }
+                    if (!solDone.includes(i)) { setSolDone((d) => [...d, i]); await reward("medium", `Paso ${i + 1} · ${etapa.title}`); }
                     setOpenSol(null);
                   }}
                   className="h-[52px] rounded-[12px] btn-primary-gradient text-white text-[16px] font-semibold disabled:opacity-50"
@@ -323,7 +327,7 @@ function CaminoDia() {
                     const i = openTask ?? 0;
                     const kind = taskKind(tasks[i] ?? "");
                     if (kind !== "oracion" && draft.trim().length < 3) { toast.error("Escribe tu respuesta para guardarla."); return; }
-                    if (!taskDone.includes(i)) { setTaskDone((d) => [...d, i]); await reward(10, `Tarea ${i + 1} · ${etapa.title}`); }
+                    if (!taskDone.includes(i)) { setTaskDone((d) => [...d, i]); await reward("medium", `Tarea ${i + 1} · ${etapa.title}`); }
                     setOpenTask(null);
                   }}
                   className="h-[52px] rounded-[12px] btn-primary-gradient text-white text-[16px] font-semibold"
@@ -363,16 +367,19 @@ function CaminoDia() {
                 {(p.fe[0]?.options ?? []).map((o, i) => (
                   <button
                     key={i}
+                    disabled={quizPick !== null}
                     onClick={async () => {
                       setQuizPick(i);
-                      if (i === p.fe[0]?.correct) { await reward(15, "Quiz del día"); toast.success("¡Correcto!"); }
+                      if (i === p.fe[0]?.correct) { setFeedback("ok"); await reward("medium", "Quiz del día"); }
+                      else setFeedback("fail");
                     }}
-                    className={cn("w-full h-[52px] rounded-[12px] px-4 text-left text-[15px] font-medium transition",
-                      quizPick === null ? "bg-secondary" : i === p.fe[0]?.correct ? "bg-[#3FBE8F]/18 text-[#2F9C74] font-bold" : quizPick === i ? "bg-destructive/12" : "bg-secondary/70")}
+                    className={cn("w-full min-h-[52px] rounded-[12px] px-4 py-3 text-left text-[15px] font-medium transition",
+                      quizPick === null ? "bg-secondary" : i === p.fe[0]?.correct ? "bg-[#2F9A73] text-white font-bold" : quizPick === i ? "bg-[#D64545]/14 text-[#B91C1C] font-bold" : "bg-secondary/70 opacity-60")}
                   >
                     {o}
                   </button>
                 ))}
+
               </div>
             </div>
             <Cta disabled={quizPick === null} onClick={next}>Continuar</Cta>
@@ -401,7 +408,7 @@ function CaminoDia() {
               <img src={chest} alt="" aria-hidden width={192} height={192} className="w-24 h-24 mx-auto mt-4 object-contain" />
               <p className="text-center text-[13px] text-muted-foreground">{cargas.length} de {p.cargas.length} entregadas al cofre</p>
             </div>
-            <Cta disabled={cargas.length < 3} onClick={async () => { await reward(15, "Cargas entregadas"); next(); }}>
+            <Cta disabled={cargas.length < 3} onClick={async () => { await reward("medium", "Cargas entregadas"); next(); }}>
               {cargas.length < 3 ? "Elige al menos 3" : "Entregar y continuar"}
             </Cta>
           </section>
@@ -435,7 +442,7 @@ function CaminoDia() {
                         if (memoryCards[a].text === memoryCards[b].text) {
                           setMatched((m) => [...m, a, b]);
                           setFlipped([]);
-                          if (matched.length + 2 >= memoryCards.length) void reward(40, "Memoria de promesas");
+                          if (matched.length + 2 >= memoryCards.length) void reward("major", "Memoria de promesas");
                         } else setTimeout(() => setFlipped([]), 700);
                       }
                     }}
@@ -467,14 +474,19 @@ function CaminoDia() {
                   <button
                     key={i}
                     onClick={async () => {
-                      if (i === p.fe[feIdx]?.correct) { setFeOk((n) => n + 1); await reward(8, "Camino de fe"); }
-                      if (feIdx + 1 < p.fe.length) setFeIdx(feIdx + 1); else next();
+                      const ok = i === p.fe[feIdx]?.correct;
+                      setFeedback(ok ? "ok" : "fail");
+                      if (ok) { setFeOk((n) => n + 1); await reward("minor", "Camino de fe"); }
+                      setTimeout(() => {
+                        if (feIdx + 1 < p.fe.length) setFeIdx(feIdx + 1); else next();
+                      }, 700);
                     }}
-                    className="w-full h-[52px] rounded-[12px] bg-secondary px-4 text-left text-[15px] font-medium active:scale-[.98] transition"
+                    className="w-full min-h-[52px] rounded-[12px] bg-secondary px-4 py-3 text-left text-[15px] font-medium active:scale-[.98] transition"
                   >
                     {o}
                   </button>
                 ))}
+
               </div>
             </div>
           </section>
@@ -518,7 +530,7 @@ function CaminoDia() {
             )}
             <Cta
               disabled={Object.keys(emo).length < 6 || Object.keys(bienestar).length < p.bienestar.length}
-              onClick={async () => { await reward(15, "Clasificación emocional"); next(); }}
+              onClick={async () => { await reward("medium", "Clasificación emocional"); next(); }}
             >
               Continuar
             </Cta>
@@ -580,11 +592,6 @@ function CaminoDia() {
           </section>
         )}
 
-        {p && step > 1 && step < 12 && (
-          <button onClick={back} className="mt-4 w-full h-12 rounded-[12px] bg-secondary text-[14px] font-semibold text-muted-foreground inline-flex items-center justify-center gap-2">
-            <X className="w-4 h-4" /> Volver al paso anterior
-          </button>
-        )}
       </main>
     </div>
   );

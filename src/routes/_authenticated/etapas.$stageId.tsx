@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { WordSearch } from "@/components/WordSearch";
 import { getStageContent, getSolutionSteps, getStageTasks } from "@/lib/stage-content";
 import { awardLeaf, ACTION_POINTS, type ActionLevel } from "@/lib/gems";
+import { AnswerFeedback } from "@/components/AnswerFeedback";
 import { useStagePack, stageVariant, type StagePack } from "@/lib/stage-pack";
 import heartCrystal from "@/assets/st-heart-crystal.png";
 import chest from "@/assets/st-chest.png";
@@ -971,7 +972,9 @@ function Step9({ questions, loading, reward, onNext }: {
   const list = questions?.length ? questions.slice(0, 10) : [];
   const [i, setI] = useState(0);
   const [picked, setPicked] = useState<number | null>(null);
+  const [feedback, setFeedback] = useState<"ok" | "fail" | null>(null);
   const letters = ["A", "B", "C", "D"];
+
 
   if (loading || !list.length) {
     return (
@@ -987,6 +990,7 @@ function Step9({ questions, loading, reward, onNext }: {
 
   return (
     <div>
+      <AnswerFeedback state={feedback} onClose={() => setFeedback(null)} />
       <h1 className="font-display font-extrabold text-[26px] leading-tight text-center">Camino de fe 🌈</h1>
       <p className="text-center text-[13px] text-muted-foreground mt-1">Responde y avanza por el camino · {list.length} pasos</p>
 
@@ -1006,19 +1010,24 @@ function Step9({ questions, loading, reward, onNext }: {
         <div className="mt-3 flex flex-wrap gap-2">
           {it.options.map((op, oi) => (
             <button key={oi} disabled={picked !== null}
-              onClick={() => { setPicked(oi); if (oi === it.correct) reward("minor", "stage_camino_fe"); }}
+              onClick={() => {
+                setPicked(oi);
+                if (oi === it.correct) { reward("minor", "stage_camino_fe"); setFeedback("ok"); }
+                else setFeedback("fail");
+              }}
               className={cn("min-h-[42px] rounded-full px-4 text-[13px] font-semibold transition active:scale-95 inline-flex items-center gap-1.5",
-                picked === null ? "bg-primary/8 text-foreground" : oi === it.correct ? "bg-[#3FBE8F] text-white" : picked === oi ? "bg-[#F87171]/12 text-[#B91C1C]" : "bg-primary/5 text-muted-foreground")}>
+                picked === null ? "bg-primary/8 text-foreground" : oi === it.correct ? "bg-[#2F9A73] text-white" : picked === oi ? "bg-[#D64545]/14 text-[#B91C1C]" : "bg-primary/5 text-muted-foreground")}>
               <span className="opacity-60">{letters[oi]}</span> {op}
             </button>
           ))}
         </div>
         {picked !== null && (
-          <p className={cn("mt-3 text-[13px] font-bold", picked === it.correct ? "text-[#2F9A73]" : "text-muted-foreground")}>
-            {picked === it.correct ? "¡Correcto! Avanzas al siguiente paso." : "Respira. La verdad es que Dios sana lo que le entregas."}
+          <p className={cn("mt-3 text-[13px] font-bold", picked === it.correct ? "text-[#2F9A73]" : "text-[#B91C1C]")}>
+            {picked === it.correct ? "¡Correcto! Avanzas al siguiente paso." : "Respuesta incorrecta. Respira: Dios sana lo que le entregas."}
           </p>
         )}
       </div>
+
 
       <Cta disabled={picked === null} onClick={() => { if (last) return onNext(); setI(i + 1); setPicked(null); }}>
         {last ? "Continuar" : "Siguiente paso"}
@@ -1183,7 +1192,7 @@ function Step12({ earned, insignia, onSave, onNext }: { earned: number; insignia
 
       <div className="mt-4 grid grid-cols-3 gap-3">
         {[
-          { top: "🌿", big: `+${Math.max(earned, 0)}`, label: "Hojas de sanación" },
+          { top: "🌿", big: `+${Math.max(earned, 0)}%`, label: "Progreso de tu hoja" },
           { top: "⭐", big: `+${STAGE_XP}`, label: "XP" },
           { top: "🛡️", big: "Insignia", label: insignia },
         ].map((c) => (
@@ -1268,7 +1277,7 @@ function LockedStageView({ tomorrow, onBack }: { tomorrow: boolean; onBack: () =
       <Card className="w-full max-w-sm rounded-[16px] p-6 text-center shadow-soft bg-card/95">
         <div className="w-14 h-14 mx-auto rounded-full bg-primary/10 text-primary grid place-items-center"><Lock className="w-7 h-7" /></div>
         <h1 className="font-display font-extrabold text-[22px] mt-3 leading-tight">
-          {tomorrow ? "Se abre a las 12:00 PM" : "Etapa bloqueada"}
+          {tomorrow ? "Se abre a medianoche" : "Etapa bloqueada"}
         </h1>
         <p className="text-[13.5px] text-muted-foreground mt-2 leading-snug">
           {tomorrow

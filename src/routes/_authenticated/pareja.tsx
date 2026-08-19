@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { getUserPlan } from "@/lib/plan";
-import { awardGems, hasHojas, wholeHojas } from "@/lib/gems";
+import { chargeConsulta, hasHojas, readBalancePoints, wholeHojas } from "@/lib/gems";
 import { printConsulta } from "@/lib/print-pdf";
 import { ConsultaHistorial, type ConsultaHistorialItem } from "@/components/ConsultaHistorial";
 import { ConsultaPDFButton } from "@/components/ConsultaPDFButton";
@@ -103,12 +103,18 @@ function ParejaPage() {
     setHistoryLoading(false);
   }
 
-  const hasEnoughGems = hasHojas(gems, CONSULTA_COST_HOJAS);
+  const hasEnoughGems = gems === null || hasHojas(gems, CONSULTA_COST_HOJAS);
 
   async function begin() {
     if (!form.self_name.trim() || !form.partner_name.trim()) return toast.error("Escribe ambos nombres");
     if (!form.self_dob || !form.partner_dob) return toast.error("Necesito ambas fechas de nacimiento");
-    if (!hasEnoughGems) return toast.error("No tienes suficientes hojas de sanación para esta consulta.");
+    {
+      const points = await readBalancePoints();
+      setGems(points);
+      if (!hasHojas(points, CONSULTA_COST_HOJAS)) {
+        return toast.error(`Necesitas ${CONSULTA_COST_HOJAS} hoja para esta consulta. Tienes ${wholeHojas(points)}.`);
+      }
+    }
     setStep(2); setLine(0); setProgress(0);
 
     const timer = setInterval(() => {
@@ -140,8 +146,8 @@ function ParejaPage() {
           advice: j.advice,
           next_step: j.next_step,
         });
-        const newBalance = await awardGems(-CONSULTA_COST_HOJAS * 100, "pareja:consulta");
-        setGems(newBalance ?? Math.max(0, (gems ?? 0) - CONSULTA_COST_HOJAS * 100));
+        const charge = await chargeConsulta("pareja", CONSULTA_COST_HOJAS);
+        setGems(charge.balance);
         await loadHistory();
       }
       setStep(3);

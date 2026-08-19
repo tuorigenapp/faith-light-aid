@@ -15,7 +15,7 @@ import e3dCoin from "@/assets/e3d-coin.png";
 import e3dBrain from "@/assets/e3d-brain.png";
 import e3dCouple from "@/assets/e3d-couple.png";
 import { getUserPlan } from "@/lib/plan";
-import { awardGems, hasHojas, wholeHojas } from "@/lib/gems";
+import { chargeConsulta, hasHojas, readBalancePoints, wholeHojas } from "@/lib/gems";
 import { printConsulta } from "@/lib/print-pdf";
 import { ConsultaHistorial, type ConsultaHistorialItem } from "@/components/ConsultaHistorial";
 import { ConsultaPDFButton } from "@/components/ConsultaPDFButton";
@@ -101,7 +101,7 @@ function MinistracionPage() {
     setHistoryLoading(false);
   }
 
-  const hasEnoughGems = hasHojas(gems, CONSULTA_COST_HOJAS);
+  const hasEnoughGems = gems === null || hasHojas(gems, CONSULTA_COST_HOJAS);
 
   function validate() {
     const e: { name?: string; dob?: string } = {};
@@ -113,7 +113,13 @@ function MinistracionPage() {
 
   async function begin() {
     if (!validate()) return toast.error("Completa tu nombre y fecha de nacimiento para continuar.");
-    if (!hasEnoughGems) return toast.error("No tienes suficientes hojas de sanación para esta consulta.");
+    {
+      const points = await readBalancePoints();
+      setGems(points);
+      if (!hasHojas(points, CONSULTA_COST_HOJAS)) {
+        return toast.error(`Necesitas ${CONSULTA_COST_HOJAS} hoja para esta consulta. Tienes ${wholeHojas(points)}.`);
+      }
+    }
     setStep(2); setLine(0); setProgress(0);
 
     const timer = setInterval(() => {
@@ -150,8 +156,8 @@ function MinistracionPage() {
           versiculo: j.versiculo ?? null,
           rompe_ciclo: j.rompe_ciclo ?? null,
         });
-        const newBalance = await awardGems(-CONSULTA_COST_HOJAS * 100, "ministracion:consulta");
-        setGems(newBalance ?? Math.max(0, (gems ?? 0) - CONSULTA_COST_HOJAS * 100));
+        const charge = await chargeConsulta("ministracion", CONSULTA_COST_HOJAS);
+        setGems(charge.balance);
         await loadHistory();
       }
     } catch (e) {
