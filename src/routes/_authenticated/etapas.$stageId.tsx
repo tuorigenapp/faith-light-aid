@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { WordSearch } from "@/components/WordSearch";
 import { getStageContent, getSolutionSteps, getStageTasks } from "@/lib/stage-content";
 import { awardLeaf, ACTION_POINTS, type ActionLevel } from "@/lib/gems";
+import { AnswerFeedback } from "@/components/AnswerFeedback";
 import { useStagePack, stageVariant, type StagePack } from "@/lib/stage-pack";
 import heartCrystal from "@/assets/st-heart-crystal.png";
 import chest from "@/assets/st-chest.png";
