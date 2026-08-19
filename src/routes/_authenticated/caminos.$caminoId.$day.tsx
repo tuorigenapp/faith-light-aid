@@ -125,9 +125,9 @@ function CaminoDia() {
   const p = pack.data ?? CAMINO_PACK_BASE;
   const alreadyDone = (state?.done ?? []).some((d) => d.day === dayNum);
 
-  async function reward(amount: number, reason: string) {
-    setEarned((e) => e + amount);
-    await awardGems(amount, reason);
+  async function reward(level: ActionLevel, reason: string) {
+    const r = await awardLeaf("caminos", level, reason, { camino: caminoId, day: dayNum });
+    setEarned((e) => e + r.granted);
     qc.invalidateQueries({ queryKey: ["profile"] });
   }
 
@@ -144,14 +144,14 @@ function CaminoDia() {
           mood, notes, quiz_ok: feOk,
         } as never,
       });
-      await reward(60, `Día ${dayNum} · ${camino!.title}`);
+      await reward("major", `Día ${dayNum} · ${camino!.title}`);
     }
     qc.invalidateQueries({ queryKey: ["camino", caminoId] });
     setStep(13);
   }
 
   const next = () => setStep((s) => Math.min(s + 1, TOTAL_STEPS));
-  const back = () => setStep((s) => Math.max(s - 1, 1));
+
 
   const solutions = p?.soluciones ?? [];
   const tasks = p?.tareas ?? [];
