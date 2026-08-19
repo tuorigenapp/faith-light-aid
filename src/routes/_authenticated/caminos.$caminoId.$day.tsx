@@ -15,7 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import {
-  ArrowLeft, ArrowRight, Award, Check, Flame, HandHeart, Leaf, ListChecks,
+  ArrowRight, Award, Check, Flame, HandHeart, Leaf, ListChecks,
   Loader2, PenLine, Sparkles, X,
 } from "lucide-react";
 import heartCrystal from "@/assets/st-heart-crystal.png";
@@ -191,6 +191,7 @@ const [feedback, setFeedback] = useState<"ok" | "fail" | null>(null);
 
 
       <main className="relative z-10 max-w-[520px] mx-auto px-4 py-5 pb-32">
+      <AnswerFeedback state={feedback} onClose={() => setFeedback(null)} />
         {pack.isFetching && (
           <div className="mb-3 flex items-center justify-center gap-2 text-[12px] text-muted-foreground">
             <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" /> Personalizando tu etapa de hoy…
