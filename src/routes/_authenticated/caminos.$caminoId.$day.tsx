@@ -473,14 +473,19 @@ const [feedback, setFeedback] = useState<"ok" | "fail" | null>(null);
                   <button
                     key={i}
                     onClick={async () => {
-                      if (i === p.fe[feIdx]?.correct) { setFeOk((n) => n + 1); await reward(8, "Camino de fe"); }
-                      if (feIdx + 1 < p.fe.length) setFeIdx(feIdx + 1); else next();
+                      const ok = i === p.fe[feIdx]?.correct;
+                      setFeedback(ok ? "ok" : "fail");
+                      if (ok) { setFeOk((n) => n + 1); await reward("minor", "Camino de fe"); }
+                      setTimeout(() => {
+                        if (feIdx + 1 < p.fe.length) setFeIdx(feIdx + 1); else next();
+                      }, 700);
                     }}
-                    className="w-full h-[52px] rounded-[12px] bg-secondary px-4 text-left text-[15px] font-medium active:scale-[.98] transition"
+                    className="w-full min-h-[52px] rounded-[12px] bg-secondary px-4 py-3 text-left text-[15px] font-medium active:scale-[.98] transition"
                   >
                     {o}
                   </button>
                 ))}
+
               </div>
             </div>
           </section>
