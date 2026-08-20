@@ -44,6 +44,33 @@ export type Database = {
         }
         Relationships: []
       }
+      cancellation_surveys: {
+        Row: {
+          comment: string | null
+          created_at: string
+          from_plan: string | null
+          id: string
+          reason: string
+          user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          from_plan?: string | null
+          id?: string
+          reason: string
+          user_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          from_plan?: string | null
+          id?: string
+          reason?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       conversations: {
         Row: {
           created_at: string
@@ -446,6 +473,7 @@ export type Database = {
         Row: {
           content: string
           created_at: string
+          deleted_at: string | null
           id: string
           kind: string
           mood: string | null
@@ -456,6 +484,7 @@ export type Database = {
         Insert: {
           content: string
           created_at?: string
+          deleted_at?: string | null
           id?: string
           kind: string
           mood?: string | null
@@ -466,6 +495,7 @@ export type Database = {
         Update: {
           content?: string
           created_at?: string
+          deleted_at?: string | null
           id?: string
           kind?: string
           mood?: string | null
@@ -904,6 +934,36 @@ export type Database = {
         }
         Relationships: []
       }
+      push_subscriptions: {
+        Row: {
+          auth: string | null
+          created_at: string
+          endpoint: string
+          id: string
+          p256dh: string | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          auth?: string | null
+          created_at?: string
+          endpoint: string
+          id?: string
+          p256dh?: string | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          auth?: string | null
+          created_at?: string
+          endpoint?: string
+          id?: string
+          p256dh?: string | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       referrals: {
         Row: {
           code: string
@@ -931,6 +991,33 @@ export type Database = {
           owner_id?: string
           reward_gems?: number
           status?: string
+        }
+        Relationships: []
+      }
+      satisfaction_ratings: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          section: string
+          stars: number
+          user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          section: string
+          stars: number
+          user_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          section?: string
+          stars?: number
+          user_id?: string
         }
         Relationships: []
       }
