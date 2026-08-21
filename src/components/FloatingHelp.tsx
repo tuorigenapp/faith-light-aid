@@ -1,15 +1,21 @@
 import { useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { HelpCircle, X, MessageCircle, Mail, Compass, Leaf } from "lucide-react";
 
-const ITEMS = [
-  { icon: Compass, label: "Ver el tour de la app", to: "/dashboard?tour=1" as const },
+const LINKS = [
   { icon: MessageCircle, label: "Hablar con la mentora", to: "/chat" as const },
   { icon: Leaf, label: "Cómo funcionan las hojas", to: "/premios" as const },
 ];
 
 export function FloatingHelp() {
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+
+  function startTour() {
+    localStorage.removeItem("origen_tour_done");
+    setOpen(false);
+    navigate({ to: "/dashboard" });
+  }
 
   return (
     <>
@@ -23,7 +29,16 @@ export function FloatingHelp() {
               ¿Te ayudo con algo?
             </p>
             <div className="space-y-1">
-              {ITEMS.map((it) => (
+              <button
+                onClick={startTour}
+                className="flex w-full min-h-11 items-center gap-3 rounded-[10px] px-2 text-left text-sm font-medium hover:bg-secondary"
+              >
+                <span className="grid h-8 w-8 place-items-center rounded-[10px] bg-primary/10 text-primary">
+                  <Compass className="h-4 w-4" />
+                </span>
+                Ver el tour de la app
+              </button>
+              {LINKS.map((it) => (
                 <Link
                   key={it.label}
                   to={it.to}
@@ -36,6 +51,7 @@ export function FloatingHelp() {
                   {it.label}
                 </Link>
               ))}
+
               <a
                 href="mailto:infodenegociorm@gmail.com"
                 className="flex min-h-11 items-center gap-3 rounded-[10px] px-2 text-sm font-medium hover:bg-secondary"
