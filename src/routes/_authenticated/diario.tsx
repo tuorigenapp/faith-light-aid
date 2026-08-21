@@ -8,13 +8,22 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Lock, Trash2 } from "lucide-react";
+import { Plus, Lock, Trash2, Undo2, BookHeart, Trash } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { EmptyState } from "@/components/EmptyState";
 
 export const Route = createFileRoute("/_authenticated/diario")({
-  head: () => ({ meta: [{ title: "Diario Espiritual — Reconectando" }] }),
+  head: () => ({
+    meta: [
+      { title: "Diario espiritual — ORÍGEN" },
+      { name: "description", content: "Tu diario privado: oración, gratitud, reflexión y testimonio, con papelera de 30 días." },
+      { property: "og:title", content: "Diario espiritual — ORÍGEN" },
+      { property: "og:description", content: "Escribe lo que solo tú y Dios necesitan leer." },
+      { property: "og:type", content: "website" },
+    ],
+  }),
   component: Diario,
 });
 
@@ -30,15 +39,17 @@ function Diario() {
   const { user } = useAuth();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
+  const [tab, setTab] = useState<"mias" | "papelera">("mias");
   const [kind, setKind] = useState("oracion");
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
 
-  const { data: entries } = useQuery({
-    queryKey: ["journal", user?.id],
+  const { data: entries, isLoading } = useQuery({
+    queryKey: ["journal", user?.id, tab],
     enabled: !!user,
     queryFn: async () => {
-      const { data } = await supabase.from("journal_entries").select("*").eq("user_id", user!.id).order("created_at", { ascending: false });
+      const q = supabase.from("journal_entries").select("*").eq("user_id", user!.id).order("created_at", { ascending: false });
+      const { data } = tab === "mias" ? await q.is("deleted_at", null) : await q.not("deleted_at", "is", null);
       return data ?? [];
     },
   });
@@ -47,57 +58,113 @@ function Diario() {
     if (!user || !content.trim()) return;
     const { error } = await supabase.from("journal_entries").insert({ user_id: user.id, kind, title: title || null, content });
     if (error) return toast.error(error.message);
-    toast.success("Entrada guardada");
+    toast.success("Entrada guardada", { description: "Nadie más puede leerla." });
     setOpen(false); setTitle(""); setContent(""); setKind("oracion");
     qc.invalidateQueries({ queryKey: ["journal"] });
   }
 
-  async function del(id: string) {
+  async function moveToTrash(id: string) {
+    await supabase.from("journal_entries").update({ deleted_at: new Date().toISOString() }).eq("id", id);
+    qc.invalidateQueries({ queryKey: ["journal"] });
+    toast("Movida a la papelera", { description: "Puedes restaurarla durante 30 días." });
+  }
+
+  async function restore(id: string) {
+    await supabase.from("journal_entries").update({ deleted_at: null }).eq("id", id);
+    qc.invalidateQueries({ queryKey: ["journal"] });
+    toast.success("Entrada restaurada");
+  }
+
+  async function destroy(id: string) {
     await supabase.from("journal_entries").delete().eq("id", id);
     qc.invalidateQueries({ queryKey: ["journal"] });
+    toast("Eliminada para siempre");
   }
 
   return (
-    <div className="p-6 md:p-10 max-w-3xl mx-auto">
-      <div className="flex items-end justify-between gap-4 flex-wrap">
+    <div className="mx-auto max-w-3xl p-5 pb-28 md:p-10">
+      <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-display text-3xl">Diario Espiritual</h1>
-          <p className="text-muted-foreground mt-1 text-sm flex items-center gap-2"><Lock className="w-3.5 h-3.5" />Privado. Solo tú y Dios.</p>
+          <h1 className="font-display text-[28px] font-extrabold leading-tight">Diario espiritual</h1>
+          <p className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
+            <Lock className="h-3.5 w-3.5" /> Privado. Solo tú y Dios.
+          </p>
         </div>
-        <Button onClick={() => setOpen(o => !o)} className="bg-primary"><Plus className="w-4 h-4 mr-2" />Nueva entrada</Button>
+        <Button onClick={() => setOpen((o) => !o)} className="bg-primary"><Plus className="mr-2 h-4 w-4" />Nueva entrada</Button>
+      </div>
+
+      <div className="mt-5 flex gap-2">
+        {(["mias", "papelera"] as const).map((t) => (
+          <button
+            key={t}
+            onClick={() => setTab(t)}
+            className={`min-h-9 rounded-[10px] px-4 text-sm font-semibold transition ${
+              tab === t ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"
+            }`}
+          >
+            {t === "mias" ? "Mis entradas" : "Papelera"}
+          </button>
+        ))}
       </div>
 
       {open && (
-        <Card className="p-6 mt-6 space-y-3">
+        <Card className="mt-5 space-y-3 p-6">
           <Select value={kind} onValueChange={setKind}>
             <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>{KINDS.map(k => <SelectItem key={k.v} value={k.v}>{k.l}</SelectItem>)}</SelectContent>
+            <SelectContent>{KINDS.map((k) => <SelectItem key={k.v} value={k.v}>{k.l}</SelectItem>)}</SelectContent>
           </Select>
-          <Input value={title} onChange={e => setTitle(e.target.value)} placeholder="Título (opcional)" />
-          <Textarea value={content} onChange={e => setContent(e.target.value)} placeholder="Escribe libremente..." className="min-h-40" />
-          <div className="flex gap-2 justify-end">
+          <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Título (opcional)" />
+          <Textarea value={content} onChange={(e) => setContent(e.target.value)} placeholder="Escribe libremente..." className="min-h-40" />
+          <div className="flex justify-end gap-2">
             <Button variant="ghost" onClick={() => setOpen(false)}>Cancelar</Button>
-            <Button onClick={save} className="bg-gold text-gold-foreground hover:bg-gold/90">Guardar</Button>
+            <Button onClick={save} className="bg-primary">Guardar</Button>
           </div>
         </Card>
       )}
 
-      <div className="mt-8 space-y-3">
+      <div className="mt-6 space-y-3">
+        {isLoading && [0, 1, 2].map((i) => <div key={i} className="h-28 animate-pulse rounded-[16px] bg-secondary" />)}
+
         {(entries ?? []).map((e: any) => (
           <Card key={e.id} className="p-5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-[10px] uppercase tracking-widest text-gold">{KINDS.find(k => k.v === e.kind)?.l}</span>
-                <span className="text-xs text-muted-foreground">{format(new Date(e.created_at), "d 'de' MMM, yyyy", { locale: es })}</span>
+                <span className="text-[10px] uppercase tracking-widest text-primary">{KINDS.find((k) => k.v === e.kind)?.l}</span>
+                <span className="text-xs text-muted-foreground">
+                  {format(new Date(e.created_at), "d 'de' MMM, yyyy", { locale: es })}
+                </span>
               </div>
-              <Button variant="ghost" size="sm" onClick={() => del(e.id)}><Trash2 className="w-3.5 h-3.5 text-muted-foreground" /></Button>
+              {tab === "mias" ? (
+                <Button variant="ghost" size="sm" aria-label="Mover a la papelera" onClick={() => moveToTrash(e.id)}>
+                  <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
+                </Button>
+              ) : (
+                <div className="flex gap-1">
+                  <Button variant="ghost" size="sm" aria-label="Restaurar" onClick={() => restore(e.id)}>
+                    <Undo2 className="h-3.5 w-3.5 text-primary" />
+                  </Button>
+                  <Button variant="ghost" size="sm" aria-label="Eliminar para siempre" onClick={() => destroy(e.id)}>
+                    <Trash className="h-3.5 w-3.5 text-destructive" />
+                  </Button>
+                </div>
+              )}
             </div>
-            {e.title && <h3 className="font-display text-lg mt-2">{e.title}</h3>}
-            <p className="text-sm text-foreground/85 mt-2 whitespace-pre-wrap">{e.content}</p>
+            {e.title && <h3 className="mt-2 font-display text-lg">{e.title}</h3>}
+            <p className="mt-2 whitespace-pre-wrap text-sm text-foreground/85">{e.content}</p>
           </Card>
         ))}
-        {entries && entries.length === 0 && (
-          <Card className="p-10 text-center text-muted-foreground">Tu diario está vacío. Empieza con una oración o gratitud.</Card>
+
+        {!isLoading && entries && entries.length === 0 && tab === "mias" && (
+          <EmptyState
+            icon={BookHeart}
+            title="Tu primera página te espera"
+            body="Empieza con una oración corta o con tres cosas que agradeces hoy. Tres líneas bastan."
+            actionLabel="Escribir mi primera entrada"
+            onAction={() => setOpen(true)}
+          />
+        )}
+        {!isLoading && entries && entries.length === 0 && tab === "papelera" && (
+          <EmptyState icon={Trash} title="Papelera limpia" body="Lo que borres aparecerá aquí y podrás restaurarlo durante 30 días." />
         )}
       </div>
     </div>
