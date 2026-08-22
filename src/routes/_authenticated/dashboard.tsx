@@ -11,6 +11,12 @@ import { CategoriaSlider } from "@/components/CategoriaSlider";
 import { ManifestacionSlider } from "@/components/ManifestacionSlider";
 import { PalabrasHoy } from "@/components/PalabrasHoy";
 import { BibliotecaSlider } from "@/components/BibliotecaSlider";
+import { PrimerosPasos } from "@/components/PrimerosPasos";
+import { GuidedTour } from "@/components/GuidedTour";
+import { useEffect } from "react";
+import { toast } from "sonner";
+import { checkLocalReminder, showLocalNotification } from "@/lib/notifications";
+
 
 import { DailyGames } from "@/components/games/DailyGames";
 import { LockedCard } from "@/components/LockedCard";
@@ -77,11 +83,15 @@ function Dashboard() {
 
   return (
     <div className="relative min-h-[calc(100vh-4rem)] bg-aura-top">
+      <GuidedTour />
       <div className="relative z-10 max-w-lg lg:max-w-4xl mx-auto px-4 pt-4 pb-10 space-y-4">
         {/* Greeting ahora vive en el header móvil deslizante */}
 
+        {/* Primeros pasos — solo mientras falte algo */}
+        <PrimerosPasos />
 
         {/* Hero mission */}
+
         <div className="hero-card">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[11px] uppercase tracking-widest font-bold text-primary">Tu misión de hoy</span>

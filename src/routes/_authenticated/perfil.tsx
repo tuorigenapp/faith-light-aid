@@ -976,9 +976,11 @@ function NotificationsBlock() {
             </div>
             <Switch checked={prefs?.push_enabled ?? true} onCheckedChange={(v) => update({ push_enabled: v })} />
           </div>
+          <NotificacionesCard />
         </div>
       )}
     </Card>
+
   );
 }
 
