@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { useQuery } from "@tanstack/react-query";
+import { CancelSurvey } from "@/components/CancelSurvey";
 import { Check, Leaf, MessageCircle, Send, Sparkles, ShieldCheck, Eye, Infinity as InfinityIcon } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/membresia")({
@@ -77,6 +78,7 @@ const INCLUIDO = [
 function Membresia() {
   const { user } = useAuth();
   const [selected, setSelected] = useState<Plan["id"]>("annual");
+  const [cancelOpen, setCancelOpen] = useState(false);
 
   const { data: sub } = useQuery({
     queryKey: ["subscription", user?.id],

@@ -1,3 +1,4 @@
+import { NotificacionesCard } from "@/components/NotificacionesCard";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
