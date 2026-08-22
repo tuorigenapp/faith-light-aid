@@ -1,3 +1,4 @@
+import { NotificacionesCard } from "@/components/NotificacionesCard";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
@@ -976,9 +977,11 @@ function NotificationsBlock() {
             </div>
             <Switch checked={prefs?.push_enabled ?? true} onCheckedChange={(v) => update({ push_enabled: v })} />
           </div>
+          <NotificacionesCard />
         </div>
       )}
     </Card>
+
   );
 }
 

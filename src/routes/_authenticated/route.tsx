@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { FloatingChatFab } from "@/components/FloatingChatFab";
+import { FloatingHelp } from "@/components/FloatingHelp";
 import { useSignedUrls } from "@/hooks/use-signed-urls";
 import origenIcon from "@/assets/origen-o-icon.png";
 
@@ -309,6 +310,7 @@ function AuthLayout() {
 
         {/* Floating chat with Ruth Esther */}
         <FloatingChatFab />
+        <FloatingHelp />
 
         {/* Mobile bottom nav — con botón central O */}
         <nav

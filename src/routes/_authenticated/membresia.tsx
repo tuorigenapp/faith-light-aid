@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { useQuery } from "@tanstack/react-query";
+import { CancelSurvey } from "@/components/CancelSurvey";
 import { Check, Leaf, MessageCircle, Send, Sparkles, ShieldCheck, Eye, Infinity as InfinityIcon } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/membresia")({
@@ -77,6 +78,7 @@ const INCLUIDO = [
 function Membresia() {
   const { user } = useAuth();
   const [selected, setSelected] = useState<Plan["id"]>("annual");
+  const [cancelOpen, setCancelOpen] = useState(false);
 
   const { data: sub } = useQuery({
     queryKey: ["subscription", user?.id],
@@ -185,7 +187,17 @@ function Membresia() {
         <p className="mt-7 text-[12px] text-muted-foreground leading-relaxed text-center">
           Cancelas cuando quieras · Te avisamos antes del cobro · Pago seguro procesado por Hotmart
         </p>
+
+        <button
+          onClick={() => setCancelOpen(true)}
+          className="mt-4 min-h-11 w-full text-[13px] font-medium text-muted-foreground underline underline-offset-4"
+        >
+          Quiero cancelar o bajar de plan
+        </button>
       </div>
+
+      <CancelSurvey open={cancelOpen} onClose={() => setCancelOpen(false)} fromPlan={sub?.plan ?? "explorador"} />
+
 
       {/* CTA fija */}
       <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-border/60 bg-background/95 backdrop-blur px-5 pt-3 pb-[calc(env(safe-area-inset-bottom)+12px)]">
