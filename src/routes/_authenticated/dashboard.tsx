@@ -16,6 +16,7 @@ import { GuidedTour } from "@/components/GuidedTour";
 import { useEffect } from "react";
 import { toast } from "sonner";
 import { checkLocalReminder, showLocalNotification } from "@/lib/notifications";
+import { celebrateOnce, milestoneMessage } from "@/lib/celebrate";
 
 
 import { DailyGames } from "@/components/games/DailyGames";
@@ -80,6 +81,21 @@ function Dashboard() {
     return { date: d, iso: d.toISOString().slice(0, 10), active: streakDates.has(d.toISOString().slice(0, 10)) };
   });
   const activeCount = week.filter((w) => w.active).length;
+
+  // Recordatorio de inactividad + celebración de hitos reales
+  useEffect(() => {
+    const reminder = checkLocalReminder();
+    if (!reminder) return;
+    toast(reminder.title, { description: reminder.body });
+    showLocalNotification(reminder).catch(() => undefined);
+  }, []);
+
+  useEffect(() => {
+    if (activeCount <= 0) return;
+    const msg = milestoneMessage(activeCount);
+    if (!msg) return;
+    if (celebrateOnce(`racha-${activeCount}`)) toast.success("¡Hito alcanzado!", { description: msg });
+  }, [activeCount]);
 
   return (
     <div className="relative min-h-[calc(100vh-4rem)] bg-aura-top">
