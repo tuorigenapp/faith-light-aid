@@ -11,7 +11,7 @@ import { AreaChart, Area, ResponsiveContainer, BarChart, Bar, XAxis, Tooltip } f
 
 export const Route = createFileRoute("/admin")({
   ssr: false,
-  head: () => ({ meta: [{ title: "Panel de administracion \u2014 ORIGEN" }] }),
+  head: () => ({ meta: [{ title: "Panel de administración — ORÍGEN" }] }),
   component: AdminGate,
 });
 
