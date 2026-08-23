@@ -50,8 +50,14 @@ export function GuidedTour() {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[60] grid place-items-end sm:place-items-center bg-foreground/45 p-0 sm:p-6">
-      <div className="max-h-[92dvh] w-full overflow-y-auto rounded-t-[20px] bg-card p-6 shadow-elevated animate-in slide-in-from-bottom sm:max-w-[420px] sm:rounded-[16px]">
+    <div className="fixed inset-0 z-[60] grid place-items-end bg-foreground/65 p-0 backdrop-blur-md sm:place-items-center sm:p-6">
+      {/* luz sobre la guía, opacidad y desenfoque en todo lo demás */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
+        style={{ background: "radial-gradient(60% 45% at 50% 62%, rgba(255,255,255,.28) 0%, transparent 70%)" }}
+      />
+      <div className="relative max-h-[92dvh] w-full overflow-y-auto rounded-t-[20px] bg-card p-6 shadow-[0_0_0_1px_rgba(124,92,255,.35),0_18px_60px_rgba(124,92,255,.45)] animate-in slide-in-from-bottom sm:max-w-[420px] sm:rounded-[16px]">
         {phase === "slides" && (
           <SlidesStep
             i={i}

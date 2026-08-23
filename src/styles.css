@@ -347,3 +347,14 @@
 @media (prefers-reduced-motion: reduce) {
   .animate-pulse-soft { animation: none !important; }
 }
+
+/* Celebración grande centrada */
+@keyframes origen-cel-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes origen-cel-pop {
+  0% { transform: scale(0.5) rotate(-8deg); opacity: 0; }
+  60% { transform: scale(1.12) rotate(3deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
