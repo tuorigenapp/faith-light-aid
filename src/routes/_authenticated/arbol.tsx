@@ -639,16 +639,11 @@ function TransferSection({ gems }: { gems: number }) {
 
     setSending(true);
     try {
-      const points = qty * 100;
-      const { error } = await supabase.from("hoja_transfers").insert({
-        user_id: user.id,
-        to_email: emailTrim,
-        points,
-        status: "pending",
-        note: `Transferencia a ${emailTrim}`,
-      });
-      if (error) throw error;
-      await spendGems(-points, `Transferencia a ${emailTrim}`);
+      const res = await sendTransfer({ data: { toEmail: emailTrim, hojas: qty } });
+      if (!res.ok) {
+        toast.error(res.message);
+        return;
+      }
       qc.invalidateQueries({ queryKey: ["hoja_transfers"] });
       qc.invalidateQueries({ queryKey: ["profile-arbol"] });
       qc.invalidateQueries({ queryKey: ["profile"] });
