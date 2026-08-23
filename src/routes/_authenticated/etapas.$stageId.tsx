@@ -11,6 +11,7 @@ import { ArrowRight, Check, Lock, X, Leaf, RefreshCw, Sparkles, Flame, PenLine, 
 import { useState, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { videoForStage } from "@/lib/stage-videos";
 import { WordSearch } from "@/components/WordSearch";
 import { getStageContent, getSolutionSteps, getStageTasks } from "@/lib/stage-content";
 import { awardLeaf, ACTION_POINTS, type ActionLevel } from "@/lib/gems";
@@ -39,7 +40,7 @@ export const Route = createFileRoute("/_authenticated/etapas/$stageId")({
   component: StageFlow,
 });
 
-const TOTAL_STEPS = 13;
+const TOTAL_STEPS = 8;
 const STAGE_XP = 120;
 
 export type StepEntry = {
@@ -223,28 +224,18 @@ function StageFlow() {
 
   switch (step) {
     case 1:
-      return shell(<Step1 stage={stage} onNext={next} />);
+      return shell(<Step1 stage={stage} position={position} onNext={next} />);
     case 2:
       return shell(<Step2 steps={solutionSteps} open={openSteps} setOpen={setOpenSteps} entries={entries} onSave={saveEntry} onNext={next} />);
     case 3:
       return shell(<Step3 tasks={tasks} done={doneTasks} setDone={setDoneTasks} entries={entries} onSave={saveEntry} reward={reward} onNext={next} />);
     case 4:
-      return shell(<Step4 mood={mood} setMood={setMood} notes={notes} setNotes={setNotes} answers={answers} setAnswers={setAnswers} onNext={next} />);
-    case 5:
       return shell(<Step5 items={content.quiz} reward={reward} onNext={next} />);
-    case 6:
-      return shell(<Step6 cargas={p?.cargas} loading={pack.isLoading} reward={reward} onNext={next} />);
-    case 7:
+    case 5:
       return shell(<Step7 words={p?.words?.length ? p.words : content.words} loading={pack.isLoading} stageId={id} onNext={next} />);
-    case 8:
-      return shell(<Step8 promesas={p?.promesas} loading={pack.isLoading} reward={reward} onNext={next} />);
-    case 9:
-      return shell(<Step9 questions={p?.fe} loading={pack.isLoading} reward={reward} onNext={next} />);
-    case 10:
-      return shell(<Step10 bienestar={p?.bienestar} reward={reward} onNext={next} />);
-    case 11:
-      return shell(<Step11 minutes={minutes} tasksDone={doneTasks.length >= Math.max(tasks.length, 1)} onNext={next} />);
-    case 12:
+    case 6:
+      return shell(<Step4 mood={mood} setMood={setMood} notes={notes} setNotes={setNotes} answers={answers} setAnswers={setAnswers} onNext={next} />);
+    case 7:
       return shell(<Step12 earned={earned} insignia={insigniaFor(stage.title, position)} onSave={saveReward} onNext={next} />);
     default:
       return shell(<Step13 stage={stage} position={position} total={data.total} onFinish={finish} />);
@@ -325,7 +316,7 @@ function LoadingPack({ label }: { label: string }) {
 
 /* ───────────────────────── 1 · Lección ───────────────────────── */
 
-function Step1({ stage, onNext }: { stage: any; onNext: () => void }) {
+function Step1({ stage, position, onNext }: { stage: any; position: number; onNext: () => void }) {
   const minis = [
     { emoji: "💜", t: "Sanarás heridas" },
     { emoji: "✨", t: "Liberarás emociones" },
@@ -354,6 +345,23 @@ function Step1({ stage, onNext }: { stage: any; onNext: () => void }) {
             <div className="mt-1.5 text-[12px] font-bold leading-snug">{m.t}</div>
           </div>
         ))}
+      </div>
+
+      <div className="mt-4 overflow-hidden rounded-[16px] bg-card border border-border shadow-soft">
+        <div className="px-4 pt-3.5 pb-2">
+          <div className="text-[13px] font-extrabold text-primary">🎧 Video guía para acompañar esta etapa</div>
+          <p className="text-[12.5px] text-muted-foreground mt-0.5 leading-snug">Ponlo de fondo mientras haces tus ejercicios.</p>
+        </div>
+        <div className="relative w-full" style={{ aspectRatio: "16 / 9" }}>
+          <iframe
+            src={`https://www.youtube-nocookie.com/embed/${videoForStage(position)}?rel=0`}
+            title="Video guía de la etapa"
+            loading="lazy"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            className="absolute inset-0 h-full w-full border-0"
+          />
+        </div>
       </div>
 
       <div className="mt-4 rounded-[16px] bg-primary/8 p-4">
