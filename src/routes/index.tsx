@@ -19,6 +19,11 @@ import eStar from "@/assets/e3d-star.png";
 import ePractice from "@/assets/e3d-practice.png";
 import eHeadphones from "@/assets/e3d-headphones.png";
 import eBrain from "@/assets/e3d-brain.png";
+import lpIdentificacion from "@/assets/lp-identificacion.png.asset.json";
+import lpObtienes from "@/assets/lp-obtienes.png.asset.json";
+import lpIncluye from "@/assets/lp-incluye.png.asset.json";
+import lpEspiritual from "@/assets/lp-espiritual.png.asset.json";
+import lpRecibes from "@/assets/lp-recibes.png.asset.json";
 import { PaymentMethods } from "@/components/PaymentMethods";
 import { ReviewsSlider } from "@/components/ReviewsSlider";
 
@@ -235,7 +240,110 @@ function Landing() {
           </div>
         </section>
 
+        {/* IDENTIFICACIÓN */}
+        <section className="mt-12">
+          <h2 className="font-display text-[26px] font-extrabold leading-tight">
+            Si te identificas con una sola de estas situaciones, esto es para ti
+          </h2>
+          <img
+            src={lpIdentificacion.url}
+            alt="Siete situaciones emocionales comunes: repetir patrones, cansancio, relaciones que duelen, culpa heredada"
+            width={1080}
+            height={1350}
+            loading="lazy"
+            className="mt-4 w-full rounded-[16px]"
+          />
+        </section>
+
+        {/* TODO EN UN SOLO LUGAR */}
+        <section className="mt-12">
+          <h2 className="font-display text-[26px] font-extrabold leading-tight">Todo en un solo lugar</h2>
+          <p className="mt-2 text-[14.5px] leading-relaxed text-muted-foreground">
+            Lo abres en el celular, en la tablet o en la computadora. Tu progreso viaja contigo.
+          </p>
+          <img
+            src={lpObtienes.url}
+            alt="La app ORÍGEN en computadora, celular, tablet y reloj, con diario y audios guiados"
+            width={1080}
+            height={1080}
+            loading="lazy"
+            className="mt-4 w-full rounded-[16px]"
+          />
+        </section>
+
+        {/* LO QUE ENCONTRARÁS DENTRO */}
+        <section className="mt-12">
+          <h2 className="font-display text-[26px] font-extrabold leading-tight">Todo lo que incluye tu membresía</h2>
+          <img
+            src={lpIncluye.url}
+            alt="Lista de doce beneficios incluidos en la membresía ORÍGEN"
+            width={1080}
+            height={1350}
+            loading="lazy"
+            className="mt-4 w-full rounded-[16px]"
+          />
+        </section>
+
+        {/* EXPERIENCIA ESPIRITUAL / ANTES Y DESPUÉS */}
+        <section className="mt-12">
+          <h2 className="font-display text-[26px] font-extrabold leading-tight">
+            Lo que lograrás dentro de ORÍGEN
+          </h2>
+          <p className="mt-2 text-[14.5px] leading-relaxed text-muted-foreground">
+            No es información nueva: es un cambio real en cómo respondes a lo de siempre.
+          </p>
+          <img
+            src={lpEspiritual.url}
+            alt="Comparación antes y después: de repetir el patrón a vivir con paz, propósito y libertad"
+            width={1080}
+            height={1350}
+            loading="lazy"
+            className="mt-4 w-full rounded-[16px]"
+          />
+        </section>
+
+        {/* TODO LO QUE RECIBES */}
+        <section className="mt-12">
+          <h2 className="font-display text-[26px] font-extrabold leading-tight">Todo lo que recibes hoy</h2>
+          <img
+            src={lpRecibes.url}
+            alt="Paquete completo ORÍGEN: acceso en todos tus dispositivos, audios, diario y soporte por WhatsApp"
+            width={1080}
+            height={1080}
+            loading="lazy"
+            className="mt-4 w-full rounded-[16px]"
+          />
+        </section>
+
+        {/* DIFERENCIACIÓN */}
+        <section className="mt-12">
+          <h2 className="font-display text-[26px] font-extrabold leading-tight">
+            Por qué ORÍGEN no se parece a lo que ya probaste
+          </h2>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            {[
+              ["Otras apps te dan frases", "ORÍGEN te dice qué se repite en tu línea familiar y por dónde entró"],
+              ["Los cursos te dejan solo", "Aquí tienes una mentora que recuerda tu historia todos los días"],
+              ["Los libros informan", "Aquí haces un ejercicio concreto de 5 a 10 minutos cada día"],
+              ["Los retos duran una semana", "Tu camino tiene 365 días y tu progreso queda guardado"],
+            ].map(([antes, despues]) => (
+              <div key={antes} className="rounded-[16px] border border-border bg-card p-4 shadow-soft">
+                <p className="text-[13px] font-semibold leading-snug text-muted-foreground line-through decoration-1">
+                  {antes}
+                </p>
+                <p className="mt-2 flex items-start gap-2.5 text-[14px] font-semibold leading-snug">
+                  <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-primary/12 text-primary">
+                    <Check className="h-3 w-3" />
+                  </span>
+                  <span className="min-w-0">{despues}</span>
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+
         {/* OFERTA / MINI CHECKOUT */}
+
         <section id="oferta" className="mt-12">
           <div className="rounded-[16px] border-2 border-primary bg-card p-5 shadow-elev">
             <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">

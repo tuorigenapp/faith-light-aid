@@ -13,7 +13,7 @@ import dailyImg from "@/assets/daily-devotional.jpg";
 import { ArrowRight, CheckCircle2, Heart } from "lucide-react";
 
 export const Route = createFileRoute("/auth")({
-  head: () => ({ meta: [{ title: "Iniciar sesión — Reconectando" }] }),
+  head: () => ({ meta: [{ title: "Entrar a ORÍGEN — tu camino de sanación" }] }),
   component: AuthPage,
 });
 
@@ -92,7 +92,7 @@ function AuthPage() {
         <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/35 to-transparent" />
         <div className="relative z-10 p-12 h-full flex flex-col justify-between text-primary-foreground">
           <Link to="/" className="flex items-center gap-3 font-display font-bold text-xl">
-            <img src="/app-icon.png" alt="" width={42} height={42} className="rounded-2xl" /> Reconectando
+            <img src="/app-icon.png" alt="" width={42} height={42} className="rounded-2xl" /> ORÍGEN
           </Link>
           <div className="max-w-md">
             <div className="rounded-[2rem] bg-background/14 backdrop-blur-xl border border-primary-foreground/20 p-6">
@@ -107,7 +107,7 @@ function AuthPage() {
         <div className="w-full max-w-md app-card p-5 sm:p-7">
           <Link to="/" className="lg:hidden flex items-center gap-2 mb-6">
             <img src="/app-icon.png" alt="" width={34} height={34} className="rounded-xl" />
-            <span className="font-display font-bold">Reconectando</span>
+            <span className="font-display font-bold">ORÍGEN</span>
           </Link>
           <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 text-primary px-3 py-1 text-xs font-bold"><Heart className="w-3.5 h-3.5" /> Espacio seguro</div>
           <h1 className="font-display font-extrabold text-4xl text-foreground mt-4">Bienvenido</h1>
