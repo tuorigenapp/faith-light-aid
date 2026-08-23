@@ -45,6 +45,7 @@ import { Route as AuthenticatedCategoriasRouteImport } from './routes/_authentic
 import { Route as AuthenticatedBibliotecaRouteImport } from './routes/_authenticated/biblioteca'
 import { Route as AuthenticatedArbolRouteImport } from './routes/_authenticated/arbol'
 import { Route as ApiPublicVapidKeyRouteImport } from './routes/api/public/vapid-key'
+import { Route as ApiPublicPushDailyRouteImport } from './routes/api/public/push-daily'
 import { Route as ApiPublicPushBroadcastRouteImport } from './routes/api/public/push-broadcast'
 import { Route as AuthenticatedVisualizaLimpiezaRouteImport } from './routes/_authenticated/visualiza.limpieza'
 import { Route as AuthenticatedVisualizaIdentidadRouteImport } from './routes/_authenticated/visualiza.identidad'
@@ -240,6 +241,11 @@ const ApiPublicVapidKeyRoute = ApiPublicVapidKeyRouteImport.update({
   path: '/api/public/vapid-key',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicPushDailyRoute = ApiPublicPushDailyRouteImport.update({
+  id: '/api/public/push-daily',
+  path: '/api/public/push-daily',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicPushBroadcastRoute = ApiPublicPushBroadcastRouteImport.update({
   id: '/api/public/push-broadcast',
   path: '/api/public/push-broadcast',
@@ -359,6 +365,7 @@ export interface FileRoutesByFullPath {
   '/visualiza/identidad': typeof AuthenticatedVisualizaIdentidadRoute
   '/visualiza/limpieza': typeof AuthenticatedVisualizaLimpiezaRoute
   '/api/public/push-broadcast': typeof ApiPublicPushBroadcastRoute
+  '/api/public/push-daily': typeof ApiPublicPushDailyRoute
   '/api/public/vapid-key': typeof ApiPublicVapidKeyRoute
   '/caminos/$caminoId/$day': typeof AuthenticatedCaminosCaminoIdDayRoute
   '/visualiza/$categoryId/$day': typeof AuthenticatedVisualizaCategoryIdDayRoute
@@ -408,6 +415,7 @@ export interface FileRoutesByTo {
   '/visualiza/identidad': typeof AuthenticatedVisualizaIdentidadRoute
   '/visualiza/limpieza': typeof AuthenticatedVisualizaLimpiezaRoute
   '/api/public/push-broadcast': typeof ApiPublicPushBroadcastRoute
+  '/api/public/push-daily': typeof ApiPublicPushDailyRoute
   '/api/public/vapid-key': typeof ApiPublicVapidKeyRoute
   '/caminos/$caminoId/$day': typeof AuthenticatedCaminosCaminoIdDayRoute
   '/visualiza/$categoryId/$day': typeof AuthenticatedVisualizaCategoryIdDayRoute
@@ -460,6 +468,7 @@ export interface FileRoutesById {
   '/_authenticated/visualiza/identidad': typeof AuthenticatedVisualizaIdentidadRoute
   '/_authenticated/visualiza/limpieza': typeof AuthenticatedVisualizaLimpiezaRoute
   '/api/public/push-broadcast': typeof ApiPublicPushBroadcastRoute
+  '/api/public/push-daily': typeof ApiPublicPushDailyRoute
   '/api/public/vapid-key': typeof ApiPublicVapidKeyRoute
   '/_authenticated/caminos/$caminoId/$day': typeof AuthenticatedCaminosCaminoIdDayRoute
   '/_authenticated/visualiza/$categoryId/$day': typeof AuthenticatedVisualizaCategoryIdDayRoute
@@ -512,6 +521,7 @@ export interface FileRouteTypes {
     | '/visualiza/identidad'
     | '/visualiza/limpieza'
     | '/api/public/push-broadcast'
+    | '/api/public/push-daily'
     | '/api/public/vapid-key'
     | '/caminos/$caminoId/$day'
     | '/visualiza/$categoryId/$day'
@@ -561,6 +571,7 @@ export interface FileRouteTypes {
     | '/visualiza/identidad'
     | '/visualiza/limpieza'
     | '/api/public/push-broadcast'
+    | '/api/public/push-daily'
     | '/api/public/vapid-key'
     | '/caminos/$caminoId/$day'
     | '/visualiza/$categoryId/$day'
@@ -612,6 +623,7 @@ export interface FileRouteTypes {
     | '/_authenticated/visualiza/identidad'
     | '/_authenticated/visualiza/limpieza'
     | '/api/public/push-broadcast'
+    | '/api/public/push-daily'
     | '/api/public/vapid-key'
     | '/_authenticated/caminos/$caminoId/$day'
     | '/_authenticated/visualiza/$categoryId/$day'
@@ -636,6 +648,7 @@ export interface RootRouteChildren {
   ApiPatronesRoute: typeof ApiPatronesRoute
   ApiStagePackRoute: typeof ApiStagePackRoute
   ApiPublicPushBroadcastRoute: typeof ApiPublicPushBroadcastRoute
+  ApiPublicPushDailyRoute: typeof ApiPublicPushDailyRoute
   ApiPublicVapidKeyRoute: typeof ApiPublicVapidKeyRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -895,6 +908,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicVapidKeyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/push-daily': {
+      id: '/api/public/push-daily'
+      path: '/api/public/push-daily'
+      fullPath: '/api/public/push-daily'
+      preLoaderRoute: typeof ApiPublicPushDailyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/push-broadcast': {
       id: '/api/public/push-broadcast'
       path: '/api/public/push-broadcast'
@@ -1125,6 +1145,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPatronesRoute: ApiPatronesRoute,
   ApiStagePackRoute: ApiStagePackRoute,
   ApiPublicPushBroadcastRoute: ApiPublicPushBroadcastRoute,
+  ApiPublicPushDailyRoute: ApiPublicPushDailyRoute,
   ApiPublicVapidKeyRoute: ApiPublicVapidKeyRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
