@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { BooksManager } from "@/components/admin/BooksManager";
 import { AudiosManager } from "@/components/admin/AudiosManager";
+import { UsersManager } from "@/components/admin/UsersManager";
 import { AreaChart, Area, ResponsiveContainer, BarChart, Bar, XAxis, Tooltip } from "recharts";
 
 export const Route = createFileRoute("/admin")({
@@ -395,27 +396,7 @@ function Admin() {
           </>
         )}
 
-        {data && section === "usuarios" && (
-          <Card className="mt-5">
-            <CardTitle icon={Users}>Personas registradas ({data.users.length})</CardTitle>
-            {data.users.length === 0 ? (
-              <Empty>Sin datos de usuarios.</Empty>
-            ) : (
-              <Table
-                head={["Nombre", "Correo", "País", "Hojas", "Registro"]}
-                rows={data.users
-                  .slice(0, 60)
-                  .map((u) => [
-                    u.display_name || u.full_name || "Sin datos",
-                    u.email || "Sin datos",
-                    u.country || "Sin datos",
-                    String(Math.floor((u.gems ?? 0) / 100)),
-                    new Date(u.created_at).toLocaleDateString("es"),
-                  ])}
-              />
-            )}
-          </Card>
-        )}
+        {section === "usuarios" && <div className="mt-5"><UsersManager /></div>}
 
         {data && section === "uso" && (
           <>
