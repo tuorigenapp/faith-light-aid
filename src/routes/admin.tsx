@@ -33,7 +33,7 @@ function AdminGate() {
       .eq("role", "admin")
       .maybeSingle();
     setState(data ? "ok" : "login");
-    if (!data) setError("Esta cuenta no tiene permisos de administracion.");
+    if (!data) setError("Esta cuenta no tiene permisos de administración.");
   }
 
   useEffect(() => {
@@ -48,7 +48,7 @@ function AdminGate() {
     const { error: err } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
     if (err) {
       setBusy(false);
-      setError("Correo o contrasena incorrectos.");
+      setError("Correo o contraseña incorrectos.");
       return;
     }
     await check();
@@ -73,7 +73,7 @@ function AdminGate() {
           <span className="grid h-11 w-11 place-items-center rounded-[12px] bg-primary text-primary-foreground">
             <ShieldCheck className="h-5 w-5" />
           </span>
-          <h1 className="mt-4 font-display text-[24px] font-extrabold leading-tight">Administracion ORIGEN</h1>
+          <h1 className="mt-4 font-display text-[24px] font-extrabold leading-tight">Administración ORÍGEN</h1>
           <p className="mt-1 text-[13px] opacity-70">Acceso solo para el equipo.</p>
 
           <label className="mt-5 block text-[12px] font-bold opacity-80" htmlFor="admin-email">Correo</label>
@@ -87,7 +87,7 @@ function AdminGate() {
             autoComplete="email"
           />
 
-          <label className="mt-4 block text-[12px] font-bold opacity-80" htmlFor="admin-pass">Contrasena</label>
+          <label className="mt-4 block text-[12px] font-bold opacity-80" htmlFor="admin-pass">Contraseña</label>
           <input
             id="admin-pass"
             type="password"
