@@ -311,6 +311,10 @@ function AuthLayout() {
         {/* Floating chat with Ruth Esther */}
         <FloatingChatFab />
         <FloatingHelp />
+        <LiveActivityToasts />
+        <SatisfactionPulse />
+        <MotivationalReminders />
+
 
         {/* Mobile bottom nav — con botón central O */}
         <nav
