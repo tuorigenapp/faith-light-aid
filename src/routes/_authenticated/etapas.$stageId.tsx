@@ -11,7 +11,6 @@ import { ArrowRight, Check, Lock, X, Leaf, RefreshCw, Sparkles, Flame, PenLine, 
 import { useState, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { videoForStage } from "@/lib/stage-videos";
 import { WordSearch } from "@/components/WordSearch";
 import { getStageContent, getSolutionSteps, getStageTasks } from "@/lib/stage-content";
 import { awardLeaf, ACTION_POINTS, type ActionLevel } from "@/lib/gems";
@@ -360,7 +359,7 @@ function Step1({ stage, position, onNext }: { stage: any; position: number; onNe
             className="grid h-[180px] w-full place-items-center rounded-[12px] bg-primary/10 text-center text-[14px] font-bold text-primary"
           >
             Ver videos guía sobre “{stage.title}” en YouTube
-          </a/>
+          </a>
         </div>
       </div>
 
