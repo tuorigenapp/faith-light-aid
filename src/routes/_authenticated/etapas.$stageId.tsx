@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ArrowRight, Check, Lock, X, Leaf, RefreshCw, Sparkles, Flame, PenLine, HandHeart, ListChecks, Loader2 } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { saveStageReward } from "@/lib/rewards.functions";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { WordSearch } from "@/components/WordSearch";
@@ -66,6 +68,7 @@ function StageFlow() {
   const [openSteps, setOpenSteps] = useState<number[]>([]);
   const [earned, setEarned] = useState(0);
   const started = useMemo(() => Date.now(), []);
+  const grantStageReward = useServerFn(saveStageReward);
 
   const { data } = useQuery({
     queryKey: ["stage", id, user?.id],
@@ -175,13 +178,14 @@ function StageFlow() {
 
   async function saveReward() {
     if (!user) return;
-    await supabase.from("stage_rewards").upsert({
-      user_id: user.id,
-      stage_id: id,
-      xp: STAGE_XP,
-      leaves: Math.max(earned, 0),
-      insignia: insigniaFor(stage.title, position),
-    }, { onConflict: "user_id,stage_id" });
+    await grantStageReward({
+      data: {
+        stageId: id,
+        xp: STAGE_XP,
+        leaves: Math.min(Math.max(earned, 0), 100),
+        insignia: insigniaFor(stage.title, position),
+      },
+    });
     qc.invalidateQueries({ queryKey: ["stage-rewards"] });
     qc.invalidateQueries({ queryKey: ["etapas"] });
     qc.invalidateQueries({ queryKey: ["perfil"] });

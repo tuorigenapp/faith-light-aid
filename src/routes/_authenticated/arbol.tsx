@@ -18,6 +18,8 @@ import hojasTree from "@/assets/hojas-tree.png";
 import { HOJA_USES } from "@/lib/hojas";
 import { formatHojas, wholeHojas, LEAF_RULES_TEXT, awardGems as spendGems, getLeafDayProgress } from "@/lib/gems";
 import { Leaf, Send, Clock as ClockIcon, Mail as MailIcon } from "lucide-react";
+import { createHojaTransfer } from "@/lib/rewards.functions";
+import { useServerFn } from "@tanstack/react-start";
 
 
 export const Route = createFileRoute("/_authenticated/arbol")({
@@ -612,6 +614,7 @@ function TransferSection({ gems }: { gems: number }) {
   const [amount, setAmount] = useState<string>("");
   const [sending, setSending] = useState(false);
   const max = wholeHojas(gems);
+  const sendTransfer = useServerFn(createHojaTransfer);
 
   const { data: transfers = [], isLoading: loadingHist, isError: histError } = useQuery({
     queryKey: ["hoja_transfers", user?.id],
@@ -639,16 +642,11 @@ function TransferSection({ gems }: { gems: number }) {
 
     setSending(true);
     try {
-      const points = qty * 100;
-      const { error } = await supabase.from("hoja_transfers").insert({
-        user_id: user.id,
-        to_email: emailTrim,
-        points,
-        status: "pending",
-        note: `Transferencia a ${emailTrim}`,
-      });
-      if (error) throw error;
-      await spendGems(-points, `Transferencia a ${emailTrim}`);
+      const res = await sendTransfer({ data: { toEmail: emailTrim, hojas: qty } });
+      if (!res.ok) {
+        toast.error(res.message);
+        return;
+      }
       qc.invalidateQueries({ queryKey: ["hoja_transfers"] });
       qc.invalidateQueries({ queryKey: ["profile-arbol"] });
       qc.invalidateQueries({ queryKey: ["profile"] });
