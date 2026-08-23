@@ -175,13 +175,14 @@ function StageFlow() {
 
   async function saveReward() {
     if (!user) return;
-    await supabase.from("stage_rewards").upsert({
-      user_id: user.id,
-      stage_id: id,
-      xp: STAGE_XP,
-      leaves: Math.max(earned, 0),
-      insignia: insigniaFor(stage.title, position),
-    }, { onConflict: "user_id,stage_id" });
+    await grantStageReward({
+      data: {
+        stageId: id,
+        xp: STAGE_XP,
+        leaves: Math.min(Math.max(earned, 0), 100),
+        insignia: insigniaFor(stage.title, position),
+      },
+    });
     qc.invalidateQueries({ queryKey: ["stage-rewards"] });
     qc.invalidateQueries({ queryKey: ["etapas"] });
     qc.invalidateQueries({ queryKey: ["perfil"] });
