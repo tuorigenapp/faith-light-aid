@@ -127,28 +127,15 @@ function AuthPage() {
             <div className="flex-1 h-px bg-border" /> O CON CORREO <div className="flex-1 h-px bg-border" />
           </div>
 
-          <Tabs defaultValue="signup">
-            <TabsList className="grid grid-cols-2 w-full rounded-full p-1 h-12 bg-muted">
-              <TabsTrigger value="signin">Iniciar sesión</TabsTrigger>
-              <TabsTrigger value="signup">Crear cuenta</TabsTrigger>
-            </TabsList>
-            <TabsContent value="signin">
-              <form onSubmit={signIn} className="space-y-4 mt-4">
-                <div><Label>Correo</Label><Input type="email" required value={email} onChange={e => setEmail(e.target.value)} /></div>
-                <div><Label>Contraseña</Label><Input type="password" required value={password} onChange={e => setPassword(e.target.value)} /></div>
-                <Button disabled={loading} type="submit" className="w-full h-12 rounded-full bg-primary">Entrar <ArrowRight className="ml-2 w-4 h-4" /></Button>
-              </form>
-            </TabsContent>
-            <TabsContent value="signup">
-              <form onSubmit={signUp} className="space-y-4 mt-4">
-                <div><Label>Nombre completo</Label><Input required value={fullName} onChange={e => setFullName(e.target.value)} /></div>
-                <div><Label>Correo</Label><Input type="email" required value={email} onChange={e => setEmail(e.target.value)} /></div>
-                <div><Label>Contraseña</Label><Input type="password" required minLength={6} value={password} onChange={e => setPassword(e.target.value)} /></div>
-                <Button disabled={loading} type="submit" className="w-full h-12 rounded-full bg-primary">Crear cuenta gratis <CheckCircle2 className="ml-2 w-4 h-4" /></Button>
-                <p className="text-[11px] text-muted-foreground text-center">Al crear tu cuenta aceptas nuestro acompañamiento espiritual. Esta herramienta no reemplaza ayuda profesional.</p>
-              </form>
-            </TabsContent>
-          </Tabs>
+          <form onSubmit={signIn} className="space-y-4">
+            <div><Label>Correo</Label><Input type="email" required value={email} onChange={e => setEmail(e.target.value)} /></div>
+            <div><Label>Contraseña</Label><Input type="password" required value={password} onChange={e => setPassword(e.target.value)} /></div>
+            <Button disabled={loading} type="submit" className="w-full h-[52px] rounded-full bg-primary text-[16px] font-semibold">Entrar <ArrowRight className="ml-2 w-4 h-4" /></Button>
+          </form>
+          <p className="mt-4 text-center text-[13px] text-muted-foreground">
+            ¿Aún no tienes cuenta?{" "}
+            <Link to="/" className="font-bold text-primary">Empieza tu camino aquí</Link>
+          </p>
         </div>
       </div>
     </div>
