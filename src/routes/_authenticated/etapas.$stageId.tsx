@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ArrowRight, Check, Lock, X, Leaf, RefreshCw, Sparkles, Flame, PenLine, HandHeart, ListChecks, Loader2 } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { saveStageReward } from "@/lib/rewards.functions";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { WordSearch } from "@/components/WordSearch";
@@ -66,6 +68,7 @@ function StageFlow() {
   const [openSteps, setOpenSteps] = useState<number[]>([]);
   const [earned, setEarned] = useState(0);
   const started = useMemo(() => Date.now(), []);
+  const grantStageReward = useServerFn(saveStageReward);
 
   const { data } = useQuery({
     queryKey: ["stage", id, user?.id],
