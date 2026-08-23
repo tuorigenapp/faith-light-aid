@@ -1,6 +1,6 @@
-import { Check, Lock, Star } from "lucide-react";
+import { Check, Leaf, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
-import mascota from "@/assets/e3d-heartgem.png";
+import mascota from "@/assets/mascota-arbol.png";
 
 export type PathNode = {
   key: string;
@@ -59,7 +59,7 @@ export function DuolingoPath({
                 {isDone ? (
                   <Check className="h-8 w-8" strokeWidth={3} />
                 ) : isActive ? (
-                  <Star className="h-8 w-8 fill-white" strokeWidth={2} />
+                  <Leaf className="h-8 w-8 fill-white/25" strokeWidth={2.2} />
                 ) : (
                   <Lock className="h-6 w-6" />
                 )}
