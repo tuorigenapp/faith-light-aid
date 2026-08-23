@@ -45,6 +45,7 @@ import { Route as AuthenticatedCategoriasRouteImport } from './routes/_authentic
 import { Route as AuthenticatedBibliotecaRouteImport } from './routes/_authenticated/biblioteca'
 import { Route as AuthenticatedArbolRouteImport } from './routes/_authenticated/arbol'
 import { Route as ApiPublicVapidKeyRouteImport } from './routes/api/public/vapid-key'
+import { Route as ApiPublicPushBroadcastRouteImport } from './routes/api/public/push-broadcast'
 import { Route as AuthenticatedVisualizaLimpiezaRouteImport } from './routes/_authenticated/visualiza.limpieza'
 import { Route as AuthenticatedVisualizaIdentidadRouteImport } from './routes/_authenticated/visualiza.identidad'
 import { Route as AuthenticatedVisualizaCristoRouteImport } from './routes/_authenticated/visualiza.cristo'
@@ -239,6 +240,11 @@ const ApiPublicVapidKeyRoute = ApiPublicVapidKeyRouteImport.update({
   path: '/api/public/vapid-key',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicPushBroadcastRoute = ApiPublicPushBroadcastRouteImport.update({
+  id: '/api/public/push-broadcast',
+  path: '/api/public/push-broadcast',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedVisualizaLimpiezaRoute =
   AuthenticatedVisualizaLimpiezaRouteImport.update({
     id: '/limpieza',
@@ -352,6 +358,7 @@ export interface FileRoutesByFullPath {
   '/visualiza/cristo': typeof AuthenticatedVisualizaCristoRoute
   '/visualiza/identidad': typeof AuthenticatedVisualizaIdentidadRoute
   '/visualiza/limpieza': typeof AuthenticatedVisualizaLimpiezaRoute
+  '/api/public/push-broadcast': typeof ApiPublicPushBroadcastRoute
   '/api/public/vapid-key': typeof ApiPublicVapidKeyRoute
   '/caminos/$caminoId/$day': typeof AuthenticatedCaminosCaminoIdDayRoute
   '/visualiza/$categoryId/$day': typeof AuthenticatedVisualizaCategoryIdDayRoute
@@ -400,6 +407,7 @@ export interface FileRoutesByTo {
   '/visualiza/cristo': typeof AuthenticatedVisualizaCristoRoute
   '/visualiza/identidad': typeof AuthenticatedVisualizaIdentidadRoute
   '/visualiza/limpieza': typeof AuthenticatedVisualizaLimpiezaRoute
+  '/api/public/push-broadcast': typeof ApiPublicPushBroadcastRoute
   '/api/public/vapid-key': typeof ApiPublicVapidKeyRoute
   '/caminos/$caminoId/$day': typeof AuthenticatedCaminosCaminoIdDayRoute
   '/visualiza/$categoryId/$day': typeof AuthenticatedVisualizaCategoryIdDayRoute
@@ -451,6 +459,7 @@ export interface FileRoutesById {
   '/_authenticated/visualiza/cristo': typeof AuthenticatedVisualizaCristoRoute
   '/_authenticated/visualiza/identidad': typeof AuthenticatedVisualizaIdentidadRoute
   '/_authenticated/visualiza/limpieza': typeof AuthenticatedVisualizaLimpiezaRoute
+  '/api/public/push-broadcast': typeof ApiPublicPushBroadcastRoute
   '/api/public/vapid-key': typeof ApiPublicVapidKeyRoute
   '/_authenticated/caminos/$caminoId/$day': typeof AuthenticatedCaminosCaminoIdDayRoute
   '/_authenticated/visualiza/$categoryId/$day': typeof AuthenticatedVisualizaCategoryIdDayRoute
@@ -502,6 +511,7 @@ export interface FileRouteTypes {
     | '/visualiza/cristo'
     | '/visualiza/identidad'
     | '/visualiza/limpieza'
+    | '/api/public/push-broadcast'
     | '/api/public/vapid-key'
     | '/caminos/$caminoId/$day'
     | '/visualiza/$categoryId/$day'
@@ -550,6 +560,7 @@ export interface FileRouteTypes {
     | '/visualiza/cristo'
     | '/visualiza/identidad'
     | '/visualiza/limpieza'
+    | '/api/public/push-broadcast'
     | '/api/public/vapid-key'
     | '/caminos/$caminoId/$day'
     | '/visualiza/$categoryId/$day'
@@ -600,6 +611,7 @@ export interface FileRouteTypes {
     | '/_authenticated/visualiza/cristo'
     | '/_authenticated/visualiza/identidad'
     | '/_authenticated/visualiza/limpieza'
+    | '/api/public/push-broadcast'
     | '/api/public/vapid-key'
     | '/_authenticated/caminos/$caminoId/$day'
     | '/_authenticated/visualiza/$categoryId/$day'
@@ -623,6 +635,7 @@ export interface RootRouteChildren {
   ApiParejaRoute: typeof ApiParejaRoute
   ApiPatronesRoute: typeof ApiPatronesRoute
   ApiStagePackRoute: typeof ApiStagePackRoute
+  ApiPublicPushBroadcastRoute: typeof ApiPublicPushBroadcastRoute
   ApiPublicVapidKeyRoute: typeof ApiPublicVapidKeyRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -882,6 +895,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicVapidKeyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/push-broadcast': {
+      id: '/api/public/push-broadcast'
+      path: '/api/public/push-broadcast'
+      fullPath: '/api/public/push-broadcast'
+      preLoaderRoute: typeof ApiPublicPushBroadcastRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/visualiza/limpieza': {
       id: '/_authenticated/visualiza/limpieza'
       path: '/limpieza'
@@ -1104,6 +1124,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiParejaRoute: ApiParejaRoute,
   ApiPatronesRoute: ApiPatronesRoute,
   ApiStagePackRoute: ApiStagePackRoute,
+  ApiPublicPushBroadcastRoute: ApiPublicPushBroadcastRoute,
   ApiPublicVapidKeyRoute: ApiPublicVapidKeyRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
