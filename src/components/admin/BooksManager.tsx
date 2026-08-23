@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Library, Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
+import { DownloadCloud, Library, Loader2, Pencil, Plus, Search, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
+import { EBOOKS } from "@/lib/biblioteca";
 
 type Item = {
   id: string;
@@ -14,6 +15,8 @@ type Item = {
   cover_url: string | null;
   resource_url: string | null;
   required_plan: string;
+  slug: string | null;
+  sort_order: number;
 };
 
 const schema = z.object({
@@ -40,13 +43,15 @@ export function BooksManager() {
   const [form, setForm] = useState({ ...EMPTY });
   const [editing, setEditing] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
 
   const { data, isLoading } = useQuery({
     queryKey: ["admin-books"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("library_items")
-        .select("id, title, category, kind, description, cover_url, resource_url, required_plan")
+        .select("id, title, category, kind, description, cover_url, resource_url, required_plan, slug, sort_order")
+        .order("sort_order")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return (data ?? []) as Item[];
@@ -79,6 +84,30 @@ export function BooksManager() {
     onError: (e: Error) => toast.error(e.message || "No pudimos guardar el libro"),
   });
 
+  const importBase = useMutation({
+    mutationFn: async () => {
+      const rows = EBOOKS.map((b, i) => ({
+        slug: b.id,
+        title: b.title,
+        cover_url: b.cover,
+        resource_url: b.files[0] ?? "",
+        category: "Biblioteca ORÍGEN",
+        kind: "ebook",
+        required_plan: "explorador",
+        sort_order: i + 1,
+      }));
+      const { error } = await supabase.from("library_items").upsert(rows, { onConflict: "slug" });
+      if (error) throw error;
+      return rows.length;
+    },
+    onSuccess: (n) => {
+      toast.success(`${n} libros del catálogo base ya son editables aquí.`);
+      void qc.invalidateQueries({ queryKey: ["admin-books"] });
+      void qc.invalidateQueries({ queryKey: ["biblioteca-extra"] });
+    },
+    onError: (e: Error) => toast.error(e.message || "No pudimos importar el catálogo base."),
+  });
+
   const remove = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from("library_items").delete().eq("id", id);
@@ -105,11 +134,14 @@ export function BooksManager() {
     setOpen(true);
   }
 
+  const q = search.trim().toLowerCase();
+  const list = (data ?? []).filter((it) => !q || `${it.title} ${it.category}`.toLowerCase().includes(q));
+
   return (
     <section className="mt-5 rounded-[16px] border border-border/60 bg-card p-5 shadow-soft">
       <div className="flex items-center justify-between gap-3">
         <h2 className="inline-flex items-center gap-2 font-display text-[17px] font-bold">
-          <Library className="h-4.5 w-4.5 text-primary" /> Libros de la biblioteca
+          <Library className="h-4.5 w-4.5 text-primary" /> Libros de la biblioteca ({data?.length ?? 0})
         </h2>
         <button
           onClick={() => {
@@ -121,6 +153,26 @@ export function BooksManager() {
         >
           {open ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
           {open ? "Cerrar" : "Agregar libro"}
+        </button>
+      </div>
+
+      <div className="mt-3 grid gap-2 sm:grid-cols-[1fr_auto]">
+        <label className="flex h-12 items-center gap-2 rounded-[10px] border-[1.5px] border-border bg-background px-3">
+          <Search className="h-4 w-4 text-muted-foreground" />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buscar libro por título o categoría"
+            className="h-full w-full bg-transparent text-[14px] outline-none"
+          />
+        </label>
+        <button
+          onClick={() => importBase.mutate()}
+          disabled={importBase.isPending}
+          className="inline-flex h-12 items-center justify-center gap-2 rounded-[12px] bg-secondary px-4 text-[13px] font-bold disabled:opacity-60"
+        >
+          {importBase.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <DownloadCloud className="h-4 w-4" />}
+          Importar catálogo base ({EBOOKS.length})
         </button>
       </div>
 
@@ -172,14 +224,16 @@ export function BooksManager() {
 
       {isLoading && <div className="mt-4 h-20 animate-pulse rounded-[12px] bg-muted" />}
 
-      {!isLoading && (data?.length ?? 0) === 0 && (
+      {!isLoading && list.length === 0 && (
         <p className="mt-4 rounded-[12px] border border-dashed border-border p-6 text-center text-[13px] text-muted-foreground">
-          Todavía no has publicado libros propios aquí. El catálogo base de 82 libros sigue visible en la app.
+          {q
+            ? "Ningún libro coincide con tu búsqueda."
+            : "Toca “Importar catálogo base” y tendrás los 82 libros aquí para editar, cambiar portada, enlace o borrarlos."}
         </p>
       )}
 
       <ul className="mt-4 space-y-2">
-        {(data ?? []).map((it) => (
+        {list.map((it) => (
           <li key={it.id} className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-[12px] border border-border/60 p-2.5">
             {it.cover_url ? (
               <img src={it.cover_url} alt="" loading="lazy" className="h-14 w-11 rounded-[8px] object-cover" />
