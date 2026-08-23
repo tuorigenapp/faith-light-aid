@@ -89,7 +89,12 @@ function makeLeaf() {
   geo.scale(1, 0.32, 1.5);
   const mesh = new THREE.Mesh(
     geo,
-    new THREE.MeshStandardMaterial({ color: 0x3fbe8f, roughness: 0.5, emissive: 0x0d4d38, emissiveIntensity: 0.25 }),
+    new THREE.MeshStandardMaterial({
+      color: 0x3fbe8f,
+      roughness: 0.5,
+      emissive: 0x0d4d38,
+      emissiveIntensity: 0.25,
+    }),
   );
   mesh.castShadow = true;
   return mesh;
@@ -171,7 +176,11 @@ export function ComeHojas3D({ onWin, level }: { onWin: (gems: number) => void; l
       t.add(trunk);
       const crown = new THREE.Mesh(
         new THREE.IcosahedronGeometry(0.55 + rand() * 0.3, 1),
-        new THREE.MeshStandardMaterial({ color: i % 3 === 0 ? 0x2f9e6d : 0x3fbe8f, roughness: 0.7, flatShading: true }),
+        new THREE.MeshStandardMaterial({
+          color: i % 3 === 0 ? 0x2f9e6d : 0x3fbe8f,
+          roughness: 0.7,
+          flatShading: true,
+        }),
       );
       crown.position.y = 1.25;
       crown.castShadow = true;
@@ -355,7 +364,9 @@ export function ComeHojas3D({ onWin, level }: { onWin: (gems: number) => void; l
         // idle / caminar
         player.position.y = moving ? Math.abs(Math.sin(t * 11)) * 0.08 : Math.sin(t * 2.2) * 0.03;
         player.legs.forEach((leg, i) => {
-          leg.rotation.x = moving ? Math.sin(t * 11 + i * Math.PI) * 0.7 : Math.sin(t * 2 + i) * 0.06;
+          leg.rotation.x = moving
+            ? Math.sin(t * 11 + i * Math.PI) * 0.7
+            : Math.sin(t * 2 + i) * 0.06;
         });
 
         // Recoger hojas
@@ -418,7 +429,9 @@ export function ComeHojas3D({ onWin, level }: { onWin: (gems: number) => void; l
               setRewarded(true);
               onWin(70);
             }
-            setMsg(`¡Completaste las ${ROUNDS_REQUIRED} rondas del desafío de hoy! Tus hojas ya están sumadas.`);
+            setMsg(
+              `¡Completaste las ${ROUNDS_REQUIRED} rondas del desafío de hoy! Tus hojas ya están sumadas.`,
+            );
           } else {
             roundRef.current += 1;
             setRound(roundRef.current);
@@ -478,7 +491,9 @@ export function ComeHojas3D({ onWin, level }: { onWin: (gems: number) => void; l
           <Leaf className="h-3.5 w-3.5" /> {leaves}/{totalLeaves || "—"}
         </span>
         <div className="min-w-0">
-          <p className="text-[10.5px] font-bold uppercase tracking-widest text-muted-foreground">Culpa</p>
+          <p className="text-[10.5px] font-bold uppercase tracking-widest text-muted-foreground">
+            Culpa
+          </p>
           <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-secondary">
             <div
               className="h-full rounded-full bg-[#F58BCB] transition-all duration-200"
@@ -500,7 +515,8 @@ export function ComeHojas3D({ onWin, level }: { onWin: (gems: number) => void; l
       {msg && <p className="mt-2 text-center text-[13.5px] font-bold text-primary">{msg}</p>}
       {!rewarded && (
         <p className="mt-1 text-center text-[12px] text-muted-foreground">
-          Sin límite de tiempo. La recompensa llega al completar las {ROUNDS_REQUIRED} rondas de hoy.
+          Sin límite de tiempo. La recompensa llega al completar las {ROUNDS_REQUIRED} rondas de
+          hoy.
         </p>
       )}
 

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 /** Verifica que quien llama sea administrador real (rol en base de datos). */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function assertAdmin(context: { supabase: any; userId: string }) {
   const { data, error } = await context.supabase.rpc("has_role", {
     _user_id: context.userId,
@@ -20,7 +21,9 @@ export const adminListUsers = createServerFn({ method: "GET" })
     const [profiles, subs, roles, activity] = await Promise.all([
       supabaseAdmin
         .from("profiles")
-        .select("id, full_name, display_name, email, country, gems, consecutive_days, created_at, last_activity_at")
+        .select(
+          "id, full_name, display_name, email, country, gems, consecutive_days, created_at, last_activity_at",
+        )
         .order("created_at", { ascending: false })
         .limit(500),
       supabaseAdmin.from("subscriptions").select("user_id, plan, status, current_period_end"),
@@ -33,9 +36,12 @@ export const adminListUsers = createServerFn({ method: "GET" })
     ]);
 
     const subByUser = new Map((subs.data ?? []).map((s) => [s.user_id, s]));
-    const adminIds = new Set((roles.data ?? []).filter((r) => r.role === "admin").map((r) => r.user_id));
+    const adminIds = new Set(
+      (roles.data ?? []).filter((r) => r.role === "admin").map((r) => r.user_id),
+    );
     const actCount = new Map<string, number>();
-    for (const a of activity.data ?? []) actCount.set(a.user_id, (actCount.get(a.user_id) ?? 0) + 1);
+    for (const a of activity.data ?? [])
+      actCount.set(a.user_id, (actCount.get(a.user_id) ?? 0) + 1);
 
     return (profiles.data ?? []).map((p) => ({
       id: p.id,
@@ -76,7 +82,11 @@ export const adminCreateUser = createServerFn({ method: "POST" })
     let userId = invited.data?.user?.id ?? null;
     if (invited.error) {
       // Ya existía: lo buscamos en profiles para poder asignarle plan.
-      const found = await supabaseAdmin.from("profiles").select("id").eq("email", data.email).maybeSingle();
+      const found = await supabaseAdmin
+        .from("profiles")
+        .select("id")
+        .eq("email", data.email)
+        .maybeSingle();
       if (!found.data) throw new Error(invited.error.message);
       userId = found.data.id;
     }

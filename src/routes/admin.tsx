@@ -4,8 +4,23 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  Users, CreditCard, MessageCircle, BookHeart, Leaf, Sparkles, LayoutDashboard,
-  TrendingUp, AlertTriangle, Library, BookOpen, Star, LogOut, XCircle, Loader2, ShieldCheck, Headphones,
+  Users,
+  CreditCard,
+  MessageCircle,
+  BookHeart,
+  Leaf,
+  Sparkles,
+  LayoutDashboard,
+  TrendingUp,
+  AlertTriangle,
+  Library,
+  BookOpen,
+  Star,
+  LogOut,
+  XCircle,
+  Loader2,
+  ShieldCheck,
+  Headphones,
 } from "lucide-react";
 import { BooksManager } from "@/components/admin/BooksManager";
 import { AudiosManager } from "@/components/admin/AudiosManager";
@@ -41,14 +56,16 @@ function AdminGate() {
 
   useEffect(() => {
     void check();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function signIn(e: FormEvent) {
     e.preventDefault();
     setBusy(true);
     setError(null);
-    const { error: err } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+    const { error: err } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password,
+    });
     if (err) {
       setBusy(false);
       setError("Correo o contraseña incorrectos.");
@@ -76,10 +93,14 @@ function AdminGate() {
           <span className="grid h-11 w-11 place-items-center rounded-[12px] bg-primary text-primary-foreground">
             <ShieldCheck className="h-5 w-5" />
           </span>
-          <h1 className="mt-4 font-display text-[24px] font-extrabold leading-tight">Administración ORÍGEN</h1>
+          <h1 className="mt-4 font-display text-[24px] font-extrabold leading-tight">
+            Administración ORÍGEN
+          </h1>
           <p className="mt-1 text-[13px] opacity-70">Acceso solo para el equipo.</p>
 
-          <label className="mt-5 block text-[12px] font-bold opacity-80" htmlFor="admin-email">Correo</label>
+          <label className="mt-5 block text-[12px] font-bold opacity-80" htmlFor="admin-email">
+            Correo
+          </label>
           <input
             id="admin-email"
             type="email"
@@ -90,7 +111,9 @@ function AdminGate() {
             autoComplete="email"
           />
 
-          <label className="mt-4 block text-[12px] font-bold opacity-80" htmlFor="admin-pass">Contraseña</label>
+          <label className="mt-4 block text-[12px] font-bold opacity-80" htmlFor="admin-pass">
+            Contraseña
+          </label>
           <input
             id="admin-pass"
             type="password"
@@ -118,7 +141,15 @@ function AdminGate() {
   return <Admin />;
 }
 
-type SectionId = "resumen" | "usuarios" | "ventas" | "uso" | "contenido" | "libros" | "audios" | "opiniones";
+type SectionId =
+  | "resumen"
+  | "usuarios"
+  | "ventas"
+  | "uso"
+  | "contenido"
+  | "libros"
+  | "audios"
+  | "opiniones";
 
 const NAV: { id: SectionId; label: string; icon: typeof Users }[] = [
   { id: "resumen", label: "Resumen", icon: LayoutDashboard },
@@ -146,20 +177,55 @@ function Admin() {
     queryKey: ["admin-panel"],
     queryFn: async () => {
       const [
-        profiles, msgs, journal, subs, activity, gems, cancel, ratings,
-        stages, books, palabras, consultas,
+        profiles,
+        msgs,
+        journal,
+        subs,
+        activity,
+        gems,
+        cancel,
+        ratings,
+        stages,
+        books,
+        palabras,
+        consultas,
       ] = await Promise.all([
-        supabase.from("profiles").select("id, full_name, display_name, email, country, current_stage, gems, created_at").order("created_at", { ascending: false }),
+        supabase
+          .from("profiles")
+          .select("id, full_name, display_name, email, country, current_stage, gems, created_at")
+          .order("created_at", { ascending: false }),
         supabase.from("messages").select("id", { count: "exact", head: true }),
         supabase.from("journal_entries").select("id", { count: "exact", head: true }),
-        supabase.from("subscriptions").select("plan, status, created_at, current_period_end, user_id"),
-        supabase.from("daily_activity").select("activity_date, activity_type").order("activity_date", { ascending: false }).limit(2000),
-        supabase.from("gem_transactions").select("amount, reason, created_at").order("created_at", { ascending: false }).limit(500),
-        supabase.from("cancellation_surveys").select("reason, comment, from_plan, created_at").order("created_at", { ascending: false }).limit(100),
-        supabase.from("satisfaction_ratings").select("section, stars, comment, created_at").order("created_at", { ascending: false }).limit(100),
+        supabase
+          .from("subscriptions")
+          .select("plan, status, created_at, current_period_end, user_id"),
+        supabase
+          .from("daily_activity")
+          .select("activity_date, activity_type")
+          .order("activity_date", { ascending: false })
+          .limit(2000),
+        supabase
+          .from("gem_transactions")
+          .select("amount, reason, created_at")
+          .order("created_at", { ascending: false })
+          .limit(500),
+        supabase
+          .from("cancellation_surveys")
+          .select("reason, comment, from_plan, created_at")
+          .order("created_at", { ascending: false })
+          .limit(100),
+        supabase
+          .from("satisfaction_ratings")
+          .select("section, stars, comment, created_at")
+          .order("created_at", { ascending: false })
+          .limit(100),
         supabase.from("stages").select("id, title").order("id"),
         supabase.from("library_items").select("id, title, category, required_plan").limit(200),
-        supabase.from("daily_devotionals").select("id, day_of_year, word").order("day_of_year").limit(400),
+        supabase
+          .from("daily_devotionals")
+          .select("id, day_of_year, word")
+          .order("day_of_year")
+          .limit(400),
         supabase.from("ministracion_lecturas").select("id", { count: "exact", head: true }),
       ]);
 
@@ -167,7 +233,9 @@ function Admin() {
       const subsList = subs.data ?? [];
       const acts = activity.data ?? [];
 
-      const paid = subsList.filter((s) => ["camino", "monthly", "annual"].includes(s.plan) && s.status === "active");
+      const paid = subsList.filter(
+        (s) => ["camino", "monthly", "annual"].includes(s.plan) && s.status === "active",
+      );
       const mrr = paid.reduce((sum, s) => sum + (s.plan === "annual" ? 7.49 : 14.99), 0);
 
       const days = lastDays(14);
@@ -192,7 +260,9 @@ function Admin() {
         .map(([name, value]) => ({ name, value }));
 
       const today = new Date().toISOString().slice(0, 10);
-      const activeToday = new Set(acts.filter((a) => a.activity_date === today).map((a) => a.activity_type)).size;
+      const activeToday = new Set(
+        acts.filter((a) => a.activity_date === today).map((a) => a.activity_type),
+      ).size;
 
       const cancelCounts: Record<string, number> = {};
       (cancel.data ?? []).forEach((c) => {
@@ -266,7 +336,9 @@ function Admin() {
               key={n.id}
               onClick={() => setSection(n.id)}
               className={`flex min-h-11 shrink-0 items-center gap-2 rounded-[10px] px-3 text-left text-sm font-medium transition ${
-                section === n.id ? "bg-primary text-primary-foreground" : "opacity-80 hover:bg-white/10"
+                section === n.id
+                  ? "bg-primary text-primary-foreground"
+                  : "opacity-80 hover:bg-white/10"
               }`}
             >
               <n.icon className="h-4 w-4" /> {n.label}
@@ -306,7 +378,9 @@ function Admin() {
                 <div
                   key={a.title}
                   className={`flex items-start gap-3 rounded-[16px] p-4 ${
-                    a.tone === "warn" ? "bg-amber-500/10 text-amber-700 dark:text-amber-300" : "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+                    a.tone === "warn"
+                      ? "bg-amber-500/10 text-amber-700 dark:text-amber-300"
+                      : "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
                   }`}
                 >
                   <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
@@ -319,10 +393,30 @@ function Admin() {
             </div>
 
             <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              <Metric icon={Users} label="Usuarios" value={data.users.length} series={data.signupSeries} />
-              <Metric icon={CreditCard} label="Suscripciones activas" value={data.paidCount} series={data.signupSeries} />
-              <Metric icon={TrendingUp} label="MRR estimado" value={`US$${data.mrr.toFixed(2)}`} series={data.activeSeries} />
-              <Metric icon={MessageCircle} label="Mensajes con la mentora" value={data.msgs} series={data.activeSeries} />
+              <Metric
+                icon={Users}
+                label="Usuarios"
+                value={data.users.length}
+                series={data.signupSeries}
+              />
+              <Metric
+                icon={CreditCard}
+                label="Suscripciones activas"
+                value={data.paidCount}
+                series={data.signupSeries}
+              />
+              <Metric
+                icon={TrendingUp}
+                label="MRR estimado"
+                value={`US$${data.mrr.toFixed(2)}`}
+                series={data.activeSeries}
+              />
+              <Metric
+                icon={MessageCircle}
+                label="Mensajes con la mentora"
+                value={data.msgs}
+                series={data.activeSeries}
+              />
             </div>
 
             <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -336,19 +430,28 @@ function Admin() {
               <CardTitle icon={Sparkles}>Lectura del negocio</CardTitle>
               <ul className="mt-3 space-y-2 text-sm leading-relaxed text-foreground/85">
                 <li>
-                  <b>{data.users.length}</b> personas registradas y <b>{data.paidCount}</b> con plan activo
+                  <b>{data.users.length}</b> personas registradas y <b>{data.paidCount}</b> con plan
+                  activo
                   {data.users.length > 0 && (
-                    <> ({((data.paidCount / data.users.length) * 100).toFixed(1)} % de conversión).</>
+                    <>
+                      {" "}
+                      ({((data.paidCount / data.users.length) * 100).toFixed(1)} % de conversión).
+                    </>
                   )}
                 </li>
                 <li>
-                  La acción más usada es <b>{data.topActions[0]?.name ?? "sin datos"}</b>: es tu gancho, ponla siempre al
-                  frente en el Home.
+                  La acción más usada es <b>{data.topActions[0]?.name ?? "sin datos"}</b>: es tu
+                  gancho, ponla siempre al frente en el Home.
                 </li>
                 <li>
-                  {data.avgStars
-                    ? <>Satisfacción promedio de <b>{data.avgStars.toFixed(1)} / 5</b> según las opiniones enviadas.</>
-                    : "Aún no hay calificaciones de satisfacción: aparecerán cuando la gente use la Palabra del día."}
+                  {data.avgStars ? (
+                    <>
+                      Satisfacción promedio de <b>{data.avgStars.toFixed(1)} / 5</b> según las
+                      opiniones enviadas.
+                    </>
+                  ) : (
+                    "Aún no hay calificaciones de satisfacción: aparecerán cuando la gente use la Palabra del día."
+                  )}
                 </li>
               </ul>
             </Card>
@@ -372,7 +475,9 @@ function Admin() {
                   rows={data.subsList.map((s) => [
                     s.plan,
                     s.status,
-                    s.current_period_end ? new Date(s.current_period_end).toLocaleDateString("es") : "Sin datos",
+                    s.current_period_end
+                      ? new Date(s.current_period_end).toLocaleDateString("es")
+                      : "Sin datos",
                     new Date(s.created_at).toLocaleDateString("es"),
                   ])}
                 />
@@ -396,7 +501,11 @@ function Admin() {
           </>
         )}
 
-        {section === "usuarios" && <div className="mt-5"><UsersManager /></div>}
+        {section === "usuarios" && (
+          <div className="mt-5">
+            <UsersManager />
+          </div>
+        )}
 
         {data && section === "uso" && (
           <>
@@ -408,7 +517,14 @@ function Admin() {
                 <div className="mt-4 h-56">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={data.topActions}>
-                      <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} angle={-20} textAnchor="end" height={50} />
+                      <XAxis
+                        dataKey="name"
+                        tick={{ fontSize: 11 }}
+                        interval={0}
+                        angle={-20}
+                        textAnchor="end"
+                        height={50}
+                      />
                       <Tooltip />
                       <Bar dataKey="value" radius={[6, 6, 0, 0]} fill="var(--primary)" />
                     </BarChart>
@@ -425,7 +541,11 @@ function Admin() {
                   head={["Motivo", "Puntos", "Fecha"]}
                   rows={data.gems
                     .slice(0, 40)
-                    .map((g) => [g.reason, String(g.amount), new Date(g.created_at).toLocaleDateString("es")])}
+                    .map((g) => [
+                      g.reason,
+                      String(g.amount),
+                      new Date(g.created_at).toLocaleDateString("es"),
+                    ])}
                 />
               )}
             </Card>
@@ -436,13 +556,20 @@ function Admin() {
           <>
             <Card className="mt-5">
               <CardTitle icon={LayoutDashboard}>Etapas del Camino ({data.stages.length})</CardTitle>
-              {data.stages.length === 0 ? <Empty>Sin datos de etapas.</Empty> : (
-                <Table head={["#", "Título"]} rows={data.stages.map((s) => [String(s.id), s.title])} />
+              {data.stages.length === 0 ? (
+                <Empty>Sin datos de etapas.</Empty>
+              ) : (
+                <Table
+                  head={["#", "Título"]}
+                  rows={data.stages.map((s) => [String(s.id), s.title])}
+                />
               )}
             </Card>
             <Card className="mt-4">
               <CardTitle icon={Library}>Biblioteca ({data.books.length})</CardTitle>
-              {data.books.length === 0 ? <Empty>Sin datos de libros en la base.</Empty> : (
+              {data.books.length === 0 ? (
+                <Empty>Sin datos de libros en la base.</Empty>
+              ) : (
                 <Table
                   head={["Título", "Categoría", "Plan"]}
                   rows={data.books.slice(0, 60).map((b) => [b.title, b.category, b.required_plan])}
@@ -450,9 +577,14 @@ function Admin() {
               )}
             </Card>
             <Card className="mt-4">
-              <CardTitle icon={BookOpen}>Palabra del día ({data.palabras.length} cargadas)</CardTitle>
+              <CardTitle icon={BookOpen}>
+                Palabra del día ({data.palabras.length} cargadas)
+              </CardTitle>
               {data.palabras.length === 0 ? (
-                <Empty>Sin datos en la base: la Palabra del día se sirve desde el contenido de la app (365 días).</Empty>
+                <Empty>
+                  Sin datos en la base: la Palabra del día se sirve desde el contenido de la app
+                  (365 días).
+                </Empty>
               ) : (
                 <Table
                   head={["Día del año", "Palabra"]}
@@ -513,7 +645,13 @@ function Admin() {
 /* ---------- piezas de UI ---------- */
 
 function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return <section className={`rounded-[16px] border border-border/60 bg-card p-5 shadow-soft ${className}`}>{children}</section>;
+  return (
+    <section
+      className={`rounded-[16px] border border-border/60 bg-card p-5 shadow-soft ${className}`}
+    >
+      {children}
+    </section>
+  );
 }
 
 function CardTitle({ icon: Icon, children }: { icon: typeof Users; children: React.ReactNode }) {
@@ -546,11 +684,20 @@ function Metric({
         </span>
       </div>
       <p className="mt-3 font-display text-[28px] font-extrabold leading-none">{value}</p>
-      <p className="mt-1 text-[12px] font-medium uppercase tracking-wider text-muted-foreground">{label}</p>
+      <p className="mt-1 text-[12px] font-medium uppercase tracking-wider text-muted-foreground">
+        {label}
+      </p>
       <div className="mt-3 h-12">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={series}>
-            <Area type="monotone" dataKey="value" stroke="var(--primary)" fill="var(--primary)" fillOpacity={0.15} strokeWidth={2} />
+            <Area
+              type="monotone"
+              dataKey="value"
+              stroke="var(--primary)"
+              fill="var(--primary)"
+              fillOpacity={0.15}
+              strokeWidth={2}
+            />
           </AreaChart>
         </ResponsiveContainer>
       </div>
@@ -558,7 +705,15 @@ function Metric({
   );
 }
 
-function Small({ icon: Icon, label, value }: { icon: typeof Users; label: string; value: number | string }) {
+function Small({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: typeof Users;
+  label: string;
+  value: number | string;
+}) {
   return (
     <div className="rounded-[16px] border border-border/60 bg-card p-4 shadow-soft">
       <span className="grid h-9 w-9 place-items-center rounded-[10px] bg-primary/10 text-primary">
@@ -577,7 +732,9 @@ function Table({ head, rows }: { head: string[]; rows: string[][] }) {
         <thead>
           <tr className="text-[11px] uppercase tracking-wider text-muted-foreground">
             {head.map((h) => (
-              <th key={h} className="pb-2 pr-4 font-semibold">{h}</th>
+              <th key={h} className="pb-2 pr-4 font-semibold">
+                {h}
+              </th>
             ))}
           </tr>
         </thead>
@@ -585,7 +742,9 @@ function Table({ head, rows }: { head: string[]; rows: string[][] }) {
           {rows.map((r, i) => (
             <tr key={i}>
               {r.map((c, j) => (
-                <td key={j} className="py-2.5 pr-4 align-top">{c}</td>
+                <td key={j} className="py-2.5 pr-4 align-top">
+                  {c}
+                </td>
               ))}
             </tr>
           ))}
@@ -596,5 +755,9 @@ function Table({ head, rows }: { head: string[]; rows: string[][] }) {
 }
 
 function Empty({ children }: { children: React.ReactNode }) {
-  return <p className="mt-3 rounded-[10px] bg-secondary/60 p-4 text-sm text-muted-foreground">{children}</p>;
+  return (
+    <p className="mt-3 rounded-[10px] bg-secondary/60 p-4 text-sm text-muted-foreground">
+      {children}
+    </p>
+  );
 }

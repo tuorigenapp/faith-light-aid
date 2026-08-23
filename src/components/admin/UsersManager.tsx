@@ -4,7 +4,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Loader2, UserPlus, Trash2, EyeOff, Eye, Users, Crown } from "lucide-react";
-import { adminCreateUser, adminDeleteUser, adminListUsers, adminSetPlan } from "@/lib/admin.functions";
+import {
+  adminCreateUser,
+  adminDeleteUser,
+  adminListUsers,
+  adminSetPlan,
+} from "@/lib/admin.functions";
 
 const EXCLUDED_KEY = "origen_admin_excluded_users";
 const PLAN_LABEL: Record<string, string> = {
@@ -48,9 +53,12 @@ export function UsersManager() {
   });
 
   const create = useMutation({
-    mutationFn: () => createUser({ data: { email: email.trim(), fullName: fullName.trim(), plan } }),
+    mutationFn: () =>
+      createUser({ data: { email: email.trim(), fullName: fullName.trim(), plan } }),
     onSuccess: (r) => {
-      toast.success(r.invited ? "Acceso enviado por correo." : "La cuenta ya existía: se actualizó su plan.");
+      toast.success(
+        r.invited ? "Acceso enviado por correo." : "La cuenta ya existía: se actualizó su plan.",
+      );
       setEmail("");
       setFullName("");
       qc.invalidateQueries({ queryKey: ["admin-users"] });
@@ -132,7 +140,11 @@ export function UsersManager() {
             disabled={create.isPending}
             className="grid h-12 place-items-center rounded-[12px] bg-primary px-5 text-[15px] font-bold text-primary-foreground active:scale-[.98] sm:col-span-3"
           >
-            {create.isPending ? <Loader2 className="h-5 w-5 animate-spin" /> : "Crear acceso y enviar correo"}
+            {create.isPending ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              "Crear acceso y enviar correo"
+            )}
           </button>
         </form>
       </section>
@@ -144,7 +156,10 @@ export function UsersManager() {
           { label: "Con plan Pro activo", value: String(pro), icon: Crown },
           { label: "Activas últimos 7 días", value: String(active7), icon: Eye },
         ].map((k) => (
-          <div key={k.label} className="rounded-[16px] border border-border bg-card p-4 shadow-soft">
+          <div
+            key={k.label}
+            className="rounded-[16px] border border-border bg-card p-4 shadow-soft"
+          >
             <k.icon className="h-4 w-4 text-primary" />
             <p className="mt-2 font-display text-[24px] font-extrabold leading-none">{k.value}</p>
             <p className="mt-1 text-[12px] text-muted-foreground">{k.label}</p>
@@ -181,7 +196,9 @@ export function UsersManager() {
               <thead className="text-[11.5px] uppercase tracking-wide text-muted-foreground">
                 <tr>
                   {["Persona", "Plan", "Hojas", "Racha", "Registro", "Métricas", ""].map((h) => (
-                    <th key={h} className="pb-2 pr-3 font-semibold">{h}</th>
+                    <th key={h} className="pb-2 pr-3 font-semibold">
+                      {h}
+                    </th>
                   ))}
                 </tr>
               </thead>
@@ -192,18 +209,25 @@ export function UsersManager() {
                     <tr key={u.id} className="border-t border-border/70">
                       <td className="py-3 pr-3">
                         <p className="font-semibold">{u.name ?? "Sin datos"}</p>
-                        <p className="text-[12px] text-muted-foreground">{u.email ?? "Sin datos"}</p>
+                        <p className="text-[12px] text-muted-foreground">
+                          {u.email ?? "Sin datos"}
+                        </p>
                       </td>
                       <td className="py-3 pr-3">
                         <select
                           value={u.plan === "camino" || u.plan === "puente" ? u.plan : "explorador"}
                           onChange={(e) =>
-                            changePlan.mutate({ userId: u.id, plan: e.target.value as "explorador" | "puente" | "camino" })
+                            changePlan.mutate({
+                              userId: u.id,
+                              plan: e.target.value as "explorador" | "puente" | "camino",
+                            })
                           }
                           className="h-10 rounded-[10px] border-[1.5px] border-border bg-background px-2 text-[12.5px]"
                         >
                           {Object.entries(PLAN_LABEL).map(([k, v]) => (
-                            <option key={k} value={k}>{v}</option>
+                            <option key={k} value={k}>
+                              {v}
+                            </option>
                           ))}
                         </select>
                       </td>
@@ -215,10 +239,16 @@ export function UsersManager() {
                       <td className="py-3 pr-3">
                         <button
                           onClick={() =>
-                            persist(isExcluded ? excluded.filter((id) => id !== u.id) : [...excluded, u.id])
+                            persist(
+                              isExcluded
+                                ? excluded.filter((id) => id !== u.id)
+                                : [...excluded, u.id],
+                            )
                           }
                           className={`h-10 rounded-full px-3 text-[12px] font-bold ${
-                            isExcluded ? "bg-amber-500/15 text-amber-700 dark:text-amber-300" : "bg-emerald-500/12 text-emerald-700 dark:text-emerald-300"
+                            isExcluded
+                              ? "bg-amber-500/15 text-amber-700 dark:text-amber-300"
+                              : "bg-emerald-500/12 text-emerald-700 dark:text-emerald-300"
                           }`}
                         >
                           {isExcluded ? "Excluida" : "Contada"}
@@ -227,7 +257,11 @@ export function UsersManager() {
                       <td className="py-3">
                         <button
                           onClick={() => {
-                            if (confirm(`¿Eliminar la cuenta de ${u.email ?? u.name}? No se puede deshacer.`))
+                            if (
+                              confirm(
+                                `¿Eliminar la cuenta de ${u.email ?? u.name}? No se puede deshacer.`,
+                              )
+                            )
                               remove.mutate(u.id);
                           }}
                           aria-label="Eliminar cuenta"
