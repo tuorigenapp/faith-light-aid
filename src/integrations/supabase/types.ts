@@ -511,10 +511,13 @@ export type Database = {
           cover_url: string | null
           created_at: string
           description: string | null
+          external_key: string | null
           id: string
           kind: string
           required_plan: string
           resource_url: string | null
+          slug: string | null
+          sort_order: number
           title: string
         }
         Insert: {
@@ -522,10 +525,13 @@ export type Database = {
           cover_url?: string | null
           created_at?: string
           description?: string | null
+          external_key?: string | null
           id?: string
           kind: string
           required_plan?: string
           resource_url?: string | null
+          slug?: string | null
+          sort_order?: number
           title: string
         }
         Update: {
@@ -533,10 +539,13 @@ export type Database = {
           cover_url?: string | null
           created_at?: string
           description?: string | null
+          external_key?: string | null
           id?: string
           kind?: string
           required_plan?: string
           resource_url?: string | null
+          slug?: string | null
+          sort_order?: number
           title?: string
         }
         Relationships: []
@@ -550,8 +559,15 @@ export type Database = {
           created_at: string
           day_index: number
           duration_seconds: number | null
+          exercise: string | null
           id: string
+          is_published: boolean
+          lesson: string | null
+          pdf_url: string | null
+          quiz: Json
           title: string
+          updated_at: string
+          word_game: Json
         }
         Insert: {
           affirmation: string
@@ -561,8 +577,15 @@ export type Database = {
           created_at?: string
           day_index: number
           duration_seconds?: number | null
+          exercise?: string | null
           id?: string
+          is_published?: boolean
+          lesson?: string | null
+          pdf_url?: string | null
+          quiz?: Json
           title: string
+          updated_at?: string
+          word_game?: Json
         }
         Update: {
           affirmation?: string
@@ -572,8 +595,15 @@ export type Database = {
           created_at?: string
           day_index?: number
           duration_seconds?: number | null
+          exercise?: string | null
           id?: string
+          is_published?: boolean
+          lesson?: string | null
+          pdf_url?: string | null
+          quiz?: Json
           title?: string
+          updated_at?: string
+          word_game?: Json
         }
         Relationships: [
           {
@@ -589,38 +619,62 @@ export type Database = {
         Row: {
           affirmation_ya_tengo: string
           color: string | null
+          cover_url: string | null
           created_at: string
+          description: string | null
           gratitude_gracias: string
+          group_key: string
           id: string
           identity_yo_soy: string
+          is_published: boolean
+          pdf_url: string | null
           petition: string
+          program_group: string
+          required_plan: string
           sort_order: number
           subtitle: string | null
           title: string
+          updated_at: string
         }
         Insert: {
           affirmation_ya_tengo: string
           color?: string | null
+          cover_url?: string | null
           created_at?: string
+          description?: string | null
           gratitude_gracias: string
+          group_key?: string
           id: string
           identity_yo_soy: string
+          is_published?: boolean
+          pdf_url?: string | null
           petition: string
+          program_group?: string
+          required_plan?: string
           sort_order?: number
           subtitle?: string | null
           title: string
+          updated_at?: string
         }
         Update: {
           affirmation_ya_tengo?: string
           color?: string | null
+          cover_url?: string | null
           created_at?: string
+          description?: string | null
           gratitude_gracias?: string
+          group_key?: string
           id?: string
           identity_yo_soy?: string
+          is_published?: boolean
+          pdf_url?: string | null
           petition?: string
+          program_group?: string
+          required_plan?: string
           sort_order?: number
           subtitle?: string | null
           title?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -673,6 +727,165 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      marketing_campaigns: {
+        Row: {
+          audience_type: string
+          button_text: string | null
+          button_url: string | null
+          channel: string
+          click_count: number
+          content: string
+          created_at: string
+          created_by: string | null
+          ends_at: string | null
+          id: string
+          image_url: string | null
+          list_id: string | null
+          name: string
+          scheduled_at: string | null
+          sent_count: number
+          status: string
+          subject: string | null
+          updated_at: string
+        }
+        Insert: {
+          audience_type?: string
+          button_text?: string | null
+          button_url?: string | null
+          channel: string
+          click_count?: number
+          content: string
+          created_at?: string
+          created_by?: string | null
+          ends_at?: string | null
+          id?: string
+          image_url?: string | null
+          list_id?: string | null
+          name: string
+          scheduled_at?: string | null
+          sent_count?: number
+          status?: string
+          subject?: string | null
+          updated_at?: string
+        }
+        Update: {
+          audience_type?: string
+          button_text?: string | null
+          button_url?: string | null
+          channel?: string
+          click_count?: number
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          ends_at?: string | null
+          id?: string
+          image_url?: string | null
+          list_id?: string | null
+          name?: string
+          scheduled_at?: string | null
+          sent_count?: number
+          status?: string
+          subject?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_campaigns_list_id_fkey"
+            columns: ["list_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_lists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketing_events: {
+        Row: {
+          campaign_id: string
+          created_at: string
+          event_type: string
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string
+          event_type: string
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string
+          event_type?: string
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_events_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketing_list_members: {
+        Row: {
+          created_at: string
+          list_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          list_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          list_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_list_members_list_id_fkey"
+            columns: ["list_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_lists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketing_lists: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          filter_type: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          filter_type?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          filter_type?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       messages: {
         Row: {
@@ -877,6 +1090,7 @@ export type Database = {
           current_stage: number
           display_name: string | null
           email: string | null
+          excluded_from_metrics: boolean
           full_name: string | null
           gems: number
           id: string
@@ -899,6 +1113,7 @@ export type Database = {
           current_stage?: number
           display_name?: string | null
           email?: string | null
+          excluded_from_metrics?: boolean
           full_name?: string | null
           gems?: number
           id: string
@@ -921,6 +1136,7 @@ export type Database = {
           current_stage?: number
           display_name?: string | null
           email?: string | null
+          excluded_from_metrics?: boolean
           full_name?: string | null
           gems?: number
           id?: string
@@ -1299,7 +1515,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "user"
+      app_role: "admin" | "user" | "marketing" | "soporte"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1427,7 +1643,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user"],
+      app_role: ["admin", "user", "marketing", "soporte"],
     },
   },
 } as const
