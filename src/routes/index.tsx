@@ -39,7 +39,8 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "Camino ORÍGEN — rompe el patrón que se repite" },
       {
         property: "og:description",
-        content: "Diagnóstico de tu patrón familiar, mentora diaria y caminos de 365 días. Empieza gratis hoy.",
+        content:
+          "Diagnóstico de tu patrón familiar, mentora diaria y caminos de 365 días. Empieza gratis hoy.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -135,8 +136,16 @@ function Landing() {
       <header className="sticky top-0 z-40 border-b border-border/70 bg-background/85 backdrop-blur-xl">
         <div className="mx-auto grid max-w-[1100px] grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-2.5">
           <div className="flex min-w-0 items-center gap-2">
-            <img src={logo} alt="ORÍGEN" width={36} height={36} className="h-9 w-9 shrink-0 object-contain" />
-            <span className="truncate font-display text-[15px] font-extrabold tracking-tight">ORÍGEN</span>
+            <img
+              src={logo}
+              alt="ORÍGEN"
+              width={36}
+              height={36}
+              className="h-9 w-9 shrink-0 object-contain"
+            />
+            <span className="truncate font-display text-[15px] font-extrabold tracking-tight">
+              ORÍGEN
+            </span>
           </div>
           <div className="flex shrink-0 items-center gap-2">
             <Link
@@ -159,7 +168,9 @@ function Landing() {
         {/* HERO */}
         <section
           className="relative -mx-4 overflow-hidden px-4 pb-8 pt-7"
-          style={{ background: "radial-gradient(120% 90% at 50% 0%, #EFE7FF 0%, var(--background) 62%)" }}
+          style={{
+            background: "radial-gradient(120% 90% at 50% 0%, #EFE7FF 0%, var(--background) 62%)",
+          }}
         >
           <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-[12px] font-bold text-primary">
             <Sparkles className="h-3.5 w-3.5" /> 7 días de prueba · sin tarjeta para empezar
@@ -168,8 +179,8 @@ function Landing() {
             Descubre en 3 minutos el patrón que se repite en tu historia — y empieza a cerrarlo hoy
           </h1>
           <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-muted-foreground">
-            No es otra app de frases. Es un diagnóstico de tu línea familiar y un paso concreto cada día para que lo
-            que heredaste no siga decidiendo por ti.
+            No es otra app de frases. Es un diagnóstico de tu línea familiar y un paso concreto cada
+            día para que lo que heredaste no siga decidiendo por ti.
           </p>
 
           <img
@@ -186,7 +197,10 @@ function Landing() {
               { icon: Star, label: "4,8 de 5" },
               { icon: Lock, label: "Pago seguro" },
             ].map((b) => (
-              <div key={b.label} className="rounded-[12px] border border-border bg-card px-2 py-2.5 text-center">
+              <div
+                key={b.label}
+                className="rounded-[12px] border border-border bg-card px-2 py-2.5 text-center"
+              >
                 <b.icon className="mx-auto h-4 w-4 text-primary" />
                 <p className="mt-1 text-[11.5px] font-bold leading-tight">{b.label}</p>
               </div>
@@ -212,29 +226,53 @@ function Landing() {
           </h2>
           <div className="mt-4 space-y-3">
             {PAINS.map((p) => (
-              <div key={p.text} className="flex items-start gap-3 rounded-[16px] border border-border bg-card p-4">
-                <img src={p.emoji} alt="" width={48} height={48} className="h-12 w-12 shrink-0 object-contain" />
+              <div
+                key={p.text}
+                className="flex items-start gap-3 rounded-[16px] border border-border bg-card p-4"
+              >
+                <img
+                  src={p.emoji}
+                  alt=""
+                  width={48}
+                  height={48}
+                  className="h-12 w-12 shrink-0 object-contain"
+                />
                 <p className="min-w-0 text-[15px] font-medium leading-snug">{p.text}</p>
               </div>
             ))}
           </div>
           <p className="mt-4 text-[14.5px] leading-relaxed text-muted-foreground">
-            Eso no es falta de voluntad. Es un patrón que aprendiste antes de poder elegirlo — y mientras no se nombra,
-            se hereda.
+            Eso no es falta de voluntad. Es un patrón que aprendiste antes de poder elegirlo — y
+            mientras no se nombra, se hereda.
           </p>
         </section>
 
         {/* MECANISMO */}
         <section className="mt-12">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-primary">El método ORÍGEN</p>
-          <h2 className="mt-1 font-display text-[26px] font-extrabold leading-tight">Tres pasos, cinco minutos al día</h2>
+          <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
+            El método ORÍGEN
+          </p>
+          <h2 className="mt-1 font-display text-[26px] font-extrabold leading-tight">
+            Tres pasos, cinco minutos al día
+          </h2>
           <div className="hairline-brand mt-3" />
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
             {STEPS.map((s) => (
-              <div key={s.title} className="rounded-[16px] border border-border bg-card p-5 shadow-soft">
-                <img src={s.emoji} alt="" width={56} height={56} className="h-14 w-14 object-contain" />
+              <div
+                key={s.title}
+                className="rounded-[16px] border border-border bg-card p-5 shadow-soft"
+              >
+                <img
+                  src={s.emoji}
+                  alt=""
+                  width={56}
+                  height={56}
+                  className="h-14 w-14 object-contain"
+                />
                 <h3 className="mt-3 font-display text-[17px] font-bold leading-tight">{s.title}</h3>
-                <p className="mt-1.5 text-[13.5px] leading-relaxed text-muted-foreground">{s.body}</p>
+                <p className="mt-1.5 text-[13.5px] leading-relaxed text-muted-foreground">
+                  {s.body}
+                </p>
               </div>
             ))}
           </div>
@@ -257,7 +295,9 @@ function Landing() {
 
         {/* TODO EN UN SOLO LUGAR */}
         <section className="mt-12">
-          <h2 className="font-display text-[26px] font-extrabold leading-tight">Todo en un solo lugar</h2>
+          <h2 className="font-display text-[26px] font-extrabold leading-tight">
+            Todo en un solo lugar
+          </h2>
           <p className="mt-2 text-[14.5px] leading-relaxed text-muted-foreground">
             Lo abres en el celular, en la tablet o en la computadora. Tu progreso viaja contigo.
           </p>
@@ -273,7 +313,9 @@ function Landing() {
 
         {/* LO QUE ENCONTRARÁS DENTRO */}
         <section className="mt-12">
-          <h2 className="font-display text-[26px] font-extrabold leading-tight">Todo lo que incluye tu membresía</h2>
+          <h2 className="font-display text-[26px] font-extrabold leading-tight">
+            Todo lo que incluye tu membresía
+          </h2>
           <img
             src={lpIncluye.url}
             alt="Lista de doce beneficios incluidos en la membresía ORÍGEN"
@@ -304,7 +346,9 @@ function Landing() {
 
         {/* TODO LO QUE RECIBES */}
         <section className="mt-12">
-          <h2 className="font-display text-[26px] font-extrabold leading-tight">Todo lo que recibes hoy</h2>
+          <h2 className="font-display text-[26px] font-extrabold leading-tight">
+            Todo lo que recibes hoy
+          </h2>
           <img
             src={lpRecibes.url}
             alt="Paquete completo ORÍGEN: acceso en todos tus dispositivos, audios, diario y soporte por WhatsApp"
@@ -322,12 +366,27 @@ function Landing() {
           </h2>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             {[
-              ["Otras apps te dan frases", "ORÍGEN te dice qué se repite en tu línea familiar y por dónde entró"],
-              ["Los cursos te dejan solo", "Aquí tienes una mentora que recuerda tu historia todos los días"],
-              ["Los libros informan", "Aquí haces un ejercicio concreto de 5 a 10 minutos cada día"],
-              ["Los retos duran una semana", "Tu camino tiene 365 días y tu progreso queda guardado"],
+              [
+                "Otras apps te dan frases",
+                "ORÍGEN te dice qué se repite en tu línea familiar y por dónde entró",
+              ],
+              [
+                "Los cursos te dejan solo",
+                "Aquí tienes una mentora que recuerda tu historia todos los días",
+              ],
+              [
+                "Los libros informan",
+                "Aquí haces un ejercicio concreto de 5 a 10 minutos cada día",
+              ],
+              [
+                "Los retos duran una semana",
+                "Tu camino tiene 365 días y tu progreso queda guardado",
+              ],
             ].map(([antes, despues]) => (
-              <div key={antes} className="rounded-[16px] border border-border bg-card p-4 shadow-soft">
+              <div
+                key={antes}
+                className="rounded-[16px] border border-border bg-card p-4 shadow-soft"
+              >
                 <p className="text-[13px] font-semibold leading-snug text-muted-foreground line-through decoration-1">
                   {antes}
                 </p>
@@ -347,7 +406,9 @@ function Landing() {
         <section id="oferta" className="mt-12">
           <div className="rounded-[16px] border-2 border-primary bg-card p-5 shadow-elev">
             <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
-              <p className="min-w-0 font-display text-[19px] font-extrabold leading-tight">Todo incluido, un solo acceso</p>
+              <p className="min-w-0 font-display text-[19px] font-extrabold leading-tight">
+                Todo incluido, un solo acceso
+              </p>
               <span className="shrink-0 rounded-full bg-primary/10 px-3 py-1 text-[11.5px] font-bold text-primary">
                 6 meses gratis al año
               </span>
@@ -355,7 +416,9 @@ function Landing() {
 
             <div className="mt-4 flex items-end gap-2">
               <span className="font-display text-[40px] font-extrabold leading-none">$5.99</span>
-              <span className="pb-1 text-[13px] font-semibold text-muted-foreground">USD / mes en el plan anual</span>
+              <span className="pb-1 text-[13px] font-semibold text-muted-foreground">
+                USD / mes en el plan anual
+              </span>
             </div>
             <p className="mt-1 text-[12.5px] text-muted-foreground">
               O 14,99 USD al mes. Empiezas con 7 días gratis en cualquiera de los dos.
@@ -400,10 +463,12 @@ function Landing() {
             <ShieldCheck className="h-6 w-6" />
           </span>
           <div className="min-w-0">
-            <h3 className="font-display text-[17px] font-bold">Prueba tranquilo: 7 días completos</h3>
+            <h3 className="font-display text-[17px] font-bold">
+              Prueba tranquilo: 7 días completos
+            </h3>
             <p className="mt-1 text-[13.5px] leading-relaxed text-muted-foreground">
-              Entra, haz tu diagnóstico, vive tus primeros días. Si no sientes que algo se movió, cancelas antes del
-              séptimo día y no se cobra nada.
+              Entra, haz tu diagnóstico, vive tus primeros días. Si no sientes que algo se movió,
+              cancelas antes del séptimo día y no se cobra nada.
             </p>
           </div>
         </section>
@@ -412,10 +477,15 @@ function Landing() {
 
         {/* FAQ */}
         <section className="mt-12">
-          <h2 className="font-display text-[26px] font-extrabold leading-tight">Antes de empezar, quizá te preguntas…</h2>
+          <h2 className="font-display text-[26px] font-extrabold leading-tight">
+            Antes de empezar, quizá te preguntas…
+          </h2>
           <div className="mt-4 space-y-2">
             {FAQ.map((f, i) => (
-              <div key={f.q} className="overflow-hidden rounded-[16px] border border-border bg-card">
+              <div
+                key={f.q}
+                className="overflow-hidden rounded-[16px] border border-border bg-card"
+              >
                 <button
                   onClick={() => setFaq(faq === i ? null : i)}
                   className="grid min-h-[52px] w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 text-left"
@@ -426,7 +496,9 @@ function Landing() {
                   />
                 </button>
                 {faq === i && (
-                  <p className="px-4 pb-4 text-[13.5px] leading-relaxed text-muted-foreground">{f.a}</p>
+                  <p className="px-4 pb-4 text-[13.5px] leading-relaxed text-muted-foreground">
+                    {f.a}
+                  </p>
                 )}
               </div>
             ))}
@@ -434,7 +506,10 @@ function Landing() {
         </section>
 
         {/* CTA FINAL */}
-        <section className="mt-12 rounded-[16px] p-6 text-center" style={{ background: "var(--gradient-brand-soft)" }}>
+        <section
+          className="mt-12 rounded-[16px] p-6 text-center"
+          style={{ background: "var(--gradient-brand-soft)" }}
+        >
           <h2 className="font-display text-[26px] font-extrabold leading-tight">
             Lo que no se sana, se hereda. Hoy puedes cortar la cadena.
           </h2>
@@ -449,21 +524,32 @@ function Landing() {
             Hacer mi diagnóstico gratis <ArrowRight className="ml-2 inline h-4 w-4" />
           </Link>
           <p className="mx-auto mt-4 max-w-lg text-left text-[12.5px] leading-relaxed text-muted-foreground">
-            <strong>P.D.</strong> Si llegaste hasta aquí es porque algo dentro ya sabe qué se repite. No necesitas otro
-            libro: necesitas empezar.
+            <strong>P.D.</strong> Si llegaste hasta aquí es porque algo dentro ya sabe qué se
+            repite. No necesitas otro libro: necesitas empezar.
           </p>
         </section>
 
         {/* FOOTER */}
         <footer className="mt-12 border-t border-border pt-6 text-[12.5px] text-muted-foreground">
           <div className="flex flex-wrap gap-x-4 gap-y-2">
-            <a href="/terminos" className="underline-offset-2 hover:underline">Términos</a>
-            <a href="/privacidad" className="underline-offset-2 hover:underline">Privacidad</a>
-            <a href="/reembolsos" className="underline-offset-2 hover:underline">Reembolsos</a>
-            <a href="/disclaimer-ia" className="underline-offset-2 hover:underline">Uso de IA</a>
+            <a href="/terminos" className="underline-offset-2 hover:underline">
+              Términos
+            </a>
+            <a href="/privacidad" className="underline-offset-2 hover:underline">
+              Privacidad
+            </a>
+            <a href="/reembolsos" className="underline-offset-2 hover:underline">
+              Reembolsos
+            </a>
+            <a href="/disclaimer-ia" className="underline-offset-2 hover:underline">
+              Uso de IA
+            </a>
           </div>
           <p className="mt-3">Soporte: infodenegociorm@gmail.com</p>
-          <p className="mt-1">© {new Date().getFullYear()} ORÍGEN. Acompañamiento espiritual, no sustituye atención médica o psicológica.</p>
+          <p className="mt-1">
+            © {new Date().getFullYear()} ORÍGEN. Acompañamiento espiritual, no sustituye atención
+            médica o psicológica.
+          </p>
         </footer>
       </div>
 
