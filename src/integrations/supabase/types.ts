@@ -1506,6 +1506,10 @@ export type Database = {
         Args: { _amount: number; _meta?: Json; _reason: string }
         Returns: number
       }
+      create_hoja_transfer: {
+        Args: { _hojas: number; _to_email: string }
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
