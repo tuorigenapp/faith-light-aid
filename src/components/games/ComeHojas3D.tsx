@@ -284,7 +284,7 @@ export function ComeHojas3D({ onWin, level }: { onWin: (gems: number) => void; l
         geo,
         new THREE.PointsMaterial({ color: 0x3fbe8f, size: 0.16, transparent: true }),
       );
-      (pts as THREE.Points & { vel: number[] }).vel = vel;
+      (pts as unknown as { vel: number[] }).vel = vel;
       scene.add(pts);
       burstPool.push({ mesh: pts, life: 1 });
     }
@@ -292,8 +292,8 @@ export function ComeHojas3D({ onWin, level }: { onWin: (gems: number) => void; l
     let over = false;
 
     function resize() {
-      const w = el.clientWidth || 320;
-      const h = el.clientHeight || 320;
+      const w = el!.clientWidth || 320;
+      const h = el!.clientHeight || 320;
       renderer.setSize(w, h, false);
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
@@ -432,7 +432,7 @@ export function ComeHojas3D({ onWin, level }: { onWin: (gems: number) => void; l
         const b = burstPool[i]!;
         b.life -= dt * 1.6;
         const p = b.mesh.geometry.getAttribute("position") as THREE.BufferAttribute;
-        const vel = (b.mesh as THREE.Points & { vel: number[] }).vel;
+        const vel = (b.mesh as unknown as { vel: number[] }).vel;
         for (let k = 0; k < p.count; k++) {
           p.setX(k, p.getX(k) + vel[k * 3]! * dt);
           p.setY(k, Math.max(0, p.getY(k) + vel[k * 3 + 1]! * dt - dt * 1.6));
