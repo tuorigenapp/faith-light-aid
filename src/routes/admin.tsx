@@ -5,8 +5,10 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Users, CreditCard, MessageCircle, BookHeart, Leaf, Sparkles, LayoutDashboard,
-  TrendingUp, AlertTriangle, Library, BookOpen, Star, LogOut, XCircle, Loader2, ShieldCheck,
+  TrendingUp, AlertTriangle, Library, BookOpen, Star, LogOut, XCircle, Loader2, ShieldCheck, Headphones,
 } from "lucide-react";
+import { BooksManager } from "@/components/admin/BooksManager";
+import { AudiosManager } from "@/components/admin/AudiosManager";
 import { AreaChart, Area, ResponsiveContainer, BarChart, Bar, XAxis, Tooltip } from "recharts";
 
 export const Route = createFileRoute("/admin")({
@@ -115,7 +117,7 @@ function AdminGate() {
   return <Admin />;
 }
 
-type SectionId = "resumen" | "usuarios" | "ventas" | "uso" | "contenido" | "opiniones";
+type SectionId = "resumen" | "usuarios" | "ventas" | "uso" | "contenido" | "libros" | "audios" | "opiniones";
 
 const NAV: { id: SectionId; label: string; icon: typeof Users }[] = [
   { id: "resumen", label: "Resumen", icon: LayoutDashboard },
@@ -123,6 +125,8 @@ const NAV: { id: SectionId; label: string; icon: typeof Users }[] = [
   { id: "usuarios", label: "Usuarios", icon: Users },
   { id: "uso", label: "Uso de la app", icon: TrendingUp },
   { id: "contenido", label: "Contenido", icon: Library },
+  { id: "libros", label: "Libros", icon: BookOpen },
+  { id: "audios", label: "Música", icon: Headphones },
   { id: "opiniones", label: "Opiniones", icon: Star },
 ];
 
@@ -477,6 +481,10 @@ function Admin() {
             </Card>
           </>
         )}
+
+        {section === "libros" && <BooksManager />}
+
+        {section === "audios" && <AudiosManager />}
 
         {data && section === "opiniones" && (
           <>

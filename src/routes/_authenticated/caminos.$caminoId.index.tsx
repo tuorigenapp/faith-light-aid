@@ -6,6 +6,7 @@ import { useProfile } from "@/hooks/use-profile";
 import { hasHojas, spendHojas, wholeHojas } from "@/lib/gems";
 import { CAMINO_TOTAL_DAYS, WEEK_UNLOCK_COST, getCamino } from "@/lib/caminos";
 import { cn } from "@/lib/utils";
+import { DuolingoPath } from "@/components/DuolingoPath";
 import { toast } from "sonner";
 import { ArrowLeft, Award, Check, Flame, Leaf, Lock, Sparkles } from "lucide-react";
 import paisaje from "@/assets/fondo-mistico.png";
@@ -159,57 +160,26 @@ function CaminoMapa() {
           <p className="mt-2 text-center text-[12.5px] text-white/75">Ya completaste tu etapa de hoy. Vuelve mañana o abre la semana completa.</p>
         )}
 
-        {/* MAPA */}
+        {/* MAPA ESTILO DUOLINGO */}
         <div className="relative mt-6">
-          <div aria-hidden className="absolute left-[27px] top-6 bottom-6 w-[3px] rounded-full bg-gradient-to-b from-[#3FBE8F]/70 via-accent-pink/60 to-white/20" />
-          <ol className="relative space-y-3.5">
-            {camino.etapas.map((e, i) => {
+          <DuolingoPath
+            nodes={camino.etapas.map((e) => {
               const completed = doneDays.has(e.day);
               const unlocked = isUnlocked(e.day);
-              const active = unlocked && !completed;
-              const inner = (
-                <div className={cn("grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3", i % 2 === 0 ? "ml-0" : "ml-6")}>
-                  <span
-                    className={cn(
-                      "relative w-[54px] h-[54px] shrink-0 rounded-full grid place-items-center border-[3px] transition",
-                      completed && "bg-[#3FBE8F] border-white/70 text-white",
-                      active && "bg-gradient-to-br from-accent-pink to-primary border-white text-white",
-                      !unlocked && "bg-primary/35 border-white/25 text-white/70 backdrop-blur",
-                    )}
-                    style={active ? { boxShadow: "0 0 0 8px rgba(245,139,203,0.22), 0 8px 22px rgba(245,139,203,0.45)" } : undefined}
-                  >
-                    {completed ? <Check className="w-7 h-7" /> : active ? (
-                      <img src={heartGem} alt="" aria-hidden width={128} height={128} className="w-8 h-8 object-contain drop-shadow" />
-                    ) : <span className="font-display font-extrabold text-[17px]">{e.day}</span>}
-                  </span>
-                  <div
-                    className={cn(
-                      "min-w-0 rounded-full pl-4 pr-3 py-3 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 transition active:scale-[.98]",
-                      completed && "bg-white/92",
-                      active && "bg-white border-2 border-accent-pink",
-                      !unlocked && "bg-white/12 border border-white/18 backdrop-blur",
-                    )}
-                    style={active ? { boxShadow: "0 4px 14px rgba(245,139,203,0.28)" } : undefined}
-                  >
-                    <span className={cn("truncate font-display font-bold text-[15px]", unlocked ? "text-foreground" : "text-white/80")}>
-                      Día {e.day} · {e.title}
-                    </span>
-                    {active && <span className="shrink-0 rounded-full bg-accent-pink px-2 py-0.5 text-[10px] font-extrabold tracking-wide text-white">HOY</span>}
-                    {!unlocked && <Lock className="w-4 h-4 shrink-0 text-white/70" />}
-                  </div>
-                </div>
-              );
-              return (
-                <li key={e.day} style={{ animation: `fade-in .45s ease-out ${i * 70}ms both` }}>
-                  {unlocked ? (
-                    <Link to="/caminos/$caminoId/$day" params={{ caminoId, day: String(e.day) }} className="block">{inner}</Link>
-                  ) : (
-                    <button onClick={unlockWeek} className="block w-full text-left">{inner}</button>
-                  )}
-                </li>
-              );
+              return {
+                key: String(e.day),
+                label: `Día ${e.day} · ${e.title}`,
+                state: completed ? "completed" : unlocked ? "active" : "locked",
+              } as const;
             })}
-          </ol>
+            onSelect={(node) => {
+              if (node.state === "locked") {
+                void unlockWeek();
+                return;
+              }
+              navigate({ to: "/caminos/$caminoId/$day", params: { caminoId, day: node.key } });
+            }}
+          />
         </div>
 
         {/* Stats */}

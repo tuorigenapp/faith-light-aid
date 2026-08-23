@@ -6,6 +6,8 @@ import { Download, Lock, Search, Sparkles, X } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/biblioteca")({
   head: () => ({
@@ -41,7 +43,27 @@ function Biblioteca() {
   const isPaid = state?.plan === "camino";
   const remaining = state?.remaining ?? 0;
 
-  const filtered = useMemo(() => EBOOKS.filter((b) => matchesQuery(b, query)), [query]);
+  const { data: extraBooks } = useQuery({
+    queryKey: ["biblioteca-extra"],
+    staleTime: 1000 * 60 * 10,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("library_items")
+        .select("id, title, cover_url, resource_url, category")
+        .eq("kind", "ebook")
+        .order("created_at", { ascending: false });
+      return (data ?? []).map((r) => ({
+        id: r.id,
+        title: r.title,
+        cover: r.cover_url ?? "",
+        keywords: `${r.title} ${r.category}`,
+        files: r.resource_url ? [r.resource_url] : [],
+      }));
+    },
+  });
+
+  const allBooks = useMemo(() => [...(extraBooks ?? []), ...EBOOKS], [extraBooks]);
+  const filtered = useMemo(() => allBooks.filter((b) => matchesQuery(b, query)), [allBooks, query]);
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
   const pageItems = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);

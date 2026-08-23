@@ -9,6 +9,7 @@ import { DailyQuiz } from "@/components/DailyQuiz";
 import { DailyExercises } from "@/components/DailyExercises";
 import { CategoriaSlider } from "@/components/CategoriaSlider";
 import { ManifestacionSlider } from "@/components/ManifestacionSlider";
+import { SonidosHome } from "@/components/SonidosHome";
 import { PalabrasHoy } from "@/components/PalabrasHoy";
 import { BibliotecaSlider } from "@/components/BibliotecaSlider";
 import { PrimerosPasos } from "@/components/PrimerosPasos";
@@ -202,6 +203,9 @@ function Dashboard() {
 
         {/* Manifestación con mentor + música + ejercicios */}
         <ManifestacionSlider />
+
+        {/* Buscador de sonidos con reproductor en segundo plano */}
+        <SonidosHome />
 
 
         {/* Reflexión del día */}

@@ -1,7 +1,20 @@
 /** Notificaciones del navegador + recordatorios de inactividad. */
 import { supabase } from "@/integrations/supabase/client";
 
-const VAPID = import.meta.env['VITE_VAPID_PUBLIC_KEY'] as string | undefined;
+let vapidCache: string | null | undefined;
+
+/** La llave pública de push se sirve desde el servidor (dato público). */
+async function getVapidKey(): Promise<string | null> {
+  if (vapidCache !== undefined) return vapidCache;
+  try {
+    const res = await fetch("/api/public/vapid-key");
+    const json = (await res.json()) as { key: string | null };
+    vapidCache = json.key ?? null;
+  } catch {
+    vapidCache = null;
+  }
+  return vapidCache;
+}
 
 export function pushSupported() {
   return typeof window !== "undefined" && "Notification" in window && "serviceWorker" in navigator;
@@ -26,6 +39,7 @@ export async function enablePush(userId: string): Promise<{ ok: boolean; message
   const reg = await navigator.serviceWorker.register("/sw.js");
   await navigator.serviceWorker.ready;
 
+  const VAPID = await getVapidKey();
   if (VAPID) {
     try {
       const sub = await reg.pushManager.subscribe({
