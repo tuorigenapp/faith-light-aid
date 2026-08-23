@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as EstilosRouteImport } from './routes/estilos'
+import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
@@ -22,6 +23,7 @@ import { Route as ApiIntakeClosureRouteImport } from './routes/api/intake-closur
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as ApiCaminoPackRouteImport } from './routes/api/camino-pack'
 import { Route as AuthenticatedVisualizaRouteImport } from './routes/_authenticated/visualiza'
+import { Route as AuthenticatedRuletaRouteImport } from './routes/_authenticated/ruleta'
 import { Route as AuthenticatedPremiosRouteImport } from './routes/_authenticated/premios'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedPatronesRouteImport } from './routes/_authenticated/patrones'
@@ -63,6 +65,11 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
 const EstilosRoute = EstilosRouteImport.update({
   id: '/estilos',
   path: '/estilos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutRoute = CheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -117,6 +124,11 @@ const ApiCaminoPackRoute = ApiCaminoPackRouteImport.update({
 const AuthenticatedVisualizaRoute = AuthenticatedVisualizaRouteImport.update({
   id: '/visualiza',
   path: '/visualiza',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedRuletaRoute = AuthenticatedRuletaRouteImport.update({
+  id: '/ruleta',
+  path: '/ruleta',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedPremiosRoute = AuthenticatedPremiosRouteImport.update({
@@ -295,6 +307,7 @@ const AuthenticatedCaminosCaminoIdDayRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/checkout': typeof CheckoutRoute
   '/estilos': typeof EstilosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRoute
@@ -317,6 +330,7 @@ export interface FileRoutesByFullPath {
   '/patrones': typeof AuthenticatedPatronesRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/premios': typeof AuthenticatedPremiosRoute
+  '/ruleta': typeof AuthenticatedRuletaRoute
   '/visualiza': typeof AuthenticatedVisualizaRouteWithChildren
   '/api/camino-pack': typeof ApiCaminoPackRoute
   '/api/chat': typeof ApiChatRoute
@@ -341,6 +355,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/checkout': typeof CheckoutRoute
   '/estilos': typeof EstilosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRoute
@@ -363,6 +378,7 @@ export interface FileRoutesByTo {
   '/patrones': typeof AuthenticatedPatronesRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/premios': typeof AuthenticatedPremiosRoute
+  '/ruleta': typeof AuthenticatedRuletaRoute
   '/visualiza': typeof AuthenticatedVisualizaRouteWithChildren
   '/api/camino-pack': typeof ApiCaminoPackRoute
   '/api/chat': typeof ApiChatRoute
@@ -388,6 +404,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/checkout': typeof CheckoutRoute
   '/estilos': typeof EstilosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
@@ -410,6 +427,7 @@ export interface FileRoutesById {
   '/_authenticated/patrones': typeof AuthenticatedPatronesRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
   '/_authenticated/premios': typeof AuthenticatedPremiosRoute
+  '/_authenticated/ruleta': typeof AuthenticatedRuletaRoute
   '/_authenticated/visualiza': typeof AuthenticatedVisualizaRouteWithChildren
   '/api/camino-pack': typeof ApiCaminoPackRoute
   '/api/chat': typeof ApiChatRoute
@@ -436,6 +454,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/checkout'
     | '/estilos'
     | '/sitemap.xml'
     | '/admin'
@@ -458,6 +477,7 @@ export interface FileRouteTypes {
     | '/patrones'
     | '/perfil'
     | '/premios'
+    | '/ruleta'
     | '/visualiza'
     | '/api/camino-pack'
     | '/api/chat'
@@ -482,6 +502,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/checkout'
     | '/estilos'
     | '/sitemap.xml'
     | '/admin'
@@ -504,6 +525,7 @@ export interface FileRouteTypes {
     | '/patrones'
     | '/perfil'
     | '/premios'
+    | '/ruleta'
     | '/visualiza'
     | '/api/camino-pack'
     | '/api/chat'
@@ -528,6 +550,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/checkout'
     | '/estilos'
     | '/sitemap.xml'
     | '/_authenticated/admin'
@@ -550,6 +573,7 @@ export interface FileRouteTypes {
     | '/_authenticated/patrones'
     | '/_authenticated/perfil'
     | '/_authenticated/premios'
+    | '/_authenticated/ruleta'
     | '/_authenticated/visualiza'
     | '/api/camino-pack'
     | '/api/chat'
@@ -576,6 +600,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  CheckoutRoute: typeof CheckoutRoute
   EstilosRoute: typeof EstilosRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiCaminoPackRoute: typeof ApiCaminoPackRoute
@@ -603,6 +628,13 @@ declare module '@tanstack/react-router' {
       path: '/estilos'
       fullPath: '/estilos'
       preLoaderRoute: typeof EstilosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout': {
+      id: '/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof CheckoutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -680,6 +712,13 @@ declare module '@tanstack/react-router' {
       path: '/visualiza'
       fullPath: '/visualiza'
       preLoaderRoute: typeof AuthenticatedVisualizaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/ruleta': {
+      id: '/_authenticated/ruleta'
+      path: '/ruleta'
+      fullPath: '/ruleta'
+      preLoaderRoute: typeof AuthenticatedRuletaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/premios': {
@@ -994,6 +1033,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPatronesRoute: typeof AuthenticatedPatronesRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
   AuthenticatedPremiosRoute: typeof AuthenticatedPremiosRoute
+  AuthenticatedRuletaRoute: typeof AuthenticatedRuletaRoute
   AuthenticatedVisualizaRoute: typeof AuthenticatedVisualizaRouteWithChildren
   AuthenticatedCaminosCaminoIdRoute: typeof AuthenticatedCaminosCaminoIdRouteWithChildren
   AuthenticatedProgramasProgramaIdRoute: typeof AuthenticatedProgramasProgramaIdRoute
@@ -1020,6 +1060,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPatronesRoute: AuthenticatedPatronesRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
   AuthenticatedPremiosRoute: AuthenticatedPremiosRoute,
+  AuthenticatedRuletaRoute: AuthenticatedRuletaRoute,
   AuthenticatedVisualizaRoute: AuthenticatedVisualizaRouteWithChildren,
   AuthenticatedCaminosCaminoIdRoute:
     AuthenticatedCaminosCaminoIdRouteWithChildren,
@@ -1033,6 +1074,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  CheckoutRoute: CheckoutRoute,
   EstilosRoute: EstilosRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiCaminoPackRoute: ApiCaminoPackRoute,

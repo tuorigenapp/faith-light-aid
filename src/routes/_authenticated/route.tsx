@@ -14,6 +14,10 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { FloatingChatFab } from "@/components/FloatingChatFab";
 import { FloatingHelp } from "@/components/FloatingHelp";
+import { LiveActivityToasts } from "@/components/LiveActivityToasts";
+import { SatisfactionPulse } from "@/components/SatisfactionPulse";
+import { MotivationalReminders } from "@/components/MotivationalReminders";
+
 import { useSignedUrls } from "@/hooks/use-signed-urls";
 import origenIcon from "@/assets/origen-o-icon.png";
 
@@ -311,6 +315,10 @@ function AuthLayout() {
         {/* Floating chat with Ruth Esther */}
         <FloatingChatFab />
         <FloatingHelp />
+        <LiveActivityToasts />
+        <SatisfactionPulse />
+        <MotivationalReminders />
+
 
         {/* Mobile bottom nav — con botón central O */}
         <nav
