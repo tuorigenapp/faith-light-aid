@@ -461,12 +461,12 @@ export function ComeHojas3D({ onWin, level }: { onWin: (gems: number) => void; l
 
       // Cámara cinematográfica que sigue al jugador
       camTarget.set(
-        player.position.x * 0.55 + Math.sin(t * 0.3) * 0.3,
-        8.6,
-        player.position.z * 0.55 + 10.4,
+        player.position.x * 0.28 + Math.sin(t * 0.3) * 0.25,
+        11.2,
+        player.position.z * 0.28 + 12.4,
       );
       camera.position.lerp(camTarget, Math.min(1, dt * 3));
-      camera.lookAt(player.position.x * 0.4, 0.5, player.position.z * 0.4);
+      camera.lookAt(player.position.x * 0.18, 0.4, player.position.z * 0.18 - 0.6);
 
       renderer.render(scene, camera);
     }
