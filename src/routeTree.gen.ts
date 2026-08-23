@@ -44,6 +44,7 @@ import { Route as AuthenticatedChatRouteImport } from './routes/_authenticated/c
 import { Route as AuthenticatedCategoriasRouteImport } from './routes/_authenticated/categorias'
 import { Route as AuthenticatedBibliotecaRouteImport } from './routes/_authenticated/biblioteca'
 import { Route as AuthenticatedArbolRouteImport } from './routes/_authenticated/arbol'
+import { Route as ApiPublicVapidKeyRouteImport } from './routes/api/public/vapid-key'
 import { Route as AuthenticatedVisualizaLimpiezaRouteImport } from './routes/_authenticated/visualiza.limpieza'
 import { Route as AuthenticatedVisualizaIdentidadRouteImport } from './routes/_authenticated/visualiza.identidad'
 import { Route as AuthenticatedVisualizaCristoRouteImport } from './routes/_authenticated/visualiza.cristo'
@@ -233,6 +234,11 @@ const AuthenticatedArbolRoute = AuthenticatedArbolRouteImport.update({
   path: '/arbol',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiPublicVapidKeyRoute = ApiPublicVapidKeyRouteImport.update({
+  id: '/api/public/vapid-key',
+  path: '/api/public/vapid-key',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedVisualizaLimpiezaRoute =
   AuthenticatedVisualizaLimpiezaRouteImport.update({
     id: '/limpieza',
@@ -346,6 +352,7 @@ export interface FileRoutesByFullPath {
   '/visualiza/cristo': typeof AuthenticatedVisualizaCristoRoute
   '/visualiza/identidad': typeof AuthenticatedVisualizaIdentidadRoute
   '/visualiza/limpieza': typeof AuthenticatedVisualizaLimpiezaRoute
+  '/api/public/vapid-key': typeof ApiPublicVapidKeyRoute
   '/caminos/$caminoId/$day': typeof AuthenticatedCaminosCaminoIdDayRoute
   '/visualiza/$categoryId/$day': typeof AuthenticatedVisualizaCategoryIdDayRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -393,6 +400,7 @@ export interface FileRoutesByTo {
   '/visualiza/cristo': typeof AuthenticatedVisualizaCristoRoute
   '/visualiza/identidad': typeof AuthenticatedVisualizaIdentidadRoute
   '/visualiza/limpieza': typeof AuthenticatedVisualizaLimpiezaRoute
+  '/api/public/vapid-key': typeof ApiPublicVapidKeyRoute
   '/caminos/$caminoId/$day': typeof AuthenticatedCaminosCaminoIdDayRoute
   '/visualiza/$categoryId/$day': typeof AuthenticatedVisualizaCategoryIdDayRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -443,6 +451,7 @@ export interface FileRoutesById {
   '/_authenticated/visualiza/cristo': typeof AuthenticatedVisualizaCristoRoute
   '/_authenticated/visualiza/identidad': typeof AuthenticatedVisualizaIdentidadRoute
   '/_authenticated/visualiza/limpieza': typeof AuthenticatedVisualizaLimpiezaRoute
+  '/api/public/vapid-key': typeof ApiPublicVapidKeyRoute
   '/_authenticated/caminos/$caminoId/$day': typeof AuthenticatedCaminosCaminoIdDayRoute
   '/_authenticated/visualiza/$categoryId/$day': typeof AuthenticatedVisualizaCategoryIdDayRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -493,6 +502,7 @@ export interface FileRouteTypes {
     | '/visualiza/cristo'
     | '/visualiza/identidad'
     | '/visualiza/limpieza'
+    | '/api/public/vapid-key'
     | '/caminos/$caminoId/$day'
     | '/visualiza/$categoryId/$day'
     | '/lovable/email/auth/preview'
@@ -540,6 +550,7 @@ export interface FileRouteTypes {
     | '/visualiza/cristo'
     | '/visualiza/identidad'
     | '/visualiza/limpieza'
+    | '/api/public/vapid-key'
     | '/caminos/$caminoId/$day'
     | '/visualiza/$categoryId/$day'
     | '/lovable/email/auth/preview'
@@ -589,6 +600,7 @@ export interface FileRouteTypes {
     | '/_authenticated/visualiza/cristo'
     | '/_authenticated/visualiza/identidad'
     | '/_authenticated/visualiza/limpieza'
+    | '/api/public/vapid-key'
     | '/_authenticated/caminos/$caminoId/$day'
     | '/_authenticated/visualiza/$categoryId/$day'
     | '/lovable/email/auth/preview'
@@ -611,6 +623,7 @@ export interface RootRouteChildren {
   ApiParejaRoute: typeof ApiParejaRoute
   ApiPatronesRoute: typeof ApiPatronesRoute
   ApiStagePackRoute: typeof ApiStagePackRoute
+  ApiPublicVapidKeyRoute: typeof ApiPublicVapidKeyRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
 }
@@ -862,6 +875,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedArbolRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/vapid-key': {
+      id: '/api/public/vapid-key'
+      path: '/api/public/vapid-key'
+      fullPath: '/api/public/vapid-key'
+      preLoaderRoute: typeof ApiPublicVapidKeyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/visualiza/limpieza': {
       id: '/_authenticated/visualiza/limpieza'
       path: '/limpieza'
@@ -1084,6 +1104,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiParejaRoute: ApiParejaRoute,
   ApiPatronesRoute: ApiPatronesRoute,
   ApiStagePackRoute: ApiStagePackRoute,
+  ApiPublicVapidKeyRoute: ApiPublicVapidKeyRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
 }
