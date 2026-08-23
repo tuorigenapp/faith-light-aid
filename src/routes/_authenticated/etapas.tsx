@@ -1,4 +1,4 @@
-import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { useProfile } from "@/hooks/use-profile";
@@ -13,6 +13,8 @@ import mapaCamino from "@/assets/mapa-camino.png";
 import arbolIsla from "@/assets/hojas-tree.png";
 import portal from "@/assets/onb-portal.png";
 import heartGem from "@/assets/e3d-heartgem.png";
+import { DuolingoPath } from "@/components/DuolingoPath";
+import { toast } from "sonner";
 import { getRecommendedFocuses, orderStages, resolveStageStates } from "@/lib/stage-order";
 
 export const Route = createFileRoute("/_authenticated/etapas")({
@@ -32,6 +34,7 @@ export const Route = createFileRoute("/_authenticated/etapas")({
 function Etapas() {
   const { user } = useAuth();
   const { data: profile } = useProfile();
+  const navigate = useNavigate();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const isDetailRoute = /^\/etapas\/[^/]+$/.test(pathname);
 
@@ -132,70 +135,26 @@ function Etapas() {
           <img src={arbolIsla} alt="" aria-hidden width={512} height={512} loading="lazy" className="pointer-events-none absolute -right-3 -top-2 w-24 opacity-95" />
         </Card>
 
-        {/* MAPA SERPENTEANTE */}
+        {/* MAPA ESTILO DUOLINGO */}
         <div className="relative mt-6">
-          <div aria-hidden className="absolute left-[27px] top-6 bottom-6 w-[3px] rounded-full bg-gradient-to-b from-[#3FBE8F]/70 via-accent-pink/60 to-white/20" />
-          <ol className="relative space-y-3.5">
-            {orderedStages.map((s: any, i: number) => {
+          <DuolingoPath
+            nodes={orderedStages.map((s: any, i: number) => {
               const state = stageStates.get(s.id) ?? "locked-sequential";
-              const completed = state === "completed";
-              const lockedTomorrow = state === "locked-today";
-              const unlocked = state === "open";
-              const active = unlocked;
-              const shift = i % 2 === 0 ? "ml-0" : "ml-6";
-              const inner = (
-                <div className={cn("grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3", shift)}>
-                  <span
-                    className={cn(
-                      "relative w-[54px] h-[54px] shrink-0 rounded-full grid place-items-center border-[3px] transition",
-                      completed && "bg-[#3FBE8F] border-white/70 text-white",
-                      active && "bg-gradient-to-br from-accent-pink to-primary border-white text-white",
-                      !unlocked && "bg-primary/35 border-white/25 text-white/70 backdrop-blur",
-                    )}
-                    style={active ? { boxShadow: "0 0 0 8px rgba(245,139,203,0.22), 0 8px 22px rgba(245,139,203,0.45)" } : undefined}
-                  >
-                    {completed ? (
-                      <Check className="w-7 h-7" />
-                    ) : active ? (
-                      <img src={heartGem} alt="" aria-hidden width={128} height={128} className="w-8 h-8 object-contain drop-shadow" />
-                    ) : lockedTomorrow ? (
-                      <Lock className="w-6 h-6" />
-                    ) : (
-                      <span className="font-display font-extrabold text-[17px]">{i + 1}</span>
-                    )}
-                  </span>
-
-                  <div
-                    className={cn(
-                      "min-w-0 rounded-full pl-4 pr-3 py-3 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 transition active:scale-[.98]",
-                      completed && "bg-white/92",
-                      active && "bg-white border-2 border-accent-pink",
-                      !unlocked && !completed && "bg-white/12 border border-white/18 backdrop-blur",
-                    )}
-                    style={active ? { boxShadow: "0 4px 14px rgba(245,139,203,0.28)" } : undefined}
-                  >
-                    <span className={cn("min-w-0", unlocked || completed ? "text-foreground" : "text-white/80")}>
-                      <span className="block truncate font-display font-bold text-[15px]">{s.title}</span>
-                      {lockedTomorrow && <span className="block text-[11px] font-semibold text-white/75">Se abre a las 12:00 PM</span>}
-                    </span>
-                    {completed && <span className="shrink-0 rounded-full bg-[#3FBE8F]/15 px-2 py-0.5 text-[10px] font-extrabold tracking-wide text-[#2F9A73]">Completada</span>}
-                    {active && <span className="shrink-0 rounded-full bg-accent-pink px-2 py-0.5 text-[10px] font-extrabold tracking-wide text-white">HOY</span>}
-                    {!unlocked && !completed && <Lock className="w-4 h-4 shrink-0 text-white/70" />}
-                  </div>
-                </div>
-              );
-
-              return (
-                <li key={s.id} style={{ animation: `fade-in .45s ease-out ${i * 70}ms both` }}>
-                  {unlocked || completed ? (
-                    <Link to="/etapas/$stageId" params={{ stageId: String(s.id) }} className="block">{inner}</Link>
-                  ) : (
-                    <div aria-disabled className="opacity-95">{inner}</div>
-                  )}
-                </li>
-              );
+              return {
+                key: String(s.id),
+                label: s.title as string,
+                note: state === "locked-today" ? "Se abre a medianoche" : undefined,
+                state: state === "completed" ? "completed" : state === "open" ? "active" : "locked",
+              } as const;
             })}
-          </ol>
+            onSelect={(node) => {
+              if (node.state === "locked") {
+                toast.info(node.note ? "Esta etapa se abre a medianoche." : "Completa la etapa anterior para abrir esta.");
+                return;
+              }
+              navigate({ to: "/etapas/$stageId", params: { stageId: node.key } });
+            }}
+          />
         </div>
 
         {/* Stats */}
