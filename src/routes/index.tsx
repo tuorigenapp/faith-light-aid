@@ -155,7 +155,7 @@ function Landing() {
               Iniciar sesión
             </Link>
             <Link
-              to="/auth"
+              to="/registro"
               className="grid h-10 place-items-center rounded-[12px] bg-primary px-4 text-[13px] font-bold text-primary-foreground shadow-glow"
             >
               Crear cuenta
@@ -208,7 +208,7 @@ function Landing() {
           </div>
 
           <Link
-            to="/auth"
+            to="/registro"
             className="mt-5 grid h-14 w-full place-items-center rounded-[12px] text-[16.5px] font-bold text-primary-foreground shadow-glow active:scale-[.98]"
             style={{ background: "var(--gradient-primary)" }}
           >
@@ -443,7 +443,7 @@ function Landing() {
             </div>
 
             <Link
-              to="/auth"
+              to="/registro"
               className="mt-4 grid h-14 w-full place-items-center rounded-[12px] text-[16.5px] font-bold text-primary-foreground shadow-glow active:scale-[.98]"
               style={{ background: "var(--gradient-primary)" }}
             >
@@ -517,7 +517,7 @@ function Landing() {
             Tres minutos para saber de dónde viene. El resto de tu vida para vivir distinto.
           </p>
           <Link
-            to="/auth"
+            to="/registro"
             className="mt-5 grid h-14 w-full place-items-center rounded-[12px] text-[16.5px] font-bold text-primary-foreground shadow-glow active:scale-[.98]"
             style={{ background: "var(--gradient-primary)" }}
           >
@@ -557,7 +557,7 @@ function Landing() {
       {sticky && (
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 px-4 pb-[max(12px,env(safe-area-inset-bottom))] pt-3 backdrop-blur-xl">
           <Link
-            to="/auth"
+            to="/registro"
             className="grid h-14 w-full place-items-center rounded-[12px] text-[16px] font-bold text-primary-foreground shadow-glow active:scale-[.98]"
             style={{ background: "var(--gradient-primary)" }}
           >

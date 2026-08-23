@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as RegistroRouteImport } from './routes/registro'
 import { Route as EstilosRouteImport } from './routes/estilos'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -63,6 +64,11 @@ import { Route as AuthenticatedCaminosCaminoIdDayRouteImport } from './routes/_a
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegistroRoute = RegistroRouteImport.update({
+  id: '/registro',
+  path: '/registro',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EstilosRoute = EstilosRouteImport.update({
@@ -328,6 +334,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRoute
   '/estilos': typeof EstilosRoute
+  '/registro': typeof RegistroRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/arbol': typeof AuthenticatedArbolRoute
   '/biblioteca': typeof AuthenticatedBibliotecaRoute
@@ -379,6 +386,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRoute
   '/estilos': typeof EstilosRoute
+  '/registro': typeof RegistroRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/arbol': typeof AuthenticatedArbolRoute
   '/biblioteca': typeof AuthenticatedBibliotecaRoute
@@ -431,6 +439,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRoute
   '/estilos': typeof EstilosRoute
+  '/registro': typeof RegistroRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/arbol': typeof AuthenticatedArbolRoute
   '/_authenticated/biblioteca': typeof AuthenticatedBibliotecaRoute
@@ -484,6 +493,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/checkout'
     | '/estilos'
+    | '/registro'
     | '/sitemap.xml'
     | '/arbol'
     | '/biblioteca'
@@ -535,6 +545,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/checkout'
     | '/estilos'
+    | '/registro'
     | '/sitemap.xml'
     | '/arbol'
     | '/biblioteca'
@@ -586,6 +597,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/checkout'
     | '/estilos'
+    | '/registro'
     | '/sitemap.xml'
     | '/_authenticated/arbol'
     | '/_authenticated/biblioteca'
@@ -639,6 +651,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   CheckoutRoute: typeof CheckoutRoute
   EstilosRoute: typeof EstilosRoute
+  RegistroRoute: typeof RegistroRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiCaminoPackRoute: typeof ApiCaminoPackRoute
   ApiChatRoute: typeof ApiChatRoute
@@ -661,6 +674,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/registro': {
+      id: '/registro'
+      path: '/registro'
+      fullPath: '/registro'
+      preLoaderRoute: typeof RegistroRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/estilos': {
@@ -1136,6 +1156,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   CheckoutRoute: CheckoutRoute,
   EstilosRoute: EstilosRoute,
+  RegistroRoute: RegistroRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiCaminoPackRoute: ApiCaminoPackRoute,
   ApiChatRoute: ApiChatRoute,

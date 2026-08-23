@@ -11,7 +11,6 @@ import { ArrowRight, Check, Lock, X, Leaf, RefreshCw, Sparkles, Flame, PenLine, 
 import { useState, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { videoForStage } from "@/lib/stage-videos";
 import { WordSearch } from "@/components/WordSearch";
 import { getStageContent, getSolutionSteps, getStageTasks } from "@/lib/stage-content";
 import { awardLeaf, ACTION_POINTS, type ActionLevel } from "@/lib/gems";
@@ -353,14 +352,14 @@ function Step1({ stage, position, onNext }: { stage: any; position: number; onNe
           <p className="text-[12.5px] text-muted-foreground mt-0.5 leading-snug">Ponlo de fondo mientras haces tus ejercicios.</p>
         </div>
         <div className="relative w-full" style={{ aspectRatio: "16 / 9" }}>
-          <iframe
-            src={`https://www.youtube-nocookie.com/embed/${videoForStage(position)}?rel=0`}
-            title="Video guía de la etapa"
-            loading="lazy"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            className="absolute inset-0 h-full w-full border-0"
-          />
+          <a
+            href={`https://www.youtube.com/results?search_query=${encodeURIComponent(`${stage.title} oración cristiana sanación interior`)}`}
+            target="_blank"
+            rel="noreferrer"
+            className="grid h-[180px] w-full place-items-center rounded-[12px] bg-primary/10 text-center text-[14px] font-bold text-primary"
+          >
+            Ver videos guía sobre “{stage.title}” en YouTube
+          </a>
         </div>
       </div>
 
@@ -647,7 +646,7 @@ function Step3({ tasks, done, setDone, entries, onSave, reward, onNext }: {
         <div className="relative mt-4 overflow-hidden rounded-[16px] p-4 pr-28 text-white" style={{ background: "linear-gradient(135deg,#7C5CFF 0%,#A855F7 55%,#F58BCB 100%)", animation: "scale-in .35s ease-out both" }}>
           <div className="font-display font-extrabold text-[19px]">¡Excelente! 🎉</div>
           <p className="text-[12.5px] text-white/85 mt-1">Has completado todas las tareas</p>
-          <p className="font-display font-extrabold text-[20px] mt-2 leading-tight">+150 hojas<br />de sanación 🌿</p>
+          <p className="font-display font-extrabold text-[20px] mt-2 leading-tight">+{ACTION_POINTS.major}% de tu<br />próxima hoja 🌿</p>
           <img src={chest} alt="" aria-hidden width={1024} height={1024} loading="lazy" className="pointer-events-none absolute right-0 bottom-0 w-28 object-contain" />
         </div>
       )}
@@ -848,7 +847,7 @@ function Step6({ cargas, loading, reward, onNext }: { cargas?: string[]; loading
               </div>
               <span className="text-[12px] font-bold shrink-0">{freed.length}/{list.length} liberadas</span>
             </div>
-            {done && <p className="mt-2 text-[13px] font-extrabold text-[#2F9A73] inline-flex items-center gap-1">+45 hojas <Leaf className="w-3.5 h-3.5" /></p>}
+            {done && <p className="mt-2 text-[13px] font-extrabold text-[#2F9A73] inline-flex items-center gap-1">+{ACTION_POINTS.medium}% de tu próxima hoja <Leaf className="w-3.5 h-3.5" /></p>}
           </div>
         </>
       )}
@@ -872,7 +871,7 @@ function Step7({ words, loading, stageId, onNext }: { words: string[]; loading: 
       )}
       <div className="relative mt-3 overflow-hidden rounded-[16px] bg-[#3FBE8F]/10 p-4 pr-24">
         <p className="text-[13.5px] font-bold">¡Excelente! Cada palabra que encuentras se graba en tu memoria.</p>
-        <p className="mt-1 font-extrabold text-[14px] text-[#2F9A73] inline-flex items-center gap-1">+30 hojas <Leaf className="w-4 h-4" /></p>
+        <p className="mt-1 font-extrabold text-[14px] text-[#2F9A73] inline-flex items-center gap-1">+{ACTION_POINTS.medium}% de tu próxima hoja <Leaf className="w-4 h-4" /></p>
         <img src={tree} alt="" aria-hidden width={512} height={512} loading="lazy" className="pointer-events-none absolute right-0 bottom-0 w-20 object-contain" />
       </div>
       <Cta onClick={onNext}>Continuar</Cta>
@@ -962,7 +961,7 @@ function Step8({ promesas, loading, reward, onNext }: { promesas?: string[]; loa
         <div className="relative mt-4 overflow-hidden rounded-[16px] bg-accent-pink/12 p-4 pr-24" style={{ animation: "scale-in .3s ease-out both" }}>
           <p className="font-display font-extrabold text-[17px] text-primary">¡Excelente! ✨</p>
           <p className="text-[13px] mt-1">Has encontrado todos los pares.</p>
-          <p className="mt-1 font-extrabold text-[14px] text-[#2F9A73] inline-flex items-center gap-1">+50 hojas <Leaf className="w-4 h-4" /></p>
+          <p className="mt-1 font-extrabold text-[14px] text-[#2F9A73] inline-flex items-center gap-1">+{ACTION_POINTS.major}% de tu próxima hoja <Leaf className="w-4 h-4" /></p>
           <img src={brain3d} alt="" aria-hidden width={512} height={512} loading="lazy" className="pointer-events-none absolute right-1 bottom-0 w-20 object-contain" />
         </div>
       )}
@@ -1138,7 +1137,7 @@ function Step10({ bienestar, reward, onNext }: { bienestar?: { q: string; option
       {done && (
         <div className="relative mt-4 overflow-hidden rounded-[16px] bg-primary/8 p-4 pr-24" style={{ animation: "scale-in .3s ease-out both" }}>
           <p className="text-[13.5px] font-bold">¡Muy bien! Reconoces y eliges lo que te acerca a la sanidad.</p>
-          <p className="mt-1 font-extrabold text-[14px] text-[#2F9A73] inline-flex items-center gap-1">+25 hojas <Leaf className="w-4 h-4" /></p>
+          <p className="mt-1 font-extrabold text-[14px] text-[#2F9A73] inline-flex items-center gap-1">+{ACTION_POINTS.minor}% de tu próxima hoja <Leaf className="w-4 h-4" /></p>
           <img src={star3d} alt="" aria-hidden width={512} height={512} loading="lazy" className="pointer-events-none absolute right-1 bottom-0 w-20 object-contain" />
         </div>
       )}
@@ -1266,7 +1265,7 @@ function CompletedStageView({ stage, position, total, onBack }: { stage: any; po
         <span className="mt-3 inline-block rounded-full bg-[#3FBE8F]/12 px-3 py-1 text-[12px] font-extrabold text-[#2F9A73]">Completada</span>
         <h1 className="font-display font-extrabold text-[22px] mt-3 leading-tight">{stage.title}</h1>
         <p className="text-[13.5px] text-muted-foreground mt-2 leading-snug">
-          Ya completaste esta etapa (Día {position} de {total}). Queda guardada como parte de tu camino, solo en modo lectura.
+          Ya completaste el Día {position} de tu camino. Queda guardada como parte de tu camino, solo en modo lectura.
         </p>
         <p className="mt-3 text-[12.5px] text-muted-foreground leading-snug">
           Son 7 etapas por semana: una lección por día hasta completarla, con 365 lecciones al año en total.
