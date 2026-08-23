@@ -14,6 +14,10 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { FloatingChatFab } from "@/components/FloatingChatFab";
 import { FloatingHelp } from "@/components/FloatingHelp";
+import { LiveActivityToasts } from "@/components/LiveActivityToasts";
+import { SatisfactionPulse } from "@/components/SatisfactionPulse";
+import { MotivationalReminders } from "@/components/MotivationalReminders";
+
 import { useSignedUrls } from "@/hooks/use-signed-urls";
 import origenIcon from "@/assets/origen-o-icon.png";
 
