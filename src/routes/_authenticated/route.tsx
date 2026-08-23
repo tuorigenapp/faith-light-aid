@@ -17,6 +17,8 @@ import { FloatingHelp } from "@/components/FloatingHelp";
 import { LiveActivityToasts } from "@/components/LiveActivityToasts";
 import { SatisfactionPulse } from "@/components/SatisfactionPulse";
 import { MotivationalReminders } from "@/components/MotivationalReminders";
+import { PlayerProvider } from "@/lib/player";
+import { MiniPlayer } from "@/components/MiniPlayer";
 
 import { useSignedUrls } from "@/hooks/use-signed-urls";
 import origenIcon from "@/assets/origen-o-icon.png";
@@ -70,6 +72,15 @@ const FULL_NAV = [
 ] as const;
 
 function AuthLayout() {
+  return (
+    <PlayerProvider>
+      <AuthLayoutInner />
+      <MiniPlayer />
+    </PlayerProvider>
+  );
+}
+
+function AuthLayoutInner() {
   const { user } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();

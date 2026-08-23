@@ -1,5 +1,6 @@
 import { createFileRoute, Link, Outlet, useParams, useNavigate, useRouterState } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
+import { usePlayer } from "@/lib/player";
 import { useAuth } from "@/lib/use-auth";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
@@ -95,10 +96,7 @@ function CategoryPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const qc = useQueryClient();
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const [playingId, setPlayingId] = useState<string | null>(null);
-  const [progress, setProgress] = useState(0);
-  const [duration, setDuration] = useState(0);
+  const player = usePlayer();
   const [exercise, setExercise] = useState("");
   const [step, setStep] = useState<1 | 2 | 3>(1);
 
@@ -119,20 +117,31 @@ function CategoryPage() {
 
   const c = data?.cat;
   const isPaid = data?.plan === "camino";
-  const playing = data?.audios.find((a: any) => a.id === playingId);
+  const playingId = player.current?.id ?? null;
+
+  const toTrack = (a: any) => ({
+    id: a.id as string,
+    title: `Día ${a.day_index} — ${DAY_TITLES[a.day_index - 1] ?? a.title}`,
+    subtitle: c?.title ?? "Manifestación guiada",
+    url: (a.audio_url as string) ?? "",
+    cover: (a.cover_url as string | null) ?? null,
+  });
 
   function toggle(a: any, dayIndex: number) {
     if (!isPaid && dayIndex > 1) {
       toast.error("Este día se libera con el plan Camino Origen.");
       return;
     }
-    if (playingId === a.id) {
-      audioRef.current?.pause();
-      setPlayingId(null);
+    if (!a.audio_url) {
+      toast.error("Este audio se publica muy pronto.");
       return;
     }
-    setPlayingId(a.id);
-    setTimeout(() => audioRef.current?.play().catch(() => {}), 50);
+    if (playingId === a.id) {
+      player.toggle();
+      return;
+    }
+    const available = (data?.audios ?? []).filter((x: any) => x.audio_url && (isPaid || x.day_index === 1));
+    player.play(toTrack(a), available.map(toTrack));
   }
 
   async function completeExercise() {
@@ -338,31 +347,6 @@ function CategoryPage() {
             );
           })}
         </div>
-
-        {playing && (
-          <Card className="mt-3 rounded-[1.3rem] p-3 flex items-center gap-3 shadow-soft border border-border/60">
-            <div className="w-12 h-12 rounded-lg shrink-0" style={{ background: `linear-gradient(135deg, ${c.color ?? "#7C5CFF"}, ${c.color ?? "#7C5CFF"}CC)` }} />
-            <div className="flex-1 min-w-0">
-              <div className="text-sm font-bold truncate">Día {playing.day_index} — {DAY_TITLES[playing.day_index - 1]}</div>
-              <div className="h-1 bg-muted rounded-full mt-1.5 overflow-hidden">
-                <div className="h-full transition-all" style={{ width: `${duration ? (progress / duration) * 100 : 5}%`, background: c.color ?? "#7C5CFF" }} />
-              </div>
-              <div className="text-[10px] text-muted-foreground mt-0.5 flex justify-between tabular-nums">
-                <span>{fmt(progress)}</span><span>{DAY_DURATION[playing.day_index - 1]}</span>
-              </div>
-            </div>
-            <button onClick={() => { audioRef.current?.pause(); setPlayingId(null); }} className="w-11 h-11 rounded-full grid place-items-center shrink-0 shadow-glow" style={{ background: c.color ?? "#7C5CFF", color: "white" }}>
-              <Pause className="w-5 h-5" />
-            </button>
-            <audio
-              ref={audioRef}
-              src={playing.audio_url ?? undefined}
-              onTimeUpdate={(e) => setProgress(e.currentTarget.currentTime)}
-              onLoadedMetadata={(e) => setDuration(e.currentTarget.duration)}
-              onEnded={() => setPlayingId(null)}
-            />
-          </Card>
-        )}
 
         {!isPaid && (
           <Card className="mt-3 rounded-2xl p-4 bg-gradient-to-br from-primary/10 to-pink-100/50 dark:to-pink-500/10 border border-primary/30">
