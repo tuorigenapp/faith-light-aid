@@ -6,11 +6,11 @@ import { lovable } from "@/integrations/lovable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import heroImg from "@/assets/spiritual-hero.jpg";
 import dailyImg from "@/assets/daily-devotional.jpg";
-import { ArrowRight, CheckCircle2, Heart } from "lucide-react";
+import logo from "@/assets/logo-origen.png";
+import { ArrowRight, Heart } from "lucide-react";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({ meta: [{ title: "Entrar a ORÍGEN — tu camino de sanación" }] }),
@@ -22,7 +22,6 @@ function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -39,34 +38,6 @@ function AuthPage() {
     try { localStorage.removeItem("origen_pending_onboarding"); } catch { /* noop */ }
     toast.success("¡Bienvenido de vuelta!");
     navigate({ to: "/dashboard" });
-  }
-
-  async function signUp(e: FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    const { data, error } = await supabase.auth.signUp({
-      email, password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth`,
-        data: { full_name: fullName },
-      },
-    });
-    setLoading(false);
-    if (error) return toast.error(error.message);
-    if (data.session) {
-      toast.success("Cuenta creada. Comienza tu camino ORIGEN.");
-      try { localStorage.setItem("origen_pending_onboarding", "1"); } catch { /* noop */ }
-      navigate({ to: "/onboarding", search: { skipIntro: true } });
-    } else {
-      const signin = await supabase.auth.signInWithPassword({ email, password });
-      if (!signin.error) {
-        toast.success("Cuenta creada. Comienza tu camino ORIGEN.");
-        try { localStorage.setItem("origen_pending_onboarding", "1"); } catch { /* noop */ }
-        navigate({ to: "/onboarding", search: { skipIntro: true } });
-      } else {
-        toast.success("Cuenta creada. Revisa tu correo para confirmar el acceso.");
-      }
-    }
   }
 
   async function googleSignIn() {
@@ -92,7 +63,7 @@ function AuthPage() {
         <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/35 to-transparent" />
         <div className="relative z-10 p-12 h-full flex flex-col justify-between text-primary-foreground">
           <Link to="/" className="flex items-center gap-3 font-display font-bold text-xl">
-            <img src="/app-icon.png" alt="" width={42} height={42} className="rounded-2xl" /> ORÍGEN
+            <img src={logo} alt="" width={42} height={42} className="rounded-2xl" /> ORÍGEN
           </Link>
           <div className="max-w-md">
             <div className="rounded-[2rem] bg-background/14 backdrop-blur-xl border border-primary-foreground/20 p-6">
@@ -106,12 +77,12 @@ function AuthPage() {
       <div className="flex items-center justify-center p-4 sm:p-6 md:p-12">
         <div className="w-full max-w-md app-card p-5 sm:p-7">
           <Link to="/" className="lg:hidden flex items-center gap-2 mb-6">
-            <img src="/app-icon.png" alt="" width={34} height={34} className="rounded-xl" />
+            <img src={logo} alt="" width={34} height={34} className="rounded-xl" />
             <span className="font-display font-bold">ORÍGEN</span>
           </Link>
           <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 text-primary px-3 py-1 text-xs font-bold"><Heart className="w-3.5 h-3.5" /> Espacio seguro</div>
-          <h1 className="font-display font-extrabold text-4xl text-foreground mt-4">Bienvenido</h1>
-          <p className="mt-2 text-muted-foreground text-sm">Crea tu cuenta, responde el onboarding y recibe una ruta ORIGEN personalizada.</p>
+          <h1 className="font-display font-extrabold text-4xl text-foreground mt-4">Iniciar sesión</h1>
+          <p className="mt-2 text-muted-foreground text-sm">Entra con tu correo y continúa justo donde dejaste tu camino.</p>
 
           <div className="mt-8 grid gap-2.5">
             <Button onClick={googleSignIn} disabled={loading} variant="outline" className="w-full h-11">
