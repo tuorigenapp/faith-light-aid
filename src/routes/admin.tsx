@@ -1,28 +1,119 @@
-import { useState } from "react";
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import type { FormEvent } from "react";
+import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Users, CreditCard, MessageCircle, BookHeart, Leaf, Sparkles, LayoutDashboard,
-  TrendingUp, AlertTriangle, Library, BookOpen, Star, LogOut, XCircle,
+  TrendingUp, AlertTriangle, Library, BookOpen, Star, LogOut, XCircle, Loader2, ShieldCheck,
 } from "lucide-react";
 import { AreaChart, Area, ResponsiveContainer, BarChart, Bar, XAxis, Tooltip } from "recharts";
 
 export const Route = createFileRoute("/admin")({
-  head: () => ({ meta: [{ title: "Panel de administración — ORÍGEN" }] }),
-  beforeLoad: async () => {
+  ssr: false,
+  head: () => ({ meta: [{ title: "Panel de administracion \u2014 ORIGEN" }] }),
+  component: AdminGate,
+});
+
+/** Acceso propio del panel: no redirige a la app ni al onboarding. */
+function AdminGate() {
+  const [state, setState] = useState<"checking" | "login" | "ok">("checking");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  async function check() {
     const { data: u } = await supabase.auth.getUser();
-    if (!u.user) throw redirect({ to: "/auth" });
+    if (!u.user) return setState("login");
     const { data } = await supabase
       .from("user_roles")
       .select("role")
       .eq("user_id", u.user.id)
       .eq("role", "admin")
       .maybeSingle();
-    if (!data) throw redirect({ to: "/dashboard" });
-  },
-  component: Admin,
-});
+    setState(data ? "ok" : "login");
+    if (!data) setError("Esta cuenta no tiene permisos de administracion.");
+  }
+
+  useEffect(() => {
+    void check();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function signIn(e: FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    setError(null);
+    const { error: err } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+    if (err) {
+      setBusy(false);
+      setError("Correo o contrasena incorrectos.");
+      return;
+    }
+    await check();
+    setBusy(false);
+  }
+
+  if (state === "checking") {
+    return (
+      <main className="grid min-h-dvh place-items-center bg-[oklch(0.22_0.03_285)]">
+        <Loader2 className="h-6 w-6 animate-spin text-white/70" />
+      </main>
+    );
+  }
+
+  if (state === "login") {
+    return (
+      <main className="grid min-h-dvh place-items-center bg-[oklch(0.22_0.03_285)] px-5">
+        <form
+          onSubmit={signIn}
+          className="w-full max-w-sm rounded-[16px] bg-[oklch(0.26_0.03_285)] p-6 text-[oklch(0.97_0.01_285)]"
+        >
+          <span className="grid h-11 w-11 place-items-center rounded-[12px] bg-primary text-primary-foreground">
+            <ShieldCheck className="h-5 w-5" />
+          </span>
+          <h1 className="mt-4 font-display text-[24px] font-extrabold leading-tight">Administracion ORIGEN</h1>
+          <p className="mt-1 text-[13px] opacity-70">Acceso solo para el equipo.</p>
+
+          <label className="mt-5 block text-[12px] font-bold opacity-80" htmlFor="admin-email">Correo</label>
+          <input
+            id="admin-email"
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="mt-1.5 h-12 w-full rounded-[10px] border-[1.5px] border-white/15 bg-white/5 px-3 text-[15px] outline-none focus:border-primary"
+            autoComplete="email"
+          />
+
+          <label className="mt-4 block text-[12px] font-bold opacity-80" htmlFor="admin-pass">Contrasena</label>
+          <input
+            id="admin-pass"
+            type="password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="mt-1.5 h-12 w-full rounded-[10px] border-[1.5px] border-white/15 bg-white/5 px-3 text-[15px] outline-none focus:border-primary"
+            autoComplete="current-password"
+          />
+
+          {error && <p className="mt-3 text-[13px] font-semibold text-[#FF9A9A]">{error}</p>}
+
+          <button
+            type="submit"
+            disabled={busy}
+            className="mt-5 grid min-h-[52px] w-full place-items-center rounded-[12px] bg-primary text-[16px] font-bold text-primary-foreground active:scale-[.98] disabled:opacity-60"
+          >
+            {busy ? <Loader2 className="h-5 w-5 animate-spin" /> : "Entrar al panel"}
+          </button>
+        </form>
+      </main>
+    );
+  }
+
+  return <Admin />;
+}
 
 type SectionId = "resumen" | "usuarios" | "ventas" | "uso" | "contenido" | "opiniones";
 
