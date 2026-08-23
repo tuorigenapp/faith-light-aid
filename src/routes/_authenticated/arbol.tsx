@@ -19,6 +19,7 @@ import { HOJA_USES } from "@/lib/hojas";
 import { formatHojas, wholeHojas, LEAF_RULES_TEXT, awardGems as spendGems, getLeafDayProgress } from "@/lib/gems";
 import { Leaf, Send, Clock as ClockIcon, Mail as MailIcon } from "lucide-react";
 import { createHojaTransfer } from "@/lib/rewards.functions";
+import { useServerFn } from "@tanstack/react-start";
 
 
 export const Route = createFileRoute("/_authenticated/arbol")({
