@@ -19,6 +19,11 @@ import eStar from "@/assets/e3d-star.png";
 import ePractice from "@/assets/e3d-practice.png";
 import eHeadphones from "@/assets/e3d-headphones.png";
 import eBrain from "@/assets/e3d-brain.png";
+import lpIdentificacion from "@/assets/lp-identificacion.png.asset.json";
+import lpObtienes from "@/assets/lp-obtienes.png.asset.json";
+import lpIncluye from "@/assets/lp-incluye.png.asset.json";
+import lpEspiritual from "@/assets/lp-espiritual.png.asset.json";
+import lpRecibes from "@/assets/lp-recibes.png.asset.json";
 import { PaymentMethods } from "@/components/PaymentMethods";
 import { ReviewsSlider } from "@/components/ReviewsSlider";
 
