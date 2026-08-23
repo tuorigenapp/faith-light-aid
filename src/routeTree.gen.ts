@@ -22,6 +22,7 @@ import { Route as ApiIntakeClosureRouteImport } from './routes/api/intake-closur
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as ApiCaminoPackRouteImport } from './routes/api/camino-pack'
 import { Route as AuthenticatedVisualizaRouteImport } from './routes/_authenticated/visualiza'
+import { Route as AuthenticatedRuletaRouteImport } from './routes/_authenticated/ruleta'
 import { Route as AuthenticatedPremiosRouteImport } from './routes/_authenticated/premios'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedPatronesRouteImport } from './routes/_authenticated/patrones'
@@ -117,6 +118,11 @@ const ApiCaminoPackRoute = ApiCaminoPackRouteImport.update({
 const AuthenticatedVisualizaRoute = AuthenticatedVisualizaRouteImport.update({
   id: '/visualiza',
   path: '/visualiza',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedRuletaRoute = AuthenticatedRuletaRouteImport.update({
+  id: '/ruleta',
+  path: '/ruleta',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedPremiosRoute = AuthenticatedPremiosRouteImport.update({
@@ -317,6 +323,7 @@ export interface FileRoutesByFullPath {
   '/patrones': typeof AuthenticatedPatronesRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/premios': typeof AuthenticatedPremiosRoute
+  '/ruleta': typeof AuthenticatedRuletaRoute
   '/visualiza': typeof AuthenticatedVisualizaRouteWithChildren
   '/api/camino-pack': typeof ApiCaminoPackRoute
   '/api/chat': typeof ApiChatRoute
@@ -363,6 +370,7 @@ export interface FileRoutesByTo {
   '/patrones': typeof AuthenticatedPatronesRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/premios': typeof AuthenticatedPremiosRoute
+  '/ruleta': typeof AuthenticatedRuletaRoute
   '/visualiza': typeof AuthenticatedVisualizaRouteWithChildren
   '/api/camino-pack': typeof ApiCaminoPackRoute
   '/api/chat': typeof ApiChatRoute
@@ -410,6 +418,7 @@ export interface FileRoutesById {
   '/_authenticated/patrones': typeof AuthenticatedPatronesRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
   '/_authenticated/premios': typeof AuthenticatedPremiosRoute
+  '/_authenticated/ruleta': typeof AuthenticatedRuletaRoute
   '/_authenticated/visualiza': typeof AuthenticatedVisualizaRouteWithChildren
   '/api/camino-pack': typeof ApiCaminoPackRoute
   '/api/chat': typeof ApiChatRoute
@@ -458,6 +467,7 @@ export interface FileRouteTypes {
     | '/patrones'
     | '/perfil'
     | '/premios'
+    | '/ruleta'
     | '/visualiza'
     | '/api/camino-pack'
     | '/api/chat'
@@ -504,6 +514,7 @@ export interface FileRouteTypes {
     | '/patrones'
     | '/perfil'
     | '/premios'
+    | '/ruleta'
     | '/visualiza'
     | '/api/camino-pack'
     | '/api/chat'
@@ -550,6 +561,7 @@ export interface FileRouteTypes {
     | '/_authenticated/patrones'
     | '/_authenticated/perfil'
     | '/_authenticated/premios'
+    | '/_authenticated/ruleta'
     | '/_authenticated/visualiza'
     | '/api/camino-pack'
     | '/api/chat'
@@ -680,6 +692,13 @@ declare module '@tanstack/react-router' {
       path: '/visualiza'
       fullPath: '/visualiza'
       preLoaderRoute: typeof AuthenticatedVisualizaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/ruleta': {
+      id: '/_authenticated/ruleta'
+      path: '/ruleta'
+      fullPath: '/ruleta'
+      preLoaderRoute: typeof AuthenticatedRuletaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/premios': {
@@ -994,6 +1013,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPatronesRoute: typeof AuthenticatedPatronesRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
   AuthenticatedPremiosRoute: typeof AuthenticatedPremiosRoute
+  AuthenticatedRuletaRoute: typeof AuthenticatedRuletaRoute
   AuthenticatedVisualizaRoute: typeof AuthenticatedVisualizaRouteWithChildren
   AuthenticatedCaminosCaminoIdRoute: typeof AuthenticatedCaminosCaminoIdRouteWithChildren
   AuthenticatedProgramasProgramaIdRoute: typeof AuthenticatedProgramasProgramaIdRoute
@@ -1020,6 +1040,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPatronesRoute: AuthenticatedPatronesRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
   AuthenticatedPremiosRoute: AuthenticatedPremiosRoute,
+  AuthenticatedRuletaRoute: AuthenticatedRuletaRoute,
   AuthenticatedVisualizaRoute: AuthenticatedVisualizaRouteWithChildren,
   AuthenticatedCaminosCaminoIdRoute:
     AuthenticatedCaminosCaminoIdRouteWithChildren,
