@@ -1,6 +1,6 @@
 {
-  "name": "Reconectando el Espíritu con Dios",
-  "short_name": "Reconectando",
+  "name": "ORÍGEN — Reconectando el Espíritu con Dios",
+  "short_name": "ORÍGEN",
   "description": "Plataforma cristiana de restauración espiritual, sanidad interior y crecimiento.",
   "start_url": "/dashboard",
   "scope": "/",
@@ -10,7 +10,17 @@
   "theme_color": "#1a2541",
   "lang": "es",
   "icons": [
-    { "src": "/app-icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "/app-icon.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "/app-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/app-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ]
 }
