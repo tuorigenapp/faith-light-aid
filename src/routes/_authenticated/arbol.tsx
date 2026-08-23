@@ -613,6 +613,7 @@ function TransferSection({ gems }: { gems: number }) {
   const [amount, setAmount] = useState<string>("");
   const [sending, setSending] = useState(false);
   const max = wholeHojas(gems);
+  const sendTransfer = useServerFn(createHojaTransfer);
 
   const { data: transfers = [], isLoading: loadingHist, isError: histError } = useQuery({
     queryKey: ["hoja_transfers", user?.id],
