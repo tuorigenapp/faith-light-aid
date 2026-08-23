@@ -13,6 +13,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as EstilosRouteImport } from './routes/estilos'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiStagePackRouteImport } from './routes/api/stage-pack'
@@ -43,7 +44,6 @@ import { Route as AuthenticatedChatRouteImport } from './routes/_authenticated/c
 import { Route as AuthenticatedCategoriasRouteImport } from './routes/_authenticated/categorias'
 import { Route as AuthenticatedBibliotecaRouteImport } from './routes/_authenticated/biblioteca'
 import { Route as AuthenticatedArbolRouteImport } from './routes/_authenticated/arbol'
-import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedVisualizaLimpiezaRouteImport } from './routes/_authenticated/visualiza.limpieza'
 import { Route as AuthenticatedVisualizaIdentidadRouteImport } from './routes/_authenticated/visualiza.identidad'
 import { Route as AuthenticatedVisualizaCristoRouteImport } from './routes/_authenticated/visualiza.cristo'
@@ -75,6 +75,11 @@ const CheckoutRoute = CheckoutRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
@@ -228,11 +233,6 @@ const AuthenticatedArbolRoute = AuthenticatedArbolRouteImport.update({
   path: '/arbol',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 const AuthenticatedVisualizaLimpiezaRoute =
   AuthenticatedVisualizaLimpiezaRouteImport.update({
     id: '/limpieza',
@@ -306,11 +306,11 @@ const AuthenticatedCaminosCaminoIdDayRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRoute
   '/estilos': typeof EstilosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/admin': typeof AuthenticatedAdminRoute
   '/arbol': typeof AuthenticatedArbolRoute
   '/biblioteca': typeof AuthenticatedBibliotecaRoute
   '/categorias': typeof AuthenticatedCategoriasRoute
@@ -354,11 +354,11 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRoute
   '/estilos': typeof EstilosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/admin': typeof AuthenticatedAdminRoute
   '/arbol': typeof AuthenticatedArbolRoute
   '/biblioteca': typeof AuthenticatedBibliotecaRoute
   '/categorias': typeof AuthenticatedCategoriasRoute
@@ -403,11 +403,11 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRoute
   '/estilos': typeof EstilosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/arbol': typeof AuthenticatedArbolRoute
   '/_authenticated/biblioteca': typeof AuthenticatedBibliotecaRoute
   '/_authenticated/categorias': typeof AuthenticatedCategoriasRoute
@@ -453,11 +453,11 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/auth'
     | '/checkout'
     | '/estilos'
     | '/sitemap.xml'
-    | '/admin'
     | '/arbol'
     | '/biblioteca'
     | '/categorias'
@@ -501,11 +501,11 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin'
     | '/auth'
     | '/checkout'
     | '/estilos'
     | '/sitemap.xml'
-    | '/admin'
     | '/arbol'
     | '/biblioteca'
     | '/categorias'
@@ -549,11 +549,11 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/admin'
     | '/auth'
     | '/checkout'
     | '/estilos'
     | '/sitemap.xml'
-    | '/_authenticated/admin'
     | '/_authenticated/arbol'
     | '/_authenticated/biblioteca'
     | '/_authenticated/categorias'
@@ -599,6 +599,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRoute
   CheckoutRoute: typeof CheckoutRoute
   EstilosRoute: typeof EstilosRoute
@@ -642,6 +643,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -854,13 +862,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedArbolRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/admin': {
-      id: '/_authenticated/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AuthenticatedAdminRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/visualiza/limpieza': {
       id: '/_authenticated/visualiza/limpieza'
       path: '/limpieza'
@@ -1013,7 +1014,6 @@ const AuthenticatedCaminosCaminoIdRouteWithChildren =
   )
 
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedArbolRoute: typeof AuthenticatedArbolRoute
   AuthenticatedBibliotecaRoute: typeof AuthenticatedBibliotecaRoute
   AuthenticatedCategoriasRoute: typeof AuthenticatedCategoriasRoute
@@ -1040,7 +1040,6 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedArbolRoute: AuthenticatedArbolRoute,
   AuthenticatedBibliotecaRoute: AuthenticatedBibliotecaRoute,
   AuthenticatedCategoriasRoute: AuthenticatedCategoriasRoute,
@@ -1073,6 +1072,7 @@ const AuthenticatedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AdminRoute: AdminRoute,
   AuthRoute: AuthRoute,
   CheckoutRoute: CheckoutRoute,
   EstilosRoute: EstilosRoute,

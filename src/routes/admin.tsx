@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import { AreaChart, Area, ResponsiveContainer, BarChart, Bar, XAxis, Tooltip } from "recharts";
 
-export const Route = createFileRoute("/_authenticated/admin")({
+export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Panel de administración — ORÍGEN" }] }),
   beforeLoad: async () => {
     const { data: u } = await supabase.auth.getUser();
