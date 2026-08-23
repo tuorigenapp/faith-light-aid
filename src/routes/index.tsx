@@ -149,7 +149,7 @@ function Landing() {
           </div>
           <div className="flex shrink-0 items-center gap-2">
             <Link
-              to="/registro"
+              to="/auth"
               className="grid h-10 place-items-center rounded-[10px] px-3 text-[13px] font-semibold text-foreground/75"
             >
               Iniciar sesión
