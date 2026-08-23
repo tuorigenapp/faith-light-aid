@@ -1,31 +1,30 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Loader2, UserPlus, Trash2, EyeOff, Eye, Users, Crown, Search, Shield, Megaphone, LifeBuoy } from "lucide-react";
+import { Loader2, UserPlus, Trash2, EyeOff, Eye, Users, Crown } from "lucide-react";
 import {
   adminCreateUser,
   adminDeleteUser,
   adminListUsers,
   adminSetPlan,
-  adminSetRole,
-  adminSetExcluded,
 } from "@/lib/admin.functions";
 
-type TeamRole = "admin" | "marketing" | "soporte";
-
-const TEAM: { role: TeamRole; label: string; icon: typeof Shield }[] = [
-  { role: "admin", label: "Admin", icon: Shield },
-  { role: "marketing", label: "Marketing", icon: Megaphone },
-  { role: "soporte", label: "Soporte", icon: LifeBuoy },
-];
-
+const EXCLUDED_KEY = "origen_admin_excluded_users";
 const PLAN_LABEL: Record<string, string> = {
   explorador: "Explorador (gratis)",
   puente: "Explorador US$2,99",
   camino: "Camino ORÍGEN (Pro)",
 };
+
+function loadExcluded(): string[] {
+  try {
+    return JSON.parse(localStorage.getItem(EXCLUDED_KEY) ?? "[]") as string[];
+  } catch {
+    return [];
+  }
+}
 
 /** Gestión de personas: alta manual, plan, exclusión de métricas y borrado. */
 export function UsersManager() {
@@ -35,13 +34,18 @@ export function UsersManager() {
   const setPlan = useServerFn(adminSetPlan);
   const deleteUser = useServerFn(adminDeleteUser);
 
-  const setRole = useServerFn(adminSetRole);
-  const setExcludedFn = useServerFn(adminSetExcluded);
+  const [excluded, setExcluded] = useState<string[]>([]);
   const [showExcluded, setShowExcluded] = useState(false);
-  const [search, setSearch] = useState("");
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
   const [plan, setPlanValue] = useState<"explorador" | "puente" | "camino">("explorador");
+
+  useEffect(() => setExcluded(loadExcluded()), []);
+
+  const persist = (ids: string[]) => {
+    setExcluded(ids);
+    localStorage.setItem(EXCLUDED_KEY, JSON.stringify(ids));
+  };
 
   const { data: users, isLoading } = useQuery({
     queryKey: ["admin-users"],
@@ -73,24 +77,6 @@ export function UsersManager() {
     onError: (e: Error) => toast.error(e.message || "No se pudo cambiar el plan."),
   });
 
-  const toggleRole = useMutation({
-    mutationFn: (v: { userId: string; role: TeamRole; grant: boolean }) => setRole({ data: v }),
-    onSuccess: () => {
-      toast.success("Permisos del equipo actualizados.");
-      qc.invalidateQueries({ queryKey: ["admin-users"] });
-    },
-    onError: (e: Error) => toast.error(e.message || "No se pudo cambiar el permiso."),
-  });
-
-  const toggleExcluded = useMutation({
-    mutationFn: (v: { userId: string; excluded: boolean }) => setExcludedFn({ data: v }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["admin-users"] });
-      qc.invalidateQueries({ queryKey: ["admin-sales"] });
-    },
-    onError: (e: Error) => toast.error(e.message || "No se pudo actualizar la métrica."),
-  });
-
   const remove = useMutation({
     mutationFn: (userId: string) => deleteUser({ data: { userId } }),
     onSuccess: () => {
@@ -109,12 +95,8 @@ export function UsersManager() {
     create.mutate();
   }
 
-  const q = search.trim().toLowerCase();
-  const visible = (users ?? [])
-    .filter((u) => showExcluded || !u.excluded)
-    .filter((u) => !q || `${u.name ?? ""} ${u.email ?? ""}`.toLowerCase().includes(q));
-  const counted = (users ?? []).filter((u) => !u.excluded);
-  const excludedCount = (users ?? []).filter((u) => u.excluded).length;
+  const visible = (users ?? []).filter((u) => showExcluded || !excluded.includes(u.id));
+  const counted = (users ?? []).filter((u) => !excluded.includes(u.id));
   const pro = counted.filter((u) => u.plan === "camino" && u.planStatus === "active").length;
   const active7 = counted.filter(
     (u) => u.lastActivityAt && Date.now() - new Date(u.lastActivityAt).getTime() < 7 * 86400000,
@@ -196,19 +178,9 @@ export function UsersManager() {
             className="inline-flex h-11 shrink-0 items-center gap-2 rounded-[10px] bg-secondary px-3 text-[13px] font-semibold"
           >
             {showExcluded ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-            {showExcluded ? "Ocultar excluidas" : `Ver excluidas (${excludedCount})`}
+            {showExcluded ? "Ocultar excluidas" : `Ver excluidas (${excluded.length})`}
           </button>
         </div>
-
-        <label className="mt-3 flex h-12 items-center gap-2 rounded-[10px] border-[1.5px] border-border bg-background px-3">
-          <Search className="h-4 w-4 text-muted-foreground" />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar por nombre o correo"
-            className="h-full w-full bg-transparent text-[14px] outline-none"
-          />
-        </label>
 
         {isLoading ? (
           <div className="mt-4 space-y-2">
@@ -223,7 +195,7 @@ export function UsersManager() {
             <table className="w-full min-w-[760px] text-left text-[13px]">
               <thead className="text-[11.5px] uppercase tracking-wide text-muted-foreground">
                 <tr>
-                  {["Persona", "Plan", "Equipo", "Hojas", "Racha", "Registro", "Métricas", ""].map((h) => (
+                  {["Persona", "Plan", "Hojas", "Racha", "Registro", "Métricas", ""].map((h) => (
                     <th key={h} className="pb-2 pr-3 font-semibold">
                       {h}
                     </th>
@@ -232,7 +204,7 @@ export function UsersManager() {
               </thead>
               <tbody>
                 {visible.map((u) => {
-                  const isExcluded = u.excluded;
+                  const isExcluded = excluded.includes(u.id);
                   return (
                     <tr key={u.id} className="border-t border-border/70">
                       <td className="py-3 pr-3">
@@ -259,28 +231,6 @@ export function UsersManager() {
                           ))}
                         </select>
                       </td>
-                      <td className="py-3 pr-3">
-                        <div className="flex gap-1">
-                          {TEAM.map((t) => {
-                            const on = u.roles.includes(t.role);
-                            return (
-                              <button
-                                key={t.role}
-                                onClick={() =>
-                                  toggleRole.mutate({ userId: u.id, role: t.role, grant: !on })
-                                }
-                                title={`${on ? "Quitar" : "Dar"} permiso de ${t.label}`}
-                                aria-label={`${on ? "Quitar" : "Dar"} permiso de ${t.label} a ${u.name ?? u.email}`}
-                                className={`grid h-10 w-10 place-items-center rounded-[10px] ${
-                                  on ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"
-                                }`}
-                              >
-                                <t.icon className="h-4 w-4" />
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </td>
                       <td className="py-3 pr-3 font-semibold">{u.leaves}</td>
                       <td className="py-3 pr-3">{u.streak} días</td>
                       <td className="py-3 pr-3 text-muted-foreground">
@@ -289,7 +239,11 @@ export function UsersManager() {
                       <td className="py-3 pr-3">
                         <button
                           onClick={() =>
-                            toggleExcluded.mutate({ userId: u.id, excluded: !isExcluded })
+                            persist(
+                              isExcluded
+                                ? excluded.filter((id) => id !== u.id)
+                                : [...excluded, u.id],
+                            )
                           }
                           className={`h-10 rounded-full px-3 text-[12px] font-bold ${
                             isExcluded

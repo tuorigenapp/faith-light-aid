@@ -515,8 +515,6 @@ export type Database = {
           kind: string
           required_plan: string
           resource_url: string | null
-          slug: string | null
-          sort_order: number
           title: string
         }
         Insert: {
@@ -528,8 +526,6 @@ export type Database = {
           kind: string
           required_plan?: string
           resource_url?: string | null
-          slug?: string | null
-          sort_order?: number
           title: string
         }
         Update: {
@@ -541,8 +537,6 @@ export type Database = {
           kind?: string
           required_plan?: string
           resource_url?: string | null
-          slug?: string | null
-          sort_order?: number
           title?: string
         }
         Relationships: []
@@ -595,16 +589,11 @@ export type Database = {
         Row: {
           affirmation_ya_tengo: string
           color: string | null
-          cover_url: string | null
           created_at: string
-          description: string | null
           gratitude_gracias: string
-          group_key: string
           id: string
           identity_yo_soy: string
-          pdf_url: string | null
           petition: string
-          required_plan: string
           sort_order: number
           subtitle: string | null
           title: string
@@ -612,16 +601,11 @@ export type Database = {
         Insert: {
           affirmation_ya_tengo: string
           color?: string | null
-          cover_url?: string | null
           created_at?: string
-          description?: string | null
           gratitude_gracias: string
-          group_key?: string
           id: string
           identity_yo_soy: string
-          pdf_url?: string | null
           petition: string
-          required_plan?: string
           sort_order?: number
           subtitle?: string | null
           title: string
@@ -629,16 +613,11 @@ export type Database = {
         Update: {
           affirmation_ya_tengo?: string
           color?: string | null
-          cover_url?: string | null
           created_at?: string
-          description?: string | null
           gratitude_gracias?: string
-          group_key?: string
           id?: string
           identity_yo_soy?: string
-          pdf_url?: string | null
           petition?: string
-          required_plan?: string
           sort_order?: number
           subtitle?: string | null
           title?: string
@@ -898,7 +877,6 @@ export type Database = {
           current_stage: number
           display_name: string | null
           email: string | null
-          excluded_from_metrics: boolean
           full_name: string | null
           gems: number
           id: string
@@ -921,7 +899,6 @@ export type Database = {
           current_stage?: number
           display_name?: string | null
           email?: string | null
-          excluded_from_metrics?: boolean
           full_name?: string | null
           gems?: number
           id: string
@@ -944,7 +921,6 @@ export type Database = {
           current_stage?: number
           display_name?: string | null
           email?: string | null
-          excluded_from_metrics?: boolean
           full_name?: string | null
           gems?: number
           id?: string
@@ -1323,7 +1299,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "user" | "marketing" | "soporte"
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1451,7 +1427,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user", "marketing", "soporte"],
+      app_role: ["admin", "user"],
     },
   },
 } as const

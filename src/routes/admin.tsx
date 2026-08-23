@@ -24,9 +24,6 @@ import {
 } from "lucide-react";
 import { BooksManager } from "@/components/admin/BooksManager";
 import { AudiosManager } from "@/components/admin/AudiosManager";
-import { MusicProgramsManager } from "@/components/admin/MusicProgramsManager";
-import { adminSalesReport } from "@/lib/admin.functions";
-import { useServerFn } from "@tanstack/react-start";
 import { UsersManager } from "@/components/admin/UsersManager";
 import { AreaChart, Area, ResponsiveContainer, BarChart, Bar, XAxis, Tooltip } from "recharts";
 
@@ -510,10 +507,6 @@ function Admin() {
           </div>
         )}
 
-        {section === "ventas" && <SalesSection />}
-
-        {section === "uso" && <UsageSection />}
-
         {data && section === "uso" && (
           <>
             <Card className="mt-5">
@@ -604,12 +597,7 @@ function Admin() {
 
         {section === "libros" && <BooksManager />}
 
-        {section === "audios" && (
-          <div className="mt-5 space-y-4">
-            <MusicProgramsManager />
-            <AudiosManager />
-          </div>
-        )}
+        {section === "audios" && <AudiosManager />}
 
         {data && section === "opiniones" && (
           <>
@@ -771,136 +759,5 @@ function Empty({ children }: { children: React.ReactNode }) {
     <p className="mt-3 rounded-[10px] bg-secondary/60 p-4 text-sm text-muted-foreground">
       {children}
     </p>
-  );
-}
-
-/* ─────────── Ventas y uso: datos reales, sin cuentas excluidas ─────────── */
-
-function useSales() {
-  const fn = useServerFn(adminSalesReport);
-  return useQuery({
-    queryKey: ["admin-sales"],
-    queryFn: () => fn(),
-    staleTime: 1000 * 60 * 2,
-  });
-}
-
-function SalesSection() {
-  const { data, isLoading } = useSales();
-  if (isLoading)
-    return (
-      <div className="mt-5 space-y-3">
-        {[0, 1, 2].map((i) => (
-          <div key={i} className="h-32 animate-pulse rounded-[16px] bg-secondary" />
-        ))}
-      </div>
-    );
-  if (!data) return <Empty>Sin datos de ventas todavía.</Empty>;
-  const t = data.totals;
-  return (
-    <>
-      <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {[
-          { label: "Ingresos del mes", value: `US$${t.ingresosMes}` },
-          { label: "Ingresos acumulados", value: `US$${t.ingresosTotales}` },
-          { label: "Con plan activo", value: String(t.activas) },
-          { label: "Todavía sin plan", value: String(t.sinPlan) },
-        ].map((k) => (
-          <div key={k.label} className="rounded-[16px] border border-border bg-card p-4 shadow-soft">
-            <p className="font-display text-[22px] font-extrabold leading-none">{k.value}</p>
-            <p className="mt-1 text-[12px] text-muted-foreground">{k.label}</p>
-          </div>
-        ))}
-      </div>
-
-      <Card className="mt-4">
-        <CardTitle icon={CreditCard}>Ventas mes a mes (últimos 12 meses)</CardTitle>
-        <div className="mt-4 h-60">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data.months}>
-              <XAxis dataKey="month" tick={{ fontSize: 11 }} />
-              <Tooltip />
-              <Bar dataKey="ingresos" radius={[6, 6, 0, 0]} fill="var(--primary)" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </Card>
-
-      <Card className="mt-4">
-        <CardTitle icon={Users}>Cuentas sin plan ({data.sinPlanList.length})</CardTitle>
-        {data.sinPlanList.length === 0 ? (
-          <Empty>Todas las cuentas contadas ya tienen plan.</Empty>
-        ) : (
-          <Table
-            head={["Persona", "Correo", "Se registró", "Última vez"]}
-            rows={data.sinPlanList.slice(0, 50).map((p) => [
-              p.name,
-              p.email,
-              new Date(p.createdAt).toLocaleDateString("es"),
-              p.lastActivityAt ? new Date(p.lastActivityAt).toLocaleDateString("es") : "Nunca",
-            ])}
-          />
-        )}
-      </Card>
-    </>
-  );
-}
-
-function UsageSection() {
-  const { data, isLoading } = useSales();
-  if (isLoading)
-    return <div className="mt-5 h-40 animate-pulse rounded-[16px] bg-secondary" />;
-  if (!data) return null;
-  return (
-    <>
-      <div className="mt-5 grid grid-cols-2 gap-3">
-        <div className="rounded-[16px] border border-border bg-card p-4 shadow-soft">
-          <p className="font-display text-[22px] font-extrabold leading-none">{data.bestHour}</p>
-          <p className="mt-1 text-[12px] text-muted-foreground">Hora con más movimiento</p>
-        </div>
-        <div className="rounded-[16px] border border-border bg-card p-4 shadow-soft">
-          <p className="font-display text-[22px] font-extrabold leading-none">{data.bestDay}</p>
-          <p className="mt-1 text-[12px] text-muted-foreground">Día más activo</p>
-        </div>
-      </div>
-
-      <Card className="mt-4">
-        <CardTitle icon={TrendingUp}>A qué hora entran</CardTitle>
-        <div className="mt-4 h-52">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data.byHour}>
-              <XAxis dataKey="hour" tick={{ fontSize: 10 }} interval={2} />
-              <Tooltip />
-              <Bar dataKey="value" radius={[6, 6, 0, 0]} fill="var(--primary)" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </Card>
-
-      <Card className="mt-4">
-        <CardTitle icon={TrendingUp}>Qué día de la semana usan más</CardTitle>
-        <div className="mt-4 h-52">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data.byWeekday}>
-              <XAxis dataKey="day" tick={{ fontSize: 11 }} />
-              <Tooltip />
-              <Bar dataKey="value" radius={[6, 6, 0, 0]} fill="var(--primary)" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </Card>
-
-      <Card className="mt-4">
-        <CardTitle icon={Users}>Personas más activas</CardTitle>
-        {data.topUsers.length === 0 ? (
-          <Empty>Sin datos de actividad todavía.</Empty>
-        ) : (
-          <Table
-            head={["Persona", "Acciones"]}
-            rows={data.topUsers.map((u) => [u.name, String(u.acciones)])}
-          />
-        )}
-      </Card>
-    </>
   );
 }
