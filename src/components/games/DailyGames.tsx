@@ -1,3 +1,4 @@
+import { ClientOnly } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -231,6 +232,22 @@ function Pad({ onDir }: { onDir: (dx: number, dy: number) => void }) {
 }
 
 /* ---------------------------------------------------------- 4. Come-hojas */
+
+/** Jardín 3D: solo en el navegador (WebGL), con carga diferida. */
+const ComeHojas3D = lazy(() => import("@/components/games/ComeHojas3D"));
+
+function LeafEater3DLazy(p: GameProps) {
+  return (
+    <ClientOnly
+      fallback={<div className="aspect-square w-full animate-pulse rounded-[16px] bg-secondary" />}
+    >
+      <Suspense fallback={<div className="aspect-square w-full animate-pulse rounded-[16px] bg-secondary" />}>
+        <ComeHojas3D onWin={p.onWin} level={p.level} />
+      </Suspense>
+    </ClientOnly>
+  );
+}
+
 
 function LeafEater({ onWin, level }: GameProps) {
   const G = 11;
@@ -647,7 +664,7 @@ const GAMES: GameDef[] = [
   { id: "sopa", title: "Encuentra la palabra", desc: "Sopa de letras de tu tema de hoy", gems: 60, tint: "from-[#7C4DFF] to-[#B18CFF]", cover: C("GQGKDcRy/file-00000000302c820c9bcc0ef622bbb95f.png"), icon: <Search className="w-6 h-6" />, render: (p) => <WordFind {...p} /> },
   { id: "memoria", title: "Memoria del alma", desc: "Empareja las palabras que te sostienen", gems: 60, tint: "from-[#F58BCB] to-[#FFB3DC]", cover: C("tMdjP53T/file-000000000968822fb55558196d3bfa85.png"), icon: <Brain className="w-6 h-6" />, render: (p) => <Memory {...p} /> },
   { id: "escribe", title: "Escríbelo y créelo", desc: "Escribe tu declaración completa", gems: 50, tint: "from-[#3FBE8F] to-[#7FE0BC]", cover: C("d4WZhL5y/file-000000005f9881f68651918204d94946.png"), icon: <PenLine className="w-6 h-6" />, render: (p) => <TypeIt {...p} /> },
-  { id: "hojas", title: "Come-hojas", desc: "Recoge todas las hojas sin que te atrape la culpa", gems: 70, tint: "from-[#F7B955] to-[#FFD79A]", cover: C("5X90QnfG/file-00000000c560822fa9626d7a57de661f.png"), icon: <Ghost className="w-6 h-6" />, render: (p) => <LeafEater {...p} /> },
+  { id: "hojas", title: "Come-hojas", desc: "Recoge todas las hojas sin que te atrape la culpa", gems: 70, tint: "from-[#F7B955] to-[#FFD79A]", cover: C("5X90QnfG/file-00000000c560822fa9626d7a57de661f.png"), icon: <Ghost className="w-6 h-6" />, render: (p) => <LeafEater3DLazy {...p} /> },
   { id: "bloques", title: "Ordena tu caos", desc: "Completa 3 líneas y ordena lo que pesa", gems: 70, tint: "from-[#4C86C6] to-[#9BC6F0]", cover: C("9HdTG5zJ/file-00000000241881f9a4ca43617619c673.png"), icon: <Blocks className="w-6 h-6" />, render: (p) => <TetrisLite {...p} /> },
   { id: "aros", title: "Aros de verdad", desc: "Adivina la palabra y coloca cada aro", gems: 60, tint: "from-[#7C4DFF] to-[#F58BCB]", cover: C("PsFpT5wj/file-000000008b4c820dbbb18f04e6dae500.png"), icon: <Circle className="w-6 h-6" />, render: (p) => <RingWord {...p} /> },
   { id: "globo", title: "Globo de afirmaciones", desc: "Pulsa y llénalo de palabras que sí son tuyas", gems: 50, tint: "from-[#F58BCB] to-[#F7B955]", cover: C("0y0rQjNR/file-00000000531881f6a38f2295738d74fb.png"), icon: <Wind className="w-6 h-6" />, render: (p) => <Balloon {...p} /> },
