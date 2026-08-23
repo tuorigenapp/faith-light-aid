@@ -40,7 +40,7 @@ export function DuolingoPath({
             style={{ marginTop: i === 0 ? 0 : 26, animation: `fade-in .45s ease-out ${Math.min(i, 8) * 60}ms both` }}
           >
             <div className="relative flex flex-col items-center" style={{ transform: `translateX(${offset}px)` }}>
-              {isActive && (
+              {isActive && i === activeIndex && (
                 <span className="mb-2 inline-flex animate-bounce items-center rounded-[10px] border-2 border-white/70 bg-white px-3 py-1 text-[11px] font-extrabold uppercase tracking-widest text-primary shadow-[0_4px_14px_rgba(124,92,255,.3)]">
                   Empieza aquí
                 </span>
