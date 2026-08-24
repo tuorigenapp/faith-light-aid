@@ -8,11 +8,9 @@ import { CAMINOS } from "@/lib/caminos";
 export function CategoriaSlider() {
   return (
     <section>
-      <h3 className="font-display font-bold text-[15px] leading-snug">
-        Lo nuevo de ORIGEN — Transformación diaria en cada categoría
-      </h3>
+      <h3 className="font-display font-bold text-[19px] leading-tight">Elige el dolor que quieres sanar</h3>
       <p className="text-[13px] text-muted-foreground mt-1">
-        Tipo Camino ORÍGEN: una lección cada día hasta alcanzar un cambio real en tu vida.
+        Cada día abre una práctica corta: entiendes algo, lo trabajas y lo cierras. Sin audios largos.
       </p>
       <div className="hairline-brand mt-3 mb-3" />
 

@@ -46,7 +46,18 @@ export async function pushReminder(r: Reminder) {
   if (permissionState() !== "granted") return;
   try {
     const reg = await navigator.serviceWorker.getRegistration("/sw.js");
-    if (reg) await reg.showNotification(r.title, { body: r.body, icon: "/icon-192.png", data: { url: r.url } });
+    if (reg) {
+      const options: NotificationOptions = {
+        body: r.body,
+        icon: "/icon-192.png",
+        badge: "/icon-192.png",
+        tag: `origen-reminder-${r.url}`,
+        data: { url: r.url },
+      };
+      // @ts-expect-error renotify no está tipado en NotificationOptions estándar del DOM
+      options.renotify = false;
+      await reg.showNotification(`tuorigen.app · ${r.title}`, options);
+    }
   } catch {
     /* noop */
   }

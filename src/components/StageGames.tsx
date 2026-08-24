@@ -168,3 +168,11 @@ export function ClassifyEmotions() {
     </div>
   );
 }
+
+/* ─────────── Re-exports: juegos reutilizables del día (13 pasos) ─────────── */
+export { ChestWords } from "@/components/games/ChestWords";
+export { GuessWord } from "@/components/games/GuessWord";
+export { MentalTasks } from "@/components/games/MentalTasks";
+export { PingPongToss } from "@/components/games/PingPongToss";
+export { FishInWater } from "@/components/games/FishInWater";
+export { DartThrow } from "@/components/games/DartThrow";

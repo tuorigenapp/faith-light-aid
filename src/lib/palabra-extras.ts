@@ -17,7 +17,7 @@ import bg10 from "@/assets/palabra-bg-10.jpg";
 
 export const PALABRA_BACKGROUNDS = [bg1, bg2, bg3, bg4, bg5, bg6, bg7, bg8, bg9, bg10];
 
-export const APP_URL = "https://faith-light-aid.lovable.app";
+export const APP_URL = "https://tuorigen.app";
 
 export function backgroundForDay(day: number) {
   return PALABRA_BACKGROUNDS[(day - 1) % PALABRA_BACKGROUNDS.length]!;
@@ -161,7 +161,7 @@ export function palabraQuiz(p: Palabra): QuizQuestion[] {
 export type ShareTarget = { id: string; label: string; href?: string; copy?: boolean };
 
 export function shareTargets(text: string): ShareTarget[] {
-  const full = `${text}\n\nORÍGEN · ${APP_URL}`;
+  const full = text.includes(APP_URL) ? text : `${text}\n\n${APP_URL}`;
   const enc = encodeURIComponent(full);
   const url = encodeURIComponent(APP_URL);
   return [
@@ -169,7 +169,33 @@ export function shareTargets(text: string): ShareTarget[] {
     { id: "facebook", label: "Facebook", href: `https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${enc}` },
     { id: "x", label: "X", href: `https://twitter.com/intent/tweet?text=${enc}` },
     { id: "telegram", label: "Telegram", href: `https://t.me/share/url?url=${url}&text=${enc}` },
+    { id: "email", label: "Email", href: `mailto:?subject=${encodeURIComponent("Palabra del día — ORÍGEN")}&body=${enc}` },
     { id: "instagram", label: "Instagram (copiar)", copy: true },
-    { id: "copiar", label: "Copiar enlace y texto", copy: true },
+    { id: "copiar", label: "Copiar texto", copy: true },
   ];
+}
+
+/** Texto completo para compartir: tema, cita, enseñanza, reflexión para ti y para tu familia + sitio. */
+export function palabraFullShareText(p: Palabra): string {
+  const blocks = palabraBlocks(p);
+  const ense = blocks.find((b) => b.key === "ensenanza")?.text ?? "";
+  const refl = blocks.find((b) => b.key === "reflexion")?.text ?? "";
+  const fam = blocks.find((b) => b.key === "familia")?.text ?? "";
+  return [
+    `✨ ${p.title}`,
+    "",
+    `${p.passage.reference}`,
+    p.passage.text,
+    "",
+    "📖 Enseñanza de hoy",
+    ense,
+    "",
+    "💛 Reflexión para ti",
+    refl,
+    "",
+    "🏡 Reflexión para tu familia",
+    fam,
+    "",
+    `${APP_URL}`,
+  ].join("\n");
 }

@@ -741,10 +741,13 @@ export type Database = {
           ends_at: string | null
           id: string
           image_url: string | null
+          last_sent_at: string | null
           list_id: string | null
+          max_per_day: number
           name: string
           scheduled_at: string | null
           sent_count: number
+          sent_today: number
           status: string
           subject: string | null
           updated_at: string
@@ -761,10 +764,13 @@ export type Database = {
           ends_at?: string | null
           id?: string
           image_url?: string | null
+          last_sent_at?: string | null
           list_id?: string | null
+          max_per_day?: number
           name: string
           scheduled_at?: string | null
           sent_count?: number
+          sent_today?: number
           status?: string
           subject?: string | null
           updated_at?: string
@@ -781,10 +787,13 @@ export type Database = {
           ends_at?: string | null
           id?: string
           image_url?: string | null
+          last_sent_at?: string | null
           list_id?: string | null
+          max_per_day?: number
           name?: string
           scheduled_at?: string | null
           sent_count?: number
+          sent_today?: number
           status?: string
           subject?: string | null
           updated_at?: string

@@ -6,6 +6,7 @@ const bodySchema = z.object({
   title: z.string().trim().min(2).max(120),
   body: z.string().trim().min(2).max(300),
   url: z.string().trim().max(300).optional(),
+  tag: z.string().trim().max(100).optional(),
   /** Si se omite, se envía a todos los usuarios con push activado. */
   userIds: z.array(z.string().uuid()).max(2000).optional(),
 });
@@ -25,7 +26,7 @@ export const Route = createFileRoute("/api/public/push-broadcast")({
 
         const parsed = bodySchema.safeParse(await request.json().catch(() => null));
         if (!parsed.success) return new Response("Bad request", { status: 400 });
-        const { title, body, url, userIds } = parsed.data;
+        const { title, body, url, userIds, tag } = parsed.data;
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
@@ -48,7 +49,7 @@ export const Route = createFileRoute("/api/public/push-broadcast")({
         const dead: string[] = [];
         for (const sub of (subs.data ?? []) as (PushSubscriptionRow & { user_id: string })[]) {
           try {
-            const status = await sendPush(sub, { title, body, url: url ?? "/dashboard" });
+            const status = await sendPush(sub, { title, body, url: url ?? "/dashboard", tag });
             if (status === 404 || status === 410) dead.push(sub.endpoint);
             else if (status >= 200 && status < 300) sent += 1;
           } catch {

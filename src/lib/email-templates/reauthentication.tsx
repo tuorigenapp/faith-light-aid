@@ -5,6 +5,7 @@ import {
   Container,
   Head,
   Heading,
+  Img,
   Html,
   Preview,
   Section,
@@ -25,8 +26,15 @@ export const ReauthenticationEmail = ({
     <Preview>Tu código de verificación</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Section style={brandBar}>
-          <Text style={brand}>ORÍGEN</Text>
+                <Section style={brandBar}>
+          <Img
+            src="https://faith-light-aid.lovable.app/assets/logo-origen-55bEiby6.png"
+            alt="ORÍGEN"
+            width="56"
+            height="56"
+            style={brandLogo}
+          />
+          <Text style={brandName}>ORÍGEN — tuorigen.app</Text>
         </Section>
         <Heading style={h1}>Tu código de verificación</Heading>
         <Text style={text}>

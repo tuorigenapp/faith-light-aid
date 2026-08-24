@@ -6,6 +6,7 @@ import {
   Container,
   Head,
   Heading,
+  Img,
   Html,
   Link,
   Preview,
@@ -31,8 +32,15 @@ export const SignupEmail = ({
     <Preview>Confirma tu correo y empieza tu camino en {siteName}</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Section style={brandBar}>
-          <Text style={brand}>{siteName}</Text>
+                <Section style={brandBar}>
+          <Img
+            src="https://faith-light-aid.lovable.app/assets/logo-origen-55bEiby6.png"
+            alt="ORÍGEN"
+            width="56"
+            height="56"
+            style={brandLogo}
+          />
+          <Text style={brandName}>ORÍGEN — tuorigen.app</Text>
         </Section>
         <Heading style={h1}>Confirma tu correo</Heading>
         <Text style={text}>
@@ -77,7 +85,16 @@ export const container = {
   maxWidth: '560px',
   margin: '0 auto',
 }
-export const brandBar = { paddingBottom: '16px' }
+export const brandBar = { paddingBottom: '16px', textAlign: 'center' as const }
+export const brandLogo = { borderRadius: '12px', margin: '0 auto 8px', display: 'block' as const }
+export const brandName = {
+  fontSize: '13px',
+  fontWeight: 700 as const,
+  letterSpacing: '1px',
+  color: '#7C5CFF',
+  margin: '0',
+  textAlign: 'center' as const,
+}
 export const brand = {
   fontSize: '15px',
   fontWeight: 700 as const,

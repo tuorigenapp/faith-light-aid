@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { getAudienceCount, sendCampaignNow, scheduleCampaign, pauseCampaign } from "@/lib/marketing.functions";
 
 type Channel = "email" | "push";
 
@@ -46,6 +47,8 @@ type Campaign = {
   sent_count: number;
   click_count: number;
   created_at: string;
+  max_per_day: number;
+  last_sent_at: string | null;
 };
 
 /** Listas predefinidas + libres, con la misma idea que MailerLite. */
@@ -100,6 +103,7 @@ const emptyCampaign = {
   list_id: "",
   scheduled_at: "",
   ends_at: "",
+  max_per_day: 1,
 };
 
 /** Email marketing y campañas push: listas, editor con etiquetas, horarios e historial de clics. */
@@ -128,7 +132,7 @@ export function MarketingManager() {
       const { data, error } = await supabase
         .from("marketing_campaigns")
         .select(
-          "id, name, channel, subject, content, image_url, button_text, button_url, audience_type, list_id, status, scheduled_at, ends_at, sent_count, click_count, created_at",
+          "id, name, channel, subject, content, image_url, button_text, button_url, audience_type, list_id, status, scheduled_at, ends_at, sent_count, click_count, created_at, max_per_day, last_sent_at",
         )
         .order("created_at", { ascending: false })
         .limit(120);

@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Check, Brain, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { awardGems } from "@/lib/gems";
+import { CELEBRATIONS } from "@/lib/celebrate-step";
 
 export type QuizItem = { q: string; options: string[]; correct: number; tip: string };
 
@@ -29,6 +30,7 @@ export function StageQuiz({ items, storageKey, gemsPerCorrect = 15 }: { items: Q
         queryClient.invalidateQueries({ queryKey: ["profile"] });
         queryClient.invalidateQueries({ queryKey: ["dashboard"] });
       });
+      CELEBRATIONS.quizPalabra();
     }
   }
 

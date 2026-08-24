@@ -7,6 +7,8 @@
  * nunca lenguaje impositivo ni esotérico.
  */
 
+import { appDayStart } from "@/lib/app-day";
+
 export type DailyExercise = {
   day: number; // 1..365
   theme: string;
@@ -629,11 +631,12 @@ function seasonLabel(day: number): string {
 
 /** Devuelve el día del año (1..365) para una fecha dada. */
 export function dayOfYear(date: Date = new Date()): number {
-  const start = new Date(date.getFullYear(), 0, 0);
+  const appDate = appDayStart(date);
+  const start = new Date(appDate.getFullYear(), 0, 0);
   const diff =
-    date.getTime() -
+    appDate.getTime() -
     start.getTime() +
-    (start.getTimezoneOffset() - date.getTimezoneOffset()) * 60 * 1000;
+    (start.getTimezoneOffset() - appDate.getTimezoneOffset()) * 60 * 1000;
   const oneDay = 1000 * 60 * 60 * 24;
   const day = Math.floor(diff / oneDay);
   return Math.min(Math.max(day, 1), TOTAL_DAYS);
@@ -690,3 +693,125 @@ export function getAllExercises(): DailyExercise[] {
 }
 
 export { TOTAL_DAYS, THEMES };
+
+// ---------------------------------------------------------------------------
+// Contenido derivado por día: todo se calcula del propio DailyExercise, para
+// que quiz, palabras del juego y ejercicio práctico nunca se sientan ajenos.
+// ---------------------------------------------------------------------------
+
+export type QuizQuestion = {
+  question: string;
+  options: string[];
+  correctIndex: number;
+  explanation: string;
+};
+
+const OTHER_THEME_HINTS: Record<(typeof THEMES)[number], string> = {
+  "Sanación emocional": "Dejar que una emoción pase sin juzgarla",
+  "Patrones familiares heredados": "Reconocer una herencia emocional para no repetirla",
+  "Niño interior": "Cuidar la parte de ti que sigue necesitando ternura",
+  Perdón: "Soltar una deuda emocional aunque el otro no la pague",
+  Identidad: "Recordar quién eres más allá de lo que haces",
+  "Relación con Dios": "Acercarte a Dios desde la confianza, no desde el miedo",
+  "Integración y descanso": "Detenerte a integrar lo vivido sin culpa",
+};
+
+function seeded(n: number, mod: number) {
+  return ((n * 2654435761) >>> 0) % mod;
+}
+
+/** Extrae palabras significativas de una lista de frases (para juegos). */
+function extractKeywords(sentences: string[], min = 4, max = 9): string[] {
+  const stop = new Set([
+    "para","como","este","esta","esto","pero","donde","hacia","desde","cuando",
+    "sobre","entre","hasta","cada","algo","alguien","tienes","hoy","aunque",
+    "sientas","siente","respira","escribe","cierra","empieza","ponte","dile",
+]);
+  const words = sentences
+    .join(" ")
+    .toUpperCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^A-Z\s]/g, " ")
+    .split(/\s+/)
+    .filter((w) => w.length >= min && w.length <= max)
+    .filter((w) => !stop.has(w.toLowerCase()));
+  return Array.from(new Set(words));
+}
+
+/** Palabras clave del día, derivadas del título y los pasos del ejercicio. */
+export function getExerciseKeywords(ex: DailyExercise): string[] {
+  const fromTitle = extractKeywords([ex.title], 3, 9);
+  const fromSteps = extractKeywords(ex.steps, 4, 9);
+  const words = Array.from(new Set([...fromTitle, ...fromSteps]));
+  if (words.length >= 6) return words.slice(0, 8);
+  // relleno determinista por tema si el texto no alcanza
+  const fallback = extractKeywords([ex.purpose, ex.closing, ex.theme], 4, 10);
+  return Array.from(new Set([...words, ...fallback])).slice(0, 8);
+}
+
+/** Quiz de 3 preguntas de opción múltiple, generado del ejercicio de hoy. */
+export function getExerciseQuiz(ex: DailyExercise): QuizQuestion[] {
+  const themeIdx = THEMES.indexOf(ex.theme as (typeof THEMES)[number]);
+  const distractorThemes = THEMES.filter((t) => t !== ex.theme);
+
+  const q1Options = [ex.purpose, ...distractorThemes.slice(0, 3).map((t) => OTHER_THEME_HINTS[t])];
+  const q1Order = [0, 1, 2, 3].sort((a, b) => seeded(ex.day + a, 97) - seeded(ex.day + b, 97));
+
+  const stepsLen = ex.steps.length;
+  const q2Options = [stepsLen - 1, stepsLen, stepsLen + 1, stepsLen + 2].filter((n) => n > 0);
+  while (q2Options.length < 4) q2Options.push(stepsLen + q2Options.length);
+
+  const q3Options = [ex.theme, ...distractorThemes.slice(0, 3)];
+
+  function shuffledWithCorrect<T>(options: T[], correctValue: T, seedBase: number) {
+    const idx = options.findIndex((o) => o === correctValue);
+    const order = options.map((_, i) => i).sort((a, b) => seeded(seedBase + a, 89) - seeded(seedBase + b, 89));
+    const shuffled = order.map((i) => options[i]);
+    return { options: shuffled, correctIndex: order.indexOf(idx) };
+  }
+
+  const s1 = shuffledWithCorrect(q1Options, ex.purpose, ex.day);
+  const s2 = shuffledWithCorrect(
+    q2Options.map(String),
+    String(stepsLen),
+    ex.day + 1,
+  );
+  const s3 = shuffledWithCorrect(q3Options, ex.theme, ex.day + 2);
+
+  return [
+    {
+      question: `¿Cuál es el propósito del ejercicio de hoy, "${ex.title}"?`,
+      options: s1.options,
+      correctIndex: s1.correctIndex,
+      explanation: ex.purpose,
+    },
+    {
+      question: "¿Cuántos pasos tiene el ejercicio de hoy?",
+      options: s2.options,
+      correctIndex: s2.correctIndex,
+      explanation: `El ejercicio de hoy tiene ${stepsLen} pasos concretos.`,
+    },
+    {
+      question: "¿A qué tema pertenece la práctica de hoy?",
+      options: s3.options,
+      correctIndex: s3.correctIndex,
+      explanation: `Hoy trabajas: ${ex.theme}.`,
+    },
+  ];
+}
+
+export type GameKind = "cofre" | "adivina" | "sopa" | "pimpon" | "pez" | "dardo";
+const GAME_ORDER: GameKind[] = ["cofre", "adivina", "sopa", "pimpon", "pez", "dardo"];
+
+/** Juego del día: rota entre los 6 tipos según el día, siempre determinista. */
+export function getGameKindForDay(day: number): GameKind {
+  return GAME_ORDER[(day - 1) % GAME_ORDER.length];
+}
+
+/** Palabra principal del ejercicio para juegos de adivinar (más larga y significativa del título). */
+export function getMainWord(ex: DailyExercise): string {
+  const words = extractKeywords([ex.title], 3, 12);
+  if (words.length) return words.sort((a, b) => b.length - a.length)[0];
+  return extractKeywords([ex.theme], 3, 14)[0] ?? "ORIGEN";
+}
