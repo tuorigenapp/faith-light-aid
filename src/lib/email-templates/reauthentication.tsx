@@ -12,7 +12,7 @@ import {
   Text,
 } from '@react-email/components'
 
-import { brand, brandBar, container, footer, h1, main, text } from './signup'
+import { brand, brandBar, brandLogo, brandName, container, footer, h1, main, text } from './signup'
 
 interface ReauthenticationEmailProps {
   token: string
