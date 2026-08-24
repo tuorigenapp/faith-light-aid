@@ -9,8 +9,8 @@
 - [ ] G. /palabra: copy de fondos, descarga completa, popup de compartir con tuorigen.app
 - [ ] H. /admin Ventas + Uso de la app (fechas/horas/secciones) + Contenido tipo Drive + backup con código por email
 - [ ] I. Push solo en la barra del teléfono, con ícono y nombre tuorigen.app
-- [ ] J. /ministracion: nueva portada con borde
+- [x] J. /ministracion: nueva portada con borde
 - [ ] K. Celebraciones al completar etapa, ejercicio, quiz, visualiza
 - [ ] L. Toasts sociales: landing (venta) y /dashboard (uso)
-- [ ] M. /dashboard: textos cortos + enlaces nuevos a /programas/*
+- [x] M. /dashboard: textos cortos + enlaces nuevos a /programas/*
 - [ ] N. /visualiza: seguimiento arriba, sin "Etapa 1..4", un solo selector, portada Duolingo
