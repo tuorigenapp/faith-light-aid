@@ -10,7 +10,7 @@ export function DartThrow({ onComplete }: { onComplete?: () => void }) {
   const [dir, setDir] = useState(1);
   const [hits, setHits] = useState(0);
   const [feedback, setFeedback] = useState<"hit" | "miss" | null>(null);
-  const raf = useRef<number>();
+  const raf = useRef<number | null>(null);
   const done = hits >= REQUIRED;
 
   useEffect(() => {
@@ -25,7 +25,9 @@ export function DartThrow({ onComplete }: { onComplete?: () => void }) {
       raf.current = requestAnimationFrame(tick);
     }
     raf.current = requestAnimationFrame(tick);
-    return () => raf.current && cancelAnimationFrame(raf.current);
+    return () => {
+      if (raf.current) cancelAnimationFrame(raf.current);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [done]);
 
