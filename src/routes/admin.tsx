@@ -21,6 +21,7 @@ import {
   Loader2,
   ShieldCheck,
   Headphones,
+  Send,
 } from "lucide-react";
 import { BooksManager } from "@/components/admin/BooksManager";
 import { AudiosManager } from "@/components/admin/AudiosManager";
