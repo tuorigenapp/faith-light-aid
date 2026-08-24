@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import ministracionHero from "@/assets/ministracion-hero.jpg";
+import ministracionHero from "@/assets/ministracion-palabra-cielo.jpg";
 import e3dCross from "@/assets/e3d-cross.png";
 import e3dStar from "@/assets/e3d-star.png";
 import e3dHeartgem from "@/assets/e3d-heartgem.png";
@@ -241,7 +241,7 @@ function MinistracionPage() {
           <div className="animate-in fade-in slide-in-from-right-6 duration-300">
             <div className="hero-card p-0 overflow-hidden relative shadow-elev ring-1 ring-border">
               <div className="relative">
-                <img src={ministracionHero} alt="Consulta de Ministración — ORIGEN" width={1280} height={720} loading="lazy" className="w-full h-auto rounded-[16px] block" />
+                <img src={ministracionHero} alt="Manos abiertas recibiendo una palabra del cielo" width={1280} height={896} loading="lazy" className="w-full h-auto rounded-[16px] block border-2 border-gold/40 shadow-soft" />
                 <div className="absolute inset-0 pointer-events-none" style={{ boxShadow: "inset 0 0 40px rgba(255,255,255,0.12)" }} />
               </div>
               <div className="p-5 text-center">

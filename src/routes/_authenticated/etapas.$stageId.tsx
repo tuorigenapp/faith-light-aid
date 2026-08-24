@@ -18,6 +18,8 @@ import { getStageContent, getSolutionSteps, getStageTasks } from "@/lib/stage-co
 import { awardLeaf, ACTION_POINTS, type ActionLevel } from "@/lib/gems";
 import { AnswerFeedback } from "@/components/AnswerFeedback";
 import { useStagePack, stageVariant, type StagePack } from "@/lib/stage-pack";
+import { msUntilAppDayReset, formatCountdown, APP_DAY_RESET_LABEL } from "@/lib/app-day";
+import { CELEBRATIONS } from "@/lib/celebrate-step";
 import heartCrystal from "@/assets/st-heart-crystal.png";
 import chest from "@/assets/st-chest.png";
 import robot from "@/assets/st-robot.png";
@@ -212,6 +214,7 @@ function StageFlow() {
     qc.invalidateQueries({ queryKey: ["etapas"] });
     qc.invalidateQueries({ queryKey: ["stage"] });
     qc.invalidateQueries({ queryKey: ["dashboard"] });
+    CELEBRATIONS.etapaCamino();
     navigate({ to: "/etapas" });
   }
 
@@ -1269,10 +1272,10 @@ function CompletedStageView({ stage, position, total, onBack }: { stage: any; po
         <span className="mt-3 inline-block rounded-full bg-[#3FBE8F]/12 px-3 py-1 text-[12px] font-extrabold text-[#2F9A73]">Completada</span>
         <h1 className="font-display font-extrabold text-[22px] mt-3 leading-tight">{stage.title}</h1>
         <p className="text-[13.5px] text-muted-foreground mt-2 leading-snug">
-          Ya completaste el Día {position} de tu camino. Queda guardada como parte de tu camino, solo en modo lectura.
+          Día {position}: {stage.title}. Ya la viviste hoy y queda guardada en tu camino, en modo lectura.
         </p>
         <p className="mt-3 text-[12.5px] text-muted-foreground leading-snug">
-          Son 7 etapas por semana: una lección por día hasta completarla, con 365 lecciones al año en total.
+          Un día a la vez. Mañana se abre tu próximo paso.
         </p>
         <Button onClick={onBack} className="mt-5 h-[52px] w-full rounded-[12px] text-[15px] font-semibold bg-gradient-to-r from-accent-pink to-primary text-white">
           Volver a mi camino
@@ -1283,18 +1286,29 @@ function CompletedStageView({ stage, position, total, onBack }: { stage: any; po
 }
 
 function LockedStageView({ tomorrow, onBack }: { tomorrow: boolean; onBack: () => void }) {
+  const [left, setLeft] = useState(msUntilAppDayReset());
+  useEffect(() => {
+    if (!tomorrow) return;
+    const t = setInterval(() => setLeft(msUntilAppDayReset()), 1000);
+    return () => clearInterval(t);
+  }, [tomorrow]);
   return (
     <div className="min-h-dvh grid place-items-center px-4 py-8" style={{ background: "radial-gradient(120% 80% at 50% 0%, #2E1A4D 0%, #1E1033 60%, #150C24 100%)" }}>
       <Card className="w-full max-w-sm rounded-[16px] p-6 text-center shadow-soft bg-card/95">
         <div className="w-14 h-14 mx-auto rounded-full bg-primary/10 text-primary grid place-items-center"><Lock className="w-7 h-7" /></div>
         <h1 className="font-display font-extrabold text-[22px] mt-3 leading-tight">
-          {tomorrow ? "Se abre a medianoche" : "Etapa bloqueada"}
+          {tomorrow ? "Se abre a las 12:00 de la noche" : "Etapa bloqueada"}
         </h1>
         <p className="text-[13.5px] text-muted-foreground mt-2 leading-snug">
           {tomorrow
-            ? "Ya completaste tu lección de hoy. Vuelve mañana para continuar tu camino: una lección por día, 7 etapas por semana."
+            ? "Ya viviste tu día de hoy. El siguiente paso se abre a medianoche."
             : "Primero completa la etapa anterior de tu camino para desbloquear esta."}
         </p>
+        {tomorrow && (
+          <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-[15px] font-mono font-extrabold text-primary" role="timer" aria-live="polite">
+            {formatCountdown(left)}
+          </div>
+        )}
         <Button onClick={onBack} className="mt-5 h-[52px] w-full rounded-[12px] text-[15px] font-semibold bg-gradient-to-r from-accent-pink to-primary text-white">
           Volver a mi camino
         </Button>

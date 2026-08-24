@@ -95,7 +95,7 @@ export type PushSubscriptionRow = {
   auth: string | null;
 };
 
-export type PushMessage = { title: string; body: string; url?: string };
+export type PushMessage = { title: string; body: string; url?: string; tag?: string };
 
 /** Envía una notificación. Devuelve el status HTTP del servicio de push. */
 export async function sendPush(sub: PushSubscriptionRow, message: PushMessage): Promise<number> {
@@ -105,7 +105,20 @@ export async function sendPush(sub: PushSubscriptionRow, message: PushMessage): 
   if (!publicKey || !privateKey) throw new Error("VAPID keys missing");
   if (!sub.p256dh || !sub.auth) return 400;
 
-  const payload = await encryptPayload(sub.p256dh, sub.auth, JSON.stringify(message));
+  const url = message.url ?? "/dashboard";
+  const title = message.title.startsWith("tuorigen.app")
+    ? message.title
+    : `tuorigen.app · ${message.title}`;
+  const fullPayload = {
+    title,
+    body: message.body,
+    url,
+    icon: "/icon-192.png",
+    badge: "/icon-192.png",
+    tag: message.tag ?? `origen-${url}`,
+  };
+
+  const payload = await encryptPayload(sub.p256dh, sub.auth, JSON.stringify(fullPayload));
   const res = await fetch(sub.endpoint, {
     method: "POST",
     headers: {

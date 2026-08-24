@@ -1,22 +1,48 @@
 import { useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { Share2, Download, Sparkles, Leaf, Check, X, Image as ImageIcon } from "lucide-react";
-import { getPalabraHoy, palabraShareText, type Palabra } from "@/lib/palabra365";
 import {
-  APP_URL,
+  Share2,
+  Download,
+  Sparkles,
+  Leaf,
+  Check,
+  X,
+  Image as ImageIcon,
+  MessageCircle,
+  Facebook,
+  Send,
+  Mail,
+  Instagram,
+  Copy,
+  AtSign,
+} from "lucide-react";
+import { getPalabraHoy, type Palabra } from "@/lib/palabra365";
+import {
   PALABRA_BACKGROUNDS,
   backgroundForDay,
   palabraBlocks,
+  palabraFullShareText,
   palabraQuiz,
   shareTargets,
 } from "@/lib/palabra-extras";
+import { blobToShareFile, downloadPalabraWallpaper, generatePalabraWallpaper } from "@/components/palabra/wallpaperCanvas";
 import { awardLeaf } from "@/lib/gems";
 import { appDayKey } from "@/lib/app-day";
 import { useAuth } from "@/lib/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { SatisfactionRating } from "@/components/SatisfactionRating";
-import { celebrate } from "@/lib/celebrate";
+import { CELEBRATIONS } from "@/lib/celebrate-step";
+
+const SHARE_ICONS: Record<string, typeof Share2> = {
+  whatsapp: MessageCircle,
+  facebook: Facebook,
+  x: AtSign,
+  telegram: Send,
+  email: Mail,
+  instagram: Instagram,
+  copiar: Copy,
+};
 
 export const Route = createFileRoute("/_authenticated/palabra")({
   head: () => ({
@@ -80,7 +106,7 @@ function PalabraPage() {
 
   const blocks = useMemo(() => (palabra ? palabraBlocks(palabra) : []), [palabra]);
   const quiz = useMemo(() => (palabra ? palabraQuiz(palabra) : []), [palabra]);
-  const shareText = useMemo(() => (palabra ? palabraShareText(palabra) : ""), [palabra]);
+  const shareText = useMemo(() => (palabra ? palabraFullShareText(palabra) : ""), [palabra]);
   const correctCount = quiz.filter((q, i) => answers[i] === q.correct).length;
   const quizDone = Object.keys(answers).length === quiz.length && quiz.length > 0;
 
@@ -92,7 +118,7 @@ function PalabraPage() {
         day: palabra.day,
         aciertos: correctCount,
       });
-      if (correctCount === quiz.length) celebrate(1200);
+      if (correctCount === quiz.length) CELEBRATIONS.quizPalabra();
       toast(
         correctCount === quiz.length
           ? "¡Las tres correctas! 🌿 Sumaste progreso de hoja."
@@ -104,11 +130,10 @@ function PalabraPage() {
 
   async function handleShare(target: ReturnType<typeof shareTargets>[number]) {
     if (!palabra) return;
-    const fullText = `${shareText}\n\nORÍGEN · ${APP_URL}`;
     if (target.copy) {
       try {
-        await navigator.clipboard.writeText(fullText);
-        toast.success("Copiado", { description: "Pégalo donde quieras compartirlo." });
+        await navigator.clipboard.writeText(shareText);
+        toast.success("Texto copiado", { description: "Pégalo donde quieras compartirlo." });
       } catch {
         toast.error("No pudimos copiar el texto.");
       }
@@ -120,13 +145,20 @@ function PalabraPage() {
 
   async function nativeShare() {
     if (!palabra) return;
-    const fullText = `${shareText}\n\nORÍGEN · ${APP_URL}`;
     if (navigator.share) {
       try {
-        await navigator.share({ title: palabra.title, text: fullText });
-        return;
+        if (navigator.canShare) {
+          const blob = await generatePalabraWallpaper(palabra, blocks, PALABRA_BACKGROUNDS[bgIndex]!);
+          const file = await blobToShareFile(blob, palabra.day);
+          if (navigator.canShare({ files: [file] })) {
+            await navigator.share({ title: palabra.title, text: shareText, files: [file] });
+            setShareOpen(true);
+            return;
+          }
+        }
+        await navigator.share({ title: palabra.title, text: shareText });
       } catch {
-        /* usuario canceló */
+        /* usuario canceló o no soportado */
       }
     }
     setShareOpen(true);
@@ -136,7 +168,7 @@ function PalabraPage() {
     if (!palabra) return;
     setDownloading(true);
     try {
-      await drawWallpaper(palabra, PALABRA_BACKGROUNDS[bgIndex]!);
+      await downloadPalabraWallpaper(palabra, blocks, PALABRA_BACKGROUNDS[bgIndex]!);
       toast.success("Imagen descargada", { description: "Ya puedes ponerla de fondo o compartirla." });
     } catch (e) {
       console.error(e);
@@ -274,8 +306,10 @@ function PalabraPage() {
               <ImageIcon className="h-5 w-5" />
             </span>
             <div>
-              <p className="font-display text-[17px] font-bold">Descarga tu fondo de pantalla</p>
-              <p className="text-[13px] text-muted-foreground">Elige uno de los 10 fondos</p>
+              <p className="font-display text-[17px] font-bold">Elige un fondo para tu Palabra de hoy</p>
+              <p className="text-[13px] text-muted-foreground">
+                Se descarga con tu Palabra completa lista para guardar o compartir.
+              </p>
             </div>
           </div>
 
@@ -325,18 +359,21 @@ function PalabraPage() {
           >
             <p className="text-center font-display text-[17px] font-bold">Compartir la Palabra de hoy</p>
             <div className="mt-4 grid grid-cols-3 gap-3">
-              {shareTargets(shareText).map((t) => (
-                <button
-                  key={t.id}
-                  onClick={() => handleShare(t)}
-                  className="flex min-h-[76px] flex-col items-center justify-center gap-2 rounded-[12px] border border-border/60 bg-background px-2 text-[12px] font-semibold"
-                >
-                  <span className="grid h-9 w-9 place-items-center rounded-full bg-primary/10 text-primary">
-                    <Share2 className="h-4 w-4" />
-                  </span>
-                  {t.label}
-                </button>
-              ))}
+              {shareTargets(shareText).map((t) => {
+                const ShareIcon = SHARE_ICONS[t.id] ?? Share2;
+                return (
+                  <button
+                    key={t.id}
+                    onClick={() => handleShare(t)}
+                    className="flex min-h-[76px] flex-col items-center justify-center gap-2 rounded-[12px] border border-border/60 bg-background px-2 text-[12px] font-semibold"
+                  >
+                    <span className="grid h-9 w-9 place-items-center rounded-full bg-primary/10 text-primary">
+                      <ShareIcon className="h-4 w-4" />
+                    </span>
+                    {t.label}
+                  </button>
+                );
+              })}
             </div>
             <button onClick={() => setShareOpen(false)} className="mt-4 min-h-11 w-full text-sm font-medium text-muted-foreground">
               Cerrar
@@ -346,128 +383,4 @@ function PalabraPage() {
       )}
     </div>
   );
-}
-
-/* ---------------- Imprimible ---------------- */
-
-function wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
-  const lines: string[] = [];
-  for (const para of text.split("\n")) {
-    if (!para.trim()) {
-      lines.push("");
-      continue;
-    }
-    let current = "";
-    for (const word of para.split(" ")) {
-      const test = current ? `${current} ${word}` : word;
-      if (ctx.measureText(test).width > maxWidth && current) {
-        lines.push(current);
-        current = word;
-      } else current = test;
-    }
-    if (current) lines.push(current);
-  }
-  return lines;
-}
-
-async function loadImage(src: string) {
-  return new Promise<HTMLImageElement>((resolve, reject) => {
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = () => resolve(img);
-    img.onerror = reject;
-    img.src = src;
-  });
-}
-
-async function drawWallpaper(palabra: Palabra, bgSrc: string) {
-  const width = 1080;
-  const height = 1920;
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("no canvas context");
-
-  const img = await loadImage(bgSrc);
-  // cubrir toda la página sin cortar contenido
-  const scale = Math.max(width / img.width, height / img.height);
-  const w = img.width * scale;
-  const h = img.height * scale;
-  ctx.drawImage(img, (width - w) / 2, (height - h) / 2, w, h);
-
-  // velo con degradado para que TODO se lea
-  const veil = ctx.createLinearGradient(0, 0, 0, height);
-  veil.addColorStop(0, "rgba(18,14,32,0.72)");
-  veil.addColorStop(0.45, "rgba(18,14,32,0.58)");
-  veil.addColorStop(1, "rgba(18,14,32,0.80)");
-  ctx.fillStyle = veil;
-  ctx.fillRect(0, 0, width, height);
-
-  const marginX = 96;
-  const maxWidth = width - marginX * 2;
-  ctx.textAlign = "center";
-
-  let y = 210;
-  ctx.font = "700 32px 'Trebuchet MS', sans-serif";
-  ctx.fillStyle = "rgba(255,255,255,0.85)";
-  ctx.fillText("🕊️  ORÍGEN · PALABRA DEL DÍA", width / 2, y);
-
-  y += 96;
-  ctx.font = "700 60px Georgia, serif";
-  ctx.fillStyle = "#ffffff";
-  for (const line of wrapText(ctx, palabra.title, maxWidth)) {
-    ctx.fillText(line, width / 2, y);
-    y += 70;
-  }
-
-  y += 34;
-  ctx.font = "italic 600 34px Georgia, serif";
-  ctx.fillStyle = "#F5C77E";
-  ctx.fillText(palabra.passage.reference, width / 2, y);
-
-  y += 66;
-  ctx.font = "500 36px Georgia, serif";
-  ctx.fillStyle = "rgba(255,255,255,0.96)";
-  for (const line of wrapText(ctx, palabra.passage.text, maxWidth)) {
-    if (line === "") {
-      y += 24;
-      continue;
-    }
-    if (y > height - 620) break;
-    ctx.fillText(line, width / 2, y);
-    y += 50;
-  }
-
-  y += 52;
-  ctx.font = "700 30px 'Trebuchet MS', sans-serif";
-  ctx.fillStyle = "#F5C77E";
-  ctx.fillText("CONSEJO ESPIRITUAL", width / 2, y);
-
-  y += 52;
-  ctx.font = "400 30px 'Trebuchet MS', sans-serif";
-  ctx.fillStyle = "rgba(255,255,255,0.92)";
-  for (const line of wrapText(ctx, palabra.advice, maxWidth)) {
-    if (y > height - 260) break;
-    ctx.fillText(line, width / 2, y);
-    y += 44;
-  }
-
-  ctx.font = "700 34px Georgia, serif";
-  ctx.fillStyle = "#F5C77E";
-  ctx.fillText("ORÍGEN", width / 2, height - 150);
-  ctx.font = "400 26px 'Trebuchet MS', sans-serif";
-  ctx.fillStyle = "rgba(255,255,255,0.82)";
-  ctx.fillText(APP_URL.replace("https://", ""), width / 2, height - 106);
-
-  const blob: Blob | null = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
-  if (!blob) throw new Error("no blob");
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `origen-palabra-dia-${palabra.day}.png`;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
 }

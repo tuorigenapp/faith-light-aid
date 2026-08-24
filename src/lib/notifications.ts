@@ -63,10 +63,16 @@ export async function enablePush(userId: string): Promise<{ ok: boolean; message
   }
 
   await supabase.from("notification_prefs").upsert({ user_id: userId, push_enabled: true });
-  await reg.showNotification("Notificaciones activadas 🕊️", {
+  const enabledOptions: NotificationOptions = {
     body: "Te avisaremos de la Palabra del día, tu racha y tus consultas.",
     icon: "/icon-192.png",
-  });
+    badge: "/icon-192.png",
+    tag: "origen-push-enabled",
+    data: { url: "/dashboard" },
+  };
+  // @ts-expect-error renotify no está tipado en NotificationOptions estándar del DOM
+  enabledOptions.renotify = false;
+  await reg.showNotification("tuorigen.app · Notificaciones activadas 🕊️", enabledOptions);
   return { ok: true, message: "Notificaciones activadas." };
 }
 
@@ -133,9 +139,19 @@ export function checkLocalReminder(): LocalReminder | null {
 export async function showLocalNotification(r: LocalReminder) {
   if (permissionState() !== "granted") return;
   try {
+    const title = `tuorigen.app · ${r.title}`;
+    const options: NotificationOptions = {
+      body: r.body,
+      icon: "/icon-192.png",
+      badge: "/icon-192.png",
+      tag: `origen-local-${r.kind}`,
+      data: { url: "/dashboard" },
+    };
+    // @ts-expect-error renotify no está tipado en NotificationOptions estándar del DOM
+    options.renotify = false;
     const reg = await navigator.serviceWorker.getRegistration("/sw.js");
-    if (reg) await reg.showNotification(r.title, { body: r.body, icon: "/icon-192.png" });
-    else new Notification(r.title, { body: r.body });
+    if (reg) await reg.showNotification(title, options);
+    else new Notification(title, options);
   } catch (e) {
     console.error(e);
   }

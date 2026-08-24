@@ -1,6 +1,18 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronDown, ChevronRight, Headphones, Loader2, Pencil, Plus, Trash2, Upload, X } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronRight,
+  FolderPlus,
+  Headphones,
+  Image as ImageIcon,
+  Loader2,
+  Pencil,
+  Plus,
+  Trash2,
+  Upload,
+  X,
+} from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,12 +36,16 @@ type Cat = {
   id: string;
   title: string;
   subtitle: string | null;
+  description: string | null;
+  cover_url: string | null;
   group_key: string;
   program_group: string;
+  required_plan: string;
   sort_order: number;
 };
 
-const BUCKET = "manifest-audios";
+const AUDIO_BUCKET = "manifest-audio";
+const COVERS_BUCKET = "manifest-covers";
 
 /** Nombre visible de cada grupo madre del panel. */
 const GROUP_LABELS: Record<string, string> = {
@@ -58,6 +74,12 @@ const GROUP_ORDER = [
   "permiso-hombre",
 ];
 
+const PLAN_OPTIONS = [
+  { value: "free", label: "Gratis" },
+  { value: "premium", label: "Premium" },
+  { value: "vip", label: "VIP" },
+];
+
 const schema = z.object({
   category_id: z.string().trim().min(1, "Elige una práctica o playlist"),
   day_index: z.number().int().min(1, "El día empieza en 1").max(365),
@@ -82,6 +104,41 @@ const emptyForm = {
   pdf_url: "",
 };
 
+const catSchema = z.object({
+  id: z
+    .string()
+    .trim()
+    .min(2, "El slug necesita al menos 2 letras")
+    .max(60)
+    .regex(/^[a-z0-9-]+$/, "Usa solo minúsculas, números y guiones"),
+  title: z.string().trim().min(3, "El título necesita al menos 3 letras").max(140),
+  subtitle: z.string().trim().max(200).optional().or(z.literal("")),
+  description: z.string().trim().max(2000).optional().or(z.literal("")),
+  cover_url: z.string().trim().max(800).optional().or(z.literal("")),
+  required_plan: z.string().trim().min(1),
+  sort_order: z.number().int().min(0).max(9999),
+});
+
+const emptyCatForm = {
+  id: "",
+  title: "",
+  subtitle: "",
+  description: "",
+  cover_url: "",
+  required_plan: "free",
+  sort_order: 0,
+};
+
+/** Convierte un título en un slug simple para usar como id de subcategoría. */
+function slugify(v: string) {
+  return v
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
 /** Alta, edición y baja de audios y prácticas de Visualízalo y Vívelo, organizadas por categoría y subcategoría. */
 export function AudiosManager() {
   const qc = useQueryClient();
@@ -91,13 +148,21 @@ export function AudiosManager() {
   const [form, setForm] = useState(emptyForm);
   const [openGroups, setOpenGroups] = useState<Set<string>>(new Set(["abundancia"]));
   const [filter, setFilter] = useState<string>("");
+  const [selectedRoot, setSelectedRoot] = useState<string>("");
 
-  const { data: cats } = useQuery({
+  const [catOpen, setCatOpen] = useState(false);
+  const [catEditing, setCatEditing] = useState<string | null>(null);
+  const [catUploading, setCatUploading] = useState(false);
+  const [catForm, setCatForm] = useState(emptyCatForm);
+
+  const { data: cats, isLoading: catsLoading, isError: catsError } = useQuery({
     queryKey: ["admin-manifest-cats"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("manifest_categories")
-        .select("id, title, subtitle, group_key, program_group, sort_order")
+        .select(
+          "id, title, subtitle, description, cover_url, group_key, program_group, required_plan, sort_order",
+        )
         .order("sort_order");
       if (error) throw error;
       return (data ?? []) as Cat[];
@@ -133,7 +198,7 @@ export function AudiosManager() {
     }));
   }, [cats]);
 
-  const { data: audios, isLoading } = useQuery({
+  const { data: audios, isLoading, isError: audiosError } = useQuery({
     queryKey: ["admin-manifest-audios", filter],
     queryFn: async () => {
       let q = supabase
@@ -150,24 +215,52 @@ export function AudiosManager() {
     },
   });
 
-  async function upload(kind: "audio" | "cover", file: File) {
-    const max = kind === "audio" ? 40 : 5;
+  async function uploadFile(kind: "audio" | "cover", file: File): Promise<string | null> {
+    const isAudio = kind === "audio";
+    const max = isAudio ? 40 : 5;
     if (file.size > max * 1024 * 1024) {
       toast.error(`El archivo supera ${max} MB.`);
-      return;
+      return null;
     }
-    setUploading(kind);
-    const ext =
-      file.name.split(".").pop()?.toLowerCase().replace(/[^a-z0-9]/g, "") || (kind === "audio" ? "mp3" : "jpg");
-    const path = `${kind}/${crypto.randomUUID()}.${ext}`;
-    const { error } = await supabase.storage.from(BUCKET).upload(path, file, { upsert: false, contentType: file.type });
-    setUploading(null);
+    if (isAudio && !file.type.startsWith("audio/")) {
+      toast.error("Elige un archivo de audio válido (MP3, WAV, M4A).");
+      return null;
+    }
+    if (!isAudio && !file.type.startsWith("image/")) {
+      toast.error("Elige una imagen válida (PNG, JPG o WEBP).");
+      return null;
+    }
+    const bucket = isAudio ? AUDIO_BUCKET : COVERS_BUCKET;
+    const ext = file.name.split(".").pop()?.toLowerCase().replace(/[^a-z0-9]/g, "") || (isAudio ? "mp3" : "jpg");
+    const path = `${crypto.randomUUID()}.${ext}`;
+    const { error } = await supabase.storage.from(bucket).upload(path, file, {
+      upsert: false,
+      contentType: file.type,
+    });
     if (error) {
       toast.error("No pudimos subir el archivo. Revisa tu conexión.");
-      return;
+      return null;
     }
-    setForm((f) => ({ ...f, [kind === "audio" ? "audio_url" : "cover_url"]: path }));
+    const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+    return data.publicUrl;
+  }
+
+  async function upload(kind: "audio" | "cover", file: File) {
+    setUploading(kind);
+    const url = await uploadFile(kind, file);
+    setUploading(null);
+    if (!url) return;
+    setForm((f) => ({ ...f, [kind === "audio" ? "audio_url" : "cover_url"]: url }));
     toast.success(kind === "audio" ? "MP3 subido" : "Portada subida");
+  }
+
+  async function uploadCatCover(file: File) {
+    setCatUploading(true);
+    const url = await uploadFile("cover", file);
+    setCatUploading(false);
+    if (!url) return;
+    setCatForm((f) => ({ ...f, cover_url: url }));
+    toast.success("Portada subida");
   }
 
   const save = useMutation({
@@ -217,6 +310,71 @@ export function AudiosManager() {
     onError: () => toast.error("No pudimos eliminar la práctica"),
   });
 
+  const saveCat = useMutation({
+    mutationFn: async () => {
+      const parsed = catSchema.safeParse(catForm);
+      if (!parsed.success) throw new Error(parsed.error.issues[0]!.message);
+      const d = parsed.data;
+      if (catEditing) {
+        const { error } = await supabase
+          .from("manifest_categories")
+          .update({
+            title: d.title,
+            subtitle: d.subtitle || null,
+            description: d.description || null,
+            cover_url: d.cover_url || null,
+            required_plan: d.required_plan,
+            sort_order: d.sort_order,
+          })
+          .eq("id", catEditing);
+        if (error) throw error;
+      } else {
+        if (!selectedRoot) throw new Error("Elige primero la categoría principal");
+        const { error } = await supabase.from("manifest_categories").insert({
+          id: d.id,
+          title: d.title,
+          subtitle: d.subtitle || null,
+          description: d.description || null,
+          cover_url: d.cover_url || null,
+          required_plan: d.required_plan,
+          sort_order: d.sort_order,
+          group_key: selectedRoot,
+          program_group: selectedRoot,
+          affirmation_ya_tengo: "",
+          identity_yo_soy: "",
+          gratitude_gracias: "",
+          petition: "",
+        });
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      toast.success(catEditing ? "Subcategoría actualizada" : "Subcategoría creada");
+      setCatOpen(false);
+      setCatEditing(null);
+      setCatForm(emptyCatForm);
+      void qc.invalidateQueries({ queryKey: ["admin-manifest-cats"] });
+      void qc.invalidateQueries({ queryKey: ["sonidos_home"] });
+    },
+    onError: (e: Error) => toast.error(e.message || "No pudimos guardar la subcategoría"),
+  });
+
+  const removeCat = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("manifest_categories").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Subcategoría eliminada");
+      if (filter === catEditing) setFilter("");
+      void qc.invalidateQueries({ queryKey: ["admin-manifest-cats"] });
+      void qc.invalidateQueries({ queryKey: ["admin-manifest-audios"] });
+      void qc.invalidateQueries({ queryKey: ["sonidos_home"] });
+    },
+    onError: () =>
+      toast.error("No pudimos eliminar la subcategoría. Borra primero sus audios."),
+  });
+
   function startEdit(a: Audio) {
     setEditing(a.id);
     setForm({
@@ -231,6 +389,28 @@ export function AudiosManager() {
       pdf_url: a.pdf_url ?? "",
     });
     setOpen(true);
+  }
+
+  function startCreateCat(rootKey: string) {
+    setSelectedRoot(rootKey);
+    setCatEditing(null);
+    setCatForm(emptyCatForm);
+    setCatOpen(true);
+  }
+
+  function startEditCat(c: Cat) {
+    setSelectedRoot(c.group_key);
+    setCatEditing(c.id);
+    setCatForm({
+      id: c.id,
+      title: c.title,
+      subtitle: c.subtitle ?? "",
+      description: c.description ?? "",
+      cover_url: c.cover_url ?? "",
+      required_plan: c.required_plan ?? "free",
+      sort_order: c.sort_order ?? 0,
+    });
+    setCatOpen(true);
   }
 
   function toggleGroup(key: string) {
@@ -254,262 +434,524 @@ export function AudiosManager() {
           onClick={() => {
             setEditing(null);
             setForm((f) => ({ ...f, category_id: filter || f.category_id }));
+            setCatOpen(false);
             setOpen((v) => !v);
           }}
           className="inline-flex h-11 items-center gap-1.5 rounded-[12px] bg-primary px-4 text-[13px] font-semibold text-primary-foreground"
         >
           {open ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-          {open ? "Cerrar" : "Agregar"}
+          {open ? "Cerrar" : "Agregar audio"}
         </button>
       </div>
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-[280px_minmax(0,1fr)]">
-        {/* Árbol de categorías y subcategorías */}
-        <nav className="rounded-[12px] border border-border/60 bg-background p-2">
-          <button
-            onClick={() => setFilter("")}
-            className={cn(
-              "mb-1 block w-full rounded-[10px] px-3 py-2 text-left text-[13px] font-semibold",
-              filter === "" ? "bg-primary/10 text-primary" : "text-muted-foreground",
-            )}
-          >
-            Todo el contenido
-          </button>
-          {groups.map((g) => {
-            const isOpen = openGroups.has(g.key);
-            return (
-              <div key={g.key} className="mb-1">
-                <button
-                  onClick={() => toggleGroup(g.key)}
-                  className="flex w-full items-center gap-1.5 rounded-[10px] px-2 py-2 text-left text-[12.5px] font-bold"
-                >
-                  {isOpen ? (
-                    <ChevronDown className="h-4 w-4 shrink-0 text-primary" />
-                  ) : (
-                    <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
-                  )}
-                  <span className="min-w-0 flex-1 truncate">{g.label}</span>
-                  <span className="shrink-0 text-[11px] font-semibold text-muted-foreground">{g.items.length}</span>
-                </button>
-                {isOpen && (
-                  <ul className="ml-4 space-y-0.5 border-l border-border pl-2">
-                    {g.items.map((c) => (
-                      <li key={c.id}>
-                        <button
-                          onClick={() => setFilter(c.id)}
-                          className={cn(
-                            "grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-2 rounded-[10px] px-2.5 py-2 text-left text-[12.5px]",
-                            filter === c.id ? "bg-primary/10 font-bold text-primary" : "text-foreground",
-                          )}
-                        >
-                          <span className="truncate">{c.title}</span>
-                          <span className="text-[11px] font-semibold text-muted-foreground">
-                            {counts?.[c.id] ?? 0}
-                          </span>
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            );
-          })}
-        </nav>
+      {catsLoading && (
+        <div className="mt-4 grid gap-4 lg:grid-cols-[280px_minmax(0,1fr)]">
+          <div className="h-64 animate-pulse rounded-[12px] bg-muted" />
+          <div className="h-64 animate-pulse rounded-[12px] bg-muted" />
+        </div>
+      )}
 
-        <div className="min-w-0">
-          <p className="text-[12px] font-semibold text-muted-foreground">
-            {activeCat ? `${activeCat.title} · ${activeCat.subtitle ?? ""}` : "Todas las categorías y subcategorías"}
-          </p>
+      {!catsLoading && catsError && (
+        <p className="mt-4 rounded-[12px] border border-dashed border-destructive/40 bg-destructive/5 p-6 text-center text-[13px] text-destructive">
+          No pudimos cargar las categorías. Revisa tu conexión e intenta de nuevo.
+        </p>
+      )}
 
-          {open && (
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                save.mutate();
-              }}
-              className="mt-3 grid gap-3 rounded-[12px] border border-border/60 bg-background p-4 sm:grid-cols-2"
+      {!catsLoading && !catsError && (
+        <div className="mt-4 grid gap-4 lg:grid-cols-[280px_minmax(0,1fr)]">
+          {/* Árbol de categorías y subcategorías */}
+          <nav className="rounded-[12px] border border-border/60 bg-background p-2">
+            <button
+              onClick={() => setFilter("")}
+              className={cn(
+                "mb-1 block w-full rounded-[10px] px-3 py-2 text-left text-[13px] font-semibold",
+                filter === "" ? "bg-primary/10 text-primary" : "text-muted-foreground",
+              )}
             >
-              <Field label="Categoría / subcategoría">
-                <select
-                  value={form.category_id}
-                  onChange={(e) => setForm({ ...form, category_id: e.target.value })}
-                  className={inputCls}
-                >
-                  <option value="">Elige dónde aparecerá</option>
-                  {groups.map((g) => (
-                    <optgroup key={g.key} label={g.label}>
+              Todo el contenido
+            </button>
+            {groups.map((g) => {
+              const isOpen = openGroups.has(g.key);
+              const isRootSelected = selectedRoot === g.key && filter === "";
+              return (
+                <div key={g.key} className="mb-1">
+                  <div
+                    className={cn(
+                      "flex w-full items-center gap-1.5 rounded-[10px] px-2 py-2",
+                      isRootSelected && "bg-primary/5",
+                    )}
+                  >
+                    <button
+                      onClick={() => toggleGroup(g.key)}
+                      className="flex flex-1 items-center gap-1.5 text-left text-[12.5px] font-bold"
+                    >
+                      {isOpen ? (
+                        <ChevronDown className="h-4 w-4 shrink-0 text-primary" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+                      )}
+                      <span className="min-w-0 flex-1 truncate">{g.label}</span>
+                      <span className="shrink-0 text-[11px] font-semibold text-muted-foreground">
+                        {g.items.length}
+                      </span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setSelectedRoot(g.key);
+                        setOpenGroups((s) => new Set(s).add(g.key));
+                        startCreateCat(g.key);
+                      }}
+                      aria-label={`Nueva subcategoría en ${g.label}`}
+                      title="Nueva subcategoría"
+                      className="grid h-7 w-7 shrink-0 place-items-center rounded-[8px] bg-primary/10 text-primary"
+                    >
+                      <FolderPlus className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                  {isOpen && (
+                    <ul className="ml-4 space-y-0.5 border-l border-border pl-2">
                       {g.items.map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.title}
-                        </option>
+                        <li key={c.id}>
+                          <div
+                            className={cn(
+                              "grid w-full grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-1 rounded-[10px] px-1 py-1",
+                              filter === c.id && "bg-primary/10",
+                            )}
+                          >
+                            <button
+                              onClick={() => setFilter(c.id)}
+                              className={cn(
+                                "min-w-0 truncate rounded-[10px] px-1.5 py-1 text-left text-[12.5px]",
+                                filter === c.id ? "font-bold text-primary" : "text-foreground",
+                              )}
+                            >
+                              {c.title}
+                            </button>
+                            <span className="shrink-0 text-[11px] font-semibold text-muted-foreground">
+                              {counts?.[c.id] ?? 0}
+                            </span>
+                            <button
+                              onClick={() => startEditCat(c)}
+                              aria-label={`Editar ${c.title}`}
+                              className="grid h-6 w-6 shrink-0 place-items-center rounded-[8px] text-muted-foreground hover:text-primary"
+                            >
+                              <Pencil className="h-3 w-3" />
+                            </button>
+                          </div>
+                        </li>
                       ))}
-                    </optgroup>
-                  ))}
-                </select>
-              </Field>
-              <Field label="Día / nivel">
-                <input
-                  type="number"
-                  min={1}
-                  max={365}
-                  value={form.day_index}
-                  onChange={(e) => setForm({ ...form, day_index: Number(e.target.value) })}
-                  className={inputCls}
-                />
-              </Field>
-              <Field label="Título">
-                <input
-                  value={form.title}
-                  onChange={(e) => setForm({ ...form, title: e.target.value })}
-                  className={inputCls}
-                  maxLength={140}
-                />
-              </Field>
-              <Field label="Afirmación">
-                <input
-                  value={form.affirmation}
-                  onChange={(e) => setForm({ ...form, affirmation: e.target.value })}
-                  className={inputCls}
-                  maxLength={600}
-                />
-              </Field>
-
-              <Field label="MP3 (enlace o archivo subido)">
-                <input
-                  value={form.audio_url}
-                  onChange={(e) => setForm({ ...form, audio_url: e.target.value })}
-                  placeholder="https://… o sube el archivo"
-                  className={inputCls}
-                  maxLength={800}
-                />
-                <span className="mt-2 inline-flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-[10px] bg-primary/10 text-[13px] font-semibold text-primary">
-                  {uploading === "audio" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-                  Subir MP3
-                  <input
-                    type="file"
-                    accept="audio/mpeg,audio/mp3,audio/wav,audio/m4a"
-                    className="hidden"
-                    onChange={(e) => {
-                      const f = e.target.files?.[0];
-                      if (f) void upload("audio", f);
-                    }}
-                  />
-                </span>
-              </Field>
-
-              <Field label="Portada (enlace o archivo)">
-                <input
-                  value={form.cover_url}
-                  onChange={(e) => setForm({ ...form, cover_url: e.target.value })}
-                  placeholder="https://… o sube la imagen"
-                  className={inputCls}
-                  maxLength={800}
-                />
-                <span className="mt-2 inline-flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-[10px] bg-primary/10 text-[13px] font-semibold text-primary">
-                  {uploading === "cover" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-                  Subir portada
-                  <input
-                    type="file"
-                    accept="image/png,image/jpeg,image/webp"
-                    className="hidden"
-                    onChange={(e) => {
-                      const f = e.target.files?.[0];
-                      if (f) void upload("cover", f);
-                    }}
-                  />
-                </span>
-              </Field>
-
-              <Field label="Lección / contenido del día">
-                <textarea
-                  value={form.lesson}
-                  onChange={(e) => setForm({ ...form, lesson: e.target.value })}
-                  rows={4}
-                  maxLength={4000}
-                  className="w-full rounded-[10px] border-[1.5px] border-border bg-card p-3 text-[14px] outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/20"
-                />
-              </Field>
-              <Field label="Ejercicio / receta">
-                <textarea
-                  value={form.exercise}
-                  onChange={(e) => setForm({ ...form, exercise: e.target.value })}
-                  rows={4}
-                  maxLength={2000}
-                  className="w-full rounded-[10px] border-[1.5px] border-border bg-card p-3 text-[14px] outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/20"
-                />
-              </Field>
-
-              <Field label="PDF de apoyo (enlace)">
-                <input
-                  value={form.pdf_url}
-                  onChange={(e) => setForm({ ...form, pdf_url: e.target.value })}
-                  placeholder="https://…"
-                  className={inputCls}
-                  maxLength={800}
-                />
-              </Field>
-
-              <div className="sm:col-span-2">
-                <button
-                  type="submit"
-                  disabled={save.isPending || uploading !== null}
-                  className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-[12px] bg-primary text-[15px] font-bold text-primary-foreground disabled:opacity-60"
-                >
-                  {save.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-                  {editing ? "Guardar cambios" : "Publicar"}
-                </button>
-              </div>
-            </form>
-          )}
-
-          {isLoading && <div className="mt-4 h-20 animate-pulse rounded-[12px] bg-muted" />}
-
-          {!isLoading && (audios?.length ?? 0) === 0 && (
-            <p className="mt-4 rounded-[12px] border border-dashed border-border p-6 text-center text-[13px] text-muted-foreground">
-              Esta práctica todavía no tiene días publicados. Agrega el día 1 para que tus usuarios puedan empezar.
-            </p>
-          )}
-
-          <ul className="mt-4 space-y-2">
-            {(audios ?? []).map((a) => (
-              <li
-                key={a.id}
-                className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-[12px] border border-border/60 p-2.5"
-              >
-                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[10px] bg-primary/10 text-[12px] font-bold text-primary">
-                  {a.day_index}
-                </span>
-                <div className="min-w-0">
-                  <p className="truncate text-[14px] font-bold leading-tight">{a.title}</p>
-                  <p className="truncate text-[12px] text-muted-foreground">
-                    {cats?.find((c) => c.id === a.category_id)?.title ?? a.category_id} ·{" "}
-                    {a.audio_url ? "con MP3" : "sin audio"}
-                    {a.pdf_url ? " · con PDF" : ""}
-                  </p>
+                      {g.items.length === 0 && (
+                        <li className="px-1.5 py-1 text-[11.5px] text-muted-foreground">
+                          Sin subcategorías todavía.
+                        </li>
+                      )}
+                    </ul>
+                  )}
                 </div>
-                <div className="flex gap-1.5">
+              );
+            })}
+          </nav>
+
+          <div className="min-w-0">
+            {activeCat && (
+              <div className="mb-3 flex items-center justify-between gap-3 rounded-[12px] border border-border/60 bg-background p-3">
+                <div className="flex min-w-0 items-center gap-3">
+                  {activeCat.cover_url ? (
+                    <img
+                      src={activeCat.cover_url}
+                      alt=""
+                      className="h-11 w-11 shrink-0 rounded-[10px] object-cover"
+                    />
+                  ) : (
+                    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[10px] bg-primary/10 text-primary">
+                      <ImageIcon className="h-4 w-4" />
+                    </span>
+                  )}
+                  <div className="min-w-0">
+                    <p className="truncate text-[13.5px] font-bold leading-tight">{activeCat.title}</p>
+                    <p className="truncate text-[11.5px] text-muted-foreground">
+                      {activeCat.subtitle || "Sin subtítulo"} · plan {activeCat.required_plan}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex shrink-0 gap-1.5">
                   <button
-                    onClick={() => startEdit(a)}
-                    aria-label={`Editar ${a.title}`}
-                    className="grid h-11 w-11 place-items-center rounded-[10px] bg-primary/10 text-primary"
+                    onClick={() => startEditCat(activeCat)}
+                    aria-label="Editar subcategoría"
+                    className="grid h-10 w-10 place-items-center rounded-[10px] bg-primary/10 text-primary"
                   >
                     <Pencil className="h-4 w-4" />
                   </button>
                   <button
                     onClick={() => {
-                      if (confirm(`¿Eliminar "${a.title}"?`)) remove.mutate(a.id);
+                      if (confirm(`¿Eliminar la subcategoría "${activeCat.title}" y todos sus audios?`))
+                        removeCat.mutate(activeCat.id);
                     }}
-                    aria-label={`Eliminar ${a.title}`}
-                    className="grid h-11 w-11 place-items-center rounded-[10px] bg-destructive/10 text-destructive"
+                    aria-label="Eliminar subcategoría"
+                    className="grid h-10 w-10 place-items-center rounded-[10px] bg-destructive/10 text-destructive"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
-              </li>
-            ))}
-          </ul>
+              </div>
+            )}
+
+            <p className="text-[12px] font-semibold text-muted-foreground">
+              {activeCat ? `${activeCat.title} · ${activeCat.subtitle ?? ""}` : "Todas las categorías y subcategorías"}
+            </p>
+
+            {catOpen && (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  saveCat.mutate();
+                }}
+                className="mt-3 grid gap-3 rounded-[12px] border border-primary/30 bg-primary/5 p-4 sm:grid-cols-2"
+              >
+                <p className="text-[12.5px] font-bold text-primary sm:col-span-2">
+                  {catEditing
+                    ? "Editar subcategoría"
+                    : `Nueva subcategoría en ${GROUP_LABELS[selectedRoot] ?? selectedRoot}`}
+                </p>
+                {!catEditing && (
+                  <Field label="Slug / id único">
+                    <input
+                      value={catForm.id}
+                      onChange={(e) => setCatForm({ ...catForm, id: slugify(e.target.value) })}
+                      placeholder="mi-nueva-subcategoria"
+                      className={inputCls}
+                      maxLength={60}
+                    />
+                  </Field>
+                )}
+                <Field label="Título">
+                  <input
+                    value={catForm.title}
+                    onChange={(e) =>
+                      setCatForm((f) => ({
+                        ...f,
+                        title: e.target.value,
+                        id: catEditing ? f.id : f.id || slugify(e.target.value),
+                      }))
+                    }
+                    className={inputCls}
+                    maxLength={140}
+                  />
+                </Field>
+                <Field label="Subtítulo">
+                  <input
+                    value={catForm.subtitle}
+                    onChange={(e) => setCatForm({ ...catForm, subtitle: e.target.value })}
+                    className={inputCls}
+                    maxLength={200}
+                  />
+                </Field>
+                <Field label="Plan requerido">
+                  <select
+                    value={catForm.required_plan}
+                    onChange={(e) => setCatForm({ ...catForm, required_plan: e.target.value })}
+                    className={inputCls}
+                  >
+                    {PLAN_OPTIONS.map((p) => (
+                      <option key={p.value} value={p.value}>
+                        {p.label}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+                <Field label="Orden">
+                  <input
+                    type="number"
+                    min={0}
+                    max={9999}
+                    value={catForm.sort_order}
+                    onChange={(e) => setCatForm({ ...catForm, sort_order: Number(e.target.value) })}
+                    className={inputCls}
+                  />
+                </Field>
+                <Field label="Descripción">
+                  <textarea
+                    value={catForm.description}
+                    onChange={(e) => setCatForm({ ...catForm, description: e.target.value })}
+                    rows={3}
+                    maxLength={2000}
+                    className="w-full rounded-[10px] border-[1.5px] border-border bg-card p-3 text-[14px] outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/20"
+                  />
+                </Field>
+                <Field label="Portada">
+                  <input
+                    value={catForm.cover_url}
+                    onChange={(e) => setCatForm({ ...catForm, cover_url: e.target.value })}
+                    placeholder="https://… o sube la imagen"
+                    className={inputCls}
+                    maxLength={800}
+                  />
+                  <label className="mt-2 inline-flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-[10px] bg-primary/10 text-[13px] font-semibold text-primary">
+                    {catUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                    Subir portada
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp"
+                      className="sr-only"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (f) void uploadCatCover(f);
+                        e.target.value = "";
+                      }}
+                    />
+                  </label>
+                </Field>
+
+                <div className="flex gap-2 sm:col-span-2">
+                  <button
+                    type="submit"
+                    disabled={saveCat.isPending || catUploading}
+                    className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-[12px] bg-primary text-[15px] font-bold text-primary-foreground disabled:opacity-60"
+                  >
+                    {saveCat.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+                    {catEditing ? "Guardar cambios" : "Crear subcategoría"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCatOpen(false);
+                      setCatEditing(null);
+                      setCatForm(emptyCatForm);
+                    }}
+                    className="inline-flex h-12 items-center justify-center rounded-[12px] border border-border px-4 text-[14px] font-semibold text-muted-foreground"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {open && (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  save.mutate();
+                }}
+                className="mt-3 grid gap-3 rounded-[12px] border border-border/60 bg-background p-4 sm:grid-cols-2"
+              >
+                <Field label="Categoría / subcategoría">
+                  <select
+                    value={form.category_id}
+                    onChange={(e) => setForm({ ...form, category_id: e.target.value })}
+                    className={inputCls}
+                  >
+                    <option value="">Elige dónde aparecerá</option>
+                    {groups.map((g) => (
+                      <optgroup key={g.key} label={g.label}>
+                        {g.items.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.title}
+                          </option>
+                        ))}
+                      </optgroup>
+                    ))}
+                  </select>
+                </Field>
+                <Field label="Día / nivel">
+                  <input
+                    type="number"
+                    min={1}
+                    max={365}
+                    value={form.day_index}
+                    onChange={(e) => setForm({ ...form, day_index: Number(e.target.value) })}
+                    className={inputCls}
+                  />
+                </Field>
+                <Field label="Título">
+                  <input
+                    value={form.title}
+                    onChange={(e) => setForm({ ...form, title: e.target.value })}
+                    className={inputCls}
+                    maxLength={140}
+                  />
+                </Field>
+                <Field label="Afirmación">
+                  <input
+                    value={form.affirmation}
+                    onChange={(e) => setForm({ ...form, affirmation: e.target.value })}
+                    className={inputCls}
+                    maxLength={600}
+                  />
+                </Field>
+
+                <Field label="MP3 (enlace o archivo subido)">
+                  <input
+                    value={form.audio_url}
+                    onChange={(e) => setForm({ ...form, audio_url: e.target.value })}
+                    placeholder="https://… o sube el archivo"
+                    className={inputCls}
+                    maxLength={800}
+                  />
+                  <label className="mt-2 inline-flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-[10px] bg-primary/10 text-[13px] font-semibold text-primary">
+                    {uploading === "audio" ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Upload className="h-4 w-4" />
+                    )}
+                    Subir MP3
+                    <input
+                      type="file"
+                      accept="audio/mpeg,audio/mp3,audio/wav,audio/m4a,audio/*"
+                      className="sr-only"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (f) void upload("audio", f);
+                        e.target.value = "";
+                      }}
+                    />
+                  </label>
+                </Field>
+
+                <Field label="Portada (enlace o archivo)">
+                  <input
+                    value={form.cover_url}
+                    onChange={(e) => setForm({ ...form, cover_url: e.target.value })}
+                    placeholder="https://… o sube la imagen"
+                    className={inputCls}
+                    maxLength={800}
+                  />
+                  <label className="mt-2 inline-flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-[10px] bg-primary/10 text-[13px] font-semibold text-primary">
+                    {uploading === "cover" ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Upload className="h-4 w-4" />
+                    )}
+                    Subir portada
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp"
+                      className="sr-only"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (f) void upload("cover", f);
+                        e.target.value = "";
+                      }}
+                    />
+                  </label>
+                </Field>
+
+                <Field label="Lección / contenido del día">
+                  <textarea
+                    value={form.lesson}
+                    onChange={(e) => setForm({ ...form, lesson: e.target.value })}
+                    rows={4}
+                    maxLength={4000}
+                    className="w-full rounded-[10px] border-[1.5px] border-border bg-card p-3 text-[14px] outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/20"
+                  />
+                </Field>
+                <Field label="Ejercicio / receta">
+                  <textarea
+                    value={form.exercise}
+                    onChange={(e) => setForm({ ...form, exercise: e.target.value })}
+                    rows={4}
+                    maxLength={2000}
+                    className="w-full rounded-[10px] border-[1.5px] border-border bg-card p-3 text-[14px] outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/20"
+                  />
+                </Field>
+
+                <Field label="PDF de apoyo (enlace)">
+                  <input
+                    value={form.pdf_url}
+                    onChange={(e) => setForm({ ...form, pdf_url: e.target.value })}
+                    placeholder="https://…"
+                    className={inputCls}
+                    maxLength={800}
+                  />
+                </Field>
+
+                <div className="sm:col-span-2">
+                  <button
+                    type="submit"
+                    disabled={save.isPending || uploading !== null}
+                    className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-[12px] bg-primary text-[15px] font-bold text-primary-foreground disabled:opacity-60"
+                  >
+                    {save.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+                    {editing ? "Guardar cambios" : "Publicar"}
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {isLoading && (
+              <div className="mt-4 space-y-2">
+                <div className="h-16 animate-pulse rounded-[12px] bg-muted" />
+                <div className="h-16 animate-pulse rounded-[12px] bg-muted" />
+                <div className="h-16 animate-pulse rounded-[12px] bg-muted" />
+              </div>
+            )}
+
+            {!isLoading && audiosError && (
+              <p className="mt-4 rounded-[12px] border border-dashed border-destructive/40 bg-destructive/5 p-6 text-center text-[13px] text-destructive">
+                No pudimos cargar los audios. Intenta de nuevo en unos segundos.
+              </p>
+            )}
+
+            {!isLoading && !audiosError && (audios?.length ?? 0) === 0 && (
+              <div className="mt-4 rounded-[12px] border border-dashed border-border p-6 text-center">
+                <p className="text-[13px] text-muted-foreground">
+                  Esta práctica todavía no tiene días publicados. Agrega el día 1 para que tus usuarios puedan
+                  empezar.
+                </p>
+                <button
+                  onClick={() => {
+                    setEditing(null);
+                    setForm({ ...emptyForm, category_id: filter });
+                    setCatOpen(false);
+                    setOpen(true);
+                  }}
+                  className="mt-3 inline-flex h-10 items-center gap-1.5 rounded-[12px] bg-primary px-4 text-[13px] font-semibold text-primary-foreground"
+                >
+                  <Plus className="h-4 w-4" /> Agregar audio
+                </button>
+              </div>
+            )}
+
+            <ul className="mt-4 space-y-2">
+              {(audios ?? []).map((a) => (
+                <li
+                  key={a.id}
+                  className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-[12px] border border-border/60 p-2.5"
+                >
+                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[10px] bg-primary/10 text-[12px] font-bold text-primary">
+                    {a.day_index}
+                  </span>
+                  <div className="min-w-0">
+                    <p className="truncate text-[14px] font-bold leading-tight">{a.title}</p>
+                    <p className="truncate text-[12px] text-muted-foreground">
+                      {cats?.find((c) => c.id === a.category_id)?.title ?? a.category_id} ·{" "}
+                      {a.audio_url ? "con MP3" : "sin audio"}
+                      {a.pdf_url ? " · con PDF" : ""}
+                    </p>
+                  </div>
+                  <div className="flex gap-1.5">
+                    <button
+                      onClick={() => startEdit(a)}
+                      aria-label={`Editar ${a.title}`}
+                      className="grid h-11 w-11 place-items-center rounded-[10px] bg-primary/10 text-primary"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (confirm(`¿Eliminar "${a.title}"?`)) remove.mutate(a.id);
+                      }}
+                      aria-label={`Eliminar ${a.title}`}
+                      className="grid h-11 w-11 place-items-center rounded-[10px] bg-destructive/10 text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
-      </div>
+      )}
     </section>
   );
 }

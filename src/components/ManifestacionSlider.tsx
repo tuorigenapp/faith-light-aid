@@ -19,16 +19,16 @@ const CLS =
 
 const GRUPO_1 = [
   { key: "musica", alt: "Manifestar con música", img: imgMusica, to: "/visualiza" as const },
-  { key: "permiso-mujer", alt: "Deja de pedir permiso para existir — Mujer", img: imgPermisoMujer, camino: "permiso" },
+  { key: "permiso-mujer", alt: "Deja de pedir permiso para existir — Mujer", img: imgPermisoMujer, programa: "permiso-mujer" },
   { key: "permiso-hombre", alt: "Deja de pedir permiso para existir — Hombre", img: imgPermisoHombre, programa: "permiso-hombre" },
-  { key: "nino", alt: "Sana a tu niño interior", img: imgNino, camino: "nino-interior" },
+  { key: "nino", alt: "Sana a tu niño interior", img: imgNino, programa: "nino-interior" },
 ];
 
 const GRUPO_2 = [
-  { key: "glowup-mujer", alt: "Glow Up: mujer de alto valor", img: imgGlowMujer, camino: "glowup-mujer" },
+  { key: "glowup-mujer", alt: "Glow Up: mujer de alto valor", img: imgGlowMujer, programa: "glowup-mujer" },
   { key: "cristo", alt: "Método de Cristo 3·6·9", img: imgCristo, to: "/visualiza/cristo" as const },
   { key: "limpieza", alt: "Limpieza espiritual", img: imgLimpieza, to: "/visualiza/limpieza" as const },
-  { key: "magnetico", alt: "Vuélvete magnético o magnética", img: imgMagnetico, camino: "magnetico" },
+  { key: "magnetico", alt: "Vuélvete magnético o magnética", img: imgMagnetico, programa: "magnetico" },
 ];
 
 type Slide = (typeof GRUPO_1)[number] & { camino?: string; programa?: string; to?: string };
@@ -60,11 +60,9 @@ function SlideLink({ s }: { s: Slide }) {
 export function ManifestacionSlider() {
   return (
     <section>
-      <h3 className="font-display font-bold text-[16px] leading-snug">
-        Wow 🥳 Ahora es posible manifestar con un Mentor Espiritual + Música + Ejercicios + Materiales de apoyo
-      </h3>
+      <h3 className="font-display font-bold text-[19px] leading-tight">Manifiesta escuchando, no leyendo</h3>
       <p className="text-[13px] text-muted-foreground mt-1">
-        Entra a cualquiera de estas secciones si no tienes tiempo para hacer las etapas cada día.
+        Ponte los audífonos: mentor, música y un ejercicio corto guiado. Diez minutos y sigues con tu día.
       </p>
       <div className="hairline-brand mt-3 mb-3" />
 
