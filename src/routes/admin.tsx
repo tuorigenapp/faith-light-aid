@@ -21,10 +21,12 @@ import {
   Loader2,
   ShieldCheck,
   Headphones,
+  Send,
 } from "lucide-react";
 import { BooksManager } from "@/components/admin/BooksManager";
 import { AudiosManager } from "@/components/admin/AudiosManager";
 import { UsersManager } from "@/components/admin/UsersManager";
+import { MarketingManager } from "@/components/admin/MarketingManager";
 import { AreaChart, Area, ResponsiveContainer, BarChart, Bar, XAxis, Tooltip } from "recharts";
 
 export const Route = createFileRoute("/admin")({
@@ -149,6 +151,7 @@ type SectionId =
   | "contenido"
   | "libros"
   | "audios"
+  | "marketing"
   | "opiniones";
 
 const NAV: { id: SectionId; label: string; icon: typeof Users }[] = [
@@ -159,6 +162,7 @@ const NAV: { id: SectionId; label: string; icon: typeof Users }[] = [
   { id: "contenido", label: "Contenido", icon: Library },
   { id: "libros", label: "Libros", icon: BookOpen },
   { id: "audios", label: "Música", icon: Headphones },
+  { id: "marketing", label: "Marketing", icon: Send },
   { id: "opiniones", label: "Opiniones", icon: Star },
 ];
 
@@ -598,6 +602,8 @@ function Admin() {
         {section === "libros" && <BooksManager />}
 
         {section === "audios" && <AudiosManager />}
+
+        {section === "marketing" && <MarketingManager />}
 
         {data && section === "opiniones" && (
           <>
