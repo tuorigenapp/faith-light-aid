@@ -3,18 +3,24 @@ import * as THREE from "three";
 import { GameShell } from "./GameShell";
 import { createRig, createBurstPool, makeAmbientParticles } from "./engine3d";
 import { cn } from "@/lib/utils";
+import { useGameLevels, seeded, shuffleSeeded } from "@/lib/game-progress";
 
 /**
- * Adivina la palabra — 3D selectivo (una sola pieza suave que respira) + UI 2D.
- * Las opciones son tarjetas grandes, separadas y fáciles de tocar.
+ * Adivina la palabra — 3 niveles con varias rondas.
+ * Nivel 1: una letra oculta y 3 opciones. Nivel 2: más letras ocultas.
+ * Nivel 3: casi toda la palabra oculta y 4 opciones.
  */
 export function GuessWord({
   words,
+  decoys = ["Miedo", "Culpa", "Prisa", "Rencor", "Vergüenza", "Ruido"],
+  storageKey = "adivina",
   onComplete,
   onClose,
   onNext,
 }: {
   words: string[];
+  decoys?: string[];
+  storageKey?: string;
   onComplete?: () => void;
   onClose?: () => void;
   onNext?: () => void;
@@ -22,21 +28,41 @@ export function GuessWord({
   const host = useRef<HTMLDivElement>(null);
   const pausedRef = useRef(false);
   const burstRef = useRef<{ spawn: (p: THREE.Vector3, c: number, n: number) => void } | null>(null);
-  const [round, setRound] = useState(0);
   const [wrong, setWrong] = useState<string | null>(null);
   const [won, setWon] = useState(false);
-  const doneRef = useRef(false);
 
-  const clean = useMemo(() => words.map((w) => w.trim()).filter(Boolean), [words]);
-  const rounds = Math.min(4, Math.max(1, clean.length));
-  const answer = clean.length ? clean[round % clean.length]! : "Paz";
+  const levels = useGameLevels(`adivina:${storageKey}`, () => {
+    onComplete?.();
+    setWon(true);
+  });
+
+  const pool = useMemo(() => {
+    const clean = Array.from(new Set(words.map((w) => (w ?? "").trim()).filter(Boolean)));
+    return clean.length ? clean : ["Paz", "Fe", "Calma", "Perdón"];
+  }, [words]);
+
+  const answer = useMemo(() => {
+    const list = shuffleSeeded(pool, levels.seed);
+    return list[(levels.round - 1) % list.length]!;
+  }, [pool, levels.seed, levels.round]);
+
+  /** Palabra con letras ocultas: más difícil en cada nivel. */
+  const masked = useMemo(() => {
+    const rnd = seeded(levels.seed + 3);
+    const chars = answer.split("");
+    const letters = chars.map((c, i) => ({ c, i })).filter((x) => /[a-záéíóúñü]/i.test(x.c));
+    const hideCount = Math.max(1, Math.round(letters.length * (levels.level === 1 ? 0.3 : levels.level === 2 ? 0.55 : 0.75)));
+    const order = letters.map((x) => ({ ...x, k: rnd() })).sort((a, b) => a.k - b.k).slice(0, hideCount);
+    const hidden = new Set(order.map((x) => x.i));
+    return chars.map((c, i) => (hidden.has(i) ? "_" : c)).join(" ");
+  }, [answer, levels.level, levels.seed]);
+
   const options = useMemo(() => {
-    const pool = [answer, ...clean.filter((w) => w !== answer)].slice(0, 3);
-    const fill = ["Miedo", "Culpa", "Prisa"];
-    while (pool.length < 3) pool.push(fill[pool.length % 3]!);
-    return pool.map((w, i) => ({ w, k: (i * 7 + round * 5) % 11 })).sort((a, b) => a.k - b.k).map((x) => x.w);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [answer, round]);
+    const optCount = levels.level >= 3 ? 4 : 3;
+    const others = [...pool.filter((w) => w !== answer), ...decoys];
+    const picked = shuffleSeeded(others, levels.seed + 9).slice(0, optCount - 1);
+    return shuffleSeeded([answer, ...picked], levels.seed + 17);
+  }, [answer, pool, decoys, levels.level, levels.seed]);
 
   useEffect(() => {
     const el = host.current;
@@ -53,7 +79,6 @@ export function GuessWord({
     const burst = createBurstPool(scene);
     burstRef.current = burst;
 
-    // Única pieza 3D: forma suave y orgánica
     const gem = new THREE.Mesh(
       new THREE.SphereGeometry(1.05, 48, 36),
       new THREE.MeshStandardMaterial({ color: 0x9d7bff, roughness: 0.25, metalness: 0.1, emissive: 0x5b32c9, emissiveIntensity: 0.35 }),
@@ -84,27 +109,25 @@ export function GuessWord({
   }, []);
 
   function choose(w: string) {
-    if (pausedRef.current || doneRef.current) return;
+    if (pausedRef.current || won) return;
     if (w !== answer) {
       setWrong(w);
-      setTimeout(() => setWrong(null), 420);
+      window.setTimeout(() => setWrong(null), 420);
       return;
     }
     burstRef.current?.spawn(new THREE.Vector3(0, 1.2, 0), 0xffd479, 26);
-    if (round + 1 >= rounds) {
-      doneRef.current = true;
-      onComplete?.();
-      setWon(true);
-      return;
-    }
-    setRound((r) => r + 1);
+    levels.clearRound();
   }
 
   return (
     <GameShell
       title="Adivina la palabra"
-      cue={`¿Cuál es "${answer}"?`}
-      progress={{ value: round, max: rounds }}
+      cue="¿Qué palabra falta?"
+      progress={{ value: levels.totalDone, max: levels.totalRounds }}
+      level={levels.level}
+      round={levels.round}
+      roundsInLevel={levels.roundsInLevel}
+      levelUp={levels.levelUp}
       won={won}
       wonText="Reconoces tu tema del día sin dudar."
       onNext={onNext}
@@ -117,8 +140,8 @@ export function GuessWord({
               key={w}
               onClick={() => choose(w)}
               className={cn(
-                "min-h-[60px] w-full rounded-[16px] border-2 bg-white/95 px-5 py-4 text-center font-display text-[19px] font-black text-[#241539] transition active:scale-[.98]",
-                wrong === w ? "border-[#F58BCB] animate-[shake_.4s_ease-in-out]" : "border-transparent",
+                "min-h-[58px] w-full rounded-[16px] border-2 bg-white/95 px-5 py-4 text-center font-display text-[18px] font-black text-[#241539] transition active:scale-[.98]",
+                wrong === w ? "border-[#F58BCB]" : "border-transparent",
               )}
             >
               {w}
@@ -127,7 +150,11 @@ export function GuessWord({
         </div>
       }
     >
-      <div ref={host} className="h-full w-full" aria-label="Escena de la palabra del día" />
+      <div ref={host} className="relative h-full w-full" aria-label="Escena de la palabra">
+        <div className="pointer-events-none absolute inset-x-0 bottom-4 z-10 px-6 text-center">
+          <p className="font-display text-[30px] font-black uppercase tracking-[0.22em] text-white">{masked}</p>
+        </div>
+      </div>
     </GameShell>
   );
 }
