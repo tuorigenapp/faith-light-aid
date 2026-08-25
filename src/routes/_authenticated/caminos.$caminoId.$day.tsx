@@ -556,7 +556,7 @@ const [feedback, setFeedback] = useState<"ok" | "fail" | null>(null);
           </section>
         )}
 
-        {p && step === 12 && (
+        {p && step === 19 && (
           <section className="text-center" style={{ animation: "fade-in .4s ease-out both" }}>
             <img src={star3d} alt="" aria-hidden width={192} height={192} className="w-24 h-24 mx-auto object-contain animate-[float_4s_ease-in-out_infinite]" />
             <h2 className="font-display font-extrabold text-[26px] leading-tight mt-2">¡Día completado!</h2>
