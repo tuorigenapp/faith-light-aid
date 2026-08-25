@@ -6,9 +6,6 @@ import { useQuery } from "@tanstack/react-query";
 import { CancelSurvey } from "@/components/CancelSurvey";
 import { Check, ChevronRight, Crown, Eye, Infinity as InfinityIcon, Leaf, ShieldCheck, Sparkles, Sprout } from "lucide-react";
 import { cn } from "@/lib/utils";
-import e3dStar from "@/assets/e3d-star.png";
-import e3dHeart from "@/assets/e3d-heartgem.png";
-import e3dCoin from "@/assets/e3d-coin.png";
 
 export const Route = createFileRoute("/_authenticated/membresia")({
   head: () => ({
@@ -37,11 +34,9 @@ type BillingPlan = {
 
 type Level = {
   id: LevelId;
-  emoji: string;
   name: string;
   tier: string;
   claim: string;
-  image: string;
   icon: typeof Sprout;
   popular?: boolean;
   included: string[];
@@ -53,11 +48,9 @@ type Level = {
 const LEVELS: Level[] = [
   {
     id: "explorador",
-    emoji: "🌱",
     name: "EXPLORADOR ORÍGEN",
     tier: "Básico",
     claim: "Ideal para comenzar a explorar ORÍGEN.",
-    image: e3dHeart,
     icon: Sprout,
     included: [
       "Diagnóstico completo de tu origen",
@@ -79,11 +72,9 @@ const LEVELS: Level[] = [
   },
   {
     id: "caminante",
-    emoji: "🌿",
     name: "CAMINANTE ORÍGEN",
     tier: "Completo",
     claim: "Para quienes desean una experiencia más amplia.",
-    image: e3dStar,
     icon: Leaf,
     popular: true,
     included: [
@@ -108,11 +99,9 @@ const LEVELS: Level[] = [
   },
   {
     id: "proposito",
-    emoji: "✨",
     name: "PROPÓSITO ORÍGEN",
     tier: "Premium",
     claim: "Para avanzar con máxima profundidad y dirección.",
-    image: e3dCoin,
     icon: Crown,
     included: [
       "Todo lo del Caminante",
@@ -198,20 +187,13 @@ function Membresia() {
                   {active && <Check className="h-4.5 w-4.5" />}
                 </span>
 
-                <img
-                  src={l.image}
-                  alt=""
-                  aria-hidden
-                  loading="lazy"
-                  className="mt-8 h-20 w-20 object-contain drop-shadow-[0_12px_22px_color-mix(in_oklab,var(--primary)_25%,transparent)]"
-                />
-                <div className="mt-3 flex items-start gap-3">
-                  <span className={cn("grid h-10 w-10 shrink-0 place-items-center rounded-[12px]", active ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary")}>
-                    <Icon className="h-5 w-5" />
+                <div className="mt-10 flex items-start gap-3">
+                  <span className={cn("grid h-11 w-11 shrink-0 place-items-center rounded-[12px]", active ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary")}>
+                    <Icon className="h-5.5 w-5.5" />
                   </span>
                   <div className="min-w-0">
                     <h2 className="font-display text-[17px] font-extrabold leading-tight">
-                      {l.emoji} {l.name}
+                      {l.name}
                     </h2>
                     <p className="mt-1 text-[12px] font-bold text-primary">{l.tier}</p>
                   </div>
@@ -235,7 +217,7 @@ function Membresia() {
         {level && (
           <div key={level.id} style={{ animation: "fade-in .35s ease-out both" }}>
             <h2 className="mt-9 text-center font-display text-[22px] font-extrabold">
-              {level.emoji} {level.name} · {level.tier}
+              {level.name} · {level.tier}
             </h2>
             <p className="mx-auto mt-2 max-w-[440px] text-center text-[13.5px] text-muted-foreground">{level.claim}</p>
 
