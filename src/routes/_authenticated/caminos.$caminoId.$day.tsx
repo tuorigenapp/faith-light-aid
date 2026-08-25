@@ -8,6 +8,8 @@ import { awardLeaf, wholeHojas, type ActionLevel } from "@/lib/gems";
 import { AnswerFeedback } from "@/components/AnswerFeedback";
 import { CAMINO_TOTAL_DAYS, getCamino, getEtapa } from "@/lib/caminos";
 import { DailyGames } from "@/components/games/DailyGames";
+import { MemoryPairs, MentalTasks, StageGameStep, type GameKind } from "@/components/StageGames";
+
 import { useCaminoPack, caminoVariant, CAMINO_PACK_BASE } from "@/lib/camino-pack";
 import { WordSearch } from "@/components/WordSearch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
