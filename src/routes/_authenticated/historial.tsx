@@ -134,7 +134,7 @@ function HistorialPage() {
               <div className="font-display font-bold text-[16px] text-foreground">Tu historial comienza hoy</div>
               <p className="mt-1 text-[13px] text-muted-foreground">Cuando recargues, ganes o transfieras hojas, verás cada movimiento aquí.</p>
               <Link
-                to="/premios"
+                to="/comprarmonedas"
                 className="mt-4 inline-flex h-12 items-center justify-center gap-2 rounded-[12px] px-5 font-display font-bold text-[15px] text-white active:scale-[.98] transition"
                 style={{ background: "linear-gradient(180deg,#8F6BFF 0%,#F58BCB 100%)", boxShadow: "0 4px 14px rgba(124,92,255,.30)" }}
               >

@@ -4,7 +4,7 @@ import { HelpCircle, X, MessageCircle, Mail, Compass, Leaf, ChevronDown } from "
 
 const LINKS = [
   { icon: MessageCircle, label: "Hablar con la mentora", to: "/chat" as const },
-  { icon: Leaf, label: "Cómo funcionan las hojas", to: "/premios" as const },
+  { icon: Leaf, label: "Cómo funcionan las hojas", to: "/comprarmonedas" as const },
 ];
 
 const FAQ = [
