@@ -42,7 +42,7 @@ export const Route = createFileRoute("/_authenticated/caminos/$caminoId/$day")({
   component: CaminoDia,
 });
 
-const TOTAL_STEPS = 13;
+const TOTAL_STEPS = 20;
 const DAY_XP = 120;
 
 function todayIso() { return new Date().toISOString().slice(0, 10); }
@@ -151,7 +151,7 @@ const [feedback, setFeedback] = useState<"ok" | "fail" | null>(null);
       await reward("major", `Día ${dayNum} · ${camino!.title}`);
     }
     qc.invalidateQueries({ queryKey: ["camino", caminoId] });
-    setStep(13);
+    setStep(20);
   }
 
   const next = () => setStep((s) => Math.min(s + 1, TOTAL_STEPS));
