@@ -156,6 +156,7 @@ type SectionId =
   | "libros"
   | "audios"
   | "marketing"
+  | "backup"
   | "opiniones";
 
 const NAV: { id: SectionId; label: string; icon: typeof Users }[] = [
@@ -167,6 +168,7 @@ const NAV: { id: SectionId; label: string; icon: typeof Users }[] = [
   { id: "libros", label: "Libros", icon: BookOpen },
   { id: "audios", label: "Música", icon: Headphones },
   { id: "marketing", label: "Marketing", icon: Send },
+  { id: "backup", label: "Copia de seguridad", icon: ShieldCheck },
   { id: "opiniones", label: "Opiniones", icon: Star },
 ];
 
@@ -478,92 +480,22 @@ function Admin() {
           </div>
         )}
 
-        {data && section === "uso" && (
-          <>
-            <Card className="mt-5">
-              <CardTitle icon={TrendingUp}>Acciones más usadas</CardTitle>
-              {data.topActions.length === 0 ? (
-                <Empty>Sin datos de actividad todavía.</Empty>
-              ) : (
-                <div className="mt-4 h-56">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={data.topActions}>
-                      <XAxis
-                        dataKey="name"
-                        tick={{ fontSize: 11 }}
-                        interval={0}
-                        angle={-20}
-                        textAnchor="end"
-                        height={50}
-                      />
-                      <Tooltip />
-                      <Bar dataKey="value" radius={[6, 6, 0, 0]} fill="var(--primary)" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              )}
-            </Card>
-            <Card className="mt-4">
-              <CardTitle icon={Leaf}>Últimos movimientos de hojas</CardTitle>
-              {data.gems.length === 0 ? (
-                <Empty>Sin datos de hojas.</Empty>
-              ) : (
-                <Table
-                  head={["Motivo", "Puntos", "Fecha"]}
-                  rows={data.gems
-                    .slice(0, 40)
-                    .map((g) => [
-                      g.reason,
-                      String(g.amount),
-                      new Date(g.created_at).toLocaleDateString("es"),
-                    ])}
-                />
-              )}
-            </Card>
-          </>
+        {section === "uso" && (
+          <div className="mt-5">
+            <UsageManager />
+          </div>
         )}
 
-        {data && section === "contenido" && (
-          <>
-            <Card className="mt-5">
-              <CardTitle icon={LayoutDashboard}>Etapas del Camino ({data.stages.length})</CardTitle>
-              {data.stages.length === 0 ? (
-                <Empty>Sin datos de etapas.</Empty>
-              ) : (
-                <Table
-                  head={["#", "Título"]}
-                  rows={data.stages.map((s) => [String(s.id), s.title])}
-                />
-              )}
-            </Card>
-            <Card className="mt-4">
-              <CardTitle icon={Library}>Biblioteca ({data.books.length})</CardTitle>
-              {data.books.length === 0 ? (
-                <Empty>Sin datos de libros en la base.</Empty>
-              ) : (
-                <Table
-                  head={["Título", "Categoría", "Plan"]}
-                  rows={data.books.slice(0, 60).map((b) => [b.title, b.category, b.required_plan])}
-                />
-              )}
-            </Card>
-            <Card className="mt-4">
-              <CardTitle icon={BookOpen}>
-                Palabra del día ({data.palabras.length} cargadas)
-              </CardTitle>
-              {data.palabras.length === 0 ? (
-                <Empty>
-                  Sin datos en la base: la Palabra del día se sirve desde el contenido de la app
-                  (365 días).
-                </Empty>
-              ) : (
-                <Table
-                  head={["Día del año", "Palabra"]}
-                  rows={data.palabras.slice(0, 60).map((p) => [String(p.day_of_year), p.word])}
-                />
-              )}
-            </Card>
-          </>
+        {section === "contenido" && (
+          <div className="mt-5">
+            <ContentManager />
+          </div>
+        )}
+
+        {section === "backup" && (
+          <div className="mt-5">
+            <BackupManager />
+          </div>
         )}
 
         {section === "libros" && <BooksManager />}
