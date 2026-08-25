@@ -14,6 +14,8 @@ import { saveStageReward } from "@/lib/rewards.functions";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { WordSearch } from "@/components/WordSearch";
+import { MemoryPairs, ClassifyEmotions, MentalTasks, StageGameStep, type GameKind } from "@/components/StageGames";
+
 import { getStageContent, getSolutionSteps, getStageTasks } from "@/lib/stage-content";
 import { awardLeaf, ACTION_POINTS, type ActionLevel } from "@/lib/gems";
 import { AnswerFeedback } from "@/components/AnswerFeedback";
