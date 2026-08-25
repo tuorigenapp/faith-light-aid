@@ -462,47 +462,10 @@ function Admin() {
           </>
         )}
 
-        {data && section === "ventas" && (
-          <>
-            <div className="mt-5 grid gap-3 sm:grid-cols-3">
-              <Small icon={CreditCard} label="Activas" value={data.paidCount} />
-              <Small icon={TrendingUp} label="MRR estimado" value={`US$${data.mrr.toFixed(2)}`} />
-              <Small icon={XCircle} label="Cancelaciones registradas" value={data.cancel.length} />
-            </div>
-            <Card className="mt-4">
-              <CardTitle icon={CreditCard}>Suscripciones</CardTitle>
-              {data.subsList.length === 0 ? (
-                <Empty>Sin datos de suscripciones todavía.</Empty>
-              ) : (
-                <Table
-                  head={["Plan", "Estado", "Renueva", "Creada"]}
-                  rows={data.subsList.map((s) => [
-                    s.plan,
-                    s.status,
-                    s.current_period_end
-                      ? new Date(s.current_period_end).toLocaleDateString("es")
-                      : "Sin datos",
-                    new Date(s.created_at).toLocaleDateString("es"),
-                  ])}
-                />
-              )}
-            </Card>
-            <Card className="mt-4">
-              <CardTitle icon={XCircle}>Motivos de cancelación</CardTitle>
-              {Object.keys(data.cancelCounts).length === 0 ? (
-                <Empty>Sin datos: nadie ha respondido la encuesta de cancelación.</Empty>
-              ) : (
-                <div className="mt-3 space-y-2">
-                  {Object.entries(data.cancelCounts).map(([r, n]) => (
-                    <div key={r} className="flex items-center justify-between text-sm">
-                      <span>{r}</span>
-                      <span className="font-bold text-primary">{n}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </Card>
-          </>
+        {section === "ventas" && (
+          <div className="mt-5">
+            <SalesManager />
+          </div>
         )}
 
         {section === "usuarios" && (
