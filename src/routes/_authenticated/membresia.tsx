@@ -198,20 +198,13 @@ function Membresia() {
                   {active && <Check className="h-4.5 w-4.5" />}
                 </span>
 
-                <img
-                  src={l.image}
-                  alt=""
-                  aria-hidden
-                  loading="lazy"
-                  className="mt-8 h-20 w-20 object-contain drop-shadow-[0_12px_22px_color-mix(in_oklab,var(--primary)_25%,transparent)]"
-                />
-                <div className="mt-3 flex items-start gap-3">
-                  <span className={cn("grid h-10 w-10 shrink-0 place-items-center rounded-[12px]", active ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary")}>
-                    <Icon className="h-5 w-5" />
+                <div className="mt-10 flex items-start gap-3">
+                  <span className={cn("grid h-11 w-11 shrink-0 place-items-center rounded-[12px]", active ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary")}>
+                    <Icon className="h-5.5 w-5.5" />
                   </span>
                   <div className="min-w-0">
                     <h2 className="font-display text-[17px] font-extrabold leading-tight">
-                      {l.emoji} {l.name}
+                      {l.name}
                     </h2>
                     <p className="mt-1 text-[12px] font-bold text-primary">{l.tier}</p>
                   </div>
