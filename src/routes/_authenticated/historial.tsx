@@ -44,16 +44,18 @@ function HistorialPage() {
     queryKey: ["historial-general", user?.id],
     enabled: !!user,
     queryFn: async () => {
+      const userId = user?.id;
+      if (!userId) return [];
       const [tx, transfers, family, journal, pareja, patrones, ministracion, messages, ratings] = await Promise.all([
-        supabase.from("gem_transactions").select("id, amount, reason, meta, created_at").eq("user_id", user!.id).order("created_at", { ascending: false }).limit(200),
-        supabase.from("hoja_transfers").select("id, to_email, points, status, created_at").eq("user_id", user!.id).order("created_at", { ascending: false }).limit(100),
-        supabase.from("family_members").select("id, full_name, relationship, lineage, created_at").eq("user_id", user!.id).order("created_at", { ascending: false }).limit(100),
-        supabase.from("journal_entries").select("id, title, kind, mood, created_at").eq("user_id", user!.id).is("deleted_at", null).order("created_at", { ascending: false }).limit(80),
-        supabase.from("pareja_lecturas").select("id, partner_name, question, created_at").eq("user_id", user!.id).order("created_at", { ascending: false }).limit(60),
-        supabase.from("patrones_consultas").select("id, name, question, created_at").eq("user_id", user!.id).order("created_at", { ascending: false }).limit(60),
-        supabase.from("ministracion_lecturas").select("id, name, question, created_at").eq("user_id", user!.id).order("created_at", { ascending: false }).limit(60),
-        supabase.from("messages").select("id, role, created_at").eq("user_id", user!.id).order("created_at", { ascending: false }).limit(80),
-        supabase.from("satisfaction_ratings").select("id, section, stars, created_at").eq("user_id", user!.id).order("created_at", { ascending: false }).limit(50),
+        supabase.from("gem_transactions").select("id, amount, reason, meta, created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(200),
+        supabase.from("hoja_transfers").select("id, to_email, points, status, created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(100),
+        supabase.from("family_members").select("id, full_name, relationship, lineage, created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(100),
+        supabase.from("journal_entries").select("id, title, kind, mood, created_at").eq("user_id", userId).is("deleted_at", null).order("created_at", { ascending: false }).limit(80),
+        supabase.from("pareja_lecturas").select("id, partner_name, question, created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(60),
+        supabase.from("patrones_consultas").select("id, name, question, created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(60),
+        supabase.from("ministracion_lecturas").select("id, name, question, created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(60),
+        supabase.from("messages").select("id, role, created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(80),
+        supabase.from("satisfaction_ratings").select("id, section, stars, created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(50),
       ]);
 
       const output: Row[] = [];
