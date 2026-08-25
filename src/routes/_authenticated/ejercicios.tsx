@@ -351,7 +351,7 @@ function renderExerciseGame(kind: string, words: string[], mainWord: string, onC
   const bad = ["MIEDO", "CULPA", "RUIDO", "PRISA"];
   if (kind === "cofre") return <ChestWords correct={good.slice(0, 5)} decoys={bad} onComplete={onComplete} />;
   if (kind === "adivina") return <GuessWord words={[mainWord, ...good]} onComplete={onComplete} />;
-  if (kind === "sopa") return <WordSearch words={good.slice(0, 8)} storageKey={`exercise-${day}`} />;
+  if (kind === "sopa") return <div><WordSearch words={good.slice(0, 8)} storageKey={`exercise-${day}`} /><button onClick={onComplete} className="mt-3 w-full min-h-[48px] rounded-[12px] bg-primary text-primary-foreground font-semibold text-[14.5px] active:scale-[.97] transition">Ya encontré mis palabras</button></div>;
   if (kind === "pimpon") return <PingPongToss onComplete={onComplete} />;
   if (kind === "pez") return <FishInWater good={good.slice(0, 4)} bad={bad} onComplete={onComplete} />;
   return <DartThrow onComplete={onComplete} />;
