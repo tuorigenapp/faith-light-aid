@@ -327,7 +327,7 @@ function Membresia() {
         </div>
       </div>
 
-      <CancelSurvey open={cancelOpen} onOpenChange={setCancelOpen} />
+      <CancelSurvey open={cancelOpen} onClose={() => setCancelOpen(false)} fromPlan={sub?.plan ?? null} />
     </div>
   );
 }
