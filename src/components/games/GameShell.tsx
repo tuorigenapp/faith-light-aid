@@ -2,11 +2,12 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ArrowRight, Leaf, Pause, Play, User, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useProfile } from "@/hooks/use-profile";
+import { TOTAL_LEVELS } from "@/lib/game-progress";
 
 /**
  * Shell de pantalla completa para las prácticas jugables de ORÍGEN.
  * Regla: 3D solo donde aporta a la mecánica; toda la interfaz (nombre, hojas,
- * instrucción, progreso, opciones, controles) es UI 2D limpia y táctil.
+ * instrucción, nivel, ronda, opciones, controles) es UI 2D limpia y táctil.
  */
 
 export type DpadHandler = (x: number, y: number) => void;
@@ -15,6 +16,10 @@ export function GameShell({
   title,
   cue,
   progress,
+  level,
+  round,
+  roundsInLevel,
+  levelUp,
   dpad,
   onPauseChange,
   won,
@@ -27,6 +32,10 @@ export function GameShell({
   title: string;
   cue: string;
   progress?: { value: number; max: number };
+  level?: number;
+  round?: number;
+  roundsInLevel?: number;
+  levelUp?: boolean;
   dpad?: DpadHandler;
   onPauseChange?: (paused: boolean) => void;
   won?: boolean;
@@ -62,13 +71,13 @@ export function GameShell({
   }, []);
 
   useEffect(() => {
-    onPauseChange?.(paused || demo);
-  }, [paused, demo, onPauseChange]);
+    onPauseChange?.(paused || demo || !!levelUp);
+  }, [paused, demo, levelUp, onPauseChange]);
 
   useEffect(() => {
     if (!won || advanced.current) return;
     advanced.current = true;
-    const t = setTimeout(() => onNext?.(), 1600);
+    const t = setTimeout(() => onNext?.(), 1800);
     return () => clearTimeout(t);
   }, [won, onNext]);
 
@@ -114,9 +123,33 @@ export function GameShell({
         </span>
       </div>
 
+      {/* Nivel y ronda */}
+      {level && (
+        <div className="relative z-20 flex items-center justify-center gap-2 px-4 pb-1">
+          {Array.from({ length: TOTAL_LEVELS }).map((_, i) => (
+            <span
+              key={i}
+              className={cn(
+                "rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-widest",
+                i + 1 < level
+                  ? "bg-[#7BE0A8]/25 text-[#7BE0A8]"
+                  : i + 1 === level
+                    ? "bg-white text-[#241539]"
+                    : "bg-white/10 text-white/45",
+              )}
+            >
+              Nivel {i + 1}
+            </span>
+          ))}
+        </div>
+      )}
+
       {/* Instrucción + progreso */}
       <div className="relative z-20 px-4 pb-3 text-center">
-        <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/55">{title}</p>
+        <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/55">
+          {title}
+          {round && roundsInLevel ? ` · Ronda ${round} de ${roundsInLevel}` : ""}
+        </p>
         <p className="mt-1 font-display text-[19px] font-black leading-tight text-white">{cue}</p>
         {progress && (
           <div className="mx-auto mt-3 flex max-w-[320px] items-center gap-2">
@@ -160,13 +193,13 @@ export function GameShell({
                 <button
                   key={i}
                   onPointerDown={b.a}
-                  aria-label={b.l === "stop" ? "Detener" : `Mover ${b.l}`}
+                  aria-label={b.l === "stop" ? "Pausar o reanudar" : `Mover ${b.l}`}
                   className={cn(
                     "grid h-[58px] place-items-center rounded-[16px] text-[20px] font-black text-white backdrop-blur-md active:scale-95",
-                    b.l === "stop" ? "bg-white/25 text-[13px]" : "bg-white/15",
+                    b.l === "stop" ? "bg-white/25" : "bg-white/15",
                   )}
                 >
-                  {b.l === "stop" ? "•" : b.l}
+                  {b.l === "stop" ? (paused ? <Play className="h-5 w-5" /> : <Pause className="h-5 w-5" />) : b.l}
                 </button>
               ) : (
                 <span key={i} />
@@ -186,6 +219,17 @@ export function GameShell({
         </div>
       )}
 
+      {/* Nivel superado */}
+      {levelUp && !won && (
+        <div className="absolute inset-0 z-30 grid place-items-center bg-[#151034]/70 backdrop-blur-[2px]">
+          <div className="px-8 text-center" style={{ animation: "scale-in .35s ease-out both" }}>
+            <p className="text-[13px] font-bold uppercase tracking-widest text-[#7BE0A8]">Nivel superado</p>
+            <p className="mt-1 font-display text-[30px] font-black leading-tight text-white">Nivel {level}</p>
+            <p className="mt-2 text-[13.5px] text-white/75">Sube un poco la dificultad. Presta atención.</p>
+          </div>
+        </div>
+      )}
+
       {/* Pausa */}
       {paused && !won && (
         <div className="absolute inset-0 z-30 grid place-items-center bg-[#151034]/75">
@@ -198,20 +242,21 @@ export function GameShell({
         </div>
       )}
 
-      {/* Victoria */}
+      {/* Victoria (los 3 niveles) */}
       {won && (
         <div className="absolute inset-0 z-30 grid place-items-center bg-[#151034]/80">
           <div className="px-8 text-center" style={{ animation: "fade-in .3s ease-out both" }}>
             <span className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-[#7BE0A8]/20">
               <Leaf className="h-8 w-8 text-[#7BE0A8]" />
             </span>
-            <p className="mt-3 font-display text-[28px] font-black text-white">¡Listo!</p>
+            <p className="mt-3 font-display text-[28px] font-black text-white">Juego completado</p>
+            <p className="mt-1 text-[12px] font-bold uppercase tracking-widest text-white/55">Niveles 1 · 2 · 3</p>
             {wonText && <p className="mx-auto mt-2 max-w-[300px] text-[13.5px] text-white/80">{wonText}</p>}
             <button
               onClick={onNext}
-              className="mt-5 inline-flex h-13 items-center gap-2 rounded-full bg-white px-7 py-3 text-[15px] font-black text-[#241539] active:scale-95"
+              className="mt-5 inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-[15px] font-black text-[#241539] active:scale-95"
             >
-              Siguiente <ArrowRight className="h-4 w-4" />
+              Siguiente paso <ArrowRight className="h-4 w-4" />
             </button>
           </div>
         </div>
