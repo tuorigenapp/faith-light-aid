@@ -10,7 +10,7 @@ import { formatHojas } from "@/lib/gems";
 import crystals from "@/assets/hojas-crystals.png";
 import treePng from "@/assets/hojas-tree.png";
 
-export const Route = createFileRoute("/_authenticated/premios")({
+export const Route = createFileRoute("/_authenticated/comprarmonedas")({
   head: () => ({
     meta: [
       { title: "Recarga de Hojas de Sanación — ORIGEN" },

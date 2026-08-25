@@ -85,7 +85,7 @@ function CaminoMapa() {
     if (!user) return;
     if (!hasHojas(profile?.gems, WEEK_UNLOCK_COST)) {
       toast.error(`Necesitas ${WEEK_UNLOCK_COST} hojas para abrir la semana completa.`);
-      navigate({ to: "/premios" });
+      navigate({ to: "/comprarmonedas" });
       return;
     }
     const nb = await spendHojas(WEEK_UNLOCK_COST, `Semana completa · ${camino!.title}`, { camino: caminoId });

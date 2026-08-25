@@ -26,7 +26,6 @@ import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as ApiCaminoPackRouteImport } from './routes/api/camino-pack'
 import { Route as AuthenticatedVisualizaRouteImport } from './routes/_authenticated/visualiza'
 import { Route as AuthenticatedRuletaRouteImport } from './routes/_authenticated/ruleta'
-import { Route as AuthenticatedPremiosRouteImport } from './routes/_authenticated/premios'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedPatronesRouteImport } from './routes/_authenticated/patrones'
 import { Route as AuthenticatedParejaRouteImport } from './routes/_authenticated/pareja'
@@ -41,6 +40,7 @@ import { Route as AuthenticatedEjerciciosRouteImport } from './routes/_authentic
 import { Route as AuthenticatedDiarioRouteImport } from './routes/_authenticated/diario'
 import { Route as AuthenticatedDiagnosticoRouteImport } from './routes/_authenticated/diagnostico'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedComprarmonedasRouteImport } from './routes/_authenticated/comprarmonedas'
 import { Route as AuthenticatedChatRouteImport } from './routes/_authenticated/chat'
 import { Route as AuthenticatedCategoriasRouteImport } from './routes/_authenticated/categorias'
 import { Route as AuthenticatedBibliotecaRouteImport } from './routes/_authenticated/biblioteca'
@@ -146,11 +146,6 @@ const AuthenticatedRuletaRoute = AuthenticatedRuletaRouteImport.update({
   path: '/ruleta',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedPremiosRoute = AuthenticatedPremiosRouteImport.update({
-  id: '/premios',
-  path: '/premios',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 const AuthenticatedPerfilRoute = AuthenticatedPerfilRouteImport.update({
   id: '/perfil',
   path: '/perfil',
@@ -223,6 +218,12 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedComprarmonedasRoute =
+  AuthenticatedComprarmonedasRouteImport.update({
+    id: '/comprarmonedas',
+    path: '/comprarmonedas',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedChatRoute = AuthenticatedChatRouteImport.update({
   id: '/chat',
   path: '/chat',
@@ -347,6 +348,7 @@ export interface FileRoutesByFullPath {
   '/biblioteca': typeof AuthenticatedBibliotecaRoute
   '/categorias': typeof AuthenticatedCategoriasRoute
   '/chat': typeof AuthenticatedChatRoute
+  '/comprarmonedas': typeof AuthenticatedComprarmonedasRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/diagnostico': typeof AuthenticatedDiagnosticoRoute
   '/diario': typeof AuthenticatedDiarioRoute
@@ -361,7 +363,6 @@ export interface FileRoutesByFullPath {
   '/pareja': typeof AuthenticatedParejaRoute
   '/patrones': typeof AuthenticatedPatronesRoute
   '/perfil': typeof AuthenticatedPerfilRoute
-  '/premios': typeof AuthenticatedPremiosRoute
   '/ruleta': typeof AuthenticatedRuletaRoute
   '/visualiza': typeof AuthenticatedVisualizaRouteWithChildren
   '/api/camino-pack': typeof ApiCaminoPackRoute
@@ -400,6 +401,7 @@ export interface FileRoutesByTo {
   '/biblioteca': typeof AuthenticatedBibliotecaRoute
   '/categorias': typeof AuthenticatedCategoriasRoute
   '/chat': typeof AuthenticatedChatRoute
+  '/comprarmonedas': typeof AuthenticatedComprarmonedasRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/diagnostico': typeof AuthenticatedDiagnosticoRoute
   '/diario': typeof AuthenticatedDiarioRoute
@@ -414,7 +416,6 @@ export interface FileRoutesByTo {
   '/pareja': typeof AuthenticatedParejaRoute
   '/patrones': typeof AuthenticatedPatronesRoute
   '/perfil': typeof AuthenticatedPerfilRoute
-  '/premios': typeof AuthenticatedPremiosRoute
   '/ruleta': typeof AuthenticatedRuletaRoute
   '/visualiza': typeof AuthenticatedVisualizaRouteWithChildren
   '/api/camino-pack': typeof ApiCaminoPackRoute
@@ -454,6 +455,7 @@ export interface FileRoutesById {
   '/_authenticated/biblioteca': typeof AuthenticatedBibliotecaRoute
   '/_authenticated/categorias': typeof AuthenticatedCategoriasRoute
   '/_authenticated/chat': typeof AuthenticatedChatRoute
+  '/_authenticated/comprarmonedas': typeof AuthenticatedComprarmonedasRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/diagnostico': typeof AuthenticatedDiagnosticoRoute
   '/_authenticated/diario': typeof AuthenticatedDiarioRoute
@@ -468,7 +470,6 @@ export interface FileRoutesById {
   '/_authenticated/pareja': typeof AuthenticatedParejaRoute
   '/_authenticated/patrones': typeof AuthenticatedPatronesRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
-  '/_authenticated/premios': typeof AuthenticatedPremiosRoute
   '/_authenticated/ruleta': typeof AuthenticatedRuletaRoute
   '/_authenticated/visualiza': typeof AuthenticatedVisualizaRouteWithChildren
   '/api/camino-pack': typeof ApiCaminoPackRoute
@@ -509,6 +510,7 @@ export interface FileRouteTypes {
     | '/biblioteca'
     | '/categorias'
     | '/chat'
+    | '/comprarmonedas'
     | '/dashboard'
     | '/diagnostico'
     | '/diario'
@@ -523,7 +525,6 @@ export interface FileRouteTypes {
     | '/pareja'
     | '/patrones'
     | '/perfil'
-    | '/premios'
     | '/ruleta'
     | '/visualiza'
     | '/api/camino-pack'
@@ -562,6 +563,7 @@ export interface FileRouteTypes {
     | '/biblioteca'
     | '/categorias'
     | '/chat'
+    | '/comprarmonedas'
     | '/dashboard'
     | '/diagnostico'
     | '/diario'
@@ -576,7 +578,6 @@ export interface FileRouteTypes {
     | '/pareja'
     | '/patrones'
     | '/perfil'
-    | '/premios'
     | '/ruleta'
     | '/visualiza'
     | '/api/camino-pack'
@@ -615,6 +616,7 @@ export interface FileRouteTypes {
     | '/_authenticated/biblioteca'
     | '/_authenticated/categorias'
     | '/_authenticated/chat'
+    | '/_authenticated/comprarmonedas'
     | '/_authenticated/dashboard'
     | '/_authenticated/diagnostico'
     | '/_authenticated/diario'
@@ -629,7 +631,6 @@ export interface FileRouteTypes {
     | '/_authenticated/pareja'
     | '/_authenticated/patrones'
     | '/_authenticated/perfil'
-    | '/_authenticated/premios'
     | '/_authenticated/ruleta'
     | '/_authenticated/visualiza'
     | '/api/camino-pack'
@@ -802,13 +803,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRuletaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/premios': {
-      id: '/_authenticated/premios'
-      path: '/premios'
-      fullPath: '/premios'
-      preLoaderRoute: typeof AuthenticatedPremiosRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/perfil': {
       id: '/_authenticated/perfil'
       path: '/perfil'
@@ -905,6 +899,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/comprarmonedas': {
+      id: '/_authenticated/comprarmonedas'
+      path: '/comprarmonedas'
+      fullPath: '/comprarmonedas'
+      preLoaderRoute: typeof AuthenticatedComprarmonedasRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/chat': {
@@ -1119,6 +1120,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedBibliotecaRoute: typeof AuthenticatedBibliotecaRoute
   AuthenticatedCategoriasRoute: typeof AuthenticatedCategoriasRoute
   AuthenticatedChatRoute: typeof AuthenticatedChatRoute
+  AuthenticatedComprarmonedasRoute: typeof AuthenticatedComprarmonedasRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedDiagnosticoRoute: typeof AuthenticatedDiagnosticoRoute
   AuthenticatedDiarioRoute: typeof AuthenticatedDiarioRoute
@@ -1133,7 +1135,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedParejaRoute: typeof AuthenticatedParejaRoute
   AuthenticatedPatronesRoute: typeof AuthenticatedPatronesRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
-  AuthenticatedPremiosRoute: typeof AuthenticatedPremiosRoute
   AuthenticatedRuletaRoute: typeof AuthenticatedRuletaRoute
   AuthenticatedVisualizaRoute: typeof AuthenticatedVisualizaRouteWithChildren
   AuthenticatedCaminosCaminoIdRoute: typeof AuthenticatedCaminosCaminoIdRouteWithChildren
@@ -1145,6 +1146,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedBibliotecaRoute: AuthenticatedBibliotecaRoute,
   AuthenticatedCategoriasRoute: AuthenticatedCategoriasRoute,
   AuthenticatedChatRoute: AuthenticatedChatRoute,
+  AuthenticatedComprarmonedasRoute: AuthenticatedComprarmonedasRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedDiagnosticoRoute: AuthenticatedDiagnosticoRoute,
   AuthenticatedDiarioRoute: AuthenticatedDiarioRoute,
@@ -1159,7 +1161,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedParejaRoute: AuthenticatedParejaRoute,
   AuthenticatedPatronesRoute: AuthenticatedPatronesRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
-  AuthenticatedPremiosRoute: AuthenticatedPremiosRoute,
   AuthenticatedRuletaRoute: AuthenticatedRuletaRoute,
   AuthenticatedVisualizaRoute: AuthenticatedVisualizaRouteWithChildren,
   AuthenticatedCaminosCaminoIdRoute:

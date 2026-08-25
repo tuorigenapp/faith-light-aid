@@ -80,7 +80,7 @@ function ProgramaPage() {
     if (!user) return;
     if (!hasHojas(profile?.gems, UNLOCK_COST)) {
       toast.error(`Necesitas ${UNLOCK_COST} hojas para abrir la semana ${w}.`);
-      navigate({ to: "/premios" });
+      navigate({ to: "/comprarmonedas" });
       return;
     }
     const nb = await spendHojas(UNLOCK_COST, `Semana ${w} · ${prog!.title}`, { programa: programaId, week: w });

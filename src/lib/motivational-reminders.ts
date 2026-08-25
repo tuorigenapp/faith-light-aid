@@ -18,7 +18,7 @@ export const REMINDERS: Reminder[] = [
   { title: "El ejercicio del día es corto", body: "5 minutos hoy valen más que una semana perfecta que nunca empieza.", url: "/ejercicios" },
   { title: "Escribe lo que no puedes decir", body: "Tu diario íntimo es solo tuyo. Sácalo del pecho y déjalo escrito.", url: "/diario" },
   { title: "Tu biblioteca digital te espera", body: "82 libros para tu proceso: identidad, perdón, propósito y prosperidad.", url: "/biblioteca" },
-  { title: "¿Sin hojas de sanación?", body: "Juega y gana progreso hacia tu próxima hoja para seguir con tus consultas.", url: "/premios" },
+  { title: "¿Sin hojas de sanación?", body: "Juega y gana progreso hacia tu próxima hoja para seguir con tus consultas.", url: "/comprarmonedas" },
   { title: "Tu giro de hoy está disponible", body: "Gira la ruleta: siempre ganas algo. Una vez cada 24 horas.", url: "/ruleta" },
   { title: "Tu árbol quiere sanar", body: "Agrega a tu familia y mira qué se está repitiendo de generación en generación.", url: "/arbol" },
   { title: "La mentora está lista para ti", body: "Cuéntale dónde estás hoy. Te responde desde tu historia, no con frases hechas.", url: "/chat" },

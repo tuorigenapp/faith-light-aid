@@ -832,7 +832,7 @@ function ProfilePanel({ profile, onEdit }: { profile: any; onEdit: () => void })
             <MetricCard color="#F58BCB" icon={<Dumbbell className="w-4 h-4" />} label="Ejercicios" value={stats?.exercises ?? 0} to="/ejercicios" />
             <MetricCard color="#5AA9FF" icon={<BookHeart className="w-4 h-4" />} label="Diario" value={stats?.journals ?? 0} to="/diario" />
             <MetricCard color="#3FBE8F" icon={<HeartHandshake className="w-4 h-4" />} label="Lecturas de pareja" value={stats?.parejas ?? 0} to="/pareja" />
-            <MetricCard color="#F7B955" icon={<Trophy className="w-4 h-4" />} label="Hojas" value={wholeHojas(profile.gems)} to="/premios" />
+            <MetricCard color="#F7B955" icon={<Trophy className="w-4 h-4" />} label="Hojas" value={wholeHojas(profile.gems)} to="/comprarmonedas" />
             <MetricCard color="#E05A6B" icon={<Target className="w-4 h-4" />} label="Familiares" value={stats?.familiares ?? 0} to="/arbol" />
           </div>
         </div>
