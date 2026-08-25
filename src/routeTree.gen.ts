@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RegistroRouteImport } from './routes/registro'
-import { Route as GametestRouteImport } from './routes/gametest'
 import { Route as EstilosRouteImport } from './routes/estilos'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -73,11 +72,6 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
 const RegistroRoute = RegistroRouteImport.update({
   id: '/registro',
   path: '/registro',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const GametestRoute = GametestRouteImport.update({
-  id: '/gametest',
-  path: '/gametest',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EstilosRoute = EstilosRouteImport.update({
@@ -361,7 +355,6 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRoute
   '/estilos': typeof EstilosRoute
-  '/gametest': typeof GametestRoute
   '/registro': typeof RegistroRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/arbol': typeof AuthenticatedArbolRoute
@@ -417,7 +410,6 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRoute
   '/estilos': typeof EstilosRoute
-  '/gametest': typeof GametestRoute
   '/registro': typeof RegistroRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/arbol': typeof AuthenticatedArbolRoute
@@ -474,7 +466,6 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRoute
   '/estilos': typeof EstilosRoute
-  '/gametest': typeof GametestRoute
   '/registro': typeof RegistroRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/arbol': typeof AuthenticatedArbolRoute
@@ -532,7 +523,6 @@ export interface FileRouteTypes {
     | '/auth'
     | '/checkout'
     | '/estilos'
-    | '/gametest'
     | '/registro'
     | '/sitemap.xml'
     | '/arbol'
@@ -588,7 +578,6 @@ export interface FileRouteTypes {
     | '/auth'
     | '/checkout'
     | '/estilos'
-    | '/gametest'
     | '/registro'
     | '/sitemap.xml'
     | '/arbol'
@@ -644,7 +633,6 @@ export interface FileRouteTypes {
     | '/auth'
     | '/checkout'
     | '/estilos'
-    | '/gametest'
     | '/registro'
     | '/sitemap.xml'
     | '/_authenticated/arbol'
@@ -702,7 +690,6 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   CheckoutRoute: typeof CheckoutRoute
   EstilosRoute: typeof EstilosRoute
-  GametestRoute: typeof GametestRoute
   RegistroRoute: typeof RegistroRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiCaminoPackRoute: typeof ApiCaminoPackRoute
@@ -734,13 +721,6 @@ declare module '@tanstack/react-router' {
       path: '/registro'
       fullPath: '/registro'
       preLoaderRoute: typeof RegistroRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/gametest': {
-      id: '/gametest'
-      path: '/gametest'
-      fullPath: '/gametest'
-      preLoaderRoute: typeof GametestRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/estilos': {
@@ -1241,7 +1221,6 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   CheckoutRoute: CheckoutRoute,
   EstilosRoute: EstilosRoute,
-  GametestRoute: GametestRoute,
   RegistroRoute: RegistroRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiCaminoPackRoute: ApiCaminoPackRoute,
