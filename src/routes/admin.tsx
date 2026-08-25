@@ -27,6 +27,10 @@ import { BooksManager } from "@/components/admin/BooksManager";
 import { AudiosManager } from "@/components/admin/AudiosManager";
 import { UsersManager } from "@/components/admin/UsersManager";
 import { MarketingManager } from "@/components/admin/MarketingManager";
+import { SalesManager } from "@/components/admin/SalesManager";
+import { UsageManager } from "@/components/admin/UsageManager";
+import { ContentManager } from "@/components/admin/ContentManager";
+import { BackupManager } from "@/components/admin/BackupManager";
 import { AreaChart, Area, ResponsiveContainer, BarChart, Bar, XAxis, Tooltip } from "recharts";
 
 export const Route = createFileRoute("/admin")({
