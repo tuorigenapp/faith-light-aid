@@ -25,7 +25,14 @@ import origenIcon from "@/assets/origen-o-icon.png";
 
 
 export const Route = createFileRoute("/_authenticated/arbol")({
-  head: () => ({ meta: [{ title: "Mi Árbol Genealógico — ORIGEN" }] }),
+  head: () => ({ meta: [
+    { title: "Mi Árbol Genealógico — ORÍGEN" },
+    { name: "description", content: "Construye tu árbol genealógico, administra tus hojas y descarga tu PDF familiar en ORÍGEN." },
+    { property: "og:title", content: "Mi Árbol Genealógico — ORÍGEN" },
+    { property: "og:description", content: "Agrega, edita y descarga tu árbol familiar con tus hojas de sanación." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary_large_image" },
+  ] }),
   component: TreePage,
 });
 

@@ -38,7 +38,7 @@ export const EXPLORE_ITEMS: ExploreItem[] = [
   { title: "Visualízalo y Vívelo", description: "Audios, ejercicios y visualización guiada.", image: visualizaBanner, to: "/visualiza", tag: "Audio" },
   { title: "Mi árbol", description: "Agrega familiares y mira tu linaje.", image: treeCover, to: "/arbol", tag: "Familia" },
   { title: "Diario íntimo", description: "Escribe, guarda y vuelve a mirar tu proceso.", image: diarioCover, to: "/diario", tag: "Diario" },
-  { title: "Biblioteca", description: "Recursos para acompañar tu camino.", image: bibliotecaCover, to: "/biblioteca", tag: "Lectura", locked: true },
+  { title: "Biblioteca", description: "Recursos para acompañar tu camino.", image: bibliotecaCover.url, to: "/biblioteca", tag: "Lectura", locked: true },
   { title: "Comprar monedas", description: "Recarga Hojas de Sanación.", image: monedasCover, to: "/comprarmonedas", tag: "Hojas" },
   { title: "Niño interior", description: "Sana a mamá, papá y tu historia.", image: ninoCover, to: "/programas/nino-interior", tag: "Programa", locked: true },
   { title: "Glow Up Mujer", description: "Belleza, carácter y propósito.", image: glowMujerCover, to: "/programas/glowup-mujer", tag: "Programa", locked: true },

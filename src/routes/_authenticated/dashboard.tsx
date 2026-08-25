@@ -37,7 +37,14 @@ import { FEATURED_EXPLORE } from "@/lib/explore-content";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
-  head: () => ({ meta: [{ title: "Hoy — ORIGEN" }] }),
+  head: () => ({ meta: [
+    { title: "Hoy — ORIGEN" },
+    { name: "description", content: "Tu misión diaria, ejercicios, racha y contenido recomendado dentro de ORÍGEN." },
+    { property: "og:title", content: "Hoy — ORIGEN" },
+    { property: "og:description", content: "Tu home diaria con misión, racha, ejercicios y contenido de ORÍGEN." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary_large_image" },
+  ] }),
   component: Dashboard,
 });
 

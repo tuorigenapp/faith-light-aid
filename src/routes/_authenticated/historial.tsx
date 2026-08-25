@@ -1,24 +1,24 @@
 import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Mail, Send, ShoppingBag, Sparkles, Leaf } from "lucide-react";
+import { ArrowLeft, BookHeart, HeartHandshake, Mail, MessageCircle, Send, ShoppingBag, Sparkles, Leaf, TreeDeciduous, UserCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { cn } from "@/lib/utils";
 import { usd } from "@/lib/hojas";
 import treePng from "@/assets/hojas-tree.png";
 
+type HistoryKind = "compra" | "transferencia" | "familia" | "diario" | "consulta" | "mentor" | "soporte" | "movimiento";
+type Tab = "todas" | HistoryKind;
+type Row = { id: string; kind: HistoryKind; title: string; detail: string; status?: string; amount?: string; date: Date };
+
 export const Route = createFileRoute("/_authenticated/historial")({
   head: () => ({
     meta: [
-      { title: "Historial de transacciones — ORÍGEN" },
-      {
-        name: "description",
-        content:
-          "Revisa cada movimiento de tus Hojas de Sanación: recargas, transferencias enviadas y su estado de aprobación.",
-      },
-      { property: "og:title", content: "Historial de transacciones — ORÍGEN" },
-      { property: "og:description", content: "Cada hoja, cada recarga y cada transferencia, siempre a la vista." },
+      { title: "Historial general — ORÍGEN" },
+      { name: "description", content: "Todo tu registro de ORÍGEN: compras, transferencias, familiares, diario, consultas, mentora, soporte y movimientos." },
+      { property: "og:title", content: "Historial general — ORÍGEN" },
+      { property: "og:description", content: "Una sola sección para revisar cada movimiento y actividad importante dentro de ORÍGEN." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -26,197 +26,140 @@ export const Route = createFileRoute("/_authenticated/historial")({
   component: HistorialPage,
 });
 
-type Tab = "todas" | "compras" | "transferencias" | "movimientos";
+const TABS: { id: Tab; label: string }[] = [
+  { id: "todas", label: "Todo" },
+  { id: "compra", label: "Compras" },
+  { id: "transferencia", label: "Transferencias" },
+  { id: "familia", label: "Familia" },
+  { id: "consulta", label: "Consultas" },
+  { id: "diario", label: "Diario" },
+  { id: "mentor", label: "Mentora" },
+];
 
 function HistorialPage() {
   const { user } = useAuth();
   const [tab, setTab] = useState<Tab>("todas");
 
-  const { data: tx, isLoading, isError } = useQuery({
-    queryKey: ["hoja-tx-full", user?.id],
+  const { data: rows = [], isLoading, isError } = useQuery({
+    queryKey: ["historial-general", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("gem_transactions")
-        .select("id, amount, reason, meta, created_at")
-        .eq("user_id", user!.id)
-        .order("created_at", { ascending: false })
-        .limit(200);
-      if (error) throw error;
-      return data ?? [];
+      const [tx, transfers, family, journal, pareja, patrones, ministracion, messages, ratings] = await Promise.all([
+        supabase.from("gem_transactions").select("id, amount, reason, meta, created_at").eq("user_id", user!.id).order("created_at", { ascending: false }).limit(200),
+        supabase.from("hoja_transfers").select("id, to_email, points, status, created_at").eq("user_id", user!.id).order("created_at", { ascending: false }).limit(100),
+        supabase.from("family_members").select("id, full_name, relationship, lineage, created_at").eq("user_id", user!.id).order("created_at", { ascending: false }).limit(100),
+        supabase.from("journal_entries").select("id, title, kind, mood, created_at").eq("user_id", user!.id).is("deleted_at", null).order("created_at", { ascending: false }).limit(80),
+        supabase.from("pareja_lecturas").select("id, partner_name, question, created_at").eq("user_id", user!.id).order("created_at", { ascending: false }).limit(60),
+        supabase.from("patrones_consultas").select("id, name, question, created_at").eq("user_id", user!.id).order("created_at", { ascending: false }).limit(60),
+        supabase.from("ministracion_lecturas").select("id, name, question, created_at").eq("user_id", user!.id).order("created_at", { ascending: false }).limit(60),
+        supabase.from("messages").select("id, role, created_at").eq("user_id", user!.id).order("created_at", { ascending: false }).limit(80),
+        supabase.from("satisfaction_ratings").select("id, section, stars, created_at").eq("user_id", user!.id).order("created_at", { ascending: false }).limit(50),
+      ]);
+
+      const output: Row[] = [];
+      (tx.data ?? []).forEach((t) => {
+        const meta = (t.meta ?? {}) as Record<string, unknown>;
+        const kind = ((meta.kind as HistoryKind | undefined) ?? (t.reason?.toLowerCase().startsWith("transferencia") ? "transferencia" : t.amount < 0 ? "movimiento" : "movimiento"));
+        const hojas = typeof meta.hojas === "number" ? meta.hojas : t.amount / 100;
+        const price = typeof meta.usd === "number" ? usd(meta.usd) : `${hojas > 0 ? "+" : ""}${hojas.toFixed(3)} hojas`;
+        output.push({ id: `tx-${t.id}`, kind, title: t.reason, detail: kind === "compra" ? "Recarga solicitada" : "Movimiento de hojas", status: (meta.status as string | undefined) ?? "aprobada", amount: price, date: new Date(t.created_at) });
+      });
+      (transfers.data ?? []).forEach((t) => output.push({ id: `tr-${t.id}`, kind: "transferencia", title: `Transferencia a ${t.to_email}`, detail: `${Math.floor(t.points / 100)} hojas enviadas`, status: t.status, date: new Date(t.created_at) }));
+      (family.data ?? []).forEach((m) => output.push({ id: `fam-${m.id}`, kind: "familia", title: m.full_name, detail: `${m.relationship} · ${m.lineage}`, status: "registrado", date: new Date(m.created_at) }));
+      (journal.data ?? []).forEach((j) => output.push({ id: `jr-${j.id}`, kind: "diario", title: j.title || "Entrada de diario", detail: `${j.kind}${j.mood ? ` · ${j.mood}` : ""}`, status: "guardado", date: new Date(j.created_at) }));
+      (pareja.data ?? []).forEach((r) => output.push({ id: `pa-${r.id}`, kind: "consulta", title: "Lectura de pareja", detail: r.partner_name || r.question || "Consulta guardada", status: "completa", date: new Date(r.created_at) }));
+      (patrones.data ?? []).forEach((r) => output.push({ id: `pt-${r.id}`, kind: "consulta", title: "Patrones familiares", detail: r.name || r.question || "Consulta guardada", status: "completa", date: new Date(r.created_at) }));
+      (ministracion.data ?? []).forEach((r) => output.push({ id: `mi-${r.id}`, kind: "consulta", title: "Dios te dice hoy", detail: r.name || r.question || "Ministración guardada", status: "completa", date: new Date(r.created_at) }));
+      (messages.data ?? []).filter((m) => m.role === "user").forEach((m) => output.push({ id: `msg-${m.id}`, kind: "mentor", title: "Mensaje con Ruth Esther", detail: "Conversación espiritual", status: "enviado", date: new Date(m.created_at) }));
+      (ratings.data ?? []).forEach((r) => output.push({ id: `sat-${r.id}`, kind: "soporte", title: `Valoración: ${r.section}`, detail: `${r.stars} estrellas`, status: "recibida", date: new Date(r.created_at) }));
+      return output.sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 300);
     },
   });
 
-  const { data: transfers } = useQuery({
-    queryKey: ["hoja_transfers_full", user?.id],
-    enabled: !!user,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("hoja_transfers")
-        .select("id, to_email, points, status, created_at")
-        .eq("user_id", user!.id)
-        .order("created_at", { ascending: false })
-        .limit(100);
-      if (error) throw error;
-      return data ?? [];
-    },
-  });
-
-  const rows = (tx ?? [])
-    .map((t) => {
-      const meta = (t.meta ?? {}) as Record<string, unknown>;
-      const kind =
-        (meta["kind"] as string) ??
-        (t.reason?.toLowerCase().startsWith("transferencia") ? "transferencia" : t.amount < 0 ? "consumo" : "movimiento");
-      const status = (meta["status"] as string) ?? "aprobada";
-      const hojas = (meta["hojas"] as number) ?? t.amount / 100;
-      const price = meta["usd"] as number | undefined;
-      return { id: t.id, kind, status, hojas, price, reason: t.reason, date: new Date(t.created_at) };
-    })
-    .filter((r) =>
-      tab === "todas"
-        ? true
-        : tab === "compras"
-          ? r.kind === "compra"
-          : tab === "transferencias"
-            ? r.kind === "transferencia"
-            : r.kind !== "compra" && r.kind !== "transferencia",
-    );
+  const filtered = rows.filter((r) => tab === "todas" || r.kind === tab);
 
   return (
-    <div className="min-h-dvh bg-background pb-28">
+    <div className="min-h-dvh bg-aura-top pb-28">
       <div className="mx-auto w-full max-w-[1100px] px-5 pt-5">
         <div className="flex items-center gap-3">
-          <Link
-            to="/arbol"
-            aria-label="Volver al árbol de sanación"
-            className="w-10 h-10 shrink-0 rounded-full bg-card shadow-soft grid place-items-center text-[#7C5CFF] active:scale-95 transition"
-          >
+          <Link to="/dashboard" aria-label="Volver al inicio" className="w-10 h-10 shrink-0 rounded-full bg-card shadow-soft grid place-items-center text-primary active:scale-95 transition">
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div className="min-w-0">
-            <p className="text-[11px] uppercase tracking-[0.18em] font-bold text-[#7C5CFF]">Tus movimientos</p>
-            <h1 className="font-display font-extrabold text-[22px] leading-tight text-foreground">Historial de transacciones 🍃</h1>
+            <p className="text-[11px] uppercase tracking-[0.18em] font-bold text-primary">Tus registros</p>
+            <h1 className="font-display font-extrabold text-[24px] leading-tight text-foreground">Historial general</h1>
+            <p className="mt-1 text-[13px] text-muted-foreground">Todo lo que pasa en ORÍGEN vive aquí.</p>
           </div>
         </div>
 
-        <div className="mt-5 grid grid-cols-4 rounded-[12px] bg-card border border-border p-1">
-          {(["todas", "compras", "transferencias", "movimientos"] as const).map((t) => (
-            <button
-              key={t}
-              onClick={() => setTab(t)}
-              className={cn(
-                "h-9 rounded-[10px] text-[11.5px] font-bold capitalize transition active:scale-95",
-                tab === t ? "bg-[#7C5CFF]/12 text-[#7C5CFF]" : "text-muted-foreground",
-              )}
-            >
-              {t}
-            </button>
-          ))}
+        <div className="mt-5 -mx-5 px-5 overflow-x-auto no-scrollbar">
+          <div className="flex gap-2 w-max pb-1">
+            {TABS.map((t) => (
+              <button key={t.id} onClick={() => setTab(t.id)} className={cn("h-10 rounded-[10px] px-3 text-[12px] font-bold transition active:scale-95", tab === t.id ? "bg-primary/12 text-primary" : "bg-card border border-border text-muted-foreground")}>
+                {t.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="mt-4 space-y-3">
-          {isLoading &&
-            [0, 1, 2, 3].map((i) => (
-              <div key={i} className="h-[86px] rounded-[16px] bg-card border border-border animate-pulse" />
-            ))}
-
-          {isError && (
-            <div className="rounded-[16px] bg-card border border-border p-5 text-center">
-              <p className="font-display font-bold text-[15px]">No pudimos cargar tu historial</p>
-              <p className="mt-1 text-[13px] text-muted-foreground">Revisa tu conexión y vuelve a intentarlo en un momento.</p>
-            </div>
-          )}
-
-          {!isLoading && !isError && rows.length === 0 && (
+          {isLoading && [0, 1, 2, 3].map((i) => <div key={i} className="h-[86px] rounded-[16px] bg-card border border-border animate-pulse" />)}
+          {isError && <State title="No pudimos cargar tu historial" body="Revisa tu conexión y vuelve a intentarlo en un momento." />}
+          {!isLoading && !isError && filtered.length === 0 && (
             <div className="rounded-[16px] bg-card border border-border p-6 text-center shadow-soft">
-              <img src={treePng} alt="" aria-hidden loading="lazy" width={1024} height={1024} className="w-28 h-28 mx-auto object-contain" />
+              <img src={treePng} alt="Árbol de sanación ORÍGEN" loading="lazy" width={1024} height={1024} className="w-28 h-28 mx-auto object-contain" />
               <div className="font-display font-bold text-[16px] text-foreground">Tu historial comienza hoy</div>
-              <p className="mt-1 text-[13px] text-muted-foreground">Cuando recargues, ganes o transfieras hojas, verás cada movimiento aquí.</p>
-              <Link
-                to="/comprarmonedas"
-                className="mt-4 inline-flex h-12 items-center justify-center gap-2 rounded-[12px] px-5 font-display font-bold text-[15px] text-white active:scale-[.98] transition"
-                style={{ background: "linear-gradient(180deg,#8F6BFF 0%,#F58BCB 100%)", boxShadow: "0 4px 14px rgba(124,92,255,.30)" }}
-              >
-                <Sparkles className="w-4 h-4" /> Recargar mis hojas
+              <p className="mt-1 text-[13px] text-muted-foreground">Cuando uses la app, tus registros importantes aparecerán aquí.</p>
+              <Link to="/explorar" className="mt-4 inline-flex h-12 items-center justify-center gap-2 rounded-[12px] px-5 btn-primary-gradient font-display font-bold text-[15px] text-primary-foreground active:scale-[.98] transition">
+                <Sparkles className="w-4 h-4" /> Explorar ORÍGEN
               </Link>
             </div>
           )}
-
-          {rows.map((r) => (
-            <div
-              key={r.id}
-              className="rounded-[16px] bg-card border border-border p-4 shadow-soft grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3"
-            >
-              <span className="w-10 h-10 rounded-[10px] bg-[#7C5CFF]/10 grid place-items-center shrink-0 text-[#7C5CFF]">
-                {r.kind === "transferencia" ? <Send className="w-4 h-4" /> : r.kind === "compra" ? <ShoppingBag className="w-4 h-4" /> : <Leaf className="w-4 h-4" />}
-              </span>
-              <div className="min-w-0">
-                <div className="font-display font-bold text-[15px] text-foreground truncate">{r.reason}</div>
-                <div className="text-[12px] text-muted-foreground capitalize">{r.kind}</div>
-                <div className="text-[11px] text-muted-foreground mt-0.5">
-                  {r.date.toLocaleDateString("es-ES", { day: "2-digit", month: "short", year: "numeric" })} ·{" "}
-                  {r.date.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}
-                </div>
-              </div>
-              <div className="text-right shrink-0">
-                <span
-                  className={cn(
-                    "inline-block rounded-full px-2.5 py-1 text-[11px] font-black",
-                    r.status === "pendiente" ? "bg-[#F7B955]/15 text-[#B77B12]" : "bg-[#3FBE8F]/15 text-[#2FA574]",
-                  )}
-                >
-                  {r.status === "pendiente" ? "Pendiente" : "Aprobada"}
-                </span>
-                <div className="mt-1 text-[13px] font-semibold text-foreground tabular-nums">
-                  {r.price !== undefined ? usd(r.price) : `${r.hojas > 0 ? "+" : ""}${r.hojas.toFixed(3)} 🍃`}
-                </div>
-              </div>
-            </div>
-          ))}
+          {filtered.map((r) => <HistoryRow key={r.id} row={r} />)}
         </div>
 
-        <section className="mt-7">
-          <h2 className="text-[12px] uppercase tracking-[0.18em] font-black text-[#7C5CFF]">Transferencias enviadas</h2>
-          <div className="mt-3 space-y-2.5">
-            {(transfers ?? []).length === 0 && (
-              <div className="rounded-[14px] bg-card border border-border p-4 text-[13px] text-muted-foreground">
-                Aún no has enviado hojas a nadie. Puedes hacerlo desde tu árbol de sanación.
-              </div>
-            )}
-            {(transfers ?? []).map((t) => (
-              <div key={t.id} className="rounded-[14px] bg-card border border-border p-3.5 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
-                <span className="w-9 h-9 rounded-[10px] bg-[#7C5CFF]/10 grid place-items-center text-[#7C5CFF] shrink-0">
-                  <Send className="w-4 h-4" />
-                </span>
-                <div className="min-w-0">
-                  <div className="text-[13px] font-bold text-foreground truncate">{t.to_email}</div>
-                  <div className="text-[11px] text-muted-foreground">
-                    {new Date(t.created_at).toLocaleDateString("es-ES", { day: "2-digit", month: "short", year: "numeric" })} ·{" "}
-                    {Math.floor(t.points / 100)} hojas
-                  </div>
-                </div>
-                <span
-                  className={cn(
-                    "shrink-0 rounded-full px-2.5 py-1 text-[11px] font-black",
-                    t.status === "pending"
-                      ? "bg-[#F7B955]/15 text-[#B77B12]"
-                      : t.status === "rejected"
-                        ? "bg-[#F5566B]/15 text-[#C23B4C]"
-                        : "bg-[#3FBE8F]/15 text-[#2FA574]",
-                  )}
-                >
-                  {t.status === "pending" ? "Pendiente" : t.status === "rejected" ? "Rechazada" : "Aprobada"}
-                </span>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <div className="mt-4 rounded-[12px] bg-[#7C5CFF]/[0.07] border border-[#7C5CFF]/15 px-4 py-3 flex items-center gap-3 text-[13px] font-semibold text-[#7C5CFF]">
-          <Mail className="w-4 h-4 shrink-0" /> Las transferencias se revisan manualmente antes de aprobarse.
+        <div className="mt-4 rounded-[12px] bg-primary/10 border border-primary/15 px-4 py-3 flex items-center gap-3 text-[13px] font-semibold text-primary">
+          <Mail className="w-4 h-4 shrink-0" /> Compras, transferencias, familiares, consultas, mentora y soporte se centralizan en esta sección.
         </div>
       </div>
     </div>
   );
+}
+
+function State({ title, body }: { title: string; body: string }) {
+  return <div className="rounded-[16px] bg-card border border-border p-5 text-center"><p className="font-display font-bold text-[15px]">{title}</p><p className="mt-1 text-[13px] text-muted-foreground">{body}</p></div>;
+}
+
+function HistoryRow({ row }: { row: Row }) {
+  const Icon = iconFor(row.kind);
+  return (
+    <div className="rounded-[16px] bg-card border border-border p-4 shadow-soft grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
+      <span className="w-10 h-10 rounded-[10px] bg-primary/10 grid place-items-center shrink-0 text-primary"><Icon className="w-4 h-4" /></span>
+      <div className="min-w-0">
+        <div className="font-display font-bold text-[15px] text-foreground truncate">{row.title}</div>
+        <div className="text-[12px] text-muted-foreground truncate">{row.detail}</div>
+        <div className="text-[11px] text-muted-foreground mt-0.5">{row.date.toLocaleDateString("es-ES", { day: "2-digit", month: "short", year: "numeric" })} · {row.date.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}</div>
+      </div>
+      <div className="text-right shrink-0">
+        {row.status && <span className="inline-block rounded-full px-2.5 py-1 text-[11px] font-black bg-primary/10 text-primary capitalize">{statusLabel(row.status)}</span>}
+        {row.amount && <div className="mt-1 text-[13px] font-semibold text-foreground tabular-nums">{row.amount}</div>}
+      </div>
+    </div>
+  );
+}
+
+function iconFor(kind: HistoryKind) {
+  if (kind === "compra") return ShoppingBag;
+  if (kind === "transferencia") return Send;
+  if (kind === "familia") return TreeDeciduous;
+  if (kind === "diario") return BookHeart;
+  if (kind === "consulta") return HeartHandshake;
+  if (kind === "mentor") return MessageCircle;
+  if (kind === "soporte") return UserCheck;
+  return Leaf;
+}
+
+function statusLabel(status: string) {
+  const map: Record<string, string> = { pending: "Pendiente", approved: "Aprobada", rejected: "Rechazada" };
+  return map[status] ?? status;
 }
