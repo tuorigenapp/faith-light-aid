@@ -579,7 +579,7 @@ export function MarketingManager() {
               />
             </Field>
 
-            <div className="grid gap-2 sm:col-span-2 sm:grid-cols-2">
+            <div className="grid gap-2 sm:col-span-2 sm:grid-cols-3">
               <button
                 onClick={() => saveCampaign.mutate("draft")}
                 disabled={saveCampaign.isPending}
@@ -590,9 +590,62 @@ export function MarketingManager() {
               <button
                 onClick={() => saveCampaign.mutate("scheduled")}
                 disabled={saveCampaign.isPending}
-                className="inline-flex h-12 items-center justify-center gap-2 rounded-[12px] bg-primary text-[15px] font-bold text-primary-foreground disabled:opacity-60"
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-[12px] bg-primary/80 text-[14px] font-bold text-primary-foreground disabled:opacity-60"
               >
                 {saveCampaign.isPending && <Loader2 className="h-4 w-4 animate-spin" />} Programar campaña
+              </button>
+              <button
+                onClick={async () => {
+                  const parsed = campaignSchema.safeParse({
+                    ...form,
+                    channel,
+                    list_id: form.list_id ? form.list_id : null,
+                    max_per_day: Number(form.max_per_day) || 1,
+                  });
+                  if (!parsed.success) {
+                    toast.error(parsed.error.issues[0]!.message);
+                    return;
+                  }
+                  const d = parsed.data;
+                  if (channel === "email" && !d.subject) {
+                    toast.error("El correo necesita un asunto");
+                    return;
+                  }
+                  const { data: inserted, error } = await supabase
+                    .from("marketing_campaigns")
+                    .insert({
+                      name: d.name,
+                      channel,
+                      subject: d.subject || null,
+                      content: d.content,
+                      image_url: d.image_url || null,
+                      button_text: d.button_text || null,
+                      button_url: d.button_url || null,
+                      audience_type: d.audience_type,
+                      list_id: d.list_id,
+                      status: "sending",
+                      max_per_day: d.max_per_day,
+                    })
+                    .select("id")
+                    .single();
+                  if (error || !inserted) {
+                    toast.error(error?.message || "No pudimos crear la campaña");
+                    return;
+                  }
+                  invalidateCampaigns();
+                  sendNowMutation.mutate(inserted.id, {
+                    onSuccess: () => setForm(emptyCampaign),
+                  });
+                }}
+                disabled={saveCampaign.isPending || sendNowMutation.isPending}
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-[12px] bg-primary text-[15px] font-bold text-primary-foreground disabled:opacity-60"
+              >
+                {sendNowMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Send className="h-4 w-4" />
+                )}
+                Publicar ahora
               </button>
             </div>
           </div>
