@@ -43,7 +43,7 @@ export const Route = createFileRoute("/_authenticated/etapas/$stageId")({
   component: StageFlow,
 });
 
-const TOTAL_STEPS = 13;
+const TOTAL_STEPS = 20;
 const STAGE_XP = 120;
 
 export type StepEntry = {
