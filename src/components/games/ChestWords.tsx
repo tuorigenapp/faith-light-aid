@@ -3,41 +3,70 @@ import * as THREE from "three";
 import { GameShell } from "./GameShell";
 import { createRig, createBurstPool, makeAmbientParticles } from "./engine3d";
 import { cn } from "@/lib/utils";
+import { useGameLevels, shuffleSeeded } from "@/lib/game-progress";
 
 /**
- * Palabras en el cofre — 3D solo para el cofre (objeto principal con física visual
- * y luz). Las palabras son tarjetas 2D grandes, separadas y fáciles de tocar.
+ * Palabras en el cofre — 3 niveles, varias rondas.
+ * 3D solo para el cofre; las palabras son tarjetas 2D grandes y separadas.
  */
 export function ChestWords({
   correct,
   decoys = [],
+  storageKey = "cofre",
   onComplete,
   onClose,
   onNext,
 }: {
   correct: string[];
   decoys?: string[];
+  storageKey?: string;
   onComplete?: () => void;
   onClose?: () => void;
   onNext?: () => void;
 }) {
   const host = useRef<HTMLDivElement>(null);
   const pausedRef = useRef(false);
-  const burstRef = useRef<{ spawn: (p: THREE.Vector3, c: number, n: number) => void } | null>(null);
   const popRef = useRef<(() => void) | null>(null);
   const [taken, setTaken] = useState<string[]>([]);
   const [wrong, setWrong] = useState<string | null>(null);
   const [won, setWon] = useState(false);
-  const doneRef = useRef(false);
 
-  const good = useMemo(() => correct.map((w) => w.trim()).filter(Boolean), [correct]);
-  const goal = Math.max(1, good.length);
+  const levels = useGameLevels(`cofre:${storageKey}`, () => {
+    onComplete?.();
+    setWon(true);
+  });
+
+  const good = useMemo(
+    () => Array.from(new Set(correct.map((w) => (w ?? "").trim()).filter(Boolean))),
+    [correct],
+  );
+  const bad = useMemo(
+    () => Array.from(new Set(decoys.map((w) => (w ?? "").trim()).filter(Boolean))),
+    [decoys],
+  );
+
+  /** Objetivo de la ronda: crece con el nivel. */
+  const targets = useMemo(() => {
+    const pool = good.length ? good : ["Paz"];
+    const need = Math.min(pool.length, 1 + levels.level);
+    return shuffleSeeded(pool, levels.seed).slice(0, need);
+  }, [good, levels.level, levels.seed]);
+
   const cards = useMemo(() => {
-    const bad = decoys.map((w) => w.trim()).filter(Boolean).slice(0, Math.max(2, good.length));
-    const all = [...good.map((w) => ({ w, ok: true })), ...bad.map((w) => ({ w, ok: false }))];
-    return all.map((c, i) => ({ ...c, k: (i * 5 + 3) % 13 })).sort((a, b) => a.k - b.k);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [correct, decoys]);
+    const fillers = bad.length ? bad : ["Miedo", "Culpa", "Prisa", "Vergüenza"];
+    const noise = shuffleSeeded(fillers, levels.seed + 5).slice(0, 1 + levels.level);
+    const others = good.filter((w) => !targets.includes(w)).slice(0, levels.level);
+    return shuffleSeeded(
+      [
+        ...targets.map((w) => ({ w, ok: true })),
+        ...noise.map((w) => ({ w, ok: false })),
+        ...others.map((w) => ({ w, ok: false })),
+      ],
+      levels.seed + 11,
+    );
+  }, [targets, bad, good, levels.level, levels.seed]);
+
+  useEffect(() => setTaken([]), [levels.level, levels.round]);
 
   useEffect(() => {
     const el = host.current;
@@ -52,7 +81,6 @@ export function ChestWords({
     const { scene } = rig;
     const dust = makeAmbientParticles(scene, { count: 30, spread: 9, height: 5.5, color: 0xffe9b0, size: 0.07, speed: 0.22, up: true });
     const burst = createBurstPool(scene);
-    burstRef.current = burst;
 
     const floor = new THREE.Mesh(
       new THREE.CircleGeometry(6, 48),
@@ -62,10 +90,11 @@ export function ChestWords({
     floor.receiveShadow = true;
     scene.add(floor);
 
-    // Cofre con formas suaves
     const chest = new THREE.Group();
-    const boxGeo = new THREE.BoxGeometry(2.6, 1.3, 1.7, 4, 4, 4);
-    const box = new THREE.Mesh(boxGeo, new THREE.MeshStandardMaterial({ color: 0xa8763f, roughness: 0.5 }));
+    const box = new THREE.Mesh(
+      new THREE.BoxGeometry(2.6, 1.3, 1.7, 4, 4, 4),
+      new THREE.MeshStandardMaterial({ color: 0xa8763f, roughness: 0.5 }),
+    );
     box.position.y = 0.65;
     box.castShadow = true;
     chest.add(box);
@@ -104,34 +133,33 @@ export function ChestWords({
     });
 
     return () => {
-      burstRef.current = null;
       popRef.current = null;
       rig.dispose();
     };
   }, []);
 
   function tap(w: string, ok: boolean) {
-    if (pausedRef.current || doneRef.current || taken.includes(w)) return;
+    if (pausedRef.current || won || taken.includes(w)) return;
     if (!ok) {
       setWrong(w);
-      setTimeout(() => setWrong(null), 420);
+      window.setTimeout(() => setWrong(null), 420);
       return;
     }
     popRef.current?.();
     const next = [...taken, w];
     setTaken(next);
-    if (next.length >= goal && !doneRef.current) {
-      doneRef.current = true;
-      onComplete?.();
-      setWon(true);
-    }
+    if (next.length >= targets.length) window.setTimeout(() => levels.clearRound(), 420);
   }
 
   return (
     <GameShell
       title="Palabras en el cofre"
-      cue="Guarda tus palabras"
-      progress={{ value: taken.length, max: goal }}
+      cue={`Guarda: ${targets.join(" · ")}`}
+      progress={{ value: levels.totalDone, max: levels.totalRounds }}
+      level={levels.level}
+      round={levels.round}
+      roundsInLevel={levels.roundsInLevel}
+      levelUp={levels.levelUp}
       won={won}
       wonText="Esas palabras ya son tuyas: guardadas en tu cofre."
       onNext={onNext}
