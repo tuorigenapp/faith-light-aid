@@ -6,7 +6,7 @@ import {
   Home, MessageCircle, Layers, BookHeart, Dumbbell,
   CreditCard, User as UserIcon, Shield, LogOut, Sun, Moon, X,
   Headphones, TreeDeciduous, Trophy, HeartHandshake, Sparkles,
-  MoveUpRight, Route as RouteIcon,
+  MoveUpRight, Route as RouteIcon, Leaf,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -155,7 +155,7 @@ function AuthLayoutInner() {
   const isActive = (to: string) =>
     location.pathname === to || (to !== "/dashboard" && location.pathname.startsWith(to));
 
-  const immersive = location.pathname.startsWith("/onboarding");
+  const immersive = location.pathname.startsWith("/onboarding") || location.pathname.startsWith("/ruleta");
   if (immersive) {
     return (
       <div className="min-h-screen bg-background text-foreground">
