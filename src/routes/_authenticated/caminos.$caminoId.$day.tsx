@@ -537,7 +537,34 @@ const [feedback, setFeedback] = useState<"ok" | "fail" | null>(null);
           </section>
         )}
 
-        {p && step === 11 && (
+        {/* ── Juegos 3D del tema, pantalla completa (pasos 11–17) ── */}
+        {p && step >= 11 && step <= 16 && (
+          <StageGameStep
+            kind={(["cofre", "adivina", "pimpon", "pez", "dardo", "cofre"] as GameKind[])[step - 11]!}
+            context={{
+              good: (p.words ?? []).length ? p.words! : [etapa.focus],
+              bad: p.cargas ?? ["Miedo", "Culpa", "Prisa"],
+              mainWord: etapa.focus ?? etapa.title,
+            }}
+            onWin={() => reward("medium", `Juego 3D día ${dayNum}`)}
+            onNext={next}
+            onClose={() => navigate({ to: "/caminos/$caminoId", params: { caminoId } })}
+          />
+        )}
+
+        {p && step === 17 && (
+          <section style={{ animation: "fade-in .4s ease-out both" }}>
+            <H title="Retos mentales" sub="Atención y memoria, cortito." />
+            <div className="mt-3 space-y-3">
+              <MentalTasks tasks={p.words ?? []} onComplete={() => reward("minor", "Retos mentales")} />
+              <MemoryPairs storageKey={`camino-${caminoId}-${dayNum}`} />
+            </div>
+            <Cta onClick={next}>Continuar</Cta>
+          </section>
+        )}
+
+        {p && step === 18 && (
+
           <section style={{ animation: "fade-in .4s ease-out both" }}>
             <H title="Tu resumen de hoy" sub="Esto es lo que trabajaste." />
             <div className="app-card p-5 mt-3">
