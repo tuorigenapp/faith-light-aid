@@ -34,11 +34,9 @@ type BillingPlan = {
 
 type Level = {
   id: LevelId;
-  emoji: string;
   name: string;
   tier: string;
   claim: string;
-  image: string;
   icon: typeof Sprout;
   popular?: boolean;
   included: string[];
@@ -50,11 +48,9 @@ type Level = {
 const LEVELS: Level[] = [
   {
     id: "explorador",
-    emoji: "🌱",
     name: "EXPLORADOR ORÍGEN",
     tier: "Básico",
     claim: "Ideal para comenzar a explorar ORÍGEN.",
-    image: e3dHeart,
     icon: Sprout,
     included: [
       "Diagnóstico completo de tu origen",
@@ -76,11 +72,9 @@ const LEVELS: Level[] = [
   },
   {
     id: "caminante",
-    emoji: "🌿",
     name: "CAMINANTE ORÍGEN",
     tier: "Completo",
     claim: "Para quienes desean una experiencia más amplia.",
-    image: e3dStar,
     icon: Leaf,
     popular: true,
     included: [
@@ -105,11 +99,9 @@ const LEVELS: Level[] = [
   },
   {
     id: "proposito",
-    emoji: "✨",
     name: "PROPÓSITO ORÍGEN",
     tier: "Premium",
     claim: "Para avanzar con máxima profundidad y dirección.",
-    image: e3dCoin,
     icon: Crown,
     included: [
       "Todo lo del Caminante",
