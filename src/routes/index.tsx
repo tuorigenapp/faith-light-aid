@@ -26,6 +26,7 @@ import lpEspiritual from "@/assets/lp-espiritual.png.asset.json";
 import lpRecibes from "@/assets/lp-recibes.png.asset.json";
 import { PaymentMethods } from "@/components/PaymentMethods";
 import { ReviewsSlider } from "@/components/ReviewsSlider";
+import { LiveActivityToasts } from "@/components/LiveActivityToasts";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -132,6 +133,7 @@ function Landing() {
 
   return (
     <main className="min-h-dvh bg-background pb-28">
+      <LiveActivityToasts variant="landing" />
       {/* Barra superior */}
       <header className="sticky top-0 z-40 border-b border-border/70 bg-background/85 backdrop-blur-xl">
         <div className="mx-auto grid max-w-[1100px] grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-2.5">
