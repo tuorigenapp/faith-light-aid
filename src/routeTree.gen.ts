@@ -26,6 +26,7 @@ import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as ApiCaminoPackRouteImport } from './routes/api/camino-pack'
 import { Route as AuthenticatedVisualizaRouteImport } from './routes/_authenticated/visualiza'
 import { Route as AuthenticatedRuletaRouteImport } from './routes/_authenticated/ruleta'
+import { Route as AuthenticatedPremiosorigenRouteImport } from './routes/_authenticated/premiosorigen'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedPatronesRouteImport } from './routes/_authenticated/patrones'
 import { Route as AuthenticatedParejaRouteImport } from './routes/_authenticated/pareja'
@@ -35,6 +36,7 @@ import { Route as AuthenticatedMinistracionRouteImport } from './routes/_authent
 import { Route as AuthenticatedMembresiaRouteImport } from './routes/_authenticated/membresia'
 import { Route as AuthenticatedInvitaRouteImport } from './routes/_authenticated/invita'
 import { Route as AuthenticatedHistorialRouteImport } from './routes/_authenticated/historial'
+import { Route as AuthenticatedExplorarRouteImport } from './routes/_authenticated/explorar'
 import { Route as AuthenticatedEtapasRouteImport } from './routes/_authenticated/etapas'
 import { Route as AuthenticatedEjerciciosRouteImport } from './routes/_authenticated/ejercicios'
 import { Route as AuthenticatedDiarioRouteImport } from './routes/_authenticated/diario'
@@ -146,6 +148,12 @@ const AuthenticatedRuletaRoute = AuthenticatedRuletaRouteImport.update({
   path: '/ruleta',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedPremiosorigenRoute =
+  AuthenticatedPremiosorigenRouteImport.update({
+    id: '/premiosorigen',
+    path: '/premiosorigen',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedPerfilRoute = AuthenticatedPerfilRouteImport.update({
   id: '/perfil',
   path: '/perfil',
@@ -190,6 +198,11 @@ const AuthenticatedInvitaRoute = AuthenticatedInvitaRouteImport.update({
 const AuthenticatedHistorialRoute = AuthenticatedHistorialRouteImport.update({
   id: '/historial',
   path: '/historial',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedExplorarRoute = AuthenticatedExplorarRouteImport.update({
+  id: '/explorar',
+  path: '/explorar',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedEtapasRoute = AuthenticatedEtapasRouteImport.update({
@@ -354,6 +367,7 @@ export interface FileRoutesByFullPath {
   '/diario': typeof AuthenticatedDiarioRoute
   '/ejercicios': typeof AuthenticatedEjerciciosRoute
   '/etapas': typeof AuthenticatedEtapasRouteWithChildren
+  '/explorar': typeof AuthenticatedExplorarRoute
   '/historial': typeof AuthenticatedHistorialRoute
   '/invita': typeof AuthenticatedInvitaRoute
   '/membresia': typeof AuthenticatedMembresiaRoute
@@ -363,6 +377,7 @@ export interface FileRoutesByFullPath {
   '/pareja': typeof AuthenticatedParejaRoute
   '/patrones': typeof AuthenticatedPatronesRoute
   '/perfil': typeof AuthenticatedPerfilRoute
+  '/premiosorigen': typeof AuthenticatedPremiosorigenRoute
   '/ruleta': typeof AuthenticatedRuletaRoute
   '/visualiza': typeof AuthenticatedVisualizaRouteWithChildren
   '/api/camino-pack': typeof ApiCaminoPackRoute
@@ -407,6 +422,7 @@ export interface FileRoutesByTo {
   '/diario': typeof AuthenticatedDiarioRoute
   '/ejercicios': typeof AuthenticatedEjerciciosRoute
   '/etapas': typeof AuthenticatedEtapasRouteWithChildren
+  '/explorar': typeof AuthenticatedExplorarRoute
   '/historial': typeof AuthenticatedHistorialRoute
   '/invita': typeof AuthenticatedInvitaRoute
   '/membresia': typeof AuthenticatedMembresiaRoute
@@ -416,6 +432,7 @@ export interface FileRoutesByTo {
   '/pareja': typeof AuthenticatedParejaRoute
   '/patrones': typeof AuthenticatedPatronesRoute
   '/perfil': typeof AuthenticatedPerfilRoute
+  '/premiosorigen': typeof AuthenticatedPremiosorigenRoute
   '/ruleta': typeof AuthenticatedRuletaRoute
   '/visualiza': typeof AuthenticatedVisualizaRouteWithChildren
   '/api/camino-pack': typeof ApiCaminoPackRoute
@@ -461,6 +478,7 @@ export interface FileRoutesById {
   '/_authenticated/diario': typeof AuthenticatedDiarioRoute
   '/_authenticated/ejercicios': typeof AuthenticatedEjerciciosRoute
   '/_authenticated/etapas': typeof AuthenticatedEtapasRouteWithChildren
+  '/_authenticated/explorar': typeof AuthenticatedExplorarRoute
   '/_authenticated/historial': typeof AuthenticatedHistorialRoute
   '/_authenticated/invita': typeof AuthenticatedInvitaRoute
   '/_authenticated/membresia': typeof AuthenticatedMembresiaRoute
@@ -470,6 +488,7 @@ export interface FileRoutesById {
   '/_authenticated/pareja': typeof AuthenticatedParejaRoute
   '/_authenticated/patrones': typeof AuthenticatedPatronesRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
+  '/_authenticated/premiosorigen': typeof AuthenticatedPremiosorigenRoute
   '/_authenticated/ruleta': typeof AuthenticatedRuletaRoute
   '/_authenticated/visualiza': typeof AuthenticatedVisualizaRouteWithChildren
   '/api/camino-pack': typeof ApiCaminoPackRoute
@@ -516,6 +535,7 @@ export interface FileRouteTypes {
     | '/diario'
     | '/ejercicios'
     | '/etapas'
+    | '/explorar'
     | '/historial'
     | '/invita'
     | '/membresia'
@@ -525,6 +545,7 @@ export interface FileRouteTypes {
     | '/pareja'
     | '/patrones'
     | '/perfil'
+    | '/premiosorigen'
     | '/ruleta'
     | '/visualiza'
     | '/api/camino-pack'
@@ -569,6 +590,7 @@ export interface FileRouteTypes {
     | '/diario'
     | '/ejercicios'
     | '/etapas'
+    | '/explorar'
     | '/historial'
     | '/invita'
     | '/membresia'
@@ -578,6 +600,7 @@ export interface FileRouteTypes {
     | '/pareja'
     | '/patrones'
     | '/perfil'
+    | '/premiosorigen'
     | '/ruleta'
     | '/visualiza'
     | '/api/camino-pack'
@@ -622,6 +645,7 @@ export interface FileRouteTypes {
     | '/_authenticated/diario'
     | '/_authenticated/ejercicios'
     | '/_authenticated/etapas'
+    | '/_authenticated/explorar'
     | '/_authenticated/historial'
     | '/_authenticated/invita'
     | '/_authenticated/membresia'
@@ -631,6 +655,7 @@ export interface FileRouteTypes {
     | '/_authenticated/pareja'
     | '/_authenticated/patrones'
     | '/_authenticated/perfil'
+    | '/_authenticated/premiosorigen'
     | '/_authenticated/ruleta'
     | '/_authenticated/visualiza'
     | '/api/camino-pack'
@@ -803,6 +828,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRuletaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/premiosorigen': {
+      id: '/_authenticated/premiosorigen'
+      path: '/premiosorigen'
+      fullPath: '/premiosorigen'
+      preLoaderRoute: typeof AuthenticatedPremiosorigenRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/perfil': {
       id: '/_authenticated/perfil'
       path: '/perfil'
@@ -864,6 +896,13 @@ declare module '@tanstack/react-router' {
       path: '/historial'
       fullPath: '/historial'
       preLoaderRoute: typeof AuthenticatedHistorialRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/explorar': {
+      id: '/_authenticated/explorar'
+      path: '/explorar'
+      fullPath: '/explorar'
+      preLoaderRoute: typeof AuthenticatedExplorarRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/etapas': {
@@ -1126,6 +1165,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDiarioRoute: typeof AuthenticatedDiarioRoute
   AuthenticatedEjerciciosRoute: typeof AuthenticatedEjerciciosRoute
   AuthenticatedEtapasRoute: typeof AuthenticatedEtapasRouteWithChildren
+  AuthenticatedExplorarRoute: typeof AuthenticatedExplorarRoute
   AuthenticatedHistorialRoute: typeof AuthenticatedHistorialRoute
   AuthenticatedInvitaRoute: typeof AuthenticatedInvitaRoute
   AuthenticatedMembresiaRoute: typeof AuthenticatedMembresiaRoute
@@ -1135,6 +1175,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedParejaRoute: typeof AuthenticatedParejaRoute
   AuthenticatedPatronesRoute: typeof AuthenticatedPatronesRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
+  AuthenticatedPremiosorigenRoute: typeof AuthenticatedPremiosorigenRoute
   AuthenticatedRuletaRoute: typeof AuthenticatedRuletaRoute
   AuthenticatedVisualizaRoute: typeof AuthenticatedVisualizaRouteWithChildren
   AuthenticatedCaminosCaminoIdRoute: typeof AuthenticatedCaminosCaminoIdRouteWithChildren
@@ -1152,6 +1193,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDiarioRoute: AuthenticatedDiarioRoute,
   AuthenticatedEjerciciosRoute: AuthenticatedEjerciciosRoute,
   AuthenticatedEtapasRoute: AuthenticatedEtapasRouteWithChildren,
+  AuthenticatedExplorarRoute: AuthenticatedExplorarRoute,
   AuthenticatedHistorialRoute: AuthenticatedHistorialRoute,
   AuthenticatedInvitaRoute: AuthenticatedInvitaRoute,
   AuthenticatedMembresiaRoute: AuthenticatedMembresiaRoute,
@@ -1161,6 +1203,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedParejaRoute: AuthenticatedParejaRoute,
   AuthenticatedPatronesRoute: AuthenticatedPatronesRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
+  AuthenticatedPremiosorigenRoute: AuthenticatedPremiosorigenRoute,
   AuthenticatedRuletaRoute: AuthenticatedRuletaRoute,
   AuthenticatedVisualizaRoute: AuthenticatedVisualizaRouteWithChildren,
   AuthenticatedCaminosCaminoIdRoute:

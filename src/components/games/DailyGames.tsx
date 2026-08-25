@@ -1182,7 +1182,7 @@ export function DailyGames({
     qc.invalidateQueries({ queryKey: ["dashboard"] });
     if (r.granted > 0) toast.success(`+${(r.granted / HOJA_POINTS).toFixed(3)} hojas · ${g.title}`);
     else if (r.capped === "daily")
-      toast.info("Ya llegaste a tu tope de hojas de hoy. Después de las 12:00 PM sigues sumando.");
+      toast.info("Ya llegaste a tu tope de hojas de hoy. Después de las 12:00 de la noche sigues sumando.");
     else toast.info("Tope de esta sección alcanzado hoy. Prueba otra sección de la app.");
   };
 

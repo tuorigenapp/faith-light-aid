@@ -6,7 +6,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Plus, Info, Trophy, Sparkles, User as UserIcon, ChevronRight } from "lucide-react";
+import { ArrowLeft, Plus, Info, Trophy, Sparkles, User as UserIcon, ChevronRight, Edit3, Trash2, FileDown } from "lucide-react";
 import { awardGems, GEM_REWARDS } from "@/lib/gems";
 import { toast } from "sonner";
 import { PhotoPicker } from "@/components/PhotoPicker";
@@ -20,20 +20,30 @@ import { formatHojas, wholeHojas, LEAF_RULES_TEXT, awardGems as spendGems, getLe
 import { Leaf, Send, Clock as ClockIcon, Mail as MailIcon } from "lucide-react";
 import { createHojaTransfer } from "@/lib/rewards.functions";
 import { useServerFn } from "@tanstack/react-start";
+import { printFamilyTree } from "@/lib/print-pdf";
+import origenIcon from "@/assets/origen-o-icon.png";
 
 
 export const Route = createFileRoute("/_authenticated/arbol")({
-  head: () => ({ meta: [{ title: "Mi Árbol Genealógico — ORIGEN" }] }),
+  head: () => ({ meta: [
+    { title: "Mi Árbol Genealógico — ORÍGEN" },
+    { name: "description", content: "Construye tu árbol genealógico, administra tus hojas y descarga tu PDF familiar en ORÍGEN." },
+    { property: "og:title", content: "Mi Árbol Genealógico — ORÍGEN" },
+    { property: "og:description", content: "Agrega, edita y descarga tu árbol familiar con tus hojas de sanación." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary_large_image" },
+  ] }),
   component: TreePage,
 });
 
-type View = "home" | "tree" | "add";
+type View = "home" | "tree" | "add" | "transfer";
 
 const RELATIONSHIPS_MATERNO = ["Madre", "Abuela materna", "Abuelo materno", "Bisabuela materna", "Bisabuelo materno", "Tía materna", "Tío materno", "Hermana", "Hermano", "Hija", "Hijo", "Otra"];
 const RELATIONSHIPS_PATERNO = ["Padre", "Abuela paterna", "Abuelo paterno", "Bisabuela paterna", "Bisabuelo paterno", "Tía paterna", "Tío paterno", "Hermana", "Hermano", "Hija", "Hijo", "Otro"];
 
 function TreePage() {
   const [view, setView] = useState<View>("home");
+  const [editing, setEditing] = useState<Member | null>(null);
   const { user } = useAuth();
 
   const { data: profile } = useQuery({
@@ -62,16 +72,17 @@ function TreePage() {
   const avatarUrl = signAvatar(profile?.avatar_url) ?? null;
   const membersSigned = members.map((m) => ({ ...m, photo_url: signFamily(m.photo_url) ?? null }));
 
-  if (view === "add") return <AddFamilyView onBack={() => setView("tree")} />;
-  if (view === "tree") return <TreeDetailView onBack={() => setView("home")} onAdd={() => setView("add")} members={membersSigned} gems={gems} displayName={displayName} avatar={avatarUrl} />;
+  if (view === "add") return <AddFamilyView initial={editing} onBack={() => { setEditing(null); setView("tree"); }} />;
+  if (view === "transfer") return <TransferView gems={gems} onBack={() => setView("home")} />;
+  if (view === "tree") return <TreeDetailView onBack={() => setView("home")} onAdd={() => { setEditing(null); setView("add"); }} onEdit={(m) => { setEditing(m); setView("add"); }} members={membersSigned} gems={gems} displayName={displayName} avatar={avatarUrl} />;
 
-  return <HomeView displayName={displayName} avatar={avatarUrl} gems={gems} onOpenTree={() => setView("tree")} />;
+  return <HomeView displayName={displayName} avatar={avatarUrl} gems={gems} onOpenTree={() => setView("tree")} onTransfer={() => setView("transfer")} />;
 
 }
 
 /* ═══════════════════════ VIEW 1 · MIS HOJAS DE SANACIÓN ═══════════════════════ */
 
-function HomeView({ displayName, avatar, gems, onOpenTree }: { displayName: string; avatar: string | null; gems: number; onOpenTree: () => void }) {
+function HomeView({ displayName, avatar, gems, onOpenTree, onTransfer }: { displayName: string; avatar: string | null; gems: number; onOpenTree: () => void; onTransfer: () => void }) {
   return (
     <div className="min-h-dvh" style={{ background: "radial-gradient(120% 90% at 50% 0%, #F3ECFF 0%, #FBFAFF 55%, #FDEEF7 100%)" }}>
       <div className="mx-auto w-full max-w-[420px] px-4 pt-4 pb-32">
@@ -89,7 +100,7 @@ function HomeView({ displayName, avatar, gems, onOpenTree }: { displayName: stri
             <div className="text-[11px] font-semibold text-muted-foreground">Tu jardín de sanación</div>
           </div>
           <Link to="/historial" aria-label="Historial de hojas" className="w-10 h-10 shrink-0 rounded-full bg-card shadow-soft grid place-items-center text-[#7C5CFF] active:scale-95 transition">
-            <Info className="w-5 h-5" />
+            <ClockIcon className="w-5 h-5" />
           </Link>
         </div>
 
@@ -118,20 +129,23 @@ function HomeView({ displayName, avatar, gems, onOpenTree }: { displayName: stri
 
         {/* CTAs */}
         <div className="mt-4 space-y-3">
-          <Link to="/premios"
+          <button onClick={onOpenTree}
+            className="w-full h-14 rounded-[12px] bg-[#7C5CFF]/[0.09] text-[#7C5CFF] font-display font-bold text-[16px] inline-flex items-center justify-center gap-2 active:scale-[.98] transition animate-pulse">
+            <TreeDeciduousIcon /> Ver mi árbol genealógico
+          </button>
+          <Link to="/comprarmonedas"
             className="w-full h-14 rounded-[12px] text-white font-display font-bold text-[16px] inline-flex items-center justify-center gap-2 active:scale-[.98] transition"
             style={{ background: "linear-gradient(180deg,#8F6BFF 0%,#F58BCB 100%)", boxShadow: "0 4px 14px rgba(124,92,255,.30)" }}>
             <Sparkles className="w-4 h-4" /> Recargar mis hojas
           </Link>
-          <TransferSection gems={gems} />
+          <button onClick={onTransfer}
+            className="w-full h-12 rounded-[12px] bg-card border border-border text-[#7C5CFF] font-display font-bold text-[15px] inline-flex items-center justify-center gap-2 active:scale-[.98] transition">
+            <Send className="w-4 h-4" /> Transferir Balance
+          </button>
           <Link to="/historial"
             className="w-full h-12 rounded-[12px] bg-card border border-border text-[#7C5CFF] font-display font-bold text-[15px] inline-flex items-center justify-center gap-2 active:scale-[.98] transition">
-            📜 Ver mi historial de transacciones
+            <ClockIcon className="w-4 h-4" /> Ver historial general
           </Link>
-          <button onClick={onOpenTree}
-            className="w-full h-12 rounded-[12px] bg-[#7C5CFF]/[0.09] text-[#7C5CFF] font-display font-bold text-[15px] inline-flex items-center justify-center gap-2 active:scale-[.98] transition">
-            🌳 Ver mi árbol genealógico
-          </button>
         </div>
 
         {/* Usos de las hojas */}
@@ -176,17 +190,46 @@ function HomeView({ displayName, avatar, gems, onOpenTree }: { displayName: stri
   );
 }
 
+function TreeDeciduousIcon() {
+  return <Leaf className="w-4 h-4" />;
+}
+
+function TransferView({ gems, onBack }: { gems: number; onBack: () => void }) {
+  return (
+    <div className="min-h-dvh" style={{ background: "radial-gradient(120% 90% at 50% 0%, #F3ECFF 0%, #FBFAFF 55%, #FDEEF7 100%)" }}>
+      <div className="mx-auto w-full max-w-[420px] px-4 pt-4 pb-32">
+        <div className="flex items-center gap-3">
+          <button onClick={onBack} aria-label="Volver" className="w-10 h-10 rounded-full bg-card shadow-soft grid place-items-center active:scale-95 transition">
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <div className="min-w-0"><p className="text-[11px] uppercase tracking-[0.18em] font-bold text-[#7C5CFF]">Hojas ORIGEN</p><h1 className="font-display font-black text-[22px] leading-tight">Transferir Balance</h1></div>
+        </div>
+        <TransferSection gems={gems} />
+      </div>
+    </div>
+  );
+}
+
 
 /* ═══════════════════════ VIEW 2 · TREE DETAIL (imagen #2) ═══════════════════════ */
 
 type Member = { id: string; full_name: string; relationship: string; lineage: string; photo_url?: string | null };
 
 function TreeDetailView({
-  onBack, onAdd, members, gems, displayName, avatar,
-}: { onBack: () => void; onAdd: () => void; members: Member[]; gems: number; displayName: string; avatar: string | null }) {
+  onBack, onAdd, onEdit, members, gems, displayName, avatar,
+}: { onBack: () => void; onAdd: () => void; onEdit: (member: Member) => void; members: Member[]; gems: number; displayName: string; avatar: string | null }) {
   const materno = members.filter((m) => m.lineage === "materno");
   const paterno = members.filter((m) => m.lineage === "paterno");
   const gemsFromMembers = members.length * GEM_REWARDS.familyMember;
+  const qc = useQueryClient();
+
+  async function removeMember(member: Member) {
+    if (!confirm(`¿Eliminar a ${member.full_name} del árbol?`)) return;
+    const { error } = await supabase.from("family_members").delete().eq("id", member.id);
+    if (error) return toast.error("No pudimos eliminar este familiar");
+    qc.invalidateQueries({ queryKey: ["family_members"] });
+    toast.success("Familiar eliminado del árbol");
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#F1ECFF] via-[#FBFAFF] to-[#E8F4FF]">
@@ -197,8 +240,8 @@ function TreeDetailView({
             <ArrowLeft className="w-5 h-5" />
           </button>
           <h1 className="font-display font-black text-[18px]">Mi Árbol Genealógico</h1>
-          <button aria-label="Información" className="w-10 h-10 rounded-full bg-card shadow-soft grid place-items-center text-primary">
-            <Info className="w-5 h-5" />
+          <button onClick={() => printFamilyTree({ userName: displayName, members, logoUrl: origenIcon })} aria-label="Descargar PDF" className="w-10 h-10 rounded-full bg-card shadow-soft grid place-items-center text-primary active:scale-95 transition">
+            <FileDown className="w-5 h-5" />
           </button>
         </div>
 
@@ -252,6 +295,27 @@ function TreeDetailView({
               members={paterno}
               onAdd={onAdd}
             />
+          </div>
+        </div>
+
+        <div className="mt-6 rounded-[16px] bg-card border border-border p-4 shadow-soft">
+          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 mb-3">
+            <h2 className="font-display font-bold text-[15px]">Familiares registrados</h2>
+            <button onClick={() => printFamilyTree({ userName: displayName, members, logoUrl: origenIcon })} className="h-10 px-3 rounded-[10px] bg-primary/10 text-primary text-[12px] font-bold inline-flex items-center gap-1.5 active:scale-95 transition"><FileDown className="w-4 h-4" /> PDF</button>
+          </div>
+          <div className="space-y-2.5">
+            {members.length ? members.map((member) => (
+              <div key={member.id} className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-[14px] border border-border p-3">
+                <div className="w-10 h-10 rounded-full overflow-hidden bg-primary/10 text-primary grid place-items-center font-black">
+                  {member.photo_url ? <img src={member.photo_url} alt={member.full_name} className="w-full h-full object-cover" /> : member.full_name.slice(0,1).toUpperCase()}
+                </div>
+                <div className="min-w-0"><div className="truncate text-[13.5px] font-bold">{member.full_name}</div><div className="truncate text-[11.5px] text-muted-foreground">{member.relationship} · {member.lineage}</div></div>
+                <div className="flex gap-1.5">
+                  <button onClick={() => onEdit(member)} aria-label="Editar familiar" className="w-9 h-9 rounded-[10px] bg-primary/10 text-primary grid place-items-center"><Edit3 className="w-4 h-4" /></button>
+                  <button onClick={() => removeMember(member)} aria-label="Eliminar familiar" className="w-9 h-9 rounded-[10px] bg-destructive/10 text-destructive grid place-items-center"><Trash2 className="w-4 h-4" /></button>
+                </div>
+              </div>
+            )) : <p className="text-[13px] text-muted-foreground">Agrega tu primer familiar para construir tu árbol.</p>}
           </div>
         </div>
 
@@ -368,18 +432,18 @@ function SlotOrPerson({ member, color, onAdd }: { member?: Member; color: string
 
 /* ═══════════════════════ VIEW 3 · ADD (imagen #3) ═══════════════════════ */
 
-function AddFamilyView({ onBack }: { onBack: () => void }) {
+function AddFamilyView({ onBack, initial }: { onBack: () => void; initial?: Member | null }) {
   const { user } = useAuth();
   const qc = useQueryClient();
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [photoBlob, setPhotoBlob] = useState<Blob | null>(null);
-  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(initial?.photo_url ?? null);
   const [form, setForm] = useState({
-    full_name: "",
-    relationship: "",
-    materno: "",
-    paterno: "",
+    full_name: initial?.full_name ?? "",
+    relationship: initial?.relationship ?? "",
+    materno: initial?.lineage === "materno" ? "si" : "",
+    paterno: initial?.lineage === "paterno" ? "si" : "",
   });
 
   const lineage = form.materno ? "materno" : form.paterno ? "paterno" : "";
@@ -397,20 +461,23 @@ function AddFamilyView({ onBack }: { onBack: () => void }) {
         photo_url = await uploadPhoto("family-photos", user.id, photoBlob);
         setUploading(false);
       }
-      const { error } = await supabase.from("family_members").insert({
+      const payload = {
         user_id: user.id,
         full_name: form.full_name.trim(),
         relationship: form.relationship,
         lineage,
-        photo_url,
-      });
+        photo_url: photo_url || initial?.photo_url || null,
+      };
+      const { error } = initial?.id
+        ? await supabase.from("family_members").update(payload).eq("id", initial.id)
+        : await supabase.from("family_members").insert(payload);
       if (error) throw error;
-      await awardGems(GEM_REWARDS.familyMember, `Nuevo familiar: ${form.full_name}`);
+      if (!initial?.id) await awardGems(GEM_REWARDS.familyMember, `Nuevo familiar: ${form.full_name}`);
       qc.invalidateQueries({ queryKey: ["family_members"] });
       qc.invalidateQueries({ queryKey: ["profile"] });
       qc.invalidateQueries({ queryKey: ["profile-arbol"] });
       qc.invalidateQueries({ queryKey: ["profile-gems"] });
-      toast.success("Sumaste progreso hacia tu próxima hoja de sanación 🍃");
+      toast.success(initial?.id ? "Familiar actualizado sin sumar hojas" : "Sumaste progreso hacia tu próxima hoja de sanación");
       onBack();
     } catch (e: any) {
       toast.error(e?.message ?? "No se pudo guardar");
@@ -428,7 +495,7 @@ function AddFamilyView({ onBack }: { onBack: () => void }) {
           <button onClick={onBack} aria-label="Volver" className="w-10 h-10 rounded-full bg-card shadow-soft grid place-items-center active:scale-95 transition">
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <h1 className="flex-1 text-center font-display font-black text-[18px] pr-10">Agregar Familiar</h1>
+          <h1 className="flex-1 text-center font-display font-black text-[18px] pr-10">{initial?.id ? "Editar Familiar" : "Agregar Familiar"}</h1>
         </div>
 
         {/* Hero mini tree */}
@@ -551,7 +618,7 @@ function AddFamilyView({ onBack }: { onBack: () => void }) {
             disabled={!canSave || saving}
             className="w-full h-14 rounded-[18px] bg-gradient-to-b from-[#4CD394] to-[#2FA574] text-white font-display font-black text-[16px] shadow-[0_8px_24px_rgba(63,190,143,0.45)] disabled:opacity-50"
           >
-            {uploading ? "Subiendo foto…" : saving ? "Guardando…" : "Guardar Familiar 🍃"}
+            {uploading ? "Subiendo foto…" : saving ? "Guardando…" : initial?.id ? "Guardar cambios" : "Guardar Familiar"}
           </Button>
         </div>
       </div>

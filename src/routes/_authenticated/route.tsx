@@ -6,7 +6,7 @@ import {
   Home, MessageCircle, Layers, BookHeart, Dumbbell,
   CreditCard, User as UserIcon, Shield, LogOut, Sun, Moon, X,
   Headphones, TreeDeciduous, Trophy, HeartHandshake, Sparkles,
-  MoveUpRight, Route as RouteIcon,
+  MoveUpRight, Route as RouteIcon, Leaf,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { FloatingChatFab } from "@/components/FloatingChatFab";
 import { FloatingHelp } from "@/components/FloatingHelp";
+import { FloatingRouletteFab } from "@/components/FloatingRouletteFab";
 import { LiveActivityToasts } from "@/components/LiveActivityToasts";
 import { SatisfactionPulse } from "@/components/SatisfactionPulse";
 import { MotivationalReminders } from "@/components/MotivationalReminders";
@@ -42,12 +43,14 @@ const TOP_CHIPS = [
   { to: "/pareja", label: "Pareja", icon: HeartHandshake },
   { to: "/patrones", label: "Patrones", icon: Sparkles },
   { to: "/categorias", label: "Categorías", icon: Layers },
+  { to: "/explorar", label: "Explorar", icon: Sparkles },
   { to: "/ministracion", label: "Dios te dice hoy", icon: Sparkles },
   { to: "/arbol", label: "Mi árbol", icon: TreeDeciduous },
   { to: "/visualiza", label: "Vívelo", icon: Headphones },
   { to: "/diario", label: "Diario", icon: BookHeart },
   { to: "/ejercicios", label: "Ejercicios", icon: Dumbbell },
-  { to: "/premios", label: "Premios", icon: Trophy },
+  { to: "/comprarmonedas", label: "Comprar monedas", icon: Leaf },
+  { to: "/premiosorigen", label: "Premios", icon: Trophy },
   { to: "/invita", label: "Invita", icon: HeartHandshake },
   { to: "/membresia", label: "Membresía", icon: CreditCard },
   { to: "/perfil", label: "Perfil", icon: UserIcon },
@@ -60,12 +63,14 @@ const FULL_NAV = [
   { to: "/pareja", label: "¿Deuda o propósito?", icon: HeartHandshake },
   { to: "/patrones", label: "Patrones familiares", icon: Sparkles },
   { to: "/categorias", label: "Todas las categorías", icon: Layers },
+  { to: "/explorar", label: "Explorar todo", icon: Sparkles },
   { to: "/arbol", label: "Mi árbol genealógico", icon: TreeDeciduous },
   { to: "/etapas", label: "Mi camino (etapas)", icon: Layers },
   { to: "/visualiza", label: "Visualízalo y Vívelo", icon: Headphones },
   { to: "/diario", label: "Diario íntimo", icon: BookHeart },
   { to: "/ejercicios", label: "Ejercicios", icon: Dumbbell },
-  { to: "/premios", label: "Hojas de sanación", icon: Trophy },
+  { to: "/comprarmonedas", label: "Comprar monedas", icon: Leaf },
+  { to: "/premiosorigen", label: "Premios ORÍGEN", icon: Trophy },
   { to: "/invita", label: "Invita y gana", icon: Sparkles },
   { to: "/membresia", label: "Camino ORIGEN", icon: CreditCard },
   { to: "/perfil", label: "Perfil", icon: UserIcon },
@@ -150,7 +155,7 @@ function AuthLayoutInner() {
   const isActive = (to: string) =>
     location.pathname === to || (to !== "/dashboard" && location.pathname.startsWith(to));
 
-  const immersive = location.pathname.startsWith("/onboarding");
+  const immersive = location.pathname.startsWith("/onboarding") || location.pathname.startsWith("/ruleta");
   if (immersive) {
     return (
       <div className="min-h-screen bg-background text-foreground">
@@ -326,6 +331,7 @@ function AuthLayoutInner() {
         {/* Floating chat with Ruth Esther */}
         <FloatingChatFab />
         <FloatingHelp />
+        <FloatingRouletteFab />
         <LiveActivityToasts />
         <SatisfactionPulse />
         <MotivationalReminders />

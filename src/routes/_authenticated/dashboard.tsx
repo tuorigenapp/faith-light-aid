@@ -21,12 +21,11 @@ import { celebrateOnce, milestoneMessage } from "@/lib/celebrate";
 
 
 import { DailyGames } from "@/components/games/DailyGames";
-import { LockedCard } from "@/components/LockedCard";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import {
-  ArrowRight, BookHeart, Flame, Headphones,
-  Layers, Sparkles, TreeDeciduous, Trophy, HeartPulse,
+  ArrowRight, Flame,
+  Layers, Lock, Sparkles, Trophy,
 } from "lucide-react";
 import pilarMentora from "@/assets/pilar-mentora.png";
 import pilarPareja from "@/assets/pilar-pareja.png";
@@ -34,9 +33,18 @@ import pilarPatron from "@/assets/pilar-patron.png";
 import pilarMinistracion from "@/assets/dios-te-dice-hoy.png";
 import visualizaBanner from "@/assets/visualiza-banner-home-v2.png";
 import afiliacionBanner from "@/assets/afiliacion-origen-home.png";
+import { FEATURED_EXPLORE } from "@/lib/explore-content";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
-  head: () => ({ meta: [{ title: "Hoy — ORIGEN" }] }),
+  head: () => ({ meta: [
+    { title: "Hoy — ORIGEN" },
+    { name: "description", content: "Tu misión diaria, ejercicios, racha y contenido recomendado dentro de ORÍGEN." },
+    { property: "og:title", content: "Hoy — ORIGEN" },
+    { property: "og:description", content: "Tu home diaria con misión, racha, ejercicios y contenido de ORÍGEN." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary_large_image" },
+  ] }),
   component: Dashboard,
 });
 
@@ -232,38 +240,30 @@ function Dashboard() {
 
 
 
-        {/* Descubre hoy — mezcla desbloqueado + bloqueado */}
+        {/* Explora todo el contenido de ORÍGEN */}
         <section>
           <div className="flex items-center justify-between mb-2">
-            <h3 className="font-display font-bold text-[15px]">Descubre hoy</h3>
-            <span className="text-[11px] font-semibold text-primary">Explorar</span>
+            <h3 className="font-display font-bold text-[15px]">Explora todo el contenido de ORÍGEN</h3>
+            <Link to="/explorar" className="text-[11px] font-semibold text-primary inline-flex items-center gap-1">
+              Explorar <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
           </div>
           <div className="hairline-brand mb-3" />
           <div className="grid grid-cols-2 gap-3">
-            <Link to="/arbol" className="app-card p-4">
-              <div className="w-10 h-10 rounded-xl bg-[#3FBE8F]/15 grid place-items-center text-[#3FBE8F]">
-                <TreeDeciduous className="w-5 h-5" />
-              </div>
-              <h4 className="font-display font-bold text-[14px] mt-2">Mi árbol genealógico</h4>
-              <p className="text-xs text-muted-foreground mt-1">Suma familiares y sana tu linaje.</p>
-            </Link>
-            <Link to="/diario" className="app-card p-4">
-              <div className="w-10 h-10 rounded-xl bg-[#F58BCB]/15 grid place-items-center text-[#F58BCB]">
-                <BookHeart className="w-5 h-5" />
-              </div>
-              <h4 className="font-display font-bold text-[14px] mt-2">Diario íntimo</h4>
-              <p className="text-xs text-muted-foreground mt-1">Escribe lo que llevas en el alma.</p>
-            </Link>
-            <LockedCard
-              title="Círculo de mujeres"
-              subtitle="Sesiones en vivo cada semana"
-              icon={<div className="w-10 h-10 rounded-xl bg-primary/15 grid place-items-center text-primary"><HeartPulse className="w-5 h-5" /></div>}
-            />
-            <LockedCard
-              title="Meditaciones guiadas"
-              subtitle="Audios diarios del método"
-              icon={<div className="w-10 h-10 rounded-xl bg-accent/15 grid place-items-center text-accent"><Headphones className="w-5 h-5" /></div>}
-            />
+            {FEATURED_EXPLORE.map((item) => (
+              <Link key={item.title} to={item.locked ? "/membresia" : item.to} className="overflow-hidden rounded-[16px] bg-card border border-border shadow-soft active:scale-[.99] transition">
+                <div className="relative aspect-[4/3] bg-muted overflow-hidden">
+                  <img src={item.image} alt={item.title} loading="lazy" className={cn("h-full w-full object-cover", item.locked && "opacity-55")} />
+                  <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-[10px] bg-background/85 px-2 py-1 text-[10px] font-black text-primary">
+                    {item.locked ? <Lock className="w-3 h-3" /> : <Sparkles className="w-3 h-3" />} {item.tag}
+                  </span>
+                </div>
+                <div className="p-3">
+                  <h4 className="font-display font-bold text-[14px] leading-tight">{item.title}</h4>
+                  <p className="text-[12px] text-muted-foreground mt-1 leading-snug">{item.description}</p>
+                </div>
+              </Link>
+            ))}
           </div>
         </section>
 
@@ -277,15 +277,15 @@ function Dashboard() {
         </Link>
 
         {/* Premios */}
-        <Link to="/premios" className="app-card p-4 flex items-center gap-3">
+        <Link to="/comprarmonedas" className="app-card p-4 flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-[#F7B955]/20 grid place-items-center text-[#F7B955]">
             <Trophy className="w-5 h-5" />
           </div>
           <div className="flex-1">
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Tus hojas de sanación</p>
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Comprar monedas</p>
             <p className="font-display font-bold text-base">{wholeHojas(data?.profile?.gems)} 🍃</p>
           </div>
-          <span className="text-xs font-bold text-primary">Canjear</span>
+          <span className="text-xs font-bold text-primary">Recargar</span>
         </Link>
       </div>
     </div>
