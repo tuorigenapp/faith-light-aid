@@ -156,6 +156,7 @@ type SectionId =
   | "libros"
   | "audios"
   | "marketing"
+  | "backup"
   | "opiniones";
 
 const NAV: { id: SectionId; label: string; icon: typeof Users }[] = [
@@ -167,6 +168,7 @@ const NAV: { id: SectionId; label: string; icon: typeof Users }[] = [
   { id: "libros", label: "Libros", icon: BookOpen },
   { id: "audios", label: "Música", icon: Headphones },
   { id: "marketing", label: "Marketing", icon: Send },
+  { id: "backup", label: "Copia de seguridad", icon: ShieldCheck },
   { id: "opiniones", label: "Opiniones", icon: Star },
 ];
 
