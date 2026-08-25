@@ -43,7 +43,7 @@ export const Route = createFileRoute("/_authenticated/etapas/$stageId")({
   component: StageFlow,
 });
 
-const TOTAL_STEPS = 8;
+const TOTAL_STEPS = 13;
 const STAGE_XP = 120;
 
 export type StepEntry = {
@@ -238,10 +238,20 @@ function StageFlow() {
     case 4:
       return shell(<Step5 items={content.quiz} reward={reward} onNext={next} />);
     case 5:
-      return shell(<Step7 words={p?.words?.length ? p.words : content.words} loading={pack.isLoading} stageId={id} onNext={next} />);
+      return shell(<Step6 cargas={p?.cargas ?? []} loading={pack.isLoading} reward={reward} onNext={next} />);
     case 6:
-      return shell(<Step4 mood={mood} setMood={setMood} notes={notes} setNotes={setNotes} answers={answers} setAnswers={setAnswers} onNext={next} />);
+      return shell(<Step7 words={p?.words?.length ? p.words : content.words} loading={pack.isLoading} stageId={id} onNext={next} />);
     case 7:
+      return shell(<Step8 promesas={p?.promesas ?? []} loading={pack.isLoading} reward={reward} onNext={next} />);
+    case 8:
+      return shell(<Step9 questions={p?.fe ?? []} loading={pack.isLoading} reward={reward} onNext={next} />);
+    case 9:
+      return shell(<Step10 bienestar={p?.bienestar ?? []} reward={reward} onNext={next} />);
+    case 10:
+      return shell(<Step4 mood={mood} setMood={setMood} notes={notes} setNotes={setNotes} answers={answers} setAnswers={setAnswers} onNext={next} />);
+    case 11:
+      return shell(<Step11 minutes={minutes} tasksDone={doneTasks.length >= tasks.length} onNext={next} />);
+    case 12:
       return shell(<Step12 earned={earned} insignia={insigniaFor(stage.title, position)} onSave={saveReward} onNext={next} />);
     default:
       return shell(<Step13 stage={stage} position={position} total={data.total} onFinish={finish} />);
