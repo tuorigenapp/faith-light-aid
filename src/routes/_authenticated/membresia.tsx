@@ -6,9 +6,6 @@ import { useQuery } from "@tanstack/react-query";
 import { CancelSurvey } from "@/components/CancelSurvey";
 import { Check, ChevronRight, Crown, Eye, Infinity as InfinityIcon, Leaf, ShieldCheck, Sparkles, Sprout } from "lucide-react";
 import { cn } from "@/lib/utils";
-import e3dStar from "@/assets/e3d-star.png";
-import e3dHeart from "@/assets/e3d-heartgem.png";
-import e3dCoin from "@/assets/e3d-coin.png";
 
 export const Route = createFileRoute("/_authenticated/membresia")({
   head: () => ({
@@ -228,7 +225,7 @@ function Membresia() {
         {level && (
           <div key={level.id} style={{ animation: "fade-in .35s ease-out both" }}>
             <h2 className="mt-9 text-center font-display text-[22px] font-extrabold">
-              {level.emoji} {level.name} · {level.tier}
+              {level.name} · {level.tier}
             </h2>
             <p className="mx-auto mt-2 max-w-[440px] text-center text-[13.5px] text-muted-foreground">{level.claim}</p>
 
