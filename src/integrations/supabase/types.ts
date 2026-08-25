@@ -14,6 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_backup_codes: {
+        Row: {
+          attempts: number
+          code_hash: string
+          consumed_at: string | null
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          requested_by: string
+        }
+        Insert: {
+          attempts?: number
+          code_hash: string
+          consumed_at?: string | null
+          created_at?: string
+          email: string
+          expires_at: string
+          id?: string
+          requested_by: string
+        }
+        Update: {
+          attempts?: number
+          code_hash?: string
+          consumed_at?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          requested_by?: string
+        }
+        Relationships: []
+      }
+      admin_backups: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          requested_by: string | null
+          size_bytes: number | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          requested_by?: string | null
+          size_bytes?: number | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          requested_by?: string | null
+          size_bytes?: number | null
+          status?: string
+        }
+        Relationships: []
+      }
       appointments: {
         Row: {
           created_at: string
