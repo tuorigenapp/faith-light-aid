@@ -14,6 +14,8 @@ import { saveStageReward } from "@/lib/rewards.functions";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { WordSearch } from "@/components/WordSearch";
+import { MemoryPairs, ClassifyEmotions, MentalTasks, StageGameStep, type GameKind } from "@/components/StageGames";
+
 import { getStageContent, getSolutionSteps, getStageTasks } from "@/lib/stage-content";
 import { awardLeaf, ACTION_POINTS, type ActionLevel } from "@/lib/gems";
 import { AnswerFeedback } from "@/components/AnswerFeedback";
@@ -43,7 +45,7 @@ export const Route = createFileRoute("/_authenticated/etapas/$stageId")({
   component: StageFlow,
 });
 
-const TOTAL_STEPS = 13;
+const TOTAL_STEPS = 20;
 const STAGE_XP = 120;
 
 export type StepEntry = {
@@ -228,6 +230,21 @@ function StageFlow() {
     </StepShell>
   );
 
+  const gameContext = {
+    good: (p?.words?.length ? p.words : content.words) ?? [],
+    bad: p?.cargas?.length ? p.cargas : ["Miedo", "Culpa", "Prisa", "Vergüenza"],
+    mainWord: (p?.words?.[0] ?? content.words?.[0] ?? stage.title ?? "Paz") as string,
+  };
+  const gameStep = (kind: GameKind) => (
+    <StageGameStep
+      kind={kind}
+      context={gameContext}
+      onWin={() => reward("medium", `Juego 3D: ${kind}`)}
+      onNext={next}
+      onClose={() => navigate({ to: "/etapas" })}
+    />
+  );
+
   switch (step) {
     case 1:
       return shell(<Step1 stage={stage} position={position} onNext={next} />);
@@ -249,14 +266,41 @@ function StageFlow() {
       return shell(<Step10 bienestar={p?.bienestar ?? []} reward={reward} onNext={next} />);
     case 10:
       return shell(<Step4 mood={mood} setMood={setMood} notes={notes} setNotes={setNotes} answers={answers} setAnswers={setAnswers} onNext={next} />);
+    /* ── Juegos 3D en pantalla completa, con el contenido del tema ── */
     case 11:
-      return shell(<Step11 minutes={minutes} tasksDone={doneTasks.length >= tasks.length} onNext={next} />);
+      return gameStep("cofre");
     case 12:
+      return gameStep("adivina");
+    case 13:
+      return gameStep("pimpon");
+    case 14:
+      return gameStep("pez");
+    case 15:
+      return gameStep("dardo");
+    case 16:
+      return shell(
+        <div className="space-y-3">
+          <MemoryPairs storageKey={`etapa-${id}`} />
+          <ClassifyEmotions />
+          <Cta onClick={next}>Continuar</Cta>
+        </div>,
+      );
+    case 17:
+      return shell(
+        <div className="space-y-3">
+          <MentalTasks tasks={(p?.bienestar ?? []).map((b: { q: string }) => b.q)} onComplete={() => reward("minor", "Retos mentales")} />
+          <Cta onClick={next}>Continuar</Cta>
+        </div>,
+      );
+    case 18:
+      return shell(<Step11 minutes={minutes} tasksDone={doneTasks.length >= tasks.length} onNext={next} />);
+    case 19:
       return shell(<Step12 earned={earned} insignia={insigniaFor(stage.title, position)} onSave={saveReward} onNext={next} />);
     default:
       return shell(<Step13 stage={stage} position={position} total={data.total} onFinish={finish} />);
   }
 }
+
 
 function insigniaFor(title: string | null, position: number) {
   const map = ["Corazón que sana", "Raíz liberada", "Alma en paz", "Identidad restaurada", "Perdón vivo", "Fe firme", "Propósito claro", "Linaje bendecido"];

@@ -1,74 +1,182 @@
-import { useMemo, useState } from "react";
-import { Check, HelpCircle } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { useEffect, useRef, useState } from "react";
+import * as THREE from "three";
+import { GameShell } from "./GameShell";
+import { createRig, createBurstPool, makeAmbientParticles, makeGround, makeTextPanel } from "./engine3d";
 
-const ALPHA = "ABCDEFGHIJKLMNÑOPQRSTUVWXYZ".split("");
+/**
+ * Adivina el concepto — juego 3D visual (sin muros de texto).
+ * Cada opción es un cristal 3D con su palabra; el jugador reconoce la que
+ * corresponde a su práctica del día. El contenido llega desde la IA.
+ */
+export function GuessWord({
+  words,
+  onComplete,
+  onClose,
+  onNext,
+}: {
+  words: string[];
+  onComplete?: () => void;
+  onClose?: () => void;
+  onNext?: () => void;
+}) {
+  const host = useRef<HTMLDivElement>(null);
+  const pausedRef = useRef(false);
+  const [hits, setHits] = useState(0);
+  const [won, setWon] = useState(false);
+  const rounds = Math.min(4, Math.max(1, words.length));
+  const doneRef = useRef(false);
 
-/** Adivinar palabras: palabra oculta con letras faltantes, del tema del día. */
-export function GuessWord({ words, onComplete }: { words: string[]; onComplete?: () => void }) {
-  const list = useMemo(() => words.map((w) => w.toUpperCase().replace(/[^A-ZÑ]/g, "")).filter((w) => w.length >= 3).slice(0, 5), [words]);
-  const [idx, setIdx] = useState(0);
-  const [guessed, setGuessed] = useState<string[]>([]);
-  const word = list[idx] ?? "";
-  const [letters, setLetters] = useState<string[]>([]);
+  useEffect(() => {
+    const el = host.current;
+    if (!el) return;
+    const clean = words.map((w) => w.trim()).filter(Boolean);
+    if (!clean.length) return;
 
-  if (!list.length) return null;
+    const rig = createRig(el, {
+      bg: 0x14213d,
+      fog: [14, 40],
+      cameraPos: [0, 4.6, 10],
+      lookAt: [0, 2.2, 0],
+      hemi: [0xd9f0ff, 0x1d2b4d],
+    });
+    const { scene } = rig;
+    makeGround(scene, { radius: 10, color: 0x24365e, plateColor: 0x1a2846 });
+    const dust = makeAmbientParticles(scene, { count: 90, spread: 20, height: 9, color: 0xbfe6ff, size: 0.1, speed: 0.35, up: true });
+    const burst = createBurstPool(scene);
 
-  function pick(l: string) {
-    if (letters.includes(l)) return;
-    const next = [...letters, l];
-    setLetters(next);
-    const complete = word.split("").every((c) => next.includes(c));
-    if (complete) {
-      setTimeout(() => {
-        const g = [...guessed, word];
-        setGuessed(g);
-        setLetters([]);
-        if (idx + 1 < list.length) setIdx(idx + 1);
-        else onComplete?.();
-      }, 500);
+    // Pedestal central con la pista
+    const pedestal = new THREE.Mesh(
+      new THREE.CylinderGeometry(1.5, 1.8, 0.5, 28),
+      new THREE.MeshStandardMaterial({ color: 0x33497a, roughness: 0.7 }),
+    );
+    pedestal.position.set(0, 0.25, 2.6);
+    pedestal.receiveShadow = true;
+    scene.add(pedestal);
+
+    const crystal = new THREE.Mesh(
+      new THREE.OctahedronGeometry(0.85, 0),
+      new THREE.MeshStandardMaterial({ color: 0x9d7bff, emissive: 0x5b32c9, emissiveIntensity: 0.8, roughness: 0.25, flatShading: true }),
+    );
+    crystal.position.set(0, 1.5, 2.6);
+    crystal.castShadow = true;
+    scene.add(crystal);
+
+    let hint = makeTextPanel("…", { bg: "#241539", fg: "#FFFFFF", width: 2.6 });
+    hint.position.set(0, 2.9, 2.6);
+    scene.add(hint);
+
+    type Option = { mesh: THREE.Mesh; gem: THREE.Mesh; label: string; phase: number };
+    let options: Option[] = [];
+    let roundIdx = 0;
+    let answer = "";
+    let local = 0;
+
+    function clearOptions() {
+      for (const o of options) {
+        scene.remove(o.mesh);
+        scene.remove(o.gem);
+      }
+      options = [];
     }
-  }
 
-  const doneAll = guessed.length >= list.length;
+    function buildRound() {
+      clearOptions();
+      answer = clean[roundIdx % clean.length]!;
+      const pool = [answer, ...clean.filter((w) => w !== answer)].slice(0, 3);
+      while (pool.length < 3) pool.push(["Miedo", "Culpa", "Prisa"][pool.length % 3]!);
+      const shuffled = pool
+        .map((w, i) => ({ w, k: (i * 7 + roundIdx * 5) % 11 }))
+        .sort((a, b) => a.k - b.k)
+        .map((x) => x.w);
+
+      scene.remove(hint);
+      hint = makeTextPanel(answer, { bg: "#241539", fg: "#FFFFFF", width: 2.6 });
+      hint.position.set(0, 2.9, 2.6);
+      scene.add(hint);
+
+      shuffled.forEach((label, i) => {
+        const x = -3.4 + i * 3.4;
+        const mesh = makeTextPanel(label, { bg: "#FFFFFF", fg: "#241539", width: 2.2 });
+        mesh.position.set(x, 1.3, -1.4);
+        scene.add(mesh);
+        const gem = new THREE.Mesh(
+          new THREE.IcosahedronGeometry(0.5, 0),
+          new THREE.MeshStandardMaterial({ color: 0x3fbe8f, roughness: 0.3, flatShading: true, emissive: 0x0f5c42, emissiveIntensity: 0.4 }),
+        );
+        gem.position.set(x, 2.5, -1.4);
+        gem.castShadow = true;
+        scene.add(gem);
+        options.push({ mesh, gem, label, phase: i * 1.3 });
+      });
+    }
+    buildRound();
+
+    function onPointer(ev: PointerEvent) {
+      if (pausedRef.current || doneRef.current) return;
+      const targets = options.flatMap((o) => [o.mesh, o.gem]);
+      const first = rig.pick(ev.clientX, ev.clientY, targets)[0];
+      if (!first) return;
+      const opt = options.find((o) => o.mesh === first.object || o.gem === first.object);
+      if (!opt) return;
+      if (opt.label !== answer) {
+        burst.spawn(opt.gem.position.clone(), 0xf58bcb, 14);
+        opt.mesh.rotation.z = 0.22;
+        setTimeout(() => (opt.mesh.rotation.z = 0), 180);
+        return;
+      }
+      burst.spawn(opt.gem.position.clone(), 0xffd479, 30);
+      local += 1;
+      setHits(local);
+      if (local >= rounds) {
+        doneRef.current = true;
+        onComplete?.();
+        setWon(true);
+        clearOptions();
+        return;
+      }
+      roundIdx += 1;
+      buildRound();
+    }
+    rig.renderer.domElement.addEventListener("pointerdown", onPointer);
+
+    rig.onFrame((dt, t) => {
+      dust.update(dt, t);
+      burst.update(dt);
+      crystal.rotation.y += dt * 0.9;
+      crystal.position.y = 1.5 + Math.sin(t * 1.7) * 0.14;
+      hint.position.y = 2.9 + Math.sin(t * 1.3) * 0.08;
+      for (const o of options) {
+        o.gem.rotation.y += dt * 1.4;
+        o.gem.rotation.x = Math.sin(t + o.phase) * 0.3;
+        o.gem.position.y = 2.5 + Math.sin(t * 1.9 + o.phase) * 0.18;
+        o.mesh.position.y = 1.3 + Math.sin(t * 1.4 + o.phase) * 0.1;
+        o.mesh.rotation.y = Math.sin(t * 0.7 + o.phase) * 0.22;
+      }
+      rig.camera.position.x = Math.sin(t * 0.25) * 0.8;
+      rig.camera.lookAt(0, 2.1, 0.4);
+    });
+
+    return () => {
+      rig.renderer.domElement.removeEventListener("pointerdown", onPointer);
+      rig.dispose();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
-    <div className="app-card p-5">
-      <div className="text-[11px] uppercase tracking-widest font-bold text-primary inline-flex items-center gap-1.5">
-        <HelpCircle className="w-3.5 h-3.5" /> Adivina la palabra {idx + 1}/{list.length}
-      </div>
-      <div className="mt-3 flex flex-wrap justify-center gap-1.5">
-        {!doneAll && word.split("").map((c, i) => (
-          <span key={i} className={cn(
-            "w-9 h-11 rounded-[8px] grid place-items-center font-display font-extrabold text-[18px] border-2",
-            letters.includes(c) ? "border-primary bg-primary/10" : "border-border bg-secondary text-transparent",
-          )}>
-            {letters.includes(c) ? c : "•"}
-          </span>
-        ))}
-      </div>
-      {!doneAll && (
-        <div className="mt-4 grid grid-cols-7 gap-1.5">
-          {ALPHA.map((l) => (
-            <button
-              key={l}
-              onClick={() => pick(l)}
-              disabled={letters.includes(l)}
-              className={cn(
-                "h-10 rounded-[8px] text-[13px] font-bold transition active:scale-95",
-                letters.includes(l) ? (word.includes(l) ? "bg-[#3FBE8F]/20 text-[#2F9A73]" : "bg-secondary/50 text-muted-foreground") : "bg-secondary",
-              )}
-            >
-              {l}
-            </button>
-          ))}
-        </div>
-      )}
-      {doneAll && (
-        <p className="mt-3 rounded-[12px] bg-[#3FBE8F]/12 text-[#2F9A73] px-4 py-3 text-[13px] font-semibold inline-flex items-center gap-2 animate-in fade-in">
-          <Check className="w-4 h-4" /> Adivinaste todas las palabras del tema de hoy.
-        </p>
-      )}
-    </div>
+    <GameShell
+      title="Adivina la palabra"
+      cue="ELIGE 🧩 la que corresponde"
+      progress={{ value: hits, max: rounds }}
+      won={won}
+      wonText="Reconoces tu tema del día sin dudar."
+      onNext={onNext}
+      onClose={onClose}
+      onPauseChange={(p) => (pausedRef.current = p)}
+    >
+      <div ref={host} className="h-full w-full" aria-label="Escenario 3D del juego de adivinar palabras" />
+    </GameShell>
   );
 }
+
+export default GuessWord;

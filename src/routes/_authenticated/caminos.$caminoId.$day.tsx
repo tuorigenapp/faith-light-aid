@@ -8,6 +8,8 @@ import { awardLeaf, wholeHojas, type ActionLevel } from "@/lib/gems";
 import { AnswerFeedback } from "@/components/AnswerFeedback";
 import { CAMINO_TOTAL_DAYS, getCamino, getEtapa } from "@/lib/caminos";
 import { DailyGames } from "@/components/games/DailyGames";
+import { MemoryPairs, MentalTasks, StageGameStep, type GameKind } from "@/components/StageGames";
+
 import { useCaminoPack, caminoVariant, CAMINO_PACK_BASE } from "@/lib/camino-pack";
 import { WordSearch } from "@/components/WordSearch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -40,7 +42,7 @@ export const Route = createFileRoute("/_authenticated/caminos/$caminoId/$day")({
   component: CaminoDia,
 });
 
-const TOTAL_STEPS = 13;
+const TOTAL_STEPS = 20;
 const DAY_XP = 120;
 
 function todayIso() { return new Date().toISOString().slice(0, 10); }
@@ -149,7 +151,7 @@ const [feedback, setFeedback] = useState<"ok" | "fail" | null>(null);
       await reward("major", `Día ${dayNum} · ${camino!.title}`);
     }
     qc.invalidateQueries({ queryKey: ["camino", caminoId] });
-    setStep(13);
+    setStep(20);
   }
 
   const next = () => setStep((s) => Math.min(s + 1, TOTAL_STEPS));
@@ -537,7 +539,34 @@ const [feedback, setFeedback] = useState<"ok" | "fail" | null>(null);
           </section>
         )}
 
-        {p && step === 11 && (
+        {/* ── Juegos 3D del tema, pantalla completa (pasos 11–17) ── */}
+        {p && step >= 11 && step <= 16 && (
+          <StageGameStep
+            kind={(["cofre", "adivina", "pimpon", "pez", "dardo", "cofre"] as GameKind[])[step - 11]!}
+            context={{
+              good: (p.words ?? []).length ? p.words! : [etapa.focus],
+              bad: p.cargas ?? ["Miedo", "Culpa", "Prisa"],
+              mainWord: etapa.focus ?? etapa.title,
+            }}
+            onWin={() => reward("medium", `Juego 3D día ${dayNum}`)}
+            onNext={next}
+            onClose={() => navigate({ to: "/caminos/$caminoId", params: { caminoId } })}
+          />
+        )}
+
+        {p && step === 17 && (
+          <section style={{ animation: "fade-in .4s ease-out both" }}>
+            <H title="Retos mentales" sub="Atención y memoria, cortito." />
+            <div className="mt-3 space-y-3">
+              <MentalTasks tasks={p.words ?? []} onComplete={() => reward("minor", "Retos mentales")} />
+              <MemoryPairs storageKey={`camino-${caminoId}-${dayNum}`} />
+            </div>
+            <Cta onClick={next}>Continuar</Cta>
+          </section>
+        )}
+
+        {p && step === 18 && (
+
           <section style={{ animation: "fade-in .4s ease-out both" }}>
             <H title="Tu resumen de hoy" sub="Esto es lo que trabajaste." />
             <div className="app-card p-5 mt-3">
@@ -556,7 +585,7 @@ const [feedback, setFeedback] = useState<"ok" | "fail" | null>(null);
           </section>
         )}
 
-        {p && step === 12 && (
+        {p && step === 19 && (
           <section className="text-center" style={{ animation: "fade-in .4s ease-out both" }}>
             <img src={star3d} alt="" aria-hidden width={192} height={192} className="w-24 h-24 mx-auto object-contain animate-[float_4s_ease-in-out_infinite]" />
             <h2 className="font-display font-extrabold text-[26px] leading-tight mt-2">¡Día completado!</h2>
@@ -569,7 +598,7 @@ const [feedback, setFeedback] = useState<"ok" | "fail" | null>(null);
           </section>
         )}
 
-        {p && step === 13 && (
+        {p && step === 20 && (
           <section className="text-center" style={{ animation: "fade-in .4s ease-out both" }}>
             <img src={tree} alt="" aria-hidden width={256} height={256} className="w-28 h-28 mx-auto object-contain" />
             <h2 className="font-display font-extrabold text-[26px] leading-tight mt-2">Tu racha sigue activa</h2>
