@@ -69,7 +69,8 @@ function DayPlayer() {
       user_id: user.id, audio_id: a.id, ya_tengo: yaTengo, yo_soy: yoSoy, gratitud, peticion, played: true, completed: true,
     }, { onConflict: "user_id,audio_id" });
     if (error) return toast.error(error.message);
-    toast.success("Ejercicio guardado ✓");
+    await awardLeaf("visualiza", "major", `Día ${a.day_index} — ${c?.title ?? "Manifestación"}`);
+    CELEBRATIONS.vivelo();
     qc.invalidateQueries();
   }
 
