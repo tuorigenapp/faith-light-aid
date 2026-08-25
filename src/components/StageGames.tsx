@@ -176,3 +176,84 @@ export { MentalTasks } from "@/components/games/MentalTasks";
 export { PingPongToss } from "@/components/games/PingPongToss";
 export { FishInWater } from "@/components/games/FishInWater";
 export { DartThrow } from "@/components/games/DartThrow";
+
+/* ═══════════ Coordinador de juegos 3D por práctica ═══════════ */
+
+export type GameKind = "cofre" | "adivina" | "pimpon" | "pez" | "dardo";
+
+export const GAME_ORDER: GameKind[] = ["cofre", "adivina", "pimpon", "pez", "dardo"];
+
+export type GameContext = {
+  /** Palabras/verdades del tema (las decide la IA de ORÍGEN). */
+  good: string[];
+  /** Cargas o palabras que pesan del tema. */
+  bad: string[];
+  /** Concepto central del día. */
+  mainWord: string;
+};
+
+/**
+ * Abre el juego correspondiente a la práctica en pantalla completa,
+ * detecta la finalización, avisa al sistema EXISTENTE de recompensas
+ * (onGameWin) y da paso automático al siguiente juego (onFinish al terminar).
+ */
+export function StageGameSequence({
+  games,
+  context,
+  onGameWin,
+  onFinish,
+  onClose,
+}: {
+  games: GameKind[];
+  context: GameContext;
+  onGameWin?: (kind: GameKind) => void;
+  onFinish: () => void;
+  onClose?: () => void;
+}) {
+  const [idx, setIdx] = useState(0);
+  const kind = games[idx];
+  if (!kind) return null;
+
+  const good = context.good.filter(Boolean).slice(0, 5);
+  const bad = context.bad.filter(Boolean).slice(0, 5);
+  const advance = () => {
+    if (idx + 1 < games.length) setIdx(idx + 1);
+    else onFinish();
+  };
+  const win = () => onGameWin?.(kind);
+
+  const common = { onComplete: win, onNext: advance, onClose };
+
+  if (kind === "cofre")
+    return <ChestWordsGame correct={good.length ? good : [context.mainWord]} decoys={bad} {...common} />;
+  if (kind === "adivina") return <GuessWordGame words={[context.mainWord, ...good]} {...common} />;
+  if (kind === "pimpon") return <PingPongGame {...common} />;
+  if (kind === "pez") return <FishGame good={good} bad={bad} {...common} />;
+  return <DartGame {...common} />;
+}
+
+/** Un solo juego 3D en pantalla completa, listo para un step. */
+export function StageGameStep({
+  kind,
+  context,
+  onWin,
+  onNext,
+  onClose,
+}: {
+  kind: GameKind;
+  context: GameContext;
+  onWin?: () => void;
+  onNext: () => void;
+  onClose?: () => void;
+}) {
+  return (
+    <StageGameSequence
+      games={[kind]}
+      context={context}
+      onGameWin={() => onWin?.()}
+      onFinish={onNext}
+      onClose={onClose}
+    />
+  );
+}
+
