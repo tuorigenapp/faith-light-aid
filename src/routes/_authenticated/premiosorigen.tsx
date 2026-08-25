@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Award, Crown, Flame, Gift, Lock, Sparkles, Star, Trophy } from "lucide-react";
+import { Award, Crown, Flame, Gift, Lock, Sparkles, Star, Trophy, type LucideIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { cn } from "@/lib/utils";
@@ -136,7 +136,7 @@ function PremiosOrigen() {
   );
 }
 
-function Stat({ icon: Icon, label, value }: { icon: typeof Flame; label: string; value: string }) {
+function Stat({ icon: Icon, label, value }: { icon: LucideIcon; label: string; value: string }) {
   return (
     <div className="rounded-[14px] bg-background border border-border p-3">
       <Icon className="w-4 h-4 text-primary" />
