@@ -569,7 +569,7 @@ const [feedback, setFeedback] = useState<"ok" | "fail" | null>(null);
           </section>
         )}
 
-        {p && step === 13 && (
+        {p && step === 20 && (
           <section className="text-center" style={{ animation: "fade-in .4s ease-out both" }}>
             <img src={tree} alt="" aria-hidden width={256} height={256} className="w-28 h-28 mx-auto object-contain" />
             <h2 className="font-display font-extrabold text-[26px] leading-tight mt-2">Tu racha sigue activa</h2>
