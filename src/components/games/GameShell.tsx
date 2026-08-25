@@ -1,14 +1,12 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { ArrowRight, Pause, Play, X } from "lucide-react";
+import { ArrowRight, Leaf, Pause, Play, User, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useProfile } from "@/hooks/use-profile";
 
 /**
- * Shell de pantalla completa para los juegos 3D de las prácticas diarias.
- * - 100dvh real, sin scroll, sin tarjeta pequeña.
- * - HUD mínimo y discreto (no tapa el juego).
- * - Demostración de 1–2 s con instrucción cortísima (accesible sin leer mucho).
- * - Control direccional con botón central de PAUSA/REANUDAR (sin reiniciar).
- * - Al ganar: "¡Listo!" y paso automático al siguiente juego.
+ * Shell de pantalla completa para las prácticas jugables de ORÍGEN.
+ * Regla: 3D solo donde aporta a la mecánica; toda la interfaz (nombre, hojas,
+ * instrucción, progreso, opciones, controles) es UI 2D limpia y táctil.
  */
 
 export type DpadHandler = (x: number, y: number) => void;
@@ -23,6 +21,7 @@ export function GameShell({
   wonText,
   onNext,
   onClose,
+  footer,
   children,
 }: {
   title: string;
@@ -34,14 +33,31 @@ export function GameShell({
   wonText?: string;
   onNext?: () => void;
   onClose?: () => void;
+  /** Zona de interfaz 2D (opciones, tarjetas de palabras, botón de acción). */
+  footer?: ReactNode;
   children: ReactNode;
 }) {
   const [demo, setDemo] = useState(true);
   const [paused, setPaused] = useState(false);
   const advanced = useRef(false);
+  const { data: profile } = useProfile();
+  const name = profile?.display_name || profile?.full_name?.split(" ")[0] || "Tú";
+  const hojas = profile?.gems ?? 0;
+  const [gain, setGain] = useState(0);
+  const prevHojas = useRef<number | null>(null);
 
   useEffect(() => {
-    const t = setTimeout(() => setDemo(false), 1800);
+    if (prevHojas.current !== null && hojas > prevHojas.current) {
+      setGain(hojas - prevHojas.current);
+      const t = setTimeout(() => setGain(0), 1400);
+      prevHojas.current = hojas;
+      return () => clearTimeout(t);
+    }
+    prevHojas.current = hojas;
+  }, [hojas]);
+
+  useEffect(() => {
+    const t = setTimeout(() => setDemo(false), 1500);
     return () => clearTimeout(t);
   }, []);
 
@@ -52,93 +68,89 @@ export function GameShell({
   useEffect(() => {
     if (!won || advanced.current) return;
     advanced.current = true;
-    const t = setTimeout(() => onNext?.(), 1500);
+    const t = setTimeout(() => onNext?.(), 1600);
     return () => clearTimeout(t);
   }, [won, onNext]);
 
-  return (
-    <div className="fixed inset-0 z-50 overflow-hidden bg-[#120A22] touch-none select-none">
-      {/* Mundo 3D a pantalla completa */}
-      <div className="absolute inset-0">{children}</div>
+  const pct = progress ? Math.min(100, (progress.value / Math.max(1, progress.max)) * 100) : 0;
 
-      {/* HUD superior discreto */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between gap-3 p-3 pt-[max(12px,env(safe-area-inset-top))]">
-        <span className="rounded-full bg-black/35 px-3 py-1.5 text-[12px] font-bold text-white/90 backdrop-blur-sm">
-          {title}
+  return (
+    <div className="fixed inset-0 z-50 flex flex-col overflow-hidden bg-[#151034] touch-none select-none">
+      {/* HUD — identidad del jugador (datos reales) */}
+      <div className="relative z-20 flex items-center gap-2 px-4 pb-2 pt-[max(12px,env(safe-area-inset-top))]">
+        <span className="inline-flex min-w-0 items-center gap-2 rounded-full bg-white/12 px-3 py-1.5 backdrop-blur-md">
+          <User className="h-4 w-4 shrink-0 text-white/80" />
+          <span className="truncate text-[13px] font-bold text-white">{name}</span>
         </span>
-        {progress && (
-          <span className="rounded-full bg-black/35 px-3 py-1.5 text-[12px] font-black text-white backdrop-blur-sm">
-            {progress.value}/{progress.max}
-          </span>
-        )}
-        {onClose && (
+        <span className="relative inline-flex shrink-0 items-center gap-1.5 rounded-full bg-white/12 px-3 py-1.5 backdrop-blur-md">
+          <Leaf className="h-4 w-4 text-[#7BE0A8]" />
+          <span className="text-[13px] font-black text-white">{hojas}</span>
+          {gain > 0 && (
+            <span
+              className="pointer-events-none absolute -top-5 right-2 text-[13px] font-black text-[#7BE0A8]"
+              style={{ animation: "fade-in .3s ease-out both" }}
+            >
+              +{gain}
+            </span>
+          )}
+        </span>
+        <span className="ml-auto flex shrink-0 items-center gap-2">
           <button
-            onClick={onClose}
-            aria-label="Salir del juego"
-            className="pointer-events-auto grid h-11 w-11 shrink-0 place-items-center rounded-full bg-black/35 text-white/90 backdrop-blur-sm active:scale-95"
+            onClick={() => setPaused((p) => !p)}
+            aria-label={paused ? "Reanudar" : "Pausar"}
+            className="grid h-11 w-11 place-items-center rounded-full bg-white/12 text-white backdrop-blur-md active:scale-95"
           >
-            <X className="h-5 w-5" />
+            {paused ? <Play className="h-5 w-5" /> : <Pause className="h-5 w-5" />}
           </button>
+          {onClose && (
+            <button
+              onClick={onClose}
+              aria-label="Salir del juego"
+              className="grid h-11 w-11 place-items-center rounded-full bg-white/12 text-white backdrop-blur-md active:scale-95"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          )}
+        </span>
+      </div>
+
+      {/* Instrucción + progreso */}
+      <div className="relative z-20 px-4 pb-3 text-center">
+        <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/55">{title}</p>
+        <p className="mt-1 font-display text-[19px] font-black leading-tight text-white">{cue}</p>
+        {progress && (
+          <div className="mx-auto mt-3 flex max-w-[320px] items-center gap-2">
+            <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-white/15">
+              <div
+                className="h-full rounded-full bg-[#7BE0A8] transition-[width] duration-300"
+                style={{ width: `${pct}%` }}
+              />
+            </div>
+            <span className="text-[12px] font-black text-white/85">
+              {progress.value}/{progress.max}
+            </span>
+          </div>
         )}
       </div>
 
-      {/* Instrucción cortísima permanente */}
-      <p className="pointer-events-none absolute inset-x-0 top-16 text-center text-[15px] font-black tracking-wide text-white/85 drop-shadow">
-        {cue}
-      </p>
+      {/* Escena (3D solo donde aporta) */}
+      <div className="relative min-h-0 flex-1">{children}</div>
 
-      {/* Demostración inicial */}
-      {demo && (
-        <div className="pointer-events-none absolute inset-0 grid place-items-center bg-black/45 backdrop-blur-[2px]">
-          <div className="text-center" style={{ animation: "fade-in .3s ease-out both" }}>
-            <p className="text-[42px] leading-none" style={{ animation: "pulse 1s ease-in-out infinite" }}>
-              👆
-            </p>
-            <p className="mt-3 font-display text-[26px] font-black text-white">{cue}</p>
-            <p className="mt-2 text-[13px] font-bold uppercase tracking-widest text-white/70">Ahora tú</p>
-          </div>
-        </div>
+      {/* Interfaz 2D del juego */}
+      {footer && !won && (
+        <div className="relative z-20 px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-3">{footer}</div>
       )}
 
-      {/* Pausa */}
-      {paused && !won && (
-        <div className="absolute inset-0 grid place-items-center bg-black/55">
-          <button
-            onClick={() => setPaused(false)}
-            className="inline-flex h-14 items-center gap-2 rounded-full bg-white px-7 text-[16px] font-black text-[#241539] active:scale-95"
-          >
-            <Play className="h-5 w-5" /> Reanudar
-          </button>
-        </div>
-      )}
-
-      {/* Victoria + siguiente automático */}
-      {won && (
-        <div className="absolute inset-0 grid place-items-center bg-black/55">
-          <div className="text-center" style={{ animation: "fade-in .3s ease-out both" }}>
-            <p className="text-[52px] leading-none">✨</p>
-            <p className="mt-2 font-display text-[28px] font-black text-white">¡Listo!</p>
-            {wonText && <p className="mx-auto mt-2 max-w-[300px] text-[13.5px] text-white/80">{wonText}</p>}
-            <button
-              onClick={onNext}
-              className="mt-5 inline-flex h-13 items-center gap-2 rounded-full bg-white px-7 py-3 text-[15px] font-black text-[#241539] active:scale-95"
-            >
-              Siguiente <ArrowRight className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Control direccional: centro = pausa/reanudar */}
+      {/* Control direccional grande */}
       {dpad && !won && (
-        <div className="absolute inset-x-0 bottom-0 p-4 pb-[max(16px,env(safe-area-inset-bottom))]">
-          <div className="mx-auto grid w-[190px] grid-cols-3 gap-2 opacity-90">
+        <div className="relative z-20 px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-1">
+          <div className="mx-auto grid w-[210px] grid-cols-3 gap-2.5">
             {[
               null,
               { l: "▲", a: () => dpad(0, -1) },
               null,
               { l: "◀", a: () => dpad(-1, 0) },
-              { l: "pause", a: () => setPaused((p) => !p) },
+              { l: "stop", a: () => dpad(0, 0) },
               { l: "▶", a: () => dpad(1, 0) },
               null,
               { l: "▼", a: () => dpad(0, 1) },
@@ -148,18 +160,59 @@ export function GameShell({
                 <button
                   key={i}
                   onPointerDown={b.a}
-                  aria-label={b.l === "pause" ? "Pausar o reanudar" : `Mover ${b.l}`}
+                  aria-label={b.l === "stop" ? "Detener" : `Mover ${b.l}`}
                   className={cn(
-                    "grid h-14 place-items-center rounded-[14px] text-[18px] font-black text-white backdrop-blur-sm active:scale-95",
-                    b.l === "pause" ? "bg-white/25" : "bg-black/35",
+                    "grid h-[58px] place-items-center rounded-[16px] text-[20px] font-black text-white backdrop-blur-md active:scale-95",
+                    b.l === "stop" ? "bg-white/25 text-[13px]" : "bg-white/15",
                   )}
                 >
-                  {b.l === "pause" ? paused ? <Play className="h-5 w-5" /> : <Pause className="h-5 w-5" /> : b.l}
+                  {b.l === "stop" ? "•" : b.l}
                 </button>
               ) : (
                 <span key={i} />
               ),
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Demostración corta */}
+      {demo && (
+        <div className="absolute inset-0 z-30 grid place-items-center bg-[#151034]/70 backdrop-blur-[2px]">
+          <div className="px-8 text-center" style={{ animation: "fade-in .3s ease-out both" }}>
+            <p className="font-display text-[26px] font-black leading-tight text-white">{cue}</p>
+            <p className="mt-2 text-[13px] font-bold uppercase tracking-widest text-white/60">Ahora tú</p>
+          </div>
+        </div>
+      )}
+
+      {/* Pausa */}
+      {paused && !won && (
+        <div className="absolute inset-0 z-30 grid place-items-center bg-[#151034]/75">
+          <button
+            onClick={() => setPaused(false)}
+            className="inline-flex h-14 items-center gap-2 rounded-full bg-white px-7 text-[16px] font-black text-[#241539] active:scale-95"
+          >
+            <Play className="h-5 w-5" /> Reanudar
+          </button>
+        </div>
+      )}
+
+      {/* Victoria */}
+      {won && (
+        <div className="absolute inset-0 z-30 grid place-items-center bg-[#151034]/80">
+          <div className="px-8 text-center" style={{ animation: "fade-in .3s ease-out both" }}>
+            <span className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-[#7BE0A8]/20">
+              <Leaf className="h-8 w-8 text-[#7BE0A8]" />
+            </span>
+            <p className="mt-3 font-display text-[28px] font-black text-white">¡Listo!</p>
+            {wonText && <p className="mx-auto mt-2 max-w-[300px] text-[13.5px] text-white/80">{wonText}</p>}
+            <button
+              onClick={onNext}
+              className="mt-5 inline-flex h-13 items-center gap-2 rounded-full bg-white px-7 py-3 text-[15px] font-black text-[#241539] active:scale-95"
+            >
+              Siguiente <ArrowRight className="h-4 w-4" />
+            </button>
           </div>
         </div>
       )}
