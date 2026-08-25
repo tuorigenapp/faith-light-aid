@@ -288,7 +288,7 @@ function StageFlow() {
     case 17:
       return shell(
         <div className="space-y-3">
-          <MentalTasks tasks={p?.bienestar ?? []} onComplete={() => reward("minor", "Retos mentales")} />
+          <MentalTasks tasks={(p?.bienestar ?? []).map((b: { q: string }) => b.q)} onComplete={() => reward("minor", "Retos mentales")} />
           <Cta onClick={next}>Continuar</Cta>
         </div>,
       );
