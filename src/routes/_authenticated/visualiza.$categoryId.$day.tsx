@@ -9,6 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Play, Pause, Download, ArrowLeft, Check, Headphones } from "lucide-react";
 import { jsPDF } from "jspdf";
+import { awardLeaf } from "@/lib/gems";
+import { CELEBRATIONS } from "@/lib/celebrate-step";
 
 export const Route = createFileRoute("/_authenticated/visualiza/$categoryId/$day")({
   head: () => ({ meta: [{ title: "Método de Cristo — Reconectando" }] }),
