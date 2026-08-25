@@ -1,13 +1,12 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { GameShell } from "./GameShell";
-import { createRig, createBurstPool, makeAmbientParticles, makeGround, makeTextPanel } from "./engine3d";
+import { createRig, createBurstPool, makeAmbientParticles } from "./engine3d";
+import { cn } from "@/lib/utils";
 
 /**
- * Palabras en el cofre — mundo 3D vivo.
- * Las palabras flotan como objetos 3D sobre un claro del bosque; el jugador
- * toca las que pertenecen a su práctica y vuelan al cofre con partículas.
- * El contenido lo determina la IA de ORÍGEN (props correct/decoys).
+ * Palabras en el cofre — 3D solo para el cofre (objeto principal con física visual
+ * y luz). Las palabras son tarjetas 2D grandes, separadas y fáciles de tocar.
  */
 export function ChestWords({
   correct,
@@ -24,137 +23,146 @@ export function ChestWords({
 }) {
   const host = useRef<HTMLDivElement>(null);
   const pausedRef = useRef(false);
-  const [saved, setSaved] = useState(0);
+  const burstRef = useRef<{ spawn: (p: THREE.Vector3, c: number, n: number) => void } | null>(null);
+  const popRef = useRef<(() => void) | null>(null);
+  const [taken, setTaken] = useState<string[]>([]);
+  const [wrong, setWrong] = useState<string | null>(null);
   const [won, setWon] = useState(false);
-  const goal = Math.max(1, correct.length);
   const doneRef = useRef(false);
+
+  const good = useMemo(() => correct.map((w) => w.trim()).filter(Boolean), [correct]);
+  const goal = Math.max(1, good.length);
+  const cards = useMemo(() => {
+    const bad = decoys.map((w) => w.trim()).filter(Boolean).slice(0, Math.max(2, good.length));
+    const all = [...good.map((w) => ({ w, ok: true })), ...bad.map((w) => ({ w, ok: false }))];
+    return all.map((c, i) => ({ ...c, k: (i * 5 + 3) % 13 })).sort((a, b) => a.k - b.k);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [correct, decoys]);
 
   useEffect(() => {
     const el = host.current;
     if (!el) return;
     const rig = createRig(el, {
-      bg: 0x1c1233,
-      fog: [16, 44],
-      cameraPos: [0, 5.4, 10.5],
-      lookAt: [0, 2, 0],
-      hemi: [0xffe9c9, 0x35225c],
+      bg: 0x2a2160,
+      cameraPos: [0, 2.3, 6.2],
+      lookAt: [0, 1, 0],
+      hemi: [0xffffff, 0x6f68a8],
+      sun: 0xfff3dc,
     });
     const { scene } = rig;
-
-    makeGround(scene, { radius: 11, color: 0x3d2a63, plateColor: 0x2b1c49 });
-    const dust = makeAmbientParticles(scene, { count: 110, spread: 22, height: 10, color: 0xffe9b0, size: 0.1, speed: 0.4, up: true });
+    const dust = makeAmbientParticles(scene, { count: 30, spread: 9, height: 5.5, color: 0xffe9b0, size: 0.07, speed: 0.22, up: true });
     const burst = createBurstPool(scene);
+    burstRef.current = burst;
 
-    // Cofre 3D
-    const chest = new THREE.Group();
-    const box = new THREE.Mesh(
-      new THREE.BoxGeometry(2.4, 1.2, 1.5),
-      new THREE.MeshStandardMaterial({ color: 0x8a5a34, roughness: 0.6 }),
+    const floor = new THREE.Mesh(
+      new THREE.CircleGeometry(6, 48),
+      new THREE.MeshStandardMaterial({ color: 0x3b3282, roughness: 0.9 }),
     );
-    box.position.y = 0.6;
+    floor.rotation.x = -Math.PI / 2;
+    floor.receiveShadow = true;
+    scene.add(floor);
+
+    // Cofre con formas suaves
+    const chest = new THREE.Group();
+    const boxGeo = new THREE.BoxGeometry(2.6, 1.3, 1.7, 4, 4, 4);
+    const box = new THREE.Mesh(boxGeo, new THREE.MeshStandardMaterial({ color: 0xa8763f, roughness: 0.5 }));
+    box.position.y = 0.65;
     box.castShadow = true;
     chest.add(box);
     const lid = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.75, 0.75, 2.4, 20, 1, false, 0, Math.PI),
-      new THREE.MeshStandardMaterial({ color: 0xa06d40, roughness: 0.55 }),
+      new THREE.CylinderGeometry(0.85, 0.85, 2.6, 32, 1, false, 0, Math.PI),
+      new THREE.MeshStandardMaterial({ color: 0xc08a4c, roughness: 0.45 }),
     );
     lid.rotation.z = Math.PI / 2;
-    lid.position.y = 1.2;
+    lid.position.y = 1.3;
     lid.castShadow = true;
     chest.add(lid);
     const glow = new THREE.Mesh(
-      new THREE.SphereGeometry(0.7, 20, 16),
-      new THREE.MeshStandardMaterial({ color: 0xffd479, emissive: 0xffb347, emissiveIntensity: 1.1, transparent: true, opacity: 0.55 }),
+      new THREE.SphereGeometry(0.75, 32, 24),
+      new THREE.MeshStandardMaterial({ color: 0xffd479, emissive: 0xffb347, emissiveIntensity: 1, transparent: true, opacity: 0.5 }),
     );
-    glow.position.y = 1.1;
+    glow.position.y = 1.2;
     chest.add(glow);
-    chest.position.set(0, 0, 3.1);
     scene.add(chest);
 
-    // Palabras flotantes
-    type Word = { mesh: THREE.Mesh; ok: boolean; phase: number; taken: boolean; base: THREE.Vector3 };
-    const words: Word[] = [];
-    const all = [
-      ...correct.map((w) => ({ w, ok: true })),
-      ...decoys.slice(0, Math.max(2, correct.length)).map((w) => ({ w, ok: false })),
-    ];
-    all.forEach((item, i) => {
-      const mesh = makeTextPanel(item.w, { bg: item.ok ? "#ffffff" : "#F6EAFF", fg: "#241539", width: 1.75 });
-      const cols = 2;
-      const col = i % cols;
-      const row = Math.floor(i / cols);
-      const base = new THREE.Vector3(-1.05 + col * 2.1, 4.1 - row * 1.25, -1.2 + row * 0.35);
-
-      mesh.position.copy(base);
-      scene.add(mesh);
-      words.push({ mesh, ok: item.ok, phase: i * 0.7, taken: false, base });
-    });
-
-    let local = 0;
-    function onPointer(ev: PointerEvent) {
-      if (pausedRef.current) return;
-      const hits = rig.pick(ev.clientX, ev.clientY, words.filter((w) => !w.taken).map((w) => w.mesh));
-      const first = hits[0];
-      if (!first) return;
-      const w = words.find((x) => x.mesh === first.object);
-      if (!w) return;
-      if (!w.ok) {
-        burst.spawn(w.mesh.position.clone(), 0xf58bcb, 14);
-        w.mesh.rotation.z = 0.25;
-        setTimeout(() => (w.mesh.rotation.z = 0), 180);
-        return;
-      }
-      w.taken = true;
-      burst.spawn(w.mesh.position.clone(), 0x3fbe8f, 26);
-      local += 1;
-      setSaved(local);
-      if (local >= goal && !doneRef.current) {
-        doneRef.current = true;
-        onComplete?.();
-        setWon(true);
-      }
-    }
-    rig.renderer.domElement.addEventListener("pointerdown", onPointer);
+    let pop = 0;
+    popRef.current = () => {
+      pop = 0.4;
+      burst.spawn(new THREE.Vector3(0, 1.5, 0), 0x7be0a8, 24);
+    };
 
     rig.onFrame((dt, t) => {
       dust.update(dt, t);
       burst.update(dt);
-      glow.scale.setScalar(1 + Math.sin(t * 2.4) * 0.08);
-      lid.rotation.x = Math.sin(t * 1.2) * 0.05;
-      for (const w of words) {
-        if (w.taken) {
-          w.mesh.position.lerp(chest.position.clone().setY(1.1), Math.min(1, dt * 4.2));
-          w.mesh.scale.multiplyScalar(1 - Math.min(0.9, dt * 1.6));
-          w.mesh.rotation.y += dt * 5;
-        } else {
-          w.mesh.position.y = w.base.y + Math.sin(t * 1.5 + w.phase) * 0.16;
-          w.mesh.rotation.y = Math.sin(t * 0.8 + w.phase) * 0.3;
-          w.mesh.rotation.z = Math.sin(t * 1.1 + w.phase) * 0.05;
-        }
-      }
-      rig.camera.position.x = Math.sin(t * 0.22) * 0.7;
-      rig.camera.lookAt(0, 2, 0.6);
+      if (pop > 0) pop -= dt;
+      const k = pop > 0 ? 1 + pop * 0.35 : 1;
+      chest.scale.setScalar(THREE.MathUtils.lerp(chest.scale.x, k, Math.min(1, dt * 8)));
+      lid.rotation.x = Math.sin(t * 1.2) * 0.05 - (pop > 0 ? 0.25 : 0);
+      glow.scale.setScalar(1 + Math.sin(t * 2.2) * 0.07);
+      chest.position.y = Math.sin(t * 1.1) * 0.05;
+      chest.rotation.y = Math.sin(t * 0.4) * 0.12;
     });
 
     return () => {
-      rig.renderer.domElement.removeEventListener("pointerdown", onPointer);
+      burstRef.current = null;
+      popRef.current = null;
       rig.dispose();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  function tap(w: string, ok: boolean) {
+    if (pausedRef.current || doneRef.current || taken.includes(w)) return;
+    if (!ok) {
+      setWrong(w);
+      setTimeout(() => setWrong(null), 420);
+      return;
+    }
+    popRef.current?.();
+    const next = [...taken, w];
+    setTaken(next);
+    if (next.length >= goal && !doneRef.current) {
+      doneRef.current = true;
+      onComplete?.();
+      setWon(true);
+    }
+  }
 
   return (
     <GameShell
       title="Palabras en el cofre"
-      cue="TOCA 👆 tus palabras"
-      progress={{ value: saved, max: goal }}
+      cue="Guarda tus palabras"
+      progress={{ value: taken.length, max: goal }}
       won={won}
       wonText="Esas palabras ya son tuyas: guardadas en tu cofre."
       onNext={onNext}
       onClose={onClose}
       onPauseChange={(p) => (pausedRef.current = p)}
+      footer={
+        <div className="mx-auto grid max-w-[420px] grid-cols-2 gap-3">
+          {cards.map((c) => {
+            const done = taken.includes(c.w);
+            return (
+              <button
+                key={c.w}
+                onClick={() => tap(c.w, c.ok)}
+                disabled={done}
+                className={cn(
+                  "min-h-[56px] rounded-[16px] border-2 px-3 py-3 text-center font-display text-[16px] font-black transition active:scale-[.98]",
+                  done
+                    ? "border-[#7BE0A8]/50 bg-[#7BE0A8]/20 text-white/60"
+                    : wrong === c.w
+                      ? "border-[#F58BCB] bg-white/95 text-[#241539]"
+                      : "border-transparent bg-white/95 text-[#241539]",
+                )}
+              >
+                {c.w}
+              </button>
+            );
+          })}
+        </div>
+      }
     >
-      <div ref={host} className="h-full w-full" aria-label="Escenario 3D del cofre de palabras" />
+      <div ref={host} className="h-full w-full" aria-label="Cofre 3D de palabras" />
     </GameShell>
   );
 }
