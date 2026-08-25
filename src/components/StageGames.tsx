@@ -1,6 +1,12 @@
 import { useMemo, useState } from "react";
 import { Check, Gamepad2, Heart, RefreshCw, Sparkles, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ChestWords as ChestWordsGame } from "@/components/games/ChestWords";
+import { GuessWord as GuessWordGame } from "@/components/games/GuessWord";
+import { PingPongToss as PingPongGame } from "@/components/games/PingPongToss";
+import { FishInWater as FishGame } from "@/components/games/FishInWater";
+import { DartThrow as DartGame } from "@/components/games/DartThrow";
+
 
 /* ═══════════ Juego 1: Memoria de pares (frase ↔ verdad) ═══════════ */
 
