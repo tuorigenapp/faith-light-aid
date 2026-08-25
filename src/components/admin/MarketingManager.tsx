@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   BarChart3,
@@ -9,6 +10,7 @@ import {
   Loader2,
   Mail,
   MousePointerClick,
+  Pause,
   Plus,
   Send,
   Trash2,
@@ -89,6 +91,7 @@ const campaignSchema = z.object({
   list_id: z.string().uuid().nullable(),
   scheduled_at: z.string().trim().optional().or(z.literal("")),
   ends_at: z.string().trim().optional().or(z.literal("")),
+  max_per_day: z.number().int().min(1).max(24),
 });
 
 const emptyCampaign = {
@@ -109,6 +112,10 @@ const emptyCampaign = {
 /** Email marketing y campañas push: listas, editor con etiquetas, horarios e historial de clics. */
 export function MarketingManager() {
   const qc = useQueryClient();
+  const audienceCount = useServerFn(getAudienceCount);
+  const sendNow = useServerFn(sendCampaignNow);
+  const schedule = useServerFn(scheduleCampaign);
+  const pause = useServerFn(pauseCampaign);
   const [channel, setChannel] = useState<Channel>("email");
   const [form, setForm] = useState(emptyCampaign);
   const [listForm, setListForm] = useState({ name: "", description: "", filter_type: "all" });
@@ -145,6 +152,17 @@ export function MarketingManager() {
     () => (campaigns ?? []).filter((c) => c.channel === channel),
     [campaigns, channel],
   );
+
+  const audienceListId = form.audience_type === "list" && form.list_id ? form.list_id : null;
+  const {
+    data: audience,
+    isLoading: audienceLoading,
+    isError: audienceError,
+  } = useQuery({
+    queryKey: ["admin-marketing-audience-count", form.audience_type, audienceListId],
+    queryFn: () => audienceCount({ data: { audienceType: form.audience_type, listId: audienceListId } }),
+    enabled: form.audience_type !== "list" || !!audienceListId,
+  });
 
   /** Horas en que la gente abre: se calcula del historial de eventos. */
   const { data: hours } = useQuery({
@@ -202,6 +220,7 @@ export function MarketingManager() {
         ...form,
         channel,
         list_id: form.list_id ? form.list_id : null,
+        max_per_day: Number(form.max_per_day) || 1,
       });
       if (!parsed.success) throw new Error(parsed.error.issues[0]!.message);
       const d = parsed.data;
@@ -219,6 +238,7 @@ export function MarketingManager() {
         status,
         scheduled_at: d.scheduled_at ? new Date(d.scheduled_at).toISOString() : null,
         ends_at: d.ends_at ? new Date(d.ends_at).toISOString() : null,
+        max_per_day: d.max_per_day,
       });
       if (error) throw error;
     },
@@ -228,6 +248,45 @@ export function MarketingManager() {
       void qc.invalidateQueries({ queryKey: ["admin-marketing-campaigns"] });
     },
     onError: (e: Error) => toast.error(e.message || "No pudimos guardar la campaña"),
+  });
+
+  function invalidateCampaigns() {
+    void qc.invalidateQueries({ queryKey: ["admin-marketing-campaigns"] });
+  }
+
+  function handleUnconfigured(r: { emailUnconfigured?: boolean } | undefined) {
+    if (r?.emailUnconfigured) {
+      toast.warning("Los correos aún no están activados; el push sí se envió.");
+    }
+  }
+
+  const sendNowMutation = useMutation({
+    mutationFn: (campaignId: string) => sendNow({ data: { campaignId } }),
+    onSuccess: (r) => {
+      toast.success(`Campaña enviada a ${r.audienceSize} personas.`);
+      handleUnconfigured(r);
+      invalidateCampaigns();
+    },
+    onError: (e: Error) => toast.error(e.message || "No pudimos enviar la campaña"),
+  });
+
+  const scheduleMutation = useMutation({
+    mutationFn: (vars: { campaignId: string; scheduledAt: string; endsAt?: string | null; maxPerDay: number }) =>
+      schedule({ data: vars }),
+    onSuccess: () => {
+      toast.success("Campaña programada");
+      invalidateCampaigns();
+    },
+    onError: (e: Error) => toast.error(e.message || "No pudimos programar la campaña"),
+  });
+
+  const pauseMutation = useMutation({
+    mutationFn: (campaignId: string) => pause({ data: { campaignId } }),
+    onSuccess: () => {
+      toast.success("Campaña pausada");
+      invalidateCampaigns();
+    },
+    onError: (e: Error) => toast.error(e.message || "No pudimos pausar la campaña"),
   });
 
   function insertCode(code: string) {
@@ -417,6 +476,20 @@ export function MarketingManager() {
               </select>
             </Field>
 
+            <div className="sm:col-span-2 -mt-1">
+              {form.audience_type === "list" && !audienceListId ? (
+                <p className="text-[12px] text-muted-foreground">Elige una lista para ver a cuántas personas llegará.</p>
+              ) : audienceLoading ? (
+                <div className="h-4 w-40 animate-pulse rounded-full bg-muted" />
+              ) : audienceError ? (
+                <p className="text-[12px] text-destructive">No pudimos calcular la audiencia. Intenta de nuevo.</p>
+              ) : (
+                <p className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-primary">
+                  <Users className="h-3.5 w-3.5" /> Llegará a {audience?.count ?? 0} personas
+                </p>
+              )}
+            </div>
+
             <div className="sm:col-span-2">
               <Field label="Mensaje">
                 <textarea
@@ -478,6 +551,16 @@ export function MarketingManager() {
                   maxLength={400}
                 />
               </div>
+            </Field>
+            <Field label="Máximo de envíos por día">
+              <input
+                type="number"
+                min={1}
+                max={24}
+                value={form.max_per_day}
+                onChange={(e) => setForm({ ...form, max_per_day: Number(e.target.value) || 1 })}
+                className={inputCls}
+              />
             </Field>
             <Field label="Empieza (fecha y hora)">
               <input
