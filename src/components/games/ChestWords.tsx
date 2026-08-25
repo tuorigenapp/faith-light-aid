@@ -79,11 +79,12 @@ export function ChestWords({
       ...decoys.slice(0, Math.max(2, correct.length)).map((w) => ({ w, ok: false })),
     ];
     all.forEach((item, i) => {
-      const mesh = makeTextPanel(item.w, { bg: item.ok ? "#ffffff" : "#F6EAFF", fg: "#241539", width: 2.1 });
-      const cols = 3;
+      const mesh = makeTextPanel(item.w, { bg: item.ok ? "#ffffff" : "#F6EAFF", fg: "#241539", width: 1.75 });
+      const cols = 2;
       const col = i % cols;
       const row = Math.floor(i / cols);
-      const base = new THREE.Vector3(-3.1 + col * 3.1, 3.5 - row * 1.35, -1.2 + row * 0.4);
+      const base = new THREE.Vector3(-1.05 + col * 2.1, 4.1 - row * 1.25, -1.2 + row * 0.35);
+
       mesh.position.copy(base);
       scene.add(mesh);
       words.push({ mesh, ok: item.ok, phase: i * 0.7, taken: false, base });
