@@ -222,10 +222,11 @@ function StageFlow() {
     qc.invalidateQueries({ queryKey: ["stage"] });
     qc.invalidateQueries({ queryKey: ["dashboard"] });
     CELEBRATIONS.etapaCamino();
+    clearStepPosition(stepKey);
     navigate({ to: "/etapas" });
   }
 
-  const next = () => setStep((s) => Math.min(s + 1, TOTAL_STEPS));
+  const next = () => setStep(step + 1);
   const minutes = Math.max(1, Math.round((Date.now() - started) / 60000));
   const p: StagePack | undefined = pack.data;
 
@@ -244,10 +245,12 @@ function StageFlow() {
     <StageGameStep
       kind={kind}
       context={gameContext}
+      storageKey={`${user?.id ?? "anon"}:etapa-${id}:step-${step}`}
       onWin={() => reward("medium", `Juego 3D: ${kind}`)}
       onNext={next}
       onClose={() => navigate({ to: "/etapas" })}
     />
+
   );
 
   switch (step) {
