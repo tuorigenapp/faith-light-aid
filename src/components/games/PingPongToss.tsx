@@ -2,18 +2,20 @@ import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { GameShell } from "./GameShell";
 import { createRig, createBurstPool, makeAmbientParticles } from "./engine3d";
+import { useGameLevels } from "@/lib/game-progress";
 
 /**
- * Bola de pimpón — mecánica de un toque: el marcador se mueve sobre los vasos,
- * tocas y la bola vuela con arco. Vasos grandes, separados y bien visibles.
+ * Lanzar la bola de pimpón — 3 niveles con varias rondas.
+ * Mecánica: un marcador oscila, tocas "Lanzar" y la bola sale con esa fuerza.
+ * Cada nivel: el marcador va más rápido y la zona buena se hace más estrecha.
  */
-const REQUIRED = 3;
-
 export function PingPongToss({
+  storageKey = "pimpon",
   onComplete,
   onClose,
   onNext,
 }: {
+  storageKey?: string;
   onComplete?: () => void;
   onClose?: () => void;
   onNext?: () => void;
@@ -21,165 +23,198 @@ export function PingPongToss({
   const host = useRef<HTMLDivElement>(null);
   const pausedRef = useRef(false);
   const throwRef = useRef<(() => void) | null>(null);
+  const [power, setPower] = useState(0);
   const [hits, setHits] = useState(0);
+  const [flying, setFlying] = useState(false);
   const [won, setWon] = useState(false);
-  const doneRef = useRef(false);
+
+  const levels = useGameLevels(`pimpon:${storageKey}`, () => {
+    onComplete?.();
+    setWon(true);
+  });
+
+  const needed = levels.level; // 1 · 2 · 3 aciertos por ronda
+  const cfg = useRef({ speed: 0.8, window: 0.16, needed: 1 });
+  cfg.current.speed = 0.75 + levels.level * 0.35;
+  cfg.current.window = 0.2 - levels.level * 0.035;
+  cfg.current.needed = needed;
+
+  const roundRef = useRef<() => void>(() => {});
+  roundRef.current = () => levels.clearRound();
+
+  useEffect(() => setHits(0), [levels.level, levels.round]);
 
   useEffect(() => {
     const el = host.current;
     if (!el) return;
     const rig = createRig(el, {
       bg: 0x2a2160,
-      cameraPos: [0, 3, 8],
-      lookAt: [0, 1.6, -2.5],
+      cameraPos: [0, 2.6, 7.4],
+      lookAt: [0, 1.5, -2],
       hemi: [0xffffff, 0x6f68a8],
       sun: 0xfff6e6,
     });
     const { scene } = rig;
-    const dust = makeAmbientParticles(scene, { count: 22, spread: 12, height: 6, color: 0xffe9b0, size: 0.07, speed: 0.2, up: true });
+    const dust = makeAmbientParticles(scene, { count: 22, spread: 10, height: 6, color: 0xffe9b0, size: 0.07, speed: 0.2, up: true });
     const burst = createBurstPool(scene);
 
     const table = new THREE.Mesh(
-      new THREE.BoxGeometry(8, 0.3, 7, 4, 2, 4),
-      new THREE.MeshStandardMaterial({ color: 0x3f8f76, roughness: 0.55 }),
+      new THREE.BoxGeometry(9, 0.3, 12, 2, 1, 2),
+      new THREE.MeshStandardMaterial({ color: 0x3b3282, roughness: 0.85 }),
     );
-    table.position.set(0, 0.9, -2);
+    table.position.set(0, 0.4, -3);
     table.receiveShadow = true;
     scene.add(table);
 
-    // Tres vasos grandes y separados
-    type Cup = { group: THREE.Group; x: number; filled: boolean };
-    const cups: Cup[] = [];
-    [-2.4, 0, 2.4].forEach((x) => {
-      const group = new THREE.Group();
-      const cup = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.62, 0.45, 1.15, 32, 1, true),
-        new THREE.MeshStandardMaterial({ color: 0xf58bcb, roughness: 0.35, side: THREE.DoubleSide }),
-      );
-      cup.castShadow = true;
-      group.add(cup);
-      group.position.set(x, 1.65, -3.6);
-      scene.add(group);
-      cups.push({ group, x, filled: false });
-    });
-
-    // Marcador que recorre los vasos
-    const marker = new THREE.Mesh(
-      new THREE.TorusGeometry(0.62, 0.07, 12, 40),
-      new THREE.MeshStandardMaterial({ color: 0x7be0a8, emissive: 0x3fbe8f, emissiveIntensity: 0.9 }),
+    // Vaso objetivo grande
+    const cup = new THREE.Group();
+    const wall = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.72, 0.5, 1.1, 32, 1, true),
+      new THREE.MeshStandardMaterial({ color: 0xf3ecff, roughness: 0.4, side: THREE.DoubleSide }),
     );
-    marker.rotation.x = Math.PI / 2;
-    scene.add(marker);
+    wall.position.y = 0.55;
+    cup.add(wall);
+    const rim = new THREE.Mesh(
+      new THREE.TorusGeometry(0.72, 0.07, 12, 40),
+      new THREE.MeshStandardMaterial({ color: 0x7be0a8, emissive: 0x3fbe8f, emissiveIntensity: 0.7 }),
+    );
+    rim.rotation.x = Math.PI / 2;
+    rim.position.y = 1.1;
+    cup.add(rim);
+    cup.position.set(0, 0.55, -5.4);
+    scene.add(cup);
 
+    // Bola
     const ball = new THREE.Mesh(
-      new THREE.SphereGeometry(0.22, 24, 18),
-      new THREE.MeshStandardMaterial({ color: 0xfff6d8, roughness: 0.25 }),
+      new THREE.SphereGeometry(0.26, 28, 20),
+      new THREE.MeshStandardMaterial({ color: 0xffd479, roughness: 0.3 }),
     );
+    const rest = new THREE.Vector3(0, 1.15, 2.4);
+    ball.position.copy(rest);
     ball.castShadow = true;
     scene.add(ball);
-    const rest = new THREE.Vector3(0, 1.9, 2.6);
-    ball.position.copy(rest);
 
-    let markerX = 0;
-    let flying = false;
-    let travel = 0;
-    let local = 0;
+    let osc = 0;
+    let dir = 1;
+    let inFlight = false;
+    let tFly = 0;
+    let strength = 0;
+    let localHits = 0;
+    let closing = false;
     const from = new THREE.Vector3();
-    const to = new THREE.Vector3();
 
     throwRef.current = () => {
-      if (pausedRef.current || flying || doneRef.current) return;
-      flying = true;
-      travel = 0;
+      if (pausedRef.current || inFlight || closing) return;
+      strength = osc;
+      inFlight = true;
+      tFly = 0;
       from.copy(rest);
-      to.set(markerX, 1.7, -3.6);
+      setFlying(true);
     };
-    const cv = rig.renderer.domElement;
-    const tap = () => throwRef.current?.();
-    cv.addEventListener("pointerdown", tap);
 
     rig.onFrame((dt, t) => {
       dust.update(dt, t);
       burst.update(dt);
+      rim.scale.setScalar(1 + Math.sin(t * 2) * 0.03);
+      cup.position.x = Math.sin(t * (0.3 + levels.level * 0.12)) * (levels.level - 1) * 0.9;
 
-      if (!flying) markerX = Math.sin(t * (0.8 + local * 0.15)) * 2.6;
-      marker.position.set(markerX, 1.15, -3.6);
-      cups.forEach((c) => {
-        const near = Math.abs(markerX - c.x) < 0.8;
-        c.group.position.y = 1.65 + (near ? Math.sin(t * 6) * 0.05 : 0);
-      });
-
-      if (flying) {
-        travel = Math.min(1, travel + dt * 1.6);
-        ball.position.lerpVectors(from, to, travel);
-        ball.position.y += Math.sin(travel * Math.PI) * 1.5;
-        ball.rotation.x += dt * 8;
-        if (travel >= 1) {
-          flying = false;
-          const cup = cups.find((c) => Math.abs(c.x - to.x) < 0.95 && !c.filled);
-          if (cup) {
-            cup.filled = true;
-            (cup.group.children[0] as THREE.Mesh).material = new THREE.MeshStandardMaterial({
-              color: 0x7be0a8,
-              roughness: 0.35,
-              side: THREE.DoubleSide,
-            });
-            burst.spawn(cup.group.position.clone().setY(2.1), 0x7be0a8, 28);
-            local += 1;
-            setHits(local);
-            if (local >= REQUIRED && !doneRef.current) {
-              doneRef.current = true;
-              onComplete?.();
-              setWon(true);
-            } else if (cups.every((c) => c.filled)) {
-              cups.forEach((c) => {
-                c.filled = false;
-                (c.group.children[0] as THREE.Mesh).material = new THREE.MeshStandardMaterial({
-                  color: 0xf58bcb,
-                  roughness: 0.35,
-                  side: THREE.DoubleSide,
-                });
-              });
-            }
-          } else {
-            burst.spawn(ball.position.clone(), 0xf58bcb, 10);
-          }
-          setTimeout(() => ball.position.copy(rest), 280);
+      if (!inFlight) {
+        if (!pausedRef.current) {
+          osc += dir * dt * cfg.current.speed;
+          if (osc > 1) { osc = 1; dir = -1; }
+          if (osc < 0) { osc = 0; dir = 1; }
+          setPower(osc);
         }
-      } else {
         ball.position.copy(rest);
-        ball.position.y = rest.y + Math.sin(t * 2.2) * 0.05;
+        ball.position.y = rest.y + Math.sin(t * 2) * 0.05;
+        return;
+      }
+
+      tFly += dt * 1.35;
+      const ideal = 0.62;
+      const err = strength - ideal;
+      const targetZ = cup.position.z - err * 4.2;
+      const targetX = cup.position.x + err * 1.6;
+      const p = Math.min(1, tFly);
+      ball.position.x = THREE.MathUtils.lerp(from.x, targetX, p);
+      ball.position.z = THREE.MathUtils.lerp(from.z, targetZ, p);
+      ball.position.y = 1.15 + Math.sin(p * Math.PI) * 2.4 - p * 0.35;
+
+      if (p >= 1) {
+        inFlight = false;
+        setFlying(false);
+        const ok = Math.abs(err) <= cfg.current.window;
+        if (ok) {
+          burst.spawn(cup.position.clone().setY(1.2), 0x7be0a8, 26);
+          localHits += 1;
+          setHits(localHits);
+          if (localHits >= cfg.current.needed && !closing) {
+            closing = true;
+            window.setTimeout(() => roundRef.current(), 500);
+          }
+        } else {
+          burst.spawn(ball.position.clone(), 0xf58bcb, 14);
+        }
+        ball.position.copy(rest);
+        osc = 0;
+        dir = 1;
       }
     });
 
+    const cv = rig.renderer.domElement;
+    const tap = () => throwRef.current?.();
+    cv.addEventListener("pointerdown", tap);
+
     return () => {
-      throwRef.current = null;
       cv.removeEventListener("pointerdown", tap);
+      throwRef.current = null;
       rig.dispose();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [levels.level]);
+
+  const goodZone = 0.2 - levels.level * 0.035;
 
   return (
     <GameShell
       title="Bola de pimpón"
-      cue="Toca cuando el aro esté sobre un vaso"
-      progress={{ value: hits, max: REQUIRED }}
+      cue="Suelta cuando el marcador esté en verde"
+      progress={{ value: levels.totalDone, max: levels.totalRounds }}
+      level={levels.level}
+      round={levels.round}
+      roundsInLevel={levels.roundsInLevel}
+      levelUp={levels.levelUp}
       won={won}
-      wonText="Puntería y calma: la constancia también se entrena."
+      wonText="Aprendiste a soltar en el momento justo."
       onNext={onNext}
       onClose={onClose}
       onPauseChange={(p) => (pausedRef.current = p)}
       footer={
-        <button
-          onClick={() => throwRef.current?.()}
-          className="mx-auto flex h-[56px] w-full max-w-[420px] items-center justify-center rounded-[16px] bg-white text-[17px] font-black text-[#241539] active:scale-[.98]"
-        >
-          Lanzar
-        </button>
+        <div className="mx-auto max-w-[420px]">
+          <div className="relative h-5 overflow-hidden rounded-full bg-white/15">
+            <span
+              className="absolute inset-y-0 rounded-full bg-[#7BE0A8]/45"
+              style={{ left: `${(0.62 - goodZone) * 100}%`, width: `${goodZone * 200}%` }}
+            />
+            <span
+              className="absolute top-0 h-5 w-1.5 rounded-full bg-white"
+              style={{ left: `calc(${power * 100}% - 3px)` }}
+            />
+          </div>
+          <p className="mt-2 text-center text-[12px] font-bold text-white/70">
+            Aciertos {hits}/{levels.level}
+          </p>
+          <button
+            onClick={() => throwRef.current?.()}
+            disabled={flying}
+            className="mt-3 h-[56px] w-full rounded-full bg-white text-[17px] font-black text-[#241539] transition active:scale-[.98] disabled:opacity-60"
+          >
+            Lanzar
+          </button>
+        </div>
       }
     >
-      <div ref={host} className="h-full w-full" aria-label="Escena de la bola de pimpón" />
+      <div ref={host} className="h-full w-full" aria-label="Mesa de pimpón en 3D" />
     </GameShell>
   );
 }
