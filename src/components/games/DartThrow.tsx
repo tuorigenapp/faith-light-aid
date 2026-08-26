@@ -2,18 +2,20 @@ import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { GameShell } from "./GameShell";
 import { createRig, createBurstPool, makeAmbientParticles } from "./engine3d";
+import { useGameLevels } from "@/lib/game-progress";
 
 /**
- * Dardo en el aro — sencillo: la mira se mueve despacio, tocas y el dardo vuela.
- * Diana grande y separada del fondo, guía de trayectoria y área válida generosa.
+ * Dardo en el aro — 3 niveles con varias rondas.
+ * Apuntar → tocar → lanzar. La mira se mueve más rápido y la diana se hace
+ * más pequeña en cada nivel, con guía de trayectoria siempre visible.
  */
-const REQUIRED = 3;
-
 export function DartThrow({
+  storageKey = "dardo",
   onComplete,
   onClose,
   onNext,
 }: {
+  storageKey?: string;
   onComplete?: () => void;
   onClose?: () => void;
   onNext?: () => void;
@@ -23,7 +25,22 @@ export function DartThrow({
   const throwRef = useRef<(() => void) | null>(null);
   const [hits, setHits] = useState(0);
   const [won, setWon] = useState(false);
-  const doneRef = useRef(false);
+
+  const levels = useGameLevels(`dardo:${storageKey}`, () => {
+    onComplete?.();
+    setWon(true);
+  });
+
+  const needed = levels.level; // 1 · 2 · 3 aciertos por ronda
+  const cfg = useRef({ aimSpeed: 0.8, radius: 1.0, needed: 1 });
+  cfg.current.aimSpeed = 0.55 + levels.level * 0.4;
+  cfg.current.radius = 1.15 - levels.level * 0.2;
+  cfg.current.needed = needed;
+
+  const roundRef = useRef<() => void>(() => {});
+  roundRef.current = () => levels.clearRound();
+
+  useEffect(() => setHits(0), [levels.level, levels.round]);
 
   useEffect(() => {
     const el = host.current;
@@ -39,21 +56,14 @@ export function DartThrow({
     const dust = makeAmbientParticles(scene, { count: 24, spread: 12, height: 7, color: 0xffe9b0, size: 0.07, speed: 0.2, up: true });
     const burst = createBurstPool(scene);
 
-    // Diana grande, limpia y con profundidad ligera
     const board = new THREE.Group();
-    const base = new THREE.Mesh(
-      new THREE.CircleGeometry(2.5, 64),
-      new THREE.MeshStandardMaterial({ color: 0xf6f2ff, roughness: 0.5 }),
-    );
+    const base = new THREE.Mesh(new THREE.CircleGeometry(2.5, 64), new THREE.MeshStandardMaterial({ color: 0xf6f2ff, roughness: 0.5 }));
     board.add(base);
-    const mid = new THREE.Mesh(
-      new THREE.CircleGeometry(1.6, 64),
-      new THREE.MeshStandardMaterial({ color: 0x9d7bff, roughness: 0.45 }),
-    );
+    const mid = new THREE.Mesh(new THREE.CircleGeometry(1.7, 64), new THREE.MeshStandardMaterial({ color: 0x9d7bff, roughness: 0.45 }));
     mid.position.z = 0.02;
     board.add(mid);
     const center = new THREE.Mesh(
-      new THREE.CircleGeometry(0.85, 48),
+      new THREE.CircleGeometry(1, 48),
       new THREE.MeshStandardMaterial({ color: 0x7be0a8, emissive: 0x3fbe8f, emissiveIntensity: 0.5, roughness: 0.4 }),
     );
     center.position.z = 0.04;
@@ -61,7 +71,6 @@ export function DartThrow({
     board.position.set(0, 2.9, -5);
     scene.add(board);
 
-    // Dardo simple y reconocible
     const dart = new THREE.Group();
     const shaft = new THREE.Mesh(
       new THREE.CapsuleGeometry(0.07, 0.7, 8, 16),
@@ -80,14 +89,12 @@ export function DartThrow({
     const rest = new THREE.Vector3(0, 1.5, 3.2);
     dart.position.copy(rest);
 
-    // Mira lenta y grande
     const reticle = new THREE.Mesh(
       new THREE.TorusGeometry(0.5, 0.07, 12, 40),
       new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xffe9b0, emissiveIntensity: 0.9 }),
     );
     scene.add(reticle);
 
-    // Guía de trayectoria (puntos suaves)
     const guide: THREE.Mesh[] = [];
     const guideMat = new THREE.MeshStandardMaterial({ color: 0xffffff, transparent: true, opacity: 0.35 });
     for (let i = 0; i < 7; i++) {
@@ -97,15 +104,16 @@ export function DartThrow({
     }
 
     let flying = false;
-    let local = 0;
+    let travel = 0;
     let aimX = 0;
     let aimY = 0;
-    let travel = 0;
+    let localHits = 0;
+    let closing = false;
     const from = new THREE.Vector3();
     const to = new THREE.Vector3();
 
     throwRef.current = () => {
-      if (pausedRef.current || flying || doneRef.current) return;
+      if (pausedRef.current || flying || closing) return;
       flying = true;
       travel = 0;
       from.copy(rest);
@@ -118,84 +126,91 @@ export function DartThrow({
     rig.onFrame((dt, t) => {
       dust.update(dt, t);
       burst.update(dt);
-      center.scale.setScalar(1 + Math.sin(t * 2) * 0.03);
+      center.scale.setScalar((cfg.current.radius / 1.0) * (1 + Math.sin(t * 2) * 0.03));
 
       if (!flying) {
-        // dificultad baja: recorrido lento y corto
-        const speed = 0.55 + local * 0.12;
-        aimX = Math.sin(t * speed) * 0.9;
-        aimY = Math.cos(t * speed * 0.7) * 0.4;
-      }
-      reticle.position.set(board.position.x + aimX, board.position.y + aimY, board.position.z + 0.25);
-      reticle.rotation.z += dt * 0.8;
-
-      // Guía visual desde el dardo hasta la mira
-      guide.forEach((dot, i) => {
-        const k = (i + 1) / (guide.length + 1);
-        dot.visible = !flying;
-        dot.position.set(
-          THREE.MathUtils.lerp(rest.x, reticle.position.x, k),
-          THREE.MathUtils.lerp(rest.y, reticle.position.y, k) + Math.sin(k * Math.PI) * 0.55,
-          THREE.MathUtils.lerp(rest.z, reticle.position.z, k),
-        );
-      });
-
-      if (flying) {
-        travel = Math.min(1, travel + dt * 1.8);
-        dart.position.lerpVectors(from, to, travel);
-        dart.position.y += Math.sin(travel * Math.PI) * 0.5;
-        dart.rotation.z += dt * 8;
-        if (travel >= 1) {
-          flying = false;
-          const d = Math.hypot(aimX, aimY);
-          if (d < 1.9) {
-            burst.spawn(dart.position.clone(), 0xffd479, 30);
-            local += 1;
-            setHits(local);
-            if (local >= REQUIRED && !doneRef.current) {
-              doneRef.current = true;
-              onComplete?.();
-              setWon(true);
-            }
-          } else {
-            burst.spawn(dart.position.clone(), 0xf58bcb, 12);
-          }
-          setTimeout(() => dart.position.copy(rest), 300);
-        }
-      } else {
+        const s = cfg.current.aimSpeed;
+        aimX = Math.sin(t * s) * 1.55;
+        aimY = Math.cos(t * s * 0.8) * 1.05;
+        reticle.position.set(board.position.x + aimX, board.position.y + aimY, board.position.z + 0.25);
+        dart.position.copy(rest);
         dart.position.y = rest.y + Math.sin(t * 2) * 0.05;
-        dart.rotation.set(0, 0, 0);
+        guide.forEach((dot, i) => {
+          const p = (i + 1) / (guide.length + 1);
+          dot.position.set(
+            THREE.MathUtils.lerp(rest.x, reticle.position.x, p),
+            THREE.MathUtils.lerp(rest.y, reticle.position.y, p) + Math.sin(p * Math.PI) * 0.7,
+            THREE.MathUtils.lerp(rest.z, reticle.position.z, p),
+          );
+          dot.visible = true;
+        });
+        return;
+      }
+
+      guide.forEach((d) => (d.visible = false));
+      travel += dt * 2.1;
+      const p = Math.min(1, travel);
+      dart.position.set(
+        THREE.MathUtils.lerp(from.x, to.x, p),
+        THREE.MathUtils.lerp(from.y, to.y, p) + Math.sin(p * Math.PI) * 0.5,
+        THREE.MathUtils.lerp(from.z, to.z, p),
+      );
+      if (p >= 1) {
+        flying = false;
+        travel = 0;
+        const dist = Math.hypot(dart.position.x - board.position.x, dart.position.y - board.position.y);
+        if (dist <= cfg.current.radius) {
+          burst.spawn(dart.position.clone(), 0x7be0a8, 26);
+          localHits += 1;
+          setHits(localHits);
+          if (localHits >= cfg.current.needed && !closing) {
+            closing = true;
+            window.setTimeout(() => roundRef.current(), 500);
+          }
+        } else {
+          burst.spawn(dart.position.clone(), 0xf58bcb, 14);
+        }
+        dart.position.copy(rest);
       }
     });
 
     return () => {
-      throwRef.current = null;
       cv.removeEventListener("pointerdown", tap);
+      throwRef.current = null;
       rig.dispose();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [levels.level]);
 
   return (
     <GameShell
       title="Dardo en el aro"
-      cue="Toca cuando la mira esté en el centro"
-      progress={{ value: hits, max: REQUIRED }}
+      cue="Apunta con calma y suelta"
+      progress={{ value: levels.totalDone, max: levels.totalRounds }}
+      level={levels.level}
+      round={levels.round}
+      roundsInLevel={levels.roundsInLevel}
+      levelUp={levels.levelUp}
       won={won}
-      wonText="Enfoque en el centro: así se toman decisiones firmes."
+      wonText="Apuntaste a lo que quieres, no a lo que temes."
       onNext={onNext}
       onClose={onClose}
       onPauseChange={(p) => (pausedRef.current = p)}
       footer={
-        <button
-          onClick={() => throwRef.current?.()}
-          className="mx-auto flex h-[56px] w-full max-w-[420px] items-center justify-center rounded-[16px] bg-white text-[17px] font-black text-[#241539] active:scale-[.98]"
-        >
-          Lanzar
-        </button>
+        <div className="mx-auto max-w-[420px]">
+          <p className="text-center text-[12px] font-bold text-white/70">
+            Aciertos {hits}/{levels.level}
+          </p>
+          <button
+            onClick={() => throwRef.current?.()}
+            className="mt-3 h-[56px] w-full rounded-full bg-white text-[17px] font-black text-[#241539] transition active:scale-[.98]"
+          >
+            Lanzar el dardo
+          </button>
+        </div>
       }
     >
-      <div ref={host} className="h-full w-full" aria-label="Escena del dardo y la diana" />
+      <div ref={host} className="h-full w-full" aria-label="Diana en 3D" />
     </GameShell>
   );
 }

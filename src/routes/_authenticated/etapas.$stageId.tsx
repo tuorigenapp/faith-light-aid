@@ -15,6 +15,9 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { WordSearch } from "@/components/WordSearch";
 import { MemoryPairs, ClassifyEmotions, MentalTasks, StageGameStep, type GameKind } from "@/components/StageGames";
+import { AffirmationSlider } from "@/components/AffirmationSlider";
+import { useResumableStep, clearStepPosition } from "@/lib/game-progress";
+
 
 import { getStageContent, getSolutionSteps, getStageTasks } from "@/lib/stage-content";
 import { awardLeaf, ACTION_POINTS, type ActionLevel } from "@/lib/gems";
@@ -64,7 +67,9 @@ function StageFlow() {
   const qc = useQueryClient();
   const id = Number(stageId);
 
-  const [step, setStep] = useState(1);
+  const stepKey = `etapa:${user?.id ?? "anon"}:${id}`;
+  const [step, setStep] = useResumableStep(stepKey, TOTAL_STEPS);
+
   const [notes, setNotes] = useState("");
   const [mood, setMood] = useState<string | null>(null);
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -217,10 +222,11 @@ function StageFlow() {
     qc.invalidateQueries({ queryKey: ["stage"] });
     qc.invalidateQueries({ queryKey: ["dashboard"] });
     CELEBRATIONS.etapaCamino();
+    clearStepPosition(stepKey);
     navigate({ to: "/etapas" });
   }
 
-  const next = () => setStep((s) => Math.min(s + 1, TOTAL_STEPS));
+  const next = () => setStep(step + 1);
   const minutes = Math.max(1, Math.round((Date.now() - started) / 60000));
   const p: StagePack | undefined = pack.data;
 
@@ -239,10 +245,12 @@ function StageFlow() {
     <StageGameStep
       kind={kind}
       context={gameContext}
+      storageKey={`${user?.id ?? "anon"}:etapa-${id}:step-${step}`}
       onWin={() => reward("medium", `Juego 3D: ${kind}`)}
       onNext={next}
       onClose={() => navigate({ to: "/etapas" })}
     />
+
   );
 
   switch (step) {
@@ -407,22 +415,8 @@ function Step1({ stage, position, onNext }: { stage: any; position: number; onNe
         ))}
       </div>
 
-      <div className="mt-4 overflow-hidden rounded-[16px] bg-card border border-border shadow-soft">
-        <div className="px-4 pt-3.5 pb-2">
-          <div className="text-[13px] font-extrabold text-primary">🎧 Video guía para acompañar esta etapa</div>
-          <p className="text-[12.5px] text-muted-foreground mt-0.5 leading-snug">Ponlo de fondo mientras haces tus ejercicios.</p>
-        </div>
-        <div className="relative w-full" style={{ aspectRatio: "16 / 9" }}>
-          <a
-            href={`https://www.youtube.com/results?search_query=${encodeURIComponent(`${stage.title} oración cristiana sanación interior`)}`}
-            target="_blank"
-            rel="noreferrer"
-            className="grid h-[180px] w-full place-items-center rounded-[12px] bg-primary/10 text-center text-[14px] font-bold text-primary"
-          >
-            Ver videos guía sobre “{stage.title}” en YouTube
-          </a>
-        </div>
-      </div>
+      <AffirmationSlider className="mt-4" focus={stage.focus_area} words={stage.problem_tags ?? []} />
+
 
       <div className="mt-4 rounded-[16px] bg-primary/8 p-4">
         <div className="text-[13px] font-extrabold text-primary">💡 Consejo práctico</div>
