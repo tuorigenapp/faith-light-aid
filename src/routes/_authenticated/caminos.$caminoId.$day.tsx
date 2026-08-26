@@ -548,10 +548,12 @@ const [feedback, setFeedback] = useState<"ok" | "fail" | null>(null);
               bad: p.cargas ?? ["Miedo", "Culpa", "Prisa"],
               mainWord: etapa.focus ?? etapa.title,
             }}
+            storageKey={`${user?.id ?? "anon"}:${caminoId}-d${dayNum}:step-${step}`}
             onWin={() => reward("medium", `Juego 3D día ${dayNum}`)}
             onNext={next}
             onClose={() => navigate({ to: "/caminos/$caminoId", params: { caminoId } })}
           />
+
         )}
 
         {p && step === 17 && (
