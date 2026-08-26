@@ -206,12 +206,15 @@ export type GameContext = {
 export function StageGameSequence({
   games,
   context,
+  storageKey = "general",
   onGameWin,
   onFinish,
   onClose,
 }: {
   games: GameKind[];
   context: GameContext;
+  /** Clave de guardado: usuario/camino/etapa/step para reanudar exacto. */
+  storageKey?: string;
   onGameWin?: (kind: GameKind) => void;
   onFinish: () => void;
   onClose?: () => void;
@@ -220,19 +223,19 @@ export function StageGameSequence({
   const kind = games[idx];
   if (!kind) return null;
 
-  const good = context.good.filter(Boolean).slice(0, 5);
-  const bad = context.bad.filter(Boolean).slice(0, 5);
+  const good = context.good.filter(Boolean).slice(0, 6);
+  const bad = context.bad.filter(Boolean).slice(0, 6);
   const advance = () => {
     if (idx + 1 < games.length) setIdx(idx + 1);
     else onFinish();
   };
   const win = () => onGameWin?.(kind);
 
-  const common = { onComplete: win, onNext: advance, onClose };
+  const common = { onComplete: win, onNext: advance, onClose, storageKey: `${storageKey}:${kind}` };
 
   if (kind === "cofre")
     return <ChestWordsGame correct={good.length ? good : [context.mainWord]} decoys={bad} {...common} />;
-  if (kind === "adivina") return <GuessWordGame words={[context.mainWord, ...good]} {...common} />;
+  if (kind === "adivina") return <GuessWordGame words={[context.mainWord, ...good]} decoys={bad} {...common} />;
   if (kind === "pimpon") return <PingPongGame {...common} />;
   if (kind === "pez") return <FishGame good={good} bad={bad} {...common} />;
   return <DartGame {...common} />;
@@ -242,12 +245,14 @@ export function StageGameSequence({
 export function StageGameStep({
   kind,
   context,
+  storageKey,
   onWin,
   onNext,
   onClose,
 }: {
   kind: GameKind;
   context: GameContext;
+  storageKey?: string;
   onWin?: () => void;
   onNext: () => void;
   onClose?: () => void;
@@ -256,10 +261,12 @@ export function StageGameStep({
     <StageGameSequence
       games={[kind]}
       context={context}
+      storageKey={storageKey}
       onGameWin={() => onWin?.()}
       onFinish={onNext}
       onClose={onClose}
     />
   );
 }
+
 
