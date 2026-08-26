@@ -407,22 +407,8 @@ function Step1({ stage, position, onNext }: { stage: any; position: number; onNe
         ))}
       </div>
 
-      <div className="mt-4 overflow-hidden rounded-[16px] bg-card border border-border shadow-soft">
-        <div className="px-4 pt-3.5 pb-2">
-          <div className="text-[13px] font-extrabold text-primary">🎧 Video guía para acompañar esta etapa</div>
-          <p className="text-[12.5px] text-muted-foreground mt-0.5 leading-snug">Ponlo de fondo mientras haces tus ejercicios.</p>
-        </div>
-        <div className="relative w-full" style={{ aspectRatio: "16 / 9" }}>
-          <a
-            href={`https://www.youtube.com/results?search_query=${encodeURIComponent(`${stage.title} oración cristiana sanación interior`)}`}
-            target="_blank"
-            rel="noreferrer"
-            className="grid h-[180px] w-full place-items-center rounded-[12px] bg-primary/10 text-center text-[14px] font-bold text-primary"
-          >
-            Ver videos guía sobre “{stage.title}” en YouTube
-          </a>
-        </div>
-      </div>
+      <AffirmationSlider className="mt-4" focus={stage.focus_area} words={stage.problem_tags ?? []} />
+
 
       <div className="mt-4 rounded-[16px] bg-primary/8 p-4">
         <div className="text-[13px] font-extrabold text-primary">💡 Consejo práctico</div>
