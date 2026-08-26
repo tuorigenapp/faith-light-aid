@@ -67,7 +67,9 @@ function StageFlow() {
   const qc = useQueryClient();
   const id = Number(stageId);
 
-  const [step, setStep] = useState(1);
+  const stepKey = `etapa:${user?.id ?? "anon"}:${id}`;
+  const [step, setStep] = useResumableStep(stepKey, TOTAL_STEPS);
+
   const [notes, setNotes] = useState("");
   const [mood, setMood] = useState<string | null>(null);
   const [answers, setAnswers] = useState<Record<string, string>>({});
