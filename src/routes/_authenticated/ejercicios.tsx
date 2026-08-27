@@ -238,7 +238,7 @@ function ExerciseModal({
   onClose: () => void;
   onComplete: () => void;
 }) {
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useResumableStep(`ejercicio:${exercise.day}`, 5);
   const [quizIdx, setQuizIdx] = useState(0);
   const [quizPick, setQuizPick] = useState<number | null>(null);
   const [mentalDone, setMentalDone] = useState(false);
