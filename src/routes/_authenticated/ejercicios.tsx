@@ -290,7 +290,9 @@ function ExerciseModal({
                 </li>
               ))}
             </ol>
+            <AffirmationSlider className="mt-4" focus={exercise.category ?? exercise.title} words={getExerciseKeywords(exercise)} />
             <StepButton onClick={() => setStep(2)}>Hacer el quiz</StepButton>
+
           </section>
         )}
 
