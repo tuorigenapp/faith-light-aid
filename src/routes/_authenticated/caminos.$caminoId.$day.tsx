@@ -175,24 +175,28 @@ const [feedback, setFeedback] = useState<"ok" | "fail" | null>(null);
         <div className={cn("absolute inset-0 bg-gradient-to-b opacity-[0.10]", camino.gradient)} />
         <div className="absolute inset-0 bg-gradient-to-b from-white/70 via-white/80 to-white/95" />
       </div>
-      {/* Header */}
+      {/* Header — mismo sistema visual que /etapas */}
       <header className="sticky top-0 z-20 bg-card/85 backdrop-blur border-b border-border">
-        <div className="max-w-[520px] mx-auto px-4 py-3 grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-3">
-          <div className="min-w-0">
-            <div className="text-[11px] font-bold uppercase tracking-widest text-primary truncate">
+        <div className="max-w-[520px] mx-auto px-4 py-3">
+          <div className="grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-3">
+            <span className="w-9 h-9 shrink-0 rounded-full bg-gradient-to-br from-accent-pink to-primary text-white grid place-items-center font-display font-extrabold text-[15px] shadow-soft">
+              {dayNum}
+            </span>
+            <span className="min-w-0 text-center text-[12px] font-bold leading-tight text-primary">
               Paso {step} de {TOTAL_STEPS}
-            </div>
-
-            <div className="mt-1.5 h-1.5 rounded-full bg-primary/12 overflow-hidden">
-              <div className={cn("h-full rounded-full bg-gradient-to-r transition-all duration-500", camino.gradient)} style={{ width: `${(step / TOTAL_STEPS) * 100}%` }} />
-            </div>
+            </span>
+            <span className="shrink-0 inline-flex items-center gap-1.5 rounded-full bg-[#3FBE8F]/12 px-3 py-1.5 text-[13px] font-bold text-[#2F9C74]">
+              <Leaf className="w-4 h-4" /> {wholeHojas(profile?.gems)}
+            </span>
+            <Link to="/caminos/$caminoId" params={{ caminoId }} aria-label="Cerrar y volver al mapa" className="w-11 h-11 shrink-0 rounded-full grid place-items-center text-muted-foreground hover:bg-primary/8 transition active:scale-95">
+              <X className="w-5 h-5" />
+            </Link>
           </div>
-          <span className="shrink-0 inline-flex items-center gap-1.5 rounded-full bg-[#3FBE8F]/12 px-3 py-1.5 text-[13px] font-bold text-[#2F9C74]">
-            <Leaf className="w-4 h-4" /> {wholeHojas(profile?.gems)}
-          </span>
-          <Link to="/caminos/$caminoId" params={{ caminoId }} aria-label="Cerrar y volver al mapa" className="w-11 h-11 shrink-0 rounded-full grid place-items-center text-muted-foreground hover:bg-primary/8 transition active:scale-95">
-            <X className="w-5 h-5" />
-          </Link>
+          <div className="mt-3 flex items-center gap-1.5" aria-label={`Paso ${step} de ${TOTAL_STEPS}`}>
+            {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
+              <span key={i} className={cn("h-1.5 flex-1 rounded-full transition-all duration-500", i + 1 <= step ? "bg-primary" : "bg-primary/15")} />
+            ))}
+          </div>
         </div>
       </header>
 
@@ -217,9 +221,11 @@ const [feedback, setFeedback] = useState<"ok" | "fail" | null>(null);
               <p className="text-[15px] text-muted-foreground mt-3 leading-relaxed text-left">{p.leccion}</p>
               <p className="scripture text-[13px] text-muted-foreground/85 mt-3">“{camino.scripture.text}” — {camino.scripture.ref}</p>
             </div>
+            <AffirmationSlider className="mt-4" focus={etapa.focus} caminoId={caminoId} words={p.words ?? []} />
             <Cta onClick={next}>Comenzar la lección</Cta>
           </section>
         )}
+
 
         {p && step === 2 && (
           <section style={{ animation: "fade-in .4s ease-out both" }}>
