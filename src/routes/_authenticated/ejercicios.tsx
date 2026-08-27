@@ -14,6 +14,9 @@ import { PingPongToss } from "@/components/games/PingPongToss";
 import { FishInWater } from "@/components/games/FishInWater";
 import { DartThrow } from "@/components/games/DartThrow";
 import { MentalTasks } from "@/components/games/MentalTasks";
+import { AffirmationSlider } from "@/components/AffirmationSlider";
+import { useResumableStep, clearStepPosition } from "@/lib/game-progress";
+
 import {
   dayOfYear,
   getAllExercises,
