@@ -156,7 +156,9 @@ const [feedback, setFeedback] = useState<"ok" | "fail" | null>(null);
       await reward("major", `Día ${dayNum} · ${camino!.title}`);
     }
     qc.invalidateQueries({ queryKey: ["camino", caminoId] });
+    clearStepPosition(stepKey);
     setStep(20);
+
   }
 
   const next = () => setStep(step + 1);
