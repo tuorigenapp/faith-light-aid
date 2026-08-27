@@ -333,7 +333,7 @@ function ExerciseModal({
             <div className="mx-auto w-16 h-16 rounded-[16px] bg-[#3FBE8F]/12 grid place-items-center text-[#2F9A73]"><Check className="w-8 h-8" /></div>
             <h3 className="mt-3 font-display font-extrabold text-[22px] leading-tight">Listo por hoy</h3>
             <p className="mt-2 text-[14px] text-muted-foreground leading-relaxed">{exercise.closing}</p>
-            <button onClick={onComplete} disabled={completed} className={cn("mt-5 w-full h-[54px] rounded-[12px] text-[16px] font-semibold inline-flex items-center justify-center gap-2 active:scale-[.97] transition", completed ? "bg-[#3FBE8F]/15 text-[#2F9A73]" : "btn-primary-gradient text-primary-foreground")}>
+            <button onClick={() => { clearStepPosition(`ejercicio:${exercise.day}`); onComplete(); }} disabled={completed} className={cn("mt-5 w-full h-[54px] rounded-[12px] text-[16px] font-semibold inline-flex items-center justify-center gap-2 active:scale-[.97] transition", completed ? "bg-[#3FBE8F]/15 text-[#2F9A73]" : "btn-primary-gradient text-primary-foreground")}>
               <Check className="w-4 h-4" /> {completed ? "Completado" : "Completar ejercicio"}
             </button>
           </section>
