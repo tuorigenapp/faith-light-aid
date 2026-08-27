@@ -57,7 +57,9 @@ function CaminoDia() {
   const qc = useQueryClient();
   const navigate = useNavigate();
 
-  const [step, setStep] = useState(1);
+  const stepKey = `camino:${user?.id ?? "anon"}:${caminoId}:${dayNum}`;
+  const [step, setStep] = useResumableStep(stepKey, TOTAL_STEPS);
+
   const [openSol, setOpenSol] = useState<number | null>(null);
   const [solDone, setSolDone] = useState<number[]>([]);
   const [openTask, setOpenTask] = useState<number | null>(null);
