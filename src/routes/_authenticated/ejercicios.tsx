@@ -14,6 +14,9 @@ import { PingPongToss } from "@/components/games/PingPongToss";
 import { FishInWater } from "@/components/games/FishInWater";
 import { DartThrow } from "@/components/games/DartThrow";
 import { MentalTasks } from "@/components/games/MentalTasks";
+import { AffirmationSlider } from "@/components/AffirmationSlider";
+import { useResumableStep, clearStepPosition } from "@/lib/game-progress";
+
 import {
   dayOfYear,
   getAllExercises,
@@ -238,7 +241,7 @@ function ExerciseModal({
   onClose: () => void;
   onComplete: () => void;
 }) {
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useResumableStep(`ejercicio:${exercise.day}`, 5);
   const [quizIdx, setQuizIdx] = useState(0);
   const [quizPick, setQuizPick] = useState<number | null>(null);
   const [mentalDone, setMentalDone] = useState(false);
@@ -287,7 +290,9 @@ function ExerciseModal({
                 </li>
               ))}
             </ol>
+            <AffirmationSlider className="mt-4" focus={exercise.title} words={keywords} />
             <StepButton onClick={() => setStep(2)}>Hacer el quiz</StepButton>
+
           </section>
         )}
 
@@ -328,7 +333,7 @@ function ExerciseModal({
             <div className="mx-auto w-16 h-16 rounded-[16px] bg-[#3FBE8F]/12 grid place-items-center text-[#2F9A73]"><Check className="w-8 h-8" /></div>
             <h3 className="mt-3 font-display font-extrabold text-[22px] leading-tight">Listo por hoy</h3>
             <p className="mt-2 text-[14px] text-muted-foreground leading-relaxed">{exercise.closing}</p>
-            <button onClick={onComplete} disabled={completed} className={cn("mt-5 w-full h-[54px] rounded-[12px] text-[16px] font-semibold inline-flex items-center justify-center gap-2 active:scale-[.97] transition", completed ? "bg-[#3FBE8F]/15 text-[#2F9A73]" : "btn-primary-gradient text-primary-foreground")}>
+            <button onClick={() => { clearStepPosition(`ejercicio:${exercise.day}`); onComplete(); }} disabled={completed} className={cn("mt-5 w-full h-[54px] rounded-[12px] text-[16px] font-semibold inline-flex items-center justify-center gap-2 active:scale-[.97] transition", completed ? "bg-[#3FBE8F]/15 text-[#2F9A73]" : "btn-primary-gradient text-primary-foreground")}>
               <Check className="w-4 h-4" /> {completed ? "Completado" : "Completar ejercicio"}
             </button>
           </section>
@@ -349,10 +354,12 @@ function StepButton({ children, onClick, disabled }: { children: React.ReactNode
 function renderExerciseGame(kind: string, words: string[], mainWord: string, onComplete: () => void, day: number) {
   const good = words.length ? words : [mainWord, "PAZ", "FE", "CALMA"];
   const bad = ["MIEDO", "CULPA", "RUIDO", "PRISA"];
-  if (kind === "cofre") return <ChestWords correct={good.slice(0, 5)} decoys={bad} onComplete={onComplete} />;
-  if (kind === "adivina") return <GuessWord words={[mainWord, ...good]} onComplete={onComplete} />;
+  const sk = `ejercicio-${day}:${kind}`;
+  if (kind === "cofre") return <ChestWords correct={good.slice(0, 6)} decoys={bad} storageKey={sk} onComplete={onComplete} />;
+  if (kind === "adivina") return <GuessWord words={[mainWord, ...good]} decoys={bad} storageKey={sk} onComplete={onComplete} />;
   if (kind === "sopa") return <div><WordSearch words={good.slice(0, 8)} storageKey={`exercise-${day}`} /><button onClick={onComplete} className="mt-3 w-full min-h-[48px] rounded-[12px] bg-primary text-primary-foreground font-semibold text-[14.5px] active:scale-[.97] transition">Ya encontré mis palabras</button></div>;
-  if (kind === "pimpon") return <PingPongToss onComplete={onComplete} />;
-  if (kind === "pez") return <FishInWater good={good.slice(0, 4)} bad={bad} onComplete={onComplete} />;
-  return <DartThrow onComplete={onComplete} />;
+  if (kind === "pimpon") return <PingPongToss storageKey={sk} onComplete={onComplete} />;
+  if (kind === "pez") return <FishInWater good={good.slice(0, 5)} bad={bad} storageKey={sk} onComplete={onComplete} />;
+  return <DartThrow storageKey={sk} onComplete={onComplete} />;
 }
+
