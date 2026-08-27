@@ -159,7 +159,7 @@ const [feedback, setFeedback] = useState<"ok" | "fail" | null>(null);
     setStep(20);
   }
 
-  const next = () => setStep((s) => Math.min(s + 1, TOTAL_STEPS));
+  const next = () => setStep(step + 1);
 
 
   const solutions = p?.soluciones ?? [];
