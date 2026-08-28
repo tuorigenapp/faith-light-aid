@@ -40,6 +40,9 @@ export function DartThrow({
   const roundRef = useRef<() => void>(() => {});
   roundRef.current = () => levels.clearRound();
 
+  const tagRef = useRef("");
+  tagRef.current = `${levels.level}:${levels.round}`;
+
   useEffect(() => setHits(0), [levels.level, levels.round]);
 
   useEffect(() => {
@@ -123,7 +126,17 @@ export function DartThrow({
     const tap = () => throwRef.current?.();
     cv.addEventListener("pointerdown", tap);
 
+    let myTag = tagRef.current;
+
     rig.onFrame((dt, t) => {
+      if (myTag !== tagRef.current) {
+        myTag = tagRef.current;
+        closing = false;
+        localHits = 0;
+        flying = false;
+        travel = 0;
+        dart.position.copy(rest);
+      }
       dust.update(dt, t);
       burst.update(dt);
       center.scale.setScalar((cfg.current.radius / 1.0) * (1 + Math.sin(t * 2) * 0.03));

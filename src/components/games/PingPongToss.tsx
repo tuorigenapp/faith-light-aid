@@ -42,6 +42,10 @@ export function PingPongToss({
   const roundRef = useRef<() => void>(() => {});
   roundRef.current = () => levels.clearRound();
 
+  // Etiqueta de ronda: al cambiar de ronda el motor se reinicia sin recrear la escena
+  const tagRef = useRef("");
+  tagRef.current = `${levels.level}:${levels.round}`;
+
   useEffect(() => setHits(0), [levels.level, levels.round]);
 
   useEffect(() => {
@@ -112,7 +116,19 @@ export function PingPongToss({
       setFlying(true);
     };
 
+    let myTag = tagRef.current;
+
     rig.onFrame((dt, t) => {
+      if (myTag !== tagRef.current) {
+        myTag = tagRef.current;
+        closing = false;
+        localHits = 0;
+        inFlight = false;
+        tFly = 0;
+        osc = 0;
+        dir = 1;
+        setFlying(false);
+      }
       dust.update(dt, t);
       burst.update(dt);
       rim.scale.setScalar(1 + Math.sin(t * 2) * 0.03);

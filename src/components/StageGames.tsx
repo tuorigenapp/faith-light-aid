@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Check, Gamepad2, Heart, RefreshCw, Sparkles, X } from "lucide-react";
+import { Check, Gamepad2, Heart, Sparkles, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ChestWords as ChestWordsGame } from "@/components/games/ChestWords";
 import { GuessWord as GuessWordGame } from "@/components/games/GuessWord";
