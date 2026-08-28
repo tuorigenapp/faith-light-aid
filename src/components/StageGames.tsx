@@ -25,12 +25,14 @@ export function MemoryPairs({ storageKey }: { storageKey: string }) {
       { id: `${i}-a`, pair: i, text: p.a, kind: "herida" as const },
       { id: `${i}-b`, pair: i, text: p.b, kind: "verdad" as const },
     ]);
-    // orden estable pero mezclado por storageKey
-    const seed = storageKey.length;
-    return list
-      .map((c, i) => ({ c, k: (i * 7 + seed * 13) % list.length }))
-      .sort((x, y) => x.k - y.k)
-      .map((x) => x.c);
+    // orden al azar en cada partida
+    const out = [...list];
+    for (let i = out.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [out[i], out[j]] = [out[j]!, out[i]!];
+    }
+    return out;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [storageKey]);
 
   const [open, setOpen] = useState<string[]>([]);
@@ -55,20 +57,20 @@ export function MemoryPairs({ storageKey }: { storageKey: string }) {
 
   return (
     <div className="app-card p-5">
-      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
-        <div className="min-w-0">
-          <div className="text-[11px] uppercase tracking-widest font-bold text-primary inline-flex items-center gap-1.5">
-            <Gamepad2 className="w-3.5 h-3.5" /> Juego · Memoria de verdades
-          </div>
-          <h3 className="font-display font-bold text-[17px] mt-1 leading-tight">Une la herida con su verdad</h3>
+      <div className="min-w-0">
+        <div className="text-[11px] uppercase tracking-widest font-bold text-primary inline-flex items-center gap-1.5">
+          <Gamepad2 className="w-3.5 h-3.5" /> Juego · Memoria de verdades
         </div>
-        <button
-          onClick={() => { setFound([]); setOpen([]); }}
-          className="shrink-0 w-10 h-10 rounded-full bg-primary/10 text-primary grid place-items-center active:scale-95 transition"
-          aria-label="Reiniciar juego"
-        >
-          <RefreshCw className="w-4 h-4" />
-        </button>
+        <h3 className="font-display font-bold text-[17px] mt-1 leading-tight">Une la herida con su verdad</h3>
+      </div>
+
+      <div className="mt-3 rounded-[14px] border border-border bg-secondary/60 p-3.5">
+        <p className="text-[13px] font-semibold leading-snug">Cómo se juega</p>
+        <p className="text-[12.5px] text-muted-foreground leading-snug mt-1">
+          Las tarjetas están tapadas. Toca dos: una dice una <b>herida</b> que quizá te suena
+          (“No soy suficiente”) y otra dice la <b>verdad</b> que la desarma (“Valgo por existir”).
+          Si son la pareja correcta, se quedan abiertas en verde. Encuentra las {PAIRS.length} parejas.
+        </p>
       </div>
 
       <div className="mt-3 grid grid-cols-2 gap-2.5">
@@ -101,6 +103,7 @@ export function MemoryPairs({ storageKey }: { storageKey: string }) {
     </div>
   );
 }
+
 
 /* ═══════════ Juego 2: Clasifica la emoción ═══════════ */
 
