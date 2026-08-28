@@ -8,7 +8,7 @@ import { awardLeaf, wholeHojas, type ActionLevel } from "@/lib/gems";
 import { AnswerFeedback } from "@/components/AnswerFeedback";
 import { CAMINO_TOTAL_DAYS, getCamino, getEtapa } from "@/lib/caminos";
 import { DailyGames } from "@/components/games/DailyGames";
-import { MemoryPairs, MentalTasks, StageGameStep, type GameKind } from "@/components/StageGames";
+import { MemoryPairs, StageGameStep, type GameKind } from "@/components/StageGames";
 import { AffirmationSlider } from "@/components/AffirmationSlider";
 import { useResumableStep, clearStepPosition } from "@/lib/game-progress";
 
@@ -571,14 +571,14 @@ const [feedback, setFeedback] = useState<"ok" | "fail" | null>(null);
 
         {p && step === 17 && (
           <section style={{ animation: "fade-in .4s ease-out both" }}>
-            <H title="Retos mentales" sub="Atención y memoria, cortito." />
+            <H title="Memoria de verdades" sub="Une cada herida con la verdad que la desarma." />
             <div className="mt-3 space-y-3">
-              <MentalTasks tasks={p.words ?? []} onComplete={() => reward("minor", "Retos mentales")} />
               <MemoryPairs storageKey={`camino-${caminoId}-${dayNum}`} />
             </div>
             <Cta onClick={next}>Continuar</Cta>
           </section>
         )}
+
 
         {p && step === 18 && (
 

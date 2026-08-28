@@ -60,6 +60,7 @@ export function FishInWater({
   const host = useRef<HTMLDivElement>(null);
   const pausedRef = useRef(false);
   const laneRef = useRef(1);
+  const xRef = useRef(-3.2);
   const [caught, setCaught] = useState(0);
   const [miss, setMiss] = useState(0);
   const [won, setWon] = useState(false);
@@ -87,6 +88,9 @@ export function FishInWater({
   const roundRef = useRef<() => void>(() => {});
   roundRef.current = () => levels.clearRound();
 
+  const tagRef = useRef("");
+  tagRef.current = `${levels.level}:${levels.round}`;
+
   useEffect(() => {
     setCaught(0);
     setMiss(0);
@@ -97,8 +101,8 @@ export function FishInWater({
     if (!el) return;
     const rig = createRig(el, {
       bg: 0x1f6f9e,
-      cameraPos: [0, 2.2, 8.6],
-      lookAt: [0, 2.1, 0],
+      cameraPos: [0, 2.1, 10.4],
+      lookAt: [0, 2.05, 0],
       hemi: [0xd9f6ff, 0x2f7ea8],
       sun: 0xffffff,
     });
@@ -134,7 +138,7 @@ export function FishInWater({
       pupil.position.set(0.7, 0.2, 0.28 * s);
       fish.add(pupil);
     }
-    fish.position.set(-3.6, LANES[1]!, 0);
+    fish.position.set(-3.2, LANES[1]!, 0);
     scene.add(fish);
 
     type Plate = { mesh: THREE.Mesh; good: boolean; lane: number; hit: boolean };
@@ -155,20 +159,30 @@ export function FishInWater({
       plates.push({ mesh, good: !isBad, lane, hit: false });
     }
 
+    let myTag = tagRef.current;
+
     rig.onFrame((dt, t) => {
       bubbles.update(dt, t);
       burst.update(dt);
+      if (myTag !== tagRef.current) {
+        myTag = tagRef.current;
+        closing = false;
+        localCaught = 0;
+        for (const p of plates) scene.remove(p.mesh);
+        plates.length = 0;
+        spawnIn = 0.5;
+      }
       if (pausedRef.current) return;
 
       // Pez: carril suave + aleteo
       const targetY = LANES[laneRef.current]!;
       fish.position.y = THREE.MathUtils.lerp(fish.position.y, targetY, Math.min(1, dt * 6));
-      fish.position.x = -3.6 + Math.sin(t * 1.6) * 0.15;
+      fish.position.x = THREE.MathUtils.lerp(fish.position.x, xRef.current + Math.sin(t * 1.6) * 0.12, Math.min(1, dt * 5));
       tail.rotation.y = Math.sin(t * 11) * 0.4;
       body.rotation.z = Math.sin(t * 2.4) * 0.05;
 
       spawnIn -= dt;
-      if (spawnIn <= 0 && !closing) {
+      if (spawnIn <= 0) {
         spawn();
         spawnIn = Math.max(0.5, 1.35 - levelSpeedBonus());
       }
@@ -191,6 +205,8 @@ export function FishInWater({
             }
           } else {
             burst.spawn(p.mesh.position.clone(), 0xf58bcb, 16);
+            localCaught = Math.max(0, localCaught - 1);
+            setCaught(localCaught);
             setMiss((m) => m + 1);
           }
           scene.remove(p.mesh);
@@ -242,7 +258,7 @@ export function FishInWater({
       dpad={(x, y) => {
         if (y < 0) laneRef.current = Math.max(0, laneRef.current - 1);
         if (y > 0) laneRef.current = Math.min(LANES.length - 1, laneRef.current + 1);
-        if (x !== 0) laneRef.current = laneRef.current; // el pez avanza solo
+        if (x !== 0) xRef.current = Math.min(1.6, Math.max(-5.2, xRef.current + x * 0.9));
       }}
     >
       <div ref={host} className="h-full w-full" aria-label="Pez que avanza atrapando palabras" />

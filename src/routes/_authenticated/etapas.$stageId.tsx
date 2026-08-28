@@ -14,7 +14,7 @@ import { saveStageReward } from "@/lib/rewards.functions";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { WordSearch } from "@/components/WordSearch";
-import { MemoryPairs, ClassifyEmotions, MentalTasks, StageGameStep, type GameKind } from "@/components/StageGames";
+import { MemoryPairs, ClassifyEmotions, StageGameStep, type GameKind } from "@/components/StageGames";
 import { AffirmationSlider } from "@/components/AffirmationSlider";
 import { useResumableStep, clearStepPosition } from "@/lib/game-progress";
 
@@ -296,10 +296,18 @@ function StageFlow() {
     case 17:
       return shell(
         <div className="space-y-3">
-          <MentalTasks tasks={(p?.bienestar ?? []).map((b: { q: string }) => b.q)} onComplete={() => reward("minor", "Retos mentales")} />
+          <div className="app-card p-5">
+            <div className="text-[11px] uppercase tracking-widest font-bold text-primary">Respira antes de cerrar</div>
+            <h3 className="font-display font-bold text-[19px] mt-1 leading-tight">Tres respiraciones lentas</h3>
+            <p className="text-[14px] text-muted-foreground mt-2 leading-snug">
+              Inhala contando 4, sostén 4, exhala 6. Hazlo tres veces. Nada que resolver aquí:
+              solo dejar que tu cuerpo registre lo que trabajaste hoy.
+            </p>
+          </div>
           <Cta onClick={next}>Continuar</Cta>
         </div>,
       );
+
     case 18:
       return shell(<Step11 minutes={minutes} tasksDone={doneTasks.length >= tasks.length} onNext={next} />);
     case 19:
