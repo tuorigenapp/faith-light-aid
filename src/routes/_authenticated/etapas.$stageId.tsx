@@ -14,7 +14,7 @@ import { saveStageReward } from "@/lib/rewards.functions";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { WordSearch } from "@/components/WordSearch";
-import { MemoryPairs, ClassifyEmotions, MentalTasks, StageGameStep, type GameKind } from "@/components/StageGames";
+import { MemoryPairs, ClassifyEmotions, StageGameStep, type GameKind } from "@/components/StageGames";
 import { AffirmationSlider } from "@/components/AffirmationSlider";
 import { useResumableStep, clearStepPosition } from "@/lib/game-progress";
 
