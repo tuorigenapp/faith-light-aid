@@ -144,12 +144,15 @@ export function ClassifyEmotions() {
                 {(["mia", "heredada"] as const).map((g) => (
                   <button
                     key={g}
-                    onClick={() => setAnswers((a) => ({ ...a, [i]: g }))}
+                    disabled={!!picked}
+                    onClick={() => setAnswers((a) => (a[i] ? a : { ...a, [i]: g }))}
                     className={cn(
                       "h-10 rounded-[10px] text-[12.5px] font-bold transition active:scale-[.97]",
                       picked === g ? "bg-primary text-primary-foreground" : "bg-secondary text-foreground/75",
+                      picked && picked !== g && "opacity-45",
                     )}
                   >
+
                     {g === "mia" ? "Es mía, de hoy" : "La heredé"}
                   </button>
                 ))}
