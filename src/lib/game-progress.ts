@@ -100,30 +100,31 @@ export function useGameLevels(storageKey: string, onFinish?: () => void): Levels
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [storageKey]);
 
+  // El avance se calcula fuera de los actualizadores de estado (deben ser puros):
+  // así nunca se pierde un cambio de nivel ni se queda un juego congelado.
   const clearRound = useCallback(() => {
     if (finishedRef.current) return;
-    setRound((r) => {
-      const max = roundsIn(level);
-      if (r < max) {
-        writeGameSave(storageKey, { level, round: r + 1 });
-        return r + 1;
-      }
-      if (level < TOTAL_LEVELS) {
-        const nextLevel = level + 1;
-        writeGameSave(storageKey, { level: nextLevel, round: 1 });
-        setLevel(nextLevel);
-        setLevelUp(true);
-        window.setTimeout(() => setLevelUp(false), 1500);
-        return 1;
-      }
-      finishedRef.current = true;
-      writeGameSave(storageKey, { level: TOTAL_LEVELS, round: max, done: true });
-      setFinished(true);
-      onFinish?.();
-      return r;
-    });
+    const max = roundsIn(level);
+    if (round < max) {
+      writeGameSave(storageKey, { level, round: round + 1 });
+      setRound(round + 1);
+      return;
+    }
+    if (level < TOTAL_LEVELS) {
+      const nextLevel = level + 1;
+      writeGameSave(storageKey, { level: nextLevel, round: 1 });
+      setRound(1);
+      setLevel(nextLevel);
+      setLevelUp(true);
+      window.setTimeout(() => setLevelUp(false), 1500);
+      return;
+    }
+    finishedRef.current = true;
+    writeGameSave(storageKey, { level: TOTAL_LEVELS, round: max, done: true });
+    setFinished(true);
+    onFinish?.();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [level, storageKey, onFinish]);
+  }, [level, round, storageKey, onFinish]);
 
   const seed = roundsBefore(level, round) * 31 + level * 7 + round;
 
