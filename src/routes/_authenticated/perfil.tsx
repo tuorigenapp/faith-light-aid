@@ -978,6 +978,13 @@ function NotificationsBlock() {
             <Switch checked={prefs?.push_enabled ?? true} onCheckedChange={(v) => update({ push_enabled: v })} />
           </div>
           <NotificacionesCard />
+          <div className="rounded-2xl border border-border p-3">
+            <div className="text-[13px] font-semibold">Escuchar las instrucciones</div>
+            <div className="text-[11.5px] text-muted-foreground">
+              Con el modo voz activo, la app te lee en voz alta las instrucciones de cada paso. Funciona sin internet.
+            </div>
+            <VoiceToggle className="mt-3" />
+          </div>
         </div>
       )}
     </Card>
