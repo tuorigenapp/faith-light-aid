@@ -470,11 +470,11 @@ function Step2({ steps, open, setOpen, entries, onSave, onNext }: {
     setActive(i);
   }
 
-  async function confirm() {
+  async function confirm(value: string) {
     if (active === null) return;
     setSaving(true);
     const [title] = list[active].split(/[.·:]\s*/);
-    await onSave({ step_key: `sol-${active}`, kind: "solucion", title, response: text.trim(), confirmed: true });
+    await onSave({ step_key: `sol-${active}`, kind: "solucion", title, response: value.trim(), confirmed: true });
     setSaving(false);
     setOpen(Array.from(new Set([...open, active])));
     setActive(null);
