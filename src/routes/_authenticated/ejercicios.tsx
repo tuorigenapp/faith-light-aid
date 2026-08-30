@@ -308,7 +308,7 @@ function ExerciseModal({
               ))}
             </div>
             {quizPick !== null && <p className="mt-3 rounded-[12px] bg-primary/8 p-3 text-[13px] leading-snug">{currentQuiz.explanation}</p>}
-            <StepButton disabled={quizPick === null} onClick={nextQuiz}>{quizDone ? "Ir al reto mental" : "Siguiente pregunta"}</StepButton>
+            <StepButton disabled={quizPick === null} onClick={nextQuiz}>{quizDone ? "Ir al juego de verdades" : "Siguiente pregunta"}</StepButton>
           </section>
         )}
 
