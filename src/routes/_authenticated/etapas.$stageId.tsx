@@ -610,14 +610,14 @@ function Step3({ tasks, done, setDone, entries, onSave, reward, onNext }: {
       : kind === "identificar" ? IDENTIFICA_QS.every((q) => quiz[q.key]) && text.trim().length >= 3
         : true;
 
-  async function confirm() {
+  async function confirm(value = text) {
     if (active === null) return;
     setSaving(true);
     await onSave({
       step_key: `task-${active}`,
       kind,
       title: list[active],
-      response: text.trim(),
+      response: value.trim(),
       answers: quiz,
       confirmed: true,
     });
