@@ -127,10 +127,11 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        
-        <Outlet />
-        <Toaster richColors position="top-center" />
-        <Analytics />
+        <VoiceProvider>
+          <Outlet />
+          <Toaster richColors position="top-center" />
+          <Analytics />
+        </VoiceProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );
