@@ -517,7 +517,7 @@ function Step2({ steps, open, setOpen, entries, onSave, onNext }: {
       </div>
 
       <Dialog open={active !== null} onOpenChange={(o) => !o && setActive(null)}>
-        <DialogContent className="max-w-[440px] rounded-[16px]">
+        <DialogContent className="max-w-[440px] rounded-[16px] max-h-[86dvh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-display text-[19px] leading-tight text-left">
               {active !== null ? list[active].split(/[.·:]\s*/)[0] : ""}
