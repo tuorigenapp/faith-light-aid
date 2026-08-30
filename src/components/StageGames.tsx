@@ -19,7 +19,7 @@ const PAIRS: Pair[] = [
   { a: "Tengo que agradar", b: "Mi no también es amor" },
 ];
 
-export function MemoryPairs({ storageKey }: { storageKey: string }) {
+export function MemoryPairs({ storageKey, onComplete }: { storageKey: string; onComplete?: () => void }) {
   const cards = useMemo(() => {
     const list = PAIRS.flatMap((p, i) => [
       { id: `${i}-a`, pair: i, text: p.a, kind: "herida" as const },
