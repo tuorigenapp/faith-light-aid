@@ -17,6 +17,7 @@ import { useCaminoPack, caminoVariant, CAMINO_PACK_BASE } from "@/lib/camino-pac
 import { WordSearch } from "@/components/WordSearch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { StepEvidence } from "@/components/StepEvidence";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import {
