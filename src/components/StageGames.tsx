@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Check, Gamepad2, Heart, Sparkles, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ChestWords as ChestWordsGame } from "@/components/games/ChestWords";
@@ -19,7 +19,7 @@ const PAIRS: Pair[] = [
   { a: "Tengo que agradar", b: "Mi no también es amor" },
 ];
 
-export function MemoryPairs({ storageKey }: { storageKey: string }) {
+export function MemoryPairs({ storageKey, onComplete }: { storageKey: string; onComplete?: () => void }) {
   const cards = useMemo(() => {
     const list = PAIRS.flatMap((p, i) => [
       { id: `${i}-a`, pair: i, text: p.a, kind: "herida" as const },
@@ -54,6 +54,11 @@ export function MemoryPairs({ storageKey }: { storageKey: string }) {
   }
 
   const done = found.length === PAIRS.length;
+
+  useEffect(() => {
+    if (done) onComplete?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [done]);
 
   return (
     <div className="app-card p-5">

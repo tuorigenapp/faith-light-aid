@@ -13,7 +13,7 @@ import { GuessWord } from "@/components/games/GuessWord";
 import { PingPongToss } from "@/components/games/PingPongToss";
 import { FishInWater } from "@/components/games/FishInWater";
 import { DartThrow } from "@/components/games/DartThrow";
-import { MentalTasks } from "@/components/games/MentalTasks";
+import { MemoryPairs } from "@/components/StageGames";
 import { AffirmationSlider } from "@/components/AffirmationSlider";
 import { useResumableStep, clearStepPosition } from "@/lib/game-progress";
 
@@ -308,14 +308,14 @@ function ExerciseModal({
               ))}
             </div>
             {quizPick !== null && <p className="mt-3 rounded-[12px] bg-primary/8 p-3 text-[13px] leading-snug">{currentQuiz.explanation}</p>}
-            <StepButton disabled={quizPick === null} onClick={nextQuiz}>{quizDone ? "Ir al reto mental" : "Siguiente pregunta"}</StepButton>
+            <StepButton disabled={quizPick === null} onClick={nextQuiz}>{quizDone ? "Ir al juego de verdades" : "Siguiente pregunta"}</StepButton>
           </section>
         )}
 
         {step === 3 && (
           <section className="mt-5">
-            <div className="text-[11px] uppercase tracking-widest font-bold text-primary inline-flex items-center gap-1.5"><Brain className="w-3.5 h-3.5" /> Reto mental</div>
-            <div className="mt-3"><MentalTasks tasks={exercise.steps.slice(0, 4)} onComplete={() => setMentalDone(true)} /></div>
+            <div className="text-[11px] uppercase tracking-widest font-bold text-primary inline-flex items-center gap-1.5"><Brain className="w-3.5 h-3.5" /> Juego de verdades</div>
+            <div className="mt-3"><MemoryPairs storageKey={`ejercicio-${exercise.day}`} onComplete={() => setMentalDone(true)} /></div>
             <StepButton disabled={!mentalDone} onClick={() => setStep(4)}>Abrir juego del día</StepButton>
           </section>
         )}

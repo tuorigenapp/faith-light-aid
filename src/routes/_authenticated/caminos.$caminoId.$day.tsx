@@ -17,6 +17,7 @@ import { useCaminoPack, caminoVariant, CAMINO_PACK_BASE } from "@/lib/camino-pac
 import { WordSearch } from "@/components/WordSearch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { StepEvidence } from "@/components/StepEvidence";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import {
@@ -258,21 +259,19 @@ const [feedback, setFeedback] = useState<"ok" | "fail" | null>(null);
             </Cta>
 
             <Dialog open={openSol !== null} onOpenChange={(o) => !o && setOpenSol(null)}>
-              <DialogContent className="rounded-[16px]">
+              <DialogContent className="rounded-[16px] max-h-[86dvh] overflow-y-auto">
                 <DialogHeader><DialogTitle className="font-display text-[19px] leading-snug">Paso {(openSol ?? 0) + 1}</DialogTitle></DialogHeader>
                 <p className="text-[14.5px] leading-relaxed">{solutions[openSol ?? 0]}</p>
-                <Textarea value={draft} onChange={(e) => setDraft(e.target.value)} rows={4} placeholder="¿Cómo lo aplicaste hoy?" className="rounded-[10px]" />
-                <button
-                  disabled={draft.trim().length < 3}
-                  onClick={async () => {
+                <StepEvidence
+                  draftKey={`camino-${camino.id}-d${etapa.day}-sol-${openSol ?? 0}`}
+                  instruction={solutions[openSol ?? 0] ?? ""}
+                  theme={camino.title}
+                  onValid={async () => {
                     const i = openSol ?? 0;
                     if (!solDone.includes(i)) { setSolDone((d) => [...d, i]); await reward("medium", `Paso ${i + 1} · ${etapa.title}`); }
                     setOpenSol(null);
                   }}
-                  className="h-[52px] rounded-[12px] btn-primary-gradient text-white text-[16px] font-semibold disabled:opacity-50"
-                >
-                  Guardar y confirmar
-                </button>
+                />
               </DialogContent>
             </Dialog>
           </section>
@@ -330,25 +329,29 @@ const [feedback, setFeedback] = useState<"ok" | "fail" | null>(null);
                     ))}
                   </div>
                 ) : null}
-                <Textarea
-                  value={draft}
-                  onChange={(e) => setDraft(e.target.value)}
-                  rows={4}
-                  placeholder={taskKind(tasks[openTask ?? 0] ?? "") === "oracion" ? "¿Qué sentiste al orar? (opcional)" : "Escribe aquí tu respuesta…"}
-                  className="rounded-[10px]"
-                />
-                <button
-                  onClick={async () => {
-                    const i = openTask ?? 0;
-                    const kind = taskKind(tasks[i] ?? "");
-                    if (kind !== "oracion" && draft.trim().length < 3) { toast.error("Escribe tu respuesta para guardarla."); return; }
-                    if (!taskDone.includes(i)) { setTaskDone((d) => [...d, i]); await reward("medium", `Tarea ${i + 1} · ${etapa.title}`); }
-                    setOpenTask(null);
-                  }}
-                  className="h-[52px] rounded-[12px] btn-primary-gradient text-white text-[16px] font-semibold"
-                >
-                  {taskKind(tasks[openTask ?? 0] ?? "") === "oracion" ? "Confirmo que la realicé" : "Guardar tarea"}
-                </button>
+                {taskKind(tasks[openTask ?? 0] ?? "") === "oracion" ? (
+                  <button
+                    onClick={async () => {
+                      const i = openTask ?? 0;
+                      if (!taskDone.includes(i)) { setTaskDone((d) => [...d, i]); await reward("medium", `Tarea ${i + 1} · ${etapa.title}`); }
+                      setOpenTask(null);
+                    }}
+                    className="h-[52px] rounded-[12px] btn-primary-gradient text-white text-[16px] font-semibold"
+                  >
+                    Confirmo que la realicé
+                  </button>
+                ) : (
+                  <StepEvidence
+                    draftKey={`camino-${camino.id}-d${etapa.day}-task-${openTask ?? 0}`}
+                    instruction={tasks[openTask ?? 0] ?? ""}
+                    theme={camino.title}
+                    onValid={async () => {
+                      const i = openTask ?? 0;
+                      if (!taskDone.includes(i)) { setTaskDone((d) => [...d, i]); await reward("medium", `Tarea ${i + 1} · ${etapa.title}`); }
+                      setOpenTask(null);
+                    }}
+                  />
+                )}
               </DialogContent>
             </Dialog>
           </section>
