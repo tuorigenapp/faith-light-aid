@@ -13,7 +13,7 @@ import { GuessWord } from "@/components/games/GuessWord";
 import { PingPongToss } from "@/components/games/PingPongToss";
 import { FishInWater } from "@/components/games/FishInWater";
 import { DartThrow } from "@/components/games/DartThrow";
-import { MentalTasks } from "@/components/games/MentalTasks";
+import { MemoryPairs } from "@/components/StageGames";
 import { AffirmationSlider } from "@/components/AffirmationSlider";
 import { useResumableStep, clearStepPosition } from "@/lib/game-progress";
 
