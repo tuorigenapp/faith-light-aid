@@ -1,4 +1,5 @@
 import { NotificacionesCard } from "@/components/NotificacionesCard";
+import { VoiceToggle } from "@/components/VoiceControls";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
