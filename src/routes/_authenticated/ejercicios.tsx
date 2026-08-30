@@ -314,7 +314,7 @@ function ExerciseModal({
 
         {step === 3 && (
           <section className="mt-5">
-            <div className="text-[11px] uppercase tracking-widest font-bold text-primary inline-flex items-center gap-1.5"><Brain className="w-3.5 h-3.5" /> Reto mental</div>
+            <div className="text-[11px] uppercase tracking-widest font-bold text-primary inline-flex items-center gap-1.5"><Brain className="w-3.5 h-3.5" /> Juego de verdades</div>
             <div className="mt-3"><MemoryPairs storageKey={`ejercicio-${exercise.day}`} onComplete={() => setMentalDone(true)} /></div>
             <StepButton disabled={!mentalDone} onClick={() => setStep(4)}>Abrir juego del día</StepButton>
           </section>
