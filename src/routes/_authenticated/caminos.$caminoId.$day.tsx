@@ -258,21 +258,19 @@ const [feedback, setFeedback] = useState<"ok" | "fail" | null>(null);
             </Cta>
 
             <Dialog open={openSol !== null} onOpenChange={(o) => !o && setOpenSol(null)}>
-              <DialogContent className="rounded-[16px]">
+              <DialogContent className="rounded-[16px] max-h-[86dvh] overflow-y-auto">
                 <DialogHeader><DialogTitle className="font-display text-[19px] leading-snug">Paso {(openSol ?? 0) + 1}</DialogTitle></DialogHeader>
                 <p className="text-[14.5px] leading-relaxed">{solutions[openSol ?? 0]}</p>
-                <Textarea value={draft} onChange={(e) => setDraft(e.target.value)} rows={4} placeholder="¿Cómo lo aplicaste hoy?" className="rounded-[10px]" />
-                <button
-                  disabled={draft.trim().length < 3}
-                  onClick={async () => {
+                <StepEvidence
+                  draftKey={`camino-${camino.id}-d${etapa.day}-sol-${openSol ?? 0}`}
+                  instruction={solutions[openSol ?? 0] ?? ""}
+                  theme={camino.title}
+                  onValid={async () => {
                     const i = openSol ?? 0;
                     if (!solDone.includes(i)) { setSolDone((d) => [...d, i]); await reward("medium", `Paso ${i + 1} · ${etapa.title}`); }
                     setOpenSol(null);
                   }}
-                  className="h-[52px] rounded-[12px] btn-primary-gradient text-white text-[16px] font-semibold disabled:opacity-50"
-                >
-                  Guardar y confirmar
-                </button>
+                />
               </DialogContent>
             </Dialog>
           </section>
