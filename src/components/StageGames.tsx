@@ -55,6 +55,11 @@ export function MemoryPairs({ storageKey, onComplete }: { storageKey: string; on
 
   const done = found.length === PAIRS.length;
 
+  useEffect(() => {
+    if (done) onComplete?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [done]);
+
   return (
     <div className="app-card p-5">
       <div className="min-w-0">
