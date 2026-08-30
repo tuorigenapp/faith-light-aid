@@ -22,6 +22,7 @@ import { useResumableStep, clearStepPosition } from "@/lib/game-progress";
 import { getStageContent, getSolutionSteps, getStageTasks } from "@/lib/stage-content";
 import { awardLeaf, ACTION_POINTS, type ActionLevel } from "@/lib/gems";
 import { AnswerFeedback } from "@/components/AnswerFeedback";
+import { StepEvidence } from "@/components/StepEvidence";
 import { useStagePack, stageVariant, type StagePack } from "@/lib/stage-pack";
 import { msUntilAppDayReset, formatCountdown, APP_DAY_RESET_LABEL } from "@/lib/app-day";
 import { CELEBRATIONS } from "@/lib/celebrate-step";
