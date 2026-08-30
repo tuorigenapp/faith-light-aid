@@ -526,17 +526,18 @@ function Step2({ steps, open, setOpen, entries, onSave, onNext }: {
           <p className="text-[13.5px] text-muted-foreground leading-snug">
             {active !== null ? list[active] : ""}
           </p>
-          <Textarea
-            value={text}
-            onChange={(e) => setText(e.target.value.slice(0, 400))}
-            placeholder="Escribe aquí cómo lo aplicaste hoy, con tus palabras…"
-            className="min-h-[110px] rounded-[10px] text-[13.5px]"
-          />
-          <div className="text-right text-[11px] text-muted-foreground -mt-2">{text.length}/400</div>
-          <Button onClick={confirm} disabled={saving || text.trim().length < 3}
-            className="h-[52px] rounded-[12px] text-[15px] font-semibold bg-gradient-to-r from-accent-pink to-primary text-white">
-            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Confirmar y guardar <Check className="w-4 h-4 ml-1.5" /></>}
-          </Button>
+          {active !== null && (
+            <StepEvidence
+              draftKey={`etapa-sol-${active}`}
+              instruction={list[active]}
+              onValid={(t) => confirm(t)}
+            />
+          )}
+          {saving && (
+            <p className="inline-flex items-center gap-2 text-[12.5px] font-semibold text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" /> Guardando tu registro…
+            </p>
+          )}
         </DialogContent>
       </Dialog>
 
