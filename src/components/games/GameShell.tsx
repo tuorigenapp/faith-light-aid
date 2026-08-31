@@ -74,12 +74,15 @@ export function GameShell({
     onPauseChange?.(paused || demo || !!levelUp);
   }, [paused, demo, levelUp, onPauseChange]);
 
+  const finish = onNext ?? onClose;
+
   useEffect(() => {
-    if (!won || advanced.current) return;
+    if (!won || advanced.current || !finish) return;
     advanced.current = true;
-    const t = setTimeout(() => onNext?.(), 1800);
+    const t = setTimeout(() => finish(), 1800);
     return () => clearTimeout(t);
-  }, [won, onNext]);
+  }, [won, finish]);
+
 
   const pct = progress ? Math.min(100, (progress.value / Math.max(1, progress.max)) * 100) : 0;
 
