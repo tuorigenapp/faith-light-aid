@@ -256,11 +256,12 @@ export function GameShell({
             <p className="mt-1 text-[12px] font-bold uppercase tracking-widest text-white/55">Niveles 1 · 2 · 3</p>
             {wonText && <p className="mx-auto mt-2 max-w-[300px] text-[13.5px] text-white/80">{wonText}</p>}
             <button
-              onClick={onNext}
+              onClick={() => finish?.()}
               className="mt-5 inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-[15px] font-black text-[#241539] active:scale-95"
             >
               Siguiente paso <ArrowRight className="h-4 w-4" />
             </button>
+
           </div>
         </div>
       )}
