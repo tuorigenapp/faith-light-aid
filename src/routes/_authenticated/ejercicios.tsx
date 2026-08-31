@@ -380,15 +380,33 @@ function StepButton({ children, onClick, disabled }: { children: React.ReactNode
   );
 }
 
-function renderExerciseGame(kind: string, words: string[], mainWord: string, onComplete: () => void, day: number) {
+function renderExerciseGame(
+  kind: string,
+  words: string[],
+  mainWord: string,
+  onComplete: () => void,
+  day: number,
+  onNext?: () => void,
+  onClose?: () => void,
+) {
   const good = words.length ? words : [mainWord, "PAZ", "FE", "CALMA"];
   const bad = ["MIEDO", "CULPA", "RUIDO", "PRISA"];
   const sk = `ejercicio-${day}:${kind}`;
-  if (kind === "cofre") return <ChestWords correct={good.slice(0, 6)} decoys={bad} storageKey={sk} onComplete={onComplete} />;
-  if (kind === "adivina") return <GuessWord words={[mainWord, ...good]} decoys={bad} storageKey={sk} onComplete={onComplete} />;
-  if (kind === "sopa") return <div><WordSearch words={good.slice(0, 8)} storageKey={`exercise-${day}`} /><button onClick={onComplete} className="mt-3 w-full min-h-[48px] rounded-[12px] bg-primary text-primary-foreground font-semibold text-[14.5px] active:scale-[.97] transition">Ya encontré mis palabras</button></div>;
-  if (kind === "pimpon") return <PingPongToss storageKey={sk} onComplete={onComplete} />;
-  if (kind === "pez") return <FishInWater good={good.slice(0, 5)} bad={bad} storageKey={sk} onComplete={onComplete} />;
-  return <DartThrow storageKey={sk} onComplete={onComplete} />;
+  const common = { storageKey: sk, onComplete, onNext, onClose };
+  if (kind === "cofre") return <ChestWords correct={good.slice(0, 6)} decoys={bad} {...common} />;
+  if (kind === "adivina") return <GuessWord words={[mainWord, ...good]} decoys={bad} {...common} />;
+  if (kind === "sopa")
+    return (
+      <div>
+        <WordSearch words={good.slice(0, 8)} storageKey={`exercise-${day}`} />
+        <button onClick={onNext ?? onComplete} className="mt-3 w-full min-h-[48px] rounded-[12px] bg-primary text-primary-foreground font-semibold text-[14.5px] active:scale-[.97] transition">
+          Ya encontré mis palabras
+        </button>
+      </div>
+    );
+  if (kind === "pimpon") return <PingPongToss {...common} />;
+  if (kind === "pez") return <FishInWater good={good.slice(0, 5)} bad={bad} {...common} />;
+  return <DartThrow {...common} />;
 }
+
 
