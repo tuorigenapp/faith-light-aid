@@ -246,6 +246,8 @@ function ExerciseModal({
   const [quizPick, setQuizPick] = useState<number | null>(null);
   const [mentalDone, setMentalDone] = useState(false);
   const [gameDone, setGameDone] = useState(false);
+  const [gameOpen, setGameOpen] = useState(false);
+
   const keywords = useMemo(() => getExerciseKeywords(exercise), [exercise]);
   const quiz = useMemo(() => getExerciseQuiz(exercise), [exercise]);
   const gameKind = getGameKindForDay(exercise.day);
