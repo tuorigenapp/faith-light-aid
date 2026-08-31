@@ -246,6 +246,8 @@ function ExerciseModal({
   const [quizPick, setQuizPick] = useState<number | null>(null);
   const [mentalDone, setMentalDone] = useState(false);
   const [gameDone, setGameDone] = useState(false);
+  const [gameOpen, setGameOpen] = useState(false);
+
   const keywords = useMemo(() => getExerciseKeywords(exercise), [exercise]);
   const quiz = useMemo(() => getExerciseQuiz(exercise), [exercise]);
   const gameKind = getGameKindForDay(exercise.day);
@@ -323,10 +325,37 @@ function ExerciseModal({
         {step === 4 && (
           <section className="mt-5">
             <h3 className="font-display font-bold text-[19px] leading-tight text-center">Juego aplicado a tu práctica</h3>
-            <div className="mt-3">{renderExerciseGame(gameKind, keywords, getMainWord(exercise), () => setGameDone(true), exercise.day)}</div>
+            {gameOpen ? (
+              <div className="mt-3">
+                {renderExerciseGame(
+                  gameKind,
+                  keywords,
+                  getMainWord(exercise),
+                  () => setGameDone(true),
+                  exercise.day,
+                  () => { setGameDone(true); setGameOpen(false); },
+                  () => setGameOpen(false),
+                )}
+              </div>
+            ) : (
+              <div className="mt-3 rounded-[16px] border border-border bg-secondary/60 p-4 text-center">
+                <p className="text-[13.5px] leading-snug text-muted-foreground">
+                  {gameDone
+                    ? "Ya jugaste el juego de hoy. Puedes repetirlo o cerrar tu práctica."
+                    : "El juego se abre en pantalla completa. Tres niveles con varias rondas y tu progreso se guarda."}
+                </p>
+                <button
+                  onClick={() => setGameOpen(true)}
+                  className="mt-3 w-full min-h-[52px] rounded-[12px] btn-primary-gradient text-primary-foreground text-[15.5px] font-semibold active:scale-[.97] transition"
+                >
+                  {gameDone ? "Volver a jugar" : "Jugar ahora"}
+                </button>
+              </div>
+            )}
             <StepButton disabled={!gameDone} onClick={() => setStep(5)}>Cerrar mi práctica</StepButton>
           </section>
         )}
+
 
         {step === 5 && (
           <section className="mt-5 text-center">
@@ -351,15 +380,33 @@ function StepButton({ children, onClick, disabled }: { children: React.ReactNode
   );
 }
 
-function renderExerciseGame(kind: string, words: string[], mainWord: string, onComplete: () => void, day: number) {
+function renderExerciseGame(
+  kind: string,
+  words: string[],
+  mainWord: string,
+  onComplete: () => void,
+  day: number,
+  onNext?: () => void,
+  onClose?: () => void,
+) {
   const good = words.length ? words : [mainWord, "PAZ", "FE", "CALMA"];
   const bad = ["MIEDO", "CULPA", "RUIDO", "PRISA"];
   const sk = `ejercicio-${day}:${kind}`;
-  if (kind === "cofre") return <ChestWords correct={good.slice(0, 6)} decoys={bad} storageKey={sk} onComplete={onComplete} />;
-  if (kind === "adivina") return <GuessWord words={[mainWord, ...good]} decoys={bad} storageKey={sk} onComplete={onComplete} />;
-  if (kind === "sopa") return <div><WordSearch words={good.slice(0, 8)} storageKey={`exercise-${day}`} /><button onClick={onComplete} className="mt-3 w-full min-h-[48px] rounded-[12px] bg-primary text-primary-foreground font-semibold text-[14.5px] active:scale-[.97] transition">Ya encontré mis palabras</button></div>;
-  if (kind === "pimpon") return <PingPongToss storageKey={sk} onComplete={onComplete} />;
-  if (kind === "pez") return <FishInWater good={good.slice(0, 5)} bad={bad} storageKey={sk} onComplete={onComplete} />;
-  return <DartThrow storageKey={sk} onComplete={onComplete} />;
+  const common = { storageKey: sk, onComplete, onNext, onClose };
+  if (kind === "cofre") return <ChestWords correct={good.slice(0, 6)} decoys={bad} {...common} />;
+  if (kind === "adivina") return <GuessWord words={[mainWord, ...good]} decoys={bad} {...common} />;
+  if (kind === "sopa")
+    return (
+      <div>
+        <WordSearch words={good.slice(0, 8)} storageKey={`exercise-${day}`} />
+        <button onClick={onNext ?? onComplete} className="mt-3 w-full min-h-[48px] rounded-[12px] bg-primary text-primary-foreground font-semibold text-[14.5px] active:scale-[.97] transition">
+          Ya encontré mis palabras
+        </button>
+      </div>
+    );
+  if (kind === "pimpon") return <PingPongToss {...common} />;
+  if (kind === "pez") return <FishInWater good={good.slice(0, 5)} bad={bad} {...common} />;
+  return <DartThrow {...common} />;
 }
+
 
