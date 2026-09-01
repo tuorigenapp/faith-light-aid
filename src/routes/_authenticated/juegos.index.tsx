@@ -3,7 +3,7 @@ import { ArrowLeft, Leaf } from "lucide-react";
 import { GAMES, GameCard } from "@/components/games/DailyGames";
 import { MIN_PLAYS } from "@/lib/game-plays";
 
-export const Route = createFileRoute("/_authenticated/juegos")({
+export const Route = createFileRoute("/_authenticated/juegos/")({
   head: () => ({
     meta: [
       { title: "Juegos del día — ORÍGEN" },

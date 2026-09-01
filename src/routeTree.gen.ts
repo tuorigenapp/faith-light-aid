@@ -47,6 +47,7 @@ import { Route as AuthenticatedChatRouteImport } from './routes/_authenticated/c
 import { Route as AuthenticatedCategoriasRouteImport } from './routes/_authenticated/categorias'
 import { Route as AuthenticatedBibliotecaRouteImport } from './routes/_authenticated/biblioteca'
 import { Route as AuthenticatedArbolRouteImport } from './routes/_authenticated/arbol'
+import { Route as AuthenticatedJuegosIndexRouteImport } from './routes/_authenticated/juegos.index'
 import { Route as ApiPublicVapidKeyRouteImport } from './routes/api/public/vapid-key'
 import { Route as ApiPublicPushDailyRouteImport } from './routes/api/public/push-daily'
 import { Route as ApiPublicPushBroadcastRouteImport } from './routes/api/public/push-broadcast'
@@ -257,6 +258,12 @@ const AuthenticatedArbolRoute = AuthenticatedArbolRouteImport.update({
   path: '/arbol',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedJuegosIndexRoute =
+  AuthenticatedJuegosIndexRouteImport.update({
+    id: '/juegos/',
+    path: '/juegos/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const ApiPublicVapidKeyRoute = ApiPublicVapidKeyRouteImport.update({
   id: '/api/public/vapid-key',
   path: '/api/public/vapid-key',
@@ -398,6 +405,7 @@ export interface FileRoutesByFullPath {
   '/api/public/push-broadcast': typeof ApiPublicPushBroadcastRoute
   '/api/public/push-daily': typeof ApiPublicPushDailyRoute
   '/api/public/vapid-key': typeof ApiPublicVapidKeyRoute
+  '/juegos/': typeof AuthenticatedJuegosIndexRoute
   '/caminos/$caminoId/$day': typeof AuthenticatedCaminosCaminoIdDayRoute
   '/visualiza/$categoryId/$day': typeof AuthenticatedVisualizaCategoryIdDayRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -452,6 +460,7 @@ export interface FileRoutesByTo {
   '/api/public/push-broadcast': typeof ApiPublicPushBroadcastRoute
   '/api/public/push-daily': typeof ApiPublicPushDailyRoute
   '/api/public/vapid-key': typeof ApiPublicVapidKeyRoute
+  '/juegos': typeof AuthenticatedJuegosIndexRoute
   '/caminos/$caminoId/$day': typeof AuthenticatedCaminosCaminoIdDayRoute
   '/visualiza/$categoryId/$day': typeof AuthenticatedVisualizaCategoryIdDayRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -509,6 +518,7 @@ export interface FileRoutesById {
   '/api/public/push-broadcast': typeof ApiPublicPushBroadcastRoute
   '/api/public/push-daily': typeof ApiPublicPushDailyRoute
   '/api/public/vapid-key': typeof ApiPublicVapidKeyRoute
+  '/_authenticated/juegos/': typeof AuthenticatedJuegosIndexRoute
   '/_authenticated/caminos/$caminoId/$day': typeof AuthenticatedCaminosCaminoIdDayRoute
   '/_authenticated/visualiza/$categoryId/$day': typeof AuthenticatedVisualizaCategoryIdDayRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -566,6 +576,7 @@ export interface FileRouteTypes {
     | '/api/public/push-broadcast'
     | '/api/public/push-daily'
     | '/api/public/vapid-key'
+    | '/juegos/'
     | '/caminos/$caminoId/$day'
     | '/visualiza/$categoryId/$day'
     | '/lovable/email/auth/preview'
@@ -620,6 +631,7 @@ export interface FileRouteTypes {
     | '/api/public/push-broadcast'
     | '/api/public/push-daily'
     | '/api/public/vapid-key'
+    | '/juegos'
     | '/caminos/$caminoId/$day'
     | '/visualiza/$categoryId/$day'
     | '/lovable/email/auth/preview'
@@ -676,6 +688,7 @@ export interface FileRouteTypes {
     | '/api/public/push-broadcast'
     | '/api/public/push-daily'
     | '/api/public/vapid-key'
+    | '/_authenticated/juegos/'
     | '/_authenticated/caminos/$caminoId/$day'
     | '/_authenticated/visualiza/$categoryId/$day'
     | '/lovable/email/auth/preview'
@@ -975,6 +988,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedArbolRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/juegos/': {
+      id: '/_authenticated/juegos/'
+      path: '/juegos'
+      fullPath: '/juegos/'
+      preLoaderRoute: typeof AuthenticatedJuegosIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/api/public/vapid-key': {
       id: '/api/public/vapid-key'
       path: '/api/public/vapid-key'
@@ -1180,6 +1200,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedVisualizaRoute: typeof AuthenticatedVisualizaRouteWithChildren
   AuthenticatedCaminosCaminoIdRoute: typeof AuthenticatedCaminosCaminoIdRouteWithChildren
   AuthenticatedProgramasProgramaIdRoute: typeof AuthenticatedProgramasProgramaIdRoute
+  AuthenticatedJuegosIndexRoute: typeof AuthenticatedJuegosIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -1209,6 +1230,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCaminosCaminoIdRoute:
     AuthenticatedCaminosCaminoIdRouteWithChildren,
   AuthenticatedProgramasProgramaIdRoute: AuthenticatedProgramasProgramaIdRoute,
+  AuthenticatedJuegosIndexRoute: AuthenticatedJuegosIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
