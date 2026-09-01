@@ -1,12 +1,9 @@
-import { ClientOnly } from "@tanstack/react-router";
+import { ClientOnly, Link } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
-import { awardLeaf, HOJA_POINTS } from "@/lib/gems";
+import { useGamePlays, MIN_PLAYS } from "@/lib/game-plays";
 
 export const MAX_LEVEL = 10000;
-import { toast } from "sonner";
 import {
   Search,
   Brain,
@@ -56,7 +53,7 @@ function clean(w: string) {
     .replace(/[^A-Z]/g, "");
 }
 
-type GameProps = { words: string[]; onWin: (gems: number) => void; level: number };
+export type GameProps = { words: string[]; onWin: (gems: number, learned?: string[]) => void; level: number };
 
 /** Dificultad creciente: cada nivel sube un poco la exigencia (sin techo). */
 export function levelScale(level: number, base: number, step = 1, max = 999999) {
@@ -136,7 +133,7 @@ function WordFind({ words, onWin, level }: GameProps) {
       const nf = [...found, hit.word];
       setFound(nf);
       setSel([]);
-      if (nf.length === placed.length) onWin(60);
+      if (nf.length === placed.length) onWin(60, nf);
     }
   };
 
@@ -209,7 +206,7 @@ function Memory({ words, onWin, level }: GameProps) {
       if (a.w === b.w) {
         const nd = [...done, a.w];
         setDone(nd);
-        if (nd.length === new Set(cards.map((c) => c.w)).size) onWin(60);
+        if (nd.length === new Set(cards.map((c) => c.w)).size) onWin(60, nd);
       }
       setOpen([]);
     }, 700);
@@ -254,7 +251,7 @@ function TypeIt({ words, onWin, level }: GameProps) {
   const [val, setVal] = useState("");
   const ok = val.trim().toLowerCase() === frase.toLowerCase();
   useEffect(() => {
-    if (ok) onWin(50); /* eslint-disable-next-line */
+    if (ok) onWin(50, frase.split(" ").filter((w) => w.length > 3)); /* eslint-disable-next-line */
   }, [ok]);
   const progress = Math.min(100, (val.length / frase.length) * 100);
   return (
@@ -952,7 +949,7 @@ function setDistThrottled(v: number, set: (n: number) => void) {
 function Breathe({ onWin, level }: GameProps) {
   const [cycle, setCycle] = useState(0);
   const [phase, setPhase] = useState<"in" | "hold" | "out">("in");
-  const goal = levelScale(level, 4, 2, 24);
+  const goal = 4;
   useEffect(() => {
     const seq: { p: "in" | "hold" | "out"; ms: number }[] = [
       { p: "in", ms: 4000 },
@@ -1024,27 +1021,24 @@ function GameFooter({ hint }: { hint?: string }) {
   );
 }
 
-type GameDef = {
+export type GameDef = {
   id: string;
   title: string;
   desc: string;
   gems: number;
   icon: React.ReactNode;
   tint: string;
-  cover: string;
   render: (p: GameProps) => React.ReactNode;
 };
 
-const C = (p: string) => `https://i.ibb.co/${p}`;
 
-const GAMES: GameDef[] = [
+export const GAMES: GameDef[] = [
   {
     id: "sopa",
     title: "Encuentra la palabra",
     desc: "Sopa de letras de tu tema de hoy",
     gems: 60,
     tint: "from-[#7C4DFF] to-[#B18CFF]",
-    cover: C("GQGKDcRy/file-00000000302c820c9bcc0ef622bbb95f.png"),
     icon: <Search className="w-6 h-6" />,
     render: (p) => <WordFind {...p} />,
   },
@@ -1054,7 +1048,6 @@ const GAMES: GameDef[] = [
     desc: "Empareja las palabras que te sostienen",
     gems: 60,
     tint: "from-[#F58BCB] to-[#FFB3DC]",
-    cover: C("tMdjP53T/file-000000000968822fb55558196d3bfa85.png"),
     icon: <Brain className="w-6 h-6" />,
     render: (p) => <Memory {...p} />,
   },
@@ -1064,7 +1057,6 @@ const GAMES: GameDef[] = [
     desc: "Escribe tu declaración completa",
     gems: 50,
     tint: "from-[#3FBE8F] to-[#7FE0BC]",
-    cover: C("d4WZhL5y/file-000000005f9881f68651918204d94946.png"),
     icon: <PenLine className="w-6 h-6" />,
     render: (p) => <TypeIt {...p} />,
   },
@@ -1074,7 +1066,6 @@ const GAMES: GameDef[] = [
     desc: "Recoge todas las hojas sin que te atrape la culpa",
     gems: 70,
     tint: "from-[#F7B955] to-[#FFD79A]",
-    cover: C("5X90QnfG/file-00000000c560822fa9626d7a57de661f.png"),
     icon: <Ghost className="w-6 h-6" />,
     render: (p) => <LeafEater3DLazy {...p} />,
   },
@@ -1084,7 +1075,6 @@ const GAMES: GameDef[] = [
     desc: "Completa 3 líneas y ordena lo que pesa",
     gems: 70,
     tint: "from-[#4C86C6] to-[#9BC6F0]",
-    cover: C("9HdTG5zJ/file-00000000241881f9a4ca43617619c673.png"),
     icon: <Blocks className="w-6 h-6" />,
     render: (p) => <TetrisLite {...p} />,
   },
@@ -1094,7 +1084,6 @@ const GAMES: GameDef[] = [
     desc: "Adivina la palabra y coloca cada aro",
     gems: 60,
     tint: "from-[#7C4DFF] to-[#F58BCB]",
-    cover: C("PsFpT5wj/file-000000008b4c820dbbb18f04e6dae500.png"),
     icon: <Circle className="w-6 h-6" />,
     render: (p) => <RingWord {...p} />,
   },
@@ -1104,7 +1093,6 @@ const GAMES: GameDef[] = [
     desc: "Pulsa y llénalo de palabras que sí son tuyas",
     gems: 50,
     tint: "from-[#F58BCB] to-[#F7B955]",
-    cover: C("0y0rQjNR/file-00000000531881f6a38f2295738d74fb.png"),
     icon: <Wind className="w-6 h-6" />,
     render: (p) => <Balloon {...p} />,
   },
@@ -1114,17 +1102,15 @@ const GAMES: GameDef[] = [
     desc: "Navega y atrapa solo lo que te hace bien",
     gems: 60,
     tint: "from-[#4C86C6] to-[#3FBE8F]",
-    cover: C("8nnY77dN/file-00000000c7f881f78ffc3a13efd5225f.png"),
     icon: <Fish className="w-6 h-6" />,
     render: (p) => <HealingFish {...p} />,
   },
   {
     id: "ardilla",
     title: "Escapa del control",
-    desc: "La ardilla corre y esquiva a quien la quiere atrapar",
+    desc: "El conejo corre, junta zanahorias y esquiva a quien lo quiere atrapar",
     gems: 70,
     tint: "from-[#C9743A] to-[#F7B955]",
-    cover: C("HLg6TJ48/file-00000000f1cc822fad2f6a5fe48a329e.png"),
     icon: <Rabbit className="w-6 h-6" />,
     render: (p) => <SquirrelRun {...p} />,
   },
@@ -1134,7 +1120,6 @@ const GAMES: GameDef[] = [
     desc: "Cuatro rondas para bajar el cuerpo a la calma",
     gems: 40,
     tint: "from-[#7FE0BC] to-[#BFE7FF]",
-    cover: C("ycL9N1Rf/file-000000008488820c838483738952c2ee.png"),
     icon: <HeartPulse className="w-6 h-6" />,
     render: (p) => <Breathe {...p} />,
   },
@@ -1143,151 +1128,85 @@ const GAMES: GameDef[] = [
 /**
  * Centro de juegos del día: 10 juegos mentales adaptados al tema de la persona.
  */
+/**
+ * Lista de "Juegos del día": cada tarjeta abre su propia sección
+ * (`/juegos/:id`), sin ventanas emergentes. Portadas 100% locales.
+ */
 export function DailyGames({
-  words = [],
   title = "Juegos del día",
-  subtitle = "Diez juegos mentales que trabajan justo lo que estás sanando.",
+  subtitle = "Diez juegos mentales que trabajan justo lo que estás sanando. Cada uno pide 5 partidas para liberar tu hoja del día.",
 }: {
   words?: string[];
   title?: string;
   subtitle?: string;
 }) {
-  const [openId, setOpenId] = useState<string | null>(null);
-  const [wonToday, setWonToday] = useState<string[]>([]);
-  const [levels, setLevels] = useState<Record<string, number>>({});
-  const [lastGranted, setLastGranted] = useState<Record<string, number>>({});
-  const qc = useQueryClient();
-  const game = GAMES.find((g) => g.id === openId) ?? null;
-
-  useEffect(() => {
-    const next: Record<string, number> = {};
-    for (const g of GAMES) {
-      const raw = Number(localStorage.getItem(`origen_game_level_${g.id}`) ?? "1");
-      next[g.id] = Number.isFinite(raw) && raw >= 1 ? Math.min(raw, MAX_LEVEL) : 1;
-    }
-    setLevels(next);
-  }, []);
-
-  const pool = words.length ? words : POSITIVAS;
-
-  const win = async (g: GameDef) => {
-    if (wonToday.includes(g.id)) return;
-    setWonToday((w) => [...w, g.id]);
-    const r = await awardLeaf("juegos", "medium", g.title, {
-      game: g.id,
-      level: levels[g.id] ?? 1,
-    });
-    setLastGranted((m) => ({ ...m, [g.id]: r.granted }));
-    qc.invalidateQueries({ queryKey: ["profile"] });
-    qc.invalidateQueries({ queryKey: ["dashboard"] });
-    if (r.granted > 0) toast.success(`+${(r.granted / HOJA_POINTS).toFixed(3)} hojas · ${g.title}`);
-    else if (r.capped === "daily")
-      toast.info("Ya llegaste a tu tope de hojas de hoy. Después de las 12:00 de la noche sigues sumando.");
-    else toast.info("Tope de esta sección alcanzado hoy. Prueba otra sección de la app.");
-  };
-
-  const nextLevel = (g: GameDef) => {
-    const lvl = Math.min(MAX_LEVEL, (levels[g.id] ?? 1) + 1);
-    localStorage.setItem(`origen_game_level_${g.id}`, String(lvl));
-    setLevels((m) => ({ ...m, [g.id]: lvl }));
-    setWonToday((w) => w.filter((id) => id !== g.id));
-  };
-
   return (
     <section>
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 mb-2">
         <h3 className="font-display font-bold text-[15px] truncate">{title}</h3>
-        <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-[#F7B955]/18 px-2.5 py-1 text-[11px] font-bold text-[#B67C15]">
-          <Trophy className="w-3.5 h-3.5" /> {wonToday.length}/10
-        </span>
+        <Link
+          to="/juegos"
+          className="shrink-0 inline-flex items-center gap-1 rounded-full bg-[#F7B955]/18 px-2.5 py-1 text-[11px] font-bold text-[#B67C15]"
+        >
+          <Trophy className="w-3.5 h-3.5" /> Ver los 10
+        </Link>
       </div>
       <div className="hairline-brand mb-3" />
       <p className="text-[13px] text-muted-foreground mb-3">{subtitle}</p>
-
       <div className="grid grid-cols-2 gap-3">
         {GAMES.map((g, i) => (
-          <button
-            key={g.id}
-            onClick={() => setOpenId(g.id)}
-            aria-label={`Jugar ${g.title}`}
-            className="block w-full overflow-hidden rounded-[16px] border border-border/60 bg-card shadow-soft text-left active:scale-[.98] transition-transform"
-            style={{ animation: `fade-in .35s ease-out ${i * 45}ms both` }}
-          >
-            <img src={g.cover} alt={g.title} loading="lazy" className="w-full h-auto block" />
-            <span className="block px-3 py-2.5">
-              <span className="block font-display font-bold text-[13.5px] leading-tight truncate">
-                {g.title}
-              </span>
-              <span className="block text-[11.5px] text-muted-foreground leading-snug line-clamp-2">
-                {g.desc}
-              </span>
-              <span
-                className={cn(
-                  "mt-1.5 inline-flex items-center gap-1 text-[11.5px] font-bold",
-                  wonToday.includes(g.id) ? "text-[#2F9C74]" : "text-primary",
-                )}
-              >
-                {wonToday.includes(g.id) ? (
-                  <>
-                    <Check className="w-3.5 h-3.5" /> Nivel {levels[g.id] ?? 1} logrado
-                  </>
-                ) : (
-                  <>
-                    <Leaf className="w-3.5 h-3.5" /> Nivel {levels[g.id] ?? 1} · suma hojas
-                  </>
-                )}
-              </span>
-            </span>
-          </button>
+          <GameCard key={g.id} game={g} index={i} />
         ))}
       </div>
+    </section>
+  );
+}
 
-      <Dialog open={!!game} onOpenChange={(o) => !o && setOpenId(null)}>
-        <DialogContent className="max-w-[440px] max-h-[92dvh] overflow-y-auto rounded-[20px]">
-          {game && (
+/** Tarjeta-enlace con portada local (degradé tonal + ícono). */
+export function GameCard({ game, index = 0 }: { game: GameDef; index?: number }) {
+  const plays = useGamePlays(game.id);
+  return (
+    <Link
+      to="/juegos/$gameId"
+      params={{ gameId: game.id }}
+      aria-label={`Abrir ${game.title}`}
+      className="block w-full overflow-hidden rounded-[16px] border border-border/60 bg-card shadow-soft text-left active:scale-[.98] transition-transform"
+      style={{ animation: `fade-in .35s ease-out ${index * 45}ms both` }}
+    >
+      <span
+        className={cn(
+          "grid h-24 place-items-center bg-gradient-to-br text-white",
+          game.tint,
+        )}
+      >
+        <span className="grid h-12 w-12 place-items-center rounded-[14px] bg-white/20">
+          {game.icon}
+        </span>
+      </span>
+      <span className="block px-3 py-2.5">
+        <span className="block font-display font-bold text-[13.5px] leading-tight truncate">
+          {game.title}
+        </span>
+        <span className="block text-[11.5px] text-muted-foreground leading-snug line-clamp-2">
+          {game.desc}
+        </span>
+        <span
+          className={cn(
+            "mt-1.5 inline-flex items-center gap-1 text-[11.5px] font-bold",
+            plays.unlocked ? "text-[#2F9C74]" : "text-primary",
+          )}
+        >
+          {plays.unlocked ? (
             <>
-              <DialogTitle className="flex items-center gap-3 text-left">
-                <span
-                  className={cn(
-                    "w-11 h-11 rounded-[12px] grid place-items-center text-white bg-gradient-to-br shrink-0",
-                    game.tint,
-                  )}
-                >
-                  {game.icon}
-                </span>
-                <span className="min-w-0">
-                  <span className="block font-display font-extrabold text-[17px] leading-tight">
-                    {game.title}
-                  </span>
-                  <span className="block text-[12px] font-medium text-muted-foreground">
-                    {game.desc}
-                  </span>
-                </span>
-              </DialogTitle>
-              <div className="mt-1" key={`${game.id}-${levels[game.id] ?? 1}`}>
-                {game.render({ words: pool, onWin: () => win(game), level: levels[game.id] ?? 1 })}
-              </div>
-              {wonToday.includes(game.id) && (
-                <div className="mt-3 rounded-[12px] bg-[#3FBE8F]/12 px-3 py-2.5">
-                  <p className="text-[13px] font-bold text-[#2F9C74] flex items-center gap-2">
-                    <Sparkles className="w-4 h-4" />
-                    {(lastGranted[game.id] ?? 0) > 0
-                      ? `Sumaste ${((lastGranted[game.id] ?? 0) / HOJA_POINTS).toFixed(3)} hojas de sanación.`
-                      : "Hoy ya llegaste a tu tope de hojas. El nivel igual queda guardado."}
-                  </p>
-                  <button
-                    onClick={() => nextLevel(game)}
-                    className="mt-2.5 inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2.5 text-[13px] font-bold text-primary-foreground active:scale-95 transition"
-                  >
-                    Nivel {Math.min(MAX_LEVEL, (levels[game.id] ?? 1) + 1)}{" "}
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
-                </div>
-              )}
+              <Check className="w-3.5 h-3.5" /> Hoja de hoy liberada
+            </>
+          ) : (
+            <>
+              <Leaf className="w-3.5 h-3.5" /> {plays.plays}/{MIN_PLAYS} partidas de hoy
             </>
           )}
-        </DialogContent>
-      </Dialog>
-    </section>
+        </span>
+      </span>
+    </Link>
   );
 }

@@ -47,6 +47,7 @@ import { Route as AuthenticatedChatRouteImport } from './routes/_authenticated/c
 import { Route as AuthenticatedCategoriasRouteImport } from './routes/_authenticated/categorias'
 import { Route as AuthenticatedBibliotecaRouteImport } from './routes/_authenticated/biblioteca'
 import { Route as AuthenticatedArbolRouteImport } from './routes/_authenticated/arbol'
+import { Route as AuthenticatedJuegosIndexRouteImport } from './routes/_authenticated/juegos.index'
 import { Route as ApiPublicVapidKeyRouteImport } from './routes/api/public/vapid-key'
 import { Route as ApiPublicPushDailyRouteImport } from './routes/api/public/push-daily'
 import { Route as ApiPublicPushBroadcastRouteImport } from './routes/api/public/push-broadcast'
@@ -56,6 +57,7 @@ import { Route as AuthenticatedVisualizaIdentidadRouteImport } from './routes/_a
 import { Route as AuthenticatedVisualizaCristoRouteImport } from './routes/_authenticated/visualiza.cristo'
 import { Route as AuthenticatedVisualizaCategoryIdRouteImport } from './routes/_authenticated/visualiza.$categoryId'
 import { Route as AuthenticatedProgramasProgramaIdRouteImport } from './routes/_authenticated/programas.$programaId'
+import { Route as AuthenticatedJuegosGameIdRouteImport } from './routes/_authenticated/juegos.$gameId'
 import { Route as AuthenticatedEtapasStageIdRouteImport } from './routes/_authenticated/etapas.$stageId'
 import { Route as AuthenticatedCaminosCaminoIdRouteImport } from './routes/_authenticated/caminos.$caminoId'
 import { Route as AuthenticatedCaminosCaminoIdIndexRouteImport } from './routes/_authenticated/caminos.$caminoId.index'
@@ -257,6 +259,12 @@ const AuthenticatedArbolRoute = AuthenticatedArbolRouteImport.update({
   path: '/arbol',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedJuegosIndexRoute =
+  AuthenticatedJuegosIndexRouteImport.update({
+    id: '/juegos/',
+    path: '/juegos/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const ApiPublicVapidKeyRoute = ApiPublicVapidKeyRouteImport.update({
   id: '/api/public/vapid-key',
   path: '/api/public/vapid-key',
@@ -306,6 +314,12 @@ const AuthenticatedProgramasProgramaIdRoute =
   AuthenticatedProgramasProgramaIdRouteImport.update({
     id: '/programas/$programaId',
     path: '/programas/$programaId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedJuegosGameIdRoute =
+  AuthenticatedJuegosGameIdRouteImport.update({
+    id: '/juegos/$gameId',
+    path: '/juegos/$gameId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedEtapasStageIdRoute =
@@ -389,6 +403,7 @@ export interface FileRoutesByFullPath {
   '/api/stage-pack': typeof ApiStagePackRoute
   '/caminos/$caminoId': typeof AuthenticatedCaminosCaminoIdRouteWithChildren
   '/etapas/$stageId': typeof AuthenticatedEtapasStageIdRoute
+  '/juegos/$gameId': typeof AuthenticatedJuegosGameIdRoute
   '/programas/$programaId': typeof AuthenticatedProgramasProgramaIdRoute
   '/visualiza/$categoryId': typeof AuthenticatedVisualizaCategoryIdRouteWithChildren
   '/visualiza/cristo': typeof AuthenticatedVisualizaCristoRoute
@@ -398,6 +413,7 @@ export interface FileRoutesByFullPath {
   '/api/public/push-broadcast': typeof ApiPublicPushBroadcastRoute
   '/api/public/push-daily': typeof ApiPublicPushDailyRoute
   '/api/public/vapid-key': typeof ApiPublicVapidKeyRoute
+  '/juegos/': typeof AuthenticatedJuegosIndexRoute
   '/caminos/$caminoId/$day': typeof AuthenticatedCaminosCaminoIdDayRoute
   '/visualiza/$categoryId/$day': typeof AuthenticatedVisualizaCategoryIdDayRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -443,6 +459,7 @@ export interface FileRoutesByTo {
   '/api/patrones': typeof ApiPatronesRoute
   '/api/stage-pack': typeof ApiStagePackRoute
   '/etapas/$stageId': typeof AuthenticatedEtapasStageIdRoute
+  '/juegos/$gameId': typeof AuthenticatedJuegosGameIdRoute
   '/programas/$programaId': typeof AuthenticatedProgramasProgramaIdRoute
   '/visualiza/$categoryId': typeof AuthenticatedVisualizaCategoryIdRouteWithChildren
   '/visualiza/cristo': typeof AuthenticatedVisualizaCristoRoute
@@ -452,6 +469,7 @@ export interface FileRoutesByTo {
   '/api/public/push-broadcast': typeof ApiPublicPushBroadcastRoute
   '/api/public/push-daily': typeof ApiPublicPushDailyRoute
   '/api/public/vapid-key': typeof ApiPublicVapidKeyRoute
+  '/juegos': typeof AuthenticatedJuegosIndexRoute
   '/caminos/$caminoId/$day': typeof AuthenticatedCaminosCaminoIdDayRoute
   '/visualiza/$categoryId/$day': typeof AuthenticatedVisualizaCategoryIdDayRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -500,6 +518,7 @@ export interface FileRoutesById {
   '/api/stage-pack': typeof ApiStagePackRoute
   '/_authenticated/caminos/$caminoId': typeof AuthenticatedCaminosCaminoIdRouteWithChildren
   '/_authenticated/etapas/$stageId': typeof AuthenticatedEtapasStageIdRoute
+  '/_authenticated/juegos/$gameId': typeof AuthenticatedJuegosGameIdRoute
   '/_authenticated/programas/$programaId': typeof AuthenticatedProgramasProgramaIdRoute
   '/_authenticated/visualiza/$categoryId': typeof AuthenticatedVisualizaCategoryIdRouteWithChildren
   '/_authenticated/visualiza/cristo': typeof AuthenticatedVisualizaCristoRoute
@@ -509,6 +528,7 @@ export interface FileRoutesById {
   '/api/public/push-broadcast': typeof ApiPublicPushBroadcastRoute
   '/api/public/push-daily': typeof ApiPublicPushDailyRoute
   '/api/public/vapid-key': typeof ApiPublicVapidKeyRoute
+  '/_authenticated/juegos/': typeof AuthenticatedJuegosIndexRoute
   '/_authenticated/caminos/$caminoId/$day': typeof AuthenticatedCaminosCaminoIdDayRoute
   '/_authenticated/visualiza/$categoryId/$day': typeof AuthenticatedVisualizaCategoryIdDayRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -557,6 +577,7 @@ export interface FileRouteTypes {
     | '/api/stage-pack'
     | '/caminos/$caminoId'
     | '/etapas/$stageId'
+    | '/juegos/$gameId'
     | '/programas/$programaId'
     | '/visualiza/$categoryId'
     | '/visualiza/cristo'
@@ -566,6 +587,7 @@ export interface FileRouteTypes {
     | '/api/public/push-broadcast'
     | '/api/public/push-daily'
     | '/api/public/vapid-key'
+    | '/juegos/'
     | '/caminos/$caminoId/$day'
     | '/visualiza/$categoryId/$day'
     | '/lovable/email/auth/preview'
@@ -611,6 +633,7 @@ export interface FileRouteTypes {
     | '/api/patrones'
     | '/api/stage-pack'
     | '/etapas/$stageId'
+    | '/juegos/$gameId'
     | '/programas/$programaId'
     | '/visualiza/$categoryId'
     | '/visualiza/cristo'
@@ -620,6 +643,7 @@ export interface FileRouteTypes {
     | '/api/public/push-broadcast'
     | '/api/public/push-daily'
     | '/api/public/vapid-key'
+    | '/juegos'
     | '/caminos/$caminoId/$day'
     | '/visualiza/$categoryId/$day'
     | '/lovable/email/auth/preview'
@@ -667,6 +691,7 @@ export interface FileRouteTypes {
     | '/api/stage-pack'
     | '/_authenticated/caminos/$caminoId'
     | '/_authenticated/etapas/$stageId'
+    | '/_authenticated/juegos/$gameId'
     | '/_authenticated/programas/$programaId'
     | '/_authenticated/visualiza/$categoryId'
     | '/_authenticated/visualiza/cristo'
@@ -676,6 +701,7 @@ export interface FileRouteTypes {
     | '/api/public/push-broadcast'
     | '/api/public/push-daily'
     | '/api/public/vapid-key'
+    | '/_authenticated/juegos/'
     | '/_authenticated/caminos/$caminoId/$day'
     | '/_authenticated/visualiza/$categoryId/$day'
     | '/lovable/email/auth/preview'
@@ -975,6 +1001,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedArbolRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/juegos/': {
+      id: '/_authenticated/juegos/'
+      path: '/juegos'
+      fullPath: '/juegos/'
+      preLoaderRoute: typeof AuthenticatedJuegosIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/api/public/vapid-key': {
       id: '/api/public/vapid-key'
       path: '/api/public/vapid-key'
@@ -1036,6 +1069,13 @@ declare module '@tanstack/react-router' {
       path: '/programas/$programaId'
       fullPath: '/programas/$programaId'
       preLoaderRoute: typeof AuthenticatedProgramasProgramaIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/juegos/$gameId': {
+      id: '/_authenticated/juegos/$gameId'
+      path: '/juegos/$gameId'
+      fullPath: '/juegos/$gameId'
+      preLoaderRoute: typeof AuthenticatedJuegosGameIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/etapas/$stageId': {
@@ -1179,7 +1219,9 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedRuletaRoute: typeof AuthenticatedRuletaRoute
   AuthenticatedVisualizaRoute: typeof AuthenticatedVisualizaRouteWithChildren
   AuthenticatedCaminosCaminoIdRoute: typeof AuthenticatedCaminosCaminoIdRouteWithChildren
+  AuthenticatedJuegosGameIdRoute: typeof AuthenticatedJuegosGameIdRoute
   AuthenticatedProgramasProgramaIdRoute: typeof AuthenticatedProgramasProgramaIdRoute
+  AuthenticatedJuegosIndexRoute: typeof AuthenticatedJuegosIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -1208,7 +1250,9 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedVisualizaRoute: AuthenticatedVisualizaRouteWithChildren,
   AuthenticatedCaminosCaminoIdRoute:
     AuthenticatedCaminosCaminoIdRouteWithChildren,
+  AuthenticatedJuegosGameIdRoute: AuthenticatedJuegosGameIdRoute,
   AuthenticatedProgramasProgramaIdRoute: AuthenticatedProgramasProgramaIdRoute,
+  AuthenticatedJuegosIndexRoute: AuthenticatedJuegosIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
