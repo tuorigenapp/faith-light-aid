@@ -56,7 +56,7 @@ function clean(w: string) {
     .replace(/[^A-Z]/g, "");
 }
 
-type GameProps = { words: string[]; onWin: (gems: number) => void; level: number };
+export type GameProps = { words: string[]; onWin: (gems: number, learned?: string[]) => void; level: number };
 
 /** Dificultad creciente: cada nivel sube un poco la exigencia (sin techo). */
 export function levelScale(level: number, base: number, step = 1, max = 999999) {
@@ -136,7 +136,7 @@ function WordFind({ words, onWin, level }: GameProps) {
       const nf = [...found, hit.word];
       setFound(nf);
       setSel([]);
-      if (nf.length === placed.length) onWin(60);
+      if (nf.length === placed.length) onWin(60, nf);
     }
   };
 
@@ -209,7 +209,7 @@ function Memory({ words, onWin, level }: GameProps) {
       if (a.w === b.w) {
         const nd = [...done, a.w];
         setDone(nd);
-        if (nd.length === new Set(cards.map((c) => c.w)).size) onWin(60);
+        if (nd.length === new Set(cards.map((c) => c.w)).size) onWin(60, nd);
       }
       setOpen([]);
     }, 700);
@@ -254,7 +254,7 @@ function TypeIt({ words, onWin, level }: GameProps) {
   const [val, setVal] = useState("");
   const ok = val.trim().toLowerCase() === frase.toLowerCase();
   useEffect(() => {
-    if (ok) onWin(50); /* eslint-disable-next-line */
+    if (ok) onWin(50, frase.split(" ").filter((w) => w.length > 3)); /* eslint-disable-next-line */
   }, [ok]);
   const progress = Math.min(100, (val.length / frase.length) * 100);
   return (
@@ -952,7 +952,7 @@ function setDistThrottled(v: number, set: (n: number) => void) {
 function Breathe({ onWin, level }: GameProps) {
   const [cycle, setCycle] = useState(0);
   const [phase, setPhase] = useState<"in" | "hold" | "out">("in");
-  const goal = levelScale(level, 4, 2, 24);
+  const goal = 4;
   useEffect(() => {
     const seq: { p: "in" | "hold" | "out"; ms: number }[] = [
       { p: "in", ms: 4000 },
@@ -1024,7 +1024,7 @@ function GameFooter({ hint }: { hint?: string }) {
   );
 }
 
-type GameDef = {
+export type GameDef = {
   id: string;
   title: string;
   desc: string;
@@ -1037,7 +1037,7 @@ type GameDef = {
 
 const C = (p: string) => `https://i.ibb.co/${p}`;
 
-const GAMES: GameDef[] = [
+export const GAMES: GameDef[] = [
   {
     id: "sopa",
     title: "Encuentra la palabra",
@@ -1121,7 +1121,7 @@ const GAMES: GameDef[] = [
   {
     id: "ardilla",
     title: "Escapa del control",
-    desc: "La ardilla corre y esquiva a quien la quiere atrapar",
+    desc: "El conejo corre, junta zanahorias y esquiva a quien lo quiere atrapar",
     gems: 70,
     tint: "from-[#C9743A] to-[#F7B955]",
     cover: C("HLg6TJ48/file-00000000f1cc822fad2f6a5fe48a329e.png"),
