@@ -1003,59 +1003,67 @@ function SquirrelRun({ onWin, level }: GameProps) {
   );
 }
 
-let lastDist = 0;
-function setDistThrottled(v: number, set: (n: number) => void) {
-  if (Math.floor(v) !== lastDist) {
-    lastDist = Math.floor(v);
-    set(v);
-  }
-}
 
 /* ---------------------------------------------------------- 10. Respira   */
 
-function Breathe({ onWin, level }: GameProps) {
+function Breathe({ onWin }: GameProps) {
+  const GOAL = 4;
+  const SEQ = [
+    { p: "in" as const, ms: 4000, label: "Inhala por la nariz" },
+    { p: "hold" as const, ms: 4000, label: "Sostén sin apretar" },
+    { p: "out" as const, ms: 6000, label: "Exhala y suelta" },
+  ];
+  const [i, setI] = useState(0);
   const [cycle, setCycle] = useState(0);
-  const [phase, setPhase] = useState<"in" | "hold" | "out">("in");
-  const goal = 4;
+  const [paused, setPaused] = useState(false);
+  const [done, setDone] = useState(false);
+  const [left, setLeft] = useState(SEQ[0].ms / 1000);
+  const wonRef = useRef(false);
+
   useEffect(() => {
-    const seq: { p: "in" | "hold" | "out"; ms: number }[] = [
-      { p: "in", ms: 4000 },
-      { p: "hold", ms: 4000 },
-      { p: "out", ms: 6000 },
-    ];
-    let i = 0;
-    let stop = false;
-    const run = () => {
-      if (stop) return;
-      const s = seq[i % seq.length];
-      setPhase(s.p);
-      setTimeout(() => {
-        if (stop) return;
-        i++;
-        if (i % seq.length === 0) {
-          setCycle((c) => {
-            const n = c + 1;
-            if (n === goal) onWin(40);
-            return n;
-          });
+    if (paused || done) return;
+    setLeft(SEQ[i % 3].ms / 1000);
+    const tick = window.setInterval(() => setLeft((v) => Math.max(0, v - 0.1)), 100);
+    const t = window.setTimeout(() => {
+      const nextI = i + 1;
+      if (nextI % 3 === 0) {
+        const c = cycle + 1;
+        setCycle(c);
+        if (c >= GOAL) {
+          setDone(true);
+          if (!wonRef.current) {
+            wonRef.current = true;
+            onWin(40);
+          }
+          return;
         }
-        run();
-      }, s.ms);
-    };
-    run();
+      }
+      setI(nextI);
+    }, SEQ[i % 3].ms);
     return () => {
-      stop = true;
+      window.clearTimeout(t);
+      window.clearInterval(tick);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-  const label = phase === "in" ? "Inhala" : phase === "hold" ? "Sostén" : "Exhala y suelta";
-  const scale = phase === "in" ? 1 : phase === "hold" ? 1 : 0.72;
-  const dur = phase === "in" ? 4 : phase === "hold" ? 4 : 6;
+  }, [i, paused, done]);
+
+  const phase = SEQ[i % 3];
+  const scale = done ? 0.85 : phase.p === "in" ? 1 : phase.p === "hold" ? 1 : 0.72;
+  const dur = paused ? 0 : phase.ms / 1000;
+
+  function restart() {
+    wonRef.current = false;
+    setI(0);
+    setCycle(0);
+    setDone(false);
+    setPaused(false);
+  }
+
   return (
-    <div className="text-center py-4">
-      <div className="h-56 grid place-items-center">
+    <div className="text-center py-2">
+      <div className="grid h-56 place-items-center">
         <div
-          className="rounded-full bg-gradient-to-br from-primary/25 to-accent-pink/25 grid place-items-center"
+          className="grid place-items-center rounded-full bg-gradient-to-br from-primary/25 to-accent-pink/25"
           style={{
             width: 190,
             height: 190,
@@ -1063,15 +1071,46 @@ function Breathe({ onWin, level }: GameProps) {
             transition: `transform ${dur}s ease-in-out`,
           }}
         >
-          <div className="rounded-full bg-gradient-to-br from-primary to-accent-pink w-24 h-24 grid place-items-center text-white font-display font-extrabold text-[14px] shadow-glow">
-            {cycle}/{goal}
+          <div className="grid h-24 w-24 place-items-center rounded-full bg-gradient-to-br from-primary to-accent-pink font-display text-[15px] font-extrabold text-white shadow-glow">
+            {cycle}/{GOAL}
           </div>
         </div>
       </div>
-      <p className="font-display font-extrabold text-[20px] mt-2">{label}</p>
-      <p className="text-[13px] text-muted-foreground mt-1">
-        Cuatro rondas y tu cuerpo entiende que ya estás a salvo.
+      <p className="mt-2 font-display text-[20px] font-extrabold">
+        {done ? "Tu cuerpo bajó a la calma" : phase.label}
       </p>
+      <p className="mt-1 text-[13px] text-muted-foreground">
+        {done
+          ? "Cuatro rondas completas. Quédate un momento así antes de seguir."
+          : `${left.toFixed(1)} s · ritmo 4 · 4 · 6, sin audio ni internet`}
+      </p>
+      <div className="mt-3 flex items-center justify-center gap-2">
+        {!done && (
+          <button
+            onClick={() => setPaused((p) => !p)}
+            className="min-h-[44px] rounded-full bg-secondary px-5 text-[13px] font-bold text-foreground active:scale-95 transition"
+          >
+            {paused ? "Reanudar" : "Pausar"}
+          </button>
+        )}
+        <button
+          onClick={restart}
+          className="min-h-[44px] rounded-full bg-primary px-5 text-[13px] font-bold text-primary-foreground active:scale-95 transition"
+        >
+          Reiniciar
+        </button>
+      </div>
+      <div className="mx-auto mt-3 flex max-w-[240px] justify-center gap-1.5">
+        {Array.from({ length: GOAL }).map((_, k) => (
+          <span
+            key={k}
+            className={cn(
+              "h-1.5 flex-1 rounded-full",
+              k < cycle ? "bg-primary" : "bg-primary/15",
+            )}
+          />
+        ))}
+      </div>
     </div>
   );
 }
