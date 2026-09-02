@@ -2,6 +2,8 @@ import { ClientOnly, Link } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useGamePlays, MIN_PLAYS } from "@/lib/game-plays";
+import { dailyWritingPrompt } from "@/lib/daily-challenge";
+import { StepEvidence } from "@/components/StepEvidence";
 
 export const MAX_LEVEL = 10000;
 import {
@@ -243,40 +245,28 @@ function Memory({ words, onWin, level }: GameProps) {
 
 /* ---------------------------------------------------------- 3. Escribir  */
 
-function TypeIt({ words, onWin, level }: GameProps) {
-  const frase = useMemo(() => {
-    const w = words.map((x) => x.toLowerCase()).filter(Boolean)[0] ?? "paz";
-    return `Hoy elijo ${w} y suelto lo que no me pertenece.`;
-  }, [words]);
-  const [val, setVal] = useState("");
-  const ok = val.trim().toLowerCase() === frase.toLowerCase();
-  useEffect(() => {
-    if (ok) onWin(50, frase.split(" ").filter((w) => w.length > 3)); /* eslint-disable-next-line */
-  }, [ok]);
-  const progress = Math.min(100, (val.length / frase.length) * 100);
+function TypeIt({ onWin, level }: GameProps) {
+  const challenge = useMemo(() => dailyWritingPrompt(level), [level]);
   return (
     <div>
-      <p className="app-card p-4 text-[15px] leading-relaxed font-display font-bold text-center">
-        {frase}
-      </p>
-      <textarea
-        value={val}
-        onChange={(e) => setVal(e.target.value)}
-        rows={3}
-        placeholder="Escríbela tal cual, con calma…"
-        className="mt-3 w-full rounded-[10px] border-[1.5px] border-border bg-background p-3 text-[15px] outline-none focus:border-primary focus:ring-4 focus:ring-primary/20"
-      />
-      <div className="mt-2 h-1.5 rounded-full bg-primary/12 overflow-hidden">
-        <div
-          className="h-full bg-brand-gradient transition-all"
-          style={{ width: `${progress}%` }}
-        />
-      </div>
-      {ok && (
-        <p className="mt-3 text-[13.5px] font-bold text-[#2F9C74] flex items-center gap-1.5">
-          <Check className="w-4 h-4" /> Lo escribiste completo. Que hoy sea verdad.
+      <div className="app-card p-4">
+        <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
+          Reto de hoy · nivel {level}
         </p>
-      )}
+        <p className="mt-1.5 font-display text-[16px] font-bold leading-snug">{challenge.prompt}</p>
+        <p className="mt-1.5 text-[13px] leading-snug text-muted-foreground">
+          Mínimo {challenge.minLines} líneas y usa estas palabras: {challenge.words.join(" · ")}.
+          Puedes escribirlo a mano, subir la foto de tu hoja (1 o 2) o decirlo en voz alta.
+        </p>
+      </div>
+      <StepEvidence
+        className="mt-3"
+        draftKey={`juego-escribe:${level}`}
+        instruction={`${challenge.prompt} Usa las palabras: ${challenge.words.join(", ")}.`}
+        theme={challenge.words[0]}
+        minChars={40}
+        onValid={() => onWin(50, challenge.words)}
+      />
     </div>
   );
 }
