@@ -126,10 +126,18 @@ function Landing() {
   const mm = String(Math.floor(left / 60)).padStart(2, "0");
   const ss = String(left % 60).padStart(2, "0");
 
-  const chargeDate = new Date(Date.now() + 7 * 86400000).toLocaleDateString("es-MX", {
-    day: "numeric",
-    month: "long",
-  });
+  // Se calcula solo en el navegador: el servidor y el dispositivo pueden estar
+  // en husos distintos y la fecha no coincidiría al hidratar.
+  const [chargeDate, setChargeDate] = useState("");
+  useEffect(() => {
+    setChargeDate(
+      new Date(Date.now() + 7 * 86400000).toLocaleDateString("es-MX", {
+        day: "numeric",
+        month: "long",
+      }),
+    );
+  }, []);
+
 
   return (
     <main className="min-h-dvh bg-background pb-28">
