@@ -2,6 +2,8 @@ import { ClientOnly, Link } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useGamePlays, MIN_PLAYS } from "@/lib/game-plays";
+import { dailyWritingPrompt } from "@/lib/daily-challenge";
+import { StepEvidence } from "@/components/StepEvidence";
 
 export const MAX_LEVEL = 10000;
 import {
@@ -243,40 +245,28 @@ function Memory({ words, onWin, level }: GameProps) {
 
 /* ---------------------------------------------------------- 3. Escribir  */
 
-function TypeIt({ words, onWin, level }: GameProps) {
-  const frase = useMemo(() => {
-    const w = words.map((x) => x.toLowerCase()).filter(Boolean)[0] ?? "paz";
-    return `Hoy elijo ${w} y suelto lo que no me pertenece.`;
-  }, [words]);
-  const [val, setVal] = useState("");
-  const ok = val.trim().toLowerCase() === frase.toLowerCase();
-  useEffect(() => {
-    if (ok) onWin(50, frase.split(" ").filter((w) => w.length > 3)); /* eslint-disable-next-line */
-  }, [ok]);
-  const progress = Math.min(100, (val.length / frase.length) * 100);
+function TypeIt({ onWin, level }: GameProps) {
+  const challenge = useMemo(() => dailyWritingPrompt(level), [level]);
   return (
     <div>
-      <p className="app-card p-4 text-[15px] leading-relaxed font-display font-bold text-center">
-        {frase}
-      </p>
-      <textarea
-        value={val}
-        onChange={(e) => setVal(e.target.value)}
-        rows={3}
-        placeholder="Escríbela tal cual, con calma…"
-        className="mt-3 w-full rounded-[10px] border-[1.5px] border-border bg-background p-3 text-[15px] outline-none focus:border-primary focus:ring-4 focus:ring-primary/20"
-      />
-      <div className="mt-2 h-1.5 rounded-full bg-primary/12 overflow-hidden">
-        <div
-          className="h-full bg-brand-gradient transition-all"
-          style={{ width: `${progress}%` }}
-        />
-      </div>
-      {ok && (
-        <p className="mt-3 text-[13.5px] font-bold text-[#2F9C74] flex items-center gap-1.5">
-          <Check className="w-4 h-4" /> Lo escribiste completo. Que hoy sea verdad.
+      <div className="app-card p-4">
+        <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
+          Reto de hoy · nivel {level}
         </p>
-      )}
+        <p className="mt-1.5 font-display text-[16px] font-bold leading-snug">{challenge.prompt}</p>
+        <p className="mt-1.5 text-[13px] leading-snug text-muted-foreground">
+          Mínimo {challenge.minLines} líneas y usa estas palabras: {challenge.words.join(" · ")}.
+          Puedes escribirlo a mano, subir la foto de tu hoja (1 o 2) o decirlo en voz alta.
+        </p>
+      </div>
+      <StepEvidence
+        className="mt-3"
+        draftKey={`juego-escribe:${level}`}
+        instruction={`${challenge.prompt} Usa las palabras: ${challenge.words.join(", ")}.`}
+        theme={challenge.words[0]}
+        minChars={40}
+        onValid={() => onWin(50, challenge.words)}
+      />
     </div>
   );
 }
@@ -760,7 +750,8 @@ function HealingFish({ onWin, level }: GameProps) {
   });
   const [score, setScore] = useState(0);
   const [msg, setMsg] = useState("");
-  const goal = levelScale(level, 6, 1, 80);
+  const caught = useRef<string[]>([]);
+  const goal = Math.min(50, 10 + (Math.max(1, level) - 1) * 8);
 
   const ref = useCanvasLoop((ctx, w, h, t) => {
     const s = st.current;
@@ -797,9 +788,10 @@ function HealingFish({ onWin, level }: GameProps) {
         if (it.good) {
           s.score++;
           setScore(s.score);
+          if (!caught.current.includes(it.w)) caught.current.push(it.w);
           if (s.score >= goal) {
             setMsg("¡Llenaste el mar de palabras sanas!");
-            onWin(60);
+            onWin(60, caught.current);
           }
         } else {
           s.score = Math.max(0, s.score - 1);
@@ -848,13 +840,15 @@ function SquirrelRun({ onWin, level }: GameProps) {
   const st = useRef({
     lane: 1,
     obs: [] as { x: number; lane: number }[],
-    dist: 0,
+    carrots: [] as { x: number; lane: number }[],
+    got: 0,
     over: false,
     spawn: 0,
+    cspawn: 0,
   });
-  const [dist, setDist] = useState(0);
+  const [got, setGot] = useState(0);
   const [over, setOver] = useState(false);
-  const goal = levelScale(level, 100, 1, 2000);
+  const goal = Math.min(50, 14 + (Math.max(1, level) - 1) * 9);
 
   const ref = useCanvasLoop((ctx, w, h, t) => {
     const s = st.current;
@@ -865,66 +859,138 @@ function SquirrelRun({ onWin, level }: GameProps) {
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, w, h);
     const laneY = (l: number) => (h / 3) * l + h / 6;
-    ctx.strokeStyle = "rgba(43,27,63,.08)";
+
+    // arbustos de fondo que corren (sensación de campo vivo)
+    ctx.fillStyle = "rgba(63,190,143,.18)";
+    for (let i = 0; i < 6; i++) {
+      const bx = (w + 120 - ((t * 60 + i * 140) % (w + 240)));
+      ctx.beginPath();
+      ctx.ellipse(bx, h - 8, 34, 14, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.strokeStyle = "rgba(43,27,63,.07)";
     for (let l = 1; l < 3; l++) {
       ctx.beginPath();
       ctx.moveTo(0, (h / 3) * l);
       ctx.lineTo(w, (h / 3) * l);
       ctx.stroke();
     }
+
     if (!s.over) {
-      s.dist += 0.35;
-      setDistThrottled(s.dist, setDist);
-      if (t - s.spawn > 0.75) {
+      if (t - s.spawn > 0.85) {
         s.spawn = t;
         s.obs.push({ x: w + 30, lane: rnd(3) });
       }
-      if (s.dist >= goal) {
-        s.over = true;
-        setOver(true);
-        onWin(70);
+      if (t - s.cspawn > 0.55) {
+        s.cspawn = t;
+        s.carrots.push({ x: w + 30, lane: rnd(3) });
       }
     }
+
+    // zanahorias
+    s.carrots = s.carrots.filter((c) => {
+      if (!s.over) c.x -= 3;
+      const y = laneY(c.lane);
+      ctx.fillStyle = "#F7913D";
+      ctx.beginPath();
+      ctx.moveTo(c.x - 7, y - 9);
+      ctx.lineTo(c.x + 7, y - 9);
+      ctx.lineTo(c.x, y + 12);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = "#3FBE8F";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(c.x, y - 9);
+      ctx.lineTo(c.x - 4, y - 18);
+      ctx.moveTo(c.x, y - 9);
+      ctx.lineTo(c.x + 4, y - 18);
+      ctx.stroke();
+      if (Math.abs(c.x - 50) < 20 && c.lane === s.lane && !s.over) {
+        s.got++;
+        setGot(s.got);
+        if (s.got >= goal) {
+          s.over = true;
+          setOver(true);
+          onWin(70);
+        }
+        return false;
+      }
+      return c.x > -30;
+    });
+
+    // humano que persigue (decide solo su carril)
     s.obs = s.obs.filter((o) => {
-      if (!s.over) o.x -= 3.2;
-      // humano
+      if (!s.over) {
+        o.x -= 3.4;
+        if (o.x < w * 0.7 && Math.random() < 0.02) o.lane = s.lane;
+      }
+      const y = laneY(o.lane);
       ctx.fillStyle = "#7C4DFF";
       ctx.beginPath();
-      ctx.arc(o.x, laneY(o.lane) - 14, 8, 0, Math.PI * 2);
+      ctx.arc(o.x, y - 16, 8, 0, Math.PI * 2);
       ctx.fill();
-      ctx.fillRect(o.x - 8, laneY(o.lane) - 6, 16, 22);
+      ctx.fillRect(o.x - 8, y - 8, 16, 22);
+      ctx.fillRect(o.x - 14, y - 4 + Math.sin(t * 12) * 3, 6, 12);
       if (Math.abs(o.x - 50) < 18 && o.lane === s.lane && !s.over) {
         s.over = true;
         setOver(true);
       }
       return o.x > -40;
     });
-    // ardilla
+
+    // conejo
     const y = laneY(s.lane);
-    ctx.fillStyle = "#C9743A";
+    const hop = Math.abs(Math.sin(t * 9)) * 5;
+    ctx.fillStyle = "#F4F1FB";
     ctx.beginPath();
-    ctx.ellipse(50, y, 15, 11, 0, 0, Math.PI * 2);
+    ctx.ellipse(50, y - hop, 16, 12, 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.beginPath();
-    ctx.arc(62, y - 8, 8, 0, Math.PI * 2);
+    ctx.arc(63, y - 10 - hop, 8, 0, Math.PI * 2);
     ctx.fill();
     ctx.beginPath();
-    ctx.ellipse(32, y - 12 + Math.sin(t * 10) * 2, 7, 14, 0.4, 0, Math.PI * 2);
+    ctx.ellipse(64, y - 24 - hop, 3.4, 11, 0.12, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(57, y - 23 - hop, 3.2, 10, -0.18, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#F58BCB";
+    ctx.beginPath();
+    ctx.arc(34, y - 6 - hop, 5.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#2B1B3F";
+    ctx.beginPath();
+    ctx.arc(67, y - 12 - hop, 2.2, 0, Math.PI * 2);
     ctx.fill();
   }, []);
+
+  function restart() {
+    st.current = { lane: 1, obs: [], carrots: [], got: 0, over: false, spawn: 0, cspawn: 0 };
+    setGot(0);
+    setOver(false);
+  }
 
   return (
     <div>
       <p className="text-center text-[12.5px] font-bold text-primary mb-2">
-        Distancia: {Math.floor(dist)} / {goal} m
+        Zanahorias: {got} / {goal}
       </p>
       <canvas ref={ref} className="w-full aspect-[4/3] rounded-[16px] shadow-soft" />
       {over && (
         <p className="mt-2 text-center text-[13.5px] font-bold text-primary">
-          {dist >= goal
-            ? "¡Escapaste! Nadie decide por ti."
+          {got >= goal
+            ? "¡Escapaste con tus zanahorias! Nadie decide por ti."
             : "Te atraparon. Respira y vuelve a correr."}
         </p>
+      )}
+      {over && got < goal && (
+        <button
+          onClick={restart}
+          className="mx-auto mt-2 block rounded-full bg-primary px-5 py-2.5 text-[13px] font-bold text-primary-foreground active:scale-95 transition"
+        >
+          Correr de nuevo
+        </button>
       )}
       <Pad
         onDir={(_, dy) => {
@@ -932,63 +998,72 @@ function SquirrelRun({ onWin, level }: GameProps) {
           if (!s.over) s.lane = Math.max(0, Math.min(2, s.lane + dy));
         }}
       />
-      <GameFooter />
+      <GameFooter hint="Sube y baja de carril: junta zanahorias y esquiva al humano" />
     </div>
   );
 }
-let lastDist = 0;
-function setDistThrottled(v: number, set: (n: number) => void) {
-  if (Math.floor(v) !== lastDist) {
-    lastDist = Math.floor(v);
-    set(v);
-  }
-}
+
 
 /* ---------------------------------------------------------- 10. Respira   */
 
-function Breathe({ onWin, level }: GameProps) {
+function Breathe({ onWin }: GameProps) {
+  const GOAL = 4;
+  const SEQ = [
+    { p: "in" as const, ms: 4000, label: "Inhala por la nariz" },
+    { p: "hold" as const, ms: 4000, label: "Sostén sin apretar" },
+    { p: "out" as const, ms: 6000, label: "Exhala y suelta" },
+  ];
+  const [i, setI] = useState(0);
   const [cycle, setCycle] = useState(0);
-  const [phase, setPhase] = useState<"in" | "hold" | "out">("in");
-  const goal = 4;
+  const [paused, setPaused] = useState(false);
+  const [done, setDone] = useState(false);
+  const [left, setLeft] = useState(SEQ[0].ms / 1000);
+  const wonRef = useRef(false);
+
   useEffect(() => {
-    const seq: { p: "in" | "hold" | "out"; ms: number }[] = [
-      { p: "in", ms: 4000 },
-      { p: "hold", ms: 4000 },
-      { p: "out", ms: 6000 },
-    ];
-    let i = 0;
-    let stop = false;
-    const run = () => {
-      if (stop) return;
-      const s = seq[i % seq.length];
-      setPhase(s.p);
-      setTimeout(() => {
-        if (stop) return;
-        i++;
-        if (i % seq.length === 0) {
-          setCycle((c) => {
-            const n = c + 1;
-            if (n === goal) onWin(40);
-            return n;
-          });
+    if (paused || done) return;
+    setLeft(SEQ[i % 3].ms / 1000);
+    const tick = window.setInterval(() => setLeft((v) => Math.max(0, v - 0.1)), 100);
+    const t = window.setTimeout(() => {
+      const nextI = i + 1;
+      if (nextI % 3 === 0) {
+        const c = cycle + 1;
+        setCycle(c);
+        if (c >= GOAL) {
+          setDone(true);
+          if (!wonRef.current) {
+            wonRef.current = true;
+            onWin(40);
+          }
+          return;
         }
-        run();
-      }, s.ms);
-    };
-    run();
+      }
+      setI(nextI);
+    }, SEQ[i % 3].ms);
     return () => {
-      stop = true;
+      window.clearTimeout(t);
+      window.clearInterval(tick);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-  const label = phase === "in" ? "Inhala" : phase === "hold" ? "Sostén" : "Exhala y suelta";
-  const scale = phase === "in" ? 1 : phase === "hold" ? 1 : 0.72;
-  const dur = phase === "in" ? 4 : phase === "hold" ? 4 : 6;
+  }, [i, paused, done]);
+
+  const phase = SEQ[i % 3];
+  const scale = done ? 0.85 : phase.p === "in" ? 1 : phase.p === "hold" ? 1 : 0.72;
+  const dur = paused ? 0 : phase.ms / 1000;
+
+  function restart() {
+    wonRef.current = false;
+    setI(0);
+    setCycle(0);
+    setDone(false);
+    setPaused(false);
+  }
+
   return (
-    <div className="text-center py-4">
-      <div className="h-56 grid place-items-center">
+    <div className="text-center py-2">
+      <div className="grid h-56 place-items-center">
         <div
-          className="rounded-full bg-gradient-to-br from-primary/25 to-accent-pink/25 grid place-items-center"
+          className="grid place-items-center rounded-full bg-gradient-to-br from-primary/25 to-accent-pink/25"
           style={{
             width: 190,
             height: 190,
@@ -996,15 +1071,46 @@ function Breathe({ onWin, level }: GameProps) {
             transition: `transform ${dur}s ease-in-out`,
           }}
         >
-          <div className="rounded-full bg-gradient-to-br from-primary to-accent-pink w-24 h-24 grid place-items-center text-white font-display font-extrabold text-[14px] shadow-glow">
-            {cycle}/{goal}
+          <div className="grid h-24 w-24 place-items-center rounded-full bg-gradient-to-br from-primary to-accent-pink font-display text-[15px] font-extrabold text-white shadow-glow">
+            {cycle}/{GOAL}
           </div>
         </div>
       </div>
-      <p className="font-display font-extrabold text-[20px] mt-2">{label}</p>
-      <p className="text-[13px] text-muted-foreground mt-1">
-        Cuatro rondas y tu cuerpo entiende que ya estás a salvo.
+      <p className="mt-2 font-display text-[20px] font-extrabold">
+        {done ? "Tu cuerpo bajó a la calma" : phase.label}
       </p>
+      <p className="mt-1 text-[13px] text-muted-foreground">
+        {done
+          ? "Cuatro rondas completas. Quédate un momento así antes de seguir."
+          : `${left.toFixed(1)} s · ritmo 4 · 4 · 6, sin audio ni internet`}
+      </p>
+      <div className="mt-3 flex items-center justify-center gap-2">
+        {!done && (
+          <button
+            onClick={() => setPaused((p) => !p)}
+            className="min-h-[44px] rounded-full bg-secondary px-5 text-[13px] font-bold text-foreground active:scale-95 transition"
+          >
+            {paused ? "Reanudar" : "Pausar"}
+          </button>
+        )}
+        <button
+          onClick={restart}
+          className="min-h-[44px] rounded-full bg-primary px-5 text-[13px] font-bold text-primary-foreground active:scale-95 transition"
+        >
+          Reiniciar
+        </button>
+      </div>
+      <div className="mx-auto mt-3 flex max-w-[240px] justify-center gap-1.5">
+        {Array.from({ length: GOAL }).map((_, k) => (
+          <span
+            key={k}
+            className={cn(
+              "h-1.5 flex-1 rounded-full",
+              k < cycle ? "bg-primary" : "bg-primary/15",
+            )}
+          />
+        ))}
+      </div>
     </div>
   );
 }
