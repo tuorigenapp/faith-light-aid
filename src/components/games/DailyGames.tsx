@@ -750,7 +750,8 @@ function HealingFish({ onWin, level }: GameProps) {
   });
   const [score, setScore] = useState(0);
   const [msg, setMsg] = useState("");
-  const goal = levelScale(level, 6, 1, 80);
+  const caught = useRef<string[]>([]);
+  const goal = Math.min(50, 10 + (Math.max(1, level) - 1) * 8);
 
   const ref = useCanvasLoop((ctx, w, h, t) => {
     const s = st.current;
@@ -787,9 +788,10 @@ function HealingFish({ onWin, level }: GameProps) {
         if (it.good) {
           s.score++;
           setScore(s.score);
+          if (!caught.current.includes(it.w)) caught.current.push(it.w);
           if (s.score >= goal) {
             setMsg("¡Llenaste el mar de palabras sanas!");
-            onWin(60);
+            onWin(60, caught.current);
           }
         } else {
           s.score = Math.max(0, s.score - 1);
@@ -838,13 +840,15 @@ function SquirrelRun({ onWin, level }: GameProps) {
   const st = useRef({
     lane: 1,
     obs: [] as { x: number; lane: number }[],
-    dist: 0,
+    carrots: [] as { x: number; lane: number }[],
+    got: 0,
     over: false,
     spawn: 0,
+    cspawn: 0,
   });
-  const [dist, setDist] = useState(0);
+  const [got, setGot] = useState(0);
   const [over, setOver] = useState(false);
-  const goal = levelScale(level, 100, 1, 2000);
+  const goal = Math.min(50, 14 + (Math.max(1, level) - 1) * 9);
 
   const ref = useCanvasLoop((ctx, w, h, t) => {
     const s = st.current;
@@ -855,66 +859,138 @@ function SquirrelRun({ onWin, level }: GameProps) {
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, w, h);
     const laneY = (l: number) => (h / 3) * l + h / 6;
-    ctx.strokeStyle = "rgba(43,27,63,.08)";
+
+    // arbustos de fondo que corren (sensación de campo vivo)
+    ctx.fillStyle = "rgba(63,190,143,.18)";
+    for (let i = 0; i < 6; i++) {
+      const bx = (w + 120 - ((t * 60 + i * 140) % (w + 240)));
+      ctx.beginPath();
+      ctx.ellipse(bx, h - 8, 34, 14, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.strokeStyle = "rgba(43,27,63,.07)";
     for (let l = 1; l < 3; l++) {
       ctx.beginPath();
       ctx.moveTo(0, (h / 3) * l);
       ctx.lineTo(w, (h / 3) * l);
       ctx.stroke();
     }
+
     if (!s.over) {
-      s.dist += 0.35;
-      setDistThrottled(s.dist, setDist);
-      if (t - s.spawn > 0.75) {
+      if (t - s.spawn > 0.85) {
         s.spawn = t;
         s.obs.push({ x: w + 30, lane: rnd(3) });
       }
-      if (s.dist >= goal) {
-        s.over = true;
-        setOver(true);
-        onWin(70);
+      if (t - s.cspawn > 0.55) {
+        s.cspawn = t;
+        s.carrots.push({ x: w + 30, lane: rnd(3) });
       }
     }
+
+    // zanahorias
+    s.carrots = s.carrots.filter((c) => {
+      if (!s.over) c.x -= 3;
+      const y = laneY(c.lane);
+      ctx.fillStyle = "#F7913D";
+      ctx.beginPath();
+      ctx.moveTo(c.x - 7, y - 9);
+      ctx.lineTo(c.x + 7, y - 9);
+      ctx.lineTo(c.x, y + 12);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = "#3FBE8F";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(c.x, y - 9);
+      ctx.lineTo(c.x - 4, y - 18);
+      ctx.moveTo(c.x, y - 9);
+      ctx.lineTo(c.x + 4, y - 18);
+      ctx.stroke();
+      if (Math.abs(c.x - 50) < 20 && c.lane === s.lane && !s.over) {
+        s.got++;
+        setGot(s.got);
+        if (s.got >= goal) {
+          s.over = true;
+          setOver(true);
+          onWin(70);
+        }
+        return false;
+      }
+      return c.x > -30;
+    });
+
+    // humano que persigue (decide solo su carril)
     s.obs = s.obs.filter((o) => {
-      if (!s.over) o.x -= 3.2;
-      // humano
+      if (!s.over) {
+        o.x -= 3.4;
+        if (o.x < w * 0.7 && Math.random() < 0.02) o.lane = s.lane;
+      }
+      const y = laneY(o.lane);
       ctx.fillStyle = "#7C4DFF";
       ctx.beginPath();
-      ctx.arc(o.x, laneY(o.lane) - 14, 8, 0, Math.PI * 2);
+      ctx.arc(o.x, y - 16, 8, 0, Math.PI * 2);
       ctx.fill();
-      ctx.fillRect(o.x - 8, laneY(o.lane) - 6, 16, 22);
+      ctx.fillRect(o.x - 8, y - 8, 16, 22);
+      ctx.fillRect(o.x - 14, y - 4 + Math.sin(t * 12) * 3, 6, 12);
       if (Math.abs(o.x - 50) < 18 && o.lane === s.lane && !s.over) {
         s.over = true;
         setOver(true);
       }
       return o.x > -40;
     });
-    // ardilla
+
+    // conejo
     const y = laneY(s.lane);
-    ctx.fillStyle = "#C9743A";
+    const hop = Math.abs(Math.sin(t * 9)) * 5;
+    ctx.fillStyle = "#F4F1FB";
     ctx.beginPath();
-    ctx.ellipse(50, y, 15, 11, 0, 0, Math.PI * 2);
+    ctx.ellipse(50, y - hop, 16, 12, 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.beginPath();
-    ctx.arc(62, y - 8, 8, 0, Math.PI * 2);
+    ctx.arc(63, y - 10 - hop, 8, 0, Math.PI * 2);
     ctx.fill();
     ctx.beginPath();
-    ctx.ellipse(32, y - 12 + Math.sin(t * 10) * 2, 7, 14, 0.4, 0, Math.PI * 2);
+    ctx.ellipse(64, y - 24 - hop, 3.4, 11, 0.12, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(57, y - 23 - hop, 3.2, 10, -0.18, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#F58BCB";
+    ctx.beginPath();
+    ctx.arc(34, y - 6 - hop, 5.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#2B1B3F";
+    ctx.beginPath();
+    ctx.arc(67, y - 12 - hop, 2.2, 0, Math.PI * 2);
     ctx.fill();
   }, []);
+
+  function restart() {
+    st.current = { lane: 1, obs: [], carrots: [], got: 0, over: false, spawn: 0, cspawn: 0 };
+    setGot(0);
+    setOver(false);
+  }
 
   return (
     <div>
       <p className="text-center text-[12.5px] font-bold text-primary mb-2">
-        Distancia: {Math.floor(dist)} / {goal} m
+        Zanahorias: {got} / {goal}
       </p>
       <canvas ref={ref} className="w-full aspect-[4/3] rounded-[16px] shadow-soft" />
       {over && (
         <p className="mt-2 text-center text-[13.5px] font-bold text-primary">
-          {dist >= goal
-            ? "¡Escapaste! Nadie decide por ti."
+          {got >= goal
+            ? "¡Escapaste con tus zanahorias! Nadie decide por ti."
             : "Te atraparon. Respira y vuelve a correr."}
         </p>
+      )}
+      {over && got < goal && (
+        <button
+          onClick={restart}
+          className="mx-auto mt-2 block rounded-full bg-primary px-5 py-2.5 text-[13px] font-bold text-primary-foreground active:scale-95 transition"
+        >
+          Correr de nuevo
+        </button>
       )}
       <Pad
         onDir={(_, dy) => {
@@ -922,10 +998,11 @@ function SquirrelRun({ onWin, level }: GameProps) {
           if (!s.over) s.lane = Math.max(0, Math.min(2, s.lane + dy));
         }}
       />
-      <GameFooter />
+      <GameFooter hint="Sube y baja de carril: junta zanahorias y esquiva al humano" />
     </div>
   );
 }
+
 let lastDist = 0;
 function setDistThrottled(v: number, set: (n: number) => void) {
   if (Math.floor(v) !== lastDist) {
