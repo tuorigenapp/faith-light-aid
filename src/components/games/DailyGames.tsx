@@ -339,6 +339,41 @@ function Pad({ onDir }: { onDir: (dx: number, dy: number) => void }) {
 
 /** Jardín 3D: solo en el navegador (WebGL), con carga diferida. */
 const ComeHojas3D = lazy(() => import("@/components/games/ComeHojas3D"));
+const Ciudad3D = lazy(() => import("@/components/games/Ciudad3D"));
+const Aros3DLazy = lazy(() => import("@/components/games/Aros3D"));
+const Globos3DLazy = lazy(() => import("@/components/games/Globos3D"));
+
+/** Envoltura común: WebGL solo en el navegador, con carga diferida. */
+function Only3D({ children }: { children: React.ReactNode }) {
+  const skeleton = <div className="aspect-[4/5] w-full animate-pulse rounded-[16px] bg-secondary" />;
+  return (
+    <ClientOnly fallback={skeleton}>
+      <Suspense fallback={skeleton}>{children}</Suspense>
+    </ClientOnly>
+  );
+}
+
+function Ciudad3DGame(p: GameProps) {
+  return (
+    <Only3D>
+      <Ciudad3D onWin={p.onWin} level={p.level} />
+    </Only3D>
+  );
+}
+function Aros3DGame(p: GameProps) {
+  return (
+    <Only3D>
+      <Aros3DLazy words={p.words} onWin={p.onWin} level={p.level} />
+    </Only3D>
+  );
+}
+function Globos3DGame(p: GameProps) {
+  return (
+    <Only3D>
+      <Globos3DLazy words={p.words} onWin={p.onWin} level={p.level} />
+    </Only3D>
+  );
+}
 
 function LeafEater3DLazy(p: GameProps) {
   return (
@@ -462,282 +497,11 @@ function LeafEater({ onWin, level }: GameProps) {
     </div>
   );
 }
-
-/* ---------------------------------------------------------- 5. Tetris     */
-
-const COLS = 8,
-  ROWS = 14;
-const SHAPES = [
-  [[1, 1, 1, 1]],
-  [
-    [1, 1],
-    [1, 1],
-  ],
-  [
-    [0, 1, 0],
-    [1, 1, 1],
-  ],
-  [
-    [1, 0, 0],
-    [1, 1, 1],
-  ],
-  [
-    [0, 0, 1],
-    [1, 1, 1],
-  ],
-];
-function TetrisLite({ onWin, level }: GameProps) {
-  const lineGoal = levelScale(level, 3, 1, 40);
-  const st = useRef({
-    board: Array.from({ length: ROWS }, () => Array(COLS).fill(0)) as number[][],
-    shape: SHAPES[0] as number[][],
-    x: 3,
-    y: 0,
-    lines: 0,
-    over: false,
-    acc: 0,
-    last: 0,
-  });
-  const [lines, setLines] = useState(0);
-  const [over, setOver] = useState(false);
-
-  const spawn = () => {
-    const s = st.current;
-    s.shape = SHAPES[rnd(SHAPES.length)];
-    s.x = 3;
-    s.y = 0;
-    if (collide(0, 0)) {
-      s.over = true;
-      setOver(true);
-    }
-  };
-  const collide = (dx: number, dy: number, sh?: number[][]) => {
-    const s = st.current;
-    const shape = sh ?? s.shape;
-    for (let r = 0; r < shape.length; r++)
-      for (let c = 0; c < shape[r].length; c++) {
-        if (!shape[r][c]) continue;
-        const nx = s.x + c + dx,
-          ny = s.y + r + dy;
-        if (nx < 0 || nx >= COLS || ny >= ROWS) return true;
-        if (ny >= 0 && s.board[ny][nx]) return true;
-      }
-    return false;
-  };
-  const merge = () => {
-    const s = st.current;
-    s.shape.forEach((row, r) =>
-      row.forEach((v, c) => {
-        if (v && s.y + r >= 0) s.board[s.y + r][s.x + c] = 1;
-      }),
-    );
-    let cleared = 0;
-    s.board = s.board.filter((row) => {
-      if (row.every(Boolean)) {
-        cleared++;
-        return false;
-      }
-      return true;
-    });
-    while (s.board.length < ROWS) s.board.unshift(Array(COLS).fill(0));
-    if (cleared) {
-      s.lines += cleared;
-      setLines(s.lines);
-      if (s.lines >= lineGoal) onWin(70);
-    }
-    spawn();
-  };
-  const drop = () => {
-    if (collide(0, 1)) merge();
-    else st.current.y++;
-  };
-  const move = (dx: number, dy: number) => {
-    const s = st.current;
-    if (s.over) return;
-    if (dy > 0) {
-      drop();
-      return;
-    }
-    if (dy < 0) {
-      const rot = s.shape[0].map((_, i) => s.shape.map((r) => r[i]).reverse());
-      if (!collide(0, 0, rot)) s.shape = rot;
-      return;
-    }
-    if (!collide(dx, 0)) s.x += dx;
-  };
-
-  useEffect(() => {
-    spawn();
-    const id = setInterval(() => {
-      if (!st.current.over) drop();
-    }, 650);
-    return () => clearInterval(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const ref = useCanvasLoop((ctx, w, h) => {
-    const cw = w / COLS,
-      ch = h / ROWS;
-    ctx.clearRect(0, 0, w, h);
-    ctx.fillStyle = "#1E1033";
-    ctx.fillRect(0, 0, w, h);
-    const s = st.current;
-    const cellPaint = (x: number, y: number, color: string) => {
-      ctx.fillStyle = color;
-      ctx.beginPath();
-      ctx.roundRect(x * cw + 1.5, y * ch + 1.5, cw - 3, ch - 3, 4);
-      ctx.fill();
-    };
-    s.board.forEach((row, y) =>
-      row.forEach((v, x) => {
-        if (v) cellPaint(x, y, "#3FBE8F");
-      }),
-    );
-    s.shape.forEach((row, r) =>
-      row.forEach((v, c) => {
-        if (v) cellPaint(s.x + c, s.y + r, "#F7B955");
-      }),
-    );
-  }, []);
-
-  const reset = () => {
-    st.current.board = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
-    st.current.lines = 0;
-    st.current.over = false;
-    setLines(0);
-    setOver(false);
-    spawn();
-  };
-
-  return (
-    <div>
-      <p className="text-center text-[12.5px] font-bold text-primary mb-2">
-        Líneas ordenadas: {lines} / 3
-      </p>
-      <canvas
-        ref={ref}
-        className="w-full aspect-[8/14] max-h-[46vh] mx-auto rounded-[16px] shadow-soft"
-      />
-      {over && (
-        <p className="mt-2 text-center text-[13px] font-bold text-primary">
-          Se llenó. Empieza otra vez con calma.
-        </p>
-      )}
-      <Pad onDir={move} />
-      <GameFooter hint="▲ gira la pieza" />
-    </div>
-  );
-}
-
 /* ---------------------------------------------------------- 6. Aros       */
 
-function RingWord({ words, onWin, level }: GameProps) {
-  const target = useMemo(
-    () => clean(words.map(clean).filter((w) => w.length >= 4)[0] ?? "LIBERTAD"),
-    [words],
-  );
-  const [guessed, setGuessed] = useState<string[]>([]);
-  const [fails, setFails] = useState(0);
-  const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
-  const won = target.split("").every((l) => guessed.includes(l));
-  useEffect(() => {
-    if (won) onWin(60); /* eslint-disable-next-line */
-  }, [won]);
-  const rings = new Set(target.split("")).size;
-  const placedRings = new Set(target.split("").filter((l) => guessed.includes(l))).size;
-
-  return (
-    <div>
-      <div className="relative h-40 grid place-items-end justify-center">
-        <div className="absolute bottom-0 w-2 h-32 rounded-full bg-primary/25" />
-        {Array.from({ length: placedRings }).map((_, i) => (
-          <span
-            key={i}
-            className="absolute rounded-full border-[6px] border-accent-pink/80"
-            style={{
-              width: 74 - i * 6,
-              height: 22,
-              bottom: i * 18,
-              animation: "scale-in .25s ease-out both",
-            }}
-          />
-        ))}
-      </div>
-      <p className="text-center font-display font-extrabold text-[26px] tracking-[6px] mt-2">
-        {target.split("").map((l, i) => (
-          <span key={i}>{guessed.includes(l) ? l : "_"}</span>
-        ))}
-      </p>
-      <p className="text-center text-[12px] text-muted-foreground mt-1">
-        Aros colocados {placedRings}/{rings} · fallos {fails}
-      </p>
-      <div className="mt-3 grid grid-cols-7 gap-1.5">
-        {letters.map((l) => (
-          <button
-            key={l}
-            disabled={guessed.includes(l)}
-            onClick={() => {
-              setGuessed([...guessed, l]);
-              if (!target.includes(l)) setFails((f) => f + 1);
-            }}
-            className={cn(
-              "h-10 rounded-[10px] text-[13px] font-bold transition active:scale-95",
-              guessed.includes(l)
-                ? target.includes(l)
-                  ? "bg-[#3FBE8F] text-white"
-                  : "bg-muted text-muted-foreground"
-                : "bg-secondary text-primary",
-            )}
-          >
-            {l}
-          </button>
-        ))}
-      </div>
-      {won && (
-        <p className="mt-3 text-center text-[13.5px] font-bold text-[#2F9C74]">
-          ¡Completaste la palabra y todos los aros!
-        </p>
-      )}
-      <GameFooter />
-    </div>
-  );
-}
 
 /* ---------------------------------------------------------- 7. Globo      */
 
-function Balloon({ onWin, level }: GameProps) {
-  const [n, setN] = useState(0);
-  const goal = levelScale(level, 12, 1, 120);
-  const word = POSITIVAS[n % POSITIVAS.length];
-  const done = n >= goal;
-  useEffect(() => {
-    if (done) onWin(50); /* eslint-disable-next-line */
-  }, [done]);
-  return (
-    <div className="text-center">
-      <div className="h-56 grid place-items-center">
-        <button
-          onClick={() => !done && setN(n + 1)}
-          aria-label="Inflar el globo"
-          className="relative grid place-items-center transition-transform active:scale-95"
-          style={{ transform: `scale(${1 + n * 0.06})` }}
-        >
-          <span className="block w-24 h-28 rounded-[50%] bg-gradient-to-br from-accent-pink to-primary shadow-glow" />
-          <span className="absolute text-white font-display font-extrabold text-[13px]">
-            {done ? "¡LISTO!" : word}
-          </span>
-        </button>
-      </div>
-      <p className="text-[13px] text-muted-foreground">
-        Pulsa para llenar tu globo de palabras que sí son tuyas.
-      </p>
-      <p className="text-[12.5px] font-bold text-primary mt-1">
-        {Math.min(n, goal)} / {goal}
-      </p>
-      <GameFooter />
-    </div>
-  );
-}
 
 /* ---------------------------------------------------------- 8. Pez        */
 
@@ -1178,29 +942,29 @@ export const GAMES: GameDef[] = [
   {
     id: "bloques",
     title: "Ordena tu caos",
-    desc: "Completa 3 líneas y ordena lo que pesa",
+    desc: "Encaja los bloques 3D y la grúa se lleva cada línea",
     gems: 70,
     tint: "from-[#4C86C6] to-[#9BC6F0]",
     icon: <Blocks className="w-6 h-6" />,
-    render: (p) => <TetrisLite {...p} />,
+    render: (p) => <Ciudad3DGame {...p} />,
   },
   {
     id: "aros",
     title: "Aros de verdad",
-    desc: "Adivina la palabra y coloca cada aro",
+    desc: "Apunta, carga la fuerza y encesta los aros",
     gems: 60,
     tint: "from-[#7C4DFF] to-[#F58BCB]",
     icon: <Circle className="w-6 h-6" />,
-    render: (p) => <RingWord {...p} />,
+    render: (p) => <Aros3DGame {...p} />,
   },
   {
     id: "globo",
     title: "Globo de afirmaciones",
-    desc: "Pulsa y llénalo de palabras que sí son tuyas",
+    desc: "Revienta globos y recibe tu afirmación del día",
     gems: 50,
     tint: "from-[#F58BCB] to-[#F7B955]",
     icon: <Wind className="w-6 h-6" />,
-    render: (p) => <Balloon {...p} />,
+    render: (p) => <Globos3DGame {...p} />,
   },
   {
     id: "pez",
