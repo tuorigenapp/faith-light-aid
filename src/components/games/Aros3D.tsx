@@ -36,6 +36,7 @@ export function Aros3D({
   const [learned, setLearned] = useState<string[]>([]);
   const [aim, setAim] = useState(0);
   const [power, setPower] = useState(0);
+  const [phase, setPhase] = useState<"aim" | "power">("aim");
   const [msg, setMsg] = useState("Apunta con el vaivén y mantén pulsado para cargar.");
   const [done, setDone] = useState(false);
 
@@ -251,7 +252,6 @@ export function Aros3D({
               best = tg;
             }
           }
-          console.log("LAND", r.mesh.position.x.toFixed(2), r.mesh.position.z.toFixed(2), bestD.toFixed(2));
           r.landed = true;
           if (best && bestD < 1.35) {
             r.mesh.position.set(best.group.position.x, best.pos.y + 0.34, best.pos.z);
@@ -305,10 +305,12 @@ export function Aros3D({
     const loop = (now: number) => {
       const dt = Math.min(0.05, (now - last) / 1000);
       last = now;
+      void dt;
       if (chargingRef.current) {
-        powerRef.current = Math.min(1, powerRef.current + dt * 0.9);
+        powerRef.current = (Math.sin(now / 620) + 1) / 2;
       } else {
         aimRef.current = Math.sin(now / 900) * 0.9;
+        powerRef.current = 0;
       }
       setAim(aimRef.current);
       setPower(powerRef.current);
@@ -328,9 +330,18 @@ export function Aros3D({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scored, goal]);
 
-  function release() {
-    if (!chargingRef.current) return;
+  function tapLaunch() {
+    if (done) return;
+    if (!chargingRef.current) {
+      // 1er toque: fija la dirección y empieza a moverse la fuerza
+      chargingRef.current = true;
+      setPhase("power");
+      setMsg("Ahora toca cuando la fuerza esté en el punto justo.");
+      return;
+    }
+    // 2do toque: lanza
     chargingRef.current = false;
+    setPhase("aim");
     throwRef.current?.(aimRef.current, powerRef.current);
     powerRef.current = 0;
     setPower(0);
@@ -378,13 +389,7 @@ export function Aros3D({
 
       <div className="mt-3 flex items-center gap-2">
         <button
-          onPointerDown={() => {
-            if (done) return;
-            chargingRef.current = true;
-          }}
-          onPointerUp={release}
-          onPointerLeave={release}
-          onPointerCancel={release}
+          onClick={tapLaunch}
           disabled={done}
           className={cn(
             "grid min-h-[56px] flex-1 place-items-center rounded-full bg-gradient-to-b from-primary to-[#5B34D6] text-[16px] font-bold text-white shadow-glow active:scale-[.98] transition",
@@ -392,7 +397,8 @@ export function Aros3D({
           )}
         >
           <span className="inline-flex items-center gap-2">
-            <Target className="h-5 w-5" /> Mantén y suelta para lanzar
+            <Target className="h-5 w-5" />{" "}
+            {phase === "aim" ? "Toca para fijar la dirección" : "¡Toca para lanzar!"}
           </span>
         </button>
         <button
