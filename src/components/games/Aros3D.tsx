@@ -111,9 +111,9 @@ export function Aros3D({
     const targets: { pos: THREE.Vector3; radius: number; ring: THREE.Mesh; group: THREE.Group }[] =
       [];
     const spots: [number, number, number][] = [
-      [-1.9, -1.1, 0x7c4dff],
-      [0, -2.6, 0xf58bcb],
-      [1.9, -1.1, 0x3fbe8f],
+      [-1.9, -1.9, 0x7c4dff],
+      [0, -1.9, 0xf58bcb],
+      [1.9, -1.9, 0x3fbe8f],
     ];
     for (const [x, z, color] of spots) {
       const g = new THREE.Group();
@@ -174,7 +174,7 @@ export function Aros3D({
 
     function velocityFor(aimN: number, powerN: number) {
       const p = 0.55 + powerN * 0.85;
-      return new THREE.Vector3(aimN * 2.0 * p, 3.7 * p, -5.6 * p);
+      return new THREE.Vector3(aimN * 2.1 * p, 3.7 * p, -5.6 * p);
     }
 
     function drawGuide(aimN: number, powerN: number) {
