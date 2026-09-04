@@ -59,7 +59,15 @@ export function PingPongToss({
       sun: 0xfff6e6,
     });
     const { scene } = rig;
-    const dust = makeAmbientParticles(scene, { count: 22, spread: 10, height: 6, color: 0xffe9b0, size: 0.07, speed: 0.2, up: true });
+    const dust = makeAmbientParticles(scene, {
+      count: 22,
+      spread: 10,
+      height: 6,
+      color: 0xffe9b0,
+      size: 0.07,
+      speed: 0.2,
+      up: true,
+    });
     const burst = createBurstPool(scene);
 
     const table = new THREE.Mesh(
@@ -80,7 +88,11 @@ export function PingPongToss({
     cup.add(wall);
     const rim = new THREE.Mesh(
       new THREE.TorusGeometry(0.72, 0.07, 12, 40),
-      new THREE.MeshStandardMaterial({ color: 0x7be0a8, emissive: 0x3fbe8f, emissiveIntensity: 0.7 }),
+      new THREE.MeshStandardMaterial({
+        color: 0x7be0a8,
+        emissive: 0x3fbe8f,
+        emissiveIntensity: 0.7,
+      }),
     );
     rim.rotation.x = Math.PI / 2;
     rim.position.y = 1.1;
@@ -137,8 +149,14 @@ export function PingPongToss({
       if (!inFlight) {
         if (!pausedRef.current) {
           osc += dir * dt * cfg.current.speed;
-          if (osc > 1) { osc = 1; dir = -1; }
-          if (osc < 0) { osc = 0; dir = 1; }
+          if (osc > 1) {
+            osc = 1;
+            dir = -1;
+          }
+          if (osc < 0) {
+            osc = 0;
+            dir = 1;
+          }
           setPower(osc);
         }
         ball.position.copy(rest);
@@ -186,7 +204,6 @@ export function PingPongToss({
       throwRef.current = null;
       rig.dispose();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [levels.level]);
 
   const goodZone = 0.2 - levels.level * 0.035;

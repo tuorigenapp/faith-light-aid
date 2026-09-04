@@ -55,7 +55,11 @@ function clean(w: string) {
     .replace(/[^A-Z]/g, "");
 }
 
-export type GameProps = { words: string[]; onWin: (gems: number, learned?: string[]) => void; level: number };
+export type GameProps = {
+  words: string[];
+  onWin: (gems: number, learned?: string[]) => void;
+  level: number;
+};
 
 /** Dificultad creciente: cada nivel sube un poco la exigencia (sin techo). */
 export function levelScale(level: number, base: number, step = 1, max = 999999) {
@@ -345,7 +349,9 @@ const Globos3DLazy = lazy(() => import("@/components/games/Globos3D"));
 
 /** Envoltura común: WebGL solo en el navegador, con carga diferida. */
 function Only3D({ children }: { children: React.ReactNode }) {
-  const skeleton = <div className="aspect-[4/5] w-full animate-pulse rounded-[16px] bg-secondary" />;
+  const skeleton = (
+    <div className="aspect-[4/5] w-full animate-pulse rounded-[16px] bg-secondary" />
+  );
   return (
     <ClientOnly fallback={skeleton}>
       <Suspense fallback={skeleton}>{children}</Suspense>
@@ -499,9 +505,7 @@ function LeafEater({ onWin, level }: GameProps) {
 }
 /* ---------------------------------------------------------- 6. Aros       */
 
-
 /* ---------------------------------------------------------- 7. Globo      */
-
 
 /* ---------------------------------------------------------- 8. Pez        */
 
@@ -627,7 +631,7 @@ function SquirrelRun({ onWin, level }: GameProps) {
     // arbustos de fondo que corren (sensación de campo vivo)
     ctx.fillStyle = "rgba(63,190,143,.18)";
     for (let i = 0; i < 6; i++) {
-      const bx = (w + 120 - ((t * 60 + i * 140) % (w + 240)));
+      const bx = w + 120 - ((t * 60 + i * 140) % (w + 240));
       ctx.beginPath();
       ctx.ellipse(bx, h - 8, 34, 14, 0, 0, Math.PI * 2);
       ctx.fill();
@@ -767,7 +771,6 @@ function SquirrelRun({ onWin, level }: GameProps) {
   );
 }
 
-
 /* ---------------------------------------------------------- 10. Respira   */
 
 function Breathe({ onWin }: GameProps) {
@@ -788,22 +791,25 @@ function Breathe({ onWin }: GameProps) {
     if (paused || done) return;
     setLeft(SEQ[i % 3].ms / 1000);
     const tick = window.setInterval(() => setLeft((v) => Math.max(0, v - 0.1)), 100);
-    const t = window.setTimeout(() => {
-      const nextI = i + 1;
-      if (nextI % 3 === 0) {
-        const c = cycle + 1;
-        setCycle(c);
-        if (c >= GOAL) {
-          setDone(true);
-          if (!wonRef.current) {
-            wonRef.current = true;
-            onWin(40);
+    const t = window.setTimeout(
+      () => {
+        const nextI = i + 1;
+        if (nextI % 3 === 0) {
+          const c = cycle + 1;
+          setCycle(c);
+          if (c >= GOAL) {
+            setDone(true);
+            if (!wonRef.current) {
+              wonRef.current = true;
+              onWin(40);
+            }
+            return;
           }
-          return;
         }
-      }
-      setI(nextI);
-    }, SEQ[i % 3].ms);
+        setI(nextI);
+      },
+      SEQ[i % 3].ms,
+    );
     return () => {
       window.clearTimeout(t);
       window.clearInterval(tick);
@@ -868,10 +874,7 @@ function Breathe({ onWin }: GameProps) {
         {Array.from({ length: GOAL }).map((_, k) => (
           <span
             key={k}
-            className={cn(
-              "h-1.5 flex-1 rounded-full",
-              k < cycle ? "bg-primary" : "bg-primary/15",
-            )}
+            className={cn("h-1.5 flex-1 rounded-full", k < cycle ? "bg-primary" : "bg-primary/15")}
           />
         ))}
       </div>
@@ -900,7 +903,6 @@ export type GameDef = {
   tint: string;
   render: (p: GameProps) => React.ReactNode;
 };
-
 
 export const GAMES: GameDef[] = [
   {
@@ -1043,12 +1045,7 @@ export function GameCard({ game, index = 0 }: { game: GameDef; index?: number })
       className="block w-full overflow-hidden rounded-[16px] border border-border/60 bg-card shadow-soft text-left active:scale-[.98] transition-transform"
       style={{ animation: `fade-in .35s ease-out ${index * 45}ms both` }}
     >
-      <span
-        className={cn(
-          "grid h-24 place-items-center bg-gradient-to-br text-white",
-          game.tint,
-        )}
-      >
+      <span className={cn("grid h-24 place-items-center bg-gradient-to-br text-white", game.tint)}>
         <span className="grid h-12 w-12 place-items-center rounded-[14px] bg-white/20">
           {game.icon}
         </span>

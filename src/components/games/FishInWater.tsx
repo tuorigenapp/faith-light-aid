@@ -114,14 +114,25 @@ export function FishInWater({
     );
     bed.position.set(0, 2, -6);
     scene.add(bed);
-    const bubbles = makeAmbientParticles(scene, { count: 40, spread: 16, height: 7, color: 0xeafcff, size: 0.09, speed: 0.5, up: true });
+    const bubbles = makeAmbientParticles(scene, {
+      count: 40,
+      spread: 16,
+      height: 7,
+      color: 0xeafcff,
+      size: 0.09,
+      speed: 0.5,
+      up: true,
+    });
     const burst = createBurstPool(scene);
 
     // Pez con formas suaves
     const fish = new THREE.Group();
     const bodyGeo = new THREE.SphereGeometry(0.6, 32, 24);
     bodyGeo.scale(1.5, 0.9, 0.85);
-    const body = new THREE.Mesh(bodyGeo, new THREE.MeshStandardMaterial({ color: 0xffb347, roughness: 0.3 }));
+    const body = new THREE.Mesh(
+      bodyGeo,
+      new THREE.MeshStandardMaterial({ color: 0xffb347, roughness: 0.3 }),
+    );
     fish.add(body);
     const tail = new THREE.Mesh(
       new THREE.ConeGeometry(0.42, 0.8, 16),
@@ -131,10 +142,16 @@ export function FishInWater({
     tail.position.x = -1.05;
     fish.add(tail);
     for (const s of [-1, 1]) {
-      const eye = new THREE.Mesh(new THREE.SphereGeometry(0.13, 16, 12), new THREE.MeshStandardMaterial({ color: 0xffffff }));
+      const eye = new THREE.Mesh(
+        new THREE.SphereGeometry(0.13, 16, 12),
+        new THREE.MeshStandardMaterial({ color: 0xffffff }),
+      );
       eye.position.set(0.6, 0.2, 0.26 * s);
       fish.add(eye);
-      const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.06, 12, 10), new THREE.MeshStandardMaterial({ color: 0x123043 }));
+      const pupil = new THREE.Mesh(
+        new THREE.SphereGeometry(0.06, 12, 10),
+        new THREE.MeshStandardMaterial({ color: 0x123043 }),
+      );
       pupil.position.set(0.7, 0.2, 0.28 * s);
       fish.add(pupil);
     }
@@ -177,7 +194,11 @@ export function FishInWater({
       // Pez: carril suave + aleteo
       const targetY = LANES[laneRef.current]!;
       fish.position.y = THREE.MathUtils.lerp(fish.position.y, targetY, Math.min(1, dt * 6));
-      fish.position.x = THREE.MathUtils.lerp(fish.position.x, xRef.current + Math.sin(t * 1.6) * 0.12, Math.min(1, dt * 5));
+      fish.position.x = THREE.MathUtils.lerp(
+        fish.position.x,
+        xRef.current + Math.sin(t * 1.6) * 0.12,
+        Math.min(1, dt * 5),
+      );
       tail.rotation.y = Math.sin(t * 11) * 0.4;
       body.rotation.z = Math.sin(t * 2.4) * 0.05;
 

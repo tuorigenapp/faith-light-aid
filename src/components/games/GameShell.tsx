@@ -83,7 +83,6 @@ export function GameShell({
     return () => clearTimeout(t);
   }, [won, finish]);
 
-
   const pct = progress ? Math.min(100, (progress.value / Math.max(1, progress.max)) * 100) : 0;
 
   return (
@@ -174,7 +173,9 @@ export function GameShell({
 
       {/* Interfaz 2D del juego */}
       {footer && !won && (
-        <div className="relative z-20 px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-3">{footer}</div>
+        <div className="relative z-20 px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-3">
+          {footer}
+        </div>
       )}
 
       {/* Control direccional grande */}
@@ -202,7 +203,15 @@ export function GameShell({
                     b.l === "stop" ? "bg-white/25" : "bg-white/15",
                   )}
                 >
-                  {b.l === "stop" ? (paused ? <Play className="h-5 w-5" /> : <Pause className="h-5 w-5" />) : b.l}
+                  {b.l === "stop" ? (
+                    paused ? (
+                      <Play className="h-5 w-5" />
+                    ) : (
+                      <Pause className="h-5 w-5" />
+                    )
+                  ) : (
+                    b.l
+                  )}
                 </button>
               ) : (
                 <span key={i} />
@@ -217,7 +226,9 @@ export function GameShell({
         <div className="absolute inset-0 z-30 grid place-items-center bg-[#151034]/70 backdrop-blur-[2px]">
           <div className="px-8 text-center" style={{ animation: "fade-in .3s ease-out both" }}>
             <p className="font-display text-[26px] font-black leading-tight text-white">{cue}</p>
-            <p className="mt-2 text-[13px] font-bold uppercase tracking-widest text-white/60">Ahora tú</p>
+            <p className="mt-2 text-[13px] font-bold uppercase tracking-widest text-white/60">
+              Ahora tú
+            </p>
           </div>
         </div>
       )}
@@ -226,9 +237,15 @@ export function GameShell({
       {levelUp && !won && (
         <div className="absolute inset-0 z-30 grid place-items-center bg-[#151034]/70 backdrop-blur-[2px]">
           <div className="px-8 text-center" style={{ animation: "scale-in .35s ease-out both" }}>
-            <p className="text-[13px] font-bold uppercase tracking-widest text-[#7BE0A8]">Nivel superado</p>
-            <p className="mt-1 font-display text-[30px] font-black leading-tight text-white">Nivel {level}</p>
-            <p className="mt-2 text-[13.5px] text-white/75">Sube un poco la dificultad. Presta atención.</p>
+            <p className="text-[13px] font-bold uppercase tracking-widest text-[#7BE0A8]">
+              Nivel superado
+            </p>
+            <p className="mt-1 font-display text-[30px] font-black leading-tight text-white">
+              Nivel {level}
+            </p>
+            <p className="mt-2 text-[13.5px] text-white/75">
+              Sube un poco la dificultad. Presta atención.
+            </p>
           </div>
         </div>
       )}
@@ -253,15 +270,18 @@ export function GameShell({
               <Leaf className="h-8 w-8 text-[#7BE0A8]" />
             </span>
             <p className="mt-3 font-display text-[28px] font-black text-white">Juego completado</p>
-            <p className="mt-1 text-[12px] font-bold uppercase tracking-widest text-white/55">Niveles 1 · 2 · 3</p>
-            {wonText && <p className="mx-auto mt-2 max-w-[300px] text-[13.5px] text-white/80">{wonText}</p>}
+            <p className="mt-1 text-[12px] font-bold uppercase tracking-widest text-white/55">
+              Niveles 1 · 2 · 3
+            </p>
+            {wonText && (
+              <p className="mx-auto mt-2 max-w-[300px] text-[13.5px] text-white/80">{wonText}</p>
+            )}
             <button
               onClick={() => finish?.()}
               className="mt-5 inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-[15px] font-black text-[#241539] active:scale-95"
             >
               Siguiente paso <ArrowRight className="h-4 w-4" />
             </button>
-
           </div>
         </div>
       )}

@@ -16,15 +16,15 @@
 - [x] Lista visible debajo de cada juego con lo acertado/memorizado del día.
 - [x] La hoja diaria se acredita con `awardLeaf` al llegar a 5 partidas (una vez al día).
 
-## Bloque 4 — Rediseños (en curso)
+## Bloque 4 — Rediseños (LISTO)
 - [x] Escríbelo y créelo: reto diario de escritura + foto de la hoja (1-2) + audio + revisión de la mentora.
 - [x] Pez de sanación: meta progresiva hasta 50 palabras positivas y registro de las acertadas.
 - [x] Escapa del control: conejo animado con saltos, zanahorias (hasta 50), humano que cambia de carril y campo con vida.
 - [x] Respiración 4·4·6: exactamente 4 rondas, cuenta visible, pausar/reanudar/reiniciar, sin voz ni internet.
-- [ ] Come-hojas: jardín 3D vivo, personaje animado, culpa con IA autónoma, cámara suave.
-- [ ] Ordena tu caos: ciudad 3D que crece por nivel + grúa animada al completar 3 líneas.
-- [ ] Aros de verdad: lanzamiento físico (apuntar, fuerza, trayectoria) sobre mesa con recipientes 3D.
-- [ ] Globo de afirmaciones: globos 3D con vida propia, persona lanzando, explosión + afirmación.
+- [x] Come-hojas: jardín 3D vivo, personaje animado, culpa con IA autónoma, cámara suave.
+- [x] Ordena tu caos: ciudad 3D que crece por nivel + grúa animada al completar 3 líneas.
+- [x] Aros de verdad (dos toques: dirección y fuerza, física parabólica): lanzamiento físico (apuntar, fuerza, trayectoria) sobre mesa con recipientes 3D.
+- [x] Globo de afirmaciones: globos 3D con vida propia, persona lanzando, explosión + afirmación.
 
 ## Regla transversal
 - [x] Todo offline: sin CDN ni recursos externos en los juegos.

@@ -51,8 +51,14 @@ export function GuessWord({
     const rnd = seeded(levels.seed + 3);
     const chars = answer.split("");
     const letters = chars.map((c, i) => ({ c, i })).filter((x) => /[a-záéíóúñü]/i.test(x.c));
-    const hideCount = Math.max(1, Math.round(letters.length * (levels.level === 1 ? 0.3 : levels.level === 2 ? 0.55 : 0.75)));
-    const order = letters.map((x) => ({ ...x, k: rnd() })).sort((a, b) => a.k - b.k).slice(0, hideCount);
+    const hideCount = Math.max(
+      1,
+      Math.round(letters.length * (levels.level === 1 ? 0.3 : levels.level === 2 ? 0.55 : 0.75)),
+    );
+    const order = letters
+      .map((x) => ({ ...x, k: rnd() }))
+      .sort((a, b) => a.k - b.k)
+      .slice(0, hideCount);
     const hidden = new Set(order.map((x) => x.i));
     return chars.map((c, i) => (hidden.has(i) ? "_" : c)).join(" ");
   }, [answer, levels.level, levels.seed]);
@@ -75,19 +81,37 @@ export function GuessWord({
       sun: 0xfff6e6,
     });
     const { scene } = rig;
-    const soft = makeAmbientParticles(scene, { count: 26, spread: 10, height: 6, color: 0xffe9b0, size: 0.07, speed: 0.2, up: true });
+    const soft = makeAmbientParticles(scene, {
+      count: 26,
+      spread: 10,
+      height: 6,
+      color: 0xffe9b0,
+      size: 0.07,
+      speed: 0.2,
+      up: true,
+    });
     const burst = createBurstPool(scene);
     burstRef.current = burst;
 
     const gem = new THREE.Mesh(
       new THREE.SphereGeometry(1.05, 48, 36),
-      new THREE.MeshStandardMaterial({ color: 0x9d7bff, roughness: 0.25, metalness: 0.1, emissive: 0x5b32c9, emissiveIntensity: 0.35 }),
+      new THREE.MeshStandardMaterial({
+        color: 0x9d7bff,
+        roughness: 0.25,
+        metalness: 0.1,
+        emissive: 0x5b32c9,
+        emissiveIntensity: 0.35,
+      }),
     );
     gem.position.set(0, 1.2, 0);
     scene.add(gem);
     const halo = new THREE.Mesh(
       new THREE.TorusGeometry(1.7, 0.06, 12, 64),
-      new THREE.MeshStandardMaterial({ color: 0x7be0a8, emissive: 0x3fbe8f, emissiveIntensity: 0.6 }),
+      new THREE.MeshStandardMaterial({
+        color: 0x7be0a8,
+        emissive: 0x3fbe8f,
+        emissiveIntensity: 0.6,
+      }),
     );
     halo.position.copy(gem.position);
     halo.rotation.x = Math.PI / 2.3;
@@ -152,7 +176,9 @@ export function GuessWord({
     >
       <div ref={host} className="relative h-full w-full" aria-label="Escena de la palabra">
         <div className="pointer-events-none absolute inset-x-0 bottom-4 z-10 px-6 text-center">
-          <p className="font-display text-[30px] font-black uppercase tracking-[0.22em] text-white">{masked}</p>
+          <p className="font-display text-[30px] font-black uppercase tracking-[0.22em] text-white">
+            {masked}
+          </p>
         </div>
       </div>
     </GameShell>

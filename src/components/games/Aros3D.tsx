@@ -36,6 +36,7 @@ export function Aros3D({
   const [learned, setLearned] = useState<string[]>([]);
   const [aim, setAim] = useState(0);
   const [power, setPower] = useState(0);
+  const [phase, setPhase] = useState<"aim" | "power">("aim");
   const [msg, setMsg] = useState("Apunta con el vaivén y mantén pulsado para cargar.");
   const [done, setDone] = useState(false);
 
@@ -108,11 +109,12 @@ export function Aros3D({
     scene.add(table);
 
     // Tres recipientes con su poste
-    const targets: { pos: THREE.Vector3; radius: number; ring: THREE.Mesh; group: THREE.Group }[] = [];
+    const targets: { pos: THREE.Vector3; radius: number; ring: THREE.Mesh; group: THREE.Group }[] =
+      [];
     const spots: [number, number, number][] = [
-      [-1.9, -1.1, 0x7c4dff],
-      [0, -2.6, 0xf58bcb],
-      [1.9, -1.1, 0x3fbe8f],
+      [-1.9, -1.9, 0x7c4dff],
+      [0, -1.9, 0xf58bcb],
+      [1.9, -1.9, 0x3fbe8f],
     ];
     for (const [x, z, color] of spots) {
       const g = new THREE.Group();
@@ -144,7 +146,11 @@ export function Aros3D({
 
     // Aro guía en la mano + guía de trayectoria
     const ringGeo = new THREE.TorusGeometry(0.3, 0.075, 12, 28);
-    const ringMat = new THREE.MeshStandardMaterial({ color: 0xffd479, roughness: 0.3, metalness: 0.15 });
+    const ringMat = new THREE.MeshStandardMaterial({
+      color: 0xffd479,
+      roughness: 0.3,
+      metalness: 0.15,
+    });
     const hand = new THREE.Mesh(ringGeo, ringMat);
     hand.rotation.x = Math.PI / 2;
     hand.castShadow = true;
@@ -154,7 +160,13 @@ export function Aros3D({
     guideGeo.setAttribute("position", new THREE.BufferAttribute(new Float32Array(24 * 3), 3));
     const guide = new THREE.Points(
       guideGeo,
-      new THREE.PointsMaterial({ color: 0xffe6ad, size: 0.09, transparent: true, opacity: 0.75, depthWrite: false }),
+      new THREE.PointsMaterial({
+        color: 0xffe6ad,
+        size: 0.09,
+        transparent: true,
+        opacity: 0.75,
+        depthWrite: false,
+      }),
     );
     scene.add(guide);
 
@@ -163,7 +175,7 @@ export function Aros3D({
 
     function velocityFor(aimN: number, powerN: number) {
       const p = 0.55 + powerN * 0.85;
-      return new THREE.Vector3(aimN * 3.4 * p, 5.1 * p, -6.4 * p);
+      return new THREE.Vector3(aimN * 2.1 * p, 3.7 * p, -5.6 * p);
     }
 
     function drawGuide(aimN: number, powerN: number) {
@@ -171,12 +183,7 @@ export function Aros3D({
       const p = guideGeo.getAttribute("position") as THREE.BufferAttribute;
       for (let i = 0; i < 24; i++) {
         const t = i * 0.055;
-        p.setXYZ(
-          i,
-          START.x + v.x * t,
-          START.y + v.y * t + 0.5 * G * t * t,
-          START.z + v.z * t,
-        );
+        p.setXYZ(i, START.x + v.x * t, START.y + v.y * t + 0.5 * G * t * t, START.z + v.z * t);
       }
       p.needsUpdate = true;
     }
@@ -188,7 +195,13 @@ export function Aros3D({
       mesh.position.copy(START);
       mesh.castShadow = true;
       scene.add(mesh);
-      rings.push({ mesh, vel: velocityFor(aimN, powerN), alive: true, landed: false, spin: 6 + powerN * 8 });
+      rings.push({
+        mesh,
+        vel: velocityFor(aimN, powerN),
+        alive: true,
+        landed: false,
+        spin: 6 + powerN * 8,
+      });
       setThrown((n) => n + 1);
     };
 
@@ -202,7 +215,11 @@ export function Aros3D({
       burst.update(dt);
 
       // vaivén de puntería si no se está cargando
-      hand.position.set(START.x + aimRef.current * 0.9, START.y + Math.sin(t * 2.2) * 0.05, START.z);
+      hand.position.set(
+        START.x + aimRef.current * 0.9,
+        START.y + Math.sin(t * 2.2) * 0.05,
+        START.z,
+      );
       hand.rotation.z = aimRef.current * 0.5;
       drawGuide(aimRef.current, powerRef.current);
 
@@ -221,33 +238,46 @@ export function Aros3D({
         r.mesh.position.addScaledVector(r.vel, dt);
         r.mesh.rotation.z += r.spin * dt;
 
-        // ¿entró en un recipiente?
-        for (const tg of targets) {
-          const dx = r.mesh.position.x - tg.group.position.x;
-          const dz = r.mesh.position.z - tg.pos.z;
-          const near = Math.hypot(dx, dz) < tg.radius;
-          if (near && r.vel.y < 0 && r.mesh.position.y <= tg.pos.y + 1.35 && r.mesh.position.y >= tg.pos.y + 0.2) {
-            r.landed = true;
-            r.mesh.position.set(tg.group.position.x, tg.pos.y + 0.36, tg.pos.z);
-            burst.spawn(new THREE.Vector3(tg.group.position.x, tg.pos.y + 1.1, tg.pos.z), 0x7be0a8, 26);
+        // Al bajar a la altura de la mesa se decide si entró en un recipiente
+        if (r.vel.y < 0 && r.mesh.position.y <= 1.18) {
+          let best: (typeof targets)[number] | null = null;
+          let bestD = 99;
+          for (const tg of targets) {
+            const d = Math.hypot(
+              r.mesh.position.x - tg.group.position.x,
+              r.mesh.position.z - tg.pos.z,
+            );
+            if (d < bestD) {
+              bestD = d;
+              best = tg;
+            }
+          }
+          r.landed = true;
+          if (best && bestD < 1.35) {
+            r.mesh.position.set(best.group.position.x, best.pos.y + 0.34, best.pos.z);
+            burst.spawn(
+              new THREE.Vector3(best.group.position.x, best.pos.y + 1.1, best.pos.z),
+              0x7be0a8,
+              26,
+            );
             const bank = wordsRef.current.filter(Boolean);
-            const w = (bank[scoredRef.current % Math.max(1, bank.length)] ?? "VERDAD").toUpperCase();
+            const w = (
+              bank[scoredRef.current % Math.max(1, bank.length)] ?? "VERDAD"
+            ).toUpperCase();
             scoredRef.current += 1;
             setScored(scoredRef.current);
             setLearned((l) => (l.includes(w) ? l : [...l, w]));
             setMsg(`¡Dentro! Guardaste "${w}".`);
-            camera.position.z -= 0.06;
-            break;
+          } else {
+            r.mesh.position.y = 1.16;
+            r.vel.set(r.vel.x * 0.15, 0, r.vel.z * 0.15);
+            setMsg(
+              bestD < 2.1
+                ? "Rozó el borde. Casi: ajusta un poquito la dirección."
+                : "Cayó fuera. Prueba con otra fuerza.",
+            );
           }
-        }
-
-        if (!r.landed && r.mesh.position.y < 0.9 && Math.abs(r.mesh.position.z + 1.6) < 3.2) {
-          // rebota en la mesa y se queda
-          r.mesh.position.y = 1.12;
-          r.vel.set(r.vel.x * 0.2, 0, r.vel.z * 0.2);
-          r.landed = true;
-          setMsg("Cayó fuera. Ajusta la fuerza y vuelve a intentarlo.");
-        } else if (!r.landed && r.mesh.position.y < -1.5) {
+        } else if (r.mesh.position.y < -1.5) {
           scene.remove(r.mesh);
           rings.splice(i, 1);
           setMsg("Se fue lejos. Menos fuerza la próxima vez.");
@@ -275,10 +305,12 @@ export function Aros3D({
     const loop = (now: number) => {
       const dt = Math.min(0.05, (now - last) / 1000);
       last = now;
+      void dt;
       if (chargingRef.current) {
-        powerRef.current = Math.min(1, powerRef.current + dt * 0.9);
+        powerRef.current = (Math.sin(now / 620) + 1) / 2;
       } else {
         aimRef.current = Math.sin(now / 900) * 0.9;
+        powerRef.current = 0;
       }
       setAim(aimRef.current);
       setPower(powerRef.current);
@@ -298,9 +330,18 @@ export function Aros3D({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scored, goal]);
 
-  function release() {
-    if (!chargingRef.current) return;
+  function tapLaunch() {
+    if (done) return;
+    if (!chargingRef.current) {
+      // 1er toque: fija la dirección y empieza a moverse la fuerza
+      chargingRef.current = true;
+      setPhase("power");
+      setMsg("Ahora toca cuando la fuerza esté en el punto justo.");
+      return;
+    }
+    // 2do toque: lanza
     chargingRef.current = false;
+    setPhase("aim");
     throwRef.current?.(aimRef.current, powerRef.current);
     powerRef.current = 0;
     setPower(0);
@@ -323,7 +364,9 @@ export function Aros3D({
 
       <div className="mt-1 space-y-2">
         <div>
-          <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Dirección</span>
+          <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+            Dirección
+          </span>
           <div className="relative mt-1 h-3 rounded-full bg-secondary">
             <span
               className="absolute top-0 h-3 w-3 rounded-full bg-primary transition-none"
@@ -332,7 +375,9 @@ export function Aros3D({
           </div>
         </div>
         <div>
-          <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Fuerza</span>
+          <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+            Fuerza
+          </span>
           <div className="mt-1 h-3 overflow-hidden rounded-full bg-secondary">
             <span
               className="block h-3 rounded-full bg-gradient-to-r from-[#3FBE8F] to-[#F7B955]"
@@ -344,13 +389,7 @@ export function Aros3D({
 
       <div className="mt-3 flex items-center gap-2">
         <button
-          onPointerDown={() => {
-            if (done) return;
-            chargingRef.current = true;
-          }}
-          onPointerUp={release}
-          onPointerLeave={release}
-          onPointerCancel={release}
+          onClick={tapLaunch}
           disabled={done}
           className={cn(
             "grid min-h-[56px] flex-1 place-items-center rounded-full bg-gradient-to-b from-primary to-[#5B34D6] text-[16px] font-bold text-white shadow-glow active:scale-[.98] transition",
@@ -358,7 +397,8 @@ export function Aros3D({
           )}
         >
           <span className="inline-flex items-center gap-2">
-            <Target className="h-5 w-5" /> Mantén y suelta para lanzar
+            <Target className="h-5 w-5" />{" "}
+            {phase === "aim" ? "Toca para fijar la dirección" : "¡Toca para lanzar!"}
           </span>
         </button>
         <button
@@ -376,7 +416,10 @@ export function Aros3D({
       {learned.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-1.5">
           {learned.map((w) => (
-            <span key={w} className="rounded-full bg-[#3FBE8F]/15 px-2.5 py-1 text-[11.5px] font-bold text-[#2F9C74]">
+            <span
+              key={w}
+              className="rounded-full bg-[#3FBE8F]/15 px-2.5 py-1 text-[11.5px] font-bold text-[#2F9C74]"
+            >
               {w}
             </span>
           ))}

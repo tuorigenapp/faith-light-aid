@@ -56,18 +56,37 @@ export function DartThrow({
       sun: 0xfff6e6,
     });
     const { scene } = rig;
-    const dust = makeAmbientParticles(scene, { count: 24, spread: 12, height: 7, color: 0xffe9b0, size: 0.07, speed: 0.2, up: true });
+    const dust = makeAmbientParticles(scene, {
+      count: 24,
+      spread: 12,
+      height: 7,
+      color: 0xffe9b0,
+      size: 0.07,
+      speed: 0.2,
+      up: true,
+    });
     const burst = createBurstPool(scene);
 
     const board = new THREE.Group();
-    const base = new THREE.Mesh(new THREE.CircleGeometry(2.5, 64), new THREE.MeshStandardMaterial({ color: 0xf6f2ff, roughness: 0.5 }));
+    const base = new THREE.Mesh(
+      new THREE.CircleGeometry(2.5, 64),
+      new THREE.MeshStandardMaterial({ color: 0xf6f2ff, roughness: 0.5 }),
+    );
     board.add(base);
-    const mid = new THREE.Mesh(new THREE.CircleGeometry(1.7, 64), new THREE.MeshStandardMaterial({ color: 0x9d7bff, roughness: 0.45 }));
+    const mid = new THREE.Mesh(
+      new THREE.CircleGeometry(1.7, 64),
+      new THREE.MeshStandardMaterial({ color: 0x9d7bff, roughness: 0.45 }),
+    );
     mid.position.z = 0.02;
     board.add(mid);
     const center = new THREE.Mesh(
       new THREE.CircleGeometry(1, 48),
-      new THREE.MeshStandardMaterial({ color: 0x7be0a8, emissive: 0x3fbe8f, emissiveIntensity: 0.5, roughness: 0.4 }),
+      new THREE.MeshStandardMaterial({
+        color: 0x7be0a8,
+        emissive: 0x3fbe8f,
+        emissiveIntensity: 0.5,
+        roughness: 0.4,
+      }),
     );
     center.position.z = 0.04;
     board.add(center);
@@ -94,12 +113,20 @@ export function DartThrow({
 
     const reticle = new THREE.Mesh(
       new THREE.TorusGeometry(0.5, 0.07, 12, 40),
-      new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xffe9b0, emissiveIntensity: 0.9 }),
+      new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        emissive: 0xffe9b0,
+        emissiveIntensity: 0.9,
+      }),
     );
     scene.add(reticle);
 
     const guide: THREE.Mesh[] = [];
-    const guideMat = new THREE.MeshStandardMaterial({ color: 0xffffff, transparent: true, opacity: 0.35 });
+    const guideMat = new THREE.MeshStandardMaterial({
+      color: 0xffffff,
+      transparent: true,
+      opacity: 0.35,
+    });
     for (let i = 0; i < 7; i++) {
       const dot = new THREE.Mesh(new THREE.SphereGeometry(0.07, 12, 10), guideMat);
       scene.add(dot);
@@ -145,7 +172,11 @@ export function DartThrow({
         const s = cfg.current.aimSpeed;
         aimX = Math.sin(t * s) * 1.55;
         aimY = Math.cos(t * s * 0.8) * 1.05;
-        reticle.position.set(board.position.x + aimX, board.position.y + aimY, board.position.z + 0.25);
+        reticle.position.set(
+          board.position.x + aimX,
+          board.position.y + aimY,
+          board.position.z + 0.25,
+        );
         dart.position.copy(rest);
         dart.position.y = rest.y + Math.sin(t * 2) * 0.05;
         guide.forEach((dot, i) => {
@@ -171,7 +202,10 @@ export function DartThrow({
       if (p >= 1) {
         flying = false;
         travel = 0;
-        const dist = Math.hypot(dart.position.x - board.position.x, dart.position.y - board.position.y);
+        const dist = Math.hypot(
+          dart.position.x - board.position.x,
+          dart.position.y - board.position.y,
+        );
         if (dist <= cfg.current.radius) {
           burst.spawn(dart.position.clone(), 0x7be0a8, 26);
           localHits += 1;
@@ -192,7 +226,6 @@ export function DartThrow({
       throwRef.current = null;
       rig.dispose();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [levels.level]);
 
   return (

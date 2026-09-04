@@ -79,7 +79,15 @@ export function ChestWords({
       sun: 0xfff3dc,
     });
     const { scene } = rig;
-    const dust = makeAmbientParticles(scene, { count: 30, spread: 9, height: 5.5, color: 0xffe9b0, size: 0.07, speed: 0.22, up: true });
+    const dust = makeAmbientParticles(scene, {
+      count: 30,
+      spread: 9,
+      height: 5.5,
+      color: 0xffe9b0,
+      size: 0.07,
+      speed: 0.22,
+      up: true,
+    });
     const burst = createBurstPool(scene);
 
     const floor = new THREE.Mesh(
@@ -108,7 +116,13 @@ export function ChestWords({
     chest.add(lid);
     const glow = new THREE.Mesh(
       new THREE.SphereGeometry(0.75, 32, 24),
-      new THREE.MeshStandardMaterial({ color: 0xffd479, emissive: 0xffb347, emissiveIntensity: 1, transparent: true, opacity: 0.5 }),
+      new THREE.MeshStandardMaterial({
+        color: 0xffd479,
+        emissive: 0xffb347,
+        emissiveIntensity: 1,
+        transparent: true,
+        opacity: 0.5,
+      }),
     );
     glow.position.y = 1.2;
     chest.add(glow);
