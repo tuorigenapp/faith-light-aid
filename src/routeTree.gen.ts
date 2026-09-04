@@ -9,7 +9,6 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TmpcheckRouteImport } from './routes/tmpcheck'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RegistroRouteImport } from './routes/registro'
 import { Route as EstilosRouteImport } from './routes/estilos'
@@ -67,11 +66,6 @@ import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/em
 import { Route as AuthenticatedVisualizaCategoryIdDayRouteImport } from './routes/_authenticated/visualiza.$categoryId.$day'
 import { Route as AuthenticatedCaminosCaminoIdDayRouteImport } from './routes/_authenticated/caminos.$caminoId.$day'
 
-const TmpcheckRoute = TmpcheckRouteImport.update({
-  id: '/tmpcheck',
-  path: '/tmpcheck',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
@@ -377,7 +371,6 @@ export interface FileRoutesByFullPath {
   '/estilos': typeof EstilosRoute
   '/registro': typeof RegistroRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/tmpcheck': typeof TmpcheckRoute
   '/arbol': typeof AuthenticatedArbolRoute
   '/biblioteca': typeof AuthenticatedBibliotecaRoute
   '/categorias': typeof AuthenticatedCategoriasRoute
@@ -435,7 +428,6 @@ export interface FileRoutesByTo {
   '/estilos': typeof EstilosRoute
   '/registro': typeof RegistroRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/tmpcheck': typeof TmpcheckRoute
   '/arbol': typeof AuthenticatedArbolRoute
   '/biblioteca': typeof AuthenticatedBibliotecaRoute
   '/categorias': typeof AuthenticatedCategoriasRoute
@@ -494,7 +486,6 @@ export interface FileRoutesById {
   '/estilos': typeof EstilosRoute
   '/registro': typeof RegistroRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/tmpcheck': typeof TmpcheckRoute
   '/_authenticated/arbol': typeof AuthenticatedArbolRoute
   '/_authenticated/biblioteca': typeof AuthenticatedBibliotecaRoute
   '/_authenticated/categorias': typeof AuthenticatedCategoriasRoute
@@ -554,7 +545,6 @@ export interface FileRouteTypes {
     | '/estilos'
     | '/registro'
     | '/sitemap.xml'
-    | '/tmpcheck'
     | '/arbol'
     | '/biblioteca'
     | '/categorias'
@@ -612,7 +602,6 @@ export interface FileRouteTypes {
     | '/estilos'
     | '/registro'
     | '/sitemap.xml'
-    | '/tmpcheck'
     | '/arbol'
     | '/biblioteca'
     | '/categorias'
@@ -670,7 +659,6 @@ export interface FileRouteTypes {
     | '/estilos'
     | '/registro'
     | '/sitemap.xml'
-    | '/tmpcheck'
     | '/_authenticated/arbol'
     | '/_authenticated/biblioteca'
     | '/_authenticated/categorias'
@@ -730,7 +718,6 @@ export interface RootRouteChildren {
   EstilosRoute: typeof EstilosRoute
   RegistroRoute: typeof RegistroRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
-  TmpcheckRoute: typeof TmpcheckRoute
   ApiCaminoPackRoute: typeof ApiCaminoPackRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiIntakeClosureRoute: typeof ApiIntakeClosureRoute
@@ -748,13 +735,6 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/tmpcheck': {
-      id: '/tmpcheck'
-      path: '/tmpcheck'
-      fullPath: '/tmpcheck'
-      preLoaderRoute: typeof TmpcheckRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/sitemap.xml': {
       id: '/sitemap.xml'
       path: '/sitemap.xml'
@@ -1287,7 +1267,6 @@ const rootRouteChildren: RootRouteChildren = {
   EstilosRoute: EstilosRoute,
   RegistroRoute: RegistroRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
-  TmpcheckRoute: TmpcheckRoute,
   ApiCaminoPackRoute: ApiCaminoPackRoute,
   ApiChatRoute: ApiChatRoute,
   ApiIntakeClosureRoute: ApiIntakeClosureRoute,
