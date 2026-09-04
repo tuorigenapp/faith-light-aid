@@ -65,8 +65,8 @@ export function Globos3D({
     const rig = createRig(el, {
       bg: 0x21174a,
       fog: [14, 40],
-      cameraPos: [0, 3.4, 8.6],
-      lookAt: [0, 3, 0],
+      cameraPos: [0, 3.9, 11.4],
+      lookAt: [0, 3.6, 0],
       hemi: [0xffe9f4, 0x5b4a94],
       sun: 0xfff0dc,
     });
@@ -85,8 +85,8 @@ export function Globos3D({
 
     // Persona que lanza
     const person = makeCharacter(0xf58bcb, 0xffd479);
-    person.scale.setScalar(1.9);
-    person.position.set(0, 0, 3.1);
+    person.scale.setScalar(1.35);
+    person.position.set(-0.2, 0, 4.4);
     scene.add(person);
 
     // Platillo en vuelo
@@ -186,7 +186,7 @@ export function Globos3D({
       }
       if (!target) return;
       const b = target;
-      const from = new THREE.Vector3(0, 1.3, 3.1);
+      const from = new THREE.Vector3(-0.2, 1.1, 4.4);
       flight = { from, to: b.group.position.clone(), t: 0, onHit: () => pop(b) };
       disc.position.copy(from);
       disc.visible = true;
@@ -205,8 +205,8 @@ export function Globos3D({
         b.group.position.y += b.speed * dt;
         b.group.position.x += Math.sin(t * b.sway + b.phase) * dt * 0.5;
         b.group.rotation.z = Math.sin(t * b.sway + b.phase) * 0.12;
-        if (b.group.position.y > 7.4) {
-          b.group.position.y = -1.6;
+        if (b.group.position.y > 7.6) {
+          b.group.position.y = 0.4;
           b.group.position.x = (Math.random() - 0.5) * 6.4;
         }
       }
@@ -225,8 +225,8 @@ export function Globos3D({
       }
 
       camera.position.x = Math.sin(t * 0.24) * 0.5;
-      camera.position.y = 3.4 + Math.sin(t * 0.4) * 0.15;
-      camera.lookAt(0, 3, 0);
+      camera.position.y = 3.9 + Math.sin(t * 0.4) * 0.15;
+      camera.lookAt(0, 3.6, 0);
     });
 
     return () => {
