@@ -251,6 +251,7 @@ export function Aros3D({
               best = tg;
             }
           }
+          console.log("LAND", r.mesh.position.x.toFixed(2), r.mesh.position.z.toFixed(2), bestD.toFixed(2));
           r.landed = true;
           if (best && bestD < 1.35) {
             r.mesh.position.set(best.group.position.x, best.pos.y + 0.34, best.pos.z);
