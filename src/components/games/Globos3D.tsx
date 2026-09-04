@@ -1,7 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { Sparkles } from "lucide-react";
-import { createRig, createBurstPool, makeAmbientParticles, makeGround, makeCharacter, animateIdle } from "./engine3d";
+import {
+  createRig,
+  createBurstPool,
+  makeAmbientParticles,
+  makeGround,
+  makeCharacter,
+  animateIdle,
+} from "./engine3d";
 
 /**
  * Globo de afirmaciones — globos 3D con vida propia (suben, se mecen, giran).
@@ -90,7 +97,8 @@ export function Globos3D({
     disc.visible = false;
     disc.castShadow = true;
     scene.add(disc);
-    let flight: { from: THREE.Vector3; to: THREE.Vector3; t: number; onHit: () => void } | null = null;
+    let flight: { from: THREE.Vector3; to: THREE.Vector3; t: number; onHit: () => void } | null =
+      null;
 
     const balloons: Balloon[] = [];
     const palette = [0xf58bcb, 0x7c4dff, 0x3fbe8f, 0xf7b955, 0x6fb7f2];
@@ -130,7 +138,11 @@ export function Globos3D({
       string.position.y = -1.42;
       g.add(string);
 
-      g.position.set((Math.random() - 0.5) * 6.4, -1.2 - Math.random() * 3, (Math.random() - 0.5) * 2.2);
+      g.position.set(
+        (Math.random() - 0.5) * 6.4,
+        -1.2 - Math.random() * 3,
+        (Math.random() - 0.5) * 2.2,
+      );
       scene.add(g);
       const list = bank();
       balloons.push({
@@ -255,7 +267,10 @@ export function Globos3D({
       {learned.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-1.5">
           {learned.map((w) => (
-            <span key={w} className="rounded-full bg-[#F58BCB]/15 px-2.5 py-1 text-[11.5px] font-bold text-[#B4478C]">
+            <span
+              key={w}
+              className="rounded-full bg-[#F58BCB]/15 px-2.5 py-1 text-[11.5px] font-bold text-[#B4478C]"
+            >
               {w}
             </span>
           ))}

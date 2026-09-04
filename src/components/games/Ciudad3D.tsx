@@ -107,7 +107,11 @@ export function Ciudad3D({
       city.add(b);
       const light = new THREE.Mesh(
         new THREE.SphereGeometry(0.07, 8, 8),
-        new THREE.MeshStandardMaterial({ color: 0xffd479, emissive: 0xffb347, emissiveIntensity: 1.4 }),
+        new THREE.MeshStandardMaterial({
+          color: 0xffd479,
+          emissive: 0xffb347,
+          emissiveIntensity: 1.4,
+        }),
       );
       light.position.set(b.position.x, h + 0.15, b.position.z);
       city.add(light);
@@ -234,7 +238,11 @@ export function Ciudad3D({
         setLines(st.lines);
         st.craneT = 1;
         burst.spawn(new THREE.Vector3(0, originY + 1.4, 0.3), 0x7be0a8, 30);
-        setMsg(cleared > 1 ? `¡${cleared} líneas de una! La grúa se lleva el peso.` : "Línea completa: la grúa se la lleva.");
+        setMsg(
+          cleared > 1
+            ? `¡${cleared} líneas de una! La grúa se lleva el peso.`
+            : "Línea completa: la grúa se la lleva.",
+        );
         if (st.lines >= lineGoal && !doneRef.current) {
           doneRef.current = true;
           setDone(true);
@@ -294,7 +302,9 @@ export function Ciudad3D({
           const m = cellMeshes[r]![c]!;
           m.visible = v > 0;
           if (v > 0) {
-            (m.material as THREE.MeshStandardMaterial).color.setHex(COLORS[(v - 1) % COLORS.length]!);
+            (m.material as THREE.MeshStandardMaterial).color.setHex(
+              COLORS[(v - 1) % COLORS.length]!,
+            );
             m.rotation.y = Math.sin(t * 0.8 + r + c) * 0.06;
           }
         }
@@ -305,7 +315,9 @@ export function Ciudad3D({
           if (!v || k >= pieceMeshes.length) return;
           const m = pieceMeshes[k++]!;
           m.visible = true;
-          (m.material as THREE.MeshStandardMaterial).color.setHex(COLORS[(st.color - 1) % COLORS.length]!);
+          (m.material as THREE.MeshStandardMaterial).color.setHex(
+            COLORS[(st.color - 1) % COLORS.length]!,
+          );
           m.position.set(originX + (st.x + c) * CELL, originY + (ROWS - 1 - (st.y + r)) * CELL, 0);
           m.rotation.z = Math.sin(t * 3) * 0.05;
         }),
