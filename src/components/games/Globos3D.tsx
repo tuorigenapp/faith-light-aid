@@ -140,7 +140,7 @@ export function Globos3D({
 
       g.position.set(
         (Math.random() - 0.5) * 6.4,
-        -1.2 - Math.random() * 3,
+        0.6 + Math.random() * 6,
         (Math.random() - 0.5) * 2.2,
       );
       scene.add(g);
