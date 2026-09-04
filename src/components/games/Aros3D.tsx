@@ -174,7 +174,7 @@ export function Aros3D({
 
     function velocityFor(aimN: number, powerN: number) {
       const p = 0.55 + powerN * 0.85;
-      return new THREE.Vector3(aimN * 3.4 * p, 5.1 * p, -6.4 * p);
+      return new THREE.Vector3(aimN * 3.2 * p, 3.7 * p, -5.6 * p);
     }
 
     function drawGuide(aimN: number, powerN: number) {
@@ -237,21 +237,25 @@ export function Aros3D({
         r.mesh.position.addScaledVector(r.vel, dt);
         r.mesh.rotation.z += r.spin * dt;
 
-        // ¿entró en un recipiente?
-        for (const tg of targets) {
-          const dx = r.mesh.position.x - tg.group.position.x;
-          const dz = r.mesh.position.z - tg.pos.z;
-          const near = Math.hypot(dx, dz) < tg.radius;
-          if (
-            near &&
-            r.vel.y < 0 &&
-            r.mesh.position.y <= tg.pos.y + 1.35 &&
-            r.mesh.position.y >= tg.pos.y + 0.2
-          ) {
-            r.landed = true;
-            r.mesh.position.set(tg.group.position.x, tg.pos.y + 0.36, tg.pos.z);
+        // Al bajar a la altura de la mesa se decide si entró en un recipiente
+        if (r.vel.y < 0 && r.mesh.position.y <= 1.18) {
+          let best: (typeof targets)[number] | null = null;
+          let bestD = 99;
+          for (const tg of targets) {
+            const d = Math.hypot(
+              r.mesh.position.x - tg.group.position.x,
+              r.mesh.position.z - tg.pos.z,
+            );
+            if (d < bestD) {
+              bestD = d;
+              best = tg;
+            }
+          }
+          r.landed = true;
+          if (best && bestD < 0.95) {
+            r.mesh.position.set(best.group.position.x, best.pos.y + 0.34, best.pos.z);
             burst.spawn(
-              new THREE.Vector3(tg.group.position.x, tg.pos.y + 1.1, tg.pos.z),
+              new THREE.Vector3(best.group.position.x, best.pos.y + 1.1, best.pos.z),
               0x7be0a8,
               26,
             );
@@ -263,18 +267,16 @@ export function Aros3D({
             setScored(scoredRef.current);
             setLearned((l) => (l.includes(w) ? l : [...l, w]));
             setMsg(`¡Dentro! Guardaste "${w}".`);
-            camera.position.z -= 0.06;
-            break;
+          } else {
+            r.mesh.position.y = 1.16;
+            r.vel.set(r.vel.x * 0.15, 0, r.vel.z * 0.15);
+            setMsg(
+              bestD < 1.6
+                ? "Rozó el borde. Casi: ajusta un poquito la dirección."
+                : "Cayó fuera. Prueba con otra fuerza.",
+            );
           }
-        }
-
-        if (!r.landed && r.mesh.position.y < 0.9 && Math.abs(r.mesh.position.z + 1.6) < 3.2) {
-          // rebota en la mesa y se queda
-          r.mesh.position.y = 1.12;
-          r.vel.set(r.vel.x * 0.2, 0, r.vel.z * 0.2);
-          r.landed = true;
-          setMsg("Cayó fuera. Ajusta la fuerza y vuelve a intentarlo.");
-        } else if (!r.landed && r.mesh.position.y < -1.5) {
+        } else if (r.mesh.position.y < -1.5) {
           scene.remove(r.mesh);
           rings.splice(i, 1);
           setMsg("Se fue lejos. Menos fuerza la próxima vez.");
