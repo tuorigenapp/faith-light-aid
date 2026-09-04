@@ -174,7 +174,7 @@ export function Aros3D({
 
     function velocityFor(aimN: number, powerN: number) {
       const p = 0.55 + powerN * 0.85;
-      return new THREE.Vector3(aimN * 3.2 * p, 3.7 * p, -5.6 * p);
+      return new THREE.Vector3(aimN * 2.0 * p, 3.7 * p, -5.6 * p);
     }
 
     function drawGuide(aimN: number, powerN: number) {
@@ -252,7 +252,7 @@ export function Aros3D({
             }
           }
           r.landed = true;
-          if (best && bestD < 0.95) {
+          if (best && bestD < 1.35) {
             r.mesh.position.set(best.group.position.x, best.pos.y + 0.34, best.pos.z);
             burst.spawn(
               new THREE.Vector3(best.group.position.x, best.pos.y + 1.1, best.pos.z),
@@ -271,7 +271,7 @@ export function Aros3D({
             r.mesh.position.y = 1.16;
             r.vel.set(r.vel.x * 0.15, 0, r.vel.z * 0.15);
             setMsg(
-              bestD < 1.6
+              bestD < 2.1
                 ? "Rozó el borde. Casi: ajusta un poquito la dirección."
                 : "Cayó fuera. Prueba con otra fuerza.",
             );
