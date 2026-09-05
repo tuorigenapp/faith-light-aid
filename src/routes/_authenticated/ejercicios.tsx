@@ -16,6 +16,8 @@ import { DartThrow } from "@/components/games/DartThrow";
 import { MemoryPairs } from "@/components/StageGames";
 import { AffirmationSlider } from "@/components/AffirmationSlider";
 import { useResumableStep, clearStepPosition } from "@/lib/game-progress";
+import { useProfile } from "@/hooks/use-profile";
+import { JourneyHeader } from "@/components/ejercicios/JourneyHeader";
 
 import {
   dayOfYear,
