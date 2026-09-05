@@ -65,27 +65,27 @@ function Ejercicios() {
     return all.slice(start - 1, end);
   }, [all, today]);
 
-  const { data: completedDays, isLoading, isError } = useQuery({
+  const { data: completions, isLoading, isError } = useQuery({
     queryKey: ["exercises365_completions", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      if (!user) return new Set<number>();
+      if (!user) return { days: new Set<number>(), dates: new Set<string>() };
       const { data, error } = await supabase
         .from("daily_activity")
-        .select("reference_id")
+        .select("reference_id, activity_date")
         .eq("user_id", user.id)
         .eq("activity_type", "exercise_completed");
       if (error) throw error;
-      return new Set(
-        (data ?? [])
-          .map((d) => d.reference_id ?? "")
-          .filter((r) => r.startsWith("ex-"))
-          .map((r) => Number(r.replace("ex-", ""))),
-      );
+      const rows = (data ?? []).filter((d) => (d.reference_id ?? "").startsWith("ex-"));
+      return {
+        days: new Set(rows.map((d) => Number((d.reference_id ?? "").replace("ex-", "")))),
+        dates: new Set(rows.map((d) => String(d.activity_date ?? "").slice(0, 10))),
+      };
     },
   });
 
-  const completed = completedDays ?? new Set<number>();
+  const completed = completions?.days ?? new Set<number>();
+  const doneDates = completions?.dates ?? new Set<string>();
   const todayCompleted = completed.has(today);
   const completedCount = completed.size;
   const currentExercise = all[today - 1];
