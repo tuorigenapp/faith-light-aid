@@ -31,7 +31,6 @@ import {
   type DailyExercise,
 } from "@/lib/ejercicios365";
 import { awardLeaf } from "@/lib/gems";
-import exerciseCover from "@/assets/prayer-exercise.jpg";
 
 export const Route = createFileRoute("/_authenticated/ejercicios")({
   head: () => ({
@@ -57,6 +56,7 @@ function refIdFor(day: number) {
 
 function Ejercicios() {
   const { user } = useAuth();
+  const { data: profile } = useProfile();
   const qc = useQueryClient();
   const today = dayOfYear();
   const [active, setActive] = useState<DailyExercise | null>(null);
