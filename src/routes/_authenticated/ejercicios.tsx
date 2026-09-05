@@ -177,129 +177,166 @@ function Ejercicios() {
   const progressPct = Math.round((completedCount / TOTAL_DAYS) * 100);
 
   return (
-    <div className="px-4 py-6 md:p-10 max-w-5xl mx-auto mobile-safe-bottom lg:pb-10">
-      <JourneyHeader
-        name={profile?.display_name || profile?.full_name || "Tu camino"}
-        avatarUrl={profile?.avatar_url ?? null}
-        streak={profile?.consecutive_days ?? 0}
-        completedCount={completedCount}
-        weekDone={doneDates}
-      />
+    <div
+      className="min-h-dvh"
+      style={{
+        background:
+          "radial-gradient(80% 40% at 12% 0%, rgba(124,92,255,.32), transparent 62%), radial-gradient(70% 35% at 95% 6%, rgba(245,139,203,.22), transparent 62%), linear-gradient(180deg, #241348 0%, #1A0F31 45%, #140C24 100%)",
+      }}
+    >
+      <div className="mx-auto w-full max-w-[1100px] px-4 py-6 md:px-6 md:py-10 mobile-safe-bottom lg:pb-10">
+        <JourneyHeader
+          name={profile?.display_name || profile?.full_name || "Tu camino"}
+          avatarUrl={profile?.avatar_url ?? null}
+          streak={profile?.consecutive_days ?? 0}
+          completedCount={completedCount}
+          weekDone={doneDates}
+        />
 
-      <section className="mt-4 app-card p-4">
-        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
-          <div className="min-w-0">
-            <p className="text-[11px] uppercase tracking-widest font-bold text-primary inline-flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5" /> Ejercicio de hoy
+        <section className="mt-4 grid gap-3 md:grid-cols-2">
+          <div className="rounded-[16px] border border-primary-foreground/12 bg-primary-foreground/[.06] p-4">
+            <p className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-gold">
+              <Sparkles className="h-3.5 w-3.5" /> Ejercicio de hoy
             </p>
-            <h2 className="font-display font-bold text-[17px] leading-tight">
+            <h2 className="mt-1 font-display text-[17px] font-bold leading-tight text-primary-foreground">
               Día {today}: {currentExercise?.title}
             </h2>
-          </div>
-        </div>
-      </section>
-
-      <section className="mt-4 app-card p-4">
-        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
-          <div className="min-w-0">
-            <p className="text-[11px] uppercase tracking-widest font-bold text-primary">
-              Tu avance
+            <p className="mt-1 text-[12.5px] leading-snug text-primary-foreground/65">
+              {currentExercise?.theme}
             </p>
-            <h2 className="font-display font-bold text-[17px] leading-tight">
-              Día {today}: vuelve a tu verdad
-            </h2>
+            <button
+              onClick={() => currentExercise && openExercise(currentExercise)}
+              className="mt-3 inline-flex h-[52px] w-full items-center justify-center gap-2 rounded-[12px] btn-primary-gradient text-[16px] font-semibold text-primary-foreground transition active:scale-[.97]"
+            >
+              {todayCompleted ? (
+                <>
+                  <Check className="h-4 w-4" /> Completado hoy
+                </>
+              ) : (
+                <>
+                  Empezar mi práctica <ArrowRight className="h-4 w-4" />
+                </>
+              )}
+            </button>
           </div>
-          <span className="text-[12px] font-black text-primary">
-            {completedCount}/{TOTAL_DAYS}
-          </span>
-        </div>
-        <div className="mt-3 h-2.5 rounded-full bg-primary/12 overflow-hidden">
-          <div
-            className="h-full bg-brand-gradient rounded-full transition-all"
-            style={{ width: `${progressPct}%` }}
-          />
-        </div>
-      </section>
 
-      <section className="mt-4 -mx-4 px-4 overflow-x-auto no-scrollbar">
-        <div className="flex gap-3 w-max pb-1">
-          {visible.slice(0, 10).map((ex) => {
-            const unlocked = ex.day === today && !todayCompleted;
-            const isDone = completed.has(ex.day);
-            return (
-              <button
-                key={ex.day}
-                onClick={() => openExercise(ex)}
-                className={cn(
-                  "w-[210px] shrink-0 rounded-[16px] border bg-card p-4 text-left shadow-soft active:scale-[.98] transition",
-                  unlocked && "border-primary ring-2 ring-primary/18",
-                  isDone && "border-[#3FBE8F]/45 bg-[#3FBE8F]/8",
-                  !unlocked && !isDone && "opacity-75",
-                )}
-              >
-                <span className="text-[11px] font-black uppercase tracking-widest text-primary">
-                  Día {ex.day}
-                </span>
-                <h3 className="mt-1 font-display font-bold text-[15px] leading-tight line-clamp-2">
-                  {ex.title}
-                </h3>
-                <p className="mt-1 text-[12px] text-muted-foreground line-clamp-2">{ex.theme}</p>
-                <span className="mt-3 inline-flex items-center gap-1 text-[12px] font-bold text-primary">
-                  {isDone ? (
-                    <Check className="w-3.5 h-3.5" />
-                  ) : unlocked ? (
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  ) : (
-                    <Lock className="w-3.5 h-3.5" />
-                  )}
-                  {isDone ? "Completado" : unlocked ? "Abrir hoy" : "No disponible"}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </section>
-
-      {isLoading && <div className="mt-6 h-80 rounded-[24px] bg-muted animate-pulse" />}
-      {isError && (
-        <div className="app-card mt-6 p-6 text-center">
-          <p className="text-muted-foreground text-sm">
-            No pudimos cargar tu historial de ejercicios.
-          </p>
-        </div>
-      )}
-      {!isLoading && !isError && (
-        <section className="mt-6 rounded-[28px] bg-gradient-to-b from-[#2E1A4D] via-[#1E1033] to-[#150C24] px-4 py-7 overflow-hidden">
-          <div className="text-center text-primary-foreground">
-            <p className="text-[11px] uppercase tracking-widest font-bold text-primary-foreground/70">
-              Mapa de prácticas
-            </p>
-            <h2 className="font-display font-extrabold text-[24px] leading-tight mt-1 text-primary-foreground">
-              Tu siguiente paso
-            </h2>
+          <div className="rounded-[16px] border border-primary-foreground/12 bg-primary-foreground/[.06] p-4">
+            <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+              <div className="min-w-0">
+                <p className="text-[11px] font-bold uppercase tracking-widest text-gold">
+                  Tu avance
+                </p>
+                <h2 className="font-display text-[17px] font-bold leading-tight text-primary-foreground">
+                  Día {today}: vuelve a tu verdad
+                </h2>
+              </div>
+              <span className="text-[12px] font-black text-primary-foreground/80">
+                {completedCount}/{TOTAL_DAYS}
+              </span>
+            </div>
+            <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-primary-foreground/12">
+              <div
+                className="h-full rounded-full bg-brand-gradient transition-all"
+                style={{ width: `${progressPct}%` }}
+              />
+            </div>
+            <div className="mt-3 flex items-center gap-2 text-[12px] text-primary-foreground/65">
+              <Clock className="h-3.5 w-3.5 text-gold" /> El siguiente se abre a las 12:00 de la
+              noche.
+            </div>
           </div>
-          <DuolingoPath
-            nodes={pathNodes}
-            onSelect={(node) => {
-              const ex = all[Number(node.key) - 1];
-              if (ex) openExercise(ex);
-            }}
-            className="mt-6"
-          />
         </section>
-      )}
 
-      {active && (
-        <ExerciseModal
-          exercise={active}
-          completed={completed.has(active.day)}
-          onClose={() => setActive(null)}
-          onComplete={() => complete(active)}
-        />
-      )}
+        <section className="mt-4 -mx-4 px-4 overflow-x-auto no-scrollbar md:mx-0 md:px-0">
+          <div className="flex w-max gap-3 pb-1 md:w-full md:grid md:grid-cols-5">
+            {visible.slice(0, 10).map((ex) => {
+              const unlocked = ex.day === today && !todayCompleted;
+              const isDone = completed.has(ex.day);
+              return (
+                <button
+                  key={ex.day}
+                  onClick={() => openExercise(ex)}
+                  className={cn(
+                    "w-[210px] shrink-0 rounded-[16px] border p-4 text-left transition active:scale-[.98] md:w-auto",
+                    unlocked
+                      ? "border-gold/60 bg-gold/[.10]"
+                      : isDone
+                        ? "border-[#3FBE8F]/45 bg-[#3FBE8F]/10"
+                        : "border-primary-foreground/12 bg-primary-foreground/[.05]",
+                  )}
+                >
+                  <span className="text-[11px] font-black uppercase tracking-widest text-gold">
+                    Día {ex.day}
+                  </span>
+                  <h3 className="mt-1 line-clamp-2 font-display text-[15px] font-bold leading-tight text-primary-foreground">
+                    {ex.title}
+                  </h3>
+                  <p className="mt-1 line-clamp-2 text-[12px] text-primary-foreground/62">
+                    {ex.theme}
+                  </p>
+                  <span className="mt-3 inline-flex items-center gap-1 text-[12px] font-bold text-primary-foreground/85">
+                    {isDone ? (
+                      <Check className="h-3.5 w-3.5" />
+                    ) : unlocked ? (
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    ) : (
+                      <Lock className="h-3.5 w-3.5" />
+                    )}
+                    {isDone ? "Completado" : unlocked ? "Abrir hoy" : "No disponible"}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        {isLoading && (
+          <div className="mt-6 h-80 animate-pulse rounded-[24px] bg-primary-foreground/[.07]" />
+        )}
+        {isError && (
+          <div className="mt-6 rounded-[16px] border border-primary-foreground/12 bg-primary-foreground/[.06] p-6 text-center">
+            <p className="text-sm text-primary-foreground/70">
+              No pudimos cargar tu historial de ejercicios.
+            </p>
+          </div>
+        )}
+        {!isLoading && !isError && (
+          <section className="mt-6 rounded-[16px] border border-primary-foreground/12 bg-primary-foreground/[.05] px-3 py-6 md:px-6">
+            <div className="text-center">
+              <p className="text-[11px] font-bold uppercase tracking-widest text-gold">
+                Tu secuencia de días
+              </p>
+              <h2 className="mt-1 font-display text-[24px] font-extrabold leading-tight text-primary-foreground">
+                Tu siguiente paso
+              </h2>
+              <p className="mt-1 text-[13px] text-primary-foreground/62">
+                Un día a la vez, en el mismo camino de tus logros.
+              </p>
+            </div>
+            <DuolingoPath
+              nodes={pathNodes}
+              onSelect={(node) => {
+                const ex = all[Number(node.key) - 1];
+                if (ex) openExercise(ex);
+              }}
+              className="mt-6"
+            />
+          </section>
+        )}
+
+        {active && (
+          <ExerciseModal
+            exercise={active}
+            completed={completed.has(active.day)}
+            onClose={() => setActive(null)}
+            onComplete={() => complete(active)}
+          />
+        )}
+      </div>
     </div>
   );
 }
+
 
 function ExerciseModal({
   exercise,

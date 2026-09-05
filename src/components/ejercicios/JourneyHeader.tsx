@@ -73,13 +73,8 @@ export function JourneyHeader({
   const weekCount = week.filter((w) => weekDone.has(w.iso)).length;
 
   return (
-    <section
-      className="relative overflow-hidden rounded-[24px] px-4 py-5 md:px-6"
-      style={{
-        background:
-          "radial-gradient(80% 50% at 12% 0%, rgba(124,92,255,.30), transparent 62%), radial-gradient(70% 45% at 95% 8%, rgba(245,139,203,.22), transparent 62%), linear-gradient(180deg, #241348 0%, #1A0F31 55%, #140C24 100%)",
-      }}
-    >
+    <section className="relative">
+
       {/* Encabezado */}
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
         <div className="min-w-0">
