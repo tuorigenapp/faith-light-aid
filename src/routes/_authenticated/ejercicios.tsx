@@ -139,19 +139,27 @@ function Ejercicios() {
 
   return (
     <div className="px-4 py-6 md:p-10 max-w-5xl mx-auto mobile-safe-bottom lg:pb-10">
-      <section className="relative overflow-hidden rounded-[24px] bg-card shadow-soft">
-        <img src={exerciseCover} alt="Ejercicios diarios ORIGEN" loading="eager" className="h-56 w-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#1B1930]/85 via-[#1B1930]/25 to-transparent" />
-        <div className="absolute inset-x-0 bottom-0 p-5 text-primary-foreground">
-          <div className="inline-flex items-center gap-2 rounded-[10px] bg-background/15 border border-primary-foreground/20 backdrop-blur-xl px-3 py-1 text-[11px] font-bold uppercase tracking-widest">
-            <Sparkles className="w-3.5 h-3.5" /> Un paso diario
+      <JourneyHeader
+        name={profile?.display_name || profile?.full_name || "Tu camino"}
+        avatarUrl={profile?.avatar_url ?? null}
+        streak={profile?.consecutive_days ?? 0}
+        completedCount={completedCount}
+        weekDone={doneDates}
+      />
+
+      <section className="mt-4 app-card p-4">
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+          <div className="min-w-0">
+            <p className="text-[11px] uppercase tracking-widest font-bold text-primary inline-flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5" /> Ejercicio de hoy
+            </p>
+            <h2 className="font-display font-bold text-[17px] leading-tight">
+              Día {today}: {currentExercise?.title}
+            </h2>
           </div>
-          <h1 className="font-display font-extrabold text-[30px] leading-tight mt-3 text-primary-foreground">Ejercicios diarios</h1>
-          <p className="mt-2 max-w-[34rem] text-[14px] leading-relaxed text-primary-foreground/86">
-            Día {today}: {currentExercise?.title}. Una práctica, cinco pasos y un solo desbloqueo por día.
-          </p>
         </div>
       </section>
+
 
       <section className="mt-4 app-card p-4">
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
