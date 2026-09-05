@@ -1,4 +1,16 @@
-import { Bell, Flag, Trophy, ShieldCheck, Crown, Gem, Flame, Lock, ChevronRight, CalendarDays, User } from "lucide-react";
+import {
+  Bell,
+  Flag,
+  Trophy,
+  ShieldCheck,
+  Crown,
+  Gem,
+  Flame,
+  Lock,
+  ChevronRight,
+  CalendarDays,
+  User,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Milestone = {
@@ -10,9 +22,24 @@ type Milestone = {
 
 const MILESTONES: Milestone[] = [
   { days: 7, title: "Explorador del origen", note: "Tus primeros 7 días de verdad.", Icon: Flag },
-  { days: 30, title: "Constructor de hábitos", note: "Estás creando tu mejor versión.", Icon: Trophy },
-  { days: 90, title: "Guardián de tu paz", note: "Cuidas lo que entra y lo que sale.", Icon: ShieldCheck },
-  { days: 180, title: "Maestro de la constancia", note: "Tus hábitos te llevan lejos.", Icon: Crown },
+  {
+    days: 30,
+    title: "Constructor de hábitos",
+    note: "Estás creando tu mejor versión.",
+    Icon: Trophy,
+  },
+  {
+    days: 90,
+    title: "Guardián de tu paz",
+    note: "Cuidas lo que entra y lo que sale.",
+    Icon: ShieldCheck,
+  },
+  {
+    days: 180,
+    title: "Maestro de la constancia",
+    note: "Tus hábitos te llevan lejos.",
+    Icon: Crown,
+  },
   { days: 365, title: "Dueño de mi historia", note: "Un año sin perderte el rastro.", Icon: Gem },
 ];
 
@@ -86,7 +113,9 @@ export function JourneyHeader({
               <Flame className="h-6 w-6" />
             </span>
             <span className="min-w-0">
-              <span className="block text-[12.5px] font-medium text-primary-foreground/70">Racha actual</span>
+              <span className="block text-[12.5px] font-medium text-primary-foreground/70">
+                Racha actual
+              </span>
               <span className="block font-display text-[26px] font-extrabold leading-tight text-primary-foreground">
                 {streak} {streak === 1 ? "día" : "días"}
               </span>
@@ -94,7 +123,9 @@ export function JourneyHeader({
           </div>
           <div className="shrink-0 border-l border-primary-foreground/12 pl-4 text-right">
             <p className="text-[12px] text-primary-foreground/65">+{missing} días para</p>
-            <p className="font-display text-[13.5px] font-bold leading-tight text-gold">{next.title}</p>
+            <p className="font-display text-[13.5px] font-bold leading-tight text-gold">
+              {next.title}
+            </p>
             <span className="mt-1.5 inline-grid h-9 w-9 place-items-center rounded-[10px] border border-gold/50 bg-gold/10 text-gold">
               <next.Icon className="h-4 w-4" />
             </span>
@@ -132,7 +163,10 @@ export function JourneyHeader({
                 <li
                   key={m.days}
                   className="flex w-full flex-col items-center"
-                  style={{ transform: `translateX(${offset}px)`, animation: `fade-in .45s ease-out ${i * 60}ms both` }}
+                  style={{
+                    transform: `translateX(${offset}px)`,
+                    animation: `fade-in .45s ease-out ${i * 60}ms both`,
+                  }}
                 >
                   <span
                     className={cn(
@@ -205,7 +239,9 @@ export function JourneyHeader({
                     {isNext ? `${streak} / ${m.days} días` : m.note}
                   </span>
                 </span>
-                {!reached && !isNext && <Lock className="h-4 w-4 shrink-0 text-primary-foreground/35" />}
+                {!reached && !isNext && (
+                  <Lock className="h-4 w-4 shrink-0 text-primary-foreground/35" />
+                )}
                 {reached && <span className="text-[11px] font-bold text-gold">Logrado</span>}
               </li>
             );
@@ -221,9 +257,14 @@ export function JourneyHeader({
           </span>
           <span className="min-w-0">
             <span className="block text-[12px] text-primary-foreground/65">Próximo desbloqueo</span>
-            <span className="block font-display text-[19px] font-extrabold leading-tight text-gold">{next.title}</span>
+            <span className="block font-display text-[19px] font-extrabold leading-tight text-gold">
+              {next.title}
+            </span>
             <span className="mt-1.5 block h-2 w-[120px] overflow-hidden rounded-full bg-primary-foreground/12">
-              <span className="block h-full rounded-full bg-brand-gradient" style={{ width: `${nextPct}%` }} />
+              <span
+                className="block h-full rounded-full bg-brand-gradient"
+                style={{ width: `${nextPct}%` }}
+              />
             </span>
           </span>
         </div>
@@ -250,7 +291,9 @@ export function JourneyHeader({
               {completedCount} prácticas completadas en total
             </span>
           </span>
-          <span className="text-[12.5px] font-bold text-primary-foreground/80">{weekCount} / 7 días</span>
+          <span className="text-[12.5px] font-bold text-primary-foreground/80">
+            {weekCount} / 7 días
+          </span>
         </div>
         <div className="mt-3 grid grid-cols-7 gap-1.5">
           {week.map(({ d, iso }) => {
@@ -267,7 +310,9 @@ export function JourneyHeader({
                 >
                   {d.getDate()}
                 </span>
-                <span className="text-[9.5px] text-primary-foreground/50">{fmtDate(d).split(" ")[1]}</span>
+                <span className="text-[9.5px] text-primary-foreground/50">
+                  {fmtDate(d).split(" ")[1]}
+                </span>
               </div>
             );
           })}
