@@ -74,7 +74,6 @@ export function JourneyHeader({
 
   return (
     <section className="relative">
-
       {/* Encabezado */}
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
         <div className="min-w-0">

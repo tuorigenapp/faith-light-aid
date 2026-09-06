@@ -337,7 +337,6 @@ function Ejercicios() {
   );
 }
 
-
 function ExerciseModal({
   exercise,
   completed,
