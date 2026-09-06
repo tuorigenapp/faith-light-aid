@@ -6,7 +6,6 @@ import { useMemo, useState } from "react";
 import {
   Check,
   Clock,
-  Dumbbell,
   Lock,
   Sparkles,
   X,
