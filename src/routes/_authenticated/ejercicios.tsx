@@ -6,7 +6,6 @@ import { useMemo, useState } from "react";
 import {
   Check,
   Clock,
-  Dumbbell,
   Lock,
   Sparkles,
   X,
@@ -336,7 +335,6 @@ function Ejercicios() {
     </div>
   );
 }
-
 
 function ExerciseModal({
   exercise,
