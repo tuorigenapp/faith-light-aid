@@ -51,6 +51,7 @@ import { Route as AuthenticatedJuegosIndexRouteImport } from './routes/_authenti
 import { Route as ApiPublicVapidKeyRouteImport } from './routes/api/public/vapid-key'
 import { Route as ApiPublicPushDailyRouteImport } from './routes/api/public/push-daily'
 import { Route as ApiPublicPushBroadcastRouteImport } from './routes/api/public/push-broadcast'
+import { Route as ApiPublicMinistracionTeaserRouteImport } from './routes/api/public/ministracion-teaser'
 import { Route as ApiPublicMarketingDispatchRouteImport } from './routes/api/public/marketing-dispatch'
 import { Route as AuthenticatedVisualizaLimpiezaRouteImport } from './routes/_authenticated/visualiza.limpieza'
 import { Route as AuthenticatedVisualizaIdentidadRouteImport } from './routes/_authenticated/visualiza.identidad'
@@ -280,6 +281,12 @@ const ApiPublicPushBroadcastRoute = ApiPublicPushBroadcastRouteImport.update({
   path: '/api/public/push-broadcast',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicMinistracionTeaserRoute =
+  ApiPublicMinistracionTeaserRouteImport.update({
+    id: '/api/public/ministracion-teaser',
+    path: '/api/public/ministracion-teaser',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicMarketingDispatchRoute =
   ApiPublicMarketingDispatchRouteImport.update({
     id: '/api/public/marketing-dispatch',
@@ -410,6 +417,7 @@ export interface FileRoutesByFullPath {
   '/visualiza/identidad': typeof AuthenticatedVisualizaIdentidadRoute
   '/visualiza/limpieza': typeof AuthenticatedVisualizaLimpiezaRoute
   '/api/public/marketing-dispatch': typeof ApiPublicMarketingDispatchRoute
+  '/api/public/ministracion-teaser': typeof ApiPublicMinistracionTeaserRoute
   '/api/public/push-broadcast': typeof ApiPublicPushBroadcastRoute
   '/api/public/push-daily': typeof ApiPublicPushDailyRoute
   '/api/public/vapid-key': typeof ApiPublicVapidKeyRoute
@@ -466,6 +474,7 @@ export interface FileRoutesByTo {
   '/visualiza/identidad': typeof AuthenticatedVisualizaIdentidadRoute
   '/visualiza/limpieza': typeof AuthenticatedVisualizaLimpiezaRoute
   '/api/public/marketing-dispatch': typeof ApiPublicMarketingDispatchRoute
+  '/api/public/ministracion-teaser': typeof ApiPublicMinistracionTeaserRoute
   '/api/public/push-broadcast': typeof ApiPublicPushBroadcastRoute
   '/api/public/push-daily': typeof ApiPublicPushDailyRoute
   '/api/public/vapid-key': typeof ApiPublicVapidKeyRoute
@@ -525,6 +534,7 @@ export interface FileRoutesById {
   '/_authenticated/visualiza/identidad': typeof AuthenticatedVisualizaIdentidadRoute
   '/_authenticated/visualiza/limpieza': typeof AuthenticatedVisualizaLimpiezaRoute
   '/api/public/marketing-dispatch': typeof ApiPublicMarketingDispatchRoute
+  '/api/public/ministracion-teaser': typeof ApiPublicMinistracionTeaserRoute
   '/api/public/push-broadcast': typeof ApiPublicPushBroadcastRoute
   '/api/public/push-daily': typeof ApiPublicPushDailyRoute
   '/api/public/vapid-key': typeof ApiPublicVapidKeyRoute
@@ -584,6 +594,7 @@ export interface FileRouteTypes {
     | '/visualiza/identidad'
     | '/visualiza/limpieza'
     | '/api/public/marketing-dispatch'
+    | '/api/public/ministracion-teaser'
     | '/api/public/push-broadcast'
     | '/api/public/push-daily'
     | '/api/public/vapid-key'
@@ -640,6 +651,7 @@ export interface FileRouteTypes {
     | '/visualiza/identidad'
     | '/visualiza/limpieza'
     | '/api/public/marketing-dispatch'
+    | '/api/public/ministracion-teaser'
     | '/api/public/push-broadcast'
     | '/api/public/push-daily'
     | '/api/public/vapid-key'
@@ -698,6 +710,7 @@ export interface FileRouteTypes {
     | '/_authenticated/visualiza/identidad'
     | '/_authenticated/visualiza/limpieza'
     | '/api/public/marketing-dispatch'
+    | '/api/public/ministracion-teaser'
     | '/api/public/push-broadcast'
     | '/api/public/push-daily'
     | '/api/public/vapid-key'
@@ -726,6 +739,7 @@ export interface RootRouteChildren {
   ApiPatronesRoute: typeof ApiPatronesRoute
   ApiStagePackRoute: typeof ApiStagePackRoute
   ApiPublicMarketingDispatchRoute: typeof ApiPublicMarketingDispatchRoute
+  ApiPublicMinistracionTeaserRoute: typeof ApiPublicMinistracionTeaserRoute
   ApiPublicPushBroadcastRoute: typeof ApiPublicPushBroadcastRoute
   ApiPublicPushDailyRoute: typeof ApiPublicPushDailyRoute
   ApiPublicVapidKeyRoute: typeof ApiPublicVapidKeyRoute
@@ -1029,6 +1043,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPushBroadcastRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/ministracion-teaser': {
+      id: '/api/public/ministracion-teaser'
+      path: '/api/public/ministracion-teaser'
+      fullPath: '/api/public/ministracion-teaser'
+      preLoaderRoute: typeof ApiPublicMinistracionTeaserRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/marketing-dispatch': {
       id: '/api/public/marketing-dispatch'
       path: '/api/public/marketing-dispatch'
@@ -1275,6 +1296,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPatronesRoute: ApiPatronesRoute,
   ApiStagePackRoute: ApiStagePackRoute,
   ApiPublicMarketingDispatchRoute: ApiPublicMarketingDispatchRoute,
+  ApiPublicMinistracionTeaserRoute: ApiPublicMinistracionTeaserRoute,
   ApiPublicPushBroadcastRoute: ApiPublicPushBroadcastRoute,
   ApiPublicPushDailyRoute: ApiPublicPushDailyRoute,
   ApiPublicVapidKeyRoute: ApiPublicVapidKeyRoute,
