@@ -6,7 +6,7 @@ import {
   Home, MessageCircle, Layers, BookHeart, Dumbbell,
   CreditCard, User as UserIcon, Shield, LogOut, Sun, Moon, X,
   Headphones, TreeDeciduous, Trophy, HeartHandshake, Sparkles,
-  MoveUpRight, Route as RouteIcon, Leaf,
+  MoveUpRight, Route as RouteIcon, Leaf, Users,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -45,6 +45,7 @@ const TOP_CHIPS = [
   { to: "/categorias", label: "Categorías", icon: Layers },
   { to: "/explorar", label: "Explorar", icon: Sparkles },
   { to: "/ministracion", label: "Dios te dice hoy", icon: Sparkles },
+  { to: "/comunidad", label: "Comunidad", icon: Users },
   { to: "/arbol", label: "Mi árbol", icon: TreeDeciduous },
   { to: "/visualiza", label: "Vívelo", icon: Headphones },
   { to: "/diario", label: "Diario", icon: BookHeart },
@@ -64,6 +65,7 @@ const FULL_NAV = [
   { to: "/patrones", label: "Patrones familiares", icon: Sparkles },
   { to: "/categorias", label: "Todas las categorías", icon: Layers },
   { to: "/explorar", label: "Explorar todo", icon: Sparkles },
+  { to: "/comunidad", label: "Comunidad (preguntas y respuestas)", icon: Users },
   { to: "/arbol", label: "Mi árbol genealógico", icon: TreeDeciduous },
   { to: "/etapas", label: "Mi camino (etapas)", icon: Layers },
   { to: "/visualiza", label: "Visualízalo y Vívelo", icon: Headphones },

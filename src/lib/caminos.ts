@@ -3,6 +3,8 @@ import bGlowHombre from "@/assets/banner-glow-hombre.png";
 import bGlowMujer from "@/assets/banner-glow-mujer.png";
 import bPermiso from "@/assets/banner-permiso.png";
 import bMagnetico from "@/assets/banner-magnetico.png";
+import bDepresion from "@/assets/banner-depresion.png";
+import bNarcisista from "@/assets/banner-narcisista.png";
 
 export const CAMINO_TOTAL_DAYS = 8;
 /** Costo en hojas para abrir la semana completa (los 7 días restantes). */
@@ -126,6 +128,46 @@ export const CAMINOS: Camino[] = [
       { day: 6, title: "Habla claro sin pelear", focus: "comunicación", insignia: "Voz firme" },
       { day: 7, title: "Decide sin buscar aprobación", focus: "decisión", insignia: "Decisión libre" },
       { day: 8, title: "Existir sin pedir permiso", focus: "consolidación", insignia: "Libertad" },
+    ],
+  },
+  {
+    id: "depresion-ansiedad",
+    title: "Salir de la depresión y la ansiedad",
+    short: "Paz para tu mente y tu cuerpo",
+    claim: "La tristeza que te apaga y el miedo que te acelera se trabajan juntos, no por separado.",
+    banner: bDepresion,
+    gradient: "from-primary via-[#61A8FF] to-accent-green",
+    tint: "text-primary",
+    scripture: { text: "No temas, porque yo estoy contigo.", ref: "Isaías 41:10" },
+    etapas: [
+      { day: 1, title: "Ponle nombre a lo que sientes", focus: "reconocimiento", insignia: "Verdad dicha" },
+      { day: 2, title: "De dónde viene tu tristeza", focus: "origen familiar", insignia: "Raíz vista" },
+      { day: 3, title: "Calma tu cuerpo primero", focus: "respiración", insignia: "Cuerpo en paz" },
+      { day: 4, title: "Corta el pensamiento que te hunde", focus: "mente", insignia: "Mente firme" },
+      { day: 5, title: "Un motivo para levantarte hoy", focus: "propósito diario", insignia: "Paso dado" },
+      { day: 6, title: "El miedo que anticipa lo peor", focus: "ansiedad", insignia: "Miedo devuelto" },
+      { day: 7, title: "Pide ayuda sin vergüenza", focus: "apoyo", insignia: "Manos tomadas" },
+      { day: 8, title: "Vivir con esperanza real", focus: "consolidación", insignia: "Luz de vuelta" },
+    ],
+  },
+  {
+    id: "salir-narcisista",
+    title: "Salir de una relación narcisista",
+    short: "Recupera tu voz y tu lugar",
+    claim: "No estás loca ni exagerada: estás cansada de sostener sola lo que dos rompieron.",
+    banner: bNarcisista,
+    gradient: "from-primary via-accent-pink to-gold",
+    tint: "text-accent-pink",
+    scripture: { text: "La verdad os hará libres.", ref: "Juan 8:32" },
+    etapas: [
+      { day: 1, title: "Lo que vives tiene nombre", focus: "reconocimiento", insignia: "Ojos abiertos" },
+      { day: 2, title: "Cómo te hicieron dudar de ti", focus: "manipulación", insignia: "Mente clara" },
+      { day: 3, title: "Deja de justificar lo que te duele", focus: "límites", insignia: "Basta dicho" },
+      { day: 4, title: "Tu plan de salida paso a paso", focus: "decisión", insignia: "Plan listo" },
+      { day: 5, title: "Corta el contacto que te vacía", focus: "distancia", insignia: "Puerta cerrada" },
+      { day: 6, title: "Sana la culpa que te dejaron", focus: "culpa", insignia: "Culpa devuelta" },
+      { day: 7, title: "Reconstruye tu propia voz", focus: "identidad", insignia: "Voz propia" },
+      { day: 8, title: "Amar sin perderte otra vez", focus: "consolidación", insignia: "Libertad" },
     ],
   },
 ];
