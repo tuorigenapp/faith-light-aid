@@ -167,7 +167,36 @@ function Visualiza() {
       params: { programaId: p.id },
       tag: "Sanación",
     }));
-    return [...methods, ...programas];
+
+    // Toda categoría y subcategoría creada desde el panel aparece aquí:
+    // se muestra con su portada, su grupo y su avance real.
+    const usedCatIds = new Set(
+      methodTargets.map((t) => t.params?.categoryId).filter(Boolean) as string[],
+    );
+    const fromDb: (UnifiedProgram & { tag: string })[] = (data?.cats ?? [])
+      .filter((c: any) => c.is_published !== false && !usedCatIds.has(c.id))
+      .map((c: any, i: number) => ({
+        key: `cat-${c.id}`,
+        title: c.title as string,
+        desc:
+          (c.subtitle as string) ||
+          (c.description as string) ||
+          "Programa guiado de 21 días con audios, práctica y evaluación.",
+        image: (c.cover_url as string) || GROUP_FALLBACK[i % GROUP_FALLBACK.length],
+        Icon: Headphones,
+        iconTint: "text-primary",
+        chipBg: "bg-primary/12",
+        gradient: "from-primary to-accent-pink",
+        tint: "text-primary",
+        emoji: "🎧",
+        days: 21,
+        done: doneByCat.get(c.id) ?? 0,
+        to: "/visualiza/$categoryId",
+        params: { categoryId: c.id as string },
+        tag: groupLabel(String(c.group_key ?? c.program_group ?? "")),
+      }));
+
+    return [...methods, ...programas, ...fromDb];
   }, [data]);
 
   const tags = ["Todos", ...Array.from(new Set(unified.map((u) => u.tag)))];
