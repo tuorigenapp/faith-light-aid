@@ -65,6 +65,7 @@ const FULL_NAV = [
   { to: "/patrones", label: "Patrones familiares", icon: Sparkles },
   { to: "/categorias", label: "Todas las categorías", icon: Layers },
   { to: "/explorar", label: "Explorar todo", icon: Sparkles },
+  { to: "/comunidad", label: "Comunidad (preguntas y respuestas)", icon: Users },
   { to: "/arbol", label: "Mi árbol genealógico", icon: TreeDeciduous },
   { to: "/etapas", label: "Mi camino (etapas)", icon: Layers },
   { to: "/visualiza", label: "Visualízalo y Vívelo", icon: Headphones },
