@@ -254,9 +254,15 @@ function Comunidad() {
      }
      function showThread(id: string) {
        if (!openPost) return;
-       setOpenThread(id);
+       const seen = new Set<string>();
+       let root = id;
+       while (repliesById.get(root)?.parent_reply_id && !seen.has(root)) {
+         seen.add(root);
+         root = repliesById.get(root)?.parent_reply_id ?? root;
+       }
+       setOpenThread(root);
        setReplyTo(null);
-       window.history.pushState(null, "", `/comunidad?post=${openPost}&thread=${id}`);
+       window.history.pushState(null, "", `/comunidad?post=${openPost}&thread=${root}`);
        window.scrollTo({ top: 0, behavior: "smooth" });
      }
      function closeThread() {
