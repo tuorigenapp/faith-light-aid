@@ -136,7 +136,7 @@ function Comunidad() {
     const { error } = mine ? await supabase.from("community_reactions").delete().eq("id", mine) : await supabase.from("community_reactions").insert({ user_id: user!.id, target_type: type, target_id: id, emoji });
     if (error) toast.error(error.message); else refresh();
   }
-  async function toggleSave(id: string) { const { error } = data?.saves.has(id) ? await supabase.from("community_saves").delete().eq("post_id", id) : await supabase.from("community_saves").insert({ user_id: user!.id, post_id: id }); if (error) toast.error(error.message); else refresh(); }
+   async function toggleSave(id: string) { const { error } = data?.saves.has(id) ? await supabase.from("community_saves").delete().eq("post_id", id) : await supabase.from("community_saves").insert({ user_id: user!.id, post_id: id }); if (error) toast.error(error.message); else refresh(); }
   async function toggleFollow(key: string) { const { error } = data?.follows.has(key) ? await supabase.from("community_follows").delete().eq("topic", key) : await supabase.from("community_follows").insert({ user_id: user!.id, topic: key }); if (error) toast.error(error.message); else refresh(); }
   async function share(id: string) { const url = `${window.location.origin}/comunidad?post=${id}`; try { if (navigator.share) await navigator.share({ title: "Comunidad ORÍGEN", url }); else { await navigator.clipboard.writeText(url); toast.success("Enlace copiado"); } } catch { /* cancelled */ } }
    async function remove(id: string) { if (!confirm("¿Borrar tu pregunta y sus respuestas?")) return; const { error } = await supabase.from("community_posts").delete().eq("id", id); if (error) toast.error(error.message); else { setOpenPost(null); refresh(); } }
