@@ -76,16 +76,18 @@ function Comunidad() {
     const paths = [...new Set([...data.posts.map(p => p.image_path), ...data.replies.flatMap(r => [r.image_path, r.audio_path])].filter((x): x is string => !!x))];
     const ids = [...new Set([...data.posts.map(p => p.author_id), ...data.replies.map(r => r.author_id)].filter((x): x is string => !!x))];
     void (async () => {
-      const [signed, profiles] = await Promise.all([paths.length ? supabase.storage.from("community-media").createSignedUrls(paths, 3600) : Promise.resolve({ data: [] }), ids.length ? supabase.from("profiles").select("id,avatar_url").in("id", ids.slice(0, 200)) : Promise.resolve({ data: [] })]);
+       const { data: session } = await supabase.auth.getSession();
+       const token = session.session?.access_token ?? "";
+       const [media, profiles] = await Promise.all([Promise.all(paths.map(async path => { const [id, type, kind] = path.split(":"); if (!id || !["post", "reply"].includes(type) || !["image", "audio"].includes(kind)) return null; const response = await fetch(`/api/community/media?type=${type}&id=${id}&kind=${kind}`, { headers: { Authorization: `Bearer ${token}` } }); return response.ok ? [path, URL.createObjectURL(await response.blob())] as const : null; })), ids.length ? supabase.from("profiles").select("id,avatar_url").in("id", ids.slice(0, 200)) : Promise.resolve({ data: [] })]);
       if (!alive) return;
-      setMediaUrls(Object.fromEntries((signed.data ?? []).filter(v => v.signedUrl).map(v => [v.path, v.signedUrl])));
+       setMediaUrls(old => { Object.values(old).forEach(v => URL.revokeObjectURL(v)); return Object.fromEntries(media.filter((v): v is readonly [string, string] => !!v)); });
       const av = (profiles.data ?? []).filter(v => v.avatar_url) as { id: string; avatar_url: string }[];
       const avatarPaths = av.filter(v => !v.avatar_url.startsWith("http")).map(v => v.avatar_url);
       const { data: avatarSigned } = avatarPaths.length ? await supabase.storage.from("avatars").createSignedUrls(avatarPaths, 3600) : { data: [] };
       const urls = Object.fromEntries((avatarSigned ?? []).map(v => [v.path, v.signedUrl]));
       if (alive) setAvatars(Object.fromEntries(av.map(v => [v.id, urls[v.avatar_url] ?? v.avatar_url])));
     })();
-    return () => { alive = false; };
+     return () => { alive = false; };
   }, [data]);
 
   const active = data?.posts.find(p => p.id === openPost);
