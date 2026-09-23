@@ -19,13 +19,13 @@ const QUIZZES = [
   { title: "¿Cómo reconocer un avance pequeño de forma saludable?", options: ["Compararme con todos", "Restarle importancia", "Esperar a ser perfecto", "Nombrar lo que hice"], answer: 3 },
 ];
 
-async function generateQuestion(topic: string, fallback: typeof PROMPTS[number] & { answer?: number }, key?: string, quiz = false) {
+async function generateQuestion(topic: string, fallback: typeof PROMPTS[number], key?: string) {
   if (!key) return fallback;
   try {
     const response = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
       method: "POST",
       headers: { "Content-Type": "application/json", "Lovable-API-Key": key, "X-Lovable-AIG-SDK": "fetch" },
-      body: JSON.stringify({ model: "openai/gpt-6-astra", stream: true, store: false, reasoning: { effort: "low" }, input: [{ role: "user", content: [{ type: "input_text", text: quiz ? `Crea UN juego educativo de selección sobre ${topic}, en español LATAM. Devuelve SOLO JSON {"title":"pregunta de 12 a 110 caracteres","options":["opción 1","opción 2","opción 3","opción 4"],"answer":0}. answer es el índice 0 a 3 de la única respuesta correcta verificable. Opciones breves y claramente diferentes, sin diagnósticos, consejos médicos ni afirmaciones extraordinarias. Si no hay respuesta inequívoca, devuelve el mismo JSON de ejemplo con la pregunta: "¿Qué ayuda a escuchar mejor?", opciones: ["Interrumpir", "Escuchar y preguntar", "Cambiar de tema", "Adivinar lo que piensa"], answer: 1.` : `Crea UNA pregunta comunitaria de reflexión sobre ${topic}, en español LATAM. Devuelve SOLO JSON: {"title":"pregunta de 12 a 110 caracteres","options":["opción 1","opción 2","opción 3","opción 4"]}. Opciones igualmente válidas, breves, diferentes y respetuosas; evita diagnósticos, estadísticas, fuentes inventadas, religión impuesta y consejo médico. No incluyas respuesta correcta.` }] }] }),
+      body: JSON.stringify({ model: "openai/gpt-6-astra", stream: true, store: false, reasoning: { effort: "low" }, input: [{ role: "user", content: [{ type: "input_text", text: `Crea UNA pregunta comunitaria de reflexión sobre ${topic}, en español LATAM. Devuelve SOLO JSON: {"title":"pregunta de 12 a 110 caracteres","options":["opción 1","opción 2","opción 3","opción 4"]}. Opciones igualmente válidas, breves, diferentes y respetuosas; evita diagnósticos, estadísticas, fuentes inventadas, religión impuesta y consejo médico. No incluyas respuesta correcta.` }] }] }),
     });
     if (!response.ok || !response.body) return fallback;
     let buffer = "", text = "";
@@ -40,9 +40,9 @@ async function generateQuestion(topic: string, fallback: typeof PROMPTS[number] 
       }
       if (text.length > 2400) { await reader.cancel(); return fallback; }
     }
-    const parsed = JSON.parse(text.replace(/^```(?:json)?\s*|\s*```$/g, "")) as { title?: unknown; options?: unknown; answer?: unknown };
-    if (typeof parsed.title !== "string" || parsed.title.length < 12 || parsed.title.length > 110 || !Array.isArray(parsed.options) || parsed.options.length !== 4 || !parsed.options.every(o => typeof o === "string" && o.length > 1 && o.length < 85) || (quiz && (!Number.isInteger(parsed.answer) || Number(parsed.answer) < 0 || Number(parsed.answer) > 3))) return fallback;
-    return { title: parsed.title, options: parsed.options as string[], answer: quiz ? Number(parsed.answer) : undefined };
+    const parsed = JSON.parse(text.replace(/^```(?:json)?\s*|\s*```$/g, "")) as { title?: unknown; options?: unknown };
+    if (typeof parsed.title !== "string" || parsed.title.length < 12 || parsed.title.length > 110 || !Array.isArray(parsed.options) || parsed.options.length !== 4 || !parsed.options.every(o => typeof o === "string" && o.length > 1 && o.length < 85)) return fallback;
+    return { title: parsed.title, options: parsed.options as string[] };
   } catch { return fallback; }
 }
 
