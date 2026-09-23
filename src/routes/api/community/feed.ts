@@ -33,7 +33,7 @@ export const Route = createFileRoute("/api/community/feed")({ server: { handlers
   const followed = (followRows.data ?? []).map(r => r.topic);
   const blocked = (blockRows.data ?? []).map(r => r.topic);
   const noMatches = (scope === "following" && !followed.length) || (["comments", "saved"].includes(scope) && !scopeIds.length);
-  const base = db.from("community_posts").select("id,user_id,author_name,topic,title,body,created_at,is_anonymous,image_path,poll_options,source_url,is_verified,is_bot,bot_kind");
+  const base = db.from("community_posts").select("id,user_id,author_name,author_kind,topic,title,body,created_at,is_anonymous,image_path,poll_options,source_url,is_verified,is_bot,bot_kind");
   let filtered = term ? base.or(`title.ilike.%${term}%,body.ilike.%${term}%,topic.ilike.%${term}%${replyIds.length ? `,id.in.(${replyIds.join(",")})` : ""}`) : base;
   if (scope === "mine") filtered = filtered.eq("user_id", user.id);
   if (scope === "topic" && topic !== "todos") filtered = filtered.eq("topic", topic);
@@ -46,7 +46,7 @@ export const Route = createFileRoute("/api/community/feed")({ server: { handlers
    let matchingPosts = (posts.data ?? []).slice(0, limit);
    const activityIds = [...new Set((activityRows.data ?? []).map(n => n.post_id))].filter(id => !matchingPosts.some(p => p.id === id));
    if (activityIds.length) {
-     let extra = db.from("community_posts").select("id,user_id,author_name,topic,title,body,created_at,is_anonymous,image_path,poll_options,source_url,is_verified,is_bot,bot_kind").in("id", activityIds);
+     let extra = db.from("community_posts").select("id,user_id,author_name,author_kind,topic,title,body,created_at,is_anonymous,image_path,poll_options,source_url,is_verified,is_bot,bot_kind").in("id", activityIds);
      if (scope === "mine") extra = extra.eq("user_id", user.id);
      if (scope === "comments") extra = extra.in("id", scopeIds);
      if (scope === "following") extra = extra.in("topic", followed);
@@ -57,15 +57,18 @@ export const Route = createFileRoute("/api/community/feed")({ server: { handlers
    }
   const ids = new Set(matchingPosts.map(p => p.id));
   const [replies, votes] = await Promise.all([
-    ids.size ? db.from("community_replies").select("id,post_id,parent_reply_id,user_id,author_name,body,created_at,is_anonymous,image_path,audio_path,is_bot").in("post_id", [...ids]).order("created_at").limit(3000) : Promise.resolve({ data: [], error: null }),
+    ids.size ? db.from("community_replies").select("id,post_id,parent_reply_id,user_id,author_name,author_kind,body,created_at,is_anonymous,image_path,audio_path,is_bot").in("post_id", [...ids]).order("created_at").limit(3000) : Promise.resolve({ data: [], error: null }),
     db.from("community_poll_votes").select("post_id,choice_index").eq("user_id", user.id).limit(2000),
   ]);
   if (replies.error || votes.error) return Response.json({ error: "No se pudieron cargar las respuestas." }, { status: 503 });
+  const authorIds = [...new Set([...matchingPosts.map(p => p.user_id), ...(replies.data ?? []).map(r => r.user_id)].filter((v): v is string => !!v))];
+  const levelRows = authorIds.length ? await db.from("profiles").select("id,verified_level").in("id", authorIds) : { data: [], error: null };
+  const levels = new Map((levelRows.data ?? []).map(row => [row.id, row.verified_level ?? 0]));
   const totals = ids.size ? await db.rpc("community_vote_totals", { _post_ids: [...ids] }) : { data: [], error: null };
   if (totals.error) return Response.json({ error: "No se pudieron cargar los resultados de las encuestas." }, { status: 503 });
   return Response.json({
-    posts: matchingPosts.map(p => ({ id: p.id, author_id: p.is_anonymous || p.is_bot ? null : p.user_id, mine: !p.is_bot && p.user_id === user.id, author_name: p.is_anonymous ? "Alma anónima" : p.author_name, topic: p.topic, title: p.title, body: p.body, created_at: p.created_at, is_anonymous: p.is_anonymous, image_path: p.image_path ? `${p.id}:post:image` : null, poll_options: p.poll_options, source_url: p.source_url, is_verified: p.is_verified, is_bot: p.is_bot, bot_kind: p.bot_kind })),
-    replies: (replies.data ?? []).filter(r => ids.has(r.post_id)).map(r => ({ id: r.id, post_id: r.post_id, parent_reply_id: r.parent_reply_id, author_id: r.is_anonymous || r.is_bot ? null : r.user_id, mine: !r.is_bot && r.user_id === user.id, author_name: r.is_anonymous ? "Alma anónima" : r.author_name, body: r.body, created_at: r.created_at, is_anonymous: r.is_anonymous, image_path: r.image_path ? `${r.id}:reply:image` : null, audio_path: !r.image_path && r.audio_path ? `${r.id}:reply:audio` : null, is_bot: r.is_bot })),
+    posts: matchingPosts.map(p => ({ id: p.id, author_id: p.is_anonymous || p.is_bot ? null : p.user_id, mine: !p.is_bot && p.user_id === user.id, author_name: p.is_anonymous ? "Alma anónima" : p.author_name, topic: p.topic, title: p.title, body: p.body, created_at: p.created_at, is_anonymous: p.is_anonymous, image_path: p.image_path ? `${p.id}:post:image` : null, poll_options: p.poll_options, source_url: p.source_url, is_verified: p.is_verified, is_bot: p.is_bot, bot_kind: p.bot_kind, author_kind: p.author_kind ?? (p.is_bot ? "ai" : "user"), author_level: p.is_anonymous || p.is_bot ? 0 : levels.get(p.user_id ?? "") ?? 0 })),
+    replies: (replies.data ?? []).filter(r => ids.has(r.post_id)).map(r => ({ id: r.id, post_id: r.post_id, parent_reply_id: r.parent_reply_id, author_id: r.is_anonymous || r.is_bot ? null : r.user_id, mine: !r.is_bot && r.user_id === user.id, author_name: r.is_anonymous ? "Alma anónima" : r.author_name, body: r.body, created_at: r.created_at, is_anonymous: r.is_anonymous, image_path: r.image_path ? `${r.id}:reply:image` : null, audio_path: !r.image_path && r.audio_path ? `${r.id}:reply:audio` : null, is_bot: r.is_bot, author_kind: r.author_kind ?? (r.is_bot ? "ai" : "user"), author_level: r.is_anonymous || r.is_bot ? 0 : levels.get(r.user_id ?? "") ?? 0 })),
     votes: votes.data ?? [],
     totals: totals.data ?? [],
     hasMore: (posts.data?.length ?? 0) === limit + 1,
