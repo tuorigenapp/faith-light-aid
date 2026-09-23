@@ -4,6 +4,9 @@
 
 @custom-variant dark (&:is(.dark *));
 
+body.community-reading .community-reading-hide { display: none !important; }
+body.community-reading .community-main { padding-bottom: 0; }
+
 @theme inline {
   --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Sora", "Manrope", ui-sans-serif, system-ui, sans-serif;

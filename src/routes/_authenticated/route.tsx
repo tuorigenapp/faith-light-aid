@@ -82,7 +82,7 @@ function AuthLayout() {
   return (
     <PlayerProvider>
       <AuthLayoutInner />
-      <MiniPlayer />
+      <div className="community-reading-hide"><MiniPlayer /></div>
     </PlayerProvider>
   );
 }
@@ -90,6 +90,7 @@ function AuthLayout() {
 function AuthLayoutInner() {
   const { user } = useAuth();
   const location = useLocation();
+  const isCommunity = location.pathname === "/comunidad";
   const navigate = useNavigate();
   const qc = useQueryClient();
   const { theme, toggle } = useTheme();
@@ -171,7 +172,7 @@ function AuthLayoutInner() {
   return (
     <div className="min-h-screen flex bg-aura-top text-foreground">
       {/* Desktop sidebar */}
-      <aside className="hidden lg:flex sticky top-0 h-screen w-72 bg-white/70 backdrop-blur border-r border-border flex-col z-30">
+       <aside className="community-reading-hide hidden lg:flex sticky top-0 h-screen w-72 bg-white/70 backdrop-blur border-r border-border flex-col z-30">
         <div className="p-5 border-b border-border">
           <Link to="/dashboard" className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-2xl bg-brand-gradient shadow-glow grid place-items-center text-white font-display font-bold">O</div>
@@ -256,7 +257,7 @@ function AuthLayoutInner() {
 
       <div className="flex-1 min-w-0 flex flex-col">
         {/* Mobile top: una sola fila deslizante con nombre + saldo + todas las secciones */}
-        <div className="lg:hidden px-3 pt-3 pb-1">
+         <div className="community-reading-hide lg:hidden px-3 pt-3 pb-1">
           <div className="overflow-x-auto no-scrollbar">
             <ul className="flex items-center gap-2 w-max">
               {/* Nombre + saldo inline */}
@@ -331,20 +332,15 @@ function AuthLayoutInner() {
           </div>
         </div>
 
-        <main className="flex-1 pb-[calc(env(safe-area-inset-bottom)+92px)] lg:pb-0"><Outlet /></main>
+         <main className="community-main flex-1 pb-[calc(env(safe-area-inset-bottom)+92px)] lg:pb-0"><Outlet /></main>
 
         {/* Floating chat with Ruth Esther */}
-        <FloatingChatFab />
-        <FloatingHelp />
-        <FloatingRouletteFab />
-        <LiveActivityToasts />
-        <SatisfactionPulse />
-        <MotivationalReminders />
+         {!isCommunity && <><FloatingChatFab /><FloatingHelp /><FloatingRouletteFab /><LiveActivityToasts /><SatisfactionPulse /><MotivationalReminders /></>}
 
 
         {/* Mobile bottom nav — con botón central O */}
         <nav
-          className="lg:hidden fixed bottom-3 inset-x-3 z-30"
+           className="community-reading-hide lg:hidden fixed bottom-3 inset-x-3 z-30"
           style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
           aria-label="Navegación principal"
         >

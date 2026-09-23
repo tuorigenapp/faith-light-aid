@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
   Link,
+  useLocation,
   createRootRouteWithContext,
   useRouter,
   HeadContent,
@@ -129,10 +130,15 @@ function RootComponent() {
       <ThemeProvider>
         <VoiceProvider>
           <Outlet />
-          <Toaster richColors position="top-center" />
+          <AppToaster />
           <Analytics />
         </VoiceProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );
+}
+
+function AppToaster() {
+  const location = useLocation();
+  return location.pathname === "/comunidad" ? null : <Toaster richColors position="top-center" />;
 }
