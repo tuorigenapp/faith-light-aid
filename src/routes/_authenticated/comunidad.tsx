@@ -237,16 +237,21 @@ function Comunidad() {
      const { error } = await supabase.from("community_reports").insert({ reporter_id: user!.id, target_type: type, target_id: id, reason: reason.trim().slice(0, 500) });
      if (error) toast.error(error.message); else toast.success("Enviado al equipo de moderación.");
    }
-   const [voteResults, setVoteResults] = useState<Record<string, { correct: boolean | null; answer: number | null }>>({});
+    const [voteResults, setVoteResults] = useState<Record<string, { correct: boolean | null; answer: number | null }>>({});
+    const [voting, setVoting] = useState<string | null>(null);
    async function vote(id: string, choice: number) {
+      if (voting || data?.votes.has(id)) return;
+      setVoting(id);
+      try {
      const { data: session } = await supabase.auth.getSession();
      const res = await fetch("/api/community/vote", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.session?.access_token ?? ""}` }, body: JSON.stringify({ postId: id, choice }) });
       const result = await res.json();
-     if (!res.ok) return toast.error(result.error ?? "No se pudo registrar tu respuesta.");
+      if (!res.ok) return toast.error(result.error ?? "No se pudo registrar tu respuesta.");
       setVoteResults(v => ({ ...v, [id]: result }));
       qc.setQueriesData<{ votes: Map<string, number>; totals: { post_id: string; choice_index: number; vote_count: number }[] }>( { queryKey: ["comunidad"] }, old => old ? { ...old, votes: new Map(old.votes).set(id, choice), totals: [...old.totals.filter(v => v.post_id !== id), ...(result.totals ?? [])] } : old);
       refresh();
      toast.success(result.correct === null ? "Gracias por participar." : result.correct ? "¡Respuesta correcta!" : "Sigue intentando en la próxima pregunta.");
+      } catch { toast.error("No se pudo registrar tu respuesta. Inténtalo de nuevo."); } finally { setVoting(null); }
    }
    async function startRecording() {
      if (recording) return;
@@ -278,8 +283,8 @@ function Comunidad() {
   function PollChoices({ post }: { post: Post }) {
     if (!post.poll_options) return null;
     const { counts, total } = pollStats(post);
-    const voted = data?.votes.has(post.id);
-     return <div className="mt-4 space-y-2.5">{post.poll_options.map((option, i) => { const percent = total ? Math.round(counts[i] / total * 100) : 0; const selected = data?.votes.get(post.id) === i; return <Button key={i} type="button" variant="outline" disabled={voted} onClick={() => void vote(post.id, i)} className={`relative flex min-h-14 h-auto w-full justify-start overflow-hidden rounded-xl border-0 bg-muted p-0 text-left text-sm font-normal whitespace-normal shadow-none ${selected ? "ring-2 ring-primary text-primary font-semibold" : ""}`}><span className="absolute inset-y-0 left-0 bg-primary/15 transition-all duration-300" style={{ width: voted ? `${percent}%` : "0%" }} /><span className="relative flex w-full items-center justify-between gap-3 px-4 py-3"><span className="min-w-0 break-words">{option}{selected && <span className="ml-2 text-xs">· Tu elección</span>}</span>{voted && <strong className="shrink-0">{percent} %</strong>}</span></Button>; })}<p role="status" className="text-xs text-muted-foreground">{voted ? `${total} ${total === 1 ? "voto" : "votos"} · ${voteResults[post.id]?.correct === false ? `La opción correcta era ${post.poll_options[voteResults[post.id].answer ?? 0]}.` : voteResults[post.id]?.correct ? "¡Correcto!" : "Tu elección quedó registrada."}` : "Elige una opción. Solo puedes votar una vez."}</p></div>;
+     const voted = data?.votes.has(post.id);
+      return <div className="mt-4 space-y-2.5">{post.poll_options.map((option, i) => { const percent = total ? Math.round(counts[i] / total * 100) : 0; const selected = data?.votes.get(post.id) === i; return <Button key={i} type="button" variant="outline" disabled={voted || !!voting} onClick={() => void vote(post.id, i)} className={`relative flex min-h-14 h-auto w-full justify-start overflow-hidden rounded-xl border-0 bg-muted p-0 text-left text-sm font-normal whitespace-normal shadow-none ${selected ? "ring-2 ring-primary text-primary font-semibold" : ""}`}><span className="absolute inset-y-0 left-0 bg-primary/15 transition-all duration-300" style={{ width: voted ? `${percent}%` : "0%" }} /><span className="relative flex w-full items-center justify-between gap-3 px-4 py-3"><span className="min-w-0 break-words">{option}{selected && <span className="ml-2 text-xs">· Tu elección</span>}</span>{voted && <strong className="shrink-0">{percent} %</strong>}</span></Button>; })}<p role="status" className="text-xs text-muted-foreground">{voted ? `${total} ${total === 1 ? "voto" : "votos"} · ${voteResults[post.id]?.correct === false ? `La opción correcta era ${post.poll_options[voteResults[post.id].answer ?? 0]}.` : voteResults[post.id]?.correct ? "¡Correcto!" : "Tu elección quedó registrada."}` : "Elige una opción. Solo puedes votar una vez."}</p></div>;
   }
    function renderThread(parent: string | null = null, depth = 0): React.ReactNode {
     const items = [...(grouped.get(parent ?? "root") ?? [])];
