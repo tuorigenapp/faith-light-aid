@@ -139,7 +139,14 @@ function Comunidad() {
   async function toggleSave(id: string) { const { error } = data?.saves.has(id) ? await supabase.from("community_saves").delete().eq("post_id", id) : await supabase.from("community_saves").insert({ user_id: user!.id, post_id: id }); if (error) toast.error(error.message); else refresh(); }
   async function toggleFollow(key: string) { const { error } = data?.follows.has(key) ? await supabase.from("community_follows").delete().eq("topic", key) : await supabase.from("community_follows").insert({ user_id: user!.id, topic: key }); if (error) toast.error(error.message); else refresh(); }
   async function share(id: string) { const url = `${window.location.origin}/comunidad?post=${id}`; try { if (navigator.share) await navigator.share({ title: "Comunidad ORÍGEN", url }); else { await navigator.clipboard.writeText(url); toast.success("Enlace copiado"); } } catch { /* cancelled */ } }
-  async function remove(id: string) { if (!confirm("¿Borrar tu pregunta y sus respuestas?")) return; const { error } = await supabase.from("community_posts").delete().eq("id", id); if (error) toast.error(error.message); else { setOpenPost(null); refresh(); } }
+   async function remove(id: string) { if (!confirm("¿Borrar tu pregunta y sus respuestas?")) return; const { error } = await supabase.from("community_posts").delete().eq("id", id); if (error) toast.error(error.message); else { setOpenPost(null); refresh(); } }
+   async function report(type: "post" | "reply", id: string) {
+     const reason = window.prompt("¿Por qué debemos revisar este contenido?");
+     if (!reason) return;
+     if (reason.trim().length < 5) return toast.error("Describe el motivo con al menos cinco caracteres.");
+     const { error } = await supabase.from("community_reports").insert({ reporter_id: user!.id, target_type: type, target_id: id, reason: reason.trim().slice(0, 500) });
+     if (error) toast.error(error.message); else toast.success("Enviado al equipo de moderación.");
+   }
   async function startRecording() {
     if (recording) { recorder.current?.stop(); return; }
     try {
