@@ -105,6 +105,7 @@ function Comunidad() {
   const { data: notifications = [] } = useCommunityNotifications(user?.id);
   const markRead = useMarkCommunityRead(user?.id);
   const [acknowledged, setAcknowledged] = useState<Record<string, true>>({});
+  const [justRead, setJustRead] = useState<Record<string, true>>({});
   const [tab, setTab] = useState<"feed" | "topics" | "saved" | "mine" | "following" | "comments">("feed");
   const [topic, setTopic] = useState("todos");
   const [blockTopic, setBlockTopic] = useState<string | null>(null);
@@ -184,14 +185,15 @@ function Comunidad() {
       const posts = (data?.posts ?? []).filter(p => (tab !== "feed" || topic === "todos" || p.topic === topic) && searchTerm === search.trim());
       if (!["mine", "comments", "following", "feed"].includes(tab) || searchTerm) return posts;
       const newest = new Map<string, number>();
-      for (const n of notifications) if (n.bucket === tab && !acknowledged[n.id]) newest.set(n.post_id, Math.max(newest.get(n.post_id) ?? 0, Date.parse(n.created_at)));
+      for (const n of notifications) if (n.bucket === tab && (!acknowledged[n.id] || justRead[n.post_id])) newest.set(n.post_id, Math.max(newest.get(n.post_id) ?? 0, Date.parse(n.created_at)));
       return [...posts].sort((a, b) => (newest.get(b.id) ?? 0) - (newest.get(a.id) ?? 0) || Date.parse(b.created_at) - Date.parse(a.created_at));
-    }, [data, topic, tab, search, searchTerm, notifications, acknowledged]);
+    }, [data, topic, tab, search, searchTerm, notifications, acknowledged, justRead]);
     function openConversation(id: string) {
       setOpenPost(id);
       window.history.replaceState(null, "", `/comunidad?post=${id}`);
       const ids = notifications.filter(n => n.post_id === id).map(n => n.id);
       if (ids.length) {
+        setJustRead(previous => ({ ...previous, [id]: true }));
         setAcknowledged(previous => ({ ...previous, ...Object.fromEntries(ids.map(item => [item, true as const])) }));
         void markRead(id).catch(() => { setAcknowledged(previous => { const next = { ...previous }; ids.forEach(item => delete next[item]); return next; }); toast.error("No se pudo marcar la actividad como leída."); });
       }
@@ -354,7 +356,7 @@ function Comunidad() {
        </div>}
     </> : <>
       <section className="rounded-3xl bg-gradient-to-br from-[#423075] via-primary to-[#df92be] p-7 text-white shadow-glow"><span className="text-xs font-semibold uppercase tracking-widest">Un espacio para acompañarnos</span><h1 className="mt-3 font-display text-3xl font-extrabold">No tienes que vivirlo en soledad.</h1><p className="mt-2 max-w-lg text-sm leading-relaxed text-white/90">Pregunta, comparte y encuentra a otras personas que están atravesando caminos parecidos. La comunidad es libre para todos.</p></section>
-       <div className="mt-5 flex gap-2 overflow-x-auto border-b border-border pb-2">{([ ["feed", "Descubrir"], ["topics", "Temas"], ["mine", "Mis publicaciones"], ["following", "Siguiendo"], ["comments", "Mis comentarios"], ["saved", "Guardados"] ] as const).map(([key, label]) => <Button key={key} type="button" variant={tab === key ? "secondary" : "ghost"} onClick={() => { setTab(key); setTopic("todos"); setPage(0); }} className={`min-h-11 shrink-0 rounded-full px-4 text-xs sm:text-sm ${tab === key ? "text-primary" : "text-muted-foreground"}`}>{label}{["feed", "mine", "comments", "following"].includes(key) && unreadIn(key).length > 0 && <span aria-label="Actividad nueva" className="ml-1 inline-block h-2 w-2 rounded-full bg-destructive" />}</Button>)}</div>
+       <div className="mt-5 flex gap-2 overflow-x-auto border-b border-border pb-2">{([ ["feed", "Descubrir"], ["topics", "Temas"], ["mine", "Mis publicaciones"], ["following", "Siguiendo"], ["comments", "Mis comentarios"], ["saved", "Guardados"] ] as const).map(([key, label]) => <Button key={key} type="button" variant={tab === key ? "secondary" : "ghost"} onClick={() => { setTab(key); setTopic("todos"); setPage(0); setJustRead({}); }} className={`min-h-11 shrink-0 rounded-full px-4 text-xs sm:text-sm ${tab === key ? "text-primary" : "text-muted-foreground"}`}>{label}{["feed", "mine", "comments", "following"].includes(key) && unreadIn(key).length > 0 && <span aria-label="Actividad nueva" className="ml-1 inline-block h-2 w-2 rounded-full bg-destructive" />}</Button>)}</div>
        <div className="relative mt-5"><Search className="absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" /><input type="search" aria-label="Buscar preguntas, respuestas y temas" value={search} onChange={e => { setSearch(e.target.value); if (e.target.value.trim()) setTab("feed"); }} placeholder="Busca temas, preguntas o respuestas…" className="h-12 w-full rounded-xl border border-border bg-card pl-10 pr-3 text-sm" /></div>
        {tab === "topics" ? <div className="mt-5 grid gap-3 sm:grid-cols-2">{TOPICS.map(t => <article key={t.key} className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4"><span className="grid h-14 w-14 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary"><img src={t.image} alt="" className="h-full w-full rounded-xl object-cover" /></span><div className="min-w-0 flex-1"><h2 className="font-bold">{t.label} <ShieldCheck className="inline h-4 w-4 text-primary" /></h2><p className="text-xs text-muted-foreground">{t.detail}</p><Button variant="link" onClick={() => { setTopic(t.key); setTab("feed"); setPage(0); }} className="mt-1 min-h-11 px-0 text-xs">Ver conversaciones →</Button></div><div className="flex flex-col gap-1"><Button type="button" variant="outline" onClick={() => void toggleFollow(t.key)} className="min-h-11 rounded-full px-3 text-xs text-primary">{data?.follows.has(t.key) ? "Siguiendo" : "Seguir"}</Button>{!data?.blocks.has(t.key) && <Button type="button" variant="ghost" onClick={() => setBlockTopic(t.key)} className="min-h-11 px-2 text-xs text-muted-foreground">Bloquear</Button>}</div></article>)}</div> : <>
            {tab === "feed" && topic !== "todos" && <div className="mt-4 flex items-center gap-3 rounded-xl bg-secondary/40 p-3"><img src={TOPICS.find(t => t.key === topic)?.image} alt="" className="h-11 w-11 rounded-lg object-cover" /><strong className="min-w-0 flex-1 text-sm">{TOPICS.find(t => t.key === topic)?.label}</strong><Button type="button" variant="outline" className="min-h-11 rounded-full px-3 text-xs" onClick={() => void toggleFollow(topic)}>{data?.follows.has(topic) ? "Siguiendo" : "Seguir"}</Button>{!data?.blocks.has(topic) && <Button type="button" variant="ghost" className="min-h-11 px-2 text-xs" onClick={() => setBlockTopic(topic)}>Bloquear</Button>}</div>}
