@@ -22,6 +22,7 @@ import { PlayerProvider } from "@/lib/player";
 import { MiniPlayer } from "@/components/MiniPlayer";
 
 import { useSignedUrls } from "@/hooks/use-signed-urls";
+import { useCommunityNotifications } from "@/hooks/use-community-notifications";
 import origenIcon from "@/assets/origen-o-icon.png";
 
 
@@ -40,12 +41,11 @@ const TOP_CHIPS = [
   { to: "/dashboard", label: "Inicio", icon: Home },
   { to: "/etapas", label: "Mi Camino", icon: MoveUpRight },
   { to: "/chat", label: "Ruth Esther", icon: MessageCircle },
-  { to: "/pareja", label: "Pareja", icon: HeartHandshake },
+  { to: "/comunidad", label: "Comunidad", icon: Users },
   { to: "/patrones", label: "Patrones", icon: Sparkles },
   { to: "/categorias", label: "Categorías", icon: Layers },
   { to: "/explorar", label: "Explorar", icon: Sparkles },
   { to: "/ministracion", label: "Dios te dice hoy", icon: Sparkles },
-  { to: "/comunidad", label: "Comunidad", icon: Users },
   { to: "/arbol", label: "Mi árbol", icon: TreeDeciduous },
   { to: "/visualiza", label: "Vívelo", icon: Headphones },
   { to: "/diario", label: "Diario", icon: BookHeart },
@@ -94,6 +94,8 @@ function AuthLayoutInner() {
   const qc = useQueryClient();
   const { theme, toggle } = useTheme();
   const [open, setOpen] = useState(false);
+  const { data: communityNotifications } = useCommunityNotifications(user?.id);
+  const communityUnread = (communityNotifications?.length ?? 0) > 0;
 
   const { data: isAdmin } = useQuery({
     queryKey: ["isAdmin", user?.id],
@@ -187,7 +189,7 @@ function AuthLayoutInner() {
                   ? "bg-secondary text-primary font-semibold"
                   : "text-foreground/75 hover:bg-secondary/60 hover:text-foreground"
               )}>
-              <Icon className="w-4 h-4 shrink-0" />{label}
+               <Icon className="w-4 h-4 shrink-0" />{label}{to === "/comunidad" && communityUnread && <span aria-label="Actividad nueva" className="ml-auto h-2.5 w-2.5 rounded-full bg-destructive" />}
             </Link>
           ))}
           {isAdmin && (
@@ -230,7 +232,7 @@ function AuthLayoutInner() {
                   className={cn("flex items-center gap-3 px-3 py-3 rounded-[12px] text-sm",
                     isActive(to) ? "bg-secondary text-primary font-semibold" : "text-foreground/80 hover:bg-secondary/60"
                   )}>
-                  <Icon className="w-5 h-5" />{label}
+                   <Icon className="w-5 h-5" />{label}{to === "/comunidad" && communityUnread && <span aria-label="Actividad nueva" className="ml-auto h-2.5 w-2.5 rounded-full bg-destructive" />}
                 </Link>
               ))}
               {isAdmin && (
@@ -300,6 +302,7 @@ function AuthLayoutInner() {
                     >
                       <Icon className="w-4 h-4" />
                       {label}
+                       {to === "/comunidad" && communityUnread && <span aria-label="Actividad nueva" className="h-2.5 w-2.5 rounded-full bg-destructive" />}
                     </Link>
                   </li>
                 );
@@ -348,7 +351,7 @@ function AuthLayoutInner() {
           <div className="relative">
             <div className="grid grid-cols-5 items-center h-[68px] rounded-[28px] bg-white/95 backdrop-blur-xl border border-border shadow-[0_10px_40px_-10px_rgba(124,92,255,0.35)]">
               <BottomItem to="/etapas" label="Camino" icon={RouteIcon} isActive={isActive} />
-              <BottomItem to="/pareja" label="Pareja" icon={HeartHandshake} isActive={isActive} />
+               <BottomItem to="/comunidad" label="Comunidad" icon={Users} isActive={isActive} unread={communityUnread} />
               <div aria-hidden />
               <BottomItem to="/visualiza" label="Vívelo" icon={Headphones} isActive={isActive} />
               <BottomItem to="/perfil" label="Yo" icon={UserIcon} isActive={isActive} />
@@ -380,18 +383,19 @@ function AuthLayoutInner() {
 }
 
 function BottomItem({
-  to, label, icon: Icon, isActive,
-}: { to: string; label: string; icon: React.ComponentType<{ className?: string }>; isActive: (to: string) => boolean }) {
+  to, label, icon: Icon, isActive, unread = false,
+}: { to: string; label: string; icon: React.ComponentType<{ className?: string }>; isActive: (to: string) => boolean; unread?: boolean }) {
   const active = isActive(to);
   return (
     <Link
       to={to}
-      className={cn(
-        "h-full flex flex-col items-center justify-center gap-0.5 text-[10px] font-bold transition-colors",
+       className={cn(
+         "relative h-full flex flex-col items-center justify-center gap-0.5 text-[10px] font-bold transition-colors",
         active ? "text-primary" : "text-muted-foreground hover:text-foreground"
       )}
     >
       <Icon className={cn("w-6 h-6", active && "drop-shadow-[0_0_6px_currentColor]")} />
+       {unread && <span aria-label="Actividad nueva" className="absolute left-[60%] top-2.5 h-2.5 w-2.5 rounded-full bg-destructive ring-2 ring-card" />}
       {label}
     </Link>
   );
