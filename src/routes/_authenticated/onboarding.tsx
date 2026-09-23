@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { DiosTeDiceHoy } from "@/components/DiosTeDiceHoy";
 import { toast } from "sonner";
 import { ArrowRight, ArrowLeft, Loader2, Lock, User as UserIcon, Heart, DollarSign, Brain, Sprout, Mountain, HandHeart, Check, Play, Pause, Star } from "lucide-react";
 import { awardGems, GEM_REWARDS, HOJA_POINTS } from "@/lib/gems";
