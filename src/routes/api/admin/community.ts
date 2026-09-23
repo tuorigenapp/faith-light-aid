@@ -36,7 +36,8 @@ export const Route = createFileRoute("/api/admin/community")({ server: { handler
     if (action === "create-poll") {
       const choices = Array.isArray(options) ? options.map(o => typeof o === "string" ? o.trim() : "") : [];
       if (!topic || !["general", "familia", "pareja", "ansiedad", "fe", "logros"].includes(topic) || !title?.trim() || title.trim().length < 6 || title.trim().length > 200 || !Array.isArray(options) || choices.length < 3 || choices.length > 6 || choices.some(o => !o || o.length > 100) || new Set(choices.map(o => o.toLocaleLowerCase("es"))).size !== choices.length || (body?.length ?? 0) > 10000) return Response.json({ error: "Revisa el tema, la pregunta y las 3 a 6 opciones diferentes." }, { status: 400 });
-      ({ error } = await ctx.db.from("community_posts").insert({ user_id: null, author_name: "ORÍGEN", topic, title: title.trim(), body: body?.trim() ?? "", poll_options: choices, is_anonymous: false, is_bot: true, bot_kind: "poll" }));
+       const topicName = { general: "Para ti", familia: "Familia", pareja: "Relaciones", ansiedad: "Bienestar", fe: "Fe", logros: "Avances" }[topic as "general" | "familia" | "pareja" | "ansiedad" | "fe" | "logros"];
+       ({ error } = await ctx.db.from("community_posts").insert({ user_id: null, author_name: topicName, topic, title: title.trim(), body: body?.trim() ?? "", poll_options: choices, is_anonymous: false, is_bot: true, bot_kind: "poll" }));
     }
     else if (action === "delete-post" && id) ({ error } = await ctx.db.from("community_posts").delete().eq("id", id));
     else if (action === "delete-reply" && id) ({ error } = await ctx.db.from("community_replies").delete().eq("id", id));
