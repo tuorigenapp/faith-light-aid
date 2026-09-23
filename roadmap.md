@@ -50,3 +50,8 @@
 - [x] Mis publicaciones, Siguiendo y Mis comentarios con estados vacíos, temas identificables y contenidos completos.
 - [x] Bloquear/desbloquear temas sin ocultarlos de Temas; quitar invitaciones de pago del listado.
 - [x] Reacciones 3D familiares y botón centrado de nueva publicación; verificado en móvil y escritorio.
+
+## Corrección final — identidad de temas
+- [x] Publicaciones y encuestas automáticas muestran nombre e imagen de su tema; logo ORÍGEN reservado a respuestas automáticas.
+- [x] Las portadas usan imágenes del grupo temático correspondiente; fechas relativas conservadas.
+- [x] Ícono de Comunidad consistente con el resto de la navegación.

@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
 
 const TOPICS = ["general", "familia", "pareja", "ansiedad", "fe", "logros"];
+const TOPIC_NAMES = ["Para ti", "Familia", "Relaciones", "Bienestar", "Fe", "Avances"];
 const QUIZZES = [
   [
     { title: "Si una conversación se vuelve difícil, ¿qué ayuda a escuchar mejor?", options: ["Interrumpir", "Escuchar y preguntar", "Cambiar de tema", "Suponer lo que siente"], answer: 1 },
@@ -83,7 +84,7 @@ export const Route = createFileRoute("/api/community/daily")({ server: { handler
          const quiz = (day + moment) % 4 === 0 ? TRUE_FALSE[index] : QUIZZES[index][(moment + day) % QUIZZES[index].length];
         const title = kind === "cover" ? COVER_QUESTIONS[index][(moment + day) % 3] : quiz.title;
          const opts = kind === "poll" ? quiz.options : null;
-         const { error } = await db.from("community_posts").insert({ user_id: null, author_name: "ORÍGEN", topic, title, body: kind === "poll" ? "Elige una respuesta y descubre el resultado. Comparte tu experiencia con los demás." : COVER_INVITATIONS[(moment + day) % COVER_INVITATIONS.length], poll_options: opts, poll_answer_index: kind === "poll" ? quiz.answer : null, is_bot: true, is_verified: false, bot_slot: moment, bot_kind: kind });
+          const { error } = await db.from("community_posts").insert({ user_id: null, author_name: TOPIC_NAMES[index], topic, title, body: kind === "poll" ? "Elige una respuesta y descubre el resultado. Comparte tu experiencia con los demás." : COVER_INVITATIONS[(moment + day) % COVER_INVITATIONS.length], poll_options: opts, poll_answer_index: kind === "poll" ? quiz.answer : null, is_bot: true, is_verified: false, bot_slot: moment, bot_kind: kind });
         if (!error) created = true;
         else if (error.code !== "23505") {
           console.error("Community daily insert failed", error.code, error.message);
