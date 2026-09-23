@@ -19,6 +19,12 @@ export const Route = createFileRoute("/api/community/media")({ server: { handler
   const { data } = await db.from(table).select(column).eq("id", id).maybeSingle();
   const path = data?.[column as keyof typeof data];
   if (typeof path !== "string") return new Response(null, { status: 404 });
+  // All published conversations are open to signed-in members, but abandoned uploads
+  // and files from removed posts are not. The storage path is never returned to clients.
+  if (type === "reply") {
+    const { data: reply } = await db.from("community_replies").select("post_id").eq("id", id).maybeSingle();
+    if (!reply?.post_id || !(await db.from("community_posts").select("id").eq("id", reply.post_id).maybeSingle()).data) return new Response(null, { status: 404 });
+  }
   const { data: file, error } = await db.storage.from("community-media").download(path);
   if (error || !file) return new Response(null, { status: 404 });
   return new Response(file, { headers: { "Content-Type": file.type || (kind === "image" ? "image/jpeg" : "audio/webm"), "Cache-Control": "private, max-age=300", "X-Content-Type-Options": "nosniff" } });
