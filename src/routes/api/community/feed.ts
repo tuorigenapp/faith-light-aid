@@ -9,16 +9,34 @@ export const Route = createFileRoute("/api/community/feed")({ server: { handlers
   const { data: { user } } = await auth.auth.getUser(token);
   if (!user) return Response.json({ error: "Sesión inválida." }, { status: 401 });
   const db = createClient(url, service, { auth: { persistSession: false } });
-  const [posts, replies, votes] = await Promise.all([
-    db.from("community_posts").select("id,user_id,author_name,topic,title,body,created_at,is_anonymous,image_path,poll_options,source_url,is_verified,is_bot").order("created_at", { ascending: false }).limit(200),
-    db.from("community_replies").select("id,post_id,parent_reply_id,user_id,author_name,body,created_at,is_anonymous,image_path,audio_path,is_bot").order("created_at").limit(2000),
-    db.from("community_poll_votes").select("post_id,choice_index").eq("user_id", user.id).limit(200),
+  const query = new URL(request.url).searchParams;
+  const search = (query.get("q") ?? "").trim().slice(0, 120);
+  const page = Math.min(Math.max(Math.trunc(Number(query.get("page")) || 0), 0), 20);
+  const topicNames: Record<string, string> = { "para ti": "general", familia: "familia", relaciones: "pareja", bienestar: "ansiedad", fe: "fe", avances: "logros" };
+  const searchValue = topicNames[search.toLocaleLowerCase("es")] ?? search;
+  // Keep punctuation, wildcard and PostgREST syntax out of the OR filter.
+  const term = searchValue.replace(/[^\p{L}\p{N}\s]/gu, " ").replace(/\s+/g, " ").trim();
+  const matches = term ? await db.from("community_replies").select("post_id").ilike("body", `%${term}%`).limit(200) : { data: [], error: null };
+  const replyIds = [...new Set((matches.data ?? []).map(r => r.post_id))];
+  const base = db.from("community_posts").select("id,user_id,author_name,topic,title,body,created_at,is_anonymous,image_path,poll_options,source_url,is_verified,is_bot,bot_kind");
+  const filtered = term ? base.or(`title.ilike.%${term}%,body.ilike.%${term}%,topic.ilike.%${term}%${replyIds.length ? `,id.in.(${replyIds.join(",")})` : ""}`) : base;
+  const limit = (page + 1) * 100;
+  const posts = await filtered.order("created_at", { ascending: false }).range(0, limit);
+  if (matches.error || posts.error) return Response.json({ error: "No se pudieron cargar las conversaciones." }, { status: 503 });
+  const matchingPosts = (posts.data ?? []).slice(0, limit);
+  const ids = new Set(matchingPosts.map(p => p.id));
+  const [replies, votes] = await Promise.all([
+    ids.size ? db.from("community_replies").select("id,post_id,parent_reply_id,user_id,author_name,body,created_at,is_anonymous,image_path,audio_path,is_bot").in("post_id", [...ids]).order("created_at").limit(3000) : Promise.resolve({ data: [], error: null }),
+    db.from("community_poll_votes").select("post_id,choice_index").eq("user_id", user.id).limit(2000),
   ]);
-  if (posts.error || replies.error) return Response.json({ error: "No se pudieron cargar las conversaciones." }, { status: 503 });
-  const ids = new Set((posts.data ?? []).map(p => p.id));
+  if (replies.error || votes.error) return Response.json({ error: "No se pudieron cargar las respuestas." }, { status: 503 });
+  const totals = ids.size ? await db.rpc("community_vote_totals", { _post_ids: [...ids] }) : { data: [], error: null };
+  if (totals.error) return Response.json({ error: "No se pudieron cargar los resultados de las encuestas." }, { status: 503 });
   return Response.json({
-    posts: (posts.data ?? []).map(p => ({ id: p.id, author_id: p.is_anonymous || p.is_bot ? null : p.user_id, mine: !p.is_bot && p.user_id === user.id, author_name: p.is_anonymous ? "Alma anónima" : p.author_name, topic: p.topic, title: p.title, body: p.body, created_at: p.created_at, is_anonymous: p.is_anonymous, image_path: p.image_path ? `${p.id}:post:image` : null, poll_options: p.poll_options, source_url: p.source_url, is_verified: p.is_verified, is_bot: p.is_bot })),
-    replies: (replies.data ?? []).filter(r => ids.has(r.post_id)).map(r => ({ id: r.id, post_id: r.post_id, parent_reply_id: r.parent_reply_id, author_id: r.is_anonymous || r.is_bot ? null : r.user_id, mine: !r.is_bot && r.user_id === user.id, author_name: r.is_anonymous ? "Alma anónima" : r.author_name, body: r.body, created_at: r.created_at, is_anonymous: r.is_anonymous, image_path: r.image_path ? `${r.id}:reply:image` : null, audio_path: r.audio_path ? `${r.id}:reply:audio` : null, is_bot: r.is_bot })),
+    posts: matchingPosts.map(p => ({ id: p.id, author_id: p.is_anonymous || p.is_bot ? null : p.user_id, mine: !p.is_bot && p.user_id === user.id, author_name: p.is_anonymous ? "Alma anónima" : p.author_name, topic: p.topic, title: p.title, body: p.body, created_at: p.created_at, is_anonymous: p.is_anonymous, image_path: p.image_path ? `${p.id}:post:image` : null, poll_options: p.poll_options, source_url: p.source_url, is_verified: p.is_verified, is_bot: p.is_bot, bot_kind: p.bot_kind })),
+    replies: (replies.data ?? []).filter(r => ids.has(r.post_id)).map(r => ({ id: r.id, post_id: r.post_id, parent_reply_id: r.parent_reply_id, author_id: r.is_anonymous || r.is_bot ? null : r.user_id, mine: !r.is_bot && r.user_id === user.id, author_name: r.is_anonymous ? "Alma anónima" : r.author_name, body: r.body, created_at: r.created_at, is_anonymous: r.is_anonymous, image_path: r.image_path ? `${r.id}:reply:image` : null, audio_path: !r.image_path && r.audio_path ? `${r.id}:reply:audio` : null, is_bot: r.is_bot })),
     votes: votes.data ?? [],
+    totals: totals.data ?? [],
+    hasMore: (posts.data?.length ?? 0) === limit + 1,
   }, { headers: { "Cache-Control": "private, no-store" } });
 } } } });

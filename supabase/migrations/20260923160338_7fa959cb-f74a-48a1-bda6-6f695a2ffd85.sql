@@ -1,0 +1,3 @@
+CREATE OR REPLACE FUNCTION public.community_vote_totals(_post_ids uuid[]) RETURNS TABLE(post_id uuid, choice_index integer, vote_count bigint) LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$ SELECT v.post_id, v.choice_index, count(*)::bigint FROM public.community_poll_votes v WHERE v.post_id = ANY(_post_ids) GROUP BY v.post_id, v.choice_index $$;
+REVOKE ALL ON FUNCTION public.community_vote_totals(uuid[]) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.community_vote_totals(uuid[]) TO service_role;
