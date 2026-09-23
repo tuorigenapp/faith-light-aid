@@ -730,6 +730,25 @@ function ScreenMulti({ eyebrow, title, hint, options, values, setValues, onNext 
   );
 }
 
+/** Opciones de selección: imagen arriba, respuesta abajo, sin escribir nada. */
+const RAICES_OPCIONES = [
+  { emoji: "💔", label: "Separaciones y abandonos" },
+  { emoji: "😶‍🌫️", label: "Silencio: nadie habla de lo que dolió" },
+  { emoji: "💸", label: "Escasez y deudas que no se van" },
+  { emoji: "🍷", label: "Adicciones o descontrol" },
+  { emoji: "😠", label: "Gritos, control o maltrato" },
+  { emoji: "🙏", label: "Fe fuerte, pero mucha culpa" },
+];
+
+const RECUERDOS_OPCIONES = [
+  { emoji: "🫥", label: "Me sentí invisible" },
+  { emoji: "😰", label: "Viví con miedo en casa" },
+  { emoji: "🎒", label: "Crecí de golpe, cuidé a otros" },
+  { emoji: "🚪", label: "Alguien se fue y no volvió" },
+  { emoji: "📉", label: "Nada de lo que hacía era suficiente" },
+  { emoji: "🌤️", label: "Hubo amor, pero también mucho dolor" },
+];
+
 function ScreenRaices({ value, setValue, onNext }: { value: string; setValue: (s: string) => void; onNext: () => void }) {
   return (
     <ScreenCard>
@@ -738,16 +757,12 @@ function ScreenRaices({ value, setValue, onNext }: { value: string; setValue: (s
       </div>
       <h2 className="text-center font-display font-extrabold text-[26px] mt-4 text-[#1B1B27]">Tus raíces 🌿</h2>
       <p className="text-center text-[14px] text-[#64667A] mt-2 leading-relaxed">
-        Las historias familiares influyen en cómo vivimos hoy.
+        Toca lo que más se repite en tu familia.
       </p>
-      <p className="text-center font-display font-semibold text-[16px] mt-4 text-[#1B1B27]">
-        ¿Qué patrones has observado repetirse en tu familia o linaje?
-      </p>
-      <Textarea value={value} onChange={(e) => setValue(e.target.value)} placeholder="Escribe con libertad…"
-        className="mt-4 min-h-32 rounded-[18px] border-[#ECEEF5] bg-white text-[15px] resize-none focus-visible:ring-2 focus-visible:ring-[#7C5CFF]/25 focus-visible:border-[#7C5CFF]" />
+      <PickGrid options={RAICES_OPCIONES} value={value} setValue={setValue} />
       <div className="mt-3"><PrivacyNote /></div>
       <div className="mt-4">
-        <PrimaryButton onClick={onNext}>Continuar <ArrowRight className="w-4 h-4" /></PrimaryButton>
+        <PrimaryButton onClick={onNext} disabled={!value}>Continuar <ArrowRight className="w-4 h-4" /></PrimaryButton>
       </div>
     </ScreenCard>
   );
@@ -763,18 +778,57 @@ function ScreenRecuerdos({ value, setValue, onNext }: { value: string; setValue:
         Tus primeros recuerdos <span className="text-[#F58BCB]">♡</span>
       </h2>
       <p className="text-center text-[14px] text-[#64667A] mt-2 leading-relaxed">
-        A veces un recuerdo explica más que cientos de palabras.
+        Toca lo que más se parece a tu infancia.
       </p>
-      <p className="text-center font-display font-semibold text-[16px] mt-4 text-[#1B1B27]">
-        ¿Qué experiencia marcó tu infancia de manera profunda?
-      </p>
-      <Textarea value={value} onChange={(e) => setValue(e.target.value)} placeholder="Escribe con libertad…"
-        className="mt-4 min-h-32 rounded-[18px] border-[#ECEEF5] bg-white text-[15px] resize-none focus-visible:ring-2 focus-visible:ring-[#7C5CFF]/25 focus-visible:border-[#7C5CFF]" />
+      <PickGrid options={RECUERDOS_OPCIONES} value={value} setValue={setValue} />
       <div className="mt-3"><PrivacyNote /></div>
       <div className="mt-4">
-        <PrimaryButton onClick={onNext}>Continuar <ArrowRight className="w-4 h-4" /></PrimaryButton>
+        <PrimaryButton onClick={onNext} disabled={!value}>Continuar <ArrowRight className="w-4 h-4" /></PrimaryButton>
       </div>
     </ScreenCard>
+  );
+}
+
+/** Cuadrícula de selección múltiple: emoji grande arriba, frase corta abajo. */
+function PickGrid({
+  options,
+  value,
+  setValue,
+}: {
+  options: { emoji: string; label: string }[];
+  value: string;
+  setValue: (s: string) => void;
+}) {
+  const picked = value ? value.split(" · ") : [];
+  const toggle = (label: string) => {
+    const next = picked.includes(label) ? picked.filter((p) => p !== label) : [...picked, label];
+    setValue(next.join(" · "));
+  };
+  return (
+    <div className="mt-5 grid grid-cols-2 gap-3">
+      {options.map((o, i) => {
+        const active = picked.includes(o.label);
+        return (
+          <button
+            key={o.label}
+            type="button"
+            onClick={() => toggle(o.label)}
+            style={{ animationDelay: `${i * 50}ms` }}
+            className={cn(
+              "min-h-[104px] rounded-[16px] bg-white px-3 py-3 text-center transition active:scale-[.97] animate-in fade-in slide-in-from-bottom-3 duration-300 fill-mode-both",
+              active
+                ? "border-2 border-[#7C5CFF] shadow-[0_4px_14px_rgba(124,92,255,0.25)]"
+                : "border border-[#ECEEF5] shadow-[0_1px_3px_rgba(30,25,20,0.06)]",
+            )}
+          >
+            <span className="block text-[30px] leading-none">{o.emoji}</span>
+            <span className="mt-2 block text-[13px] font-semibold leading-snug text-[#1B1B27]">
+              {o.label}
+            </span>
+          </button>
+        );
+      })}
+    </div>
   );
 }
 
