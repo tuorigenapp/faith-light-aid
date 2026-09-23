@@ -19,14 +19,15 @@ export const Route = createFileRoute("/api/community/feed")({ server: { handlers
   const searchValue = topicNames[search.toLocaleLowerCase("es")] ?? search;
   // Keep punctuation, wildcard and PostgREST syntax out of the OR filter.
   const term = searchValue.replace(/[^\p{L}\p{N}\s]/gu, " ").replace(/\s+/g, " ").trim();
-  const [matches, followRows, blockRows, commentRows, saveRows] = await Promise.all([
+   const [matches, followRows, blockRows, commentRows, saveRows, activityRows] = await Promise.all([
     term ? db.from("community_replies").select("post_id").ilike("body", `%${term}%`).limit(200) : Promise.resolve({ data: [], error: null }),
     scope === "following" ? db.from("community_follows").select("topic").eq("user_id", user.id) : Promise.resolve({ data: [], error: null }),
     scope === "feed" ? db.from("community_blocks").select("topic").eq("user_id", user.id) : Promise.resolve({ data: [], error: null }),
     scope === "comments" ? db.from("community_replies").select("post_id").eq("user_id", user.id).limit(5000) : Promise.resolve({ data: [], error: null }),
     scope === "saved" ? db.from("community_saves").select("post_id").eq("user_id", user.id) : Promise.resolve({ data: [], error: null }),
+     !term && ["feed", "mine", "comments", "following"].includes(scope) ? db.from("community_notifications").select("post_id,created_at").eq("user_id", user.id).eq("bucket", scope).is("read_at", null).order("created_at", { ascending: false }).limit(1000) : Promise.resolve({ data: [], error: null }),
   ]);
-  if (matches.error || followRows.error || blockRows.error || commentRows.error || saveRows.error) return Response.json({ error: "No se pudieron cargar las conversaciones." }, { status: 503 });
+   if (matches.error || followRows.error || blockRows.error || commentRows.error || saveRows.error || activityRows.error) return Response.json({ error: "No se pudieron cargar las conversaciones." }, { status: 503 });
   const replyIds = [...new Set((matches.data ?? []).map(r => r.post_id))];
   const scopeIds = scope === "comments" ? [...new Set((commentRows.data ?? []).map(r => r.post_id))] : [...new Set((saveRows.data ?? []).map(r => r.post_id))];
   const followed = (followRows.data ?? []).map(r => r.topic);
@@ -42,7 +43,18 @@ export const Route = createFileRoute("/api/community/feed")({ server: { handlers
   const limit = (page + 1) * 100;
   const posts = noMatches ? { data: [], error: null } : await filtered.order("created_at", { ascending: false }).range(0, limit);
   if (matches.error || posts.error) return Response.json({ error: "No se pudieron cargar las conversaciones." }, { status: 503 });
-  const matchingPosts = (posts.data ?? []).slice(0, limit);
+   let matchingPosts = (posts.data ?? []).slice(0, limit);
+   const activityIds = [...new Set((activityRows.data ?? []).map(n => n.post_id))].filter(id => !matchingPosts.some(p => p.id === id));
+   if (activityIds.length) {
+     let extra = db.from("community_posts").select("id,user_id,author_name,topic,title,body,created_at,is_anonymous,image_path,poll_options,source_url,is_verified,is_bot,bot_kind").in("id", activityIds);
+     if (scope === "mine") extra = extra.eq("user_id", user.id);
+     if (scope === "comments") extra = extra.in("id", scopeIds);
+     if (scope === "following") extra = extra.in("topic", followed);
+     if (scope === "feed" && blocked.length) extra = extra.not("topic", "in", `(${blocked.join(",")})`);
+     const older = await extra.limit(1000);
+     if (older.error) return Response.json({ error: "No se pudieron cargar los avisos." }, { status: 503 });
+     matchingPosts = [...matchingPosts, ...(older.data ?? [])];
+   }
   const ids = new Set(matchingPosts.map(p => p.id));
   const [replies, votes] = await Promise.all([
     ids.size ? db.from("community_replies").select("id,post_id,parent_reply_id,user_id,author_name,body,created_at,is_anonymous,image_path,audio_path,is_bot").in("post_id", [...ids]).order("created_at").limit(3000) : Promise.resolve({ data: [], error: null }),
