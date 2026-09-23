@@ -63,7 +63,7 @@ export const Route = createFileRoute("/api/community/daily")({ server: { handler
     const { data: existing } = await db.from("community_posts").select("id").eq("topic", topic).eq("is_bot", true).gte("created_at", `${today}T00:00:00Z`).limit(1);
     if (existing?.length) continue;
     const quiz = position === 1;
-    const question = await generateQuestion(topic, quiz ? QUIZZES[index] : PROMPTS[index], process.env.LOVABLE_API_KEY, quiz);
+    const question = quiz ? QUIZZES[index] : await generateQuestion(topic, PROMPTS[index], process.env.LOVABLE_API_KEY);
     const { error } = await db.from("community_posts").insert({ user_id: null, author_name: "ORÍGEN", topic, title: question.title, body: quiz ? "Pon a prueba lo que aprendiste. Elige una respuesta y descubre el resultado." : "Una pausa para compartir lo que piensas. Puedes elegir una opción y contar tu experiencia en las respuestas.", poll_options: question.options, poll_answer_index: question.answer ?? null, is_bot: true, is_verified: false });
     if (!error) created = true;
     else if (error.code !== "23505") {
