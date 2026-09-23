@@ -1,9 +1,9 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { DiosTeDiceHoy } from "@/components/DiosTeDiceHoy";
 import { toast } from "sonner";
 import { ArrowRight, ArrowLeft, Loader2, Lock, User as UserIcon, Heart, DollarSign, Brain, Sprout, Mountain, HandHeart, Check, Play, Pause, Star } from "lucide-react";
 import { awardGems, GEM_REWARDS, HOJA_POINTS } from "@/lib/gems";
@@ -730,6 +730,25 @@ function ScreenMulti({ eyebrow, title, hint, options, values, setValues, onNext 
   );
 }
 
+/** Opciones de selección: imagen arriba, respuesta abajo, sin escribir nada. */
+const RAICES_OPCIONES = [
+  { emoji: "💔", label: "Separaciones y abandonos" },
+  { emoji: "😶‍🌫️", label: "Silencio: nadie habla de lo que dolió" },
+  { emoji: "💸", label: "Escasez y deudas que no se van" },
+  { emoji: "🍷", label: "Adicciones o descontrol" },
+  { emoji: "😠", label: "Gritos, control o maltrato" },
+  { emoji: "🙏", label: "Fe fuerte, pero mucha culpa" },
+];
+
+const RECUERDOS_OPCIONES = [
+  { emoji: "🫥", label: "Me sentí invisible" },
+  { emoji: "😰", label: "Viví con miedo en casa" },
+  { emoji: "🎒", label: "Crecí de golpe, cuidé a otros" },
+  { emoji: "🚪", label: "Alguien se fue y no volvió" },
+  { emoji: "📉", label: "Nada de lo que hacía era suficiente" },
+  { emoji: "🌤️", label: "Hubo amor, pero también mucho dolor" },
+];
+
 function ScreenRaices({ value, setValue, onNext }: { value: string; setValue: (s: string) => void; onNext: () => void }) {
   return (
     <ScreenCard>
@@ -738,16 +757,12 @@ function ScreenRaices({ value, setValue, onNext }: { value: string; setValue: (s
       </div>
       <h2 className="text-center font-display font-extrabold text-[26px] mt-4 text-[#1B1B27]">Tus raíces 🌿</h2>
       <p className="text-center text-[14px] text-[#64667A] mt-2 leading-relaxed">
-        Las historias familiares influyen en cómo vivimos hoy.
+        Toca lo que más se repite en tu familia.
       </p>
-      <p className="text-center font-display font-semibold text-[16px] mt-4 text-[#1B1B27]">
-        ¿Qué patrones has observado repetirse en tu familia o linaje?
-      </p>
-      <Textarea value={value} onChange={(e) => setValue(e.target.value)} placeholder="Escribe con libertad…"
-        className="mt-4 min-h-32 rounded-[18px] border-[#ECEEF5] bg-white text-[15px] resize-none focus-visible:ring-2 focus-visible:ring-[#7C5CFF]/25 focus-visible:border-[#7C5CFF]" />
+      <PickGrid options={RAICES_OPCIONES} value={value} setValue={setValue} />
       <div className="mt-3"><PrivacyNote /></div>
       <div className="mt-4">
-        <PrimaryButton onClick={onNext}>Continuar <ArrowRight className="w-4 h-4" /></PrimaryButton>
+        <PrimaryButton onClick={onNext} disabled={!value}>Continuar <ArrowRight className="w-4 h-4" /></PrimaryButton>
       </div>
     </ScreenCard>
   );
@@ -763,18 +778,57 @@ function ScreenRecuerdos({ value, setValue, onNext }: { value: string; setValue:
         Tus primeros recuerdos <span className="text-[#F58BCB]">♡</span>
       </h2>
       <p className="text-center text-[14px] text-[#64667A] mt-2 leading-relaxed">
-        A veces un recuerdo explica más que cientos de palabras.
+        Toca lo que más se parece a tu infancia.
       </p>
-      <p className="text-center font-display font-semibold text-[16px] mt-4 text-[#1B1B27]">
-        ¿Qué experiencia marcó tu infancia de manera profunda?
-      </p>
-      <Textarea value={value} onChange={(e) => setValue(e.target.value)} placeholder="Escribe con libertad…"
-        className="mt-4 min-h-32 rounded-[18px] border-[#ECEEF5] bg-white text-[15px] resize-none focus-visible:ring-2 focus-visible:ring-[#7C5CFF]/25 focus-visible:border-[#7C5CFF]" />
+      <PickGrid options={RECUERDOS_OPCIONES} value={value} setValue={setValue} />
       <div className="mt-3"><PrivacyNote /></div>
       <div className="mt-4">
-        <PrimaryButton onClick={onNext}>Continuar <ArrowRight className="w-4 h-4" /></PrimaryButton>
+        <PrimaryButton onClick={onNext} disabled={!value}>Continuar <ArrowRight className="w-4 h-4" /></PrimaryButton>
       </div>
     </ScreenCard>
+  );
+}
+
+/** Cuadrícula de selección múltiple: emoji grande arriba, frase corta abajo. */
+function PickGrid({
+  options,
+  value,
+  setValue,
+}: {
+  options: { emoji: string; label: string }[];
+  value: string;
+  setValue: (s: string) => void;
+}) {
+  const picked = value ? value.split(" · ") : [];
+  const toggle = (label: string) => {
+    const next = picked.includes(label) ? picked.filter((p) => p !== label) : [...picked, label];
+    setValue(next.join(" · "));
+  };
+  return (
+    <div className="mt-5 grid grid-cols-2 gap-3">
+      {options.map((o, i) => {
+        const active = picked.includes(o.label);
+        return (
+          <button
+            key={o.label}
+            type="button"
+            onClick={() => toggle(o.label)}
+            style={{ animationDelay: `${i * 50}ms` }}
+            className={cn(
+              "min-h-[104px] rounded-[16px] bg-white px-3 py-3 text-center transition active:scale-[.97] animate-in fade-in slide-in-from-bottom-3 duration-300 fill-mode-both",
+              active
+                ? "border-2 border-[#7C5CFF] shadow-[0_4px_14px_rgba(124,92,255,0.25)]"
+                : "border border-[#ECEEF5] shadow-[0_1px_3px_rgba(30,25,20,0.06)]",
+            )}
+          >
+            <span className="block text-[30px] leading-none">{o.emoji}</span>
+            <span className="mt-2 block text-[13px] font-semibold leading-snug text-[#1B1B27]">
+              {o.label}
+            </span>
+          </button>
+        );
+      })}
+    </div>
   );
 }
 
@@ -865,6 +919,62 @@ function ImpactCard({ icon, tint, title, text }: { icon: React.ReactNode; tint: 
   );
 }
 
+/** Explica en tres pasos qué pasa hoy, en 7 días y después. */
+function TresPasosPrueba() {
+  const cobro = new Date();
+  cobro.setDate(cobro.getDate() + 7);
+  const fecha = cobro.toLocaleDateString("es-MX", { day: "numeric", month: "long" });
+  const pasos = [
+    {
+      letra: "A",
+      emoji: "🎁",
+      title: "Hoy no pagas nada",
+      body: "Entras completo: tu diagnóstico, tus audios y tu primer paso del camino.",
+    },
+    {
+      letra: "B",
+      emoji: "🔔",
+      title: `El ${fecha} empieza tu plan`,
+      body: "Te avisamos antes. Si no es para ti, cancelas en un toque y no se cobra nada.",
+    },
+    {
+      letra: "C",
+      emoji: "🌱",
+      title: "Luego vives el camino",
+      body: "Un paso al día, tu racha, tu árbol y tu mentora acompañándote.",
+    },
+  ];
+  return (
+    <div className="mt-8 rounded-[24px] bg-white border border-[#ECEEF5] p-5 shadow-[0_1px_3px_rgba(30,25,20,0.06)]">
+      <p className="text-[12px] tracking-widest font-semibold text-[#7C5CFF] uppercase">Cómo funciona</p>
+      <div className="mt-4 space-y-3">
+        {pasos.map((p) => (
+          <div key={p.letra} className="flex items-start gap-3 rounded-[16px] bg-[#F7F8FD] p-3.5">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[12px] bg-[#F1EDFF] text-[20px]">
+              {p.emoji}
+            </span>
+            <div className="min-w-0">
+              <p className="text-[14px] font-bold text-[#1B1B27]">
+                {p.letra}. {p.title}
+              </p>
+              <p className="mt-1 text-[12.5px] leading-relaxed text-[#64667A]">{p.body}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+      <Link
+        to="/membresia"
+        className="mt-4 grid h-14 w-full place-items-center rounded-[12px] bg-gradient-primary text-[16px] font-bold text-white shadow-glow active:scale-[.98]"
+      >
+        Ver mis 3 planes
+      </Link>
+      <p className="mt-3 text-center text-[11.5px] text-[#64667A]">
+        Cancela cuando quieras · te avisamos antes del cobro · garantía real
+      </p>
+    </div>
+  );
+}
+
 function Screen6({ ai, onNext }: { ai: AIResult; onNext: () => void }) {
   return (
     <div>
@@ -888,6 +998,12 @@ function Screen6({ ai, onNext }: { ai: AIResult; onNext: () => void }) {
           fortalecer tu bienestar emocional y avanzar paso a paso hacia una vida con mayor claridad y equilibrio.
         </p>
         <p className="mt-4 text-[13px] italic text-[#7C5CFF]">{ai.welcome_message}</p>
+      </div>
+
+      <TresPasosPrueba />
+
+      <div className="mt-8">
+        <DiosTeDiceHoy ctaTo="/membresia" />
       </div>
 
       <div className="mt-8">
