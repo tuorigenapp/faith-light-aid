@@ -43,3 +43,10 @@
 - [x] Avatares ilustrados, nombres, imágenes de temas y logo ORÍGEN; búsqueda de preguntas y respuestas.
 - [x] Publicación flotante, 10.000 caracteres y oferta de membresía en cada conversación.
 - [x] Tres momentos diarios por tema con portada y encuestas, sin borrar contenido anterior; verificar en móvil.
+
+## Comunidad — organización y audio (en curso)
+- [ ] Encuestas solo desde administración, opciones visibles antes del voto y porcentajes/selección después.
+- [ ] Grabación completa audible, manos libres y controles únicos de borrar, pausar y enviar.
+- [ ] Mis publicaciones, Siguiendo y Mis comentarios con estados vacíos, temas identificables y contenidos completos.
+- [ ] Bloquear/desbloquear temas sin ocultarlos de Temas; quitar invitaciones de pago del listado.
+- [ ] Reacciones 3D familiares y botón centrado de nueva publicación; verificar en móvil y escritorio.
