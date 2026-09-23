@@ -190,14 +190,14 @@ body.community-reading .community-main { padding-bottom: 0; }
 .community-post-list, .community-post-detail { background: var(--card); border: 1px solid var(--border); box-shadow: var(--shadow-soft); }
 .community-poll-option.community-poll-option { background: var(--community-poll); border: 2px solid var(--community-poll-border); color: var(--foreground); box-shadow: var(--shadow-soft); }
 .community-poll-option.community-poll-option[data-selected="true"] { background: var(--community-poll-selected); border-color: var(--primary); }
-.community-reply { background: var(--community-reply-0); border: 1px solid var(--community-reply-border); box-shadow: var(--shadow-soft); }
-.community-reply[data-tone="1"] { background: var(--community-reply-1); }
-.community-reply[data-tone="2"] { background: var(--community-reply-2); }
-.community-reply[data-tone="3"] { background: var(--community-reply-3); }
-.community-reply[data-tone="4"] { background: var(--community-reply-4); }
-.community-reply[data-tone="5"] { background: var(--community-reply-5); }
-.community-reply[data-tone="6"] { background: var(--community-reply-6); }
-.community-reply[data-bot="true"] { background: var(--community-reply-bot); }
+.community-reply { background: var(--community-reply-0); border: 1px solid var(--community-reply-border-0); }
+.community-reply[data-tone="1"] { background: var(--community-reply-1); border-color: var(--community-reply-border-1); }
+.community-reply[data-tone="2"] { background: var(--community-reply-2); border-color: var(--community-reply-border-2); }
+.community-reply[data-tone="3"] { background: var(--community-reply-3); border-color: var(--community-reply-border-3); }
+.community-reply[data-tone="4"] { background: var(--community-reply-4); border-color: var(--community-reply-border-4); }
+.community-reply[data-tone="5"] { background: var(--community-reply-5); border-color: var(--community-reply-border-5); }
+.community-reply[data-tone="6"] { background: var(--community-reply-6); border-color: var(--community-reply-border-6); }
+.community-reply[data-bot="true"] { background: var(--community-reply-bot); border-color: var(--community-reply-bot-border); }
 .dark .community-post-list, .dark .community-post-detail, .dark .community-poll-option, .dark .community-reply { box-shadow: none; }
 
 @layer base {
