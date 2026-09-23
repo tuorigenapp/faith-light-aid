@@ -184,7 +184,7 @@ function Comunidad() {
     const active = data?.posts.find(p => p.id === openPost);
     const unreadIn = (bucket: string, id?: string) => notifications.filter(n => n.bucket === bucket && (!id || n.post_id === id) && !acknowledged[n.id]);
     const visible = useMemo(() => {
-      const posts = (data?.posts ?? []).filter(p => (tab !== "feed" || topic === "todos" || p.topic === topic) && searchTerm === search.trim());
+       const posts = (data?.posts ?? []).filter(p => (tab !== "feed" || topic === "todos" || p.topic === topic) && searchTerm === search.trim() && (tab !== "feed" || topic !== "todos" || !data?.blocks.has(p.topic)));
       if (!["mine", "comments", "following", "feed"].includes(tab) || searchTerm) return posts;
       const newest = new Map<string, number>();
       for (const n of notifications) if (n.bucket === tab && !acknowledged[n.id]) newest.set(n.post_id, Math.max(newest.get(n.post_id) ?? 0, Date.parse(n.created_at)));
