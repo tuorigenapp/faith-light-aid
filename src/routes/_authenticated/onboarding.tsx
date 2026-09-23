@@ -919,6 +919,62 @@ function ImpactCard({ icon, tint, title, text }: { icon: React.ReactNode; tint: 
   );
 }
 
+/** Explica en tres pasos qué pasa hoy, en 7 días y después. */
+function TresPasosPrueba() {
+  const cobro = new Date();
+  cobro.setDate(cobro.getDate() + 7);
+  const fecha = cobro.toLocaleDateString("es-MX", { day: "numeric", month: "long" });
+  const pasos = [
+    {
+      letra: "A",
+      emoji: "🎁",
+      title: "Hoy no pagas nada",
+      body: "Entras completo: tu diagnóstico, tus audios y tu primer paso del camino.",
+    },
+    {
+      letra: "B",
+      emoji: "🔔",
+      title: `El ${fecha} empieza tu plan`,
+      body: "Te avisamos antes. Si no es para ti, cancelas en un toque y no se cobra nada.",
+    },
+    {
+      letra: "C",
+      emoji: "🌱",
+      title: "Luego vives el camino",
+      body: "Un paso al día, tu racha, tu árbol y tu mentora acompañándote.",
+    },
+  ];
+  return (
+    <div className="mt-8 rounded-[24px] bg-white border border-[#ECEEF5] p-5 shadow-[0_1px_3px_rgba(30,25,20,0.06)]">
+      <p className="text-[12px] tracking-widest font-semibold text-[#7C5CFF] uppercase">Cómo funciona</p>
+      <div className="mt-4 space-y-3">
+        {pasos.map((p) => (
+          <div key={p.letra} className="flex items-start gap-3 rounded-[16px] bg-[#F7F8FD] p-3.5">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[12px] bg-[#F1EDFF] text-[20px]">
+              {p.emoji}
+            </span>
+            <div className="min-w-0">
+              <p className="text-[14px] font-bold text-[#1B1B27]">
+                {p.letra}. {p.title}
+              </p>
+              <p className="mt-1 text-[12.5px] leading-relaxed text-[#64667A]">{p.body}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+      <Link
+        to="/membresia"
+        className="mt-4 grid h-14 w-full place-items-center rounded-[12px] bg-gradient-primary text-[16px] font-bold text-white shadow-glow active:scale-[.98]"
+      >
+        Ver mis 3 planes
+      </Link>
+      <p className="mt-3 text-center text-[11.5px] text-[#64667A]">
+        Cancela cuando quieras · te avisamos antes del cobro · garantía real
+      </p>
+    </div>
+  );
+}
+
 function Screen6({ ai, onNext }: { ai: AIResult; onNext: () => void }) {
   return (
     <div>
