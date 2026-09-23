@@ -167,6 +167,54 @@ export type Database = {
         }
         Relationships: []
       }
+      community_notifications: {
+        Row: {
+          bucket: string
+          created_at: string
+          event_type: string
+          id: string
+          post_id: string
+          read_at: string | null
+          source_id: string
+          user_id: string
+        }
+        Insert: {
+          bucket: string
+          created_at?: string
+          event_type: string
+          id?: string
+          post_id: string
+          read_at?: string | null
+          source_id: string
+          user_id: string
+        }
+        Update: {
+          bucket?: string
+          created_at?: string
+          event_type?: string
+          id?: string
+          post_id?: string
+          read_at?: string | null
+          source_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_notifications_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "community_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       community_poll_votes: {
         Row: {
           choice_index: number
