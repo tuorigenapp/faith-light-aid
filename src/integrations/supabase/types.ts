@@ -340,6 +340,7 @@ export type Database = {
           author_kind: string
           author_name: string
           body: string
+          bot_target_user_id: string | null
           created_at: string
           id: string
           image_path: string | null
@@ -355,6 +356,7 @@ export type Database = {
           author_kind?: string
           author_name?: string
           body: string
+          bot_target_user_id?: string | null
           created_at?: string
           id?: string
           image_path?: string | null
@@ -370,6 +372,7 @@ export type Database = {
           author_kind?: string
           author_name?: string
           body?: string
+          bot_target_user_id?: string | null
           created_at?: string
           id?: string
           image_path?: string | null

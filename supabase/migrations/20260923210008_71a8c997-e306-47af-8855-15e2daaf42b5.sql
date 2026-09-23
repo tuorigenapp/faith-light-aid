@@ -1,0 +1,2 @@
+ALTER TABLE public.community_replies ADD COLUMN bot_target_user_id uuid REFERENCES auth.users(id) ON DELETE SET NULL;
+CREATE UNIQUE INDEX community_one_bot_reply_per_person_post ON public.community_replies (post_id, bot_target_user_id) WHERE is_bot = true AND bot_target_user_id IS NOT NULL;
