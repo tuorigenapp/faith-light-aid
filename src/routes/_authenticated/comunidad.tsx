@@ -42,6 +42,7 @@ import reactionLeaf from "@/assets/community-reactions/leaf.png";
 import reactionTouched from "@/assets/community-reactions/touched.png";
 import reactionApplause from "@/assets/community-reactions/applause.png";
 import reactionLove from "@/assets/community-reactions/love.png";
+import { useCommunityNotifications, useMarkCommunityRead } from "@/hooks/use-community-notifications";
 
 export const Route = createFileRoute("/_authenticated/comunidad")({
   head: () => ({ meta: [{ title: "Comunidad ORÍGEN — un lugar para acompañarnos" }, { name: "description", content: "Comparte preguntas y conversa con respeto. Comunidad abierta a todas las membresías." }, { property: "og:title", content: "Comunidad ORÍGEN" }, { property: "og:description", content: "Preguntas y conversaciones para acompañarnos." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
@@ -61,6 +62,24 @@ const REACTION_IMAGES = [reactionHeart, reactionPrayer, reactionLeaf, reactionTo
 const SCENES = [scene01, scene02, scene03, scene04, scene05, scene06, scene07, scene08, scene09, scene10, scene11, scene12, scene13, scene14, scene15, scene16];
 const AVATARS = [avatar01, avatar02, avatar03, avatar04, avatar05, avatar06, avatar07, avatar08, avatar09, avatar10, avatar11, avatar12];
 function botScene(id: string) { return SCENES[parseInt(id.replaceAll("-", "").slice(0, 8), 16) % SCENES.length]; }
+function relativeDate(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  const now = new Date();
+  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const target = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+  const days = Math.round((start - target) / 86400000);
+  if (days === 0) return "Hoy";
+  if (days === -1) return "Mañana";
+  if (days === -2) return "Pasado mañana";
+  if (days === 1) return "Ayer";
+  if (days === 2) return "Antier";
+  if (days < 0) return new Intl.DateTimeFormat("es", { day: "numeric", month: "short" }).format(date);
+  if (days < 7) return `Hace ${days} días`;
+  if (days < 35) { const weeks = Math.floor(days / 7); return `Hace ${weeks} ${weeks === 1 ? "semana" : "semanas"}`; }
+  if (days < 365) { const months = Math.floor(days / 30); return `Hace ${months} ${months === 1 ? "mes" : "meses"}`; }
+  return new Intl.DateTimeFormat("es", { day: "numeric", month: "short", year: "numeric" }).format(date);
+}
 type Post = { id: string; author_id: string | null; mine: boolean; author_name: string; topic: string; title: string; body: string; created_at: string; is_anonymous: boolean; image_path: string | null; poll_options: string[] | null; source_url: string | null; is_verified: boolean; is_bot: boolean; bot_kind: string | null };
 type Reply = { id: string; post_id: string; parent_reply_id: string | null; author_id: string | null; mine: boolean; author_name: string; body: string; created_at: string; is_anonymous: boolean; image_path: string | null; audio_path: string | null; is_bot: boolean };
 type Reaction = { id: string; user_id: string; target_type: string; target_id: string; emoji: string };
@@ -83,6 +102,9 @@ function Comunidad() {
   const { user } = useAuth();
   const { data: profile } = useProfile();
   const qc = useQueryClient();
+  const { data: notifications = [] } = useCommunityNotifications(user?.id);
+  const markRead = useMarkCommunityRead(user?.id);
+  const [acknowledged, setAcknowledged] = useState<Record<string, true>>({});
   const [tab, setTab] = useState<"feed" | "topics" | "saved" | "mine" | "following" | "comments">("feed");
   const [topic, setTopic] = useState("todos");
   const [blockTopic, setBlockTopic] = useState<string | null>(null);
@@ -156,8 +178,24 @@ function Comunidad() {
      return () => { alive = false; };
   }, [data]);
 
-   const active = data?.posts.find(p => p.id === openPost);
-      const visible = useMemo(() => (data?.posts ?? []).filter(p => (tab !== "feed" || topic === "todos" || p.topic === topic) && searchTerm === search.trim()), [data, topic, tab, search, searchTerm]);
+    const active = data?.posts.find(p => p.id === openPost);
+    const unreadIn = (bucket: string, id?: string) => notifications.filter(n => n.bucket === bucket && (!id || n.post_id === id) && !acknowledged[n.id]);
+    const visible = useMemo(() => {
+      const posts = (data?.posts ?? []).filter(p => (tab !== "feed" || topic === "todos" || p.topic === topic) && searchTerm === search.trim());
+      if (!["mine", "comments", "following", "feed"].includes(tab) || searchTerm) return posts;
+      const newest = new Map<string, number>();
+      for (const n of notifications) if (n.bucket === tab && !acknowledged[n.id]) newest.set(n.post_id, Math.max(newest.get(n.post_id) ?? 0, Date.parse(n.created_at)));
+      return [...posts].sort((a, b) => (newest.get(b.id) ?? 0) - (newest.get(a.id) ?? 0) || Date.parse(b.created_at) - Date.parse(a.created_at));
+    }, [data, topic, tab, search, searchTerm, notifications, acknowledged]);
+    function openConversation(id: string) {
+      setOpenPost(id);
+      window.history.replaceState(null, "", `/comunidad?post=${id}`);
+      const ids = notifications.filter(n => n.post_id === id).map(n => n.id);
+      if (ids.length) {
+        setAcknowledged(previous => ({ ...previous, ...Object.fromEntries(ids.map(item => [item, true as const])) }));
+        void markRead(id).catch(() => { setAcknowledged(previous => { const next = { ...previous }; ids.forEach(item => delete next[item]); return next; }); toast.error("No se pudo marcar la actividad como leída."); });
+      }
+    }
    const matchedTopics = search.trim() ? TOPICS.filter(t => `${t.label} ${t.detail}`.toLocaleLowerCase("es").includes(search.trim().toLocaleLowerCase("es"))) : [];
    const pollStats = (p: Post) => {
      const counts = (p.poll_options ?? []).map((_, index) => Number(data?.totals?.find(v => v.post_id === p.id && v.choice_index === index)?.vote_count ?? 0));
@@ -282,8 +320,8 @@ function Comunidad() {
       const pickerId = `${type}:${id}`;
       return <div className="relative flex min-h-11 flex-wrap items-center gap-1" aria-label="Reacciones"><Button type="button" variant="ghost" aria-label="Elegir reacción" aria-expanded={reactionPicker === pickerId} onClick={() => setReactionPicker(current => current === pickerId ? null : pickerId)} className="min-h-11 rounded-full border border-primary/15 px-2 text-xs text-primary">{items.find(it => it.mine) ? <img src={REACTION_IMAGES[items.findIndex(it => it.mine)]} alt="" className="h-6 w-6 object-contain" /> : <img src={reactionHeart} alt="" className="h-6 w-6 object-contain" />}{items.find(it => it.mine) ? "Cambiar" : "Reaccionar"}</Button>{items.filter(it => it.count > 0).map(it => <span key={it.emoji} aria-label={`${it.emoji}, ${it.count} reacciones`} className="inline-flex min-h-9 items-center gap-1 rounded-full border border-border bg-background px-1.5 text-xs"><img src={REACTION_IMAGES[EMOJIS.indexOf(it.emoji)]} alt="" className="h-6 w-6 object-contain" />{it.count}</span>)}{reactionPicker === pickerId && <div role="group" aria-label="Elige una reacción" className="absolute bottom-full left-0 z-30 mb-2 flex max-w-[min(90vw,360px)] gap-1 overflow-x-auto rounded-full border border-border bg-card p-1.5 shadow-elev">{items.map((it, i) => <Button key={it.emoji} type="button" variant="ghost" aria-label={`Reaccionar con ${it.emoji}`} aria-pressed={!!it.mine} onClick={() => { setReactionPicker(null); void toggleReaction(type, id, it.emoji, it.mine); }} className={`h-11 w-11 shrink-0 rounded-full p-1 transition-transform hover:scale-110 ${it.mine ? "bg-primary/10" : ""}`}><img src={REACTION_IMAGES[i]} alt="" className="h-9 w-9 object-contain" /></Button>)}</div>}</div>;
    }
-  function PollChoices({ post }: { post: Post }) {
-    if (!post.poll_options) return null;
+    function PollChoices({ post }: { post: Post }) {
+     if (!post.poll_options || post.bot_kind === "cover" || post.image_path) return null;
     const { counts, total } = pollStats(post);
      const voted = data?.votes.has(post.id);
       return <div className="mt-4 space-y-2.5">{post.poll_options.map((option, i) => { const percent = total ? Math.round(counts[i] / total * 100) : 0; const selected = data?.votes.get(post.id) === i; return <Button key={i} type="button" variant="outline" disabled={voted || !!voting} onClick={() => void vote(post.id, i)} className={`relative flex min-h-14 h-auto w-full justify-start overflow-hidden rounded-xl border-0 bg-muted p-0 text-left text-sm font-normal whitespace-normal shadow-none ${selected ? "ring-2 ring-primary text-primary font-semibold" : ""}`}><span className="absolute inset-y-0 left-0 bg-primary/15 transition-all duration-300" style={{ width: voted ? `${percent}%` : "0%" }} /><span className="relative flex w-full items-center justify-between gap-3 px-4 py-3"><span className="min-w-0 break-words">{option}{selected && <span className="ml-2 text-xs">· Tu elección</span>}</span>{voted && <strong className="shrink-0">{percent} %</strong>}</span></Button>; })}<p role="status" className="text-xs text-muted-foreground">{voted ? `${total} ${total === 1 ? "voto" : "votos"} · ${voteResults[post.id]?.correct === false ? `La opción correcta era ${post.poll_options[voteResults[post.id].answer ?? 0]}.` : voteResults[post.id]?.correct ? "¡Correcto!" : "Tu elección quedó registrada."}` : "Elige una opción. Solo puedes votar una vez."}</p></div>;
@@ -292,7 +330,7 @@ function Comunidad() {
     const items = [...(grouped.get(parent ?? "root") ?? [])];
     if (sort === "top" && !parent) items.sort((a, b) => (data?.reactions.filter(r => r.target_id === b.id).length ?? 0) - (data?.reactions.filter(r => r.target_id === a.id).length ?? 0));
     if (sort === "recent" && !parent) items.reverse();
-     return <div className="space-y-3">{items.map(r => <div key={r.id} className={`rounded-2xl border border-border/70 p-3.5 ${r.is_bot ? "bg-primary/5" : "bg-secondary/30"}`}><div className="flex items-center gap-2"><Avatar name={r.author_name} bot={r.is_bot} identity={r.author_id ?? r.id} /><div><p className="text-sm font-bold">{displayName(r.author_name, r.is_anonymous, r.is_bot)} {r.is_bot && <ShieldCheck className="inline h-4 w-4 text-primary" aria-label="Respuesta verificada de ORÍGEN" />}</p><p className="text-xs text-muted-foreground">{new Date(r.created_at).toLocaleDateString("es", { day: "numeric", month: "short" })} · {r.is_bot ? "Asistente automático" : "Comunidad"}</p></div></div>{r.body && <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed">{r.body}</p>}{r.image_path && mediaUrls[r.image_path] && <img src={mediaUrls[r.image_path]} alt="Adjunto a la respuesta" className="mt-3 max-h-72 w-full rounded-xl object-contain" />}{r.audio_path && mediaUrls[r.audio_path] && <audio controls preload="metadata" src={mediaUrls[r.audio_path]} className="mt-3 w-full" aria-label="Respuesta de audio" />}<div className="mt-3 flex flex-wrap items-center gap-3">{renderReactions("reply", r.id)}<button onClick={() => void report("reply", r.id)} className="min-h-11 text-xs text-muted-foreground">Denunciar</button><button onClick={() => { setReplyTo(r.id); document.getElementById("community-reply")?.focus(); }} className="min-h-11 text-xs font-bold text-primary">Responder a {displayName(r.author_name, r.is_anonymous, r.is_bot)}</button></div>{depth < 8 && grouped.has(r.id) && <div className="mt-3 border-l-2 border-primary/20 pl-3">{renderThread(r.id, depth + 1)}</div>}</div>)}</div>;
+      return <div className="space-y-3">{items.map(r => <div key={r.id} className={`rounded-2xl border border-border/70 p-3.5 ${r.is_bot ? "bg-primary/5" : "bg-secondary/30"}`}><div className="flex items-center gap-2"><Avatar name={r.author_name} bot={r.is_bot} identity={r.author_id ?? r.id} /><div><p className="text-sm font-bold">{displayName(r.author_name, r.is_anonymous, r.is_bot)} {r.is_bot && <ShieldCheck className="inline h-4 w-4 text-primary" aria-label="Respuesta verificada de ORÍGEN" />}</p><p className="text-xs text-muted-foreground">{relativeDate(r.created_at)} · {r.is_bot ? "Asistente automático" : "Comunidad"}</p></div></div>{r.body && <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed">{r.body}</p>}{r.image_path && mediaUrls[r.image_path] && <img src={mediaUrls[r.image_path]} alt="Adjunto a la respuesta" className="mt-3 max-h-72 w-full rounded-xl object-contain" />}{r.audio_path && mediaUrls[r.audio_path] && <audio controls preload="metadata" src={mediaUrls[r.audio_path]} className="mt-3 w-full" aria-label="Respuesta de audio" />}<div className="mt-3 flex flex-wrap items-center gap-3">{renderReactions("reply", r.id)}<button onClick={() => void report("reply", r.id)} className="min-h-11 text-xs text-muted-foreground">Denunciar</button><button onClick={() => { setReplyTo(r.id); document.getElementById("community-reply")?.focus(); }} className="min-h-11 text-xs font-bold text-primary">Responder a {displayName(r.author_name, r.is_anonymous, r.is_bot)}</button></div>{depth < 8 && grouped.has(r.id) && <div className="mt-3 border-l-2 border-primary/20 pl-3">{renderThread(r.id, depth + 1)}</div>}</div>)}</div>;
   }
 
   return <div className="mx-auto max-w-3xl px-4 pb-32 pt-6">
