@@ -35,7 +35,11 @@ export const Route = createFileRoute("/api/admin/community")({ server: { handler
     let error: { message: string } | null = null;
     if (action === "delete-post" && id) ({ error } = await ctx.db.from("community_posts").delete().eq("id", id));
     else if (action === "delete-reply" && id) ({ error } = await ctx.db.from("community_replies").delete().eq("id", id));
-    else if (action === "verify" && id) ({ error } = await ctx.db.from("community_posts").update({ is_verified: true, source_url: sourceUrl?.trim().slice(0, 800) || null }).eq("id", id));
+    else if (action === "verify" && id) {
+      const source = sourceUrl?.trim();
+      if (source && (!/^https:\/\//i.test(source) || source.length > 800)) return Response.json({ error: "La fuente debe ser un enlace HTTPS válido." }, { status: 400 });
+      ({ error } = await ctx.db.from("community_posts").update({ is_verified: true, source_url: source || null }).eq("id", id));
+    }
     else if (action === "unverify" && id) ({ error } = await ctx.db.from("community_posts").update({ is_verified: false, source_url: null }).eq("id", id));
     else if (action === "suspend" && userId && userId !== ctx.user.id && reason?.trim()) ({ error } = await ctx.db.from("community_suspensions").upsert({ user_id: userId, suspended_by: ctx.user.id, reason: reason.trim().slice(0, 500) }));
     else if (action === "unsuspend" && userId) ({ error } = await ctx.db.from("community_suspensions").delete().eq("user_id", userId));

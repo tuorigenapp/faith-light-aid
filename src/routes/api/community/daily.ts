@@ -57,7 +57,10 @@ export const Route = createFileRoute("/api/community/daily")({ server: { handler
     const question = await generateQuestion(topic, PROMPTS[index], process.env.LOVABLE_API_KEY);
     const { error } = await db.from("community_posts").insert({ user_id: null, author_name: "ORÍGEN", topic, title: question.title, body: "Una pausa para compartir lo que piensas. Puedes elegir una opción y contar tu experiencia en las respuestas.", poll_options: question.options, is_bot: true, is_verified: false });
     if (!error) created = true;
-    else console.error("Community daily insert failed", error.code, error.message);
+    else if (error.code !== "23505") {
+      console.error("Community daily insert failed", error.code, error.message);
+      return Response.json({ error: "Las preguntas de hoy no están disponibles. Inténtalo más tarde." }, { status: 503 });
+    }
   }
   return Response.json({ created }, { headers: { "Cache-Control": "private, no-store" } });
 } } } });
