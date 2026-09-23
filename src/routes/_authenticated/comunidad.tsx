@@ -104,6 +104,8 @@ function Comunidad() {
   const qc = useQueryClient();
   const { data: notifications = [] } = useCommunityNotifications(user?.id);
   const markRead = useMarkCommunityRead(user?.id);
+  const notificationKeys = notifications.map(n => n.id).join(",");
+  useEffect(() => { if (notificationKeys) void qc.invalidateQueries({ queryKey: ["comunidad"] }); }, [notificationKeys, qc]);
   const [acknowledged, setAcknowledged] = useState<Record<string, true>>({});
   const [justRead, setJustRead] = useState<Record<string, number>>({});
   const [tab, setTab] = useState<"feed" | "topics" | "saved" | "mine" | "following" | "comments">("feed");
@@ -192,9 +194,9 @@ function Comunidad() {
     function openConversation(id: string) {
       setOpenPost(id);
       window.history.replaceState(null, "", `/comunidad?post=${id}`);
-      const ids = notifications.filter(n => n.post_id === id).map(n => n.id);
+     const ids = notifications.filter(n => n.post_id === id).map(n => n.id);
       if (ids.length) {
-        setJustRead(previous => ({ ...previous, [id]: Math.max(...notifications.filter(n => n.post_id === id).map(n => Date.parse(n.created_at))) }));
+       setJustRead(previous => ({ ...previous, [id]: Math.max(...notifications.filter(n => n.post_id === id).map(n => Date.parse(n.created_at))) }));
         setAcknowledged(previous => ({ ...previous, ...Object.fromEntries(ids.map(item => [item, true as const])) }));
         void markRead(id).catch(() => { setAcknowledged(previous => { const next = { ...previous }; ids.forEach(item => delete next[item]); return next; }); toast.error("No se pudo marcar la actividad como leída."); });
       }
