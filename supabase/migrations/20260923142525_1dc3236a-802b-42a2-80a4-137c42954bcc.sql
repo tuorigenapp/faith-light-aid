@@ -1,0 +1,1 @@
+DROP FUNCTION public.community_moderation_feed();

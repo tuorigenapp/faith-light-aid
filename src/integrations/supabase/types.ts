@@ -131,12 +131,66 @@ export type Database = {
         }
         Relationships: []
       }
+      community_follows: {
+        Row: {
+          created_at: string
+          topic: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          topic: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          topic?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      community_poll_votes: {
+        Row: {
+          choice_index: number
+          created_at: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          choice_index: number
+          created_at?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          choice_index?: number
+          created_at?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_poll_votes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "community_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       community_posts: {
         Row: {
           author_name: string
           body: string
           created_at: string
           id: string
+          image_path: string | null
+          is_anonymous: boolean
+          is_bot: boolean
+          is_verified: boolean
+          poll_answer_index: number | null
+          poll_options: Json | null
+          source_url: string | null
           title: string
           topic: string
           updated_at: string
@@ -147,6 +201,13 @@ export type Database = {
           body?: string
           created_at?: string
           id?: string
+          image_path?: string | null
+          is_anonymous?: boolean
+          is_bot?: boolean
+          is_verified?: boolean
+          poll_answer_index?: number | null
+          poll_options?: Json | null
+          source_url?: string | null
           title: string
           topic?: string
           updated_at?: string
@@ -157,6 +218,13 @@ export type Database = {
           body?: string
           created_at?: string
           id?: string
+          image_path?: string | null
+          is_anonymous?: boolean
+          is_bot?: boolean
+          is_verified?: boolean
+          poll_answer_index?: number | null
+          poll_options?: Json | null
+          source_url?: string | null
           title?: string
           topic?: string
           updated_at?: string
@@ -193,33 +261,55 @@ export type Database = {
       }
       community_replies: {
         Row: {
+          audio_path: string | null
           author_name: string
           body: string
           created_at: string
           id: string
+          image_path: string | null
+          is_anonymous: boolean
+          is_bot: boolean
+          parent_reply_id: string | null
           post_id: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          audio_path?: string | null
           author_name?: string
           body: string
           created_at?: string
           id?: string
+          image_path?: string | null
+          is_anonymous?: boolean
+          is_bot?: boolean
+          parent_reply_id?: string | null
           post_id: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          audio_path?: string | null
           author_name?: string
           body?: string
           created_at?: string
           id?: string
+          image_path?: string | null
+          is_anonymous?: boolean
+          is_bot?: boolean
+          parent_reply_id?: string | null
           post_id?: string
           updated_at?: string
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "community_replies_parent_reply_id_fkey"
+            columns: ["parent_reply_id"]
+            isOneToOne: false
+            referencedRelation: "community_replies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "community_replies_post_id_fkey"
             columns: ["post_id"]
@@ -228,6 +318,89 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      community_reports: {
+        Row: {
+          created_at: string
+          id: string
+          reason: string
+          reporter_id: string
+          status: string
+          target_id: string
+          target_type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reason: string
+          reporter_id: string
+          status?: string
+          target_id: string
+          target_type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reason?: string
+          reporter_id?: string
+          status?: string
+          target_id?: string
+          target_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      community_saves: {
+        Row: {
+          created_at: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_saves_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "community_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_suspensions: {
+        Row: {
+          created_at: string
+          reason: string
+          suspended_by: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          reason: string
+          suspended_by: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          reason?: string
+          suspended_by?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       conversations: {
         Row: {
@@ -1672,6 +1845,42 @@ export type Database = {
       award_gems: {
         Args: { _amount: number; _meta?: Json; _reason: string }
         Returns: number
+      }
+      community_feed_posts: {
+        Args: never
+        Returns: {
+          author_id: string
+          author_name: string
+          body: string
+          created_at: string
+          id: string
+          image_path: string
+          is_anonymous: boolean
+          is_bot: boolean
+          is_verified: boolean
+          mine: boolean
+          poll_options: Json
+          source_url: string
+          title: string
+          topic: string
+        }[]
+      }
+      community_feed_replies: {
+        Args: never
+        Returns: {
+          audio_path: string
+          author_id: string
+          author_name: string
+          body: string
+          created_at: string
+          id: string
+          image_path: string
+          is_anonymous: boolean
+          is_bot: boolean
+          mine: boolean
+          parent_reply_id: string
+          post_id: string
+        }[]
       }
       create_hoja_transfer: {
         Args: { _hojas: number; _to_email: string }

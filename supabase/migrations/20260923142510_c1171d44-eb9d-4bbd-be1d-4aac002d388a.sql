@@ -1,0 +1,13 @@
+CREATE TABLE public.community_reports (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), reporter_id uuid NOT NULL, target_type text NOT NULL, target_id uuid NOT NULL, reason text NOT NULL, status text NOT NULL DEFAULT 'pending', created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now());
+GRANT SELECT, INSERT, UPDATE ON public.community_reports TO authenticated;
+GRANT ALL ON public.community_reports TO service_role;
+ALTER TABLE public.community_reports ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "own report or admin read" ON public.community_reports FOR SELECT TO authenticated USING (reporter_id=auth.uid() OR public.has_role(auth.uid(),'admin'));
+CREATE POLICY "report as self" ON public.community_reports FOR INSERT TO authenticated WITH CHECK (reporter_id=auth.uid() AND status='pending' AND target_type IN ('post','reply') AND length(trim(reason)) BETWEEN 5 AND 500);
+CREATE POLICY "admin review report" ON public.community_reports FOR UPDATE TO authenticated USING (public.has_role(auth.uid(),'admin')) WITH CHECK (public.has_role(auth.uid(),'admin'));
+CREATE TRIGGER community_reports_updated_at BEFORE UPDATE ON public.community_reports FOR EACH ROW EXECUTE FUNCTION public.touch_updated_at();
+CREATE INDEX community_reports_status_idx ON public.community_reports(status,created_at DESC);
+CREATE POLICY "backup codes inaccessible through data api" ON public.admin_backup_codes FOR SELECT TO authenticated USING (false);
+CREATE OR REPLACE FUNCTION public.community_moderation_feed() RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path=public AS $$ BEGIN IF auth.uid() IS NULL OR NOT public.has_role(auth.uid(),'admin') THEN RAISE EXCEPTION 'Solo administradores'; END IF; RETURN jsonb_build_object('posts',(SELECT coalesce(jsonb_agg(to_jsonb(p) ORDER BY p.created_at DESC),'[]'::jsonb) FROM (SELECT id,user_id,author_name,topic,title,body,is_anonymous,is_bot,is_verified,created_at FROM public.community_posts ORDER BY created_at DESC LIMIT 200) p),'replies',(SELECT coalesce(jsonb_agg(to_jsonb(r) ORDER BY r.created_at DESC),'[]'::jsonb) FROM (SELECT id,post_id,user_id,author_name,body,is_anonymous,is_bot,created_at FROM public.community_replies ORDER BY created_at DESC LIMIT 300) r)); END $$;
+REVOKE ALL ON FUNCTION public.community_moderation_feed() FROM PUBLIC,anon;
+GRANT EXECUTE ON FUNCTION public.community_moderation_feed() TO authenticated;

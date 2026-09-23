@@ -85,7 +85,7 @@ const schema = z.object({
   day_index: z.number().int().min(1, "El día empieza en 1").max(365),
   title: z.string().trim().min(3, "El título necesita al menos 3 letras").max(140),
   affirmation: z.string().trim().min(3, "Escribe la afirmación del audio").max(600),
-  audio_url: z.string().trim().min(4, "Falta el MP3: sube el archivo o pega el enlace").max(800),
+  audio_url: z.string().trim().max(800),
   cover_url: z.string().trim().max(800).optional().or(z.literal("")),
   lesson: z.string().trim().max(4000).optional().or(z.literal("")),
   exercise: z.string().trim().max(2000).optional().or(z.literal("")),
@@ -146,6 +146,8 @@ export function AudiosManager() {
   const [editing, setEditing] = useState<string | null>(null);
   const [uploading, setUploading] = useState<"audio" | "cover" | null>(null);
   const [form, setForm] = useState(emptyForm);
+  const [generating, setGenerating] = useState(false);
+  const [autoGenerate, setAutoGenerate] = useState(true);
   const [openGroups, setOpenGroups] = useState<Set<string>>(new Set(["abundancia"]));
   const [filter, setFilter] = useState<string>("");
   const [selectedRoot, setSelectedRoot] = useState<string>("");
@@ -263,9 +265,23 @@ export function AudiosManager() {
     toast.success("Portada subida");
   }
 
+  async function generateContent(current: typeof emptyForm) {
+    const { data: session } = await supabase.auth.getSession();
+    const res = await fetch("/api/admin/generate-manifest", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.session?.access_token ?? ""}` }, body: JSON.stringify({ title: current.title, category: cats?.find(c => c.id === current.category_id)?.title ?? current.category_id, day: current.day_index, context: [current.affirmation, current.lesson, current.exercise].filter(Boolean).join("\n").slice(0, 2000) }) });
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.error ?? "No pudimos generar el contenido");
+    return result as { affirmation: string; lesson: string; exercise: string };
+  }
+
   const save = useMutation({
     mutationFn: async () => {
-      const parsed = schema.safeParse(form);
+      let current = form;
+      if (autoGenerate && (!form.affirmation || !form.lesson || !form.exercise)) {
+        setGenerating(true);
+        try { current = { ...form, ...await generateContent(form) }; setForm(current); }
+        finally { setGenerating(false); }
+      }
+      const parsed = schema.safeParse(current);
       if (!parsed.success) throw new Error(parsed.error.issues[0]!.message);
       const d = parsed.data;
       const row = {
@@ -273,7 +289,7 @@ export function AudiosManager() {
         day_index: d.day_index,
         title: d.title,
         affirmation: d.affirmation,
-        audio_url: d.audio_url,
+        audio_url: d.audio_url || null,
         cover_url: d.cover_url || null,
         lesson: d.lesson || null,
         exercise: d.exercise || null,
@@ -779,7 +795,7 @@ export function AudiosManager() {
                   />
                 </Field>
 
-                <Field label="MP3 (enlace o archivo subido)">
+                <Field label="MP3 opcional (enlace o archivo subido)">
                   <input
                     value={form.audio_url}
                     onChange={(e) => setForm({ ...form, audio_url: e.target.value })}
@@ -806,6 +822,12 @@ export function AudiosManager() {
                     />
                   </label>
                 </Field>
+
+                <div className="sm:col-span-2 rounded-xl bg-primary/5 border border-primary/20 p-4 text-sm">
+                  <label className="flex items-center gap-2 font-semibold"><input type="checkbox" checked={autoGenerate} onChange={e => setAutoGenerate(e.target.checked)} /> Completar con IA los campos vacíos al guardar</label>
+                  <p className="mt-1 text-muted-foreground">Puedes publicar sin audio. La IA usa el título, categoría, día y texto que escribas; revisa el contenido antes de publicarlo.</p>
+                  <button type="button" disabled={generating || !form.title.trim()} className="mt-3 rounded-xl bg-primary px-4 py-2 text-white disabled:opacity-50" onClick={async () => { setGenerating(true); try { const content = await generateContent(form); setForm(f => ({ ...f, ...content })); toast.success("Contenido listo para revisar"); } catch (e) { toast.error((e as Error).message); } finally { setGenerating(false); } }}>{generating ? "Generando…" : "Generar contenido ahora"}</button>
+                </div>
 
                 <Field label="Portada (enlace o archivo)">
                   <input
@@ -867,7 +889,7 @@ export function AudiosManager() {
                 <div className="sm:col-span-2">
                   <button
                     type="submit"
-                    disabled={save.isPending || uploading !== null}
+                    disabled={save.isPending || generating || uploading !== null}
                     className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-[12px] bg-primary text-[15px] font-bold text-primary-foreground disabled:opacity-60"
                   >
                     {save.isPending && <Loader2 className="h-4 w-4 animate-spin" />}

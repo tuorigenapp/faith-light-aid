@@ -17,7 +17,7 @@ import { WordSearch } from "@/components/WordSearch";
 import { StageQuiz, type QuizItem } from "@/components/StageQuiz";
 
 export const Route = createFileRoute("/_authenticated/visualiza/$categoryId")({
-  head: () => ({ meta: [{ title: "Manifestar con Música — Reconectando" }] }),
+  head: () => ({ meta: [{ title: "Visualízalo y Vívelo — ORÍGEN" }, { name: "description", content: "Explora las categorías, lecciones y prácticas de Visualízalo y Vívelo." }, { property: "og:title", content: "Visualízalo y Vívelo — ORÍGEN" }, { property: "og:description", content: "Explora categorías y prácticas diarias." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
   component: CategoryPage,
 });
 
@@ -41,16 +41,7 @@ const INCLUDES = [
   { Icon: Sparkles, label: "Transformación interior y resultados" },
 ];
 
-const AREAS = [
-  { id: "dinero", label: "Dinero y\nProsperidad", desc: "Atrae abundancia y libertad financiera.", Icon: DollarSign, color: "#F5B441", bg: "#FFF3D6" },
-  { id: "pareja", label: "Pareja y\nAmor", desc: "Alinea tu corazón con un amor sano.", Icon: Heart, color: "#F58BCB", bg: "#FFE1F1" },
-  { id: "casa", label: "Casa\nPropia", desc: "Visualiza tu hogar ideal y hazlo realidad.", Icon: Home, color: "#A78BFA", bg: "#EDE7FF" },
-  { id: "negocio", label: "Negocio y\nÉxito", desc: "Impulsa tu emprendimiento y multiplica.", Icon: Briefcase, color: "#5AA9FF", bg: "#DCEBFF" },
-  { id: "libre", label: "Paz\nInterior", desc: "Encuentra calma, equilibrio y bienestar.", Icon: Flower2, color: "#B49BFF", bg: "#EDE7FF" },
-  { id: "abundancia", label: "Salud y\nBienestar", desc: "Cuida tu cuerpo, mente y espíritu.", Icon: HeartHandshake, color: "#3FBE8F", bg: "#DFF6EA" },
-  { id: "trabajo", label: "Crecimiento\nPersonal", desc: "Desarrolla tu mejor versión día a día.", Icon: User, color: "#7C5CFF", bg: "#E7DEFF" },
-  { id: "proposito", label: "Propósito y\nMisión", desc: "Descubre tu llamado y vive con sentido.", Icon: Star, color: "#F5B441", bg: "#FFF3D6" },
-];
+const AREA_ICONS = [DollarSign, Heart, Home, Briefcase, Flower2, HeartHandshake, User, Star];
 
 const AFFIRMATIONS = [
   { text: "Estoy alineado con la abundancia infinita del Universo.", Icon: Sparkles, color: "#F5B441", bg: "#FFF3D6" },
@@ -114,6 +105,14 @@ function CategoryPage() {
       return { cat: cat.data, audios: audios.data ?? [], entries: new Map((entries.data ?? []).map((e: any) => [e.audio_id, e])), plan };
     },
   });
+  const { data: areas = [] } = useQuery({
+    queryKey: ["manifest-area-list"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("manifest_categories").select("id,title,description,cover_url,color,sort_order").eq("group_key", "abundancia").order("sort_order", { ascending: true });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
 
   const c = data?.cat;
   const isPaid = data?.plan === "camino";
@@ -133,7 +132,7 @@ function CategoryPage() {
       return;
     }
     if (!a.audio_url) {
-      toast.error("Este audio se publica muy pronto.");
+      navigate({ to: "/visualiza/$categoryId/$day", params: { categoryId, day: String(dayIndex) } });
       return;
     }
     if (playingId === a.id) {
@@ -161,7 +160,7 @@ function CategoryPage() {
   if (!c) return <div className="p-8 text-center text-muted-foreground">Cargando...</div>;
 
   const doneCount = data?.audios.filter((a: any) => data.entries.get(a.id)?.completed).length ?? 0;
-  const selectedArea = AREAS.find((a) => a.id === categoryId);
+  const selectedArea = areas.find((a) => a.id === categoryId);
 
   const StepDots = (
     <div className="flex items-center justify-center gap-2 pt-4">
@@ -246,8 +245,9 @@ function CategoryPage() {
         </div>
 
         <div className="mt-5 grid grid-cols-2 sm:grid-cols-3 gap-3">
-          {AREAS.map((a) => {
+           {areas.map((a, i) => {
             const active = a.id === categoryId;
+             const Icon = AREA_ICONS[i % AREA_ICONS.length];
             return (
               <button
                 key={a.id}
@@ -262,11 +262,11 @@ function CategoryPage() {
                   active ? "border-2 border-primary shadow-glow" : "border border-border/60",
                 )}
               >
-                <div className="w-12 h-12 rounded-2xl grid place-items-center mx-auto mb-2" style={{ background: a.bg, color: a.color }}>
-                  <a.Icon className="w-5 h-5" />
-                </div>
-                <div className="font-bold text-[13px] leading-tight whitespace-pre-line">{a.label}</div>
-                <div className="text-[10px] text-muted-foreground mt-1.5 leading-snug">{a.desc}</div>
+                 <div className="w-12 h-12 rounded-2xl grid place-items-center mx-auto mb-2 bg-primary/10 text-primary">
+                   {a.cover_url ? <img src={a.cover_url} alt="" className="h-full w-full rounded-2xl object-cover" /> : <Icon className="w-5 h-5" />}
+                 </div>
+                 <div className="font-bold text-[13px] leading-tight">{a.title}</div>
+                 <div className="text-[10px] text-muted-foreground mt-1.5 leading-snug">{a.description}</div>
               </button>
             );
           })}
@@ -292,7 +292,7 @@ function CategoryPage() {
         <div className="text-center mt-3">
           <div className="text-xs uppercase tracking-widest text-primary font-bold">Paso 3 de 3 · Tu lección</div>
           <h2 className="font-display font-extrabold text-2xl mt-2 leading-tight">
-            {selectedArea?.label.replace("\n", " ") ?? c.title} <span>💗</span>
+             {selectedArea?.title ?? c.title} <span>💗</span>
           </h2>
           <p className="text-sm text-muted-foreground mt-2 max-w-md mx-auto">
             Escucha, siente y practica. Todo en un solo lugar.
@@ -308,17 +308,17 @@ function CategoryPage() {
               <Headphones className="w-6 h-6 text-white" />
             </div>
             <div className="min-w-0">
-              <h3 className="font-display font-extrabold text-base leading-tight truncate">Playlist 21 días 🎵</h3>
+               <h3 className="font-display font-extrabold text-base leading-tight truncate">{data?.audios.some((a: any) => a.audio_url) ? "Playlist y prácticas" : "Prácticas sin audio"}</h3>
               <p className="text-xs text-muted-foreground mt-0.5">{c.title} · Manifiesta con música guiada.</p>
             </div>
           </div>
         </Card>
 
         <div className="mt-3 rounded-[1.5rem] overflow-hidden border border-border/60 bg-card">
-          {data?.audios.map((a: any) => {
+           {data?.audios.map((a: any) => {
             const day = a.day_index as number;
             const locked = !isPaid && day > 1;
-            const title = DAY_TITLES[day - 1] ?? a.title;
+             const title = a.title || DAY_TITLES[day - 1];
             const dur = DAY_DURATION[day - 1] ?? "11:00";
             const active = playingId === a.id;
             return (
@@ -341,7 +341,7 @@ function CategoryPage() {
                   className="w-9 h-9 rounded-full grid place-items-center shrink-0 shadow-sm"
                   style={{ background: locked ? "#94A3B822" : (c.color ?? "#7C5CFF"), color: locked ? "#64748B" : "white" }}
                 >
-                  {locked ? <Lock className="w-4 h-4" /> : active ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-0.5" />}
+                   {locked ? <Lock className="w-4 h-4" /> : !a.audio_url ? <ArrowRight className="w-4 h-4" /> : active ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-0.5" />}
                 </div>
               </button>
             );

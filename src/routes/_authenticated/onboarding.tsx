@@ -133,10 +133,12 @@ function Onboarding() {
         const c = (intake?.childhood as Record<string, unknown>) ?? {};
         setRaices((g.raices as string) ?? "");
         setRecuerdos((c.recuerdos as string) ?? "");
-        setDeseo((g.deseo as string) ?? "");
-        setAreas((g.areas as string[]) ?? []);
+        let preview: Record<string, string> = {};
+        try { preview = JSON.parse(localStorage.getItem("origen_preonboarding") || "{}"); } catch { /* no preview */ }
+        setDeseo((g.deseo as string) || DESEOS.find(v => v.label === preview.deseo)?.id || "");
+        setAreas((g.areas as string[])?.length ? g.areas as string[] : AREAS.filter(v => v.label === preview.area).map(v => v.id));
         setDetonantes((c.detonantes as string[]) ?? []);
-        setGuia((c.guia as string) ?? "");
+        setGuia((c.guia as string) || ({ "Con música y afirmaciones": "musica", "Con ejercicios prácticos": "practica", "Con fe y reflexión": "fe" } as Record<string, string>)[preview.guia] || "");
         const raw = profile?.display_name || profile?.full_name || "";
         setName(raw.startsWith("invitado_") ? "" : raw);
       } catch {

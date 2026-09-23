@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RegistroRouteImport } from './routes/registro'
 import { Route as EstilosRouteImport } from './routes/estilos'
+import { Route as EmpezarRouteImport } from './routes/empezar'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -54,6 +55,12 @@ import { Route as ApiPublicPushDailyRouteImport } from './routes/api/public/push
 import { Route as ApiPublicPushBroadcastRouteImport } from './routes/api/public/push-broadcast'
 import { Route as ApiPublicMinistracionTeaserRouteImport } from './routes/api/public/ministracion-teaser'
 import { Route as ApiPublicMarketingDispatchRouteImport } from './routes/api/public/marketing-dispatch'
+import { Route as ApiCommunityVoteRouteImport } from './routes/api/community/vote'
+import { Route as ApiCommunityMediaRouteImport } from './routes/api/community/media'
+import { Route as ApiCommunityFeedRouteImport } from './routes/api/community/feed'
+import { Route as ApiCommunityBotRouteImport } from './routes/api/community/bot'
+import { Route as ApiAdminGenerateManifestRouteImport } from './routes/api/admin/generate-manifest'
+import { Route as ApiAdminCommunityRouteImport } from './routes/api/admin/community'
 import { Route as AuthenticatedVisualizaLimpiezaRouteImport } from './routes/_authenticated/visualiza.limpieza'
 import { Route as AuthenticatedVisualizaIdentidadRouteImport } from './routes/_authenticated/visualiza.identidad'
 import { Route as AuthenticatedVisualizaCristoRouteImport } from './routes/_authenticated/visualiza.cristo'
@@ -81,6 +88,11 @@ const RegistroRoute = RegistroRouteImport.update({
 const EstilosRoute = EstilosRouteImport.update({
   id: '/estilos',
   path: '/estilos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmpezarRoute = EmpezarRouteImport.update({
+  id: '/empezar',
+  path: '/empezar',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CheckoutRoute = CheckoutRouteImport.update({
@@ -299,6 +311,37 @@ const ApiPublicMarketingDispatchRoute =
     path: '/api/public/marketing-dispatch',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiCommunityVoteRoute = ApiCommunityVoteRouteImport.update({
+  id: '/api/community/vote',
+  path: '/api/community/vote',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCommunityMediaRoute = ApiCommunityMediaRouteImport.update({
+  id: '/api/community/media',
+  path: '/api/community/media',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCommunityFeedRoute = ApiCommunityFeedRouteImport.update({
+  id: '/api/community/feed',
+  path: '/api/community/feed',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCommunityBotRoute = ApiCommunityBotRouteImport.update({
+  id: '/api/community/bot',
+  path: '/api/community/bot',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminGenerateManifestRoute =
+  ApiAdminGenerateManifestRouteImport.update({
+    id: '/api/admin/generate-manifest',
+    path: '/api/admin/generate-manifest',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiAdminCommunityRoute = ApiAdminCommunityRouteImport.update({
+  id: '/api/admin/community',
+  path: '/api/admin/community',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedVisualizaLimpiezaRoute =
   AuthenticatedVisualizaLimpiezaRouteImport.update({
     id: '/limpieza',
@@ -381,6 +424,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRoute
+  '/empezar': typeof EmpezarRoute
   '/estilos': typeof EstilosRoute
   '/registro': typeof RegistroRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -423,6 +467,12 @@ export interface FileRoutesByFullPath {
   '/visualiza/cristo': typeof AuthenticatedVisualizaCristoRoute
   '/visualiza/identidad': typeof AuthenticatedVisualizaIdentidadRoute
   '/visualiza/limpieza': typeof AuthenticatedVisualizaLimpiezaRoute
+  '/api/admin/community': typeof ApiAdminCommunityRoute
+  '/api/admin/generate-manifest': typeof ApiAdminGenerateManifestRoute
+  '/api/community/bot': typeof ApiCommunityBotRoute
+  '/api/community/feed': typeof ApiCommunityFeedRoute
+  '/api/community/media': typeof ApiCommunityMediaRoute
+  '/api/community/vote': typeof ApiCommunityVoteRoute
   '/api/public/marketing-dispatch': typeof ApiPublicMarketingDispatchRoute
   '/api/public/ministracion-teaser': typeof ApiPublicMinistracionTeaserRoute
   '/api/public/push-broadcast': typeof ApiPublicPushBroadcastRoute
@@ -440,6 +490,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRoute
+  '/empezar': typeof EmpezarRoute
   '/estilos': typeof EstilosRoute
   '/registro': typeof RegistroRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -481,6 +532,12 @@ export interface FileRoutesByTo {
   '/visualiza/cristo': typeof AuthenticatedVisualizaCristoRoute
   '/visualiza/identidad': typeof AuthenticatedVisualizaIdentidadRoute
   '/visualiza/limpieza': typeof AuthenticatedVisualizaLimpiezaRoute
+  '/api/admin/community': typeof ApiAdminCommunityRoute
+  '/api/admin/generate-manifest': typeof ApiAdminGenerateManifestRoute
+  '/api/community/bot': typeof ApiCommunityBotRoute
+  '/api/community/feed': typeof ApiCommunityFeedRoute
+  '/api/community/media': typeof ApiCommunityMediaRoute
+  '/api/community/vote': typeof ApiCommunityVoteRoute
   '/api/public/marketing-dispatch': typeof ApiPublicMarketingDispatchRoute
   '/api/public/ministracion-teaser': typeof ApiPublicMinistracionTeaserRoute
   '/api/public/push-broadcast': typeof ApiPublicPushBroadcastRoute
@@ -500,6 +557,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRoute
+  '/empezar': typeof EmpezarRoute
   '/estilos': typeof EstilosRoute
   '/registro': typeof RegistroRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -542,6 +600,12 @@ export interface FileRoutesById {
   '/_authenticated/visualiza/cristo': typeof AuthenticatedVisualizaCristoRoute
   '/_authenticated/visualiza/identidad': typeof AuthenticatedVisualizaIdentidadRoute
   '/_authenticated/visualiza/limpieza': typeof AuthenticatedVisualizaLimpiezaRoute
+  '/api/admin/community': typeof ApiAdminCommunityRoute
+  '/api/admin/generate-manifest': typeof ApiAdminGenerateManifestRoute
+  '/api/community/bot': typeof ApiCommunityBotRoute
+  '/api/community/feed': typeof ApiCommunityFeedRoute
+  '/api/community/media': typeof ApiCommunityMediaRoute
+  '/api/community/vote': typeof ApiCommunityVoteRoute
   '/api/public/marketing-dispatch': typeof ApiPublicMarketingDispatchRoute
   '/api/public/ministracion-teaser': typeof ApiPublicMinistracionTeaserRoute
   '/api/public/push-broadcast': typeof ApiPublicPushBroadcastRoute
@@ -561,6 +625,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/checkout'
+    | '/empezar'
     | '/estilos'
     | '/registro'
     | '/sitemap.xml'
@@ -603,6 +668,12 @@ export interface FileRouteTypes {
     | '/visualiza/cristo'
     | '/visualiza/identidad'
     | '/visualiza/limpieza'
+    | '/api/admin/community'
+    | '/api/admin/generate-manifest'
+    | '/api/community/bot'
+    | '/api/community/feed'
+    | '/api/community/media'
+    | '/api/community/vote'
     | '/api/public/marketing-dispatch'
     | '/api/public/ministracion-teaser'
     | '/api/public/push-broadcast'
@@ -620,6 +691,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/checkout'
+    | '/empezar'
     | '/estilos'
     | '/registro'
     | '/sitemap.xml'
@@ -661,6 +733,12 @@ export interface FileRouteTypes {
     | '/visualiza/cristo'
     | '/visualiza/identidad'
     | '/visualiza/limpieza'
+    | '/api/admin/community'
+    | '/api/admin/generate-manifest'
+    | '/api/community/bot'
+    | '/api/community/feed'
+    | '/api/community/media'
+    | '/api/community/vote'
     | '/api/public/marketing-dispatch'
     | '/api/public/ministracion-teaser'
     | '/api/public/push-broadcast'
@@ -679,6 +757,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/checkout'
+    | '/empezar'
     | '/estilos'
     | '/registro'
     | '/sitemap.xml'
@@ -721,6 +800,12 @@ export interface FileRouteTypes {
     | '/_authenticated/visualiza/cristo'
     | '/_authenticated/visualiza/identidad'
     | '/_authenticated/visualiza/limpieza'
+    | '/api/admin/community'
+    | '/api/admin/generate-manifest'
+    | '/api/community/bot'
+    | '/api/community/feed'
+    | '/api/community/media'
+    | '/api/community/vote'
     | '/api/public/marketing-dispatch'
     | '/api/public/ministracion-teaser'
     | '/api/public/push-broadcast'
@@ -740,6 +825,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRoute
   CheckoutRoute: typeof CheckoutRoute
+  EmpezarRoute: typeof EmpezarRoute
   EstilosRoute: typeof EstilosRoute
   RegistroRoute: typeof RegistroRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -750,6 +836,12 @@ export interface RootRouteChildren {
   ApiParejaRoute: typeof ApiParejaRoute
   ApiPatronesRoute: typeof ApiPatronesRoute
   ApiStagePackRoute: typeof ApiStagePackRoute
+  ApiAdminCommunityRoute: typeof ApiAdminCommunityRoute
+  ApiAdminGenerateManifestRoute: typeof ApiAdminGenerateManifestRoute
+  ApiCommunityBotRoute: typeof ApiCommunityBotRoute
+  ApiCommunityFeedRoute: typeof ApiCommunityFeedRoute
+  ApiCommunityMediaRoute: typeof ApiCommunityMediaRoute
+  ApiCommunityVoteRoute: typeof ApiCommunityVoteRoute
   ApiPublicMarketingDispatchRoute: typeof ApiPublicMarketingDispatchRoute
   ApiPublicMinistracionTeaserRoute: typeof ApiPublicMinistracionTeaserRoute
   ApiPublicPushBroadcastRoute: typeof ApiPublicPushBroadcastRoute
@@ -780,6 +872,13 @@ declare module '@tanstack/react-router' {
       path: '/estilos'
       fullPath: '/estilos'
       preLoaderRoute: typeof EstilosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/empezar': {
+      id: '/empezar'
+      path: '/empezar'
+      fullPath: '/empezar'
+      preLoaderRoute: typeof EmpezarRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/checkout': {
@@ -1076,6 +1175,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicMarketingDispatchRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/community/vote': {
+      id: '/api/community/vote'
+      path: '/api/community/vote'
+      fullPath: '/api/community/vote'
+      preLoaderRoute: typeof ApiCommunityVoteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/community/media': {
+      id: '/api/community/media'
+      path: '/api/community/media'
+      fullPath: '/api/community/media'
+      preLoaderRoute: typeof ApiCommunityMediaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/community/feed': {
+      id: '/api/community/feed'
+      path: '/api/community/feed'
+      fullPath: '/api/community/feed'
+      preLoaderRoute: typeof ApiCommunityFeedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/community/bot': {
+      id: '/api/community/bot'
+      path: '/api/community/bot'
+      fullPath: '/api/community/bot'
+      preLoaderRoute: typeof ApiCommunityBotRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/generate-manifest': {
+      id: '/api/admin/generate-manifest'
+      path: '/api/admin/generate-manifest'
+      fullPath: '/api/admin/generate-manifest'
+      preLoaderRoute: typeof ApiAdminGenerateManifestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/community': {
+      id: '/api/admin/community'
+      path: '/api/admin/community'
+      fullPath: '/api/admin/community'
+      preLoaderRoute: typeof ApiAdminCommunityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/visualiza/limpieza': {
       id: '/_authenticated/visualiza/limpieza'
       path: '/limpieza'
@@ -1306,6 +1447,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   AuthRoute: AuthRoute,
   CheckoutRoute: CheckoutRoute,
+  EmpezarRoute: EmpezarRoute,
   EstilosRoute: EstilosRoute,
   RegistroRoute: RegistroRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
@@ -1316,6 +1458,12 @@ const rootRouteChildren: RootRouteChildren = {
   ApiParejaRoute: ApiParejaRoute,
   ApiPatronesRoute: ApiPatronesRoute,
   ApiStagePackRoute: ApiStagePackRoute,
+  ApiAdminCommunityRoute: ApiAdminCommunityRoute,
+  ApiAdminGenerateManifestRoute: ApiAdminGenerateManifestRoute,
+  ApiCommunityBotRoute: ApiCommunityBotRoute,
+  ApiCommunityFeedRoute: ApiCommunityFeedRoute,
+  ApiCommunityMediaRoute: ApiCommunityMediaRoute,
+  ApiCommunityVoteRoute: ApiCommunityVoteRoute,
   ApiPublicMarketingDispatchRoute: ApiPublicMarketingDispatchRoute,
   ApiPublicMinistracionTeaserRoute: ApiPublicMinistracionTeaserRoute,
   ApiPublicPushBroadcastRoute: ApiPublicPushBroadcastRoute,

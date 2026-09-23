@@ -12,6 +12,9 @@ import eBrain from "@/assets/e3d-brain.png";
 import { ReviewsSlider } from "@/components/ReviewsSlider";
 import { LiveActivityToasts } from "@/components/LiveActivityToasts";
 import { DiosTeDiceHoy } from "@/components/DiosTeDiceHoy";
+import screenExercises from "@/assets/landing-screens/ejercicios.png";
+import screenVisualiza from "@/assets/landing-screens/visualiza.png";
+import screenCommunity from "@/assets/landing-screens/comunidad.png";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -73,6 +76,12 @@ const FAQ = [
 function Landing() {
   const [faq, setFaq] = useState<number | null>(null);
   const [sticky, setSticky] = useState(false);
+  const [screen, setScreen] = useState(0);
+  const screens = [
+    { image: screenExercises, title: "Tu camino, un día a la vez", caption: "Ejercicios diarios y progreso visible." },
+    { image: screenVisualiza, title: "Visualízalo y Vívelo", caption: "Programas guiados de fe, identidad y bienestar." },
+    { image: screenCommunity, title: "Personas que te escuchan", caption: "Preguntas, respuestas y acompañamiento en comunidad." },
+  ];
 
   useEffect(() => {
     const onScroll = () => setSticky(window.scrollY > 520);
@@ -98,7 +107,7 @@ function Landing() {
               Entrar
             </Link>
             <Link
-              to="/registro"
+              to="/empezar"
               className="grid h-10 place-items-center rounded-[12px] bg-primary px-4 text-[13px] font-bold text-primary-foreground shadow-glow"
             >
               Empezar gratis
@@ -133,7 +142,7 @@ function Landing() {
           <Reveal delay={240}>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
               <Link
-                to="/registro"
+                to="/empezar"
                 className="grid h-14 place-items-center rounded-[12px] px-7 text-[16.5px] font-bold text-primary-foreground shadow-glow transition active:scale-[.98]"
                 style={{ background: "var(--gradient-primary)" }}
               >
@@ -157,6 +166,19 @@ function Landing() {
             />
           </Reveal>
         </section>
+
+        <section className="mt-12 overflow-hidden rounded-[24px] border border-primary/15 bg-gradient-to-br from-primary/10 via-background to-pink-100/50 p-5 sm:p-9" aria-label="Conoce ORÍGEN desde adentro">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div><p className="text-xs font-bold uppercase tracking-widest text-primary">La app por dentro</p><h2 className="mt-1 font-display text-2xl font-extrabold sm:text-3xl">Un lugar para volver a ti.</h2><p className="mt-2 text-sm text-muted-foreground">Explora las pantallas reales antes de empezar.</p></div>
+            <div className="flex gap-2"><button type="button" onClick={() => setScreen((screen + screens.length - 1) % screens.length)} aria-label="Pantalla anterior" className="grid h-11 w-11 place-items-center rounded-full border border-primary/20 bg-card text-primary">←</button><button type="button" onClick={() => setScreen((screen + 1) % screens.length)} aria-label="Siguiente pantalla" className="grid h-11 w-11 place-items-center rounded-full border border-primary/20 bg-card text-primary">→</button></div>
+          </div>
+          <div className="mt-6 grid gap-5 sm:grid-cols-[minmax(0,1fr)_220px] sm:items-center">
+            <div className="h-[300px] overflow-hidden rounded-2xl border border-border bg-card shadow-soft sm:h-[390px]"><img key={screen} src={screens[screen].image} alt={`Captura real de ORÍGEN: ${screens[screen].title}`} className="w-full object-cover object-top" loading="lazy" /></div>
+            <div><span className="text-xs font-bold text-primary">0{screen + 1} / 0{screens.length}</span><h3 className="mt-2 font-display text-xl font-bold">{screens[screen].title}</h3><p className="mt-2 text-sm leading-relaxed text-muted-foreground">{screens[screen].caption}</p><div className="mt-5 flex gap-2">{screens.map((s, i) => <button key={s.title} type="button" onClick={() => setScreen(i)} aria-label={`Ver ${s.title}`} className={`h-2 rounded-full transition-all ${screen === i ? "w-8 bg-primary" : "w-2 bg-primary/25"}`} />)}</div></div>
+          </div>
+        </section>
+
+        <section className="mt-8 rounded-[24px] bg-[#45317e] p-6 text-white sm:p-9"><p className="text-xs font-bold uppercase tracking-widest text-pink-200">Comunidad ORÍGEN</p><h2 className="mt-2 font-display text-2xl font-bold">Tu historia merece ser escuchada.</h2><p className="mt-2 max-w-xl text-sm text-white/80">Comparte preguntas, encuentra respuestas y conversa con personas en un camino parecido al tuyo. Abierta a todas las membresías.</p><Link to="/empezar" className="mt-5 inline-flex min-h-11 items-center rounded-xl bg-white px-5 text-sm font-bold text-primary">Conocer la comunidad <ArrowRight className="ml-2 h-4 w-4" /></Link></section>
 
         {/* DIOS TE DICE HOY */}
         <Reveal>
@@ -267,7 +289,7 @@ function Landing() {
               Hoy puedes cortar la cadena.
             </h2>
             <Link
-              to="/registro"
+              to="/empezar"
               className="mt-5 grid h-14 w-full place-items-center rounded-[12px] text-[16.5px] font-bold text-primary-foreground shadow-glow active:scale-[.98]"
               style={{ background: "var(--gradient-primary)" }}
             >
@@ -294,7 +316,7 @@ function Landing() {
       {sticky && (
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 px-4 pb-[max(12px,env(safe-area-inset-bottom))] pt-3 backdrop-blur-xl">
           <Link
-            to="/registro"
+            to="/empezar"
             className="grid h-14 w-full place-items-center rounded-[12px] text-[16px] font-bold text-primary-foreground shadow-glow active:scale-[.98]"
             style={{ background: "var(--gradient-primary)" }}
           >

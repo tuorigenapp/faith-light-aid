@@ -13,7 +13,7 @@ type Teaser = {
  * "Dios te dice hoy" abierto: la persona pone su nombre, su fecha de nacimiento
  * y (si quiere) una pregunta. Recibe lo más importante y el resto queda velado.
  */
-export function DiosTeDiceHoy({ ctaTo = "/registro" }: { ctaTo?: "/registro" | "/membresia" }) {
+export function DiosTeDiceHoy({ ctaTo = "/empezar" }: { ctaTo?: "/empezar" | "/membresia" }) {
   const [name, setName] = useState("");
   const [dob, setDob] = useState("");
   const [question, setQuestion] = useState("");
@@ -67,8 +67,10 @@ ${data.versiculo}
     const a = document.createElement("a");
     a.href = url;
     a.download = "dios-te-dice-hoy.txt";
+    document.body.appendChild(a);
     a.click();
-    URL.revokeObjectURL(url);
+    a.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 30000);
   }
 
   return (

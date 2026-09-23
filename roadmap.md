@@ -29,3 +29,10 @@
 ## Regla transversal
 - [x] Todo offline: sin CDN ni recursos externos en los juegos.
 - [x] Niveles, progreso y recompensas existentes intactos.
+
+## Solicitud actual — comunidad, inicio y Visualízalo
+- [ ] Comunidad: preguntas y respuestas anidadas, anonimato protegido, moderación/suspensión, multimedia, guardados, seguir temas y reacciones/compartir.
+- [ ] Comunidad: respuestas ORÍGEN, categorías interactivas, contenidos verificados con fuentes y acceso premium sin prometer pruebas inexistentes.
+- [ ] Inicio: slider de pantallas reales, banner de comunidad, descarga funcional, empezar por onboarding; revisar correo de confirmación.
+- [ ] Visualízalo: novena subcategoría y orden dinámico, quitar Juegos del día, audio opcional y generación de textos desde el panel.
+- [ ] Verificar en móvil y escritorio los flujos y límites de seguridad.

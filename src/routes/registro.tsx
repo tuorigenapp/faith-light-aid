@@ -27,6 +27,7 @@ function RegistroPage() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmation, setConfirmation] = useState(false);
 
   function goOnboarding() {
     try {
@@ -39,23 +40,23 @@ function RegistroPage() {
 
   async function submit(e: FormEvent) {
     e.preventDefault();
+    try { localStorage.setItem("origen_pending_onboarding", "1"); } catch { /* no storage */ }
     setLoading(true);
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { emailRedirectTo: `${window.location.origin}/auth`, data: { full_name: fullName } },
+      options: { emailRedirectTo: `${window.location.origin}/auth`, data: { full_name: fullName, pre_onboarding: (() => { try { return JSON.parse(localStorage.getItem("origen_preonboarding") || "{}"); } catch { return {}; } })() } },
     });
     if (error) {
       setLoading(false);
+      try { localStorage.removeItem("origen_pending_onboarding"); } catch { /* no storage */ }
       return toast.error(error.message);
     }
     if (!data.session) {
-      const signin = await supabase.auth.signInWithPassword({ email, password });
-      if (signin.error) {
-        setLoading(false);
-        toast.success("Cuenta creada. Revisa tu correo para confirmar el acceso.");
-        return;
-      }
+      setLoading(false);
+      setConfirmation(true);
+      toast.success("Revisa tu correo para confirmar el acceso.");
+      return;
     }
     setLoading(false);
     toast.success("¡Bienvenida! Vamos con tus preguntas.");
@@ -112,6 +113,7 @@ function RegistroPage() {
           <span className="h-px flex-1 bg-border" /> O CON TU CORREO <span className="h-px flex-1 bg-border" />
         </div>
 
+        {confirmation && <div role="status" className="mt-5 rounded-2xl border border-primary/25 bg-primary/5 p-5 text-sm"><p className="font-bold text-primary">Confirma tu correo para continuar</p><p className="mt-2 text-muted-foreground">Enviamos un enlace a {email}. Revisa también spam o promociones; abre el enlace en el mismo navegador. Si no llega, usa el botón de reenviar.</p><button type="button" className="mt-3 min-h-11 font-bold text-primary underline" onClick={async () => { const { error } = await supabase.auth.resend({ type: "signup", email, options: { emailRedirectTo: `${window.location.origin}/auth` } }); if (error) toast.error(error.message); else toast.success("Enlace de confirmación reenviado."); }}>Reenviar confirmación</button></div>}
         <form onSubmit={submit} className="grid gap-3">
           <label className="block">
             <span className="mb-1 block text-[12px] font-semibold text-muted-foreground">¿Cómo te llamas?</span>

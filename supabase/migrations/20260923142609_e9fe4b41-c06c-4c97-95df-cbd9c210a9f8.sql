@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.community_feed_posts(),public.community_feed_replies() FROM authenticated;
