@@ -129,10 +129,10 @@ export function CommunityModerator() {
       <div className="mt-3 space-y-2 border-l-2 border-primary/20 pl-3">
         {list.length === 0 && <p className="text-xs text-muted-foreground">{empty}</p>}
         {list.map(r => <div key={r.id} className="rounded-lg bg-secondary/40 p-2.5">
-          <div className="flex flex-wrap items-center gap-2"><KindTag kind={r.author_kind} /><span className="text-xs font-semibold">{r.is_anonymous ? "Alma anónima" : r.author_name}</span><span className="text-xs text-muted-foreground">{fecha(r.created_at)}</span></div>
+           <div className="flex flex-wrap items-center gap-2"><KindTag kind={r.author_kind} /><span className="text-xs font-semibold">{r.author_name}</span><span className="text-xs text-muted-foreground">{fecha(r.created_at)}</span></div>
           <p className="mt-1 whitespace-pre-wrap">{r.body || "Respuesta con adjunto"}</p>
           <div className="mt-1 flex flex-wrap gap-3 text-xs">
-            {r.author_kind === "user" && <button onClick={() => { setAnswerFor(post.id); setAnswer(""); setAnswerParent({ id: r.id, name: r.is_anonymous ? "Alma anónima" : r.author_name }); }} className="font-semibold text-primary">Responder a {r.is_anonymous ? "Alma anónima" : r.author_name.split(" ")[0]}</button>}
+             {r.author_kind === "user" && <button onClick={() => { setAnswerFor(post.id); setAnswer(""); setAnswerParent({ id: r.id, name: r.author_name }); }} className="font-semibold text-primary">Responder a {r.is_anonymous ? r.author_name : r.author_name.split(" ")[0]}</button>}
             <button onClick={() => void act({ action: "delete-reply", id: r.id }, "¿Eliminar esta respuesta?")} className="text-destructive">Eliminar</button>
             {r.user_id && r.author_kind === "user" && <button onClick={() => setSuspendFor({ userId: r.user_id!, targetType: "reply", targetId: r.id })} className="text-destructive">Suspender autor</button>}
           </div>
@@ -190,7 +190,7 @@ export function CommunityModerator() {
             {list.map(p => <article key={p.id} className="rounded-xl border p-3">
               <p className="font-bold">{p.title} {p.is_verified && <ShieldCheck className="inline h-4 w-4 text-primary" />}</p>
               <p className="mt-1 line-clamp-2 text-muted-foreground">{p.body}</p>
-              <p className="mt-1 text-xs">{topicLabel(p.topic)} · {p.is_anonymous ? "Anónimo" : p.author_name} · {p.reply_count} respuestas · {fecha(p.created_at)}</p>
+               <p className="mt-1 text-xs">{topicLabel(p.topic)} · {p.author_name} · {p.reply_count} respuestas · {fecha(p.created_at)}</p>
               <div className="mt-2 flex flex-wrap gap-3 text-primary">
                 {kind === "user" && <button onClick={() => void act({ action: p.is_verified ? "unverify" : "verify", id: p.id, sourceUrl: p.is_verified ? undefined : window.prompt("URL de la fuente comprobada (opcional)") ?? undefined })}>{p.is_verified ? "Quitar verificación" : "Verificar"}</button>}
                 <button onClick={() => void act({ action: "delete-post", id: p.id }, "¿Eliminar esta publicación y sus respuestas?")} className="text-destructive">Eliminar</button>
