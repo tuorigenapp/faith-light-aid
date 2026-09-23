@@ -131,6 +131,24 @@ export type Database = {
         }
         Relationships: []
       }
+      community_blocks: {
+        Row: {
+          created_at: string
+          topic: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          topic: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          topic?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       community_follows: {
         Row: {
           created_at: string
