@@ -80,7 +80,7 @@
 - [x] Comprobar nombres y colores en móvil y escritorio.
 
 ## Comunidad — restaurar diseño y simplificar números
-- [ ] Restaurar colores originales de publicaciones, opciones separadas de encuestas y sombra oscura legible en portadas.
-- [ ] Dar a cada burbuja de respuesta un tono cálido distinto, visible en claro y oscuro.
+- [x] Restaurar colores originales de publicaciones, opciones separadas de encuestas y sombra oscura legible en portadas.
+- [x] Dar a cada burbuja de respuesta un tono cálido distinto, visible en claro y oscuro.
 - [x] Asignar a cada persona anónima un número único entre 1 y 999.999, salvo que se agote ese rango; corregir nombres anteriores.
-- [ ] Comprobar publicaciones, encuestas, portadas y conversaciones en móvil y escritorio.
+- [x] Comprobar publicaciones, encuestas, portadas y conversaciones en móvil y escritorio.

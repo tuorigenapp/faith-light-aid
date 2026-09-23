@@ -172,8 +172,8 @@ body.community-reading .community-main { padding-bottom: 0; }
 }
 
 .community-post-list, .community-post-detail { background: var(--card); border: 1px solid var(--border); box-shadow: var(--shadow-soft); }
-.community-poll-option { background: var(--community-poll); border: 1.5px solid var(--community-poll-border); color: var(--foreground); box-shadow: var(--shadow-soft); }
-.community-poll-option[data-selected="true"] { background: var(--community-poll-selected); border: 2px solid var(--primary); }
+.community-poll-option.community-poll-option { background: var(--community-poll); border: 2px solid var(--community-poll-border); color: var(--foreground); box-shadow: var(--shadow-soft); }
+.community-poll-option.community-poll-option[data-selected="true"] { background: var(--community-poll-selected); border-color: var(--primary); }
 .community-reply { background: var(--community-reply-0); border: 1px solid var(--community-reply-border); box-shadow: var(--shadow-soft); }
 .community-reply[data-tone="1"] { background: var(--community-reply-1); }
 .community-reply[data-tone="2"] { background: var(--community-reply-2); }
