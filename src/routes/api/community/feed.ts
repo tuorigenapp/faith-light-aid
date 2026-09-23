@@ -12,16 +12,33 @@ export const Route = createFileRoute("/api/community/feed")({ server: { handlers
   const query = new URL(request.url).searchParams;
   const search = (query.get("q") ?? "").trim().slice(0, 120);
   const page = Math.min(Math.max(Math.trunc(Number(query.get("page")) || 0), 0), 20);
+  const scope = query.get("scope") ?? "feed";
+  if (!["feed", "mine", "following", "comments", "saved"].includes(scope)) return Response.json({ error: "Vista inválida." }, { status: 400 });
   const topicNames: Record<string, string> = { "para ti": "general", familia: "familia", relaciones: "pareja", bienestar: "ansiedad", fe: "fe", avances: "logros" };
   const searchValue = topicNames[search.toLocaleLowerCase("es")] ?? search;
   // Keep punctuation, wildcard and PostgREST syntax out of the OR filter.
   const term = searchValue.replace(/[^\p{L}\p{N}\s]/gu, " ").replace(/\s+/g, " ").trim();
-  const matches = term ? await db.from("community_replies").select("post_id").ilike("body", `%${term}%`).limit(200) : { data: [], error: null };
+  const [matches, followRows, blockRows, commentRows, saveRows] = await Promise.all([
+    term ? db.from("community_replies").select("post_id").ilike("body", `%${term}%`).limit(200) : Promise.resolve({ data: [], error: null }),
+    scope === "following" ? db.from("community_follows").select("topic").eq("user_id", user.id) : Promise.resolve({ data: [], error: null }),
+    scope === "feed" ? db.from("community_blocks").select("topic").eq("user_id", user.id) : Promise.resolve({ data: [], error: null }),
+    scope === "comments" ? db.from("community_replies").select("post_id").eq("user_id", user.id).limit(5000) : Promise.resolve({ data: [], error: null }),
+    scope === "saved" ? db.from("community_saves").select("post_id").eq("user_id", user.id) : Promise.resolve({ data: [], error: null }),
+  ]);
+  if (matches.error || followRows.error || blockRows.error || commentRows.error || saveRows.error) return Response.json({ error: "No se pudieron cargar las conversaciones." }, { status: 503 });
   const replyIds = [...new Set((matches.data ?? []).map(r => r.post_id))];
+  const scopeIds = scope === "comments" ? [...new Set((commentRows.data ?? []).map(r => r.post_id))] : [...new Set((saveRows.data ?? []).map(r => r.post_id))];
+  const followed = (followRows.data ?? []).map(r => r.topic);
+  const blocked = (blockRows.data ?? []).map(r => r.topic);
+  const noMatches = (scope === "following" && !followed.length) || (["comments", "saved"].includes(scope) && !scopeIds.length);
   const base = db.from("community_posts").select("id,user_id,author_name,topic,title,body,created_at,is_anonymous,image_path,poll_options,source_url,is_verified,is_bot,bot_kind");
-  const filtered = term ? base.or(`title.ilike.%${term}%,body.ilike.%${term}%,topic.ilike.%${term}%${replyIds.length ? `,id.in.(${replyIds.join(",")})` : ""}`) : base;
+  let filtered = term ? base.or(`title.ilike.%${term}%,body.ilike.%${term}%,topic.ilike.%${term}%${replyIds.length ? `,id.in.(${replyIds.join(",")})` : ""}`) : base;
+  if (scope === "mine") filtered = filtered.eq("user_id", user.id);
+  if (scope === "following" && followed.length) filtered = filtered.in("topic", followed);
+  if (["comments", "saved"].includes(scope) && scopeIds.length) filtered = filtered.in("id", scopeIds);
+  if (scope === "feed" && blocked.length) filtered = filtered.not("topic", "in", `(${blocked.join(",")})`);
   const limit = (page + 1) * 100;
-  const posts = await filtered.order("created_at", { ascending: false }).range(0, limit);
+  const posts = noMatches ? { data: [], error: null } : await filtered.order("created_at", { ascending: false }).range(0, limit);
   if (matches.error || posts.error) return Response.json({ error: "No se pudieron cargar las conversaciones." }, { status: 503 });
   const matchingPosts = (posts.data ?? []).slice(0, limit);
   const ids = new Set(matchingPosts.map(p => p.id));

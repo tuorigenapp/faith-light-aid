@@ -29,11 +29,16 @@ export const Route = createFileRoute("/api/admin/community")({ server: { handler
   POST: async ({ request }) => {
     const ctx = await connect(request);
     if (!ctx) return Response.json({ error: "Solo administradores." }, { status: 403 });
-    const { action, id, userId, reason, sourceUrl } = await request.json() as { action?: string; id?: string; userId?: string; reason?: string; sourceUrl?: string };
+    const { action, id, userId, reason, sourceUrl, topic, title, body, options } = await request.json() as { action?: string; id?: string; userId?: string; reason?: string; sourceUrl?: string; topic?: string; title?: string; body?: string; options?: string[] };
     const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     if (id && !uuid.test(id) || userId && !uuid.test(userId)) return Response.json({ error: "Identificador inválido." }, { status: 400 });
     let error: { message: string } | null = null;
-    if (action === "delete-post" && id) ({ error } = await ctx.db.from("community_posts").delete().eq("id", id));
+    if (action === "create-poll") {
+      const choices = Array.isArray(options) ? options.map(o => typeof o === "string" ? o.trim() : "") : [];
+      if (!topic || !["general", "familia", "pareja", "ansiedad", "fe", "logros"].includes(topic) || !title?.trim() || title.trim().length < 6 || title.trim().length > 200 || !Array.isArray(options) || choices.length < 3 || choices.length > 6 || choices.some(o => !o || o.length > 100) || new Set(choices.map(o => o.toLocaleLowerCase("es"))).size !== choices.length || (body?.length ?? 0) > 10000) return Response.json({ error: "Revisa el tema, la pregunta y las 3 a 6 opciones diferentes." }, { status: 400 });
+      ({ error } = await ctx.db.from("community_posts").insert({ user_id: ctx.user.id, author_name: "ORÍGEN", topic, title: title.trim(), body: body?.trim() ?? "", poll_options: choices, is_anonymous: false, is_bot: true }));
+    }
+    else if (action === "delete-post" && id) ({ error } = await ctx.db.from("community_posts").delete().eq("id", id));
     else if (action === "delete-reply" && id) ({ error } = await ctx.db.from("community_replies").delete().eq("id", id));
     else if (action === "verify" && id) {
       const source = sourceUrl?.trim();
