@@ -168,15 +168,27 @@ body.community-reading .community-main { padding-bottom: 0; }
   --community-poll: #252033;
   --community-poll-border: #635775;
   --community-poll-selected: #49345F;
-  --community-reply-0: #51303D;
-  --community-reply-1: #53362F;
-  --community-reply-2: #513C27;
-  --community-reply-3: #4C4429;
-  --community-reply-4: #334834;
-  --community-reply-5: #304744;
-  --community-reply-6: #493457;
-  --community-reply-border: #776270;
-  --community-reply-bot: #453058;
+  .dark {
+  --community-poll: #252033;
+  --community-poll-border: #635775;
+  --community-poll-selected: #49345F;
+  /* Respuestas en oscuro: mismas veladuras, un poco más presentes */
+  --community-reply-0: rgba(244, 63, 94, 0.16);
+  --community-reply-1: rgba(249, 115, 22, 0.16);
+  --community-reply-2: rgba(234, 179, 8, 0.18);
+  --community-reply-3: rgba(132, 204, 22, 0.18);
+  --community-reply-4: rgba(16, 185, 129, 0.16);
+  --community-reply-5: rgba(6, 182, 212, 0.16);
+  --community-reply-6: rgba(139, 92, 246, 0.16);
+  --community-reply-border-0: rgba(244, 63, 94, 0.32);
+  --community-reply-border-1: rgba(249, 115, 22, 0.32);
+  --community-reply-border-2: rgba(234, 179, 8, 0.34);
+  --community-reply-border-3: rgba(132, 204, 22, 0.34);
+  --community-reply-border-4: rgba(16, 185, 129, 0.32);
+  --community-reply-border-5: rgba(6, 182, 212, 0.32);
+  --community-reply-border-6: rgba(139, 92, 246, 0.32);
+  --community-reply-bot: rgba(167, 139, 250, 0.14);
+  --community-reply-bot-border: rgba(167, 139, 250, 0.30);
 }
 
 .community-post-list, .community-post-detail { background: var(--card); border: 1px solid var(--border); box-shadow: var(--shadow-soft); }
