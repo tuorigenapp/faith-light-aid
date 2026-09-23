@@ -1,0 +1,13 @@
+CREATE SCHEMA IF NOT EXISTS app_internal;
+REVOKE ALL ON SCHEMA app_internal FROM PUBLIC, anon;
+GRANT USAGE ON SCHEMA app_internal TO authenticated, service_role;
+ALTER FUNCTION public.award_gems(integer,text,jsonb) SET SCHEMA app_internal;
+ALTER FUNCTION public.create_hoja_transfer(text,integer) SET SCHEMA app_internal;
+ALTER FUNCTION public.has_role(uuid,public.app_role) SET SCHEMA app_internal;
+REVOKE ALL ON FUNCTION app_internal.award_gems(integer,text,jsonb),app_internal.create_hoja_transfer(text,integer),app_internal.has_role(uuid,public.app_role) FROM PUBLIC,anon;
+GRANT EXECUTE ON FUNCTION app_internal.award_gems(integer,text,jsonb),app_internal.create_hoja_transfer(text,integer),app_internal.has_role(uuid,public.app_role) TO authenticated,service_role;
+CREATE FUNCTION public.award_gems(_amount integer,_reason text,_meta jsonb DEFAULT NULL) RETURNS integer LANGUAGE sql SECURITY INVOKER SET search_path=public AS $$ SELECT app_internal.award_gems(_amount,_reason,_meta) $$;
+CREATE FUNCTION public.create_hoja_transfer(_to_email text,_hojas integer) RETURNS uuid LANGUAGE sql SECURITY INVOKER SET search_path=public AS $$ SELECT app_internal.create_hoja_transfer(_to_email,_hojas) $$;
+CREATE FUNCTION public.has_role(_user_id uuid,_role public.app_role) RETURNS boolean LANGUAGE sql STABLE SECURITY INVOKER SET search_path=public AS $$ SELECT app_internal.has_role(_user_id,_role) $$;
+REVOKE ALL ON FUNCTION public.award_gems(integer,text,jsonb),public.create_hoja_transfer(text,integer),public.has_role(uuid,public.app_role) FROM PUBLIC,anon;
+GRANT EXECUTE ON FUNCTION public.award_gems(integer,text,jsonb),public.create_hoja_transfer(text,integer),public.has_role(uuid,public.app_role) TO authenticated,service_role;
