@@ -40,6 +40,7 @@ function RegistroPage() {
 
   async function submit(e: FormEvent) {
     e.preventDefault();
+    try { localStorage.setItem("origen_pending_onboarding", "1"); } catch { /* no storage */ }
     setLoading(true);
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -48,6 +49,7 @@ function RegistroPage() {
     });
     if (error) {
       setLoading(false);
+      try { localStorage.removeItem("origen_pending_onboarding"); } catch { /* no storage */ }
       return toast.error(error.message);
     }
     if (!data.session) {
