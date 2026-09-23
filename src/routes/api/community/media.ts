@@ -17,7 +17,7 @@ export const Route = createFileRoute("/api/community/media")({ server: { handler
   if (type === "post" && kind === "audio") return new Response(null, { status: 404 });
   const column = kind === "image" ? "image_path" : "audio_path";
   const { data } = await db.from(table).select(column).eq("id", id).maybeSingle();
-  const path = data?.[column as keyof typeof data];
+   const path: unknown = (data as Record<string, unknown> | null)?.[column];
   if (typeof path !== "string") return new Response(null, { status: 404 });
   // All published conversations are open to signed-in members, but abandoned uploads
   // and files from removed posts are not. The storage path is never returned to clients.
@@ -27,7 +27,7 @@ export const Route = createFileRoute("/api/community/media")({ server: { handler
   }
   const { data: file, error } = await db.storage.from("community-media").download(path);
   if (error || !file) return new Response(null, { status: 404 });
-   const extension = path.split(".").pop()?.toLowerCase();
+   const extension = typeof path === "string" ? path.split(".").pop()?.toLowerCase() : undefined;
    const contentTypes: Record<string, string> = { webm: "audio/webm", m4a: "audio/mp4", mp3: "audio/mpeg", ogg: "audio/ogg", jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png" };
    return new Response(file, { headers: { "Content-Type": contentTypes[extension ?? ""] ?? file.type, "Cache-Control": "private, max-age=300", "X-Content-Type-Options": "nosniff" } });
 } } } });
