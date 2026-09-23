@@ -13,7 +13,7 @@ export const Route = createFileRoute("/api/community/vote")({ server: { handlers
   const db = createClient(url, service, { auth: { persistSession: false } });
   const { data: post } = await db.from("community_posts").select("poll_options,poll_answer_index").eq("id", postId).maybeSingle();
   const opts = post?.poll_options;
-  if (!Array.isArray(opts) || choice! < 0 || choice! >= opts.length) return Response.json({ error: "Pregunta no disponible." }, { status: 404 });
+  if (!post || !Array.isArray(opts) || choice! < 0 || choice! >= opts.length) return Response.json({ error: "Pregunta no disponible." }, { status: 404 });
   const { error } = await db.from("community_poll_votes").insert({ post_id: postId, user_id: user.id, choice_index: choice! });
   if (error) return Response.json({ error: error.code === "23505" ? "Ya respondiste esta pregunta." : "No se pudo registrar tu respuesta." }, { status: 409 });
   return Response.json({ correct: post.poll_answer_index === null ? null : choice === post.poll_answer_index, answer: post.poll_answer_index }, { headers: { "Cache-Control": "private, no-store" } });

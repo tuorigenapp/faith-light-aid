@@ -55,6 +55,7 @@ import { Route as ApiPublicPushDailyRouteImport } from './routes/api/public/push
 import { Route as ApiPublicPushBroadcastRouteImport } from './routes/api/public/push-broadcast'
 import { Route as ApiPublicMinistracionTeaserRouteImport } from './routes/api/public/ministracion-teaser'
 import { Route as ApiPublicMarketingDispatchRouteImport } from './routes/api/public/marketing-dispatch'
+import { Route as ApiCommunityVoteRouteImport } from './routes/api/community/vote'
 import { Route as ApiCommunityFeedRouteImport } from './routes/api/community/feed'
 import { Route as ApiCommunityBotRouteImport } from './routes/api/community/bot'
 import { Route as ApiAdminGenerateManifestRouteImport } from './routes/api/admin/generate-manifest'
@@ -309,6 +310,11 @@ const ApiPublicMarketingDispatchRoute =
     path: '/api/public/marketing-dispatch',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiCommunityVoteRoute = ApiCommunityVoteRouteImport.update({
+  id: '/api/community/vote',
+  path: '/api/community/vote',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiCommunityFeedRoute = ApiCommunityFeedRouteImport.update({
   id: '/api/community/feed',
   path: '/api/community/feed',
@@ -459,6 +465,7 @@ export interface FileRoutesByFullPath {
   '/api/admin/generate-manifest': typeof ApiAdminGenerateManifestRoute
   '/api/community/bot': typeof ApiCommunityBotRoute
   '/api/community/feed': typeof ApiCommunityFeedRoute
+  '/api/community/vote': typeof ApiCommunityVoteRoute
   '/api/public/marketing-dispatch': typeof ApiPublicMarketingDispatchRoute
   '/api/public/ministracion-teaser': typeof ApiPublicMinistracionTeaserRoute
   '/api/public/push-broadcast': typeof ApiPublicPushBroadcastRoute
@@ -522,6 +529,7 @@ export interface FileRoutesByTo {
   '/api/admin/generate-manifest': typeof ApiAdminGenerateManifestRoute
   '/api/community/bot': typeof ApiCommunityBotRoute
   '/api/community/feed': typeof ApiCommunityFeedRoute
+  '/api/community/vote': typeof ApiCommunityVoteRoute
   '/api/public/marketing-dispatch': typeof ApiPublicMarketingDispatchRoute
   '/api/public/ministracion-teaser': typeof ApiPublicMinistracionTeaserRoute
   '/api/public/push-broadcast': typeof ApiPublicPushBroadcastRoute
@@ -588,6 +596,7 @@ export interface FileRoutesById {
   '/api/admin/generate-manifest': typeof ApiAdminGenerateManifestRoute
   '/api/community/bot': typeof ApiCommunityBotRoute
   '/api/community/feed': typeof ApiCommunityFeedRoute
+  '/api/community/vote': typeof ApiCommunityVoteRoute
   '/api/public/marketing-dispatch': typeof ApiPublicMarketingDispatchRoute
   '/api/public/ministracion-teaser': typeof ApiPublicMinistracionTeaserRoute
   '/api/public/push-broadcast': typeof ApiPublicPushBroadcastRoute
@@ -654,6 +663,7 @@ export interface FileRouteTypes {
     | '/api/admin/generate-manifest'
     | '/api/community/bot'
     | '/api/community/feed'
+    | '/api/community/vote'
     | '/api/public/marketing-dispatch'
     | '/api/public/ministracion-teaser'
     | '/api/public/push-broadcast'
@@ -717,6 +727,7 @@ export interface FileRouteTypes {
     | '/api/admin/generate-manifest'
     | '/api/community/bot'
     | '/api/community/feed'
+    | '/api/community/vote'
     | '/api/public/marketing-dispatch'
     | '/api/public/ministracion-teaser'
     | '/api/public/push-broadcast'
@@ -782,6 +793,7 @@ export interface FileRouteTypes {
     | '/api/admin/generate-manifest'
     | '/api/community/bot'
     | '/api/community/feed'
+    | '/api/community/vote'
     | '/api/public/marketing-dispatch'
     | '/api/public/ministracion-teaser'
     | '/api/public/push-broadcast'
@@ -816,6 +828,7 @@ export interface RootRouteChildren {
   ApiAdminGenerateManifestRoute: typeof ApiAdminGenerateManifestRoute
   ApiCommunityBotRoute: typeof ApiCommunityBotRoute
   ApiCommunityFeedRoute: typeof ApiCommunityFeedRoute
+  ApiCommunityVoteRoute: typeof ApiCommunityVoteRoute
   ApiPublicMarketingDispatchRoute: typeof ApiPublicMarketingDispatchRoute
   ApiPublicMinistracionTeaserRoute: typeof ApiPublicMinistracionTeaserRoute
   ApiPublicPushBroadcastRoute: typeof ApiPublicPushBroadcastRoute
@@ -1149,6 +1162,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicMarketingDispatchRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/community/vote': {
+      id: '/api/community/vote'
+      path: '/api/community/vote'
+      fullPath: '/api/community/vote'
+      preLoaderRoute: typeof ApiCommunityVoteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/community/feed': {
       id: '/api/community/feed'
       path: '/api/community/feed'
@@ -1422,6 +1442,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminGenerateManifestRoute: ApiAdminGenerateManifestRoute,
   ApiCommunityBotRoute: ApiCommunityBotRoute,
   ApiCommunityFeedRoute: ApiCommunityFeedRoute,
+  ApiCommunityVoteRoute: ApiCommunityVoteRoute,
   ApiPublicMarketingDispatchRoute: ApiPublicMarketingDispatchRoute,
   ApiPublicMinistracionTeaserRoute: ApiPublicMinistracionTeaserRoute,
   ApiPublicPushBroadcastRoute: ApiPublicPushBroadcastRoute,
