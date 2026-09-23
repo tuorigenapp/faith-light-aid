@@ -115,15 +115,23 @@ body.community-reading .community-main { padding-bottom: 0; }
   --community-poll: #FFFCF8;
   --community-poll-border: #CEBDD8;
   --community-poll-selected: #F5E9FF;
-  --community-reply-0: #FFE0E2;
-  --community-reply-1: #FFDCD0;
-  --community-reply-2: #FFE5BA;
-  --community-reply-3: #FFF0AE;
-  --community-reply-4: #DCEEC8;
-  --community-reply-5: #D6EDE5;
-  --community-reply-6: #ECDDFC;
-  --community-reply-border: #BDA4A5;
-  --community-reply-bot: #EBDCF7;
+  /* Respuestas: veladuras translúcidas (arcoíris suave), como acuarela */
+  --community-reply-0: rgba(244, 63, 94, 0.09);
+  --community-reply-1: rgba(249, 115, 22, 0.09);
+  --community-reply-2: rgba(234, 179, 8, 0.11);
+  --community-reply-3: rgba(132, 204, 22, 0.11);
+  --community-reply-4: rgba(16, 185, 129, 0.09);
+  --community-reply-5: rgba(6, 182, 212, 0.09);
+  --community-reply-6: rgba(139, 92, 246, 0.09);
+  --community-reply-border-0: rgba(244, 63, 94, 0.20);
+  --community-reply-border-1: rgba(249, 115, 22, 0.20);
+  --community-reply-border-2: rgba(202, 138, 4, 0.22);
+  --community-reply-border-3: rgba(101, 163, 13, 0.22);
+  --community-reply-border-4: rgba(5, 150, 105, 0.20);
+  --community-reply-border-5: rgba(8, 145, 178, 0.20);
+  --community-reply-border-6: rgba(124, 92, 255, 0.20);
+  --community-reply-bot: rgba(124, 92, 255, 0.08);
+  --community-reply-bot-border: rgba(124, 92, 255, 0.20);
 }
 
 .dark {
@@ -160,28 +168,36 @@ body.community-reading .community-main { padding-bottom: 0; }
   --community-poll: #252033;
   --community-poll-border: #635775;
   --community-poll-selected: #49345F;
-  --community-reply-0: #51303D;
-  --community-reply-1: #53362F;
-  --community-reply-2: #513C27;
-  --community-reply-3: #4C4429;
-  --community-reply-4: #334834;
-  --community-reply-5: #304744;
-  --community-reply-6: #493457;
-  --community-reply-border: #776270;
-  --community-reply-bot: #453058;
+  /* Respuestas en oscuro: mismas veladuras, un poco más presentes */
+  --community-reply-0: rgba(244, 63, 94, 0.16);
+  --community-reply-1: rgba(249, 115, 22, 0.16);
+  --community-reply-2: rgba(234, 179, 8, 0.18);
+  --community-reply-3: rgba(132, 204, 22, 0.18);
+  --community-reply-4: rgba(16, 185, 129, 0.16);
+  --community-reply-5: rgba(6, 182, 212, 0.16);
+  --community-reply-6: rgba(139, 92, 246, 0.16);
+  --community-reply-border-0: rgba(244, 63, 94, 0.32);
+  --community-reply-border-1: rgba(249, 115, 22, 0.32);
+  --community-reply-border-2: rgba(234, 179, 8, 0.34);
+  --community-reply-border-3: rgba(132, 204, 22, 0.34);
+  --community-reply-border-4: rgba(16, 185, 129, 0.32);
+  --community-reply-border-5: rgba(6, 182, 212, 0.32);
+  --community-reply-border-6: rgba(139, 92, 246, 0.32);
+  --community-reply-bot: rgba(167, 139, 250, 0.14);
+  --community-reply-bot-border: rgba(167, 139, 250, 0.30);
 }
 
 .community-post-list, .community-post-detail { background: var(--card); border: 1px solid var(--border); box-shadow: var(--shadow-soft); }
 .community-poll-option.community-poll-option { background: var(--community-poll); border: 2px solid var(--community-poll-border); color: var(--foreground); box-shadow: var(--shadow-soft); }
 .community-poll-option.community-poll-option[data-selected="true"] { background: var(--community-poll-selected); border-color: var(--primary); }
-.community-reply { background: var(--community-reply-0); border: 1px solid var(--community-reply-border); box-shadow: var(--shadow-soft); }
-.community-reply[data-tone="1"] { background: var(--community-reply-1); }
-.community-reply[data-tone="2"] { background: var(--community-reply-2); }
-.community-reply[data-tone="3"] { background: var(--community-reply-3); }
-.community-reply[data-tone="4"] { background: var(--community-reply-4); }
-.community-reply[data-tone="5"] { background: var(--community-reply-5); }
-.community-reply[data-tone="6"] { background: var(--community-reply-6); }
-.community-reply[data-bot="true"] { background: var(--community-reply-bot); }
+.community-reply { background: var(--community-reply-0); border: 1px solid var(--community-reply-border-0); }
+.community-reply[data-tone="1"] { background: var(--community-reply-1); border-color: var(--community-reply-border-1); }
+.community-reply[data-tone="2"] { background: var(--community-reply-2); border-color: var(--community-reply-border-2); }
+.community-reply[data-tone="3"] { background: var(--community-reply-3); border-color: var(--community-reply-border-3); }
+.community-reply[data-tone="4"] { background: var(--community-reply-4); border-color: var(--community-reply-border-4); }
+.community-reply[data-tone="5"] { background: var(--community-reply-5); border-color: var(--community-reply-border-5); }
+.community-reply[data-tone="6"] { background: var(--community-reply-6); border-color: var(--community-reply-border-6); }
+.community-reply[data-bot="true"] { background: var(--community-reply-bot); border-color: var(--community-reply-bot-border); }
 .dark .community-post-list, .dark .community-post-detail, .dark .community-poll-option, .dark .community-reply { box-shadow: none; }
 
 @layer base {
