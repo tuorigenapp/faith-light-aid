@@ -246,6 +246,7 @@ export type Database = {
       }
       community_posts: {
         Row: {
+          author_kind: string
           author_name: string
           body: string
           bot_kind: string | null
@@ -265,6 +266,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          author_kind?: string
           author_name?: string
           body?: string
           bot_kind?: string | null
@@ -284,6 +286,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          author_kind?: string
           author_name?: string
           body?: string
           bot_kind?: string | null
@@ -334,6 +337,7 @@ export type Database = {
       community_replies: {
         Row: {
           audio_path: string | null
+          author_kind: string
           author_name: string
           body: string
           created_at: string
@@ -348,6 +352,7 @@ export type Database = {
         }
         Insert: {
           audio_path?: string | null
+          author_kind?: string
           author_name?: string
           body: string
           created_at?: string
@@ -362,6 +367,7 @@ export type Database = {
         }
         Update: {
           audio_path?: string | null
+          author_kind?: string
           author_name?: string
           body?: string
           created_at?: string
@@ -452,25 +458,46 @@ export type Database = {
       }
       community_suspensions: {
         Row: {
+          admin_note: string | null
           created_at: string
+          expires_at: string | null
+          kind: string
           reason: string
           suspended_by: string
+          target_excerpt: string | null
+          target_id: string | null
+          target_type: string | null
           updated_at: string
           user_id: string
+          user_message: string | null
         }
         Insert: {
+          admin_note?: string | null
           created_at?: string
+          expires_at?: string | null
+          kind?: string
           reason: string
           suspended_by: string
+          target_excerpt?: string | null
+          target_id?: string | null
+          target_type?: string | null
           updated_at?: string
           user_id: string
+          user_message?: string | null
         }
         Update: {
+          admin_note?: string | null
           created_at?: string
+          expires_at?: string | null
+          kind?: string
           reason?: string
           suspended_by?: string
+          target_excerpt?: string | null
+          target_id?: string | null
+          target_type?: string | null
           updated_at?: string
           user_id?: string
+          user_message?: string | null
         }
         Relationships: []
       }
@@ -1513,6 +1540,7 @@ export type Database = {
           referral_code: string | null
           spiritual_level: string
           updated_at: string
+          verified_level: number
         }
         Insert: {
           age?: number | null
@@ -1536,6 +1564,7 @@ export type Database = {
           referral_code?: string | null
           spiritual_level?: string
           updated_at?: string
+          verified_level?: number
         }
         Update: {
           age?: number | null
@@ -1559,6 +1588,7 @@ export type Database = {
           referral_code?: string | null
           spiritual_level?: string
           updated_at?: string
+          verified_level?: number
         }
         Relationships: []
       }
