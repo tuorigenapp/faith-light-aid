@@ -1,0 +1,2 @@
+GRANT SELECT ON public.community_settings TO authenticated;
+CREATE POLICY "Admins read community settings" ON public.community_settings FOR SELECT TO authenticated USING (public.has_role(auth.uid(), 'admin'));
