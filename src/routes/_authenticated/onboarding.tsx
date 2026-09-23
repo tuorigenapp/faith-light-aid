@@ -944,6 +944,12 @@ function Screen6({ ai, onNext }: { ai: AIResult; onNext: () => void }) {
         <p className="mt-4 text-[13px] italic text-[#7C5CFF]">{ai.welcome_message}</p>
       </div>
 
+      <TresPasosPrueba />
+
+      <div className="mt-8">
+        <DiosTeDiceHoy ctaTo="/membresia" />
+      </div>
+
       <div className="mt-8">
         <PrimaryButton onClick={onNext}>Comenzar mi transformación ✨</PrimaryButton>
       </div>
