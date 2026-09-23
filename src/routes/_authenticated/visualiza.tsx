@@ -78,6 +78,20 @@ const METHODS_META = [
   },
 ] as const;
 
+/** Portadas propias para las categorías que el panel crea sin imagen. */
+const GROUP_FALLBACK = [musicImg, cleanImg, identityImg, cristoImg];
+
+/** Nombre humano del grupo al que pertenece una categoría del panel. */
+function groupLabel(key: string) {
+  const k = key.toLowerCase();
+  if (k.includes("espiritual") || k.includes("limpieza") || k.includes("cristo")) return "Fe";
+  if (k.includes("identidad")) return "Identidad";
+  if (k.includes("san")) return "Sanación";
+  if (k.includes("musica") || k.includes("música") || k.includes("manifest")) return "Música";
+  return "Programas";
+}
+
+
 function Visualiza() {
   const { user } = useAuth();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
