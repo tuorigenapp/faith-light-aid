@@ -61,3 +61,8 @@
 - [ ] Permitir contrarespuestas con contexto citado, reacciones compactas y acceso directo a cada conversación.
 - [ ] Evitar que ORÍGEN interrumpa conversaciones entre personas o responda más de una vez a la misma persona en un hilo.
 - [ ] Comprobar conversación y navegación en móvil y escritorio.
+
+## Comunidad — lectura sin distracciones
+- [ ] Colocar "Ver todos" antes de las tres respuestas visibles.
+- [ ] Al abrir una publicación o conversación, ocultar las barras superior, inferior y lateral, además de preguntas, mentora, ruleta y avisos flotantes; mantener la suspensión.
+- [ ] Mostrar la flecha de regreso junto a "Conversación" y verificar la lectura y escritura a 375 px y en escritorio.
