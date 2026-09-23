@@ -202,6 +202,13 @@ function Dashboard() {
         {/* Palabras para ti Hoy */}
         <PalabrasHoy name={displayName} />
 
+        <Link to="/comunidad" className="block rounded-[24px] bg-gradient-to-r from-[#44317b] via-primary to-[#c579be] p-6 text-white shadow-soft transition hover:shadow-glow">
+          <span className="text-xs font-bold uppercase tracking-widest text-white/75">Comunidad ORÍGEN · Abierta para todos</span>
+          <h2 className="mt-2 font-display text-xl font-bold">No tienes que vivirlo en soledad.</h2>
+          <p className="mt-1 text-sm text-white/85">Comparte una pregunta, acompaña a alguien y encuentra nuevas perspectivas.</p>
+          <span className="mt-4 inline-flex min-h-11 items-center rounded-full bg-white px-5 text-sm font-bold text-primary">Entrar a la comunidad →</span>
+        </Link>
+
 
         {/* Árbol de Sanación */}
         <HealingTree />

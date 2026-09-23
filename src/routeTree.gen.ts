@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RegistroRouteImport } from './routes/registro'
 import { Route as EstilosRouteImport } from './routes/estilos'
+import { Route as EmpezarRouteImport } from './routes/empezar'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -85,6 +86,11 @@ const RegistroRoute = RegistroRouteImport.update({
 const EstilosRoute = EstilosRouteImport.update({
   id: '/estilos',
   path: '/estilos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmpezarRoute = EmpezarRouteImport.update({
+  id: '/empezar',
+  path: '/empezar',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CheckoutRoute = CheckoutRouteImport.update({
@@ -406,6 +412,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRoute
+  '/empezar': typeof EmpezarRoute
   '/estilos': typeof EstilosRoute
   '/registro': typeof RegistroRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -469,6 +476,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRoute
+  '/empezar': typeof EmpezarRoute
   '/estilos': typeof EstilosRoute
   '/registro': typeof RegistroRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -533,6 +541,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRoute
+  '/empezar': typeof EmpezarRoute
   '/estilos': typeof EstilosRoute
   '/registro': typeof RegistroRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -598,6 +607,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/checkout'
+    | '/empezar'
     | '/estilos'
     | '/registro'
     | '/sitemap.xml'
@@ -661,6 +671,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/checkout'
+    | '/empezar'
     | '/estilos'
     | '/registro'
     | '/sitemap.xml'
@@ -724,6 +735,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/checkout'
+    | '/empezar'
     | '/estilos'
     | '/registro'
     | '/sitemap.xml'
@@ -789,6 +801,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRoute
   CheckoutRoute: typeof CheckoutRoute
+  EmpezarRoute: typeof EmpezarRoute
   EstilosRoute: typeof EstilosRoute
   RegistroRoute: typeof RegistroRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -833,6 +846,13 @@ declare module '@tanstack/react-router' {
       path: '/estilos'
       fullPath: '/estilos'
       preLoaderRoute: typeof EstilosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/empezar': {
+      id: '/empezar'
+      path: '/empezar'
+      fullPath: '/empezar'
+      preLoaderRoute: typeof EmpezarRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/checkout': {
@@ -1387,6 +1407,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   AuthRoute: AuthRoute,
   CheckoutRoute: CheckoutRoute,
+  EmpezarRoute: EmpezarRoute,
   EstilosRoute: EstilosRoute,
   RegistroRoute: RegistroRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
