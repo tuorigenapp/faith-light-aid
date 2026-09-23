@@ -292,8 +292,9 @@ function Comunidad() {
     try {
        const image_path = !sendAudio && replyImage ? await upload(replyImage, "image") : null;
         const audio_path = sendAudio && audioFile ? await upload(audioFile, "audio") : null;
-       const { error } = await supabase.from("community_replies").insert({ post_id: openPost!, parent_reply_id: replyTo, user_id: user.id, author_name: replyAnonymous ? "Alma anónima" : author, is_anonymous: replyAnonymous, body: sendAudio ? "" : replyText.trim(), image_path, audio_path });
+       const { data: saved, error } = await supabase.from("community_replies").insert({ post_id: openPost!, parent_reply_id: replyTo, user_id: user.id, author_name: replyAnonymous ? "Alma anónima" : author, is_anonymous: replyAnonymous, body: sendAudio ? "" : replyText.trim(), image_path, audio_path }).select("id").single();
       if (error) throw error;
+      if (saved && !sendAudio && replyText.trim().length > 3) { const postForBot = openPost!; void supabase.auth.getSession().then(({ data: ses }) => fetch("/api/community/bot", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${ses.session?.access_token ?? ""}` }, body: JSON.stringify({ postId: postForBot, replyId: saved.id }) })).then(() => refresh()).catch(() => undefined); }
        setReplyText(""); setReplyTo(null); setReplyImage(null); setAudioFile(null); setAudioMode(false); setSeconds(0); refresh(); toast.success(sendAudio ? "Tu audio ya está en la conversación." : "Tu respuesta ya está en la conversación.");
     } catch (e) { toast.error((e as Error).message); } finally { setBusy(false); }
   }
