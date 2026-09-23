@@ -66,3 +66,9 @@
 - [x] Colocar "Ver todos" antes de las tres respuestas visibles.
 - [x] Al abrir una publicación o conversación, ocultar las barras superior, inferior y lateral, además de preguntas, mentora, ruleta y avisos flotantes; mantener la suspensión.
 - [x] Mostrar la flecha de regreso junto a "Conversación" y verificar la lectura y escritura a 375 px y en escritorio.
+
+## Comunidad — respuestas grupales claras y publicación silenciosa
+- [x] Publicar respuestas del grupo dentro de su conversación, sin confirmaciones ni ventanas emergentes; comprobar el envío real.
+- [x] Distinguir el comentario de origen de sus tres respuestas tenues y abrir el grupo desde la estrella amarilla animada.
+- [x] En Conversación mostrar solo el comentario del usuario que originó las respuestas, sin repetir la publicación ni la encuesta.
+- [x] Conservar la respuesta automática de ORÍGEN solo cuando está habilitada y una vez por persona; no entrar en contrarespuestas humanas.
