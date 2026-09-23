@@ -57,12 +57,12 @@
 - [x] Ícono de Comunidad consistente con el resto de la navegación.
 
 ## Comunidad — conversaciones entre personas
-- [ ] Mostrar tres respuestas por comentario y abrir el resto en una vista Conversación, sin línea gris en la vista principal.
-- [ ] Permitir contrarespuestas con contexto citado, reacciones compactas y acceso directo a cada conversación.
-- [ ] Evitar que ORÍGEN interrumpa conversaciones entre personas o responda más de una vez a la misma persona en un hilo.
-- [ ] Comprobar conversación y navegación en móvil y escritorio.
+- [x] Mostrar tres respuestas por comentario y abrir el resto en una vista Conversación, sin línea gris en la vista principal.
+- [x] Permitir contrarespuestas con contexto citado, reacciones compactas y acceso directo a cada conversación.
+- [x] Evitar que ORÍGEN interrumpa conversaciones entre personas o responda más de una vez a la misma persona en un hilo.
+- [x] Comprobar conversación y navegación en móvil y escritorio.
 
 ## Comunidad — lectura sin distracciones
-- [ ] Colocar "Ver todos" antes de las tres respuestas visibles.
-- [ ] Al abrir una publicación o conversación, ocultar las barras superior, inferior y lateral, además de preguntas, mentora, ruleta y avisos flotantes; mantener la suspensión.
-- [ ] Mostrar la flecha de regreso junto a "Conversación" y verificar la lectura y escritura a 375 px y en escritorio.
+- [x] Colocar "Ver todos" antes de las tres respuestas visibles.
+- [x] Al abrir una publicación o conversación, ocultar las barras superior, inferior y lateral, además de preguntas, mentora, ruleta y avisos flotantes; mantener la suspensión.
+- [x] Mostrar la flecha de regreso junto a "Conversación" y verificar la lectura y escritura a 375 px y en escritorio.
