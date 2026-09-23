@@ -103,6 +103,7 @@ function Comunidad() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [micState, setMicState] = useState<"requesting" | "ready" | "denied" | null>(null);
   const discardAudio = useRef(false);
+  const pendingAudioSend = useRef(false);
   const recorder = useRef<MediaRecorder | null>(null); const recordingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => { if (!recording || recordingPaused) return; const ticker = window.setInterval(() => setSeconds(s => Math.min(s + 1, 299)), 1000); return () => clearInterval(ticker); }, [recording, recordingPaused]);
   const duration = `${Math.floor(seconds / 60).toString().padStart(2, "0")}:${(seconds % 60).toString().padStart(2, "0")}`;
@@ -193,12 +194,12 @@ function Comunidad() {
   }
    async function reply(sendAudio = false) {
     if (!user || busy || data?.suspended) return;
-      if (sendAudio && !recordedAudio && !audioFile) return toast.error("Primero graba un audio.");
+      if (sendAudio && !audioFile) return toast.error("Primero graba un audio.");
      if (!sendAudio && !replyText.trim() && !replyImage) return toast.error("Escribe o adjunta algo para responder.");
     setBusy(true);
     try {
        const image_path = !sendAudio && replyImage ? await upload(replyImage, "image") : null;
-        const audio_path = sendAudio && (recordedAudio || audioFile) ? await upload((recordedAudio || audioFile)!, "audio") : null;
+        const audio_path = sendAudio && audioFile ? await upload(audioFile, "audio") : null;
        const { error } = await supabase.from("community_replies").insert({ post_id: openPost!, parent_reply_id: replyTo, user_id: user.id, author_name: replyAnonymous ? "Alma anónima" : author, is_anonymous: replyAnonymous, body: sendAudio ? "" : replyText.trim(), image_path, audio_path });
       if (error) throw error;
        setReplyText(""); setReplyTo(null); setReplyImage(null); setAudioFile(null); setAudioMode(false); setSeconds(0); refresh(); toast.success(sendAudio ? "Tu audio ya está en la conversación." : "Tu respuesta ya está en la conversación.");
@@ -219,6 +220,7 @@ function Comunidad() {
      if (!following && data?.blocks.has(key)) { const removed = await supabase.from("community_blocks").delete().eq("topic", key); if (removed.error) return toast.error(removed.error.message); }
      refresh();
    }
+   useEffect(() => { if (audioFile && pendingAudioSend.current) { pendingAudioSend.current = false; void reply(true); } }, [audioFile]);
    async function confirmBlock() {
      if (!blockTopic || !user) return;
      const { error } = await supabase.from("community_blocks").upsert({ user_id: user.id, topic: blockTopic });
@@ -257,16 +259,16 @@ function Comunidad() {
       if (!format) { stream.getTracks().forEach(t => t.stop()); throw new Error("Tu navegador no permite grabar audio aquí."); }
       const chunks: Blob[] = []; const rec = new MediaRecorder(stream, { mimeType: format }); recorder.current = rec;
       rec.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
-       rec.onstop = () => { if (recordingTimer.current) clearTimeout(recordingTimer.current); stream.getTracks().forEach(t => t.stop()); setRecording(false); setRecordingPaused(false); const blob = new Blob(chunks, { type: format }); if (blob.size > 1000 && !discardAudio.current) setAudioFile(new File([blob], `respuesta.${format.split("/")[1]}`, { type: format })); else if (!discardAudio.current) toast.error("No se grabó el audio completo. Inténtalo de nuevo."); discardAudio.current = false; };
+        rec.onstop = () => { if (recordingTimer.current) clearTimeout(recordingTimer.current); stream.getTracks().forEach(t => t.stop()); setRecording(false); setRecordingPaused(false); const blob = new Blob(chunks, { type: format }); if (blob.size > 1000 && !discardAudio.current) setAudioFile(new File([blob], `respuesta.${format.split("/")[1]}`, { type: format })); else if (!discardAudio.current) { pendingAudioSend.current = false; toast.error("No se grabó el audio completo. Inténtalo de nuevo."); } discardAudio.current = false; };
        rec.onerror = () => { stream.getTracks().forEach(t => t.stop()); setRecording(false); toast.error("No se pudo continuar la grabación."); };
         discardAudio.current = false; setAudioFile(null); setReplyImage(null); setAudioMode(true); setSeconds(0);
         rec.start(1000); setRecording(true); recordingTimer.current = setTimeout(() => { if (rec.state === "paused") rec.resume(); if (rec.state !== "inactive") rec.stop(); }, 4 * 60 * 1000 + 59 * 1000);
      } catch (e) { setMicState("denied"); toast.error((e as Error).name === "NotAllowedError" ? "Permite el acceso al micrófono para grabar un audio." : (e as Error).message); }
   }
-    function discardRecording() { discardAudio.current = true; if (recorder.current?.state !== "inactive") recorder.current?.stop(); setRecording(false); setAudioFile(null); setAudioMode(false); setSeconds(0); }
+     function discardRecording() { discardAudio.current = true; pendingAudioSend.current = false; if (recorder.current?.state !== "inactive") recorder.current?.stop(); setRecording(false); setAudioFile(null); setAudioMode(false); setSeconds(0); }
    function togglePause() { const rec = recorder.current; if (!rec) return; if (rec.state === "recording") { rec.pause(); setRecordingPaused(true); } else if (rec.state === "paused") { rec.resume(); setRecordingPaused(false); } }
   useEffect(() => { const query = new URLSearchParams(window.location.search).get("post"); if (query && data?.posts.some(p => p.id === query)) setOpenPost(query); }, [data?.posts]);
-    useEffect(() => () => { discardAudio.current = true; if (recordingTimer.current) clearTimeout(recordingTimer.current); if (recorder.current?.state !== "inactive") recorder.current?.stop(); }, []);
+     useEffect(() => () => { discardAudio.current = true; pendingAudioSend.current = false; if (recordingTimer.current) clearTimeout(recordingTimer.current); if (recorder.current?.state !== "inactive") recorder.current?.stop(); }, []);
     useEffect(() => { if (!openPost && recorder.current?.state && recorder.current.state !== "inactive") { discardAudio.current = true; recorder.current.stop(); setRecording(false); setAudioFile(null); setAudioMode(false); } }, [openPost]);
 
   function ReactionBar({ type, id }: { type: "post" | "reply"; id: string }) {
@@ -301,7 +303,7 @@ function Comunidad() {
           {audioMode ? <div className="rounded-2xl border border-primary/20 bg-secondary/50 p-4" aria-label="Grabadora de audio">
             <div className="flex items-center gap-3"><span className={`h-2.5 w-2.5 rounded-full bg-destructive ${recording && !recordingPaused ? "animate-pulse" : ""}`} /><span className="font-mono text-base tabular-nums">{duration}</span><div className="flex min-w-0 flex-1 items-center justify-center gap-1 overflow-hidden" aria-hidden="true">{Array.from({ length: 24 }, (_, i) => <span key={i} className={`w-1 rounded-full bg-primary/60 ${recording && !recordingPaused ? "animate-pulse" : ""}`} style={{ height: `${8 + ((i * 17) % 24)}px`, animationDelay: `${i * 35}ms` }} />)}</div><Mic className="h-5 w-5 text-primary" /></div>
             {previewUrl && <audio controls preload="metadata" src={previewUrl} className="mt-4 w-full" aria-label="Escuchar audio antes de enviarlo" />}
-            <div className="mt-4 flex items-center justify-between gap-2"><Button type="button" variant="ghost" onClick={discardRecording} aria-label="Borrar audio" className="h-12 w-12 rounded-full"><Trash2 /></Button><Button type="button" variant="secondary" onClick={togglePause} disabled={!recording} aria-label={recordingPaused ? "Continuar grabación" : "Pausar grabación"} className="h-12 w-12 rounded-full">{recordingPaused ? <Play /> : <Pause />}</Button><Button type="button" disabled={busy || (!recording && !audioFile)} onClick={() => { if (recording) { if (recorder.current?.state === "paused") recorder.current.resume(); recorder.current?.stop(); } else void reply(true); }} className="min-h-12 rounded-full px-4 text-xs font-bold">{recording ? "Terminar" : busy ? "Enviando…" : "Enviar Audio"}</Button></div>
+             <div className="mt-4 flex items-center justify-between gap-2"><Button type="button" variant="ghost" onClick={discardRecording} aria-label="Borrar audio" className="h-12 w-12 rounded-full"><Trash2 /></Button><Button type="button" variant="secondary" onClick={togglePause} disabled={!recording} aria-label={recordingPaused ? "Continuar grabación" : "Pausar grabación"} className="h-12 w-12 rounded-full">{recordingPaused ? <Play /> : <Pause />}</Button><Button type="button" disabled={busy || (!recording && !audioFile) || pendingAudioSend.current} onClick={() => { if (recording) { pendingAudioSend.current = true; if (recorder.current?.state === "paused") recorder.current.resume(); recorder.current?.stop(); } else void reply(true); }} className="min-h-12 rounded-full px-4 text-xs font-bold">{busy || pendingAudioSend.current ? "Enviando…" : "Enviar Audio"}</Button></div>
             <p className="mt-3 text-center text-xs text-muted-foreground">{micState === "requesting" ? "Solicitando acceso al micrófono…" : recording ? "Grabación manos libres · máximo 4:59" : "Escucha tu grabación antes de enviarla"}</p>
           </div> : <><textarea id="community-reply" value={replyText} onChange={e => setReplyText(e.target.value.slice(0, 10000))} maxLength={10000} rows={2} placeholder="Comparte lo que te ayudó. Con respeto y sin juicios…" className="w-full resize-none rounded-xl border border-border bg-background p-3 text-sm outline-none focus:border-primary" /><div className="mt-2 flex flex-wrap items-center gap-2"><label className="grid h-11 w-11 cursor-pointer place-items-center rounded-xl border border-border" title="Añadir JPG o PNG"><ImagePlus className="h-5 w-5" /><input type="file" accept="image/jpeg,image/png" className="sr-only" onChange={e => { setReplyImage(e.target.files?.[0] ?? null); setAudioFile(null); }} /></label><button onClick={() => void startRecording()} className="inline-flex min-h-11 items-center gap-1 rounded-xl border border-border px-2 text-xs font-bold" aria-label="Enviar Audio, grabar hasta cinco minutos"><Mic className="h-4 w-4" /> Enviar Audio</button><label className="flex items-center gap-1 text-xs"><input type="checkbox" checked={replyAnonymous} onChange={e => setReplyAnonymous(e.target.checked)} /> Anónimo</label><button disabled={busy} onClick={() => void reply()} className="ml-auto inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary px-4 text-sm font-bold text-white disabled:opacity-50"><Send className="h-4 w-4" /> Responder</button></div>{replyImage && <p className="mt-2 text-xs text-primary">{replyImage.name} <button onClick={() => setReplyImage(null)} className="underline">Quitar imagen</button></p>}</>}
        </div>}
