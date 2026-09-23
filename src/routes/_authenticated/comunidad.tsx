@@ -311,7 +311,7 @@ function Comunidad() {
   }
      function discardRecording() { discardAudio.current = true; if (recorder.current?.state !== "inactive") recorder.current?.stop(); setRecording(false); setAudioFile(null); setAudioMode(false); setSeconds(0); }
    function togglePause() { const rec = recorder.current; if (!rec) return; if (rec.state === "recording") { rec.pause(); setRecordingPaused(true); } else if (rec.state === "paused") { rec.resume(); setRecordingPaused(false); } }
-  useEffect(() => { const query = new URLSearchParams(window.location.search).get("post"); if (query && data?.posts.some(p => p.id === query)) openConversation(query); }, [data?.posts]);
+  useEffect(() => { const query = new URLSearchParams(window.location.search).get("post"); if (query && data?.posts.some(p => p.id === query) && openPost !== query) openConversation(query); }, [data?.posts, openPost]);
      useEffect(() => () => { discardAudio.current = true; if (recordingTimer.current) clearTimeout(recordingTimer.current); if (recorder.current?.state !== "inactive") recorder.current?.stop(); }, []);
     useEffect(() => { if (!openPost && recorder.current?.state && recorder.current.state !== "inactive") { discardAudio.current = true; recorder.current.stop(); setRecording(false); setAudioFile(null); setAudioMode(false); } }, [openPost]);
 
