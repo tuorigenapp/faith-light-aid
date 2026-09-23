@@ -325,7 +325,7 @@ function Comunidad() {
         const audio_path = sendAudio && audioFile ? await upload(audioFile, "audio") : null;
        const { data: saved, error } = await supabase.from("community_replies").insert({ post_id: openPost!, parent_reply_id: replyTo, user_id: user.id, author_name: replyAnonymous ? "Alma anónima" : author, is_anonymous: replyAnonymous, body: sendAudio ? "" : replyText.trim(), image_path, audio_path }).select("id").single();
       if (error) throw error;
-      if (saved && !sendAudio && replyText.trim().length > 3) { const postForBot = openPost!; void supabase.auth.getSession().then(({ data: ses }) => fetch("/api/community/bot", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${ses.session?.access_token ?? ""}` }, body: JSON.stringify({ postId: postForBot, replyId: saved.id }) })).then(() => refresh()).catch(() => undefined); }
+       if (saved && !replyTo && !sendAudio && replyText.trim().length > 3) { const postForBot = openPost; void supabase.auth.getSession().then(({ data: ses }) => fetch("/api/community/bot", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${ses.session?.access_token ?? ""}` }, body: JSON.stringify({ postId: postForBot, replyId: saved.id }) })).then(() => refresh()).catch(() => undefined); }
        setReplyText(""); setReplyTo(null); setReplyImage(null); setAudioFile(null); setAudioMode(false); setSeconds(0); refresh(); toast.success(sendAudio ? "Tu audio ya está en la conversación." : "Tu respuesta ya está en la conversación.");
     } catch (e) { toast.error((e as Error).message); } finally { setBusy(false); }
   }
@@ -440,18 +440,18 @@ function Comunidad() {
     }
     function replyCard(r: Reply, focused = false) {
       const referenced = focused && r.parent_reply_id ? repliesById.get(r.parent_reply_id) : undefined;
-      return <article key={r.id} className={`min-w-0 rounded-xl p-3.5 ${r.is_bot ? "bg-primary/5" : "bg-secondary/30"}`}>
+       return <article key={r.id} className={`min-w-0 rounded-xl p-3.5 ${r.is_bot ? "bg-primary/5" : "bg-secondary/30"}`}>
         <div className="flex items-center gap-2"><Avatar name={r.author_name} bot={r.is_bot} identity={r.author_id ?? r.id} /><div className="min-w-0"><p className="text-sm font-bold">{displayName(r.author_name, r.is_anonymous, r.is_bot)} {r.is_bot && <ShieldCheck className="inline h-4 w-4 text-primary" aria-label="Respuesta verificada de ORÍGEN" />}<LevelBadge level={r.author_level} /></p><p className="text-xs text-muted-foreground">{relativeDate(r.created_at)} · {authorRole(r.author_kind, r.is_bot)}</p></div></div>
         {referenced && <div className="mt-3 rounded-lg border-l-2 border-border bg-muted/80 px-3 py-2 text-xs text-muted-foreground"><span className="font-semibold">En respuesta a {displayName(referenced.author_name, referenced.is_anonymous, referenced.is_bot)}</span><p className="mt-1 line-clamp-3 whitespace-pre-wrap break-words">{referenced.body || (referenced.audio_path ? "Mensaje de audio" : referenced.image_path ? "Imagen adjunta" : "Comentario")}</p></div>}
         {r.body && <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-relaxed">{r.body}</p>}{r.image_path && mediaUrls[r.image_path] && <img src={mediaUrls[r.image_path]} alt="Adjunto a la respuesta" className="mt-3 max-h-72 w-full rounded-xl object-contain" />}{r.audio_path && mediaUrls[r.audio_path] && <audio controls preload="metadata" src={mediaUrls[r.audio_path]} className="mt-3 w-full" aria-label="Respuesta de audio" />}
-        <div className="mt-2 flex flex-wrap items-center gap-2">{renderReactions("reply", r.id, focused)}<Button variant="ghost" onClick={() => void report("reply", r.id)} className="min-h-11 px-2 text-xs text-muted-foreground">Denunciar</Button><Button variant="ghost" onClick={() => { if (!focused && !openThread) showThread(r.id); setReplyTo(r.id); requestAnimationFrame(() => document.getElementById("community-reply")?.focus()); }} className="min-h-11 px-2 text-xs font-bold text-primary">Responder</Button></div>
+        <div className="mt-2 flex flex-wrap items-center gap-2">{renderReactions("reply", r.id, focused)}<Button variant="ghost" onClick={() => void report("reply", r.id)} className="min-h-11 px-2 text-xs text-muted-foreground">Denunciar</Button><Button variant="ghost" onClick={() => { if (!focused && !openThread) showThread(r.id); setReplyTo(r.id); requestAnimationFrame(() => document.getElementById("community-reply")?.focus()); }} className="min-h-11 px-2 text-xs font-bold text-primary">Responder a {displayName(r.author_name, r.is_anonymous, r.is_bot)}</Button></div>
       </article>;
     }
     function renderThread() {
       const items = [...(grouped.get("root") ?? [])];
       if (sort === "top") items.sort((a, b) => (data?.reactions.filter(r => r.target_id === b.id).length ?? 0) - (data?.reactions.filter(r => r.target_id === a.id).length ?? 0));
       if (sort === "recent") items.reverse();
-      return <div className="space-y-5">{items.map(r => { const children = descendants(r.id); return <section key={r.id} className="space-y-2">{replyCard(r)}{children.slice(0, 3).map(child => <div key={child.id} className="ml-6 sm:ml-12">{replyCard(child)}</div>)}{children.length > 3 && <Button type="button" variant="ghost" onClick={() => showThread(r.id)} className="ml-6 min-h-11 px-2 text-sm font-bold text-primary sm:ml-12">Ver todos {children.length} respuestas</Button>}</section>; })}</div>;
+      return <div className="space-y-5">{items.map(r => { const children = descendants(r.id); return <section key={r.id} className="space-y-2">{replyCard(r)}{children.slice(0, 3).map(child => <div key={child.id} className="ml-3 sm:ml-8">{replyCard(child)}</div>)}{children.length > 3 && <Button type="button" variant="ghost" onClick={() => showThread(r.id)} className="ml-3 min-h-11 px-2 text-sm font-bold text-primary sm:ml-8">Ver todos {children.length} respuestas</Button>}</section>; })}</div>;
     }
 
   return <div className="mx-auto max-w-3xl px-4 pb-32 pt-6">

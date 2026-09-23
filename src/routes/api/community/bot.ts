@@ -21,10 +21,18 @@ export const Route = createFileRoute("/api/community/bot")({ server: { handlers:
     let question = `${post.title}\n${post.body ?? ""}`; let parent: string | null = null;
     if (replyId) {
       if (!/^[0-9a-f-]{36}$/i.test(replyId)) return send({ error: "Respuesta inválida." }, 400);
-      const { data: rep } = await admin.from("community_replies").select("id,user_id,body,post_id").eq("id", replyId).maybeSingle();
+      const { data: rep, error: replyError } = await admin.from("community_replies").select("id,user_id,body,post_id,parent_reply_id").eq("id", replyId).maybeSingle();
+      if (replyError) return send({ error: "No se pudo revisar esta respuesta." }, 503);
       if (!rep || rep.post_id !== post.id || rep.user_id !== auth.user.id || !rep.body?.trim()) return send({ ok: true });
-      const { data: done } = await admin.from("community_replies").select("id").eq("parent_reply_id", rep.id).eq("is_bot", true).limit(1);
-      if (done?.length) return send({ ok: true });
+      // A conversation between people is theirs: never join a reply to another reply.
+      if (rep.parent_reply_id) return send({ ok: true, conversation: true });
+      const { data: replies, error: repliesError } = await admin.from("community_replies").select("id,user_id,parent_reply_id,is_bot,bot_target_user_id").eq("post_id", post.id).limit(3000);
+      if (repliesError) return send({ error: "No se pudo revisar la conversación." }, 503);
+      const rows = replies ?? [];
+      const mine = new Set(rows.filter(row => row.user_id === auth.user.id).map(row => row.id));
+      const alreadyAnswered = rows.some(row => row.is_bot && (row.bot_target_user_id === auth.user.id || (row.parent_reply_id && mine.has(row.parent_reply_id))));
+      const humanConversation = rows.some(row => !row.is_bot && row.parent_reply_id === rep.id);
+      if (alreadyAnswered || humanConversation) return send({ ok: true });
       question = `Publicación: ${post.title}\nComentario de la persona: ${rep.body}`; parent = rep.id;
     } else {
       if (post.user_id !== auth.user.id) return send({ error: "Pregunta no encontrada." }, 404);
@@ -38,7 +46,14 @@ export const Route = createFileRoute("/api/community/bot")({ server: { handlers:
     const reader = r.body.getReader(); const decoder = new TextDecoder(); let buffer = ""; let answer = "";
     for (;;) { const { done, value } = await reader.read(); if (done) break; buffer += decoder.decode(value, { stream: true }); const lines = buffer.split("\n"); buffer = lines.pop() ?? ""; for (const line of lines) if (line.startsWith("data:")) { try { const evt = JSON.parse(line.slice(5)); if (evt.type === "response.output_text.delta") answer += evt.delta ?? ""; } catch { /* incomplete */ } } }
     if (answer.trim().length < 15) return send({ error: "La respuesta de ORÍGEN no pudo generarse." }, 503);
-    const { error } = await admin.from("community_replies").insert({ post_id: post.id, parent_reply_id: parent, author_kind: "ai", user_id: null, author_name: "ORÍGEN · asistente", body: answer.trim().slice(0, 1600), is_bot: true });
+    if (replyId) {
+      const { data: latest, error: latestError } = await admin.from("community_replies").select("id,user_id,parent_reply_id,is_bot,bot_target_user_id").eq("post_id", post.id).limit(3000);
+      if (latestError) return send({ error: "No se pudo revisar la conversación." }, 503);
+      const mine = new Set((latest ?? []).filter(row => row.user_id === auth.user.id).map(row => row.id));
+      if ((latest ?? []).some(row => row.is_bot && (row.bot_target_user_id === auth.user.id || (row.parent_reply_id && mine.has(row.parent_reply_id)))) || (latest ?? []).some(row => !row.is_bot && row.parent_reply_id === replyId)) return send({ ok: true });
+    }
+    const { error } = await admin.from("community_replies").insert({ post_id: post.id, parent_reply_id: parent, author_kind: "ai", user_id: null, bot_target_user_id: replyId ? auth.user.id : null, author_name: "ORÍGEN · asistente", body: answer.trim().slice(0, 1600), is_bot: true });
+    if (error?.code === "23505") return send({ ok: true });
     if (error) return send({ error: "No se pudo guardar la respuesta." }, 500);
     return send({ ok: true });
   } catch { return send({ error: "La guía automática no está disponible ahora." }, 503); }
