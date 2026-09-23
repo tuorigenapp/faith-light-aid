@@ -307,6 +307,8 @@ function Comunidad() {
    }, [focusedReply, grouped]);
    const reactItems = (type: "post" | "reply", id: string) => EMOJIS.map(emoji => { const list = (data?.reactions ?? []).filter(r => r.target_type === type && r.target_id === id && r.emoji === emoji); return { emoji, count: list.length, mine: list.find(r => r.user_id === user?.id)?.id }; });
    const [reactionPicker, setReactionPicker] = useState<string | null>(null);
+    const pendingReactions = useRef(new Set<string>());
+    const [pendingReaction, setPendingReaction] = useState<string | null>(null);
 
   async function upload(file: File, type: "image" | "audio") {
     if (file.size > (type === "image" ? 8 : 12) * 1024 * 1024) throw new Error("Archivo demasiado grande.");
@@ -349,12 +351,37 @@ function Comunidad() {
        setReplyText(""); setReplyTo(null); setReplyImage(null); setAudioFile(null); setAudioMode(false); setSeconds(0); refresh();
     } catch (e) { toast.error((e as Error).message); } finally { setBusy(false); }
   }
-  async function toggleReaction(type: "post" | "reply", id: string, emoji: string, mine?: string) {
+  async function toggleReaction(type: "post" | "reply", id: string, emoji: string) {
+    if (!user) return;
     if (data?.suspended) return toast.error("Tu participación está suspendida.");
-     const old = data?.reactions.find(r => r.target_type === type && r.target_id === id && r.user_id === user?.id);
-     if (old && old.emoji !== emoji) { const removed = await supabase.from("community_reactions").delete().eq("id", old.id); if (removed.error) return toast.error(removed.error.message); }
-      const { error } = old?.emoji === emoji ? await supabase.from("community_reactions").delete().eq("id", old.id) : await supabase.from("community_reactions").insert({ user_id: user!.id, target_type: type, target_id: id, emoji });
-    if (error) toast.error(error.message); else refresh();
+    const target = `${type}:${id}`;
+    if (pendingReactions.current.has(target)) return;
+    pendingReactions.current.add(target);
+    setPendingReaction(target);
+    try {
+      // Read the current choice, not the possibly stale feed snapshot, before toggling.
+      const { data: existing, error: readError } = await supabase.from("community_reactions")
+        .select("id,emoji").eq("user_id", user.id).eq("target_type", type).eq("target_id", id);
+      if (readError) throw readError;
+      const chosen = existing?.some(reaction => reaction.emoji === emoji);
+      if (existing?.length) {
+        const { error: deleteError } = await supabase.from("community_reactions").delete()
+          .eq("user_id", user.id).eq("target_type", type).eq("target_id", id);
+        if (deleteError) throw deleteError;
+      }
+      if (!chosen) {
+        const { error: insertError } = await supabase.from("community_reactions")
+          .upsert({ user_id: user.id, target_type: type, target_id: id, emoji }, { onConflict: "user_id,target_type,target_id,emoji", ignoreDuplicates: true });
+        if (insertError) throw insertError;
+      }
+      refresh();
+    } catch {
+      toast.error("No se pudo guardar la reacción. Inténtalo de nuevo.");
+      refresh();
+    } finally {
+      pendingReactions.current.delete(target);
+      setPendingReaction(current => current === target ? null : current);
+    }
   }
    async function toggleSave(id: string) { const { error } = data?.saves.has(id) ? await supabase.from("community_saves").delete().eq("post_id", id) : await supabase.from("community_saves").insert({ user_id: user!.id, post_id: id }); if (error) toast.error(error.message); else refresh(); }
    async function toggleFollow(key: string) {
@@ -438,7 +465,7 @@ function Comunidad() {
       const pickerId = `${type}:${id}`;
        const selected = items.find(it => it.mine) ?? [...items].sort((a, b) => b.count - a.count)[0];
        const shown = compact ? (selected?.count ? [selected] : []) : items.filter(it => it.count > 0);
-       return <div className="relative flex min-h-11 flex-wrap items-center gap-1" aria-label="Reacciones"><Button type="button" variant="ghost" aria-label="Elegir reacción" aria-expanded={reactionPicker === pickerId} onClick={() => setReactionPicker(current => current === pickerId ? null : pickerId)} className="min-h-11 rounded-full border border-primary/15 px-2 text-xs text-primary">{items.find(it => it.mine) ? <img src={REACTION_IMAGES[items.findIndex(it => it.mine)]} alt="" className="h-6 w-6 object-contain" /> : <img src={reactionHeart} alt="" className="h-6 w-6 object-contain" />}{items.find(it => it.mine) ? "Cambiar" : "Reaccionar"}</Button>{shown.map(it => <span key={it.emoji} aria-label={`${it.emoji}, ${it.count} reacciones`} className="inline-flex min-h-9 items-center gap-1 rounded-full border border-border bg-background px-1.5 text-xs"><img src={REACTION_IMAGES[EMOJIS.indexOf(it.emoji)]} alt="" className="h-6 w-6 object-contain" />{it.count}</span>)}{reactionPicker === pickerId && <div role="group" aria-label="Elige una reacción" className="absolute bottom-full left-0 z-30 mb-2 flex max-w-[min(90vw,360px)] gap-1 overflow-x-auto rounded-full border border-border bg-card p-1.5 shadow-elev">{items.map((it, i) => <Button key={it.emoji} type="button" variant="ghost" aria-label={`Reaccionar con ${it.emoji}`} aria-pressed={!!it.mine} onClick={() => { setReactionPicker(null); void toggleReaction(type, id, it.emoji, it.mine); }} className={`h-11 w-11 shrink-0 rounded-full p-1 transition-transform hover:scale-110 ${it.mine ? "bg-primary/10" : ""}`}><img src={REACTION_IMAGES[i]} alt="" className="h-9 w-9 object-contain" /></Button>)}</div>}</div>;
+       return <div className="relative flex min-h-11 flex-wrap items-center gap-1" aria-label="Reacciones"><Button type="button" variant="ghost" aria-label="Elegir reacción" aria-expanded={reactionPicker === pickerId} disabled={pendingReaction === pickerId} onClick={() => setReactionPicker(current => current === pickerId ? null : pickerId)} className="community-reaction-trigger min-h-11 rounded-full border px-2 text-xs text-primary">{items.find(it => it.mine) ? <img src={REACTION_IMAGES[items.findIndex(it => it.mine)]} alt="" className="h-6 w-6 object-contain" /> : <img src={reactionHeart} alt="" className="h-6 w-6 object-contain" />}{items.find(it => it.mine) ? "Cambiar" : "Reaccionar"}</Button>{shown.map(it => <span key={it.emoji} aria-label={`${it.emoji}, ${it.count} reacciones`} className="inline-flex min-h-9 items-center gap-1 rounded-full border border-border bg-background px-1.5 text-xs"><img src={REACTION_IMAGES[EMOJIS.indexOf(it.emoji)]} alt="" className="h-6 w-6 object-contain" />{it.count}</span>)}{reactionPicker === pickerId && <div role="group" aria-label="Elige una reacción" className="absolute bottom-full left-0 z-30 mb-2 flex max-w-[min(90vw,360px)] gap-1 overflow-x-auto rounded-full border border-border bg-card p-1.5 shadow-elev">{items.map((it, i) => <Button key={it.emoji} type="button" variant="ghost" disabled={pendingReaction === pickerId} aria-label={`Reaccionar con ${it.emoji}`} aria-pressed={!!it.mine} onClick={() => { setReactionPicker(null); void toggleReaction(type, id, it.emoji); }} className={`h-11 w-11 shrink-0 rounded-full p-1 transition-transform hover:scale-110 ${it.mine ? "bg-primary/10" : ""}`}><img src={REACTION_IMAGES[i]} alt="" className="h-9 w-9 object-contain" /></Button>)}</div>}</div>;
    }
     function PollChoices({ post }: { post: Post }) {
      if (!post.poll_options || post.bot_kind === "cover" || post.image_path) return null;
@@ -471,7 +498,7 @@ function Comunidad() {
       const items = [...(grouped.get("root") ?? [])];
       if (sort === "top") items.sort((a, b) => (data?.reactions.filter(r => r.target_id === b.id).length ?? 0) - (data?.reactions.filter(r => r.target_id === a.id).length ?? 0));
       if (sort === "recent") items.reverse();
-       return <div className="space-y-5">{items.map((r, rootIndex) => { const children = descendants(r.id); return <section key={r.id} className="space-y-2">{replyCard(r, false, rootIndex)}{children.length > 0 && <div className="ml-3 flex min-h-11 items-center gap-2 sm:ml-8"><Button type="button" variant="ghost" onClick={() => showThread(r.id)} aria-label={`Ver conversación que surgió de la respuesta de ${displayName(r.author_name, r.is_anonymous, r.is_bot)}`} title="Ver origen de esta conversación" className="h-11 w-11 shrink-0 bg-transparent p-0 hover:bg-transparent"><img src={star3d} alt="" className="h-9 w-9 object-contain animate-floaty" /></Button>{children.length > 3 && <Button type="button" variant="ghost" onClick={() => showThread(r.id)} className="min-h-11 px-2 text-sm font-bold text-primary">Ver todos {children.length} respuestas</Button>}</div>}{children.slice(0, 3).map((child, index) => <div key={child.id} className="ml-3 sm:ml-8">{replyCard(child, false, (rootIndex + index + 1) % 7)}</div>)}</section>; })}</div>;
+        return <div className="space-y-5">{items.map((r, rootIndex) => { const children = descendants(r.id); return <section key={r.id} className="space-y-2">{replyCard(r, false, rootIndex)}{children.length >= 3 && <div className="ml-3 flex min-h-11 items-center gap-2 sm:ml-8"><Button type="button" variant="ghost" onClick={() => showThread(r.id)} aria-label={`Ver conversación que surgió de la respuesta de ${displayName(r.author_name, r.is_anonymous, r.is_bot)}`} title="Ver origen de esta conversación" className="h-11 w-11 shrink-0 bg-transparent p-0 hover:bg-transparent"><img src={star3d} alt="" className="h-9 w-9 object-contain animate-floaty" /></Button><Button type="button" variant="ghost" onClick={() => showThread(r.id)} className="min-h-11 px-2 text-sm font-bold text-primary">{children.length > 3 ? `Ver todos ${children.length} respuestas` : "Ver conversación"}</Button></div>}{children.slice(0, 3).map((child, index) => <div key={child.id} className="ml-3 sm:ml-8">{replyCard(child, false, (rootIndex + index + 1) % 7)}{children.length <= 2 && <p className="mt-1 px-2 text-xs text-muted-foreground">En respuesta al mensaje de {displayName(r.author_name, r.is_anonymous, r.is_bot)}</p>}</div>)}</section>; })}</div>;
     }
 
   return <div className="mx-auto max-w-3xl px-4 pb-32 pt-6">
