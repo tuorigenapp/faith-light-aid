@@ -58,14 +58,14 @@ function Comunidad() {
        supabase.auth.getSession().then(async ({ data: session }) => {
          const res = await fetch("/api/community/feed", { headers: { Authorization: `Bearer ${session.session?.access_token ?? ""}` } });
          if (!res.ok) throw new Error("No se pudo abrir la comunidad.");
-         return res.json() as Promise<{ posts: Post[]; replies: Reply[] }>;
+         return res.json() as Promise<{ posts: Post[]; replies: Reply[]; votes: { post_id: string; choice_index: number }[] }>;
        }),
       supabase.from("community_reactions").select("id,user_id,target_type,target_id,emoji").limit(4000),
       supabase.from("community_saves").select("post_id"), supabase.from("community_follows").select("topic"),
       supabase.from("community_suspensions").select("reason").eq("user_id", user!.id).maybeSingle(),
     ]);
      if (reactions.error || saves.error || follows.error) throw reactions.error || saves.error || follows.error;
-     return { posts: posts.posts, replies: posts.replies, reactions: (reactions.data ?? []) as Reaction[], saves: new Set((saves.data ?? []).map(s => s.post_id)), follows: new Set((follows.data ?? []).map(f => f.topic)), suspended: suspension.data?.reason ?? null };
+     return { posts: posts.posts, replies: posts.replies, votes: new Map(posts.votes.map(v => [v.post_id, v.choice_index])), reactions: (reactions.data ?? []) as Reaction[], saves: new Set((saves.data ?? []).map(s => s.post_id)), follows: new Set((follows.data ?? []).map(f => f.topic)), suspended: suspension.data?.reason ?? null };
   } });
   const refresh = () => void qc.invalidateQueries({ queryKey: ["comunidad"] });
   const [mediaUrls, setMediaUrls] = useState<Record<string, string>>({});
@@ -146,6 +146,15 @@ function Comunidad() {
      if (reason.trim().length < 5) return toast.error("Describe el motivo con al menos cinco caracteres.");
      const { error } = await supabase.from("community_reports").insert({ reporter_id: user!.id, target_type: type, target_id: id, reason: reason.trim().slice(0, 500) });
      if (error) toast.error(error.message); else toast.success("Enviado al equipo de moderación.");
+   }
+   const [voteResults, setVoteResults] = useState<Record<string, { correct: boolean | null; answer: number | null }>>({});
+   async function vote(id: string, choice: number) {
+     const { data: session } = await supabase.auth.getSession();
+     const res = await fetch("/api/community/vote", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.session?.access_token ?? ""}` }, body: JSON.stringify({ postId: id, choice }) });
+     const result = await res.json();
+     if (!res.ok) return toast.error(result.error ?? "No se pudo registrar tu respuesta.");
+     setVoteResults(v => ({ ...v, [id]: result })); refresh();
+     toast.success(result.correct === null ? "Gracias por participar." : result.correct ? "¡Respuesta correcta!" : "Sigue intentando en la próxima pregunta.");
    }
   async function startRecording() {
     if (recording) { recorder.current?.stop(); return; }
