@@ -54,7 +54,7 @@ function Comunidad() {
   const author = (profile?.full_name || profile?.display_name || "Persona del camino").trim();
 
   const { data, isLoading, isError, refetch } = useQuery({ queryKey: ["comunidad", user?.id], enabled: !!user, queryFn: async () => {
-    const [posts, replies, reactions, saves, follows, suspension] = await Promise.all([
+     const [posts, reactions, saves, follows, suspension] = await Promise.all([
        supabase.auth.getSession().then(async ({ data: session }) => {
          const res = await fetch("/api/community/feed", { headers: { Authorization: `Bearer ${session.session?.access_token ?? ""}` } });
          if (!res.ok) throw new Error("No se pudo abrir la comunidad.");
