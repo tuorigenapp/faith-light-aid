@@ -271,12 +271,14 @@ function Comunidad() {
        }
        setOpenThread(root);
        setReplyTo(null);
+       setNotice(null);
        window.history.pushState(null, "", `/comunidad?post=${openPost}&thread=${root}`);
        window.scrollTo({ top: 0, behavior: "smooth" });
      }
      function closeThread() {
        setOpenThread(null);
        setReplyTo(null);
+       setNotice(null);
        if (openPost) window.history.pushState(null, "", `/comunidad?post=${openPost}`);
      }
    const matchedTopics = search.trim() ? TOPICS.filter(t => `${t.label} ${t.detail}`.toLocaleLowerCase("es").includes(search.trim().toLocaleLowerCase("es"))) : [];
