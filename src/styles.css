@@ -64,7 +64,7 @@ body.community-reading .community-main { padding-bottom: 0; }
   --gradient-emotional: linear-gradient(135deg, #7C5CFF 0%, #F58BCB 100%);
   --gradient-spiritual: linear-gradient(180deg, #5AA9FF 0%, #B5D9FF 55%, #FBFAFF 100%);
   --gradient-card: linear-gradient(180deg, #FFFFFF 0%, #FBFAFF 100%);
-  --gradient-community-cover: linear-gradient(180deg, rgba(27, 25, 48, 0.68), rgba(27, 25, 48, 0.78));
+  --gradient-community-cover: linear-gradient(180deg, rgba(22, 16, 37, 0.68), rgba(22, 16, 37, 0.82));
 }
 
 :root {
@@ -112,11 +112,18 @@ body.community-reading .community-main { padding-bottom: 0; }
   --sidebar-ring: #7C5CFF;
   --community-cover: #1B1930;
   --community-cover-foreground: #F9F7FF;
-  --community-post-list: #F8F6FD;
-  --community-post-detail: #F1ECFF;
-  --community-reply-root: #FFFFFF;
-  --community-reply-group: #F1F0F5;
-  --community-reply-bot: #F4F0FF;
+  --community-poll: #FFFCF8;
+  --community-poll-border: #CEBDD8;
+  --community-poll-selected: #F5E9FF;
+  --community-reply-0: #FFE0E2;
+  --community-reply-1: #FFDCD0;
+  --community-reply-2: #FFE5BA;
+  --community-reply-3: #FFF0AE;
+  --community-reply-4: #DCEEC8;
+  --community-reply-5: #D6EDE5;
+  --community-reply-6: #ECDDFC;
+  --community-reply-border: #BDA4A5;
+  --community-reply-bot: #EBDCF7;
 }
 
 .dark {
@@ -150,19 +157,32 @@ body.community-reading .community-main { padding-bottom: 0; }
   --sidebar-accent-foreground: #F4F2FF;
   --sidebar-border: rgba(255, 255, 255, 0.08);
   --sidebar-ring: #A78BFA;
-  --community-post-list: #1B182F;
-  --community-post-detail: #241E3A;
-  --community-reply-root: #17142A;
-  --community-reply-group: #24222D;
-  --community-reply-bot: #231D39;
+  --community-poll: #252033;
+  --community-poll-border: #635775;
+  --community-poll-selected: #49345F;
+  --community-reply-0: #51303D;
+  --community-reply-1: #53362F;
+  --community-reply-2: #513C27;
+  --community-reply-3: #4C4429;
+  --community-reply-4: #334834;
+  --community-reply-5: #304744;
+  --community-reply-6: #493457;
+  --community-reply-border: #776270;
+  --community-reply-bot: #453058;
 }
 
-.community-post-list { background: var(--community-post-list); border: 1px solid var(--border); box-shadow: var(--shadow-soft); }
-.community-post-detail { background: var(--community-post-detail); border: 1px solid var(--border); box-shadow: var(--shadow-soft); }
-.community-reply-root { background: var(--community-reply-root); border: 1px solid var(--border); box-shadow: var(--shadow-soft); }
-.community-reply-group { background: var(--community-reply-group); border: 1px solid var(--border); }
-.community-reply-bot { background: var(--community-reply-bot); border: 1px solid var(--border); }
-.dark .community-post-list, .dark .community-post-detail, .dark .community-reply-root { box-shadow: none; }
+.community-post-list, .community-post-detail { background: var(--card); border: 1px solid var(--border); box-shadow: var(--shadow-soft); }
+.community-poll-option.community-poll-option { background: var(--community-poll); border: 2px solid var(--community-poll-border); color: var(--foreground); box-shadow: var(--shadow-soft); }
+.community-poll-option.community-poll-option[data-selected="true"] { background: var(--community-poll-selected); border-color: var(--primary); }
+.community-reply { background: var(--community-reply-0); border: 1px solid var(--community-reply-border); box-shadow: var(--shadow-soft); }
+.community-reply[data-tone="1"] { background: var(--community-reply-1); }
+.community-reply[data-tone="2"] { background: var(--community-reply-2); }
+.community-reply[data-tone="3"] { background: var(--community-reply-3); }
+.community-reply[data-tone="4"] { background: var(--community-reply-4); }
+.community-reply[data-tone="5"] { background: var(--community-reply-5); }
+.community-reply[data-tone="6"] { background: var(--community-reply-6); }
+.community-reply[data-bot="true"] { background: var(--community-reply-bot); }
+.dark .community-post-list, .dark .community-post-detail, .dark .community-poll-option, .dark .community-reply { box-shadow: none; }
 
 @layer base {
   * { border-color: var(--color-border); }

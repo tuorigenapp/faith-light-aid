@@ -78,3 +78,9 @@
 - [x] Mostrar «Alma Anónima #número» sin revelar la identidad real en la comunidad ni en las citas.
 - [x] Diferenciar visualmente las publicaciones, respuestas principales y respuestas agrupadas en claro y oscuro.
 - [x] Comprobar nombres y colores en móvil y escritorio.
+
+## Comunidad — restaurar diseño y simplificar números
+- [x] Restaurar colores originales de publicaciones, opciones separadas de encuestas y sombra oscura legible en portadas.
+- [x] Dar a cada burbuja de respuesta un tono cálido distinto, visible en claro y oscuro.
+- [x] Asignar a cada persona anónima un número único entre 1 y 999.999, salvo que se agote ese rango; corregir nombres anteriores.
+- [x] Comprobar publicaciones, encuestas, portadas y conversaciones en móvil y escritorio.
