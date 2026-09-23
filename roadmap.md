@@ -55,3 +55,9 @@
 - [x] Publicaciones y encuestas automáticas muestran nombre e imagen de su tema; logo ORÍGEN reservado a respuestas automáticas.
 - [x] Las portadas usan imágenes del grupo temático correspondiente; fechas relativas conservadas.
 - [x] Ícono de Comunidad consistente con el resto de la navegación.
+
+## Comunidad — conversaciones entre personas
+- [ ] Mostrar tres respuestas por comentario y abrir el resto en una vista Conversación, sin línea gris en la vista principal.
+- [ ] Permitir contrarespuestas con contexto citado, reacciones compactas y acceso directo a cada conversación.
+- [ ] Evitar que ORÍGEN interrumpa conversaciones entre personas o responda más de una vez a la misma persona en un hilo.
+- [ ] Comprobar conversación y navegación en móvil y escritorio.

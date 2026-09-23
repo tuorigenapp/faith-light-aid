@@ -165,6 +165,7 @@ function Comunidad() {
   const [createOpen, setCreateOpen] = useState(false);
    const [page, setPage] = useState(0);
   const [openPost, setOpenPost] = useState<string | null>(null);
+  const [openThread, setOpenThread] = useState<string | null>(null);
   const [title, setTitle] = useState(""); const [body, setBody] = useState(""); const [newTopic, setNewTopic] = useState("general");
   const [anonymous, setAnonymous] = useState(false); const [replyAnonymous, setReplyAnonymous] = useState(false);
   const [postImage, setPostImage] = useState<File | null>(null); const [replyImage, setReplyImage] = useState<File | null>(null);
@@ -242,6 +243,7 @@ function Comunidad() {
     }, [data, topic, tab, search, searchTerm, notifications, acknowledged, justRead]);
     function openConversation(id: string) {
       setOpenPost(id);
+       setOpenThread(null);
       window.history.replaceState(null, "", `/comunidad?post=${id}`);
      const ids = notifications.filter(n => n.post_id === id).map(n => n.id);
       if (ids.length) {
@@ -249,6 +251,18 @@ function Comunidad() {
         setAcknowledged(previous => ({ ...previous, ...Object.fromEntries(ids.map(item => [item, true as const])) }));
         void markRead(id).catch(() => { setAcknowledged(previous => { const next = { ...previous }; ids.forEach(item => delete next[item]); return next; }); toast.error("No se pudo marcar la actividad como leída."); });
       }
+     function showThread(id: string) {
+       if (!openPost) return;
+       setOpenThread(id);
+       setReplyTo(null);
+       window.history.pushState(null, "", `/comunidad?post=${openPost}&thread=${id}`);
+       window.scrollTo({ top: 0, behavior: "smooth" });
+     }
+     function closeThread() {
+       setOpenThread(null);
+       setReplyTo(null);
+       if (openPost) window.history.pushState(null, "", `/comunidad?post=${openPost}`);
+     }
     }
    const matchedTopics = search.trim() ? TOPICS.filter(t => `${t.label} ${t.detail}`.toLocaleLowerCase("es").includes(search.trim().toLocaleLowerCase("es"))) : [];
    const pollStats = (p: Post) => {
@@ -257,6 +271,23 @@ function Comunidad() {
    };
   const replies = useMemo(() => (data?.replies ?? []).filter(r => r.post_id === openPost), [data, openPost]);
   const grouped = useMemo(() => { const map = new Map<string, Reply[]>(); for (const r of replies) { const key = r.parent_reply_id ?? "root"; map.set(key, [...(map.get(key) ?? []), r]); } return map; }, [replies]);
+   const repliesById = useMemo(() => new Map(replies.map(r => [r.id, r])), [replies]);
+   const focusedReply = openThread ? repliesById.get(openThread) : undefined;
+   const threadReplies = useMemo(() => {
+     if (!focusedReply) return [];
+     const collected: Reply[] = [];
+     const seen = new Set<string>([focusedReply.id]);
+     const collect = (id: string) => {
+       for (const child of grouped.get(id) ?? []) {
+         if (seen.has(child.id)) continue;
+         seen.add(child.id);
+         collected.push(child);
+         collect(child.id);
+       }
+     };
+     collect(focusedReply.id);
+     return collected.sort((a, b) => Date.parse(a.created_at) - Date.parse(b.created_at));
+   }, [focusedReply, grouped]);
    const reactItems = (type: "post" | "reply", id: string) => EMOJIS.map(emoji => { const list = (data?.reactions ?? []).filter(r => r.target_type === type && r.target_id === id && r.emoji === emoji); return { emoji, count: list.length, mine: list.find(r => r.user_id === user?.id)?.id }; });
    const [reactionPicker, setReactionPicker] = useState<string | null>(null);
 
@@ -366,14 +397,28 @@ function Comunidad() {
   }
      function discardRecording() { discardAudio.current = true; if (recorder.current?.state !== "inactive") recorder.current?.stop(); setRecording(false); setAudioFile(null); setAudioMode(false); setSeconds(0); }
    function togglePause() { const rec = recorder.current; if (!rec) return; if (rec.state === "recording") { rec.pause(); setRecordingPaused(true); } else if (rec.state === "paused") { rec.resume(); setRecordingPaused(false); } }
-  useEffect(() => { const query = new URLSearchParams(window.location.search).get("post"); if (query && data?.posts.some(p => p.id === query) && openPost !== query) openConversation(query); }, [data?.posts, openPost]);
+   useEffect(() => {
+     const syncLocation = () => {
+       const params = new URLSearchParams(window.location.search);
+       const post = params.get("post");
+       if (post && data?.posts.some(p => p.id === post)) {
+         setOpenPost(post);
+         setOpenThread(params.get("thread"));
+       } else if (!post) { setOpenPost(null); setOpenThread(null); }
+     };
+     syncLocation();
+     window.addEventListener("popstate", syncLocation);
+     return () => window.removeEventListener("popstate", syncLocation);
+   }, [data?.posts]);
      useEffect(() => () => { discardAudio.current = true; if (recordingTimer.current) clearTimeout(recordingTimer.current); if (recorder.current?.state !== "inactive") recorder.current?.stop(); }, []);
     useEffect(() => { if (!openPost && recorder.current?.state && recorder.current.state !== "inactive") { discardAudio.current = true; recorder.current.stop(); setRecording(false); setAudioFile(null); setAudioMode(false); } }, [openPost]);
 
-   function renderReactions(type: "post" | "reply", id: string) {
+   function renderReactions(type: "post" | "reply", id: string, compact = false) {
       const items = reactItems(type, id);
       const pickerId = `${type}:${id}`;
-      return <div className="relative flex min-h-11 flex-wrap items-center gap-1" aria-label="Reacciones"><Button type="button" variant="ghost" aria-label="Elegir reacción" aria-expanded={reactionPicker === pickerId} onClick={() => setReactionPicker(current => current === pickerId ? null : pickerId)} className="min-h-11 rounded-full border border-primary/15 px-2 text-xs text-primary">{items.find(it => it.mine) ? <img src={REACTION_IMAGES[items.findIndex(it => it.mine)]} alt="" className="h-6 w-6 object-contain" /> : <img src={reactionHeart} alt="" className="h-6 w-6 object-contain" />}{items.find(it => it.mine) ? "Cambiar" : "Reaccionar"}</Button>{items.filter(it => it.count > 0).map(it => <span key={it.emoji} aria-label={`${it.emoji}, ${it.count} reacciones`} className="inline-flex min-h-9 items-center gap-1 rounded-full border border-border bg-background px-1.5 text-xs"><img src={REACTION_IMAGES[EMOJIS.indexOf(it.emoji)]} alt="" className="h-6 w-6 object-contain" />{it.count}</span>)}{reactionPicker === pickerId && <div role="group" aria-label="Elige una reacción" className="absolute bottom-full left-0 z-30 mb-2 flex max-w-[min(90vw,360px)] gap-1 overflow-x-auto rounded-full border border-border bg-card p-1.5 shadow-elev">{items.map((it, i) => <Button key={it.emoji} type="button" variant="ghost" aria-label={`Reaccionar con ${it.emoji}`} aria-pressed={!!it.mine} onClick={() => { setReactionPicker(null); void toggleReaction(type, id, it.emoji, it.mine); }} className={`h-11 w-11 shrink-0 rounded-full p-1 transition-transform hover:scale-110 ${it.mine ? "bg-primary/10" : ""}`}><img src={REACTION_IMAGES[i]} alt="" className="h-9 w-9 object-contain" /></Button>)}</div>}</div>;
+       const selected = items.find(it => it.mine) ?? [...items].sort((a, b) => b.count - a.count)[0];
+       const shown = compact ? (selected?.count ? [selected] : []) : items.filter(it => it.count > 0);
+       return <div className="relative flex min-h-11 flex-wrap items-center gap-1" aria-label="Reacciones"><Button type="button" variant="ghost" aria-label="Elegir reacción" aria-expanded={reactionPicker === pickerId} onClick={() => setReactionPicker(current => current === pickerId ? null : pickerId)} className="min-h-11 rounded-full border border-primary/15 px-2 text-xs text-primary">{items.find(it => it.mine) ? <img src={REACTION_IMAGES[items.findIndex(it => it.mine)]} alt="" className="h-6 w-6 object-contain" /> : <img src={reactionHeart} alt="" className="h-6 w-6 object-contain" />}{items.find(it => it.mine) ? "Cambiar" : "Reaccionar"}</Button>{shown.map(it => <span key={it.emoji} aria-label={`${it.emoji}, ${it.count} reacciones`} className="inline-flex min-h-9 items-center gap-1 rounded-full border border-border bg-background px-1.5 text-xs"><img src={REACTION_IMAGES[EMOJIS.indexOf(it.emoji)]} alt="" className="h-6 w-6 object-contain" />{it.count}</span>)}{reactionPicker === pickerId && <div role="group" aria-label="Elige una reacción" className="absolute bottom-full left-0 z-30 mb-2 flex max-w-[min(90vw,360px)] gap-1 overflow-x-auto rounded-full border border-border bg-card p-1.5 shadow-elev">{items.map((it, i) => <Button key={it.emoji} type="button" variant="ghost" aria-label={`Reaccionar con ${it.emoji}`} aria-pressed={!!it.mine} onClick={() => { setReactionPicker(null); void toggleReaction(type, id, it.emoji, it.mine); }} className={`h-11 w-11 shrink-0 rounded-full p-1 transition-transform hover:scale-110 ${it.mine ? "bg-primary/10" : ""}`}><img src={REACTION_IMAGES[i]} alt="" className="h-9 w-9 object-contain" /></Button>)}</div>}</div>;
    }
     function PollChoices({ post }: { post: Post }) {
      if (!post.poll_options || post.bot_kind === "cover" || post.image_path) return null;
@@ -381,12 +426,33 @@ function Comunidad() {
      const voted = data?.votes.has(post.id);
       return <div className="mt-4 space-y-2.5">{post.poll_options.map((option, i) => { const percent = total ? Math.round(counts[i] / total * 100) : 0; const selected = data?.votes.get(post.id) === i; return <Button key={i} type="button" variant="outline" disabled={voted || !!voting} onClick={() => void vote(post.id, i)} className={`relative flex min-h-14 h-auto w-full justify-start overflow-hidden rounded-xl border-0 bg-muted p-0 text-left text-sm font-normal whitespace-normal shadow-none ${selected ? "ring-2 ring-primary text-primary font-semibold" : ""}`}><span className="absolute inset-y-0 left-0 bg-primary/15 transition-all duration-300" style={{ width: voted ? `${percent}%` : "0%" }} /><span className="relative flex w-full items-center justify-between gap-3 px-4 py-3"><span className="min-w-0 break-words">{option}{selected && <span className="ml-2 text-xs">· Tu elección</span>}</span>{voted && <strong className="shrink-0">{percent} %</strong>}</span></Button>; })}<p role="status" className="text-xs text-muted-foreground">{voted ? `${total} ${total === 1 ? "voto" : "votos"} · ${voteResults[post.id]?.correct === false ? `La opción correcta era ${post.poll_options[voteResults[post.id].answer ?? 0]}.` : voteResults[post.id]?.correct ? "¡Correcto!" : "Tu elección quedó registrada."}` : "Elige una opción. Solo puedes votar una vez."}</p></div>;
   }
-   function renderThread(parent: string | null = null, depth = 0): React.ReactNode {
-    const items = [...(grouped.get(parent ?? "root") ?? [])];
-    if (sort === "top" && !parent) items.sort((a, b) => (data?.reactions.filter(r => r.target_id === b.id).length ?? 0) - (data?.reactions.filter(r => r.target_id === a.id).length ?? 0));
-    if (sort === "recent" && !parent) items.reverse();
-      return <div className="space-y-3">{items.map(r => <div key={r.id} className={`rounded-2xl border border-border/70 p-3.5 ${r.is_bot ? "bg-primary/5" : "bg-secondary/30"}`}><div className="flex items-center gap-2"><Avatar name={r.author_name} bot={r.is_bot} identity={r.author_id ?? r.id} /><div><p className="text-sm font-bold">{displayName(r.author_name, r.is_anonymous, r.is_bot)} {r.is_bot && <ShieldCheck className="inline h-4 w-4 text-primary" aria-label="Respuesta verificada de ORÍGEN" />}<LevelBadge level={r.author_level} /></p><p className="text-xs text-muted-foreground">{relativeDate(r.created_at)} · {authorRole(r.author_kind, r.is_bot)}</p></div></div>{r.body && <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed">{r.body}</p>}{r.image_path && mediaUrls[r.image_path] && <img src={mediaUrls[r.image_path]} alt="Adjunto a la respuesta" className="mt-3 max-h-72 w-full rounded-xl object-contain" />}{r.audio_path && mediaUrls[r.audio_path] && <audio controls preload="metadata" src={mediaUrls[r.audio_path]} className="mt-3 w-full" aria-label="Respuesta de audio" />}<div className="mt-3 flex flex-wrap items-center gap-3">{renderReactions("reply", r.id)}<button onClick={() => void report("reply", r.id)} className="min-h-11 text-xs text-muted-foreground">Denunciar</button><button onClick={() => { setReplyTo(r.id); document.getElementById("community-reply")?.focus(); }} className="min-h-11 text-xs font-bold text-primary">Responder a {displayName(r.author_name, r.is_anonymous, r.is_bot)}</button></div>{depth < 8 && grouped.has(r.id) && <div className="mt-3 border-l-2 border-primary/20 pl-3">{renderThread(r.id, depth + 1)}</div>}</div>)}</div>;
-  }
+    function descendants(id: string) {
+      const found: Reply[] = [];
+      const seen = new Set<string>([id]);
+      const visit = (parent: string) => {
+        for (const child of grouped.get(parent) ?? []) {
+          if (seen.has(child.id)) continue;
+          seen.add(child.id); found.push(child); visit(child.id);
+        }
+      };
+      visit(id);
+      return found.sort((a, b) => Date.parse(a.created_at) - Date.parse(b.created_at));
+    }
+    function replyCard(r: Reply, focused = false) {
+      const referenced = focused && r.parent_reply_id ? repliesById.get(r.parent_reply_id) : undefined;
+      return <article key={r.id} className={`min-w-0 rounded-xl p-3.5 ${r.is_bot ? "bg-primary/5" : "bg-secondary/30"}`}>
+        <div className="flex items-center gap-2"><Avatar name={r.author_name} bot={r.is_bot} identity={r.author_id ?? r.id} /><div className="min-w-0"><p className="text-sm font-bold">{displayName(r.author_name, r.is_anonymous, r.is_bot)} {r.is_bot && <ShieldCheck className="inline h-4 w-4 text-primary" aria-label="Respuesta verificada de ORÍGEN" />}<LevelBadge level={r.author_level} /></p><p className="text-xs text-muted-foreground">{relativeDate(r.created_at)} · {authorRole(r.author_kind, r.is_bot)}</p></div></div>
+        {referenced && <div className="mt-3 rounded-lg border-l-2 border-border bg-muted/80 px-3 py-2 text-xs text-muted-foreground"><span className="font-semibold">En respuesta a {displayName(referenced.author_name, referenced.is_anonymous, referenced.is_bot)}</span><p className="mt-1 line-clamp-3 whitespace-pre-wrap break-words">{referenced.body || (referenced.audio_path ? "Mensaje de audio" : referenced.image_path ? "Imagen adjunta" : "Comentario")}</p></div>}
+        {r.body && <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-relaxed">{r.body}</p>}{r.image_path && mediaUrls[r.image_path] && <img src={mediaUrls[r.image_path]} alt="Adjunto a la respuesta" className="mt-3 max-h-72 w-full rounded-xl object-contain" />}{r.audio_path && mediaUrls[r.audio_path] && <audio controls preload="metadata" src={mediaUrls[r.audio_path]} className="mt-3 w-full" aria-label="Respuesta de audio" />}
+        <div className="mt-2 flex flex-wrap items-center gap-2">{renderReactions("reply", r.id, focused)}<Button variant="ghost" onClick={() => void report("reply", r.id)} className="min-h-11 px-2 text-xs text-muted-foreground">Denunciar</Button><Button variant="ghost" onClick={() => { if (!focused && !openThread) showThread(r.id); setReplyTo(r.id); requestAnimationFrame(() => document.getElementById("community-reply")?.focus()); }} className="min-h-11 px-2 text-xs font-bold text-primary">Responder</Button></div>
+      </article>;
+    }
+    function renderThread() {
+      const items = [...(grouped.get("root") ?? [])];
+      if (sort === "top") items.sort((a, b) => (data?.reactions.filter(r => r.target_id === b.id).length ?? 0) - (data?.reactions.filter(r => r.target_id === a.id).length ?? 0));
+      if (sort === "recent") items.reverse();
+      return <div className="space-y-5">{items.map(r => { const children = descendants(r.id); return <section key={r.id} className="space-y-2">{replyCard(r)}{children.slice(0, 3).map(child => <div key={child.id} className="ml-6 sm:ml-12">{replyCard(child)}</div>)}{children.length > 3 && <Button type="button" variant="ghost" onClick={() => showThread(r.id)} className="ml-6 min-h-11 px-2 text-sm font-bold text-primary sm:ml-12">Ver todos {children.length} respuestas</Button>}</section>; })}</div>;
+    }
 
   return <div className="mx-auto max-w-3xl px-4 pb-32 pt-6">
       {data?.suspension && <SuspensionNotice suspension={data.suspension} name={displayName(author, false)} />}
