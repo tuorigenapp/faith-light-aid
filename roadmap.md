@@ -74,7 +74,7 @@
 - [x] Conservar la respuesta automática de ORÍGEN solo cuando está habilitada y una vez por persona; no entrar en contrarespuestas humanas.
 
 ## Comunidad — identidad anónima y burbujas
-- [ ] Asignar un número aleatorio único y persistente por persona anónima, también para publicaciones y respuestas anteriores.
-- [ ] Mostrar «Alma Anónima #número» sin revelar la identidad real en la comunidad ni en las citas.
-- [ ] Diferenciar visualmente las publicaciones, respuestas principales y respuestas agrupadas en claro y oscuro.
-- [ ] Comprobar nombres y colores en móvil y escritorio.
+- [x] Asignar un número aleatorio único y persistente por persona anónima, también para publicaciones y respuestas anteriores.
+- [x] Mostrar «Alma Anónima #número» sin revelar la identidad real en la comunidad ni en las citas.
+- [x] Diferenciar visualmente las publicaciones, respuestas principales y respuestas agrupadas en claro y oscuro.
+- [x] Comprobar nombres y colores en móvil y escritorio.
