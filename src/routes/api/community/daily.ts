@@ -42,13 +42,18 @@ const COVER_QUESTIONS = [
   ["¿Qué pregunta sobre la fe quisieras compartir sin temor?", "¿Qué palabra de esperanza te acompaña hoy?", "¿Cómo vives tu espiritualidad sin imposiciones?"],
   ["¿Qué pequeño avance celebras esta mañana?", "¿Qué hiciste hoy que antes te costaba?", "¿Qué paso te gustaría reconocer antes de dormir?"],
 ];
-const REFLECTION_OPTIONS = [
-  ["Hacer una pausa", "Pedir ayuda", "Escribirlo", "Tomar aire", "Hablar con alguien", "Todavía lo descubro"],
-  ["Hablar con calma", "Poner un límite", "Escuchar primero", "Tomar distancia", "Pedir apoyo", "Necesito tiempo"],
-  ["Pedir claridad", "Escuchar mejor", "Decir lo que siento", "Cuidar mis límites", "Darme tiempo", "Buscar apoyo"],
-  ["Respirar", "Caminar", "Descansar", "Escribir", "Pedir compañía", "Hacer una pausa"],
-  ["Esperanza", "Paciencia", "Paz", "Confianza", "Gratitud", "Preguntar sin miedo"],
-  ["Lo intenté de nuevo", "Pedí ayuda", "Puse un límite", "Descansé", "Me escuché", "Di el primer paso"],
+const TRUE_FALSE = [
+  { title: "¿Es verdadero que escuchar no siempre significa estar de acuerdo?", options: ["Verdadero", "Falso"], answer: 0 },
+  { title: "¿Es verdadero que poner un límite respetuoso equivale a dejar de querer a tu familia?", options: ["Verdadero", "Falso"], answer: 1 },
+  { title: "¿Es verdadero que una relación sana necesita espacio para hablar de lo difícil?", options: ["Verdadero", "Falso"], answer: 0 },
+  { title: "¿Es verdadero que pedir apoyo cuando la ansiedad persiste es una señal de debilidad?", options: ["Verdadero", "Falso"], answer: 1 },
+  { title: "¿Es verdadero que preguntar con respeto puede ser parte de tu camino espiritual?", options: ["Verdadero", "Falso"], answer: 0 },
+  { title: "¿Es verdadero que un paso pequeño no cuenta como avance?", options: ["Verdadero", "Falso"], answer: 1 },
+];
+const COVER_INVITATIONS = [
+  "Comparte tu experiencia: ¿qué idea o método te ha ayudado? Tu historia puede acompañar a alguien más.",
+  "¿Cómo lo has vivido tú? Comparte una experiencia o un consejo que te habría gustado escuchar.",
+  "Cuéntanos qué has intentado y qué aprendiste. Aquí hay espacio para escuchar distintas formas de avanzar.",
 ];
 
 export const Route = createFileRoute("/api/community/daily")({ server: { handlers: { POST: async ({ request }) => {
@@ -75,10 +80,10 @@ export const Route = createFileRoute("/api/community/daily")({ server: { handler
     for (const [index, topic] of TOPICS.entries()) {
       for (const kind of ["cover", "poll"] as const) {
         if (seen.has(`${topic}:${moment}:${kind}`)) continue;
-         const quiz = QUIZZES[index][moment];
+         const quiz = (day + moment) % 4 === 0 ? TRUE_FALSE[index] : QUIZZES[index][(moment + day) % QUIZZES[index].length];
         const title = kind === "cover" ? COVER_QUESTIONS[index][(moment + day) % 3] : quiz.title;
-        const opts = kind === "cover" ? REFLECTION_OPTIONS[index].slice(0, 4 + moment) : quiz.options;
-        const { error } = await db.from("community_posts").insert({ user_id: null, author_name: "ORÍGEN", topic, title, body: kind === "poll" ? "Elige una respuesta y descubre el resultado. Comparte tu experiencia con los demás." : "Una pregunta para acompañarnos. Elige una opción y cuéntanos tu experiencia en las respuestas.", poll_options: opts, poll_answer_index: kind === "poll" ? opts.indexOf(quiz.options[quiz.answer]) : null, is_bot: true, is_verified: false, bot_slot: moment, bot_kind: kind });
+         const opts = kind === "poll" ? quiz.options : null;
+         const { error } = await db.from("community_posts").insert({ user_id: null, author_name: "ORÍGEN", topic, title, body: kind === "poll" ? "Elige una respuesta y descubre el resultado. Comparte tu experiencia con los demás." : COVER_INVITATIONS[(moment + day) % COVER_INVITATIONS.length], poll_options: opts, poll_answer_index: kind === "poll" ? quiz.answer : null, is_bot: true, is_verified: false, bot_slot: moment, bot_kind: kind });
         if (!error) created = true;
         else if (error.code !== "23505") {
           console.error("Community daily insert failed", error.code, error.message);
