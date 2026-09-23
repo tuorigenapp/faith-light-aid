@@ -41,6 +41,7 @@ import reactionLeaf from "@/assets/community-reactions/leaf.png";
 import reactionTouched from "@/assets/community-reactions/touched.png";
 import reactionApplause from "@/assets/community-reactions/applause.png";
 import reactionLove from "@/assets/community-reactions/love.png";
+import star3d from "@/assets/e3d-star.png";
 import { useCommunityNotifications, useMarkCommunityRead } from "@/hooks/use-community-notifications";
 
 export const Route = createFileRoute("/_authenticated/comunidad")({
@@ -168,7 +169,7 @@ function Comunidad() {
   const [notice, setNotice] = useState<{ message: string; error: boolean } | null>(null);
   const toast = {
     error: (message: string) => setNotice({ message, error: true }),
-    success: (message: string) => setNotice({ message, error: false }),
+    success: (_message: string) => setNotice(null),
   };
   useEffect(() => {
     document.body.classList.toggle("community-reading", Boolean(openPost));
@@ -333,14 +334,17 @@ function Comunidad() {
     if (!user || busy || data?.suspended) return;
       if (sendAudio && !audioFile) return toast.error("Primero graba un audio.");
      if (!sendAudio && !replyText.trim() && !replyImage) return toast.error("Escribe o adjunta algo para responder.");
+    if (!openPost) return;
     setBusy(true);
+    setNotice(null);
     try {
        const image_path = !sendAudio && replyImage ? await upload(replyImage, "image") : null;
         const audio_path = sendAudio && audioFile ? await upload(audioFile, "audio") : null;
-       const { data: saved, error } = await supabase.from("community_replies").insert({ post_id: openPost!, parent_reply_id: replyTo, user_id: user.id, author_name: replyAnonymous ? "Alma anónima" : author, is_anonymous: replyAnonymous, body: sendAudio ? "" : replyText.trim(), image_path, audio_path }).select("id").single();
+       const parentId = replyTo ?? openThread;
+       const { data: saved, error } = await supabase.from("community_replies").insert({ post_id: openPost, parent_reply_id: parentId, user_id: user.id, author_name: replyAnonymous ? "Alma anónima" : author, is_anonymous: replyAnonymous, body: sendAudio ? "" : replyText.trim(), image_path, audio_path }).select("id").single();
       if (error) throw error;
-       if (saved && !replyTo && !sendAudio && replyText.trim().length > 3) { const postForBot = openPost; void supabase.auth.getSession().then(({ data: ses }) => fetch("/api/community/bot", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${ses.session?.access_token ?? ""}` }, body: JSON.stringify({ postId: postForBot, replyId: saved.id }) })).then(() => refresh()).catch(() => undefined); }
-       setReplyText(""); setReplyTo(null); setReplyImage(null); setAudioFile(null); setAudioMode(false); setSeconds(0); refresh(); toast.success(sendAudio ? "Tu audio ya está en la conversación." : "Tu respuesta ya está en la conversación.");
+       if (saved && !parentId && !sendAudio && replyText.trim().length > 3) { const postForBot = openPost; void supabase.auth.getSession().then(({ data: ses }) => fetch("/api/community/bot", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${ses.session?.access_token ?? ""}` }, body: JSON.stringify({ postId: postForBot, replyId: saved.id }) })).then(() => refresh()).catch(() => undefined); }
+       setReplyText(""); setReplyTo(null); setReplyImage(null); setAudioFile(null); setAudioMode(false); setSeconds(0); refresh();
     } catch (e) { toast.error((e as Error).message); } finally { setBusy(false); }
   }
   async function toggleReaction(type: "post" | "reply", id: string, emoji: string, mine?: string) {
@@ -452,25 +456,24 @@ function Comunidad() {
       visit(id);
       return found.sort((a, b) => Date.parse(a.created_at) - Date.parse(b.created_at));
     }
-    function replyCard(r: Reply, focused = false) {
+    function replyCard(r: Reply, focused = false, nested = false) {
       const referenced = focused && r.parent_reply_id ? repliesById.get(r.parent_reply_id) : undefined;
-       return <article key={r.id} className={`min-w-0 rounded-xl p-3.5 ${r.is_bot ? "bg-primary/5" : "bg-secondary/30"}`}>
+       return <article key={r.id} className={`min-w-0 rounded-xl p-3.5 ${nested ? "border border-border/60 bg-muted/60" : r.is_bot ? "border border-primary/15 bg-primary/5" : "border border-border bg-card shadow-soft"}`}>
         <div className="flex items-center gap-2"><Avatar name={r.author_name} bot={r.is_bot} identity={r.author_id ?? r.id} /><div className="min-w-0"><p className="text-sm font-bold">{displayName(r.author_name, r.is_anonymous, r.is_bot)} {r.is_bot && <ShieldCheck className="inline h-4 w-4 text-primary" aria-label="Respuesta verificada de ORÍGEN" />}<LevelBadge level={r.author_level} /></p><p className="text-xs text-muted-foreground">{relativeDate(r.created_at)} · {authorRole(r.author_kind, r.is_bot)}</p></div></div>
         {referenced && <div className="mt-3 rounded-lg border-l-2 border-border bg-muted/80 px-3 py-2 text-xs text-muted-foreground"><span className="font-semibold">En respuesta a {displayName(referenced.author_name, referenced.is_anonymous, referenced.is_bot)}</span><p className="mt-1 line-clamp-3 whitespace-pre-wrap break-words">{referenced.body || (referenced.audio_path ? "Mensaje de audio" : referenced.image_path ? "Imagen adjunta" : "Comentario")}</p></div>}
         {r.body && <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-relaxed">{r.body}</p>}{r.image_path && mediaUrls[r.image_path] && <img src={mediaUrls[r.image_path]} alt="Adjunto a la respuesta" className="mt-3 max-h-72 w-full rounded-xl object-contain" />}{r.audio_path && mediaUrls[r.audio_path] && <audio controls preload="metadata" src={mediaUrls[r.audio_path]} className="mt-3 w-full" aria-label="Respuesta de audio" />}
-        <div className="mt-2 flex flex-wrap items-center gap-2">{renderReactions("reply", r.id, focused)}<Button variant="ghost" onClick={() => void report("reply", r.id)} className="min-h-11 px-2 text-xs text-muted-foreground">Denunciar</Button><Button variant="ghost" onClick={() => { if (!focused && !openThread) showThread(r.id); setReplyTo(r.id); requestAnimationFrame(() => document.getElementById("community-reply")?.focus()); }} className="min-h-11 px-2 text-xs font-bold text-primary">Responder a {displayName(r.author_name, r.is_anonymous, r.is_bot)}</Button></div>
+        <div className="mt-2 flex flex-wrap items-center gap-2">{renderReactions("reply", r.id, focused || nested)}<Button variant="ghost" onClick={() => void report("reply", r.id)} className="min-h-11 px-2 text-xs text-muted-foreground">Denunciar</Button><Button variant="ghost" onClick={() => { if (!focused && !openThread) showThread(r.id); setReplyTo(r.id); requestAnimationFrame(() => document.getElementById("community-reply")?.focus()); }} className="min-h-11 px-2 text-xs font-bold text-primary">Responder a {displayName(r.author_name, r.is_anonymous, r.is_bot)}</Button></div>
       </article>;
     }
     function renderThread() {
       const items = [...(grouped.get("root") ?? [])];
       if (sort === "top") items.sort((a, b) => (data?.reactions.filter(r => r.target_id === b.id).length ?? 0) - (data?.reactions.filter(r => r.target_id === a.id).length ?? 0));
       if (sort === "recent") items.reverse();
-      return <div className="space-y-5">{items.map(r => { const children = descendants(r.id); return <section key={r.id} className="space-y-2">{replyCard(r)}{children.length > 3 && <Button type="button" variant="ghost" onClick={() => showThread(r.id)} className="ml-3 min-h-11 px-2 text-sm font-bold text-primary sm:ml-8">Ver todos {children.length} respuestas</Button>}{children.slice(0, 3).map(child => <div key={child.id} className="ml-3 sm:ml-8">{replyCard(child)}</div>)}</section>; })}</div>;
+      return <div className="space-y-5">{items.map(r => { const children = descendants(r.id); return <section key={r.id} className="space-y-2">{replyCard(r)}{children.length > 0 && <div className="ml-3 flex min-h-11 items-center gap-2 sm:ml-8"><Button type="button" variant="ghost" onClick={() => showThread(r.id)} aria-label={`Ver conversación que surgió de la respuesta de ${displayName(r.author_name, r.is_anonymous, r.is_bot)}`} title="Ver origen de esta conversación" className="h-11 w-11 shrink-0 bg-transparent p-0 hover:bg-transparent"><img src={star3d} alt="" className="h-9 w-9 object-contain animate-floaty" /></Button>{children.length > 3 && <Button type="button" variant="ghost" onClick={() => showThread(r.id)} className="min-h-11 px-2 text-sm font-bold text-primary">Ver todos {children.length} respuestas</Button>}</div>}{children.slice(0, 3).map(child => <div key={child.id} className="ml-3 sm:ml-8">{replyCard(child, false, true)}</div>)}</section>; })}</div>;
     }
 
   return <div className="mx-auto max-w-3xl px-4 pb-32 pt-6">
       {data?.suspension && <SuspensionNotice suspension={data.suspension} name={displayName(author, false)} />}
-      {notice && <div role={notice.error ? "alert" : "status"} className={`mb-4 flex items-start justify-between gap-3 rounded-xl border p-3 text-sm ${notice.error ? "border-destructive/30 bg-destructive/10 text-foreground" : "border-primary/20 bg-primary/10 text-foreground"}`}><span>{notice.message}</span><Button type="button" variant="ghost" size="icon" onClick={() => setNotice(null)} aria-label="Cerrar aviso" className="h-11 w-11 shrink-0"><X className="h-4 w-4" /></Button></div>}
       {createOpen && <div className="fixed inset-0 z-40 bg-foreground/50" onClick={() => setCreateOpen(false)} aria-hidden="true" />}
       {blockTopic && <div className="fixed inset-0 z-50 grid place-items-center bg-foreground/40 px-5" onClick={() => setBlockTopic(null)}><section role="alertdialog" aria-modal="true" aria-label="Bloquear tema" onClick={e => e.stopPropagation()} className="w-full max-w-sm rounded-2xl bg-card p-6 shadow-elev"><h2 className="text-lg font-bold">Bloquear {TOPICS.find(t => t.key === blockTopic)?.label}</h2><p className="mt-3 text-sm text-muted-foreground">Dejarás de ver sus publicaciones en Descubrir. El tema seguirá en Temas y podrás volver a seguirlo cuando quieras.</p><div className="mt-5 flex justify-end gap-2"><Button variant="ghost" onClick={() => setBlockTopic(null)}>Cancelar</Button><Button variant="destructive" onClick={() => void confirmBlock()}>Bloquear</Button></div></section></div>}
        {createOpen && <section role="dialog" aria-modal="true" aria-label="Nueva publicación" className="fixed inset-x-3 top-1/2 z-50 mx-auto max-h-[85vh] max-w-xl -translate-y-1/2 overflow-y-auto rounded-2xl border border-border bg-card p-5 shadow-elev sm:inset-x-0"><div className="flex items-center justify-between"><h2 className="font-display text-lg font-bold">Nueva publicación</h2><Button variant="ghost" aria-label="Cerrar nueva publicación" onClick={() => setCreateOpen(false)} className="h-11 w-11 rounded-full"><X /></Button></div><p className="mt-2 text-xs text-muted-foreground">ORÍGEN y la comunidad podrán acompañarte.</p><select aria-label="Tema" value={newTopic} onChange={e => setNewTopic(e.target.value)} className="mt-3 h-12 w-full rounded-xl border border-border bg-background px-3 text-sm">{TOPICS.map(t => <option key={t.key} value={t.key}>{t.label}</option>)}</select><input value={title} maxLength={200} onChange={e => setTitle(e.target.value)} placeholder="¿Qué te gustaría preguntar?" className="mt-2 h-12 w-full rounded-xl border border-border bg-background px-3 text-sm" /><textarea value={body} maxLength={10000} onChange={e => setBody(e.target.value)} placeholder="Cuéntanos un poco más (opcional)" rows={4} className="mt-2 w-full rounded-xl border border-border bg-background p-3 text-sm" /><p className="text-right text-xs text-muted-foreground">{body.length} / 10.000</p><div className="mt-2 flex flex-wrap items-center gap-3 text-xs"><label className="flex items-center gap-1"><input type="checkbox" checked={anonymous} onChange={e => setAnonymous(e.target.checked)} /> Publicar anónimamente</label><label className="flex min-h-11 cursor-pointer items-center gap-1 text-primary"><ImagePlus className="h-4 w-4" /> {postImage?.name ?? "Adjuntar JPG/PNG"}<input type="file" accept="image/jpeg,image/png" className="sr-only" onChange={e => setPostImage(e.target.files?.[0] ?? null)} /></label></div><Button disabled={busy} onClick={() => void publish()} className="mt-3 min-h-12 rounded-xl px-5">{busy ? "Publicando…" : "Publicar pregunta"}</Button></section>}
