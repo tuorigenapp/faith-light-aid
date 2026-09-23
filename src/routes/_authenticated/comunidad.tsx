@@ -128,7 +128,7 @@ function Comunidad() {
   } });
   const refresh = () => void qc.invalidateQueries({ queryKey: ["comunidad"] });
   const [mediaUrls, setMediaUrls] = useState<Record<string, string>>({});
-  const mediaRef = useRef<Record<string, string>>({});
+   const mediaRef = useRef<Record<string, string>>({});
   useEffect(() => () => { Object.values(mediaRef.current).forEach(URL.revokeObjectURL); mediaRef.current = {}; }, []);
   useEffect(() => {
     if (!user) return;
@@ -143,13 +143,13 @@ function Comunidad() {
     if (!data) return;
     let alive = true;
     const paths = [...new Set([...data.posts.map(p => p.image_path), ...data.replies.flatMap(r => [r.image_path, r.audio_path])].filter((x): x is string => !!x))];
-    void (async () => {
+     void (async () => {
        const { data: session } = await supabase.auth.getSession();
        const token = session.session?.access_token ?? "";
-       const media = await Promise.all(paths.map(async path => { const [id, type, kind] = path.split(":"); if (!id || !["post", "reply"].includes(type) || !["image", "audio"].includes(kind)) return null; const response = await fetch(`/api/community/media?type=${type}&id=${id}&kind=${kind}`, { headers: { Authorization: `Bearer ${token}` } }); return response.ok ? [path, URL.createObjectURL(await response.blob())] as const : null; }));
+        const media = await Promise.all(paths.filter(path => !mediaRef.current[path]).map(async path => { const [id, type, kind] = path.split(":"); if (!id || !["post", "reply"].includes(type) || !["image", "audio"].includes(kind)) return null; const response = await fetch(`/api/community/media?type=${type}&id=${id}&kind=${kind}`, { headers: { Authorization: `Bearer ${token}` } }); return response.ok ? [path, URL.createObjectURL(await response.blob())] as const : null; }));
        if (!alive) { media.forEach(item => { if (item) URL.revokeObjectURL(item[1]); }); return; }
-       const next = Object.fromEntries(media.filter((v): v is readonly [string, string] => !!v));
-       Object.values(mediaRef.current).forEach(URL.revokeObjectURL);
+        const next = { ...mediaRef.current, ...Object.fromEntries(media.filter((v): v is readonly [string, string] => !!v)) };
+        for (const path of Object.keys(next)) if (!paths.includes(path)) { URL.revokeObjectURL(next[path]); delete next[path]; }
        mediaRef.current = next;
        setMediaUrls(next);
     })();
@@ -193,12 +193,12 @@ function Comunidad() {
   }
    async function reply(sendAudio = false) {
     if (!user || busy || data?.suspended) return;
-     if (sendAudio && !audioFile) return toast.error("Primero graba un audio.");
+      if (sendAudio && !recordedAudio && !audioFile) return toast.error("Primero graba un audio.");
      if (!sendAudio && !replyText.trim() && !replyImage) return toast.error("Escribe o adjunta algo para responder.");
     setBusy(true);
     try {
        const image_path = !sendAudio && replyImage ? await upload(replyImage, "image") : null;
-       const audio_path = sendAudio && audioFile ? await upload(audioFile, "audio") : null;
+        const audio_path = sendAudio && (recordedAudio || audioFile) ? await upload((recordedAudio || audioFile)!, "audio") : null;
        const { error } = await supabase.from("community_replies").insert({ post_id: openPost!, parent_reply_id: replyTo, user_id: user.id, author_name: replyAnonymous ? "Alma anónima" : author, is_anonymous: replyAnonymous, body: sendAudio ? "" : replyText.trim(), image_path, audio_path });
       if (error) throw error;
        setReplyText(""); setReplyTo(null); setReplyImage(null); setAudioFile(null); setAudioMode(false); setSeconds(0); refresh(); toast.success(sendAudio ? "Tu audio ya está en la conversación." : "Tu respuesta ya está en la conversación.");
