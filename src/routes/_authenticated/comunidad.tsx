@@ -266,7 +266,9 @@ function Comunidad() {
         rec.onstop = () => { if (recordingTimer.current) clearTimeout(recordingTimer.current); stream.getTracks().forEach(t => t.stop()); setRecording(false); setRecordingPaused(false); const blob = new Blob(chunks, { type: format }); if (blob.size > 1000 && !discardAudio.current) setAudioFile(new File([blob], `respuesta.${format.split("/")[1]}`, { type: format })); else if (!discardAudio.current) toast.error("No se grabó el audio completo. Inténtalo de nuevo."); discardAudio.current = false; };
        rec.onerror = () => { stream.getTracks().forEach(t => t.stop()); setRecording(false); toast.error("No se pudo continuar la grabación."); };
         discardAudio.current = false; setAudioFile(null); setReplyImage(null); setAudioMode(true); setSeconds(0);
-        rec.start(1000); setRecording(true); recordingTimer.current = setTimeout(() => { if (rec.state === "paused") rec.resume(); if (rec.state !== "inactive") rec.stop(); }, 4 * 60 * 1000 + 59 * 1000);
+         // Capture one continuous recording. Time-sliced chunks can contain incomplete
+         // Opus pages on some browsers, leaving only the final fragment audible.
+         rec.start(); setRecording(true); recordingTimer.current = setTimeout(() => { if (rec.state === "paused") rec.resume(); if (rec.state !== "inactive") rec.stop(); }, 4 * 60 * 1000 + 59 * 1000);
      } catch (e) { setMicState("denied"); toast.error((e as Error).name === "NotAllowedError" ? "Permite el acceso al micrófono para grabar un audio." : (e as Error).message); }
   }
      function discardRecording() { discardAudio.current = true; if (recorder.current?.state !== "inactive") recorder.current?.stop(); setRecording(false); setAudioFile(null); setAudioMode(false); setSeconds(0); }
