@@ -89,7 +89,8 @@ function Comunidad() {
   const [search, setSearch] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [createOpen, setCreateOpen] = useState(false);
-  const [page, setPage] = useState(0);
+   const [page, setPage] = useState(0);
+   const [expandedPages, setExpandedPages] = useState<Post[]>([]);
   const [openPost, setOpenPost] = useState<string | null>(null);
   const [title, setTitle] = useState(""); const [body, setBody] = useState(""); const [newTopic, setNewTopic] = useState("general");
   const [anonymous, setAnonymous] = useState(false); const [replyAnonymous, setReplyAnonymous] = useState(false);
@@ -111,7 +112,8 @@ function Comunidad() {
   const author = (profile?.full_name || profile?.display_name || "Persona del camino").trim();
 
   useEffect(() => { const timer = setTimeout(() => { setPage(0); setSearchTerm(search.trim()); }, 350); return () => clearTimeout(timer); }, [search]);
-  const scope = tab === "topics" ? "feed" : tab === "feed" && topic !== "todos" ? "topic" : tab;
+   const scope = tab === "topics" ? "feed" : tab === "feed" && topic !== "todos" ? "topic" : tab;
+   useEffect(() => { setPage(0); setExpandedPages([]); }, [scope, topic, searchTerm]);
    const { data, isLoading, isError, refetch } = useQuery({ queryKey: ["comunidad", user?.id, page, searchTerm, scope, scope === "topic" ? topic : "todos"], enabled: !!user, queryFn: async () => {
      const [posts, reactions, saves, follows, blocks, suspension] = await Promise.all([
        supabase.auth.getSession().then(async ({ data: session }) => {
@@ -157,8 +159,8 @@ function Comunidad() {
      return () => { alive = false; };
   }, [data]);
 
-  const active = data?.posts.find(p => p.id === openPost);
-     const visible = useMemo(() => (data?.posts ?? []).filter(p => (tab !== "feed" || topic === "todos" || p.topic === topic) && searchTerm === search.trim()), [data, topic, tab, search, searchTerm]);
+   const active = data?.posts.find(p => p.id === openPost);
+      const visible = useMemo(() => [...expandedPages, ...(data?.posts ?? [])].filter((p, index, all) => all.findIndex(item => item.id === p.id) === index && (tab !== "feed" || topic === "todos" || p.topic === topic) && searchTerm === search.trim()), [data, expandedPages, topic, tab, search, searchTerm]);
    const matchedTopics = search.trim() ? TOPICS.filter(t => `${t.label} ${t.detail}`.toLocaleLowerCase("es").includes(search.trim().toLocaleLowerCase("es"))) : [];
    const pollStats = (p: Post) => {
      const counts = (p.poll_options ?? []).map((_, index) => Number(data?.totals?.find(v => v.post_id === p.id && v.choice_index === index)?.vote_count ?? 0));
