@@ -55,13 +55,17 @@ function Comunidad() {
 
   const { data, isLoading, isError, refetch } = useQuery({ queryKey: ["comunidad", user?.id], enabled: !!user, queryFn: async () => {
     const [posts, replies, reactions, saves, follows, suspension] = await Promise.all([
-      supabase.rpc("community_feed_posts"), supabase.rpc("community_feed_replies"),
+       supabase.auth.getSession().then(async ({ data: session }) => {
+         const res = await fetch("/api/community/feed", { headers: { Authorization: `Bearer ${session.session?.access_token ?? ""}` } });
+         if (!res.ok) throw new Error("No se pudo abrir la comunidad.");
+         return res.json() as Promise<{ posts: Post[]; replies: Reply[] }>;
+       }),
       supabase.from("community_reactions").select("id,user_id,target_type,target_id,emoji").limit(4000),
       supabase.from("community_saves").select("post_id"), supabase.from("community_follows").select("topic"),
       supabase.from("community_suspensions").select("reason").eq("user_id", user!.id).maybeSingle(),
     ]);
-    if (posts.error || replies.error || reactions.error || saves.error || follows.error) throw posts.error || replies.error || reactions.error || saves.error || follows.error;
-    return { posts: (posts.data ?? []) as Post[], replies: (replies.data ?? []) as Reply[], reactions: (reactions.data ?? []) as Reaction[], saves: new Set((saves.data ?? []).map(s => s.post_id)), follows: new Set((follows.data ?? []).map(f => f.topic)), suspended: suspension.data?.reason ?? null };
+     if (reactions.error || saves.error || follows.error) throw reactions.error || saves.error || follows.error;
+     return { posts: posts.posts, replies: posts.replies, reactions: (reactions.data ?? []) as Reaction[], saves: new Set((saves.data ?? []).map(s => s.post_id)), follows: new Set((follows.data ?? []).map(f => f.topic)), suspended: suspension.data?.reason ?? null };
   } });
   const refresh = () => void qc.invalidateQueries({ queryKey: ["comunidad"] });
   const [mediaUrls, setMediaUrls] = useState<Record<string, string>>({});
