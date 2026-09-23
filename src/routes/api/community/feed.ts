@@ -13,7 +13,8 @@ export const Route = createFileRoute("/api/community/feed")({ server: { handlers
   const search = (query.get("q") ?? "").trim().slice(0, 120);
   const page = Math.min(Math.max(Math.trunc(Number(query.get("page")) || 0), 0), 20);
   const scope = query.get("scope") ?? "feed";
-  if (!["feed", "mine", "following", "comments", "saved"].includes(scope)) return Response.json({ error: "Vista inválida." }, { status: 400 });
+  const topic = query.get("topic") ?? "todos";
+  if (!["feed", "topic", "mine", "following", "comments", "saved"].includes(scope) || !["todos", "general", "familia", "pareja", "ansiedad", "fe", "logros"].includes(topic)) return Response.json({ error: "Vista inválida." }, { status: 400 });
   const topicNames: Record<string, string> = { "para ti": "general", familia: "familia", relaciones: "pareja", bienestar: "ansiedad", fe: "fe", avances: "logros" };
   const searchValue = topicNames[search.toLocaleLowerCase("es")] ?? search;
   // Keep punctuation, wildcard and PostgREST syntax out of the OR filter.
@@ -34,6 +35,7 @@ export const Route = createFileRoute("/api/community/feed")({ server: { handlers
   const base = db.from("community_posts").select("id,user_id,author_name,topic,title,body,created_at,is_anonymous,image_path,poll_options,source_url,is_verified,is_bot,bot_kind");
   let filtered = term ? base.or(`title.ilike.%${term}%,body.ilike.%${term}%,topic.ilike.%${term}%${replyIds.length ? `,id.in.(${replyIds.join(",")})` : ""}`) : base;
   if (scope === "mine") filtered = filtered.eq("user_id", user.id);
+  if (scope === "topic" && topic !== "todos") filtered = filtered.eq("topic", topic);
   if (scope === "following" && followed.length) filtered = filtered.in("topic", followed);
   if (["comments", "saved"].includes(scope) && scopeIds.length) filtered = filtered.in("id", scopeIds);
   if (scope === "feed" && blocked.length) filtered = filtered.not("topic", "in", `(${blocked.join(",")})`);
