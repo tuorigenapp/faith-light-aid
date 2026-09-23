@@ -22,7 +22,7 @@ type Reply = { id: string; post_id: string; user_id: string | null; author_name:
 type Report = { id: string; target_type: string; target_id: string; target_kind: string; target_user_id: string | null; target_excerpt: string; post_title: string | null; reason: string; status: string; created_at: string };
 type Suspension = { user_id: string; reason: string; kind: string | null; expires_at: string | null; target_excerpt: string | null; admin_note: string | null; user_message: string | null; created_at: string; name: string; email: string | null; active: boolean };
 type Member = { id: string; name: string | null; email: string | null; level: number; paid: boolean };
-type ModData = { posts: Post[]; replies: Reply[]; reports: Report[]; suspensions: Suspension[]; members: Member[] };
+type ModData = { posts: Post[]; replies: Reply[]; reports: Report[]; suspensions: Suspension[]; members: Member[]; autoReply: boolean; votes: { post_id: string; choice_index: number; vote_count: number }[] };
 
 const fecha = (value: string) => new Date(value).toLocaleString("es", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 
@@ -47,6 +47,7 @@ export function CommunityModerator() {
   const [publishing, setPublishing] = useState(false);
   const [search, setSearch] = useState("");
   const [answerFor, setAnswerFor] = useState<string | null>(null);
+  const [answerParent, setAnswerParent] = useState<{ id: string; name: string } | null>(null);
   const [answer, setAnswer] = useState("");
   const [suspendFor, setSuspendFor] = useState<{ userId: string; targetType?: string; targetId?: string; reportId?: string } | null>(null);
   const [suspendKind, setSuspendKind] = useState<"temporal" | "permanent" | "indefinite">("temporal");
@@ -94,7 +95,7 @@ export function CommunityModerator() {
     } catch (e) { toast.error((e as Error).message); } finally { setPublishing(false); }
   }
   async function sendAnswer(postId: string) {
-    try { await send({ action: "admin-reply", id: postId, content: answer }); setAnswer(""); setAnswerFor(null); toast.success("La comunidad verá la respuesta de ORÍGEN."); }
+    try { await send({ action: "admin-reply", id: postId, content: answer, parentReplyId: answerParent?.id }); setAnswer(""); setAnswerFor(null); setAnswerParent(null); toast.success("La comunidad verá la respuesta de ORÍGEN."); }
     catch (e) { toast.error((e as Error).message); }
   }
   async function confirmSuspend() {
@@ -124,20 +125,22 @@ export function CommunityModerator() {
       <div className="flex flex-wrap items-center gap-2"><KindTag kind={post.author_kind} /><span className="rounded-full bg-muted px-2 py-0.5 text-xs">{topicLabel(post.topic)}</span>{post.poll_options && <span className="text-xs text-primary">Encuesta</span>}{post.is_verified && <ShieldCheck className="h-4 w-4 text-primary" aria-label="Verificada" />}<span className="text-xs text-muted-foreground">{fecha(post.created_at)}</span></div>
       <p className="mt-2 font-bold">{post.title}</p>
       {post.body && <p className="mt-1 line-clamp-2 text-muted-foreground">{post.body}</p>}
+      {post.poll_options && (() => { const v = (data?.votes ?? []).filter(x => x.post_id === post.id); const total = v.reduce((a, x) => a + Number(x.vote_count), 0); return <div className="mt-3 space-y-2">{post.poll_options.map((o, i) => { const n = Number(v.find(x => x.choice_index === i)?.vote_count ?? 0); const pct = total ? Math.round(n * 100 / total) : 0; return <div key={i} className="relative overflow-hidden rounded-lg border px-3 py-2 text-sm"><div className="absolute inset-y-0 left-0 bg-primary/15 transition-all" style={{ width: `${pct}%` }} /><div className="relative flex justify-between gap-2"><span>{o}</span><span className="font-bold">{pct}% · {n}</span></div></div>; })}<p className="text-xs text-muted-foreground">{total} {total === 1 ? "voto" : "votos"}</p></div>; })()}
       <div className="mt-3 space-y-2 border-l-2 border-primary/20 pl-3">
         {list.length === 0 && <p className="text-xs text-muted-foreground">{empty}</p>}
         {list.map(r => <div key={r.id} className="rounded-lg bg-secondary/40 p-2.5">
           <div className="flex flex-wrap items-center gap-2"><KindTag kind={r.author_kind} /><span className="text-xs font-semibold">{r.is_anonymous ? "Alma anónima" : r.author_name}</span><span className="text-xs text-muted-foreground">{fecha(r.created_at)}</span></div>
           <p className="mt-1 whitespace-pre-wrap">{r.body || "Respuesta con adjunto"}</p>
           <div className="mt-1 flex flex-wrap gap-3 text-xs">
+            {r.author_kind === "user" && <button onClick={() => { setAnswerFor(post.id); setAnswer(""); setAnswerParent({ id: r.id, name: r.is_anonymous ? "Alma anónima" : r.author_name }); }} className="font-semibold text-primary">Responder a {r.is_anonymous ? "Alma anónima" : r.author_name.split(" ")[0]}</button>}
             <button onClick={() => void act({ action: "delete-reply", id: r.id }, "¿Eliminar esta respuesta?")} className="text-destructive">Eliminar</button>
             {r.user_id && r.author_kind === "user" && <button onClick={() => setSuspendFor({ userId: r.user_id!, targetType: "reply", targetId: r.id })} className="text-destructive">Suspender autor</button>}
           </div>
         </div>)}
       </div>
       {answerFor === post.id
-        ? <div className="mt-3"><textarea aria-label="Respuesta de la administración" value={answer} maxLength={4000} onChange={e => setAnswer(e.target.value)} placeholder="Responde como ORÍGEN · Administración" className="min-h-20 w-full rounded-xl border bg-background p-3" /><div className="mt-2 flex gap-2"><Button type="button" disabled={answer.trim().length < 2} onClick={() => void sendAnswer(post.id)}>Enviar como ORÍGEN</Button><Button type="button" variant="ghost" onClick={() => { setAnswerFor(null); setAnswer(""); }}>Cancelar</Button></div></div>
-        : <Button type="button" variant="secondary" className="mt-3" onClick={() => { setAnswerFor(post.id); setAnswer(""); }}>Responder como ORÍGEN</Button>}
+        ? <div className="mt-3"><p className="mb-1 text-xs font-semibold text-primary">{answerParent ? `Respondiendo a ${answerParent.name}` : "Respondiendo a todos en la publicación"}</p><textarea aria-label="Respuesta de la administración" value={answer} maxLength={4000} onChange={e => setAnswer(e.target.value)} placeholder="Responde como ORÍGEN · Administración" className="min-h-20 w-full rounded-xl border bg-background p-3" /><div className="mt-2 flex gap-2"><Button type="button" disabled={answer.trim().length < 2} onClick={() => void sendAnswer(post.id)}>Enviar como ORÍGEN</Button><Button type="button" variant="ghost" onClick={() => { setAnswerFor(null); setAnswer(""); setAnswerParent(null); }}>Cancelar</Button></div></div>
+        : <Button type="button" variant="secondary" className="mt-3" onClick={() => { setAnswerFor(post.id); setAnswer(""); setAnswerParent(null); }}>Responder a todos</Button>}
     </article>;
   }
 
@@ -168,6 +171,7 @@ export function CommunityModerator() {
     </Section>}
 
     {view === "preguntas" && <Section icon={Users} title="Preguntas de la administración y respuestas recibidas" hint="Cada pregunta del panel con las respuestas de la comunidad debajo. Tu respuesta aparece como ORÍGEN · Administración.">
+      <div className="mt-4 flex items-center justify-between gap-3 rounded-xl border p-3"><div><p className="font-bold">Respuestas automáticas 24/7</p><p className="text-xs text-muted-foreground">{data?.autoReply ? "Encendido: la IA contesta preguntas y comentarios en toda la comunidad." : "Apagado: modo manual, solo responde la administración."}</p></div><button type="button" role="switch" aria-checked={!!data?.autoReply} aria-label="Respuestas automáticas" onClick={() => void act({ action: "auto-reply", enabled: !data?.autoReply })} className={`relative h-8 w-14 shrink-0 rounded-full transition-colors ${data?.autoReply ? "bg-primary" : "bg-muted"}`}><span className={`absolute top-1 h-6 w-6 rounded-full bg-background shadow transition-all ${data?.autoReply ? "left-7" : "left-1"}`} /></button></div>
       <div className="mt-4 space-y-4">{adminThreads.length === 0 ? <p className="text-muted-foreground">Todavía no has publicado preguntas desde el panel.</p> : adminThreads.map(p => <Thread key={p.id} post={p} empty="Nadie ha respondido esta pregunta todavía." />)}</div>
     </Section>}
 
