@@ -105,7 +105,7 @@ function Comunidad() {
   const { data: notifications = [] } = useCommunityNotifications(user?.id);
   const markRead = useMarkCommunityRead(user?.id);
   const [acknowledged, setAcknowledged] = useState<Record<string, true>>({});
-  const [justRead, setJustRead] = useState<Record<string, true>>({});
+  const [justRead, setJustRead] = useState<Record<string, number>>({});
   const [tab, setTab] = useState<"feed" | "topics" | "saved" | "mine" | "following" | "comments">("feed");
   const [topic, setTopic] = useState("todos");
   const [blockTopic, setBlockTopic] = useState<string | null>(null);
@@ -185,7 +185,8 @@ function Comunidad() {
       const posts = (data?.posts ?? []).filter(p => (tab !== "feed" || topic === "todos" || p.topic === topic) && searchTerm === search.trim());
       if (!["mine", "comments", "following", "feed"].includes(tab) || searchTerm) return posts;
       const newest = new Map<string, number>();
-      for (const n of notifications) if (n.bucket === tab && (!acknowledged[n.id] || justRead[n.post_id])) newest.set(n.post_id, Math.max(newest.get(n.post_id) ?? 0, Date.parse(n.created_at)));
+      for (const n of notifications) if (n.bucket === tab && !acknowledged[n.id]) newest.set(n.post_id, Math.max(newest.get(n.post_id) ?? 0, Date.parse(n.created_at)));
+      for (const [postId, timestamp] of Object.entries(justRead)) newest.set(postId, Math.max(newest.get(postId) ?? 0, timestamp));
       return [...posts].sort((a, b) => (newest.get(b.id) ?? 0) - (newest.get(a.id) ?? 0) || Date.parse(b.created_at) - Date.parse(a.created_at));
     }, [data, topic, tab, search, searchTerm, notifications, acknowledged, justRead]);
     function openConversation(id: string) {
@@ -193,7 +194,7 @@ function Comunidad() {
       window.history.replaceState(null, "", `/comunidad?post=${id}`);
       const ids = notifications.filter(n => n.post_id === id).map(n => n.id);
       if (ids.length) {
-        setJustRead(previous => ({ ...previous, [id]: true }));
+        setJustRead(previous => ({ ...previous, [id]: Math.max(...notifications.filter(n => n.post_id === id).map(n => Date.parse(n.created_at))) }));
         setAcknowledged(previous => ({ ...previous, ...Object.fromEntries(ids.map(item => [item, true as const])) }));
         void markRead(id).catch(() => { setAcknowledged(previous => { const next = { ...previous }; ids.forEach(item => delete next[item]); return next; }); toast.error("No se pudo marcar la actividad como leída."); });
       }
