@@ -27,5 +27,7 @@ export const Route = createFileRoute("/api/community/media")({ server: { handler
   }
   const { data: file, error } = await db.storage.from("community-media").download(path);
   if (error || !file) return new Response(null, { status: 404 });
-  return new Response(file, { headers: { "Content-Type": file.type || (kind === "image" ? "image/jpeg" : "audio/webm"), "Cache-Control": "private, max-age=300", "X-Content-Type-Options": "nosniff" } });
+   const extension = path.split(".").pop()?.toLowerCase();
+   const contentTypes: Record<string, string> = { webm: "audio/webm", m4a: "audio/mp4", mp3: "audio/mpeg", ogg: "audio/ogg", jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png" };
+   return new Response(file, { headers: { "Content-Type": contentTypes[extension ?? ""] ?? file.type, "Cache-Control": "private, max-age=300", "X-Content-Type-Options": "nosniff" } });
 } } } });
