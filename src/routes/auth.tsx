@@ -25,7 +25,7 @@ function AuthPage() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-       if (data.session) { let pending = false; try { pending = localStorage.getItem("origen_pending_onboarding") === "1"; } catch { /* no storage */ } navigate({ to: pending ? "/onboarding" : "/dashboard" }); }
+       if (data.session) navigate({ to: "/dashboard" });
     });
   }, [navigate]);
 
