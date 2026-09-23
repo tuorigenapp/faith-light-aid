@@ -61,9 +61,16 @@ export const Route = createFileRoute("/api/admin/community")({ server: { handler
     const profileById = new Map((members.data ?? []).map(m => [m.id, m]));
     const postById = new Map((posts.data ?? []).map(p => [p.id, p]));
     const replyById = new Map((replies.data ?? []).map(r => [r.id, r]));
+    const pollIds = (posts.data ?? []).filter(p => Array.isArray(p.poll_options)).map(p => p.id);
+    const [{ data: totals }, { data: setting }] = await Promise.all([
+      pollIds.length ? ctx.db.rpc("community_vote_totals", { _post_ids: pollIds }) : Promise.resolve({ data: [] as { post_id: string; choice_index: number; vote_count: number }[] }),
+      ctx.db.from("community_settings").select("value").eq("key", "auto_reply").maybeSingle(),
+    ]);
     const subs = await ctx.db.from("subscriptions").select("user_id,plan,status").in("status", ["active", "trialing"]).limit(1000);
     const paid = new Set((subs.data ?? []).map(s => s.user_id));
     return Response.json({
+      autoReply: setting ? setting.value !== false : true,
+      votes: totals ?? [],
       posts: (posts.data ?? []).map(p => ({ ...p, author_kind: p.author_kind ?? (p.is_bot ? "ai" : "user"), reply_count: (replies.data ?? []).filter(r => r.post_id === p.id).length })),
       replies: (replies.data ?? []).map(r => ({ ...r, author_kind: r.author_kind ?? (r.is_bot ? "ai" : "user"), post_title: postById.get(r.post_id)?.title ?? "Publicación eliminada", post_topic: postById.get(r.post_id)?.topic ?? "general", post_author_kind: postById.get(r.post_id)?.author_kind ?? "user" })),
       reports: (reports.data ?? []).map(r => {
@@ -105,6 +112,7 @@ export const Route = createFileRoute("/api/admin/community")({ server: { handler
       if (!id || content.length < 2 || content.length > 4000) return Response.json({ error: "Escribe la respuesta de la administración." }, { status: 400 });
       ({ error } = await ctx.db.from("community_replies").insert({ post_id: id, parent_reply_id: parent, user_id: null, author_name: "ORÍGEN", author_kind: "admin", body: content, is_bot: true }));
     }
+    else if (action === "auto-reply") ({ error } = await ctx.db.from("community_settings").upsert({ key: "auto_reply", value: body.enabled === true, updated_at: new Date().toISOString() }));
     else if (action === "delete-post" && id) ({ error } = await ctx.db.from("community_posts").delete().eq("id", id));
     else if (action === "delete-reply" && id) ({ error } = await ctx.db.from("community_replies").delete().eq("id", id));
     else if (action === "verify" && id) {
@@ -118,7 +126,9 @@ export const Route = createFileRoute("/api/admin/community")({ server: { handler
       if (![0, 1, 2, 3].includes(level)) return Response.json({ error: "Nivel inválido." }, { status: 400 });
       ({ error } = await ctx.db.from("profiles").update({ verified_level: level }).eq("id", userId));
     }
-    else if (action === "suspend" && userId && userId !== ctx.user.id) {
+    else if (action === "suspend") {
+      if (!userId) return Response.json({ error: "Este contenido no tiene una persona asociada para suspender." }, { status: 400 });
+      if (userId === ctx.user.id) return Response.json({ error: "No puedes suspender tu propia cuenta de administración." }, { status: 400 });
       const reason = text(body.reason); const note = text(body.note);
       const kind = text(body.kind) || "temporal";
       const days = Math.trunc(Number(body.days) || 0);
