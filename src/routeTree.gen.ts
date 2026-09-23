@@ -58,6 +58,7 @@ import { Route as ApiPublicMarketingDispatchRouteImport } from './routes/api/pub
 import { Route as ApiCommunityVoteRouteImport } from './routes/api/community/vote'
 import { Route as ApiCommunityMediaRouteImport } from './routes/api/community/media'
 import { Route as ApiCommunityFeedRouteImport } from './routes/api/community/feed'
+import { Route as ApiCommunityDailyRouteImport } from './routes/api/community/daily'
 import { Route as ApiCommunityBotRouteImport } from './routes/api/community/bot'
 import { Route as ApiAdminGenerateManifestRouteImport } from './routes/api/admin/generate-manifest'
 import { Route as ApiAdminCommunityRouteImport } from './routes/api/admin/community'
@@ -326,6 +327,11 @@ const ApiCommunityFeedRoute = ApiCommunityFeedRouteImport.update({
   path: '/api/community/feed',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiCommunityDailyRoute = ApiCommunityDailyRouteImport.update({
+  id: '/api/community/daily',
+  path: '/api/community/daily',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiCommunityBotRoute = ApiCommunityBotRouteImport.update({
   id: '/api/community/bot',
   path: '/api/community/bot',
@@ -470,6 +476,7 @@ export interface FileRoutesByFullPath {
   '/api/admin/community': typeof ApiAdminCommunityRoute
   '/api/admin/generate-manifest': typeof ApiAdminGenerateManifestRoute
   '/api/community/bot': typeof ApiCommunityBotRoute
+  '/api/community/daily': typeof ApiCommunityDailyRoute
   '/api/community/feed': typeof ApiCommunityFeedRoute
   '/api/community/media': typeof ApiCommunityMediaRoute
   '/api/community/vote': typeof ApiCommunityVoteRoute
@@ -535,6 +542,7 @@ export interface FileRoutesByTo {
   '/api/admin/community': typeof ApiAdminCommunityRoute
   '/api/admin/generate-manifest': typeof ApiAdminGenerateManifestRoute
   '/api/community/bot': typeof ApiCommunityBotRoute
+  '/api/community/daily': typeof ApiCommunityDailyRoute
   '/api/community/feed': typeof ApiCommunityFeedRoute
   '/api/community/media': typeof ApiCommunityMediaRoute
   '/api/community/vote': typeof ApiCommunityVoteRoute
@@ -603,6 +611,7 @@ export interface FileRoutesById {
   '/api/admin/community': typeof ApiAdminCommunityRoute
   '/api/admin/generate-manifest': typeof ApiAdminGenerateManifestRoute
   '/api/community/bot': typeof ApiCommunityBotRoute
+  '/api/community/daily': typeof ApiCommunityDailyRoute
   '/api/community/feed': typeof ApiCommunityFeedRoute
   '/api/community/media': typeof ApiCommunityMediaRoute
   '/api/community/vote': typeof ApiCommunityVoteRoute
@@ -671,6 +680,7 @@ export interface FileRouteTypes {
     | '/api/admin/community'
     | '/api/admin/generate-manifest'
     | '/api/community/bot'
+    | '/api/community/daily'
     | '/api/community/feed'
     | '/api/community/media'
     | '/api/community/vote'
@@ -736,6 +746,7 @@ export interface FileRouteTypes {
     | '/api/admin/community'
     | '/api/admin/generate-manifest'
     | '/api/community/bot'
+    | '/api/community/daily'
     | '/api/community/feed'
     | '/api/community/media'
     | '/api/community/vote'
@@ -803,6 +814,7 @@ export interface FileRouteTypes {
     | '/api/admin/community'
     | '/api/admin/generate-manifest'
     | '/api/community/bot'
+    | '/api/community/daily'
     | '/api/community/feed'
     | '/api/community/media'
     | '/api/community/vote'
@@ -839,6 +851,7 @@ export interface RootRouteChildren {
   ApiAdminCommunityRoute: typeof ApiAdminCommunityRoute
   ApiAdminGenerateManifestRoute: typeof ApiAdminGenerateManifestRoute
   ApiCommunityBotRoute: typeof ApiCommunityBotRoute
+  ApiCommunityDailyRoute: typeof ApiCommunityDailyRoute
   ApiCommunityFeedRoute: typeof ApiCommunityFeedRoute
   ApiCommunityMediaRoute: typeof ApiCommunityMediaRoute
   ApiCommunityVoteRoute: typeof ApiCommunityVoteRoute
@@ -1196,6 +1209,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiCommunityFeedRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/community/daily': {
+      id: '/api/community/daily'
+      path: '/api/community/daily'
+      fullPath: '/api/community/daily'
+      preLoaderRoute: typeof ApiCommunityDailyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/community/bot': {
       id: '/api/community/bot'
       path: '/api/community/bot'
@@ -1461,6 +1481,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminCommunityRoute: ApiAdminCommunityRoute,
   ApiAdminGenerateManifestRoute: ApiAdminGenerateManifestRoute,
   ApiCommunityBotRoute: ApiCommunityBotRoute,
+  ApiCommunityDailyRoute: ApiCommunityDailyRoute,
   ApiCommunityFeedRoute: ApiCommunityFeedRoute,
   ApiCommunityMediaRoute: ApiCommunityMediaRoute,
   ApiCommunityVoteRoute: ApiCommunityVoteRoute,
