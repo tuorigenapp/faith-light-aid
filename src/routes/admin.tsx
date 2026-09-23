@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { BooksManager } from "@/components/admin/BooksManager";
 import { AudiosManager } from "@/components/admin/AudiosManager";
+import { CommunityModerator } from "@/components/admin/CommunityModerator";
 import { UsersManager } from "@/components/admin/UsersManager";
 import { MarketingManager } from "@/components/admin/MarketingManager";
 import { SalesManager } from "@/components/admin/SalesManager";
@@ -155,6 +156,7 @@ type SectionId =
   | "contenido"
   | "libros"
   | "audios"
+  | "comunidad"
   | "marketing"
   | "backup"
   | "opiniones";
@@ -167,6 +169,7 @@ const NAV: { id: SectionId; label: string; icon: typeof Users }[] = [
   { id: "contenido", label: "Contenido", icon: Library },
   { id: "libros", label: "Libros", icon: BookOpen },
   { id: "audios", label: "Música", icon: Headphones },
+  { id: "comunidad", label: "Comunidad", icon: MessageCircle },
   { id: "marketing", label: "Marketing", icon: Send },
   { id: "backup", label: "Copia de seguridad", icon: ShieldCheck },
   { id: "opiniones", label: "Opiniones", icon: Star },
@@ -501,6 +504,7 @@ function Admin() {
         {section === "libros" && <BooksManager />}
 
         {section === "audios" && <AudiosManager />}
+        {section === "comunidad" && <CommunityModerator />}
 
         {section === "marketing" && <MarketingManager />}
 
