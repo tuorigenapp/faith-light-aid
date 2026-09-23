@@ -2,49 +2,54 @@ import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
 
 const TOPICS = ["general", "familia", "pareja", "ansiedad", "fe", "logros"];
-const PROMPTS = [
-  { title: "¿Qué pequeño paso te ayudó a cuidar de ti esta semana?", options: ["Poner un límite", "Pedir ayuda", "Descansar", "Escribir lo que siento"] },
-  { title: "¿Qué conversación te gustaría tener con tu familia?", options: ["Sobre mis necesidades", "Sobre límites", "Sobre recuerdos", "Necesito más tiempo"] },
-  { title: "¿Qué te hace sentir escuchado en una relación?", options: ["Atención sin interrumpir", "Respeto a mis límites", "Tiempo juntos", "Preguntas sinceras"] },
-  { title: "Cuando necesito calma, ¿qué puedo intentar primero?", options: ["Respirar con pausa", "Salir a caminar", "Hablar con alguien", "Todas pueden ayudar"] },
-  { title: "¿Qué palabra te acompaña en un día difícil?", options: ["Esperanza", "Paciencia", "Confianza", "Gratitud"] },
-  { title: "¿Qué avance pequeño quieres celebrar hoy?", options: ["Empecé de nuevo", "Pedí compañía", "Tomé un descanso", "Lo escribí"] },
-];
 const QUIZZES = [
-  { title: "Si una conversación se vuelve difícil, ¿qué ayuda a escuchar mejor?", options: ["Interrumpir", "Escuchar y preguntar", "Cambiar de tema", "Suponer lo que siente"], answer: 1 },
-  { title: "Al expresar un límite con tu familia, ¿cuál frase es más clara?", options: ["Nunca me entienden", "Haré todo aunque no pueda", "Hoy necesito descansar", "No importa lo que yo quiera"], answer: 2 },
-  { title: "¿Qué ayuda a expresar una necesidad en una relación?", options: ["Guardar silencio siempre", "Hablar desde lo que siento", "Adivinar lo que piensa", "Culpar a la otra persona"], answer: 1 },
-  { title: "Cuando la ansiedad se intensifica, ¿qué acción puede ayudar a volver al presente?", options: ["Exigirme más", "Ignorar mis señales", "Respirar y buscar apoyo", "Aislarme sin avisar"], answer: 2 },
-  { title: "Ante una duda sobre tu fe, ¿qué forma de conversar respeta a los demás?", options: ["Escuchar sin imponer", "Burlarse de otras ideas", "Evitar todas las preguntas", "Exigir una respuesta inmediata"], answer: 0 },
-  { title: "¿Cómo reconocer un avance pequeño de forma saludable?", options: ["Compararme con todos", "Restarle importancia", "Esperar a ser perfecto", "Nombrar lo que hice"], answer: 3 },
+  [
+    { title: "Si una conversación se vuelve difícil, ¿qué ayuda a escuchar mejor?", options: ["Interrumpir", "Escuchar y preguntar", "Cambiar de tema", "Suponer lo que siente"], answer: 1 },
+    { title: "Cuando alguien comparte algo personal, ¿qué respuesta cuida su confianza?", options: ["Divulgarlo", "Juzgarlo", "Preguntar cómo desea ser acompañado", "Cambiar de tema"], answer: 2 },
+    { title: "Si no sabes cómo ayudar a alguien, ¿qué puedes hacer?", options: ["Prometer resolverlo todo", "Escuchar y preguntar qué necesita", "Decidir por esa persona", "Minimizar lo que siente"], answer: 1 },
+  ],
+  [
+    { title: "Al expresar un límite con tu familia, ¿cuál frase es más clara?", options: ["Nunca me entienden", "Haré todo aunque no pueda", "Hoy necesito descansar", "No importa lo que yo quiera"], answer: 2 },
+    { title: "¿Cuál es una forma respetuosa de iniciar una conversación familiar difícil?", options: ["Escuchar y hablar desde mi experiencia", "Acusar a todos", "Gritar para ser escuchado", "Suponer las intenciones"], answer: 0 },
+    { title: "Cuando un familiar no respeta tu tiempo, ¿qué puedes expresar?", options: ["Que nunca volverás a hablar", "Que tus necesidades no importan", "Un límite concreto y amable", "Que harás todo por obligación"], answer: 2 },
+  ],
+  [
+    { title: "¿Qué ayuda a expresar una necesidad en una relación?", options: ["Guardar silencio siempre", "Hablar desde lo que siento", "Adivinar lo que piensa", "Culpar a la otra persona"], answer: 1 },
+    { title: "Ante un desacuerdo de pareja, ¿qué favorece una conversación sana?", options: ["Escuchar antes de responder", "Amenazar para ganar", "Evitar siempre el tema", "Revisar el teléfono ajeno"], answer: 0 },
+    { title: "¿Qué es importante al decir que no en una relación?", options: ["Pedir permiso para sentir", "Respetar mis límites y los de la otra persona", "Aceptar por miedo", "Sentir culpa siempre"], answer: 1 },
+  ],
+  [
+    { title: "Cuando la ansiedad se intensifica, ¿qué acción puede ayudar a volver al presente?", options: ["Exigirme más", "Ignorar mis señales", "Respirar y buscar apoyo", "Aislarme sin avisar"], answer: 2 },
+    { title: "¿Cuál es una pausa sencilla para atenderte en un momento difícil?", options: ["Notar mi respiración y mi entorno", "Exigirme respuestas inmediatas", "Compararme con otros", "Ocultar siempre lo que siento"], answer: 0 },
+    { title: "Si el malestar persiste e interfiere con tu vida, ¿qué opción puede ayudarte?", options: ["Enfrentarlo siempre a solas", "Buscar apoyo profesional", "Ignorar los síntomas", "Culparme por sentirlo"], answer: 1 },
+  ],
+  [
+    { title: "Ante una duda sobre tu fe, ¿qué forma de conversar respeta a los demás?", options: ["Escuchar sin imponer", "Burlarse de otras ideas", "Evitar todas las preguntas", "Exigir una respuesta inmediata"], answer: 0 },
+    { title: "Si alguien vive su espiritualidad de otra manera, ¿qué muestra respeto?", options: ["Imponer mis creencias", "Escuchar con curiosidad y amabilidad", "Descalificar su historia", "Terminar toda conversación"], answer: 1 },
+    { title: "Al compartir una experiencia de fe, ¿qué cuida a los demás?", options: ["Hablar desde mi experiencia sin presionar", "Afirmar que todos deben sentir lo mismo", "No aceptar preguntas", "Ridiculizar las dudas"], answer: 0 },
+  ],
+  [
+    { title: "¿Cómo reconocer un avance pequeño de forma saludable?", options: ["Compararme con todos", "Restarle importancia", "Esperar a ser perfecto", "Nombrar lo que hice"], answer: 3 },
+    { title: "Si hoy avanzaste menos de lo esperado, ¿qué pensamiento te acompaña mejor?", options: ["Nada cuenta si no es perfecto", "Puedo valorar lo que sí hice", "Debo compararme", "Ya no debo intentarlo"], answer: 1 },
+    { title: "¿Cómo puedes celebrar un logro sin compararte con otras personas?", options: ["Recordar el esfuerzo que hubo detrás", "Esperar aprobación de todos", "Negar que costó trabajo", "Medirlo solo por resultados ajenos"], answer: 0 },
+  ],
 ];
-
-async function generateQuestion(topic: string, fallback: typeof PROMPTS[number], key?: string) {
-  if (!key) return fallback;
-  try {
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "Lovable-API-Key": key, "X-Lovable-AIG-SDK": "fetch" },
-      body: JSON.stringify({ model: "openai/gpt-6-astra", stream: true, store: false, reasoning: { effort: "low" }, input: [{ role: "user", content: [{ type: "input_text", text: `Crea UNA pregunta comunitaria de reflexión sobre ${topic}, en español LATAM. Devuelve SOLO JSON: {"title":"pregunta de 12 a 110 caracteres","options":["opción 1","opción 2","opción 3","opción 4"]}. Opciones igualmente válidas, breves, diferentes y respetuosas; evita diagnósticos, estadísticas, fuentes inventadas, religión impuesta y consejo médico. No incluyas respuesta correcta.` }] }] }),
-    });
-    if (!response.ok || !response.body) return fallback;
-    let buffer = "", text = "";
-    const reader = response.body.getReader(), decoder = new TextDecoder();
-    for (;;) {
-      const { value, done } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split("\n"); buffer = lines.pop() ?? "";
-      for (const line of lines) if (line.startsWith("data:")) {
-        try { const event = JSON.parse(line.slice(5)); if (event.type === "response.output_text.delta") text += event.delta ?? ""; } catch { /* partial event */ }
-      }
-      if (text.length > 2400) { await reader.cancel(); return fallback; }
-    }
-    const parsed = JSON.parse(text.replace(/^```(?:json)?\s*|\s*```$/g, "")) as { title?: unknown; options?: unknown };
-    if (typeof parsed.title !== "string" || parsed.title.length < 12 || parsed.title.length > 110 || !Array.isArray(parsed.options) || parsed.options.length !== 4 || !parsed.options.every(o => typeof o === "string" && o.length > 1 && o.length < 85)) return fallback;
-    return { title: parsed.title, options: parsed.options as string[] };
-  } catch { return fallback; }
-}
+const COVER_QUESTIONS = [
+  ["¿Qué gesto pequeño te ayuda a volver a ti?", "¿Qué necesitas soltar esta tarde sin juzgarte?", "¿Qué aprendiste de ti en un día difícil?"],
+  ["¿Qué límite familiar te gustaría expresar con calma?", "¿Qué recuerdo familiar merece ser escuchado?", "¿Qué conversación pendiente te gustaría tener?"],
+  ["¿Cómo reconoces que te sientes escuchado en pareja?", "¿Qué necesitas decir con honestidad en tu relación?", "¿Qué te gustaría cuidar en tu próximo vínculo?"],
+  ["¿Qué haces para encontrar un momento de calma?", "¿Qué señal te avisa que necesitas descansar?", "¿Qué pequeña pausa te ayudó hoy?"],
+  ["¿Qué pregunta sobre la fe quisieras compartir sin temor?", "¿Qué palabra de esperanza te acompaña hoy?", "¿Cómo vives tu espiritualidad sin imposiciones?"],
+  ["¿Qué pequeño avance celebras esta mañana?", "¿Qué hiciste hoy que antes te costaba?", "¿Qué paso te gustaría reconocer antes de dormir?"],
+];
+const REFLECTION_OPTIONS = [
+  ["Hacer una pausa", "Pedir ayuda", "Escribirlo", "Tomar aire", "Hablar con alguien", "Todavía lo descubro"],
+  ["Hablar con calma", "Poner un límite", "Escuchar primero", "Tomar distancia", "Pedir apoyo", "Necesito tiempo"],
+  ["Pedir claridad", "Escuchar mejor", "Decir lo que siento", "Cuidar mis límites", "Darme tiempo", "Buscar apoyo"],
+  ["Respirar", "Caminar", "Descansar", "Escribir", "Pedir compañía", "Hacer una pausa"],
+  ["Esperanza", "Paciencia", "Paz", "Confianza", "Gratitud", "Preguntar sin miedo"],
+  ["Lo intenté de nuevo", "Pedí ayuda", "Puse un límite", "Descansé", "Me escuché", "Di el primer paso"],
+];
 
 export const Route = createFileRoute("/api/community/daily")({ server: { handlers: { POST: async ({ request }) => {
   const token = request.headers.get("Authorization")?.match(/^Bearer (.+)$/)?.[1];
@@ -54,21 +59,32 @@ export const Route = createFileRoute("/api/community/daily")({ server: { handler
   const { data: { user } } = await auth.auth.getUser(token);
   if (!user) return Response.json({ error: "Sesión inválida." }, { status: 401 });
   const db = createClient(url, service, { auth: { persistSession: false } });
-  const today = new Date().toISOString().slice(0, 10);
-  const day = Math.floor(Date.parse(`${today}T00:00:00Z`) / 86400000);
-  const indices = [day % TOPICS.length, (day + 3) % TOPICS.length];
+  const now = new Date();
+  const local = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Santo_Domingo", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", hourCycle: "h23" }).formatToParts(now);
+  const parts = Object.fromEntries(local.map(p => [p.type, p.value]));
+  const date = `${parts.year}-${parts.month}-${parts.day}`;
+  const day = Math.floor(Date.parse(`${date}T00:00:00Z`) / 86400000);
+  const slot = Number(parts.hour) < 12 ? 0 : Number(parts.hour) < 18 ? 1 : 2;
+  const start = `${date}T04:00:00Z`;
+  const end = new Date(Date.parse(start) + 86400000).toISOString();
+  const { data: existing, error: existingError } = await db.from("community_posts").select("topic,bot_slot,bot_kind").eq("is_bot", true).gte("created_at", start).lt("created_at", end);
+  if (existingError) return Response.json({ error: "Las preguntas no están disponibles ahora." }, { status: 503 });
+  const seen = new Set((existing ?? []).map(p => `${p.topic}:${p.bot_slot}:${p.bot_kind}`));
   let created = false;
-  for (const [position, index] of indices.entries()) {
-    const topic = TOPICS[index];
-    const { data: existing } = await db.from("community_posts").select("id").eq("topic", topic).eq("is_bot", true).gte("created_at", `${today}T00:00:00Z`).limit(1);
-    if (existing?.length) continue;
-    const quiz = position === 1;
-    const question = quiz ? QUIZZES[index] : await generateQuestion(topic, PROMPTS[index], process.env.LOVABLE_API_KEY);
-    const { error } = await db.from("community_posts").insert({ user_id: null, author_name: "ORÍGEN", topic, title: question.title, body: quiz ? "Pon a prueba lo que aprendiste. Elige una respuesta y descubre el resultado." : "Una pausa para compartir lo que piensas. Puedes elegir una opción y contar tu experiencia en las respuestas.", poll_options: question.options, poll_answer_index: quiz ? QUIZZES[index].answer : null, is_bot: true, is_verified: false });
-    if (!error) created = true;
-    else if (error.code !== "23505") {
-      console.error("Community daily insert failed", error.code, error.message);
-      return Response.json({ error: "Las preguntas de hoy no están disponibles. Inténtalo más tarde." }, { status: 503 });
+  for (let moment = 0; moment <= slot; moment++) {
+    for (const [index, topic] of TOPICS.entries()) {
+      for (const kind of ["cover", "poll"] as const) {
+        if (seen.has(`${topic}:${moment}:${kind}`)) continue;
+         const quiz = QUIZZES[index][moment];
+        const title = kind === "cover" ? COVER_QUESTIONS[index][(moment + day) % 3] : quiz.title;
+        const opts = kind === "cover" ? REFLECTION_OPTIONS[index].slice(0, 4 + moment) : quiz.options;
+        const { error } = await db.from("community_posts").insert({ user_id: null, author_name: "ORÍGEN", topic, title, body: kind === "poll" ? "Elige una respuesta y descubre el resultado. Comparte tu experiencia con los demás." : "Una pregunta para acompañarnos. Elige una opción y cuéntanos tu experiencia en las respuestas.", poll_options: opts, poll_answer_index: kind === "poll" ? opts.indexOf(quiz.options[quiz.answer]) : null, is_bot: true, is_verified: false, bot_slot: moment, bot_kind: kind });
+        if (!error) created = true;
+        else if (error.code !== "23505") {
+          console.error("Community daily insert failed", error.code, error.message);
+          return Response.json({ error: "Las preguntas de hoy no están disponibles. Inténtalo más tarde." }, { status: 503 });
+        }
+      }
     }
   }
   return Response.json({ created }, { headers: { "Cache-Control": "private, no-store" } });

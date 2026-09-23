@@ -182,6 +182,8 @@ export type Database = {
         Row: {
           author_name: string
           body: string
+          bot_kind: string | null
+          bot_slot: number | null
           created_at: string
           id: string
           image_path: string | null
@@ -199,6 +201,8 @@ export type Database = {
         Insert: {
           author_name?: string
           body?: string
+          bot_kind?: string | null
+          bot_slot?: number | null
           created_at?: string
           id?: string
           image_path?: string | null
@@ -216,6 +220,8 @@ export type Database = {
         Update: {
           author_name?: string
           body?: string
+          bot_kind?: string | null
+          bot_slot?: number | null
           created_at?: string
           id?: string
           image_path?: string | null
@@ -1880,6 +1886,14 @@ export type Database = {
           mine: boolean
           parent_reply_id: string
           post_id: string
+        }[]
+      }
+      community_vote_totals: {
+        Args: { _post_ids: string[] }
+        Returns: {
+          choice_index: number
+          post_id: string
+          vote_count: number
         }[]
       }
       create_hoja_transfer: {

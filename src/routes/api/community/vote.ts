@@ -16,5 +16,6 @@ export const Route = createFileRoute("/api/community/vote")({ server: { handlers
   if (!post || !Array.isArray(opts) || choice === undefined || choice < 0 || choice >= opts.length) return Response.json({ error: "Pregunta no disponible." }, { status: 404 });
   const { error } = await db.from("community_poll_votes").insert({ post_id: postId, user_id: user.id, choice_index: choice });
   if (error) return Response.json({ error: error.code === "23505" ? "Ya respondiste esta pregunta." : "No se pudo registrar tu respuesta." }, { status: 409 });
-  return Response.json({ correct: post.poll_answer_index === null ? null : choice === post.poll_answer_index, answer: post.poll_answer_index }, { headers: { "Cache-Control": "private, no-store" } });
+  const { data: totals } = await db.rpc("community_vote_totals", { _post_ids: [postId] });
+  return Response.json({ correct: post.poll_answer_index === null ? null : choice === post.poll_answer_index, answer: post.poll_answer_index, totals: totals ?? [] }, { headers: { "Cache-Control": "private, no-store" } });
 } } } });
