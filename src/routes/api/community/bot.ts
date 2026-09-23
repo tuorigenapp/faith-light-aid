@@ -46,6 +46,8 @@ export const Route = createFileRoute("/api/community/bot")({ server: { handlers:
     const reader = r.body.getReader(); const decoder = new TextDecoder(); let buffer = ""; let answer = "";
     for (;;) { const { done, value } = await reader.read(); if (done) break; buffer += decoder.decode(value, { stream: true }); const lines = buffer.split("\n"); buffer = lines.pop() ?? ""; for (const line of lines) if (line.startsWith("data:")) { try { const evt = JSON.parse(line.slice(5)); if (evt.type === "response.output_text.delta") answer += evt.delta ?? ""; } catch { /* incomplete */ } } }
     if (answer.trim().length < 15) return send({ error: "La respuesta de ORÍGEN no pudo generarse." }, 503);
+    const { data: latestSetting } = await admin.from("community_settings").select("value").eq("key", "auto_reply").maybeSingle();
+    if (latestSetting?.value === false) return send({ ok: true, manual: true });
     if (replyId) {
       const { data: latest, error: latestError } = await admin.from("community_replies").select("id,user_id,parent_reply_id,is_bot,bot_target_user_id").eq("post_id", post.id).limit(3000);
       if (latestError) return send({ error: "No se pudo revisar la conversación." }, 503);
