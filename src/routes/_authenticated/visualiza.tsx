@@ -6,7 +6,6 @@ import { useMemo, useState } from "react";
 import { Sparkles, Headphones, Leaf, Star, Cross } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PROGRAMAS } from "@/lib/programas";
-import { DailyGames } from "@/components/games/DailyGames";
 import { SeguimientoPanel } from "@/components/visualiza/SeguimientoPanel";
 import { IncludesModal } from "@/components/visualiza/IncludesModal";
 import { ProgramCard, type UnifiedProgram } from "@/components/visualiza/ProgramCard";
@@ -19,7 +18,7 @@ import identityImg from "@/assets/viv-identity.jpg";
 import cristoImg from "@/assets/viv-cristo.jpg";
 
 export const Route = createFileRoute("/_authenticated/visualiza")({
-  head: () => ({ meta: [{ title: "Visualízalo y Vívelo — Reconectando" }] }),
+  head: () => ({ meta: [{ title: "Visualízalo y Vívelo — ORÍGEN" }, { name: "description", content: "Programas, audios y prácticas de Visualízalo y Vívelo." }, { property: "og:title", content: "Visualízalo y Vívelo — ORÍGEN" }, { property: "og:description", content: "Programas, audios y prácticas para acompañar tu camino." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
   component: Visualiza,
 });
 
@@ -256,15 +255,6 @@ function Visualiza() {
         selectedCatTitle={selectedCatTitle}
         hasAnyProgress={hasAnyProgress}
       />
-
-      {hasAnyProgress && (
-        <div className="mt-2">
-          <DailyGames
-            title="Juegos del día"
-            subtitle={`Diez juegos mentales alineados con ${selectedCatTitle ?? "tu programa"}.`}
-          />
-        </div>
-      )}
 
       {/* SELECTOR ÚNICO DE PROGRAMAS */}
       <section>

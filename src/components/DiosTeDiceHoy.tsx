@@ -67,8 +67,10 @@ ${data.versiculo}
     const a = document.createElement("a");
     a.href = url;
     a.download = "dios-te-dice-hoy.txt";
+    document.body.appendChild(a);
     a.click();
-    URL.revokeObjectURL(url);
+    a.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 30000);
   }
 
   return (

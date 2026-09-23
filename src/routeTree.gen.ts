@@ -54,6 +54,8 @@ import { Route as ApiPublicPushDailyRouteImport } from './routes/api/public/push
 import { Route as ApiPublicPushBroadcastRouteImport } from './routes/api/public/push-broadcast'
 import { Route as ApiPublicMinistracionTeaserRouteImport } from './routes/api/public/ministracion-teaser'
 import { Route as ApiPublicMarketingDispatchRouteImport } from './routes/api/public/marketing-dispatch'
+import { Route as ApiCommunityBotRouteImport } from './routes/api/community/bot'
+import { Route as ApiAdminGenerateManifestRouteImport } from './routes/api/admin/generate-manifest'
 import { Route as AuthenticatedVisualizaLimpiezaRouteImport } from './routes/_authenticated/visualiza.limpieza'
 import { Route as AuthenticatedVisualizaIdentidadRouteImport } from './routes/_authenticated/visualiza.identidad'
 import { Route as AuthenticatedVisualizaCristoRouteImport } from './routes/_authenticated/visualiza.cristo'
@@ -299,6 +301,17 @@ const ApiPublicMarketingDispatchRoute =
     path: '/api/public/marketing-dispatch',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiCommunityBotRoute = ApiCommunityBotRouteImport.update({
+  id: '/api/community/bot',
+  path: '/api/community/bot',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminGenerateManifestRoute =
+  ApiAdminGenerateManifestRouteImport.update({
+    id: '/api/admin/generate-manifest',
+    path: '/api/admin/generate-manifest',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedVisualizaLimpiezaRoute =
   AuthenticatedVisualizaLimpiezaRouteImport.update({
     id: '/limpieza',
@@ -423,6 +436,8 @@ export interface FileRoutesByFullPath {
   '/visualiza/cristo': typeof AuthenticatedVisualizaCristoRoute
   '/visualiza/identidad': typeof AuthenticatedVisualizaIdentidadRoute
   '/visualiza/limpieza': typeof AuthenticatedVisualizaLimpiezaRoute
+  '/api/admin/generate-manifest': typeof ApiAdminGenerateManifestRoute
+  '/api/community/bot': typeof ApiCommunityBotRoute
   '/api/public/marketing-dispatch': typeof ApiPublicMarketingDispatchRoute
   '/api/public/ministracion-teaser': typeof ApiPublicMinistracionTeaserRoute
   '/api/public/push-broadcast': typeof ApiPublicPushBroadcastRoute
@@ -481,6 +496,8 @@ export interface FileRoutesByTo {
   '/visualiza/cristo': typeof AuthenticatedVisualizaCristoRoute
   '/visualiza/identidad': typeof AuthenticatedVisualizaIdentidadRoute
   '/visualiza/limpieza': typeof AuthenticatedVisualizaLimpiezaRoute
+  '/api/admin/generate-manifest': typeof ApiAdminGenerateManifestRoute
+  '/api/community/bot': typeof ApiCommunityBotRoute
   '/api/public/marketing-dispatch': typeof ApiPublicMarketingDispatchRoute
   '/api/public/ministracion-teaser': typeof ApiPublicMinistracionTeaserRoute
   '/api/public/push-broadcast': typeof ApiPublicPushBroadcastRoute
@@ -542,6 +559,8 @@ export interface FileRoutesById {
   '/_authenticated/visualiza/cristo': typeof AuthenticatedVisualizaCristoRoute
   '/_authenticated/visualiza/identidad': typeof AuthenticatedVisualizaIdentidadRoute
   '/_authenticated/visualiza/limpieza': typeof AuthenticatedVisualizaLimpiezaRoute
+  '/api/admin/generate-manifest': typeof ApiAdminGenerateManifestRoute
+  '/api/community/bot': typeof ApiCommunityBotRoute
   '/api/public/marketing-dispatch': typeof ApiPublicMarketingDispatchRoute
   '/api/public/ministracion-teaser': typeof ApiPublicMinistracionTeaserRoute
   '/api/public/push-broadcast': typeof ApiPublicPushBroadcastRoute
@@ -603,6 +622,8 @@ export interface FileRouteTypes {
     | '/visualiza/cristo'
     | '/visualiza/identidad'
     | '/visualiza/limpieza'
+    | '/api/admin/generate-manifest'
+    | '/api/community/bot'
     | '/api/public/marketing-dispatch'
     | '/api/public/ministracion-teaser'
     | '/api/public/push-broadcast'
@@ -661,6 +682,8 @@ export interface FileRouteTypes {
     | '/visualiza/cristo'
     | '/visualiza/identidad'
     | '/visualiza/limpieza'
+    | '/api/admin/generate-manifest'
+    | '/api/community/bot'
     | '/api/public/marketing-dispatch'
     | '/api/public/ministracion-teaser'
     | '/api/public/push-broadcast'
@@ -721,6 +744,8 @@ export interface FileRouteTypes {
     | '/_authenticated/visualiza/cristo'
     | '/_authenticated/visualiza/identidad'
     | '/_authenticated/visualiza/limpieza'
+    | '/api/admin/generate-manifest'
+    | '/api/community/bot'
     | '/api/public/marketing-dispatch'
     | '/api/public/ministracion-teaser'
     | '/api/public/push-broadcast'
@@ -750,6 +775,8 @@ export interface RootRouteChildren {
   ApiParejaRoute: typeof ApiParejaRoute
   ApiPatronesRoute: typeof ApiPatronesRoute
   ApiStagePackRoute: typeof ApiStagePackRoute
+  ApiAdminGenerateManifestRoute: typeof ApiAdminGenerateManifestRoute
+  ApiCommunityBotRoute: typeof ApiCommunityBotRoute
   ApiPublicMarketingDispatchRoute: typeof ApiPublicMarketingDispatchRoute
   ApiPublicMinistracionTeaserRoute: typeof ApiPublicMinistracionTeaserRoute
   ApiPublicPushBroadcastRoute: typeof ApiPublicPushBroadcastRoute
@@ -1076,6 +1103,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicMarketingDispatchRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/community/bot': {
+      id: '/api/community/bot'
+      path: '/api/community/bot'
+      fullPath: '/api/community/bot'
+      preLoaderRoute: typeof ApiCommunityBotRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/generate-manifest': {
+      id: '/api/admin/generate-manifest'
+      path: '/api/admin/generate-manifest'
+      fullPath: '/api/admin/generate-manifest'
+      preLoaderRoute: typeof ApiAdminGenerateManifestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/visualiza/limpieza': {
       id: '/_authenticated/visualiza/limpieza'
       path: '/limpieza'
@@ -1316,6 +1357,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiParejaRoute: ApiParejaRoute,
   ApiPatronesRoute: ApiPatronesRoute,
   ApiStagePackRoute: ApiStagePackRoute,
+  ApiAdminGenerateManifestRoute: ApiAdminGenerateManifestRoute,
+  ApiCommunityBotRoute: ApiCommunityBotRoute,
   ApiPublicMarketingDispatchRoute: ApiPublicMarketingDispatchRoute,
   ApiPublicMinistracionTeaserRoute: ApiPublicMinistracionTeaserRoute,
   ApiPublicPushBroadcastRoute: ApiPublicPushBroadcastRoute,

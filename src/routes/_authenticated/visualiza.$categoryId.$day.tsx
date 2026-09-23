@@ -155,12 +155,17 @@ function DayPlayer() {
           ) : (
             <div className="text-center py-6">
               <Headphones className="w-10 h-10 mx-auto text-muted-foreground/60" />
-              <p className="text-sm text-muted-foreground mt-3">🎧 El audio guiado se libera pronto. Mientras tanto, puedes hacer el ejercicio escrito abajo.</p>
+               <p className="text-sm text-muted-foreground mt-3">Esta práctica no requiere audio. Continúa con la lección y el ejercicio escrito.</p>
             </div>
           )}
         </Card>
 
-        <Card className="rounded-[1.7rem] p-5 md:p-6 shadow-soft">
+         {(a.lesson || a.exercise || a.pdf_url) && <Card className="rounded-[1.7rem] p-5 md:p-6 shadow-soft space-y-3">
+           {a.lesson && <div><h2 className="font-display font-bold text-lg">Lección del día</h2><p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed">{a.lesson}</p></div>}
+           {a.exercise && <div><h2 className="font-display font-bold text-lg">Ejercicio o receta</h2><p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed">{a.exercise}</p></div>}
+           {a.pdf_url && <a href={a.pdf_url} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center gap-2 text-primary underline"><Download className="h-4 w-4" /> Abrir PDF de apoyo</a>}
+         </Card>}
+         <Card className="rounded-[1.7rem] p-5 md:p-6 shadow-soft">
           <div className="text-[11px] uppercase tracking-widest text-primary font-bold">Tu ejercicio Método de Cristo</div>
           <div className="mt-4 space-y-5">
             <Field label="Escribe 3 veces aquello que ya ves realizado en tu vida por fe en tiempo presente (YA TENGO)" value={yaTengo} set={setYaTengo} placeholder={c.affirmation_ya_tengo} rows={3} />

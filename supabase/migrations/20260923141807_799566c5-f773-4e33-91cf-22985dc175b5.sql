@@ -1,0 +1,45 @@
+ALTER TABLE public.community_posts ADD COLUMN is_anonymous boolean NOT NULL DEFAULT false, ADD COLUMN image_path text, ADD COLUMN poll_options jsonb, ADD COLUMN source_url text, ADD COLUMN is_verified boolean NOT NULL DEFAULT false, ADD COLUMN is_bot boolean NOT NULL DEFAULT false;
+ALTER TABLE public.community_replies ADD COLUMN parent_reply_id uuid REFERENCES public.community_replies(id) ON DELETE SET NULL, ADD COLUMN is_anonymous boolean NOT NULL DEFAULT false, ADD COLUMN image_path text, ADD COLUMN audio_path text, ADD COLUMN is_bot boolean NOT NULL DEFAULT false;
+CREATE INDEX community_replies_parent_idx ON public.community_replies(parent_reply_id);
+CREATE TABLE public.community_saves (user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE, post_id uuid NOT NULL REFERENCES public.community_posts(id) ON DELETE CASCADE, created_at timestamptz NOT NULL DEFAULT now(), PRIMARY KEY(user_id,post_id));
+GRANT SELECT, INSERT, DELETE ON public.community_saves TO authenticated;
+GRANT ALL ON public.community_saves TO service_role;
+ALTER TABLE public.community_saves ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "save own" ON public.community_saves FOR ALL TO authenticated USING (user_id=auth.uid()) WITH CHECK (user_id=auth.uid());
+CREATE TABLE public.community_follows (user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE, topic text NOT NULL, created_at timestamptz NOT NULL DEFAULT now(), PRIMARY KEY(user_id,topic));
+GRANT SELECT, INSERT, DELETE ON public.community_follows TO authenticated;
+GRANT ALL ON public.community_follows TO service_role;
+ALTER TABLE public.community_follows ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "follow own" ON public.community_follows FOR ALL TO authenticated USING (user_id=auth.uid()) WITH CHECK (user_id=auth.uid());
+CREATE TABLE public.community_suspensions (user_id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE, reason text NOT NULL, suspended_by uuid NOT NULL REFERENCES auth.users(id), created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now());
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.community_suspensions TO authenticated;
+GRANT ALL ON public.community_suspensions TO service_role;
+ALTER TABLE public.community_suspensions ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "suspension own read" ON public.community_suspensions FOR SELECT TO authenticated USING (user_id=auth.uid() OR public.has_role(auth.uid(),'admin'));
+CREATE POLICY "admin manages suspensions" ON public.community_suspensions FOR ALL TO authenticated USING (public.has_role(auth.uid(),'admin')) WITH CHECK (public.has_role(auth.uid(),'admin') AND suspended_by=auth.uid());
+CREATE TRIGGER community_suspensions_updated_at BEFORE UPDATE ON public.community_suspensions FOR EACH ROW EXECUTE FUNCTION public.touch_updated_at();
+CREATE POLICY "admin delete post" ON public.community_posts FOR DELETE TO authenticated USING (public.has_role(auth.uid(),'admin'));
+CREATE POLICY "admin delete reply" ON public.community_replies FOR DELETE TO authenticated USING (public.has_role(auth.uid(),'admin'));
+CREATE OR REPLACE FUNCTION public.community_guard() RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$ BEGIN
+ IF current_setting('role',true) <> 'service_role' THEN
+  IF EXISTS (SELECT 1 FROM public.community_suspensions WHERE user_id=auth.uid()) THEN RAISE EXCEPTION 'Tu participación en la comunidad está suspendida.'; END IF;
+  IF TG_TABLE_NAME='community_posts' THEN NEW.is_bot:=false; NEW.is_verified:=false; NEW.source_url:=null; END IF;
+  IF TG_TABLE_NAME='community_replies' THEN NEW.is_bot:=false; END IF;
+ END IF;
+ IF TG_TABLE_NAME='community_replies' AND NEW.parent_reply_id IS NOT NULL THEN
+  IF NOT EXISTS (SELECT 1 FROM public.community_replies r WHERE r.id=NEW.parent_reply_id AND r.post_id=NEW.post_id) THEN RAISE EXCEPTION 'La respuesta pertenece a otra conversación.'; END IF;
+ END IF;
+ RETURN NEW; END $$;
+CREATE TRIGGER community_post_guard BEFORE INSERT OR UPDATE ON public.community_posts FOR EACH ROW EXECUTE FUNCTION public.community_guard();
+CREATE TRIGGER community_reply_guard BEFORE INSERT OR UPDATE ON public.community_replies FOR EACH ROW EXECUTE FUNCTION public.community_guard();
+CREATE OR REPLACE FUNCTION public.community_reaction_guard() RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$ BEGIN IF EXISTS (SELECT 1 FROM public.community_suspensions WHERE user_id=auth.uid()) THEN RAISE EXCEPTION 'Tu participación en la comunidad está suspendida.'; END IF; RETURN NEW; END $$;
+CREATE TRIGGER community_reaction_guard_before BEFORE INSERT ON public.community_reactions FOR EACH ROW EXECUTE FUNCTION public.community_reaction_guard();
+CREATE POLICY "community own media read" ON storage.objects FOR SELECT TO authenticated USING (bucket_id='community-media');
+CREATE POLICY "community own media upload" ON storage.objects FOR INSERT TO authenticated WITH CHECK (bucket_id='community-media' AND (storage.foldername(name))[1]=auth.uid()::text AND (lower(storage.extension(name))=ANY(ARRAY['jpg','jpeg','png','webm','mp3','m4a','ogg'])) AND NOT EXISTS (SELECT 1 FROM public.community_suspensions WHERE user_id=auth.uid()));
+CREATE POLICY "community own media remove" ON storage.objects FOR DELETE TO authenticated USING (bucket_id='community-media' AND (storage.foldername(name))[1]=auth.uid()::text);
+CREATE VIEW public.community_feed_posts WITH (security_barrier=true) AS SELECT p.id, CASE WHEN p.is_anonymous THEN NULL ELSE p.user_id END AS author_id, (p.user_id=auth.uid()) AS mine, CASE WHEN p.is_anonymous THEN 'Anónimo' ELSE p.author_name END AS author_name, p.is_anonymous,p.topic,p.title,p.body,p.created_at,p.image_path,p.poll_options,p.source_url,p.is_verified,p.is_bot FROM public.community_posts p;
+CREATE VIEW public.community_feed_replies WITH (security_barrier=true) AS SELECT r.id,r.post_id,r.parent_reply_id,CASE WHEN r.is_anonymous THEN NULL ELSE r.user_id END AS author_id,(r.user_id=auth.uid()) AS mine,CASE WHEN r.is_anonymous THEN 'Anónimo' ELSE r.author_name END AS author_name,r.is_anonymous,r.body,r.created_at,r.image_path,r.audio_path,r.is_bot FROM public.community_replies r;
+GRANT SELECT ON public.community_feed_posts, public.community_feed_replies TO authenticated;
+REVOKE SELECT ON public.community_posts,public.community_replies FROM authenticated;
+GRANT SELECT (id,author_name,topic,title,body,created_at,updated_at,is_anonymous,image_path,poll_options,source_url,is_verified,is_bot) ON public.community_posts TO authenticated;
+GRANT SELECT (id,post_id,parent_reply_id,author_name,body,created_at,updated_at,is_anonymous,image_path,audio_path,is_bot) ON public.community_replies TO authenticated;
