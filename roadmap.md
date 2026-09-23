@@ -38,8 +38,8 @@
 - [x] Verificar en móvil y escritorio los flujos y límites de seguridad.
 
 ## Comunidad — ajustes solicitados
-- [ ] Grabación de audio manos libres: permiso, bloqueo, pausa, envío y descarte; respuesta solo de audio.
-- [ ] Separar imágenes y audios; encuestas con porcentajes y hasta seis opciones; reacciones visibles.
-- [ ] Avatares ilustrados, nombres, imágenes de temas y logo ORÍGEN; búsqueda de preguntas y respuestas.
-- [ ] Publicación flotante, 10.000 caracteres y oferta de membresía en cada conversación.
-- [ ] Tres momentos diarios por tema con portada y encuestas, sin borrar contenido anterior; verificar en móvil.
+- [x] Grabación de audio manos libres: permiso, bloqueo, pausa, envío y descarte; respuesta solo de audio.
+- [x] Separar imágenes y audios; encuestas con porcentajes y hasta seis opciones; reacciones visibles.
+- [x] Avatares ilustrados, nombres, imágenes de temas y logo ORÍGEN; búsqueda de preguntas y respuestas.
+- [x] Publicación flotante, 10.000 caracteres y oferta de membresía en cada conversación.
+- [x] Tres momentos diarios por tema con portada y encuestas, sin borrar contenido anterior; verificar en móvil.
