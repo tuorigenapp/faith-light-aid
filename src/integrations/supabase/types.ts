@@ -131,6 +131,27 @@ export type Database = {
         }
         Relationships: []
       }
+      community_anonymous_identities: {
+        Row: {
+          anonymous_number: number
+          created_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          anonymous_number: number
+          created_at?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          anonymous_number?: number
+          created_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       community_blocks: {
         Row: {
           created_at: string
@@ -1967,6 +1988,10 @@ export type Database = {
     Functions: {
       award_gems: {
         Args: { _amount: number; _meta?: Json; _reason: string }
+        Returns: number
+      }
+      community_anonymous_number: {
+        Args: { _user_id: string }
         Returns: number
       }
       community_feed_posts: {
