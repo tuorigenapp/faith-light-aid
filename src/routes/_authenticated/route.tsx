@@ -78,6 +78,10 @@ const FULL_NAV = [
   { to: "/perfil", label: "Perfil", icon: UserIcon },
 ] as const;
 
+function CommunityEmoji({ className }: { className?: string }) {
+  return <span aria-hidden="true" className={cn(className, "inline-grid place-items-center text-[22px] leading-none")}>👥</span>;
+}
+
 function AuthLayout() {
   return (
     <PlayerProvider>
@@ -351,7 +355,7 @@ function AuthLayoutInner() {
           <div className="relative">
             <div className="grid grid-cols-5 items-center h-[68px] rounded-[28px] bg-white/95 backdrop-blur-xl border border-border shadow-[0_10px_40px_-10px_rgba(124,92,255,0.35)]">
               <BottomItem to="/etapas" label="Camino" icon={RouteIcon} isActive={isActive} />
-               <BottomItem to="/comunidad" label="Comunidad" icon={Users} isActive={isActive} unread={communityUnread} />
+               <BottomItem to="/comunidad" label="Comunidad" icon={CommunityEmoji} isActive={isActive} unread={communityUnread} />
               <div aria-hidden />
               <BottomItem to="/visualiza" label="Vívelo" icon={Headphones} isActive={isActive} />
               <BottomItem to="/perfil" label="Yo" icon={UserIcon} isActive={isActive} />
