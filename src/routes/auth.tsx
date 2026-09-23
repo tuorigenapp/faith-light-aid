@@ -13,7 +13,7 @@ import logo from "@/assets/logo-origen.png";
 import { ArrowRight, Heart } from "lucide-react";
 
 export const Route = createFileRoute("/auth")({
-  head: () => ({ meta: [{ title: "Entrar a ORÍGEN — tu camino de sanación" }] }),
+  head: () => ({ meta: [{ title: "Entrar a ORÍGEN — tu camino de sanación" }, { name: "description", content: "Entra a tu cuenta ORÍGEN y continúa tu camino de bienestar." }, { property: "og:title", content: "Entrar a ORÍGEN" }, { property: "og:description", content: "Continúa tu camino de bienestar en ORÍGEN." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
   component: AuthPage,
 });
 

@@ -25,7 +25,7 @@ export const Route = createFileRoute("/api/community/bot")({ server: { handlers:
     const reader = r.body.getReader(); const decoder = new TextDecoder(); let buffer = ""; let answer = "";
     for (;;) { const { done, value } = await reader.read(); if (done) break; buffer += decoder.decode(value, { stream: true }); const lines = buffer.split("\n"); buffer = lines.pop() ?? ""; for (const line of lines) if (line.startsWith("data:")) { try { const evt = JSON.parse(line.slice(5)); if (evt.type === "response.output_text.delta") answer += evt.delta ?? ""; } catch { /* incomplete */ } } }
     if (answer.trim().length < 15) return send({ error: "La respuesta de ORÍGEN no pudo generarse." }, 503);
-    const { error } = await admin.from("community_replies").insert({ post_id: post.id, user_id: auth.user.id, author_name: "ORÍGEN · asistente", body: answer.trim().slice(0, 1600), is_bot: true });
+    const { error } = await admin.from("community_replies").insert({ post_id: post.id, user_id: null, author_name: "ORÍGEN · asistente", body: answer.trim().slice(0, 1600), is_bot: true });
     if (error) return send({ error: "No se pudo guardar la respuesta." }, 500);
     return send({ ok: true });
   } catch { return send({ error: "La guía automática no está disponible ahora." }, 503); }

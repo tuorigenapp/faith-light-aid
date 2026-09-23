@@ -4,7 +4,7 @@ import { ArrowLeft, ArrowRight, Check, Sparkles } from "lucide-react";
 import logo from "@/assets/logo-origen.png";
 
 export const Route = createFileRoute("/empezar")({
-  head: () => ({ meta: [{ title: "Empieza tu camino — ORÍGEN" }, { name: "description", content: "Conoce tu camino con unas preguntas breves antes de crear tu cuenta." }] }),
+  head: () => ({ meta: [{ title: "Empieza tu camino — ORÍGEN" }, { name: "description", content: "Conoce tu camino con unas preguntas breves antes de crear tu cuenta." }, { property: "og:title", content: "Empieza tu camino — ORÍGEN" }, { property: "og:description", content: "Elige tu primer paso y descubre un camino de bienestar adaptado a ti." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
   component: Empezar,
 });
 

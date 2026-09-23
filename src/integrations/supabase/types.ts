@@ -194,7 +194,7 @@ export type Database = {
           title: string
           topic: string
           updated_at: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           author_name?: string
@@ -211,7 +211,7 @@ export type Database = {
           title: string
           topic?: string
           updated_at?: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           author_name?: string
@@ -228,7 +228,7 @@ export type Database = {
           title?: string
           topic?: string
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -272,7 +272,7 @@ export type Database = {
           parent_reply_id: string | null
           post_id: string
           updated_at: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           audio_path?: string | null
@@ -286,7 +286,7 @@ export type Database = {
           parent_reply_id?: string | null
           post_id: string
           updated_at?: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           audio_path?: string | null
@@ -300,7 +300,7 @@ export type Database = {
           parent_reply_id?: string | null
           post_id?: string
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
