@@ -149,6 +149,35 @@ export type Database = {
         }
         Relationships: []
       }
+      community_poll_votes: {
+        Row: {
+          choice_index: number
+          created_at: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          choice_index: number
+          created_at?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          choice_index?: number
+          created_at?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_poll_votes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "community_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       community_posts: {
         Row: {
           author_name: string
@@ -159,6 +188,7 @@ export type Database = {
           is_anonymous: boolean
           is_bot: boolean
           is_verified: boolean
+          poll_answer_index: number | null
           poll_options: Json | null
           source_url: string | null
           title: string
@@ -175,6 +205,7 @@ export type Database = {
           is_anonymous?: boolean
           is_bot?: boolean
           is_verified?: boolean
+          poll_answer_index?: number | null
           poll_options?: Json | null
           source_url?: string | null
           title: string
@@ -191,6 +222,7 @@ export type Database = {
           is_anonymous?: boolean
           is_bot?: boolean
           is_verified?: boolean
+          poll_answer_index?: number | null
           poll_options?: Json | null
           source_url?: string | null
           title?: string
