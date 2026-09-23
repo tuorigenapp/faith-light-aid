@@ -55,7 +55,7 @@ export const Route = createFileRoute("/api/community/daily")({ server: { handler
     const { data: existing } = await db.from("community_posts").select("id").eq("topic", topic).eq("is_bot", true).gte("created_at", `${today}T00:00:00Z`).limit(1);
     if (existing?.length) continue;
     const question = await generateQuestion(topic, PROMPTS[index], process.env.LOVABLE_API_KEY);
-    const { error } = await db.from("community_posts").insert({ user_id: user.id, author_name: "ORÍGEN", topic, title: question.title, body: "Una pausa para compartir lo que piensas. Puedes elegir una opción y contar tu experiencia en las respuestas.", poll_options: question.options, is_bot: true, is_verified: false });
+    const { error } = await db.from("community_posts").insert({ user_id: null, author_name: "ORÍGEN", topic, title: question.title, body: "Una pausa para compartir lo que piensas. Puedes elegir una opción y contar tu experiencia en las respuestas.", poll_options: question.options, is_bot: true, is_verified: false });
     if (!error) created = true;
   }
   return Response.json({ created }, { headers: { "Cache-Control": "private, no-store" } });
