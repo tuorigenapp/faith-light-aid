@@ -168,10 +168,6 @@ body.community-reading .community-main { padding-bottom: 0; }
   --community-poll: #252033;
   --community-poll-border: #635775;
   --community-poll-selected: #49345F;
-  .dark {
-  --community-poll: #252033;
-  --community-poll-border: #635775;
-  --community-poll-selected: #49345F;
   /* Respuestas en oscuro: mismas veladuras, un poco más presentes */
   --community-reply-0: rgba(244, 63, 94, 0.16);
   --community-reply-1: rgba(249, 115, 22, 0.16);
