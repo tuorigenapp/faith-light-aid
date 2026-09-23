@@ -43,4 +43,4 @@ export const Route = createFileRoute("/api/admin/community")({ server: { handler
     else return Response.json({ error: "Acción inválida." }, { status: 400 });
     return error ? Response.json({ error: error.message }, { status: 500 }) : Response.json({ ok: true });
   },
-} } } });
+} } });
