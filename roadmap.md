@@ -90,3 +90,7 @@
 - [x] Mostrar conversaciones de una o dos respuestas sin estrella ni contador, con referencia discreta al mensaje de origen.
 - [x] Dar una pulsación suave a la burbuja de reacción y respetar el movimiento reducido.
 - [x] Comprobar reacción en publicaciones y respuestas, y conversaciones en móvil y escritorio.
+
+## Comunidad — celebración al acertar encuestas
+- [x] Quitar la pulsación de las reacciones sin cambiar su funcionamiento.
+- [x] Celebrar con confeti únicamente los votos correctos; los incorrectos siguen mostrando su resultado sin celebración.
