@@ -8,7 +8,7 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Analytics } from "@vercel/analytics/react";
 
 import appCss from "../styles.css?url";
@@ -140,5 +140,7 @@ function RootComponent() {
 
 function AppToaster() {
   const location = useLocation();
-  return location.pathname === "/comunidad" ? null : <Toaster richColors position="top-center" />;
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  return !mounted || location.pathname === "/comunidad" ? null : <Toaster richColors position="top-center" />;
 }
