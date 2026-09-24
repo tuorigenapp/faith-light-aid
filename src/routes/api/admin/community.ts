@@ -104,7 +104,7 @@ export const Route = createFileRoute("/api/admin/community")({ server: { handler
         if (options.length < 3 || options.length > 6 || options.some(o => !o || o.length > 100) || new Set(options.map(o => o.toLocaleLowerCase("es"))).size !== options.length) return Response.json({ error: "Escribe entre 3 y 6 opciones diferentes." }, { status: 400 });
         choices = options;
       }
-      ({ error } = await ctx.db.from("community_posts").insert({ user_id: null, author_name: TOPIC_NAMES[topic], author_kind: "admin", topic, title, body: content, poll_options: choices, image_path: choices ? null : imagePath, is_anonymous: false, is_bot: true, is_verified: true, bot_kind: choices ? "poll" : imagePath ? "image" : "cover" }));
+      ({ error } = await ctx.db.from("community_posts").insert({ user_id: null, author_name: TOPIC_NAMES[topic], author_kind: "admin", topic, title, body: content, poll_options: choices, image_path: choices ? null : imagePath, is_anonymous: false, is_bot: true, is_verified: true, bot_kind: choices ? "poll" : imagePath ? (body.coverMode === true ? "image_cover" : "image") : "cover" }));
     }
     else if (action === "admin-reply") {
       const content = text(body.content);
