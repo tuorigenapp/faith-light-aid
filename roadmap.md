@@ -84,3 +84,9 @@
 - [x] Dar a cada burbuja de respuesta un tono cálido distinto, visible en claro y oscuro.
 - [x] Asignar a cada persona anónima un número único entre 1 y 999.999, salvo que se agote ese rango; corregir nombres anteriores.
 - [x] Comprobar publicaciones, encuestas, portadas y conversaciones en móvil y escritorio.
+
+## Comunidad — reacciones y conversaciones pequeñas
+- [x] Evitar reacciones duplicadas con lectura actualizada, protección ante doble toque y cambio seguro de reacción.
+- [x] Mostrar conversaciones de una o dos respuestas sin estrella ni contador, con referencia discreta al mensaje de origen.
+- [x] Dar una pulsación suave a la burbuja de reacción y respetar el movimiento reducido.
+- [x] Comprobar reacción en publicaciones y respuestas, y conversaciones en móvil y escritorio.

@@ -198,6 +198,12 @@ body.community-reading .community-main { padding-bottom: 0; }
 .community-reply[data-tone="5"] { background: var(--community-reply-5); border-color: var(--community-reply-border-5); }
 .community-reply[data-tone="6"] { background: var(--community-reply-6); border-color: var(--community-reply-border-6); }
 .community-reply[data-bot="true"] { background: var(--community-reply-bot); border-color: var(--community-reply-bot-border); }
+.community-reaction-trigger.community-reaction-trigger { animation: community-reaction-breathe 3s ease-in-out infinite; }
+@keyframes community-reaction-breathe {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 14%, transparent); }
+  50% { box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 7%, transparent); }
+}
+@media (prefers-reduced-motion: reduce) { .community-reaction-trigger.community-reaction-trigger { animation: none; } }
 .dark .community-post-list, .dark .community-post-detail, .dark .community-poll-option, .dark .community-reply { box-shadow: none; }
 
 @layer base {
