@@ -94,3 +94,8 @@
 ## Comunidad — celebración al acertar encuestas
 - [x] Quitar la pulsación de las reacciones sin cambiar su funcionamiento.
 - [x] Celebrar con confeti únicamente los votos correctos; los incorrectos siguen mostrando su resultado sin celebración.
+
+## Comunidad — fotos y audios
+- [x] Publicación con foto: título, foto debajo y texto (sin portada)
+- [x] Panel: elegir imagen normal o de portada
+- [x] Respuestas: fotos de cualquier formato, foto + audio juntos

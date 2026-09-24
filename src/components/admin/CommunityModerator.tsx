@@ -43,6 +43,7 @@ export function CommunityModerator() {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [image, setImage] = useState<File | null>(null);
+  const [coverMode, setCoverMode] = useState(false);
   const [options, setOptions] = useState(["", "", ""]);
   const [publishing, setPublishing] = useState(false);
   const [search, setSearch] = useState("");
@@ -89,8 +90,8 @@ export function CommunityModerator() {
       }
       await send(mode === "encuesta"
         ? { action: "create-poll", topic, title, content: body, options }
-        : { action: "create-post", topic, title, content: body, imagePath });
-      setTitle(""); setBody(""); setImage(null); setOptions(["", "", ""]);
+        : { action: "create-post", topic, title, content: body, imagePath, coverMode: !!imagePath && coverMode });
+      setTitle(""); setBody(""); setImage(null); setCoverMode(false); setOptions(["", "", ""]);
       toast.success(mode === "encuesta" ? "Encuesta publicada y verificada." : "Publicación creada y verificada.");
     } catch (e) { toast.error((e as Error).message); } finally { setPublishing(false); }
   }
@@ -165,7 +166,8 @@ export function CommunityModerator() {
       <input aria-label="Título o pregunta" value={title} maxLength={200} onChange={e => setTitle(e.target.value)} placeholder={mode === "encuesta" ? "Escribe la pregunta de la encuesta" : "Título de la publicación o promoción"} className="mt-3 h-12 w-full rounded-xl border bg-background px-3" />
       <textarea aria-label="Texto" value={body} maxLength={10000} onChange={e => setBody(e.target.value)} placeholder={mode === "encuesta" ? "Contexto (opcional)" : "Cuerpo de la publicación"} className="mt-3 min-h-24 w-full rounded-xl border bg-background p-3" />
       {mode === "texto"
-        ? <label className="mt-3 flex min-h-12 cursor-pointer items-center gap-2 text-primary">Imagen JPG o PNG (opcional): {image?.name ?? "Adjuntar"}<input type="file" accept="image/jpeg,image/png" className="sr-only" onChange={e => setImage(e.target.files?.[0] ?? null)} /></label>
+        ? <><label className="mt-3 flex min-h-12 cursor-pointer items-center gap-2 text-primary">Imagen JPG o PNG (opcional): {image?.name ?? "Adjuntar"}<input type="file" accept="image/jpeg,image/png" className="sr-only" onChange={e => setImage(e.target.files?.[0] ?? null)} /></label>
+        {image && <div className="mt-2 grid grid-cols-2 gap-2" role="radiogroup" aria-label="Formato de la imagen">{([[false, "Imagen normal", "Título arriba, imagen debajo y luego el texto"], [true, "Imagen de portada", "La imagen queda de fondo con el título encima"]] as const).map(([value, label, hint]) => <button key={label} type="button" role="radio" aria-checked={coverMode === value} onClick={() => setCoverMode(value)} className={`min-h-14 rounded-xl border-2 p-3 text-left text-xs ${coverMode === value ? "border-primary bg-primary/5" : "border-border"}`}><span className="block text-sm font-bold">{label}</span><span className="text-muted-foreground">{hint}</span></button>)}</div>}</>
         : <><div className="mt-3 space-y-2">{options.map((value, index) => <div key={index} className="flex gap-2"><input aria-label={`Opción ${index + 1}`} maxLength={100} value={value} onChange={e => setOptions(previous => previous.map((item, position) => position === index ? e.target.value : item))} placeholder={`Opción ${index + 1}`} className="h-12 min-w-0 flex-1 rounded-xl border bg-background px-3" />{options.length > 3 && <Button type="button" variant="ghost" onClick={() => setOptions(previous => previous.filter((_, position) => position !== index))} aria-label={`Quitar opción ${index + 1}`}>Quitar</Button>}</div>)}</div><Button type="button" variant="secondary" className="mt-3" disabled={options.length >= 6} onClick={() => setOptions(previous => [...previous, ""])}>Añadir opción</Button></>}
       <div className="mt-4"><Button type="button" disabled={publishing || title.trim().length < 6 || (mode === "encuesta" && options.some(value => !value.trim()))} onClick={() => void publish()}>{publishing ? "Publicando…" : mode === "encuesta" ? "Publicar encuesta" : "Publicar"}</Button></div>
     </Section>}

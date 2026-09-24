@@ -1,0 +1,2 @@
+ALTER TABLE public.community_posts DROP CONSTRAINT community_bot_kind_valid;
+ALTER TABLE public.community_posts ADD CONSTRAINT community_bot_kind_valid CHECK (bot_kind IS NULL OR bot_kind = ANY (ARRAY['cover','poll','image','image_cover']));
