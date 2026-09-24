@@ -201,8 +201,10 @@ body.community-reading .community-main { padding-bottom: 0; }
 .dark .community-post-list, .dark .community-post-detail, .dark .community-poll-option, .dark .community-reply { box-shadow: none; }
 
 @layer base {
-  * { border-color: var(--color-border); }
+  * { border-color: var(--color-border); -webkit-tap-highlight-color: transparent; }
   html { color-scheme: light; }
+  ::selection { background: rgba(128, 128, 128, 0.22); }
+  .dark ::selection { background: rgba(200, 200, 200, 0.25); }
   body {
     background: var(--color-background);
     color: var(--color-foreground);
