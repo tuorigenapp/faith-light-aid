@@ -140,7 +140,7 @@ function RootComponent() {
 
 function AppToaster() {
   const location = useLocation();
-  const [mounted, setMounted] = React.useState(false);
-  React.useEffect(() => setMounted(true), []);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   return !mounted || location.pathname === "/comunidad" ? null : <Toaster richColors position="top-center" />;
 }
