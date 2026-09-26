@@ -722,7 +722,7 @@ function CristoPage() {
           <ul className="mt-3 space-y-2.5">
             {practice.info.map((line, i) => {
               const Ic = infoIcons[i % infoIcons.length];
-              const locked = !isPaid && i >= 2;
+              const locked = !isPaid && i >= 3;
               return (
                 <li key={i} className="flex items-start gap-2.5 text-sm">
                   <span className="w-6 h-6 rounded-lg bg-primary/12 text-primary grid place-items-center shrink-0 mt-0.5">
@@ -740,7 +740,7 @@ function CristoPage() {
           <div className="text-xs font-bold text-primary uppercase tracking-widest">Guía paso a paso del día</div>
           <ol className="mt-3 space-y-3 relative">
             {practice.steps.map((s, i) => {
-              const locked = !isPaid && i >= 1;
+              const locked = !isPaid && i >= 3;
               return (
                 <li key={i} className="flex items-start gap-3 text-sm">
                   <span className={cn("w-7 h-7 rounded-full grid place-items-center shrink-0 font-bold text-xs", locked ? "bg-muted text-muted-foreground" : "bg-primary/12 text-primary")}>

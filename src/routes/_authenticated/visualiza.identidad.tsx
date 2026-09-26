@@ -552,7 +552,7 @@ function IdentidadPage() {
           <div className="text-xs font-bold text-primary uppercase tracking-widest">Paso a paso</div>
           <ol className="mt-3 space-y-3 relative">
             {practice.steps.map((s, i) => {
-              const locked = !isPaid && i >= 2;
+              const locked = !isPaid && i >= 3;
               return (
                 <li key={i} className="flex items-start gap-3 text-sm">
                   <span className={cn("w-7 h-7 rounded-full grid place-items-center shrink-0 font-bold text-xs", locked ? "bg-muted text-muted-foreground" : "bg-primary/12 text-primary")}>
