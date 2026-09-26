@@ -111,7 +111,13 @@ function Visualiza() {
           : Promise.resolve({ data: [] as any[] }),
       ]);
       if (cats.error) throw cats.error;
-      return { cats: cats.data ?? [], entries: entries.data ?? [] };
+      const customIds = (cats.data ?? []).filter((c: any) => c.is_custom).map((c: any) => c.id as string);
+      const counts = new Map<string, number>();
+      if (customIds.length) {
+        const { data: subs } = await supabase.from("manifest_audios").select("category_id").in("category_id", customIds);
+        for (const r of subs ?? []) counts.set(r.category_id, (counts.get(r.category_id) ?? 0) + 1);
+      }
+      return { cats: (cats.data ?? []).map((c: any) => ({ ...c, subtopics: counts.get(c.id) ?? 0 })), entries: entries.data ?? [] };
     },
   });
 
