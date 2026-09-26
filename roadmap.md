@@ -114,12 +114,12 @@
 
 ## Pedido Sep 26 (2) — panel y avisos
 - [x] Saldo: 1 hoja = 1 hoja en toda la app (barra, etapas, juegos, premios); 1 hoja en ~3 días
-- [ ] Temas principales: visible/oculto, editar título, portada URL o IA, copiar diseño de otro, eliminar, búsqueda, portadas visibles
-- [ ] Subtemas: listar todos los temas (también ocultos) en vivo, regenerar con IA, eliminar
-- [ ] Limpieza: editar, portada URL/IA, mejorar con IA, eliminar
-- [ ] Música (Audios): eliminar y rellenar con IA al subir audio
-- [ ] Camino ORÍGEN: crear caminos con IA, visible/oculto, portada URL
-- [ ] Portadas por URL de /categorias y de los 10 juegos
-- [ ] Usuarios: sumar/quitar hojas, eliminar, selección múltiple con filtros por plan
-- [ ] Avisos ORÍGEN de todo (camino, ejercicios, palabra, visualízate, juegos, compras) + bolita en Camino
-- [ ] Ocultar burbujas flotantes en secciones de concentración; nuevo ícono TODO EN ORÍGEN
+- [x] Temas principales: visible/oculto, editar título, portada URL o IA, copiar diseño de otro, eliminar, búsqueda, portadas visibles
+- [x] Subtemas: listar todos los temas (también ocultos) en vivo, regenerar con IA, eliminar
+- [x] Limpieza: editar, portada URL/IA, mejorar con IA, eliminar
+- [x] Música (Audios): eliminar y rellenar con IA al subir audio
+- [x] Camino ORÍGEN: crear caminos con IA, visible/oculto, portada URL
+- [x] Portadas por URL de /categorias y de los 10 juegos
+- [x] Usuarios: sumar/quitar hojas, eliminar, selección múltiple con filtros por plan
+- [x] Avisos ORÍGEN de todo (camino, ejercicios, palabra, visualízate, juegos, compras) + bolita en Camino
+- [x] Ocultar burbujas flotantes en secciones de concentración; nuevo ícono TODO EN ORÍGEN
