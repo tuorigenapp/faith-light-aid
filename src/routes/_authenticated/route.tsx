@@ -1,3 +1,7 @@
+import { useServerFn } from "@tanstack/react-start";
+import { ensureDailyNotice } from "@/lib/notices.functions";
+import { useOrigenPendings } from "@/hooks/use-origen-pendings";
+import { wholeHojas } from "@/lib/gems";
 import { createFileRoute, Link, Outlet, redirect, useLocation, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
@@ -97,6 +101,15 @@ function AuthLayoutInner() {
   const [open, setOpen] = useState(false);
   const { data: communityNotifications } = useCommunityNotifications(user?.id);
   const communityUnread = (communityNotifications?.length ?? 0) > 0;
+  const { data: pendings } = useOrigenPendings(user?.id);
+  const ensureNotice = useServerFn(ensureDailyNotice);
+  useEffect(() => {
+    if (!user?.id) return;
+    const key = `origen-notice-${new Date().toISOString().slice(0, 10)}`;
+    if (sessionStorage.getItem(key)) return;
+    sessionStorage.setItem(key, "1");
+    ensureNotice().then(() => qc.invalidateQueries({ queryKey: ["origen-pendings"] })).catch(() => {});
+  }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const { data: isAdmin } = useQuery({
     queryKey: ["isAdmin", user?.id],
@@ -160,6 +173,8 @@ function AuthLayoutInner() {
   const isActive = (to: string) =>
     location.pathname === to || (to !== "/dashboard" && location.pathname.startsWith(to));
 
+  const FOCUS = ["/visualiza", "/ejercicios", "/caminos", "/camino-nuevo", "/etapas/", "/juegos/", "/palabra", "/programas", "/chat", "/patrones", "/pareja", "/ministracion", "/diagnostico"];
+  const focusMode = FOCUS.some((f) => location.pathname.startsWith(f));
   const immersive = location.pathname.startsWith("/onboarding") || location.pathname.startsWith("/ruleta");
   if (immersive) {
     return (
@@ -273,7 +288,7 @@ function AuthLayoutInner() {
                   <span className="font-display font-bold text-[13px] text-foreground truncate max-w-[90px] leading-none">{displayName}</span>
                   <span className="inline-flex items-center gap-1 pl-2 ml-1 border-l border-border leading-none">
                     <span className="text-base leading-none">🍃</span>
-                    <span className="font-display font-bold text-[13px] text-primary leading-none">{gems.toLocaleString()}</span>
+                    <span className="font-display font-bold text-[13px] text-primary leading-none">{wholeHojas(gems).toLocaleString("es")}</span>
                   </span>
                 </Link>
               </li>
@@ -335,7 +350,7 @@ function AuthLayoutInner() {
          <main className="community-main flex-1 pb-[calc(env(safe-area-inset-bottom)+92px)] lg:pb-0"><Outlet /></main>
 
         {/* Floating chat with Ruth Esther */}
-         {!isCommunity && <><FloatingChatFab /><FloatingHelp /><FloatingOrigenMenu /><LiveActivityToasts /><SatisfactionPulse /><MotivationalReminders /></>}
+         {!isCommunity && !focusMode && <><FloatingChatFab /><FloatingHelp /><FloatingOrigenMenu /><LiveActivityToasts /><SatisfactionPulse /><MotivationalReminders /></>}
 
 
         {/* Mobile bottom nav — con botón central O */}
@@ -346,10 +361,10 @@ function AuthLayoutInner() {
         >
           <div className="relative">
             <div className="grid grid-cols-5 items-center h-[68px] rounded-[28px] bg-white/95 backdrop-blur-xl border border-border shadow-[0_10px_40px_-10px_rgba(124,92,255,0.35)]">
-              <BottomItem to="/etapas" label="Camino" icon={RouteIcon} isActive={isActive} />
+              <BottomItem to="/etapas" label="Camino" icon={RouteIcon} isActive={isActive} unread={!!pendings?.camino} />
                 <BottomItem to="/comunidad" label="Comunidad" icon={Users} isActive={isActive} unread={communityUnread} />
               <div aria-hidden />
-              <BottomItem to="/visualiza" label="Vívelo" icon={Headphones} isActive={isActive} />
+              <BottomItem to="/visualiza" label="Vívelo" icon={Headphones} isActive={isActive} unread={!!pendings?.visualiza} />
               <BottomItem to="/perfil" label="Yo" icon={UserIcon} isActive={isActive} />
             </div>
             <Link

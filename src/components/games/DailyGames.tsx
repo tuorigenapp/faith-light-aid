@@ -1,3 +1,4 @@
+import { useContentOverrides } from "@/hooks/use-content-overrides";
 import { ClientOnly, Link } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
@@ -1037,6 +1038,8 @@ export function DailyGames({
 /** Tarjeta-enlace con portada local (degradé tonal + ícono). */
 export function GameCard({ game, index = 0 }: { game: GameDef; index?: number }) {
   const plays = useGamePlays(game.id);
+  const ov = useContentOverrides().get(`juego:${game.id}`);
+  if (ov?.is_hidden) return null;
   return (
     <Link
       to="/juegos/$gameId"
@@ -1045,14 +1048,18 @@ export function GameCard({ game, index = 0 }: { game: GameDef; index?: number })
       className="block w-full overflow-hidden rounded-[16px] border border-border/60 bg-card shadow-soft text-left active:scale-[.98] transition-transform"
       style={{ animation: `fade-in .35s ease-out ${index * 45}ms both` }}
     >
-      <span className={cn("grid h-24 place-items-center bg-gradient-to-br text-white", game.tint)}>
-        <span className="grid h-12 w-12 place-items-center rounded-[14px] bg-white/20">
-          {game.icon}
+      {ov?.cover_url ? (
+        <img src={ov.cover_url} alt="" loading="lazy" className="h-24 w-full object-cover" />
+      ) : (
+        <span className={cn("grid h-24 place-items-center bg-gradient-to-br text-white", game.tint)}>
+          <span className="grid h-12 w-12 place-items-center rounded-[14px] bg-white/20">
+            {game.icon}
+          </span>
         </span>
-      </span>
+      )}
       <span className="block px-3 py-2.5">
         <span className="block font-display font-bold text-[13.5px] leading-tight truncate">
-          {game.title}
+          {ov?.title || game.title}
         </span>
         <span className="block text-[11.5px] text-muted-foreground leading-snug line-clamp-2">
           {game.desc}

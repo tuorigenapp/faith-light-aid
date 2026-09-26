@@ -1,3 +1,4 @@
+import { wholeHojas } from "@/lib/gems";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Award, Crown, Flame, Gift, Lock, Sparkles, Star, Trophy, type LucideIcon } from "lucide-react";
@@ -76,7 +77,7 @@ function PremiosOrigen() {
               <div className="mt-5 grid grid-cols-3 gap-3">
                 <Stat icon={Flame} label="Racha" value={`${streak} días`} />
                 <Stat icon={Sparkles} label="XP" value={xp.toLocaleString()} />
-                <Stat icon={Gift} label="Hojas" value={(data?.profile?.gems ?? 0).toLocaleString()} />
+                <Stat icon={Gift} label="Hojas" value={wholeHojas(data?.profile?.gems).toLocaleString("es")} />
               </div>
             </div>
             <img src={e3dStar} alt="Premio ORÍGEN en 3D" loading="eager" className="mx-auto w-48 h-48 object-contain drop-shadow-[0_18px_30px_color-mix(in_oklab,var(--primary)_28%,transparent)]" />

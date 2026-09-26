@@ -1,3 +1,4 @@
+import { celebrate } from "@/lib/celebrate";
 import { useMemo, useState, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
@@ -113,6 +114,7 @@ export function WordSearch({ words, storageKey, gemsReward = 40 }: { words: stri
     const hit = placed.find((p) => (p.word === word || p.word === rev) && !found.includes(p.word));
     if (hit) {
       setFound((f) => [...f, hit.word]);
+      celebrate(900);
       setFeedback(`Encontraste ${hit.word}: +5 hojas`);
       awardGems(5, "wordsearch_word", { word: hit.word }).then(() => {
         queryClient.invalidateQueries({ queryKey: ["profile"] });

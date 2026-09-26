@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import {
   Bell,
   BookHeart,
-  ChevronUp,
   CreditCard,
   Dumbbell,
   Gift,
@@ -95,7 +94,7 @@ export function FloatingOrigenMenu() {
         >
           <div className="flex items-center justify-between gap-2 px-1 pb-2">
             <p className="font-display text-[15px] font-extrabold text-foreground">
-              TODO LO DE ORÍGEN
+              Todo en ORÍGEN
             </p>
             <button
               onClick={() => setOpen(false)}
@@ -131,13 +130,19 @@ export function FloatingOrigenMenu() {
       <button
         onClick={() => setOpen((v) => !v)}
         aria-label="Abrir todo lo de ORÍGEN"
-        className={cn(
-          "fixed right-4 z-50 inline-flex min-h-12 items-center gap-2 rounded-full border border-primary/25 bg-card px-3 text-[12px] font-bold text-primary shadow-elev transition active:scale-95",
-        )}
+        className="fixed right-4 z-50 grid h-14 w-14 place-items-center rounded-[18px] bg-gradient-to-b from-[#8F74FF] to-[#6A4BEF] text-white shadow-[0_6px_18px_rgba(106,75,239,.35)] ring-2 ring-background transition active:scale-95"
         style={{ bottom: "calc(env(safe-area-inset-bottom) + 150px)" }}
       >
-        <span className="max-w-[124px] truncate">TODO LO DE ORÍGEN</span>
-        <ChevronUp className={cn("h-4 w-4 transition-transform", open && "rotate-180")} />
+        {open ? (
+          <X className="h-6 w-6" />
+        ) : (
+          <span className="grid grid-cols-2 gap-[3px]" aria-hidden>
+            <span className="h-[9px] w-[9px] rounded-[3px] bg-white" />
+            <span className="h-[9px] w-[9px] rounded-full bg-white/80" />
+            <span className="h-[9px] w-[9px] rounded-full bg-white/80" />
+            <span className="h-[9px] w-[9px] rotate-45 rounded-[2px] bg-[#FFD27A]" />
+          </span>
+        )}
         {anyPending && (
           <span
             aria-label="Tienes pendientes"

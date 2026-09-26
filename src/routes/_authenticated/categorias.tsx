@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Sparkles, ArrowRight } from "lucide-react";
 import { CAMINOS } from "@/lib/caminos";
 import fondo from "@/assets/fondo-mistico.png";
+import { useContentOverrides, useCustomCaminos } from "@/hooks/use-content-overrides";
 
 export const Route = createFileRoute("/_authenticated/categorias")({
   head: () => ({
@@ -18,6 +19,8 @@ export const Route = createFileRoute("/_authenticated/categorias")({
 });
 
 function CategoriasPage() {
+  const ov = useContentOverrides();
+  const custom = useCustomCaminos();
   return (
     <div className="relative min-h-[calc(100vh-4rem)]">
       <img src={fondo} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover opacity-[0.18]" />
@@ -33,7 +36,7 @@ function CategoriasPage() {
         </header>
 
         <div className="mt-4 grid gap-4 lg:grid-cols-2">
-          {CAMINOS.map((c, i) => (
+          {CAMINOS.filter((c) => !ov.get(`camino:${c.id}`)?.is_hidden).map((c, i) => (
             <Link
               key={c.id}
               to="/caminos/$caminoId"
@@ -42,10 +45,24 @@ function CategoriasPage() {
               style={{ animation: `fade-in .4s ease-out ${i * 70}ms both` }}
               className="block rounded-[16px] overflow-hidden shadow-soft active:scale-[.98] transition-transform"
             >
-              <img src={c.banner} alt={c.title} loading="lazy" className="w-full h-auto block" />
+              <img src={ov.get(`camino:${c.id}`)?.cover_url || c.banner} alt={ov.get(`camino:${c.id}`)?.title || c.title} loading="lazy" className="w-full h-auto block" />
             </Link>
           ))}
 
+          {(custom.data ?? []).map((c) => (
+            <Link
+              key={c.id}
+              to="/camino-nuevo/$slug"
+              params={{ slug: c.slug }}
+              className="block overflow-hidden rounded-[16px] border border-border bg-card shadow-soft active:scale-[.98] transition-transform"
+            >
+              {c.cover_url && <img src={c.cover_url} alt="" loading="lazy" className="h-44 w-full object-cover" />}
+              <span className="block p-4">
+                <span className="block font-display text-[17px] font-bold">{c.title}</span>
+                {c.subtitle && <span className="mt-1 block text-[13px] text-muted-foreground">{c.subtitle}</span>}
+              </span>
+            </Link>
+          ))}
 
           <Link
             to="/visualiza"

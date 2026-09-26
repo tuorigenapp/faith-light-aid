@@ -10,6 +10,7 @@ import {
   adminListUsers,
   adminSetPlan,
 } from "@/lib/admin.functions";
+import { adminAdjustHojas, adminDeleteUsers } from "@/lib/content-admin.functions";
 
 const EXCLUDED_KEY = "origen_admin_excluded_users";
 const PLAN_LABEL: Record<string, string> = {
@@ -40,7 +41,37 @@ export function UsersManager() {
   const [fullName, setFullName] = useState("");
   const [plan, setPlanValue] = useState<"explorador" | "puente" | "camino">("explorador");
 
+  const adjust = useServerFn(adminAdjustHojas);
+  const bulkDelete = useServerFn(adminDeleteUsers);
+  const [selected, setSelected] = useState<string[]>([]);
+  const [planFilter, setPlanFilter] = useState<"todos" | "pago" | "gratis" | "camino" | "puente">("todos");
+  const [search, setSearch] = useState("");
+  const [amount, setAmount] = useState("1");
+  const [bulkBusy, setBulkBusy] = useState(false);
+
   useEffect(() => setExcluded(loadExcluded()), []);
+
+  async function bulk(kind: "add" | "remove" | "delete") {
+    if (selected.length === 0) return;
+    const n = Math.abs(parseInt(amount.replace(/\D/g, ""), 10) || 0);
+    if (kind !== "delete" && n === 0) return toast.error("Escribe cuántas hojas.");
+    if (kind === "delete" && !confirm(`¿Eliminar ${selected.length} cuentas? No se puede deshacer.`)) return;
+    setBulkBusy(true);
+    try {
+      if (kind === "delete") {
+        const r = await bulkDelete({ data: { userIds: selected } });
+        toast.success(`${r.deleted} cuentas eliminadas.`);
+      } else {
+        const r = await adjust({ data: { userIds: selected, hojas: kind === "add" ? n : -n } });
+        toast.success(`${kind === "add" ? "Sumadas" : "Quitadas"} ${n} hojas a ${r.updated} personas.`);
+      }
+      setSelected([]);
+      qc.invalidateQueries({ queryKey: ["admin-users"] });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "No se pudo completar.");
+    }
+    setBulkBusy(false);
+  }
 
   const persist = (ids: string[]) => {
     setExcluded(ids);
@@ -95,7 +126,17 @@ export function UsersManager() {
     create.mutate();
   }
 
-  const visible = (users ?? []).filter((u) => showExcluded || !excluded.includes(u.id));
+  const isPaid = (u: { plan: string; planStatus: string }) => u.plan !== "explorador" && u.planStatus === "active";
+  const visible = (users ?? [])
+    .filter((u) => showExcluded || !excluded.includes(u.id))
+    .filter((u) =>
+      planFilter === "todos" ? true
+      : planFilter === "pago" ? isPaid(u)
+      : planFilter === "gratis" ? !isPaid(u)
+      : u.plan === planFilter,
+    )
+    .filter((u) => `${u.name ?? ""} ${u.email ?? ""}`.toLowerCase().includes(search.trim().toLowerCase()));
+  const allSelected = visible.length > 0 && visible.every((u) => selected.includes(u.id));
   const counted = (users ?? []).filter((u) => !excluded.includes(u.id));
   const pro = counted.filter((u) => u.plan === "camino" && u.planStatus === "active").length;
   const active7 = counted.filter(
@@ -182,6 +223,30 @@ export function UsersManager() {
           </button>
         </div>
 
+        <div className="mt-3 flex flex-wrap gap-2">
+          {([
+            ["todos", "Todas"], ["pago", "De pago"], ["gratis", "Gratis"], ["camino", "Camino ORÍGEN"], ["puente", "US$2,99"],
+          ] as const).map(([k, l]) => (
+            <button key={k} onClick={() => { setPlanFilter(k); setSelected([]); }}
+              className={`h-9 rounded-full px-3 text-[12.5px] font-semibold ${planFilter === k ? "bg-primary text-primary-foreground" : "bg-secondary"}`}>
+              {l}
+            </button>
+          ))}
+        </div>
+        <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar por nombre o correo"
+          className="mt-3 h-11 w-full rounded-[10px] border-[1.5px] border-border bg-background px-3 text-[14px] outline-none focus:border-primary" />
+        {selected.length > 0 && (
+          <div className="mt-3 flex flex-wrap items-center gap-2 rounded-[12px] border-2 border-primary/40 bg-primary/5 p-3">
+            <span className="text-[13px] font-bold">{selected.length} seleccionadas</span>
+            <input value={amount} onChange={(e) => setAmount(e.target.value)} inputMode="numeric" aria-label="Cantidad de hojas"
+              className="h-11 w-20 rounded-[10px] border-[1.5px] border-border bg-background px-2 text-center text-[14px]" />
+            <button disabled={bulkBusy} onClick={() => bulk("add")} className="h-11 rounded-[10px] bg-primary px-3 text-[13px] font-bold text-primary-foreground">Sumar hojas</button>
+            <button disabled={bulkBusy} onClick={() => bulk("remove")} className="h-11 rounded-[10px] bg-secondary px-3 text-[13px] font-bold">Quitar hojas</button>
+            <button disabled={bulkBusy} onClick={() => bulk("delete")} className="h-11 rounded-[10px] bg-destructive/10 px-3 text-[13px] font-bold text-destructive">Eliminar cuentas</button>
+            {bulkBusy && <Loader2 className="h-4 w-4 animate-spin" />}
+          </div>
+        )}
+
         {isLoading ? (
           <div className="mt-4 space-y-2">
             {[0, 1, 2, 3].map((i) => (
@@ -195,6 +260,10 @@ export function UsersManager() {
             <table className="w-full min-w-[760px] text-left text-[13px]">
               <thead className="text-[11.5px] uppercase tracking-wide text-muted-foreground">
                 <tr>
+                  <th className="pb-2 pr-2">
+                    <input type="checkbox" aria-label="Seleccionar todas" checked={allSelected} className="h-5 w-5"
+                      onChange={() => setSelected(allSelected ? [] : visible.map((u) => u.id))} />
+                  </th>
                   {["Persona", "Plan", "Hojas", "Racha", "Registro", "Métricas", ""].map((h) => (
                     <th key={h} className="pb-2 pr-3 font-semibold">
                       {h}
@@ -207,6 +276,10 @@ export function UsersManager() {
                   const isExcluded = excluded.includes(u.id);
                   return (
                     <tr key={u.id} className="border-t border-border/70">
+                      <td className="py-3 pr-2">
+                        <input type="checkbox" aria-label="Seleccionar" className="h-5 w-5" checked={selected.includes(u.id)}
+                          onChange={() => setSelected((s) => (s.includes(u.id) ? s.filter((x) => x !== u.id) : [...s, u.id]))} />
+                      </td>
                       <td className="py-3 pr-3">
                         <p className="font-semibold">{u.name ?? "Sin datos"}</p>
                         <p className="text-[12px] text-muted-foreground">

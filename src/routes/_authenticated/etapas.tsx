@@ -1,3 +1,4 @@
+import { wholeHojas } from "@/lib/gems";
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
@@ -61,7 +62,7 @@ function Etapas() {
   const completedCount = completedIds.size;
   const pct = Math.round((completedCount / total) * 100);
   const firstName = (profile?.display_name || profile?.full_name || "Alma").split(" ")[0];
-  const gems = profile?.gems ?? 0;
+  const gems = wholeHojas(profile?.gems);
   const rewards = data?.rewards ?? [];
   const totalXp = rewards.reduce((a: number, r: any) => a + (r.xp ?? 0), 0);
   const insignias = Array.from(new Set(rewards.map((r: any) => r.insignia).filter(Boolean))) as string[];

@@ -1,7 +1,6 @@
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { supabase } from "@/integrations/supabase/client";
 import {
   adminCreateLimpieza,
   adminCreateVisualizaCategory,
@@ -9,16 +8,27 @@ import {
   adminListLimpieza,
   adminToggleLimpieza,
   adminUpdateSubtopic,
+  adminListCategories,
+  adminUpdateCategory,
+  adminDeleteCategory,
+  adminListSubtopics,
+  adminDeleteSubtopic,
+  adminRegenerateSubtopic,
+  adminUpdateLimpieza,
+  adminDeleteLimpieza,
 } from "@/lib/content-admin.functions";
-import { Loader2, Plus, Sparkles, Wand2 } from "lucide-react";
+import { Copy, Eye, EyeOff, ImageIcon, Loader2, Pencil, Plus, RefreshCw, Search, Sparkles, Trash2, Wand2 } from "lucide-react";
+import { CaminosStudio, CoversStudio } from "@/components/admin/CaminosStudio";
 import { cn } from "@/lib/utils";
 
-type Tab = "temas" | "subtemas" | "limpieza";
+type Tab = "temas" | "subtemas" | "limpieza" | "caminos" | "portadas";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "temas", label: "Temas principales" },
   { id: "subtemas", label: "Subtemas" },
   { id: "limpieza", label: "Limpieza espiritual" },
+  { id: "caminos", label: "Caminos ORÍGEN" },
+  { id: "portadas", label: "Portadas de categorías y juegos" },
 ];
 
 function Field({
@@ -78,6 +88,8 @@ export function ContentStudio() {
       {tab === "temas" && <MainTopics onNote={setNote} />}
       {tab === "subtemas" && <Subtopics onNote={setNote} />}
       {tab === "limpieza" && <Limpieza onNote={setNote} />}
+      {tab === "caminos" && <CaminosStudio onNote={setNote} />}
+      {tab === "portadas" && <CoversStudio onNote={setNote} />}
     </div>
   );
 }
@@ -85,16 +97,33 @@ export function ContentStudio() {
 type Notify = (n: { text: string; error?: boolean } | null) => void;
 
 function useCategories() {
+  const list = useServerFn(adminListCategories);
   return useQuery({
     queryKey: ["studio-categories"],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("manifest_categories")
-        .select("id, title, group_key, required_plan, cover_url, is_published, sort_order")
-        .order("sort_order");
-      return data ?? [];
-    },
+    queryFn: () => list(),
+    refetchInterval: 20_000,
   });
+}
+
+export function ask(msg: string) {
+  return typeof window !== "undefined" && window.confirm(msg);
+}
+
+export function IconAction({ label, onClick, children, danger }: { label: string; onClick: () => void; children: React.ReactNode; danger?: boolean }) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      title={label}
+      onClick={onClick}
+      className={cn(
+        "grid h-11 w-11 shrink-0 place-items-center rounded-[10px] border border-border bg-card transition active:scale-95",
+        danger ? "text-destructive" : "text-foreground/70 hover:text-foreground",
+      )}
+    >
+      {children}
+    </button>
+  );
 }
 
 function MainTopics({ onNote }: { onNote: Notify }) {
@@ -164,29 +193,120 @@ function MainTopics({ onNote }: { onNote: Notify }) {
         </button>
       </div>
 
-      <div className="rounded-[16px] border border-border bg-card p-5">
-        <h3 className="font-display text-[17px] font-bold text-foreground">Temas existentes</h3>
-        {isLoading && <div className="mt-3 h-24 animate-pulse rounded-[12px] bg-muted" />}
-        <ul className="mt-3 space-y-2">
-          {categories.map((c) => (
-            <li key={c.id} className="flex items-center gap-3 rounded-[12px] border border-border bg-muted/40 p-3">
-              {c.cover_url ? (
-                <img src={c.cover_url} alt="" className="h-12 w-12 shrink-0 rounded-[10px] object-cover" />
-              ) : (
-                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-[10px] bg-muted text-foreground/50">
-                  <Sparkles className="h-4 w-4" />
+      <TopicList categories={categories} loading={isLoading} onNote={onNote} />
+    </div>
+  );
+}
+
+type Cat = { id: string; title: string; group_key: string; cover_url: string | null; is_published: boolean | null; subtopics: number };
+
+function TopicList({ categories, loading, onNote }: { categories: Cat[]; loading: boolean; onNote: Notify }) {
+  const qc = useQueryClient();
+  const update = useServerFn(adminUpdateCategory);
+  const remove = useServerFn(adminDeleteCategory);
+  const [q, setQ] = useState("");
+  const [edit, setEdit] = useState<Cat | null>(null);
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const refresh = () => qc.invalidateQueries({ queryKey: ["studio-categories"] });
+
+  async function run(id: string, fn: () => Promise<unknown>, ok: string) {
+    setBusyId(id);
+    try {
+      await fn();
+      onNote({ text: ok });
+      refresh();
+    } catch (e) {
+      onNote({ text: e instanceof Error ? e.message : "No pudimos guardar el cambio.", error: true });
+    }
+    setBusyId(null);
+  }
+
+  const shown = categories.filter((c) => c.title.toLowerCase().includes(q.trim().toLowerCase()));
+
+  return (
+    <div className="rounded-[16px] border border-border bg-card p-5 lg:col-span-2">
+      <h3 className="font-display text-[17px] font-bold text-foreground">Temas existentes ({categories.length})</h3>
+      <div className="mt-3 flex items-center gap-2 rounded-[10px] border border-border bg-background px-3">
+        <Search className="h-4 w-4 text-muted-foreground" />
+        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar tema por nombre" className="min-h-11 w-full bg-transparent text-[14px] outline-none" />
+      </div>
+      {loading && <div className="mt-3 h-24 animate-pulse rounded-[12px] bg-muted" />}
+      <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {shown.map((c) => (
+          <article key={c.id} className="overflow-hidden rounded-[14px] border border-border bg-muted/30">
+            {c.cover_url ? (
+              <img src={c.cover_url} alt={c.title} className="aspect-[16/10] w-full object-cover" />
+            ) : (
+              <div className="grid aspect-[16/10] w-full place-items-center bg-muted text-foreground/40"><ImageIcon className="h-6 w-6" /></div>
+            )}
+            <div className="p-3">
+              <div className="flex items-start justify-between gap-2">
+                <p className="text-[14px] font-bold leading-tight text-foreground">{c.title}</p>
+                <span className={cn("shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold", c.is_published ? "bg-[#3FBE8F]/20 text-[#1B6B4F]" : "bg-muted text-foreground/60")}>
+                  {c.is_published ? "Visible" : "Oculto"}
                 </span>
+              </div>
+              <p className="text-[11.5px] text-foreground/55">{c.group_key} · {c.subtopics} subtemas</p>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {busyId === c.id ? (
+                  <span className="grid h-11 w-11 place-items-center"><Loader2 className="h-4 w-4 animate-spin" /></span>
+                ) : (
+                  <>
+                    <IconAction label={c.is_published ? "Ocultar" : "Hacer visible"} onClick={() => run(c.id, () => update({ data: { id: c.id, isPublished: !c.is_published } }), c.is_published ? "Tema oculto." : "Tema visible en la app.")}>
+                      {c.is_published ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                    </IconAction>
+                    <IconAction label="Editar" onClick={() => setEdit(c)}><Pencil className="h-4 w-4" /></IconAction>
+                    <IconAction label="Nueva portada con IA" onClick={() => run(c.id, () => update({ data: { id: c.id, regenerateCover: true } }), "Portada nueva generada.")}>
+                      <RefreshCw className="h-4 w-4" />
+                    </IconAction>
+                    <IconAction danger label="Eliminar" onClick={() => ask(`¿Eliminar "${c.title}" y sus ${c.subtopics} subtemas? No se puede deshacer.`) && run(c.id, () => remove({ data: { id: c.id } }), "Tema eliminado.")}>
+                      <Trash2 className="h-4 w-4" />
+                    </IconAction>
+                  </>
+                )}
+              </div>
+              {edit?.id === c.id && (
+                <EditTopic
+                  cat={c}
+                  others={categories.filter((o) => o.id !== c.id && o.cover_url)}
+                  onCancel={() => setEdit(null)}
+                  onSave={(patch) => run(c.id, async () => { await update({ data: { id: c.id, ...patch } }); setEdit(null); }, "Tema actualizado.")}
+                />
               )}
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-[14px] font-bold text-foreground">{c.title}</span>
-                <span className="block text-[11.5px] text-foreground/55">{c.group_key}</span>
-              </span>
-              <span className={cn("shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold", c.is_published ? "bg-[#3FBE8F]/20 text-[#1B6B4F]" : "bg-muted text-foreground/60")}>
-                {c.is_published ? "Visible" : "Oculto"}
-              </span>
-            </li>
-          ))}
-        </ul>
+            </div>
+          </article>
+        ))}
+      </div>
+      {!loading && shown.length === 0 && <p className="mt-3 text-[13px] text-foreground/60">No encontramos temas con ese nombre.</p>}
+    </div>
+  );
+}
+
+function EditTopic({ cat, others, onCancel, onSave }: {
+  cat: Cat; others: Cat[]; onCancel: () => void;
+  onSave: (p: { title?: string; coverUrl?: string; copyFromId?: string }) => void;
+}) {
+  const [title, setTitle] = useState(cat.title);
+  const [cover, setCover] = useState(cat.cover_url ?? "");
+  const [copy, setCopy] = useState("");
+  return (
+    <div className="mt-3 space-y-2 rounded-[12px] border border-border bg-card p-3">
+      <Field label="Título"><input className={inputClass} value={title} onChange={(e) => setTitle(e.target.value)} /></Field>
+      <Field label="Portada (enlace de imagen)"><input className={inputClass} value={cover} onChange={(e) => setCover(e.target.value)} placeholder="https://…" /></Field>
+      <Field label="Usar el mismo diseño que otro tema">
+        <select className={inputClass} value={copy} onChange={(e) => setCopy(e.target.value)}>
+          <option value="">No copiar</option>
+          {others.map((o) => <option key={o.id} value={o.id}>{o.title}</option>)}
+        </select>
+      </Field>
+      <div className="flex gap-2">
+        <button onClick={onCancel} className="min-h-11 flex-1 rounded-[12px] border border-border text-[14px] font-semibold">Cancelar</button>
+        <button
+          onClick={() => onSave({ title: title.trim() !== cat.title ? title.trim() : undefined, coverUrl: cover !== (cat.cover_url ?? "") ? cover.trim() : undefined, copyFromId: copy || undefined })}
+          className="min-h-11 flex-1 rounded-[12px] bg-[#7C5CFF] text-[14px] font-bold text-white"
+        >
+          <Copy className="mr-1 inline h-4 w-4" /> Guardar
+        </button>
       </div>
     </div>
   );
@@ -204,18 +324,29 @@ function Subtopics({ onNote }: { onNote: Notify }) {
   const [busy, setBusy] = useState(false);
   const selected = categoryId || categories[0]?.id || "";
 
+  const listSubs = useServerFn(adminListSubtopics);
+  const removeSub = useServerFn(adminDeleteSubtopic);
+  const regen = useServerFn(adminRegenerateSubtopic);
+  const [working, setWorking] = useState<string | null>(null);
   const { data: subtopics = [] } = useQuery({
     queryKey: ["studio-subtopics", selected],
     enabled: !!selected,
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("manifest_audios")
-        .select("id, day_index, title, audio_url, pdf_url, is_published")
-        .eq("category_id", selected)
-        .order("day_index");
-      return data ?? [];
-    },
+    refetchInterval: 20_000,
+    queryFn: () => listSubs({ data: { categoryId: selected } }),
   });
+
+  async function act(id: string, fn: () => Promise<unknown>, ok: string) {
+    setWorking(id);
+    try {
+      await fn();
+      onNote({ text: ok });
+      qc.invalidateQueries({ queryKey: ["studio-subtopics"] });
+      qc.invalidateQueries({ queryKey: ["studio-categories"] });
+    } catch (e) {
+      onNote({ text: e instanceof Error ? e.message : "No pudimos guardar.", error: true });
+    }
+    setWorking(null);
+  }
 
   async function submit() {
     if (!selected) return onNote({ text: "Primero crea un tema principal.", error: true });
@@ -236,10 +367,15 @@ function Subtopics({ onNote }: { onNote: Notify }) {
     setBusy(false);
   }
 
+  async function regenSilently(id: string) {
+    try { await regen({ data: { id, notes: "", cover: false } }); } catch { /* el audio ya quedó guardado */ }
+  }
+
   async function saveAudio(id: string, audioUrl: string) {
     try {
-      await update({ data: { id, audioUrl } });
-      onNote({ text: "Audio guardado." });
+      await update({ data: { id, audioUrl, isPublished: audioUrl ? true : undefined } });
+      if (audioUrl) await regenSilently(id);
+      onNote({ text: "Audio guardado. La IA completó el contenido y el subtema ya está visible." });
       qc.invalidateQueries({ queryKey: ["studio-subtopics"] });
     } catch {
       onNote({ text: "No pudimos guardar el audio.", error: true });
@@ -264,9 +400,9 @@ function Subtopics({ onNote }: { onNote: Notify }) {
         </h3>
         <Field label="Tema principal">
           <select className={inputClass} value={selected} onChange={(e) => setCategoryId(e.target.value)}>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id} className="text-black">
-                {c.title}
+              {categories.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.title} {c.is_published ? "" : "(oculto)"} · {c.subtopics} subtemas
               </option>
             ))}
           </select>
@@ -290,7 +426,7 @@ function Subtopics({ onNote }: { onNote: Notify }) {
           Crear subtema con IA
         </button>
         <p className="text-[12px] leading-snug text-foreground/55">
-          La IA lo coloca en el siguiente día libre y escribe lección, ejercicio con pasos, tareas, sopa de letras, preguntas y afirmación. Tú subes el audio.
+          No importa el orden: la IA lo coloca en el siguiente día libre y escribe lección, ejercicio con pasos, tareas, sopa de letras, preguntas y afirmación. Tú subes el audio.
         </p>
       </div>
 
@@ -313,6 +449,18 @@ function Subtopics({ onNote }: { onNote: Notify }) {
                 >
                   {s.is_published ? "Visible" : "Oculto"}
                 </button>
+                {working === s.id ? (
+                  <span className="grid h-11 w-11 place-items-center"><Loader2 className="h-4 w-4 animate-spin" /></span>
+                ) : (
+                  <>
+                    <IconAction label="Rehacer todo con IA" onClick={() => act(s.id, () => regen({ data: { id: s.id, notes: "", cover: true } }), "La IA reescribió lección, juegos, afirmación y portada.")}>
+                      <Wand2 className="h-4 w-4" />
+                    </IconAction>
+                    <IconAction danger label="Eliminar" onClick={() => ask(`¿Eliminar "${s.title}"?`) && act(s.id, () => removeSub({ data: { id: s.id } }), "Subtema eliminado.")}>
+                      <Trash2 className="h-4 w-4" />
+                    </IconAction>
+                  </>
+                )}
               </div>
               <div className="mt-2 flex gap-2">
                 <input
@@ -342,6 +490,21 @@ function Limpieza({ onNote }: { onNote: Notify }) {
   const create = useServerFn(adminCreateLimpieza);
   const list = useServerFn(adminListLimpieza);
   const toggle = useServerFn(adminToggleLimpieza);
+  const updateL = useServerFn(adminUpdateLimpieza);
+  const removeL = useServerFn(adminDeleteLimpieza);
+  const [working, setWorking] = useState<string | null>(null);
+  const [editing, setEditing] = useState<{ id: string; title: string; cover: string; notes: string } | null>(null);
+  async function act(id: string, fn: () => Promise<unknown>, ok: string) {
+    setWorking(id);
+    try {
+      await fn();
+      onNote({ text: ok });
+      qc.invalidateQueries({ queryKey: ["studio-limpieza"] });
+    } catch (e) {
+      onNote({ text: e instanceof Error ? e.message : "No pudimos guardar.", error: true });
+    }
+    setWorking(null);
+  }
   const [title, setTitle] = useState("");
   const [level, setLevel] = useState(1);
   const [notes, setNotes] = useState("");
@@ -404,7 +567,8 @@ function Limpieza({ onNote }: { onNote: Notify }) {
         <h3 className="font-display text-[17px] font-bold text-foreground">Prácticas creadas</h3>
         <ul className="mt-3 space-y-2">
           {practices.map((p) => (
-            <li key={p.id} className="flex items-center gap-3 rounded-[12px] border border-border bg-muted/40 p-3">
+            <Fragment key={p.id}>
+            <li className="flex items-center gap-3 rounded-[12px] border border-border bg-muted/40 p-3">
               {p.cover_url && <img src={p.cover_url} alt="" className="h-12 w-12 shrink-0 rounded-[10px] object-cover" />}
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-[14px] font-bold text-foreground">{p.title}</span>
@@ -424,7 +588,28 @@ function Limpieza({ onNote }: { onNote: Notify }) {
               >
                 {p.is_published ? "Visible" : "Oculta"}
               </button>
+              {working === p.id ? (
+                <span className="grid h-11 w-11 place-items-center"><Loader2 className="h-4 w-4 animate-spin" /></span>
+              ) : (
+                <>
+                  <IconAction label="Editar" onClick={() => setEditing({ id: p.id, title: p.title, cover: p.cover_url ?? "", notes: "" })}><Pencil className="h-4 w-4" /></IconAction>
+                  <IconAction danger label="Eliminar" onClick={() => ask(`¿Eliminar "${p.title}"?`) && act(p.id, () => removeL({ data: { id: p.id } }), "Práctica eliminada.")}><Trash2 className="h-4 w-4" /></IconAction>
+                </>
+              )}
             </li>
+            {editing?.id === p.id && (
+              <li className="space-y-2 rounded-[12px] border border-border bg-card p-3">
+                <Field label="Título"><input className={inputClass} value={editing.title} onChange={(e) => setEditing({ ...editing, title: e.target.value })} /></Field>
+                <Field label="Portada (enlace de imagen)"><input className={inputClass} value={editing.cover} onChange={(e) => setEditing({ ...editing, cover: e.target.value })} placeholder="https://…" /></Field>
+                <Field label="Nota para la IA"><textarea className={cn(inputClass, "min-h-20 py-2")} value={editing.notes} onChange={(e) => setEditing({ ...editing, notes: e.target.value })} /></Field>
+                <div className="grid gap-2 sm:grid-cols-3">
+                  <button className="min-h-11 rounded-[12px] border border-border text-[13px] font-semibold" onClick={() => { const e = editing; setEditing(null); act(p.id, () => updateL({ data: { id: p.id, title: e.title.trim() !== p.title ? e.title.trim() : undefined, coverUrl: e.cover !== (p.cover_url ?? "") ? e.cover.trim() : undefined, notes: e.notes } }), "Práctica guardada."); }}>Guardar cambios</button>
+                  <button className="min-h-11 rounded-[12px] border border-border text-[13px] font-semibold" onClick={() => { const e = editing; setEditing(null); act(p.id, () => updateL({ data: { id: p.id, regenerateCover: true, notes: e.notes } }), "Portada nueva generada."); }}><RefreshCw className="mr-1 inline h-4 w-4" />Portada con IA</button>
+                  <button className="min-h-11 rounded-[12px] bg-[#7C5CFF] text-[13px] font-bold text-white" onClick={() => { const e = editing; setEditing(null); act(p.id, () => updateL({ data: { id: p.id, improve: true, notes: e.notes } }), "La IA mejoró la receta y los pasos."); }}><Wand2 className="mr-1 inline h-4 w-4" />Mejorar con IA</button>
+                </div>
+              </li>
+            )}
+            </Fragment>
           ))}
           {practices.length === 0 && (
             <li className="rounded-[12px] border border-border bg-muted/40 p-4 text-[13px] text-foreground/60">
