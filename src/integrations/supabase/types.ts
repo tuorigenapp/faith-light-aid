@@ -104,6 +104,33 @@ export type Database = {
         }
         Relationships: []
       }
+      audio_unlocks: {
+        Row: {
+          audio_id: string | null
+          created_at: string
+          id: string
+          source: string
+          used_at: string | null
+          user_id: string
+        }
+        Insert: {
+          audio_id?: string | null
+          created_at?: string
+          id?: string
+          source?: string
+          used_at?: string | null
+          user_id: string
+        }
+        Update: {
+          audio_id?: string | null
+          created_at?: string
+          id?: string
+          source?: string
+          used_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       cancellation_surveys: {
         Row: {
           comment: string | null
@@ -1242,6 +1269,7 @@ export type Database = {
           cover_url: string | null
           created_at: string
           description: string | null
+          design: string
           gratitude_gracias: string
           group_key: string
           id: string
@@ -1264,6 +1292,7 @@ export type Database = {
           cover_url?: string | null
           created_at?: string
           description?: string | null
+          design?: string
           gratitude_gracias: string
           group_key?: string
           id: string
@@ -1286,6 +1315,7 @@ export type Database = {
           cover_url?: string | null
           created_at?: string
           description?: string | null
+          design?: string
           gratitude_gracias?: string
           group_key?: string
           id?: string
@@ -2269,6 +2299,7 @@ export type Database = {
         Args: { _amount: number; _meta?: Json; _reason: string }
         Returns: number
       }
+      claim_audio_unlock: { Args: { _audio_id: string }; Returns: boolean }
       community_anonymous_number: {
         Args: { _user_id: string }
         Returns: number
