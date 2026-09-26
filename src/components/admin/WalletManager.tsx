@@ -89,14 +89,14 @@ export function WalletManager() {
             className={cn(
               "inline-flex min-h-11 items-center gap-2 rounded-full border-2 px-4 text-[13px] font-bold transition",
               tab === t.id
-                ? "border-[#7C5CFF] bg-[#7C5CFF]/15 text-white"
-                : "border-white/15 bg-white/[0.04] text-white/70",
+                ? "border-[#7C5CFF] bg-[#7C5CFF]/15 text-foreground"
+                : "border-white/15 bg-card text-foreground/70",
             )}
           >
             <t.icon className="h-4 w-4" />
             {t.label}
             {t.count > 0 && (
-              <span className="grid h-5 min-w-5 place-items-center rounded-full bg-destructive px-1 text-[11px] font-bold text-white">
+              <span className="grid h-5 min-w-5 place-items-center rounded-full bg-destructive px-1 text-[11px] font-bold text-foreground">
                 {t.count}
               </span>
             )}
@@ -104,7 +104,7 @@ export function WalletManager() {
         ))}
         <button
           onClick={() => qc.invalidateQueries({ queryKey: ["admin-wallet"] })}
-          className="inline-flex min-h-11 items-center gap-2 rounded-full border-2 border-white/15 bg-white/[0.04] px-4 text-[13px] font-bold text-white/70"
+          className="inline-flex min-h-11 items-center gap-2 rounded-full border-2 border-white/15 bg-card px-4 text-[13px] font-bold text-foreground/70"
         >
           <RefreshCw className="h-4 w-4" />
           Actualizar
@@ -124,23 +124,23 @@ export function WalletManager() {
         </p>
       )}
 
-      {isLoading && <div className="h-32 animate-pulse rounded-[16px] bg-white/10" />}
+      {isLoading && <div className="h-32 animate-pulse rounded-[16px] bg-muted" />}
 
       {tab === "compras" && (
         <ul className="space-y-3">
           {(data?.purchases ?? []).map((p) => (
-            <li key={p.id} className="rounded-[16px] border border-white/10 bg-white/[0.04] p-4">
+            <li key={p.id} className="rounded-[16px] border border-border bg-card p-4">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="text-[15px] font-bold text-white">{nameOf(p.user_id)}</span>
-                <span className={cn("rounded-full px-2.5 py-1 text-[11px] font-bold", STATUS_STYLE[p.status] ?? "bg-white/10 text-white/60")}>
+                <span className="text-[15px] font-bold text-foreground">{nameOf(p.user_id)}</span>
+                <span className={cn("rounded-full px-2.5 py-1 text-[11px] font-bold", STATUS_STYLE[p.status] ?? "bg-muted text-foreground/60")}>
                   {p.status}
                 </span>
-                <span className="text-[11.5px] text-white/50">{whenLabel(p.created_at)}</span>
+                <span className="text-[11.5px] text-foreground/50">{whenLabel(p.created_at)}</span>
               </div>
-              <p className="mt-1 text-[13px] text-white/70">
+              <p className="mt-1 text-[13px] text-foreground/70">
                 {p.hojas} hojas · US${Number(p.usd).toFixed(2)} · {p.method}
               </p>
-              {p.user_message && <p className="mt-1 text-[13px] italic text-white/60">“{p.user_message}”</p>}
+              {p.user_message && <p className="mt-1 text-[13px] italic text-foreground/60">“{p.user_message}”</p>}
               {p.appeal_message && (
                 <p className="mt-2 rounded-[10px] border border-[#E9B949]/40 bg-[#E9B949]/10 px-3 py-2 text-[13px] text-[#F3D08A]">
                   Pidió revisión: {p.appeal_message}
@@ -151,14 +151,14 @@ export function WalletManager() {
                   <img src={data.receipts[p.id]} alt="Comprobante de pago" className="max-h-56 w-full rounded-[12px] object-contain" />
                 </a>
               )}
-              {p.admin_note && <p className="mt-2 text-[12.5px] text-white/55">Nota: {p.admin_note}</p>}
+              {p.admin_note && <p className="mt-2 text-[12.5px] text-foreground/55">Nota: {p.admin_note}</p>}
               {p.status !== "aprobada" && (
                 <div className="mt-3 space-y-2">
                   <input
                     value={messages[p.id] ?? ""}
                     onChange={(e) => setMessages((m) => ({ ...m, [p.id]: e.target.value }))}
                     placeholder="Mensaje para la persona (opcional)"
-                    className="w-full min-h-12 rounded-[10px] border-2 border-white/15 bg-white/[0.06] px-3 text-[14px] text-white placeholder:text-white/40 focus:border-[#7C5CFF] focus:outline-none"
+                    className="w-full min-h-12 rounded-[10px] border-2 border-white/15 bg-card px-3 text-[14px] text-foreground placeholder:text-muted-foreground focus:border-[#7C5CFF] focus:outline-none"
                   />
                   <div className="flex flex-wrap gap-2">
                     <button
@@ -172,7 +172,7 @@ export function WalletManager() {
                     <button
                       onClick={() => act("compras", p.id, "rechazada")}
                       disabled={busyId === p.id}
-                      className="inline-flex min-h-11 items-center gap-2 rounded-full bg-destructive/90 px-4 text-[13px] font-bold text-white disabled:opacity-60"
+                      className="inline-flex min-h-11 items-center gap-2 rounded-full bg-destructive/90 px-4 text-[13px] font-bold text-foreground disabled:opacity-60"
                     >
                       <X className="h-4 w-4" />
                       Rechazar
@@ -180,7 +180,7 @@ export function WalletManager() {
                     <button
                       onClick={() => act("compras", p.id, "revision")}
                       disabled={busyId === p.id}
-                      className="inline-flex min-h-11 items-center gap-2 rounded-full border-2 border-white/20 px-4 text-[13px] font-bold text-white/80 disabled:opacity-60"
+                      className="inline-flex min-h-11 items-center gap-2 rounded-full border-2 border-white/20 px-4 text-[13px] font-bold text-foreground/80 disabled:opacity-60"
                     >
                       Pedir revisión
                     </button>
@@ -190,7 +190,7 @@ export function WalletManager() {
             </li>
           ))}
           {!isLoading && (data?.purchases ?? []).length === 0 && (
-            <li className="rounded-[16px] border border-white/10 bg-white/[0.04] p-5 text-[13px] text-white/60">
+            <li className="rounded-[16px] border border-border bg-card p-5 text-[13px] text-foreground/60">
               Todavía nadie ha subido un comprobante de pago.
             </li>
           )}
@@ -200,15 +200,15 @@ export function WalletManager() {
       {tab === "transferencias" && (
         <ul className="space-y-3">
           {(data?.transfers ?? []).map((t) => (
-            <li key={t.id} className="rounded-[16px] border border-white/10 bg-white/[0.04] p-4">
+            <li key={t.id} className="rounded-[16px] border border-border bg-card p-4">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="text-[15px] font-bold text-white">{nameOf(t.user_id)}</span>
-                <span className={cn("rounded-full px-2.5 py-1 text-[11px] font-bold", STATUS_STYLE[t.status] ?? "bg-white/10 text-white/60")}>
+                <span className="text-[15px] font-bold text-foreground">{nameOf(t.user_id)}</span>
+                <span className={cn("rounded-full px-2.5 py-1 text-[11px] font-bold", STATUS_STYLE[t.status] ?? "bg-muted text-foreground/60")}>
                   {t.status}
                 </span>
-                <span className="text-[11.5px] text-white/50">{whenLabel(t.created_at)}</span>
+                <span className="text-[11.5px] text-foreground/50">{whenLabel(t.created_at)}</span>
               </div>
-              <p className="mt-1 text-[13px] text-white/70">
+              <p className="mt-1 text-[13px] text-foreground/70">
                 Envía {Math.round(t.points / 100)} hojas a {t.to_email}
               </p>
               {t.appeal_message && (
@@ -216,14 +216,14 @@ export function WalletManager() {
                   Pidió revisión: {t.appeal_message}
                 </p>
               )}
-              {t.admin_note && <p className="mt-2 text-[12.5px] text-white/55">Nota: {t.admin_note}</p>}
+              {t.admin_note && <p className="mt-2 text-[12.5px] text-foreground/55">Nota: {t.admin_note}</p>}
               {t.status !== "aprobada" && t.status !== "rechazada" && (
                 <div className="mt-3 space-y-2">
                   <input
                     value={messages[t.id] ?? ""}
                     onChange={(e) => setMessages((m) => ({ ...m, [t.id]: e.target.value }))}
                     placeholder="Mensaje para la persona (opcional)"
-                    className="w-full min-h-12 rounded-[10px] border-2 border-white/15 bg-white/[0.06] px-3 text-[14px] text-white placeholder:text-white/40 focus:border-[#7C5CFF] focus:outline-none"
+                    className="w-full min-h-12 rounded-[10px] border-2 border-white/15 bg-card px-3 text-[14px] text-foreground placeholder:text-muted-foreground focus:border-[#7C5CFF] focus:outline-none"
                   />
                   <div className="flex flex-wrap gap-2">
                     <button
@@ -237,7 +237,7 @@ export function WalletManager() {
                     <button
                       onClick={() => act("transferencias", t.id, "rechazada")}
                       disabled={busyId === t.id}
-                      className="inline-flex min-h-11 items-center gap-2 rounded-full bg-destructive/90 px-4 text-[13px] font-bold text-white disabled:opacity-60"
+                      className="inline-flex min-h-11 items-center gap-2 rounded-full bg-destructive/90 px-4 text-[13px] font-bold text-foreground disabled:opacity-60"
                     >
                       <X className="h-4 w-4" />
                       Rechazar y devolver
@@ -245,7 +245,7 @@ export function WalletManager() {
                     <button
                       onClick={() => act("transferencias", t.id, "revision")}
                       disabled={busyId === t.id}
-                      className="inline-flex min-h-11 items-center gap-2 rounded-full border-2 border-white/20 px-4 text-[13px] font-bold text-white/80 disabled:opacity-60"
+                      className="inline-flex min-h-11 items-center gap-2 rounded-full border-2 border-white/20 px-4 text-[13px] font-bold text-foreground/80 disabled:opacity-60"
                     >
                       Pedir revisión
                     </button>
@@ -255,7 +255,7 @@ export function WalletManager() {
             </li>
           ))}
           {!isLoading && (data?.transfers ?? []).length === 0 && (
-            <li className="rounded-[16px] border border-white/10 bg-white/[0.04] p-5 text-[13px] text-white/60">
+            <li className="rounded-[16px] border border-border bg-card p-5 text-[13px] text-foreground/60">
               Todavía no hay envíos de hojas entre personas.
             </li>
           )}
