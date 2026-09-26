@@ -53,7 +53,7 @@ export function ContentStudio() {
             className={cn(
               "min-h-11 rounded-full border-2 px-4 text-[13px] font-bold transition",
               tab === t.id
-                ? "border-[#7C5CFF] bg-[#7C5CFF]/15 text-foreground"
+                ? "border-[#7C5CFF] bg-[#7C5CFF]/15 text-[#4B32A8]"
                 : "border-white/15 bg-card text-foreground/70",
             )}
           >
@@ -68,7 +68,7 @@ export function ContentStudio() {
             "rounded-[12px] border px-4 py-3 text-[13px] font-semibold",
             note.error
               ? "border-destructive/40 bg-destructive/10 text-destructive"
-              : "border-[#3FBE8F]/40 bg-[#3FBE8F]/10 text-[#8FE3C4]",
+              : "border-[#3FBE8F]/40 bg-[#3FBE8F]/10 text-[#1B6B4F]",
           )}
         >
           {note.text}
@@ -157,7 +157,7 @@ function MainTopics({ onNote }: { onNote: Notify }) {
         <button
           onClick={submit}
           disabled={busy}
-          className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-[12px] bg-[#7C5CFF] px-4 text-[15px] font-bold text-foreground disabled:opacity-60"
+          className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-[12px] bg-[#7C5CFF] px-4 text-[15px] font-bold text-white disabled:opacity-60"
         >
           {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
           Crear tema con IA
@@ -181,7 +181,7 @@ function MainTopics({ onNote }: { onNote: Notify }) {
                 <span className="block truncate text-[14px] font-bold text-foreground">{c.title}</span>
                 <span className="block text-[11.5px] text-foreground/55">{c.group_key}</span>
               </span>
-              <span className={cn("shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold", c.is_published ? "bg-[#3FBE8F]/20 text-[#8FE3C4]" : "bg-muted text-foreground/60")}>
+              <span className={cn("shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold", c.is_published ? "bg-[#3FBE8F]/20 text-[#1B6B4F]" : "bg-muted text-foreground/60")}>
                 {c.is_published ? "Visible" : "Oculto"}
               </span>
             </li>
@@ -284,7 +284,7 @@ function Subtopics({ onNote }: { onNote: Notify }) {
         <button
           onClick={submit}
           disabled={busy}
-          className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-[12px] bg-[#7C5CFF] px-4 text-[15px] font-bold text-foreground disabled:opacity-60"
+          className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-[12px] bg-[#7C5CFF] px-4 text-[15px] font-bold text-white disabled:opacity-60"
         >
           {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
           Crear subtema con IA
@@ -308,7 +308,7 @@ function Subtopics({ onNote }: { onNote: Notify }) {
                   onClick={() => togglePublish(s.id, !s.is_published)}
                   className={cn(
                     "min-h-11 shrink-0 rounded-full px-3 text-[11.5px] font-bold",
-                    s.is_published ? "bg-[#3FBE8F]/20 text-[#8FE3C4]" : "bg-muted text-foreground/60",
+                    s.is_published ? "bg-[#3FBE8F]/20 text-[#1B6B4F]" : "bg-muted text-foreground/60",
                   )}
                 >
                   {s.is_published ? "Visible" : "Oculto"}
@@ -393,7 +393,7 @@ function Limpieza({ onNote }: { onNote: Notify }) {
         <button
           onClick={submit}
           disabled={busy}
-          className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-[12px] bg-[#7C5CFF] px-4 text-[15px] font-bold text-foreground disabled:opacity-60"
+          className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-[12px] bg-[#7C5CFF] px-4 text-[15px] font-bold text-white disabled:opacity-60"
         >
           {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
           Crear práctica con IA
@@ -419,7 +419,7 @@ function Limpieza({ onNote }: { onNote: Notify }) {
                 }}
                 className={cn(
                   "min-h-11 shrink-0 rounded-full px-3 text-[11.5px] font-bold",
-                  p.is_published ? "bg-[#3FBE8F]/20 text-[#8FE3C4]" : "bg-muted text-foreground/60",
+                  p.is_published ? "bg-[#3FBE8F]/20 text-[#1B6B4F]" : "bg-muted text-foreground/60",
                 )}
               >
                 {p.is_published ? "Visible" : "Oculta"}

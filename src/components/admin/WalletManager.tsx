@@ -10,9 +10,9 @@ type Tab = "compras" | "transferencias";
 const STATUS_STYLE: Record<string, string> = {
   pendiente: "bg-[#E9B949]/20 text-[#F3D08A]",
   pending: "bg-[#E9B949]/20 text-[#F3D08A]",
-  aprobada: "bg-[#3FBE8F]/20 text-[#8FE3C4]",
+  aprobada: "bg-[#3FBE8F]/20 text-[#1B6B4F]",
   rechazada: "bg-destructive/20 text-destructive",
-  revision: "bg-[#7C5CFF]/20 text-[#C6B4FF]",
+  revision: "bg-[#7C5CFF]/20 text-[#4B32A8]",
 };
 
 function whenLabel(iso: string) {
@@ -89,14 +89,14 @@ export function WalletManager() {
             className={cn(
               "inline-flex min-h-11 items-center gap-2 rounded-full border-2 px-4 text-[13px] font-bold transition",
               tab === t.id
-                ? "border-[#7C5CFF] bg-[#7C5CFF]/15 text-foreground"
+                ? "border-[#7C5CFF] bg-[#7C5CFF]/15 text-[#4B32A8]"
                 : "border-white/15 bg-card text-foreground/70",
             )}
           >
             <t.icon className="h-4 w-4" />
             {t.label}
             {t.count > 0 && (
-              <span className="grid h-5 min-w-5 place-items-center rounded-full bg-destructive px-1 text-[11px] font-bold text-foreground">
+              <span className="grid h-5 min-w-5 place-items-center rounded-full bg-destructive px-1 text-[11px] font-bold text-white">
                 {t.count}
               </span>
             )}
@@ -117,7 +117,7 @@ export function WalletManager() {
             "rounded-[12px] border px-4 py-3 text-[13px] font-semibold",
             note.error
               ? "border-destructive/40 bg-destructive/10 text-destructive"
-              : "border-[#3FBE8F]/40 bg-[#3FBE8F]/10 text-[#8FE3C4]",
+              : "border-[#3FBE8F]/40 bg-[#3FBE8F]/10 text-[#1B6B4F]",
           )}
         >
           {note.text}
@@ -172,7 +172,7 @@ export function WalletManager() {
                     <button
                       onClick={() => act("compras", p.id, "rechazada")}
                       disabled={busyId === p.id}
-                      className="inline-flex min-h-11 items-center gap-2 rounded-full bg-destructive/90 px-4 text-[13px] font-bold text-foreground disabled:opacity-60"
+                      className="inline-flex min-h-11 items-center gap-2 rounded-full bg-destructive/90 px-4 text-[13px] font-bold text-white disabled:opacity-60"
                     >
                       <X className="h-4 w-4" />
                       Rechazar
@@ -237,7 +237,7 @@ export function WalletManager() {
                     <button
                       onClick={() => act("transferencias", t.id, "rechazada")}
                       disabled={busyId === t.id}
-                      className="inline-flex min-h-11 items-center gap-2 rounded-full bg-destructive/90 px-4 text-[13px] font-bold text-foreground disabled:opacity-60"
+                      className="inline-flex min-h-11 items-center gap-2 rounded-full bg-destructive/90 px-4 text-[13px] font-bold text-white disabled:opacity-60"
                     >
                       <X className="h-4 w-4" />
                       Rechazar y devolver
