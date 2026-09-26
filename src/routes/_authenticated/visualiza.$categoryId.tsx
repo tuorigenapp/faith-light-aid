@@ -82,17 +82,20 @@ const MANIFEST_QUIZ: QuizItem[] = [
 ];
 
 function CategoryPage() {
-  const { categoryId } = useParams({ from: "/_authenticated/visualiza/$categoryId" });
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const isDayRoute = /^\/visualiza\/[^/]+\/[^/]+$/.test(pathname);
+  if (isDayRoute) return <Outlet />;
+  return <CategoryInner />;
+}
+
+function CategoryInner() {
+  const { categoryId } = useParams({ from: "/_authenticated/visualiza/$categoryId" });
   const { user } = useAuth();
   const navigate = useNavigate();
   const qc = useQueryClient();
   const player = usePlayer();
   const [exercise, setExercise] = useState("");
   const [step, setStep] = useState<1 | 2 | 3>(1);
-
-  if (isDayRoute) return <Outlet />;
 
   const { data } = useQuery({
     queryKey: ["cat-full", categoryId, user?.id],
@@ -121,7 +124,7 @@ function CategoryPage() {
 
   const toTrack = (a: any) => ({
     id: a.id as string,
-    title: `Día ${a.day_index} — ${DAY_TITLES[a.day_index - 1] ?? a.title}`,
+    title: (c as any)?.is_custom ? `#${String(a.day_index).padStart(2, "0")} — ${a.title}` : `Día ${a.day_index} — ${DAY_TITLES[a.day_index - 1] ?? a.title}`,
     subtitle: c?.title ?? "Manifestación guiada",
     url: (a.audio_url as string) ?? "",
     cover: (a.cover_url as string | null) ?? null,
@@ -166,7 +169,7 @@ function CategoryPage() {
         <Link to="/visualiza" className="mt-4 inline-flex min-h-11 items-center rounded-[12px] bg-primary/10 px-4 font-bold text-primary">Ver todos los temas</Link>
       </div>
     );
-  if ((c as any).is_custom) return <CustomTopic cat={c} audios={data.audios as any} entries={data.entries as any} isPaid={isPaid} />;
+  if ((c as any).is_custom && (c as any).audio_only) return <CustomTopic cat={c} audios={data.audios as any} entries={data.entries as any} isPaid={isPaid} />;
 
   const doneCount = data?.audios.filter((a: any) => data.entries.get(a.id)?.completed).length ?? 0;
   const selectedArea = areas.find((a) => a.id === categoryId);

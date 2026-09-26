@@ -61,11 +61,6 @@ export function useSectionSeen(userId: string | undefined, pathname: string, sea
         .filter((n) => n.link && prefixes.some((p) => (n.link as string).startsWith(p)))
         .map((n) => n.id);
       if (ids.length) tasks.push(supabase.from("origen_notifications").update({ read_at: now }).in("id", ids));
-      if (keys.includes("comunidad")) {
-        tasks.push(
-          supabase.from("community_notifications").update({ read_at: now }).eq("user_id", userId).is("read_at", null),
-        );
-      }
       await Promise.all(tasks);
       if (cancelled) return;
       qc.invalidateQueries({ queryKey: ["origen-pendings"] });
