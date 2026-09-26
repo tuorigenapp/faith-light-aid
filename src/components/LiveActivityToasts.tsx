@@ -89,7 +89,7 @@ export function LiveActivityToasts({ variant = "app" }: { variant?: "landing" | 
       className={
         variant === "landing"
           ? "pointer-events-none fixed left-4 right-4 top-[72px] z-30 sm:right-auto sm:top-auto sm:bottom-6 sm:w-[320px]"
-          : "pointer-events-none fixed bottom-[150px] left-4 z-30 w-[min(78vw,290px)]"
+          : "pointer-events-none fixed right-3 top-[64px] z-30 w-[min(62vw,240px)] scale-[.92] origin-top-right lg:top-4"
       }
     >
       <div className="pointer-events-auto flex items-start gap-2.5 rounded-[14px] border border-border/60 bg-card/95 p-3 shadow-elevated backdrop-blur animate-in fade-in slide-in-from-left-4 duration-500">
