@@ -63,8 +63,8 @@ function HistorialPage() {
         const meta = (t.meta ?? {}) as Record<string, unknown>;
         const kind = ((meta.kind as HistoryKind | undefined) ?? (t.reason?.toLowerCase().startsWith("transferencia") ? "transferencia" : t.amount < 0 ? "movimiento" : "movimiento"));
         const hojas = typeof meta.hojas === "number" ? meta.hojas : t.amount / 100;
-        const price = typeof meta.usd === "number" ? usd(meta.usd) : `${hojas > 0 ? "+" : ""}${hojas.toFixed(3)} hojas`;
-        output.push({ id: `tx-${t.id}`, kind, title: t.reason, detail: kind === "compra" ? "Recarga solicitada" : "Movimiento de hojas", status: (meta.status as string | undefined) ?? "aprobada", amount: price, date: new Date(t.created_at) });
+        const price = typeof meta.usd === "number" ? usd(meta.usd) : `${hojas > 0 ? "+" : ""}${Number.isInteger(hojas) ? hojas : hojas.toFixed(2)} hojas`;
+        output.push({ id: `tx-${t.id}`, kind, title: humanReason(t.reason ?? ""), detail: kind === "compra" ? "Recarga solicitada" : "Movimiento de hojas", status: (meta.status as string | undefined) ?? "aprobada", amount: price, date: new Date(t.created_at) });
       });
       (transfers.data ?? []).forEach((t) => output.push({ id: `tr-${t.id}`, kind: "transferencia", title: `Transferencia a ${t.to_email}`, detail: `${Math.floor(t.points / 100)} hojas enviadas`, status: t.status, date: new Date(t.created_at) }));
       (family.data ?? []).forEach((m) => output.push({ id: `fam-${m.id}`, kind: "familia", title: m.full_name, detail: `${m.relationship} · ${m.lineage}`, status: "registrado", date: new Date(m.created_at) }));
@@ -73,7 +73,7 @@ function HistorialPage() {
       (patrones.data ?? []).forEach((r) => output.push({ id: `pt-${r.id}`, kind: "consulta", title: "Patrones familiares", detail: r.name || r.question || "Consulta guardada", status: "completa", date: new Date(r.created_at) }));
       (ministracion.data ?? []).forEach((r) => output.push({ id: `mi-${r.id}`, kind: "consulta", title: "Dios te dice hoy", detail: r.name || r.question || "Ministración guardada", status: "completa", date: new Date(r.created_at) }));
       (messages.data ?? []).filter((m) => m.role === "user").forEach((m) => output.push({ id: `msg-${m.id}`, kind: "mentor", title: "Mensaje con Ruth Esther", detail: "Conversación espiritual", status: "enviado", date: new Date(m.created_at) }));
-      (ratings.data ?? []).forEach((r) => output.push({ id: `sat-${r.id}`, kind: "soporte", title: `Valoración: ${r.section}`, detail: `${r.stars} estrellas`, status: "recibida", date: new Date(r.created_at) }));
+      (ratings.data ?? []).forEach((r) => output.push({ id: `sat-${r.id}`, kind: "soporte", title: `Tu opinión sobre ${SECTION_NAMES[r.section] ?? humanWord(r.section)}`, detail: `${r.stars} estrellas`, status: "recibida", date: new Date(r.created_at) }));
       return output.sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 300);
     },
   });
@@ -164,4 +164,40 @@ function iconFor(kind: HistoryKind) {
 function statusLabel(status: string) {
   const map: Record<string, string> = { pending: "Pendiente", approved: "Aprobada", rejected: "Rechazada" };
   return map[status] ?? status;
+}
+
+const SECTION_NAMES: Record<string, string> = {
+  camino: "Camino ORÍGEN", etapas: "Camino ORÍGEN", etapa: "Camino ORÍGEN", ejercicios: "Ejercicios del día", ejercicio: "Ejercicios del día",
+  palabra: "Palabra del día", visualiza: "Visualízalo y Vívelo", juegos: "Juegos", juego: "Juegos", ruleta: "Ruleta de hoy",
+  arbol: "Mi árbol", comunidad: "Comunidad", chat: "Mentora Ruth", mentor: "Mentora Ruth", pareja: "Consulta de pareja",
+  patrones: "Patrones familiares", ministracion: "Dios te dice hoy", diario: "Diario íntimo", premios: "Premios ORÍGEN",
+  diagnostico: "Diagnóstico", perfil: "Mi perfil", invita: "Invita y gana", referido: "Invita y gana",
+};
+
+function humanWord(w: string) {
+  const clean = w.replace(/[-_]+/g, " ").trim();
+  return clean ? clean.charAt(0).toUpperCase() + clean.slice(1) : "ORÍGEN";
+}
+
+/** Convierte los códigos internos (leaf:, ruleta:, day:…) en nombres claros. */
+function humanReason(raw: string): string {
+  const [code, ...rest] = raw.split(" · ");
+  const label = rest.join(" · ").trim();
+  const parts = code.split(":");
+  const head = parts[0]?.toLowerCase() ?? "";
+  const sec = parts[1] ?? "";
+  const name = SECTION_NAMES[sec.toLowerCase()] ?? humanWord(sec);
+  if (!code.includes(":")) return humanWord(raw);
+  switch (head) {
+    case "leaf": return label ? `Avance en ${name} · ${label}` : `Avance en ${name}`;
+    case "ruleta": return "Premio de la Ruleta de hoy";
+    case "compra": return "Compra de hojas";
+    case "transfer-in": return "Hojas recibidas de otra persona";
+    case "transfer-refund": return "Devolución de una transferencia";
+    case "ajuste": return "Ajuste de saldo de ORÍGEN";
+    case "day": return `Acceso del día a ${name}`;
+    case "consulta": return `Consulta: ${name}`;
+    case "valoracion": case "valoración": return `Tu opinión sobre ${name}`;
+    default: return label ? `${humanWord(head)} · ${label}` : humanWord(head);
+  }
 }

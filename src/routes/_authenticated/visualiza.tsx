@@ -111,7 +111,13 @@ function Visualiza() {
           : Promise.resolve({ data: [] as any[] }),
       ]);
       if (cats.error) throw cats.error;
-      return { cats: cats.data ?? [], entries: entries.data ?? [] };
+      const customIds = (cats.data ?? []).filter((c: any) => c.is_custom).map((c: any) => c.id as string);
+      const counts = new Map<string, number>();
+      if (customIds.length) {
+        const { data: subs } = await supabase.from("manifest_audios").select("category_id").in("category_id", customIds);
+        for (const r of subs ?? []) counts.set(r.category_id, (counts.get(r.category_id) ?? 0) + 1);
+      }
+      return { cats: (cats.data ?? []).map((c: any) => ({ ...c, subtopics: counts.get(c.id) ?? 0 })), entries: entries.data ?? [] };
     },
   });
 
@@ -181,20 +187,19 @@ function Visualiza() {
       tag: "Sanación",
     }));
 
-    // Toda categoría y subcategoría creada desde el panel aparece aquí:
-    // se muestra con su portada, su grupo y su avance real.
+    // Solo los temas principales creados en el panel; sus subcategorías viven dentro.
     const usedCatIds = new Set(
       methodTargets.map((t) => t.params?.categoryId).filter(Boolean) as string[],
     );
     const fromDb: (UnifiedProgram & { tag: string })[] = (data?.cats ?? [])
-      .filter((c: any) => c.is_published !== false && !usedCatIds.has(c.id))
+      .filter((c: any) => c.is_custom === true && c.is_published !== false && !usedCatIds.has(c.id))
       .map((c: any, i: number) => ({
         key: `cat-${c.id}`,
         title: c.title as string,
         desc:
           (c.subtitle as string) ||
           (c.description as string) ||
-          "Programa guiado de 21 días con audios, práctica y evaluación.",
+          "Tema guiado con audios, práctica y evaluación.",
         image: (c.cover_url as string) || GROUP_FALLBACK[i % GROUP_FALLBACK.length],
         Icon: Headphones,
         iconTint: "text-primary",
@@ -202,14 +207,14 @@ function Visualiza() {
         gradient: "from-primary to-accent-pink",
         tint: "text-primary",
         emoji: "🎧",
-        days: 21,
+        days: Math.max(1, Number(c.subtopics ?? 0) || 1),
         done: doneByCat.get(c.id) ?? 0,
         to: "/visualiza/$categoryId",
         params: { categoryId: c.id as string },
         tag: groupLabel(String(c.group_key ?? c.program_group ?? "")),
       }));
 
-    return [...methods, ...programas, ...fromDb];
+    return [...methods, ...fromDb, ...programas];
   }, [data]);
 
   const tags = ["Todos", ...Array.from(new Set(unified.map((u) => u.tag)))];

@@ -35,6 +35,8 @@ import { ContentManager } from "@/components/admin/ContentManager";
 import { BackupManager } from "@/components/admin/BackupManager";
 import { ContentStudio } from "@/components/admin/ContentStudio";
 import { WalletManager } from "@/components/admin/WalletManager";
+import { PromoManager } from "@/components/admin/PromoManager";
+import { Megaphone } from "lucide-react";
 import { AreaChart, Area, ResponsiveContainer, BarChart, Bar, XAxis, Tooltip } from "recharts";
 
 export const Route = createFileRoute("/admin")({
@@ -159,6 +161,7 @@ type SectionId =
   | "contenido"
   | "studio"
   | "wallet"
+  | "promos"
   | "libros"
   | "audios"
   | "comunidad"
@@ -174,6 +177,7 @@ const NAV: { id: SectionId; label: string; icon: typeof Users }[] = [
   { id: "contenido", label: "Contenido", icon: Library },
   { id: "studio", label: "Crear con IA", icon: Sparkles },
   { id: "wallet", label: "Compras y envíos", icon: Receipt },
+  { id: "promos", label: "Campañas emergentes", icon: Megaphone },
   { id: "libros", label: "Libros", icon: BookOpen },
   { id: "audios", label: "Música", icon: Headphones },
   { id: "comunidad", label: "Comunidad", icon: MessageCircle },
@@ -511,6 +515,7 @@ function Admin() {
         {section === "studio" && <ContentStudio />}
 
         {section === "wallet" && <WalletManager />}
+        {section === "promos" && <PromoManager />}
 
         {section === "libros" && <BooksManager />}
 

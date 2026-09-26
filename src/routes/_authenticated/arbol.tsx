@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -33,6 +33,10 @@ export const Route = createFileRoute("/_authenticated/arbol")({
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary_large_image" },
   ] }),
+  validateSearch: (search: Record<string, unknown>): { vista?: "mi-arbol" | "transferir" } => {
+    const v = search.vista;
+    return v === "mi-arbol" || v === "transferir" ? { vista: v } : {};
+  },
   component: TreePage,
 });
 
@@ -42,7 +46,12 @@ const RELATIONSHIPS_MATERNO = ["Madre", "Abuela materna", "Abuelo materno", "Bis
 const RELATIONSHIPS_PATERNO = ["Padre", "Abuela paterna", "Abuelo paterno", "Bisabuela paterna", "Bisabuelo paterno", "Tía paterna", "Tío paterno", "Hermana", "Hermano", "Hija", "Hijo", "Otro"];
 
 function TreePage() {
-  const [view, setView] = useState<View>("home");
+  const { vista } = Route.useSearch();
+  const [view, setView] = useState<View>(vista === "mi-arbol" ? "tree" : vista === "transferir" ? "transfer" : "home");
+  useEffect(() => {
+    if (vista === "mi-arbol") setView("tree");
+    else if (vista === "transferir") setView("transfer");
+  }, [vista]);
   const [editing, setEditing] = useState<Member | null>(null);
   const { user } = useAuth();
 

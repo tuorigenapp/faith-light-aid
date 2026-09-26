@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Lock, Search, Sparkles } from "lucide-react";
-import { EXPLORE_ITEMS } from "@/lib/explore-content";
+import { EXPLORE_ITEMS, exploreKey } from "@/lib/explore-content";
+import { useContentOverrides } from "@/hooks/use-content-overrides";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/explorar")({
@@ -18,6 +19,11 @@ export const Route = createFileRoute("/_authenticated/explorar")({
 });
 
 function ExplorarPage() {
+  const ov = useContentOverrides();
+  const items = EXPLORE_ITEMS.filter((i) => !ov.get(exploreKey(i.title))?.is_hidden).map((i) => {
+    const o = ov.get(exploreKey(i.title));
+    return { ...i, title: o?.title || i.title, image: o?.cover_url || i.image };
+  });
   return (
     <div className="min-h-dvh bg-aura-top">
       <div className="mx-auto max-w-[1120px] px-5 pt-6 pb-28">
@@ -35,7 +41,7 @@ function ExplorarPage() {
         </section>
 
         <section className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {EXPLORE_ITEMS.map((item) => (
+          {items.map((item) => (
             <ExploreCard key={`${item.title}-${item.to}`} item={item} />
           ))}
         </section>

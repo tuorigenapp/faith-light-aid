@@ -7,13 +7,15 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Play, Pause, Download, ArrowLeft, Check, Headphones } from "lucide-react";
+import { Play, Pause, Download, ArrowLeft, Check, Headphones, Lock } from "lucide-react";
+import { getUserPlan } from "@/lib/plan";
+import { FREE_AUDIOS } from "@/components/visualiza/CustomTopic";
 import { jsPDF } from "jspdf";
 import { awardLeaf } from "@/lib/gems";
 import { CELEBRATIONS } from "@/lib/celebrate-step";
 
 export const Route = createFileRoute("/_authenticated/visualiza/$categoryId/$day")({
-  head: () => ({ meta: [{ title: "Método de Cristo — Reconectando" }] }),
+  head: () => ({ meta: [{ title: "Práctica de Visualízalo y Vívelo — ORÍGEN" }, { name: "description", content: "Audio, afirmación y práctica guiada del día." }, { property: "og:title", content: "Práctica de Visualízalo y Vívelo — ORÍGEN" }, { property: "og:description", content: "Audio, afirmación y práctica guiada del día." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: DayPlayer,
 });
 
@@ -38,7 +40,13 @@ function DayPlayer() {
         supabase.from("manifest_audios").select("*").eq("category_id", categoryId).eq("day_index", Number(day)).maybeSingle(),
       ]);
       const entry = audio.data && user ? await supabase.from("manifest_entries").select("*").eq("user_id", user.id).eq("audio_id", audio.data.id).maybeSingle() : { data: null };
-      return { cat: cat.data, audio: audio.data, entry: entry.data };
+      const plan = user ? await getUserPlan(user.id) : "explorador";
+      let position = Number(day);
+      if ((cat.data as any)?.is_custom && audio.data) {
+        const { data: list } = await supabase.from("manifest_audios").select("day_index").eq("category_id", categoryId).order("day_index");
+        position = (list ?? []).findIndex((r) => r.day_index === audio.data!.day_index) + 1;
+      }
+      return { cat: cat.data, audio: audio.data, entry: entry.data, locked: plan !== "camino" && position > FREE_AUDIOS };
     },
   });
 
@@ -104,7 +112,27 @@ function DayPlayer() {
     doc.save(`metodo-cristo-${categoryId}-dia${day}.pdf`);
   }
 
-  if (!c || !a) return <div className="p-8">Cargando...</div>;
+  if (!data) return <div className="p-8 text-center text-muted-foreground">Cargando...</div>;
+  if (!c || !a)
+    return (
+      <div className="mx-auto max-w-md p-8 text-center">
+        <p className="font-display text-[18px] font-bold">Esta práctica todavía no está lista</p>
+        <p className="mt-1 text-[14px] text-muted-foreground">Vuelve al tema y elige otra mientras la preparamos.</p>
+        <Link to="/visualiza/$categoryId" params={{ categoryId }} className="mt-4 inline-flex min-h-11 items-center rounded-[12px] bg-primary/10 px-4 font-bold text-primary">Volver al tema</Link>
+      </div>
+    );
+  if (data.locked)
+    return (
+      <div className="mx-auto max-w-md p-8 text-center">
+        <span className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-primary/10 text-primary"><Lock className="h-6 w-6" /></span>
+        <p className="mt-3 font-display text-[20px] font-bold">Tus {FREE_AUDIOS} audios gratis ya están abiertos</p>
+        <p className="mt-1 text-[14px] text-muted-foreground">"{a.title}" y el resto del programa se abren con Camino ORÍGEN.</p>
+        <Link to="/membresia" className="mt-5 flex min-h-[52px] items-center justify-center rounded-[12px] bg-primary font-bold text-primary-foreground">Desbloquear todo</Link>
+        <Link to="/visualiza/$categoryId" params={{ categoryId }} className="mt-2 inline-flex min-h-11 items-center font-semibold text-primary">Volver al tema</Link>
+      </div>
+    );
+  const audioOnly = Boolean((a as any).audio_only);
+  const tasks: string[] = Array.isArray((a as any).quiz?.tasks) ? (a as any).quiz.tasks : [];
 
   return (
     <div className="pb-32">
@@ -113,7 +141,7 @@ function DayPlayer() {
         <div className="relative max-w-3xl mx-auto px-4 md:px-8 pt-6 pb-10">
           <Link to="/visualiza/$categoryId" params={{ categoryId }} className="inline-flex items-center gap-2 text-white/95 text-sm"><ArrowLeft className="w-4 h-4" /> {c.title}</Link>
           <div className="text-center mt-6">
-            <div className="text-[11px] uppercase tracking-widest text-white/80 font-bold">Día {a.day_index} de 21</div>
+            <div className="text-[11px] uppercase tracking-widest text-white/80 font-bold">{(c as any).is_custom ? `#${String(a.day_index).padStart(2, "0")} · ${c.title}` : `Día ${a.day_index} de 21`}</div>
             <div className="mx-auto mt-4 w-56 h-56 md:w-64 md:h-64 rounded-3xl grid place-items-center shadow-glow" style={{ background: c.color ?? "#7C6AED" }}>
               <Headphones className="w-24 h-24 text-white/95 drop-shadow" />
             </div>
@@ -160,12 +188,13 @@ function DayPlayer() {
           )}
         </Card>
 
-         {(a.lesson || a.exercise || a.pdf_url) && <Card className="rounded-[1.7rem] p-5 md:p-6 shadow-soft space-y-3">
+         {!audioOnly && tasks.length > 0 && <Card className="rounded-[1.7rem] p-5 shadow-soft"><h2 className="font-display font-bold text-lg">Tareas de hoy</h2><ul className="mt-3 space-y-2">{tasks.map((t) => <li key={t} className="flex gap-2 text-sm"><span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-primary/12 text-primary"><Check className="h-3 w-3" /></span>{t}</li>)}</ul></Card>}
+         {!audioOnly && (a.lesson || a.exercise || a.pdf_url) && <Card className="rounded-[1.7rem] p-5 md:p-6 shadow-soft space-y-3">
            {a.lesson && <div><h2 className="font-display font-bold text-lg">Lección del día</h2><p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed">{a.lesson}</p></div>}
            {a.exercise && <div><h2 className="font-display font-bold text-lg">Ejercicio o receta</h2><p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed">{a.exercise}</p></div>}
            {a.pdf_url && <a href={a.pdf_url} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center gap-2 text-primary underline"><Download className="h-4 w-4" /> Abrir PDF de apoyo</a>}
          </Card>}
-         <Card className="rounded-[1.7rem] p-5 md:p-6 shadow-soft">
+         {!audioOnly && <Card className="rounded-[1.7rem] p-5 md:p-6 shadow-soft">
           <div className="text-[11px] uppercase tracking-widest text-primary font-bold">Tu ejercicio Método de Cristo</div>
           <div className="mt-4 space-y-5">
             <Field label="Escribe 3 veces aquello que ya ves realizado en tu vida por fe en tiempo presente (YA TENGO)" value={yaTengo} set={setYaTengo} placeholder={c.affirmation_ya_tengo} rows={3} />
@@ -178,7 +207,7 @@ function DayPlayer() {
             <Button onClick={downloadPdf} variant="outline" className="rounded-full h-12"><Download className="w-4 h-4 mr-2" /> Descargar PDF imprimible</Button>
           </div>
           <p className="text-[11px] text-muted-foreground text-center mt-3">El PDF sigue el formato blanco y negro del libro para llenarlo a mano.</p>
-        </Card>
+        </Card>}
       </div>
     </div>
   );

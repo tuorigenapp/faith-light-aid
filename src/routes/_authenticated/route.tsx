@@ -1,6 +1,8 @@
 import { useServerFn } from "@tanstack/react-start";
 import { ensureDailyNotice } from "@/lib/notices.functions";
 import { useOrigenPendings } from "@/hooks/use-origen-pendings";
+import { useSectionSeen } from "@/hooks/use-section-seen";
+import { PromoPopup } from "@/components/PromoPopup";
 import { wholeHojas } from "@/lib/gems";
 import { createFileRoute, Link, Outlet, redirect, useLocation, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
@@ -102,6 +104,7 @@ function AuthLayoutInner() {
   const { data: communityNotifications } = useCommunityNotifications(user?.id);
   const communityUnread = (communityNotifications?.length ?? 0) > 0;
   const { data: pendings } = useOrigenPendings(user?.id);
+  useSectionSeen(user?.id, location.pathname, location.searchStr ?? "");
   const ensureNotice = useServerFn(ensureDailyNotice);
   useEffect(() => {
     if (!user?.id) return;
@@ -350,7 +353,8 @@ function AuthLayoutInner() {
          <main className="community-main flex-1 pb-[calc(env(safe-area-inset-bottom)+92px)] lg:pb-0"><Outlet /></main>
 
         {/* Floating chat with Ruth Esther */}
-         {!isCommunity && !focusMode && <><FloatingChatFab /><FloatingHelp /><FloatingOrigenMenu /><LiveActivityToasts /><SatisfactionPulse /><MotivationalReminders /></>}
+         {!isCommunity && !focusMode && <><FloatingChatFab /><FloatingHelp /><PromoPopup userId={user?.id} />
+      <FloatingOrigenMenu /><LiveActivityToasts /><SatisfactionPulse /><MotivationalReminders /></>}
 
 
         {/* Mobile bottom nav — con botón central O */}

@@ -98,7 +98,7 @@ export function WordSearch({ words, storageKey, gemsReward = 40 }: { words: stri
       awardGems(gemsReward, "wordsearch_completed", { key: storageKey }).then(() => {
         queryClient.invalidateQueries({ queryKey: ["profile"] });
         queryClient.invalidateQueries({ queryKey: ["dashboard"] });
-        setFeedback(`Sopa completada: +${gemsReward} hojas de sanación`);
+        setFeedback("Sopa completada: sumaste avance hacia tu próxima hoja de sanación");
       });
     }
   }, [found, awarded, gemsReward, placed.length, queryClient, storageKey]);
@@ -115,7 +115,7 @@ export function WordSearch({ words, storageKey, gemsReward = 40 }: { words: stri
     if (hit) {
       setFound((f) => [...f, hit.word]);
       celebrate(900);
-      setFeedback(`Encontraste ${hit.word}: +5 hojas`);
+      setFeedback(`Encontraste ${hit.word}. ¡Bien hecho!`);
       awardGems(5, "wordsearch_word", { word: hit.word }).then(() => {
         queryClient.invalidateQueries({ queryKey: ["profile"] });
         queryClient.invalidateQueries({ queryKey: ["dashboard"] });

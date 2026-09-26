@@ -37,6 +37,7 @@ export const adminCreateVisualizaCategory = createServerFn({ method: "POST" })
         requiredPlan: z.enum(["free", "camino"]).default("camino"),
         notes: z.string().trim().max(1200).default(""),
         withCover: z.boolean().default(true),
+        audioOnly: z.boolean().default(false),
       })
       .parse(input),
   )
@@ -87,7 +88,9 @@ Devuelve JSON con: subtitle (máx 70 caracteres), description (2 a 3 frases, má
       cover_url: cover,
       sort_order: (last?.sort_order ?? 0) + 1,
       is_published: false,
-    });
+      is_custom: true,
+      audio_only: data.audioOnly,
+    } as never);
     if (error) throw new Error(error.message);
     return { id, cover: Boolean(cover) };
   });
@@ -103,6 +106,7 @@ export const adminCreateVisualizaSubtopic = createServerFn({ method: "POST" })
         title: z.string().trim().min(3).max(140),
         notes: z.string().trim().max(1200).default(""),
         withCover: z.boolean().default(true),
+        audioOnly: z.boolean().optional(),
       })
       .parse(input),
   )
@@ -113,7 +117,7 @@ export const adminCreateVisualizaSubtopic = createServerFn({ method: "POST" })
 
     const { data: category } = await supabaseAdmin
       .from("manifest_categories")
-      .select("id, title, description")
+      .select("id, title, description, audio_only")
       .eq("id", data.categoryId)
       .maybeSingle();
     if (!category) throw new Error("Ese tema principal ya no existe.");
@@ -164,8 +168,9 @@ Devuelve JSON con: affirmation (una frase poderosa en presente, máx 160 caracte
           questions: generated.quiz ?? [],
         } as never,
         word_game: { words: generated.search_words ?? [] } as never,
-        is_published: false,
-      })
+        is_published: true,
+        audio_only: data.audioOnly ?? Boolean((category as { audio_only?: boolean }).audio_only),
+      } as never)
       .select("id")
       .maybeSingle();
     if (error) throw new Error(error.message);
@@ -503,7 +508,7 @@ export const adminSetOverride = createServerFn({ method: "POST" })
   .inputValidator((i) =>
     z.object({
       key: z.string().min(1).max(120),
-      scope: z.enum(["camino", "categoria", "juego"]),
+      scope: z.enum(["camino", "categoria", "juego", "explorar"]),
       title: z.string().trim().max(120).optional(),
       coverUrl: z.string().trim().max(1000).optional(),
       isHidden: z.boolean().optional(),
