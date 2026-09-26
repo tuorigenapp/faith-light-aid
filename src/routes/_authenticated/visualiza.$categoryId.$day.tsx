@@ -156,6 +156,8 @@ function DayPlayer() {
     );
   const audioOnly = Boolean((a as any).audio_only);
   const tasks: string[] = Array.isArray((a as any).quiz?.tasks) ? (a as any).quiz.tasks : [];
+  const materials: string[] = Array.isArray((a as any).quiz?.materials) ? (a as any).quiz.materials : [];
+  const steps: string[] = Array.isArray((a as any).quiz?.steps) ? (a as any).quiz.steps : [];
 
   return (
     <div className="pb-32">
@@ -211,6 +213,8 @@ function DayPlayer() {
           )}
         </Card>
 
+         {materials.length > 0 && <Card className="rounded-[1.7rem] p-5 shadow-soft"><h2 className="font-display font-bold text-lg">Materiales</h2><ul className="mt-3 grid gap-2 sm:grid-cols-2">{materials.map((m) => <li key={m} className="flex gap-2 text-sm"><span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-primary/12 text-primary"><Check className="h-3 w-3" /></span>{m}</li>)}</ul></Card>}
+         {steps.length > 0 && <Card className="rounded-[1.7rem] p-5 shadow-soft"><h2 className="font-display font-bold text-lg">Paso a paso</h2><ol className="mt-3 space-y-3">{steps.map((st, i) => <li key={st} className="flex gap-3 text-sm"><span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-primary text-[12px] font-bold text-primary-foreground">{i + 1}</span><span className="pt-1">{st}</span></li>)}</ol></Card>}
          {!audioOnly && tasks.length > 0 && <Card className="rounded-[1.7rem] p-5 shadow-soft"><h2 className="font-display font-bold text-lg">Tareas de hoy</h2><ul className="mt-3 space-y-2">{tasks.map((t) => <li key={t} className="flex gap-2 text-sm"><span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-primary/12 text-primary"><Check className="h-3 w-3" /></span>{t}</li>)}</ul></Card>}
          {!audioOnly && (a.lesson || a.exercise || a.pdf_url) && <Card className="rounded-[1.7rem] p-5 md:p-6 shadow-soft space-y-3">
            {a.lesson && <div><h2 className="font-display font-bold text-lg">Lección del día</h2><p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed">{a.lesson}</p></div>}

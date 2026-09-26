@@ -38,6 +38,7 @@ export const adminCreateVisualizaCategory = createServerFn({ method: "POST" })
         notes: z.string().trim().max(1200).default(""),
         withCover: z.boolean().default(true),
         audioOnly: z.boolean().default(false),
+        design: z.enum(["musica", "audio", "limpieza"]).optional(),
       })
       .parse(input),
   )
@@ -89,7 +90,8 @@ Devuelve JSON con: subtitle (máx 70 caracteres), description (2 a 3 frases, má
       sort_order: (last?.sort_order ?? 0) + 1,
       is_published: false,
       is_custom: true,
-      audio_only: data.audioOnly,
+      audio_only: data.design ? data.design === "audio" : data.audioOnly,
+      design: data.design ?? (data.audioOnly ? "audio" : "musica"),
     } as never);
     if (error) throw new Error(error.message);
     return { id, cover: Boolean(cover) };
@@ -117,7 +119,7 @@ export const adminCreateVisualizaSubtopic = createServerFn({ method: "POST" })
 
     const { data: category } = await supabaseAdmin
       .from("manifest_categories")
-      .select("id, title, description, audio_only")
+      .select("id, title, description, audio_only, design")
       .eq("id", data.categoryId)
       .maybeSingle();
     if (!category) throw new Error("Ese tema principal ya no existe.");
@@ -130,7 +132,9 @@ export const adminCreateVisualizaSubtopic = createServerFn({ method: "POST" })
       .limit(1);
     const dayIndex = (days?.[0]?.day_index ?? 0) + 1;
 
+    const isRecipe = (category as { design?: string }).design === "limpieza";
     const generated = await aiJson<{
+      materials?: string[];
       affirmation: string;
       lesson: string;
       exercise: string;
@@ -141,7 +145,7 @@ export const adminCreateVisualizaSubtopic = createServerFn({ method: "POST" })
       cover_prompt: string;
     }>(
       `Tema principal: "${category.title}" (${category.description ?? "sin descripción"}). Crea el subtema número ${dayIndex} titulado "${data.title}". Notas del editor: ${data.notes || "sin notas"}.
-Devuelve JSON con: affirmation (una frase poderosa en presente, máx 160 caracteres), lesson (lección práctica de 110 a 170 palabras), exercise (práctica concreta de 80 a 130 palabras), recipe_steps (array de 5 a 8 pasos cortos y seguros), tasks (array de 3 tareas del día, cada una máx 90 caracteres), search_words (array de 8 palabras en MAYÚSCULAS de 4 a 9 letras sin tildes ni espacios, relacionadas con el tema), quiz (array de 3 objetos con question, options de 3 opciones, correctIndex 0-2 y explanation breve) y cover_prompt (descripción visual en inglés, sin texto).`,
+Devuelve JSON con: affirmation (una frase poderosa en presente, máx 160 caracteres), lesson (lección práctica de 110 a 170 palabras), exercise (práctica concreta de 80 a 130 palabras), recipe_steps (array de 5 a 8 pasos cortos y seguros), tasks (array de 3 tareas del día, cada una máx 90 caracteres), search_words (array de 8 palabras en MAYÚSCULAS de 4 a 9 letras sin tildes ni espacios, relacionadas con el tema), quiz (array de 3 objetos con question, options de 3 opciones, correctIndex 0-2 y explanation breve) y cover_prompt (descripción visual en inglés, sin texto).${isRecipe ? " Es una receta o práctica con instrucciones: agrega también materials (array de 4 a 8 materiales o ingredientes sencillos y seguros) y haz que recipe_steps sean instrucciones claras en orden." : ""}`,
     );
 
     const cover = data.withCover
@@ -166,6 +170,8 @@ Devuelve JSON con: affirmation (una frase poderosa en presente, máx 160 caracte
         quiz: {
           tasks: generated.tasks ?? [],
           questions: generated.quiz ?? [],
+          materials: isRecipe ? generated.materials ?? [] : undefined,
+          steps: isRecipe ? generated.recipe_steps ?? [] : undefined,
         } as never,
         word_game: { words: generated.search_words ?? [] } as never,
         is_published: true,

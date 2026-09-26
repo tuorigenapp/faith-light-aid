@@ -22,7 +22,9 @@ export function CustomTopic({
   audios,
   entries,
   isPaid,
+  recipe = false,
 }: {
+  recipe?: boolean;
   cat: any;
   audios: Sub[];
   entries: Map<string, { completed?: boolean }>;
@@ -74,7 +76,7 @@ export function CustomTopic({
         )}
 
         <section>
-          <h2 className="font-display text-[20px] font-extrabold">Subcategorías</h2>
+          <h2 className="font-display text-[20px] font-extrabold">{recipe ? "Recetas y prácticas" : "Audios del tema"}</h2>
           <p className="mt-1 text-[13px] text-muted-foreground">
             {isPaid ? "Tienes acceso a todas." : `Las primeras ${FREE_AUDIOS} están abiertas en tu plan gratis.`}
           </p>
@@ -100,7 +102,7 @@ export function CustomTopic({
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-[11px] font-bold uppercase tracking-wide text-primary">
-                        #{String(s.day_index).padStart(2, "0")} · {s.audio_only ? "Audio" : "Práctica completa"}
+                        #{String(s.day_index).padStart(2, "0")} · {recipe ? "Receta" : s.audio_only ? "Audio" : "Práctica completa"}
                       </p>
                       <p className="truncate font-display text-[15px] font-bold">{s.title}</p>
                       {s.affirmation && <p className="line-clamp-1 text-[12.5px] text-muted-foreground">{s.affirmation}</p>}
