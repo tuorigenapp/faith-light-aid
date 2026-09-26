@@ -1,17 +1,19 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, ArrowRight, Check, Clock, Hourglass, Lock, Mail, Send, ShieldCheck, ShoppingBag, Sparkles, UserCheck } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Clock, Hourglass, Lock, Mail, ReceiptText, Send, ShieldCheck, ShoppingBag, Sparkles, UserCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { HOJA_PACKS, HOJA_PACK_HERO, PAY_METHODS, usd, type HojaPack } from "@/lib/hojas";
+import { HOJA_PACKS, HOJA_PACK_HERO, usd, type HojaPack } from "@/lib/hojas";
 import { formatHojas } from "@/lib/gems";
 import { useServerFn } from "@tanstack/react-start";
 import { createPurchaseRequest } from "@/lib/wallet.functions";
 import { Camera, Loader2 } from "lucide-react";
 import crystals from "@/assets/hojas-crystals.png";
 import treePng from "@/assets/hojas-tree.png";
+import { PayPalCheckout } from "@/components/PayPalCheckout";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_authenticated/comprarmonedas")({
   head: () => ({
@@ -27,7 +29,7 @@ export const Route = createFileRoute("/_authenticated/comprarmonedas")({
   component: HojasFlow,
 });
 
-type Step = 1 | 2 | 3 | 4 | 5 | 6;
+type Step = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
 function HojasFlow() {
   const { user } = useAuth();
@@ -35,7 +37,7 @@ function HojasFlow() {
   const navigate = useNavigate();
   const [step, setStep] = useState<Step>(1);
   const [pack, setPack] = useState<HojaPack | null>(null);
-  const [method, setMethod] = useState<string>("stripe");
+  const [paymentRef, setPaymentRef] = useState("");
 
   const { data: profile } = useQuery({
     queryKey: ["profile-hojas", user?.id],
@@ -61,10 +63,10 @@ function HojasFlow() {
     },
   });
 
-  function submitOrder() {
-    if (!user || !pack) return;
+  const paymentApproved = useCallback((orderId: string) => {
+    setPaymentRef(orderId);
     setStep(4);
-  }
+  }, []);
 
   async function afterReceipt() {
     setStep(5);
@@ -74,7 +76,7 @@ function HojasFlow() {
 
   function back() {
     if (step === 1) { navigate({ to: "/arbol" }); return; }
-    setStep((s) => (s === 6 ? 1 : ((s - 1) as Step)));
+    setStep((s) => (s === 6 || s === 7 ? 1 : ((s - 1) as Step)));
   }
 
   return (
@@ -95,12 +97,13 @@ function HojasFlow() {
         </div>
 
         <div key={step} className="mt-5 animate-in fade-in slide-in-from-bottom-3 duration-300">
-          {step === 1 && <StepPacks pack={pack} onPick={(p) => { setPack(p); setStep(2); }} />}
+          {step === 1 && <StepPacks pack={pack} onPick={(p) => { setPack(p); setStep(2); }} onConfirm={() => setStep(7)} />}
           {step === 2 && pack && <StepSummary pack={pack} onNext={() => setStep(3)} />}
-          {step === 3 && pack && <StepPay pack={pack} method={method} setMethod={setMethod} onPay={submitOrder} />}
-          {step === 4 && pack && <StepReceipt pack={pack} method={method} onDone={afterReceipt} />}
+          {step === 3 && pack && user && <StepPay pack={pack} userId={user.id} onPaid={paymentApproved} onConfirm={() => setStep(4)} />}
+          {step === 4 && pack && <StepReceipt pack={pack} paymentRef={paymentRef} onDone={afterReceipt} />}
           {step === 5 && pack && <StepProcessing pack={pack} onDone={() => setStep(6)} />}
           {step === 6 && <StepHistory tx={tx} />}
+          {step === 7 && <ConfirmPack onPick={(p) => { setPack(p); setPaymentRef(""); setStep(4); }} />}
         </div>
 
         {step !== 6 && <Dots active={step} />}
@@ -156,7 +159,7 @@ function CTA({ children, onClick, disabled }: { children: React.ReactNode; onCli
 
 /* ───────── 2 · Selecciona tu paquete ───────── */
 
-function StepPacks({ pack, onPick }: { pack: HojaPack | null; onPick: (p: HojaPack) => void }) {
+function StepPacks({ pack, onPick, onConfirm }: { pack: HojaPack | null; onPick: (p: HojaPack) => void; onConfirm: () => void }) {
   return (
     <div>
       <div className="flex items-start gap-3">
@@ -203,6 +206,11 @@ function StepPacks({ pack, onPick }: { pack: HojaPack | null; onPick: (p: HojaPa
           <img src={crystals} alt="" aria-hidden loading="lazy" width={1024} height={1024} className="ml-auto w-24 h-24 shrink-0 object-contain" />
         </div>
       </button>
+
+      <Button type="button" variant="outline" onClick={onConfirm} className="mt-4 min-h-[52px] w-full rounded-[12px] border-primary/25 bg-card text-[15px] font-bold text-primary">
+        <ReceiptText className="h-5 w-5" /> Confirmar un pago realizado
+      </Button>
+      <p className="mt-2 text-center text-[12.5px] leading-relaxed text-muted-foreground">Úsalo si ya pagaste y la página se cerró antes de enviar tu comprobante.</p>
     </div>
   );
 }
@@ -256,41 +264,14 @@ function Row({ label, value }: { label: string; value: string }) {
 
 /* ───────── 4 · Pago seguro ───────── */
 
-function StepPay({ pack, method, setMethod, onPay }: { pack: HojaPack; method: string; setMethod: (s: string) => void; onPay: () => void }) {
+function StepPay({ pack, userId, onPaid, onConfirm }: { pack: HojaPack; userId: string; onPaid: (orderId: string) => void; onConfirm: () => void }) {
   return (
     <div>
-      <Title eyebrow="Paso 3 · Pago" title={<>Pago seguro <span className="text-[#F58BCB]">🔐</span></>} sub="Elige tu método de pago favorito." />
-      <div className="mt-5 space-y-3">
-        {PAY_METHODS.map((m) => {
-          const on = method === m.id;
-          return (
-            <button key={m.id} onClick={() => setMethod(m.id)}
-              className={cn("w-full h-14 px-4 rounded-[12px] bg-white flex items-center gap-3 transition active:scale-[.98]",
-                on ? "border-2 border-[#F58BCB]" : "border border-[#1B1B27]/[0.08]")}>
-              <span className={cn("w-5 h-5 rounded-full border-2 grid place-items-center shrink-0", on ? "border-[#F58BCB]" : "border-[#C9C6DA]")}>
-                {on && <span className="w-2.5 h-2.5 rounded-full bg-[#F58BCB]" />}
-              </span>
-              <span className="min-w-0 truncate text-[14px] font-semibold text-[#1B1B27] text-left">{m.label}</span>
-              <span className="ml-auto shrink-0 text-[12px] font-black text-[#64667A]">{m.badge}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      <div className="mt-4 flex items-start gap-2 text-[12.5px] leading-snug text-[#64667A]">
-        <Lock className="w-4 h-4 mt-0.5 shrink-0 text-[#7C5CFF]" />
-        Tus datos están protegidos con encriptación de nivel bancario.
-      </div>
-
-      <div className="mt-5">
-        <CTA onClick={onPay}>
-          <span className="flex flex-col leading-tight">
-            <span>Pagar ahora</span>
-            <span className="text-[12px] font-semibold opacity-90">{usd(pack.usd)}</span>
-          </span>
-          <Lock className="w-4 h-4" />
-        </CTA>
-      </div>
+      <Title eyebrow="Paso 3 · Pago" title="Paga con PayPal" sub="Completa todo sin salir de ORÍGEN. También puede aparecer la opción de tarjeta según tu país." />
+      <div className="mt-5"><PayPalCheckout pack={pack} userId={userId} onPaid={onPaid} /></div>
+      <Button type="button" variant="ghost" onClick={onConfirm} className="mt-3 min-h-12 w-full rounded-[10px] text-[14px] font-bold text-primary">
+        <ReceiptText className="h-4 w-4" /> Ya pagué: confirmar pago
+      </Button>
     </div>
   );
 }
@@ -447,7 +428,24 @@ function Rules() {
   );
 }
 
-function StepReceipt({ pack, method, onDone }: { pack: HojaPack; method: string; onDone: () => void }) {
+function ConfirmPack({ onPick }: { onPick: (pack: HojaPack) => void }) {
+  const packs = [...HOJA_PACKS, HOJA_PACK_HERO];
+  return (
+    <div>
+      <Title eyebrow="Confirmar pago" title="¿Qué paquete pagaste?" sub="Selecciona el paquete exacto y luego adjunta nuevamente tu comprobante." />
+      <div className="mt-5 grid grid-cols-2 gap-3">
+        {packs.map((item) => (
+          <Button key={item.id} type="button" variant="outline" onClick={() => onPick(item)} className="h-auto min-h-[76px] flex-col rounded-[12px] border-border bg-card px-3 py-3">
+            <span className="font-display text-[17px] font-bold text-foreground">{item.hojas.toLocaleString()} hojas</span>
+            <span className="text-[12.5px] text-muted-foreground">{usd(item.usd)}</span>
+          </Button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function StepReceipt({ pack, paymentRef, onDone }: { pack: HojaPack; paymentRef: string; onDone: () => void }) {
   const { user } = useAuth();
   const send = useServerFn(createPurchaseRequest);
   const [file, setFile] = useState<File | null>(null);
@@ -476,7 +474,14 @@ function StepReceipt({ pack, method, onDone }: { pack: HojaPack; method: string;
     }
     try {
       await send({
-        data: { packId: pack.id, hojas: pack.hojas, usd: pack.usd, method, receiptPath: path, userMessage: message },
+        data: {
+          packId: pack.id,
+          hojas: pack.hojas,
+          usd: pack.usd,
+          method: "paypal",
+          receiptPath: path,
+          userMessage: [paymentRef ? `Orden PayPal: ${paymentRef}` : "Confirmación manual de pago PayPal", message].filter(Boolean).join(" · "),
+        },
       });
       onDone();
     } catch {
@@ -487,7 +492,7 @@ function StepReceipt({ pack, method, onDone }: { pack: HojaPack; method: string;
 
   return (
     <section className="rounded-[16px] bg-white p-5 shadow-[0_1px_3px_rgba(30,25,20,.06)]">
-      <h2 className="font-display text-[22px] font-bold leading-tight text-[#1B1B27]">Sube la foto de tu pago</h2>
+      <h2 className="font-display text-[22px] font-bold leading-tight text-[#1B1B27]">Confirmar pago</h2>
       <p className="mt-1 text-[15px] leading-relaxed text-[#64667A]">
         Adjunta la captura o foto del comprobante de {usd(pack.usd)} por {pack.hojas} hojas. Lo revisamos y te avisamos aquí mismo.
       </p>
@@ -522,7 +527,7 @@ function StepReceipt({ pack, method, onDone }: { pack: HojaPack; method: string;
         className="mt-4 inline-flex min-h-[54px] w-full items-center justify-center gap-2 rounded-[12px] bg-[#7C5CFF] text-[17px] font-bold text-white shadow-[0_4px_14px_rgba(124,92,255,.28)] transition active:scale-[.97] disabled:opacity-60"
       >
         {busy ? <Loader2 className="h-5 w-5 animate-spin" /> : <Check className="h-5 w-5" />}
-        Enviar mi comprobante
+        Confirmar pago
       </button>
       <p className="mt-2 text-center text-[12.5px] text-[#64667A]">Tu foto es privada, solo la ve el equipo de ORÍGEN.</p>
     </section>

@@ -27,14 +27,6 @@ export const HOJA_USES = [
   { title: "Dios te dice hoy", cost: 1, to: "/ministracion" as const, emoji: "📖" },
 ];
 
-export const PAY_METHODS = [
-  { id: "card", label: "Tarjeta de crédito / débito", badge: "VISA · MC" },
-  { id: "stripe", label: "Stripe", badge: "stripe" },
-  { id: "paypal", label: "PayPal", badge: "PayPal" },
-  { id: "applepay", label: "Apple Pay", badge: " Pay" },
-  { id: "googlepay", label: "Google Pay", badge: "G Pay" },
-] as const;
-
 export function usd(n: number) {
   return `${n.toFixed(2)} USD`;
 }
