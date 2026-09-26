@@ -14,7 +14,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { FloatingChatFab } from "@/components/FloatingChatFab";
 import { FloatingHelp } from "@/components/FloatingHelp";
-import { FloatingRouletteFab } from "@/components/FloatingRouletteFab";
+import { FloatingOrigenMenu } from "@/components/FloatingOrigenMenu";
 import { LiveActivityToasts } from "@/components/LiveActivityToasts";
 import { SatisfactionPulse } from "@/components/SatisfactionPulse";
 import { MotivationalReminders } from "@/components/MotivationalReminders";
@@ -335,7 +335,7 @@ function AuthLayoutInner() {
          <main className="community-main flex-1 pb-[calc(env(safe-area-inset-bottom)+92px)] lg:pb-0"><Outlet /></main>
 
         {/* Floating chat with Ruth Esther */}
-         {!isCommunity && <><FloatingChatFab /><FloatingHelp /><FloatingRouletteFab /><LiveActivityToasts /><SatisfactionPulse /><MotivationalReminders /></>}
+         {!isCommunity && <><FloatingChatFab /><FloatingHelp /><FloatingOrigenMenu /><LiveActivityToasts /><SatisfactionPulse /><MotivationalReminders /></>}
 
 
         {/* Mobile bottom nav — con botón central O */}
