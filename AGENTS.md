@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Hojas de Sanación use PayPal Checkout for payment and manual receipt review for crediting; this prevents unverified browser payment data from changing balances.
