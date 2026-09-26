@@ -1,6 +1,5 @@
-import { Check, Leaf, Lock } from "lucide-react";
+import { Check, Flag, Leaf, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
-import mascota from "@/assets/mascota-arbol.png";
 
 export type PathNode = {
   key: string;
@@ -76,20 +75,20 @@ export function DuolingoPath({
               {node.note && <span className="text-center text-[10.5px] font-semibold text-white/60">{node.note}</span>}
             </div>
 
-            {i === activeIndex && (
-              <img
-                src={mascota}
-                alt=""
-                aria-hidden
-                width={256}
-                height={256}
-                className="pointer-events-none absolute top-6 h-16 w-16 object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,.35)]"
-                style={{ transform: `translateX(${offset > 0 ? offset - 120 : offset + 120}px)` }}
-              />
-            )}
           </li>
         );
       })}
+
+      {/* Meta final del mapa */}
+      <li className="relative mt-7 flex flex-col items-center">
+        <span className="grid h-[68px] w-[68px] place-items-center rounded-full border-[3px] border-gold/70 bg-gold/20 text-gold shadow-[0_6px_0_rgba(0,0,0,.18)]">
+          <Flag className="h-8 w-8" strokeWidth={2.4} />
+        </span>
+        <span className="mt-2 text-center text-[12px] font-bold text-white">Meta del camino</span>
+        <span className="text-center text-[10.5px] font-semibold text-white/60">
+          Aquí termina el mapa y empieza tu nueva historia
+        </span>
+      </li>
     </ol>
   );
 }

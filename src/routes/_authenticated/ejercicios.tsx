@@ -82,6 +82,11 @@ function Ejercicios() {
     const end = Math.min(TOTAL_DAYS, today + 18);
     return all.slice(start - 1, end);
   }, [all, today]);
+  /** Lecciones de la semana: 8 días desde hoy. */
+  const weekLessons = useMemo(() => {
+    const start = Math.max(0, today - 1);
+    return all.slice(start, Math.min(TOTAL_DAYS, start + 8));
+  }, [all, today]);
 
   const {
     data: completions,
@@ -186,11 +191,69 @@ function Ejercicios() {
       <div className="mx-auto w-full max-w-[1100px] px-4 py-6 md:px-6 md:py-10 mobile-safe-bottom lg:pb-10">
         <JourneyHeader
           name={profile?.display_name || profile?.full_name || "Tu camino"}
-          avatarUrl={profile?.avatar_url ?? null}
           streak={profile?.consecutive_days ?? 0}
           completedCount={completedCount}
           weekDone={doneDates}
         />
+
+        {/* Lecciones de la semana: siempre arriba, 8 por semana */}
+        <section className="mt-4">
+          <div className="flex items-end justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-[11px] font-bold uppercase tracking-widest text-gold">
+                Lecciones de esta semana
+              </p>
+              <h2 className="font-display text-[19px] font-extrabold leading-tight text-primary-foreground">
+                8 prácticas, una por día
+              </h2>
+            </div>
+            <span className="shrink-0 text-[12px] font-bold text-primary-foreground/70">
+              Día {today}
+            </span>
+          </div>
+          <div className="mt-3 -mx-4 overflow-x-auto no-scrollbar px-4 md:mx-0 md:px-0">
+            <div className="flex w-max gap-3 pb-1 md:w-full md:grid md:grid-cols-4">
+              {weekLessons.map((ex) => {
+                const unlocked = ex.day === today && !todayCompleted;
+                const isDone = completed.has(ex.day);
+                return (
+                  <button
+                    key={ex.day}
+                    onClick={() => openExercise(ex)}
+                    className={cn(
+                      "w-[210px] shrink-0 rounded-[16px] border p-4 text-left transition active:scale-[.98] md:w-auto",
+                      unlocked
+                        ? "border-gold/60 bg-gold/[.10]"
+                        : isDone
+                          ? "border-[#3FBE8F]/45 bg-[#3FBE8F]/10"
+                          : "border-primary-foreground/12 bg-primary-foreground/[.05]",
+                    )}
+                  >
+                    <span className="text-[11px] font-black uppercase tracking-widest text-gold">
+                      Día {ex.day}
+                    </span>
+                    <h3 className="mt-1 line-clamp-2 font-display text-[15px] font-bold leading-tight text-primary-foreground">
+                      {ex.title}
+                    </h3>
+                    <p className="mt-1 line-clamp-2 text-[12px] text-primary-foreground/62">
+                      {ex.theme}
+                    </p>
+                    <span className="mt-3 inline-flex items-center gap-1 text-[12px] font-bold text-primary-foreground/85">
+                      {isDone ? (
+                        <Check className="h-3.5 w-3.5" />
+                      ) : unlocked ? (
+                        <ArrowRight className="h-3.5 w-3.5" />
+                      ) : (
+                        <Lock className="h-3.5 w-3.5" />
+                      )}
+                      {isDone ? "Completado" : unlocked ? "Abrir hoy" : "No disponible"}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </section>
 
         <section className="mt-4 grid gap-3 md:grid-cols-2">
           <div className="rounded-[16px] border border-primary-foreground/12 bg-primary-foreground/[.06] p-4">
@@ -243,49 +306,6 @@ function Ejercicios() {
               <Clock className="h-3.5 w-3.5 text-gold" /> El siguiente se abre a las 12:00 de la
               noche.
             </div>
-          </div>
-        </section>
-
-        <section className="mt-4 -mx-4 px-4 overflow-x-auto no-scrollbar md:mx-0 md:px-0">
-          <div className="flex w-max gap-3 pb-1 md:w-full md:grid md:grid-cols-5">
-            {visible.slice(0, 10).map((ex) => {
-              const unlocked = ex.day === today && !todayCompleted;
-              const isDone = completed.has(ex.day);
-              return (
-                <button
-                  key={ex.day}
-                  onClick={() => openExercise(ex)}
-                  className={cn(
-                    "w-[210px] shrink-0 rounded-[16px] border p-4 text-left transition active:scale-[.98] md:w-auto",
-                    unlocked
-                      ? "border-gold/60 bg-gold/[.10]"
-                      : isDone
-                        ? "border-[#3FBE8F]/45 bg-[#3FBE8F]/10"
-                        : "border-primary-foreground/12 bg-primary-foreground/[.05]",
-                  )}
-                >
-                  <span className="text-[11px] font-black uppercase tracking-widest text-gold">
-                    Día {ex.day}
-                  </span>
-                  <h3 className="mt-1 line-clamp-2 font-display text-[15px] font-bold leading-tight text-primary-foreground">
-                    {ex.title}
-                  </h3>
-                  <p className="mt-1 line-clamp-2 text-[12px] text-primary-foreground/62">
-                    {ex.theme}
-                  </p>
-                  <span className="mt-3 inline-flex items-center gap-1 text-[12px] font-bold text-primary-foreground/85">
-                    {isDone ? (
-                      <Check className="h-3.5 w-3.5" />
-                    ) : unlocked ? (
-                      <ArrowRight className="h-3.5 w-3.5" />
-                    ) : (
-                      <Lock className="h-3.5 w-3.5" />
-                    )}
-                    {isDone ? "Completado" : unlocked ? "Abrir hoy" : "No disponible"}
-                  </span>
-                </button>
-              );
-            })}
           </div>
         </section>
 
