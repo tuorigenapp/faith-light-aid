@@ -10,6 +10,7 @@ import { Play, Pause, Check, Lock, Sparkles, Heart, Home, Briefcase, Flower2, He
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { getUserPlan } from "@/lib/plan";
+import { CustomTopic, FREE_AUDIOS } from "@/components/visualiza/CustomTopic";
 import { awardGems } from "@/lib/gems";
 import heroAsset from "@/assets/manifest-music-hero.jpg";
 import { cn } from "@/lib/utils";
@@ -127,7 +128,7 @@ function CategoryPage() {
   });
 
   function toggle(a: any, dayIndex: number) {
-    if (!isPaid && dayIndex > 1) {
+    if (!isPaid && dayIndex > FREE_AUDIOS) {
       toast.error("Este día se libera con el plan Camino Origen.");
       return;
     }
@@ -139,7 +140,7 @@ function CategoryPage() {
       player.toggle();
       return;
     }
-    const available = (data?.audios ?? []).filter((x: any) => x.audio_url && (isPaid || x.day_index === 1));
+    const available = (data?.audios ?? []).filter((x: any) => x.audio_url && (isPaid || x.day_index <= FREE_AUDIOS));
     player.play(toTrack(a), available.map(toTrack));
   }
 
@@ -157,7 +158,15 @@ function CategoryPage() {
     qc.invalidateQueries();
   }
 
-  if (!c) return <div className="p-8 text-center text-muted-foreground">Cargando...</div>;
+  if (!data) return <div className="p-8 text-center text-muted-foreground">Cargando...</div>;
+  if (!c)
+    return (
+      <div className="mx-auto max-w-md p-8 text-center">
+        <p className="font-display text-[18px] font-bold">Este tema ya no está disponible</p>
+        <Link to="/visualiza" className="mt-4 inline-flex min-h-11 items-center rounded-[12px] bg-primary/10 px-4 font-bold text-primary">Ver todos los temas</Link>
+      </div>
+    );
+  if ((c as any).is_custom) return <CustomTopic cat={c} audios={data.audios as any} entries={data.entries as any} isPaid={isPaid} />;
 
   const doneCount = data?.audios.filter((a: any) => data.entries.get(a.id)?.completed).length ?? 0;
   const selectedArea = areas.find((a) => a.id === categoryId);
@@ -317,7 +326,7 @@ function CategoryPage() {
         <div className="mt-3 rounded-[1.5rem] overflow-hidden border border-border/60 bg-card">
            {data?.audios.map((a: any) => {
             const day = a.day_index as number;
-            const locked = !isPaid && day > 1;
+            const locked = !isPaid && day > FREE_AUDIOS;
              const title = a.title || DAY_TITLES[day - 1];
             const dur = DAY_DURATION[day - 1] ?? "11:00";
             const active = playingId === a.id;
