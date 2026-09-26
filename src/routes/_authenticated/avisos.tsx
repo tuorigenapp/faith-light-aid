@@ -133,7 +133,7 @@ function Avisos() {
           <EmptyState
             icon={Sparkles}
             title="Tu primer mensaje llega hoy"
-            description="Cada día ORÍGEN te deja un mensaje pensado para lo que estás trabajando."
+            body="Cada día ORÍGEN te deja un mensaje pensado para lo que estás trabajando."
           />
         </div>
       )}
