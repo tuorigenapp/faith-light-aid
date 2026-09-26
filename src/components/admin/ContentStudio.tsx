@@ -134,6 +134,7 @@ function MainTopics({ onNote }: { onNote: Notify }) {
   const [groupKey, setGroupKey] = useState("abundancia");
   const [notes, setNotes] = useState("");
   const [withCover, setWithCover] = useState(true);
+  const [audioOnly, setAudioOnly] = useState(false);
   const [busy, setBusy] = useState(false);
 
   async function submit() {
@@ -142,7 +143,7 @@ function MainTopics({ onNote }: { onNote: Notify }) {
     onNote(null);
     try {
       const result = await create({
-        data: { title: title.trim(), groupKey, notes, withCover, programGroup: "visualiza", requiredPlan: "camino" },
+        data: { title: title.trim(), groupKey, notes, withCover, audioOnly, programGroup: "visualiza", requiredPlan: "camino" },
       });
       onNote({
         text: result.cover
@@ -182,6 +183,10 @@ function MainTopics({ onNote }: { onNote: Notify }) {
         <label className="flex min-h-11 items-center gap-2 text-[13px] font-semibold text-foreground/80">
           <input type="checkbox" checked={withCover} onChange={(e) => setWithCover(e.target.checked)} className="h-5 w-5" />
           Generar la portada con IA
+        </label>
+        <label className="flex min-h-11 items-start gap-2 text-[13px] font-semibold text-foreground/80">
+          <input type="checkbox" checked={audioOnly} onChange={(e) => setAudioOnly(e.target.checked)} className="mt-0.5 h-5 w-5" />
+          <span>Solo audio (como "Sanar tu niño interior"). Si no la marcas, la IA lo arma como subcategoría completa: lección, pasos, tareas, sopa de letras y preguntas.</span>
         </label>
         <button
           onClick={submit}
@@ -321,6 +326,7 @@ function Subtopics({ onNote }: { onNote: Notify }) {
   const [title, setTitle] = useState("");
   const [notes, setNotes] = useState("");
   const [withCover, setWithCover] = useState(true);
+  const [audioOnly, setAudioOnly] = useState(false);
   const [busy, setBusy] = useState(false);
   const selected = categoryId || categories[0]?.id || "";
 
@@ -354,7 +360,7 @@ function Subtopics({ onNote }: { onNote: Notify }) {
     setBusy(true);
     onNote(null);
     try {
-      const result = await create({ data: { categoryId: selected, title: title.trim(), notes, withCover } });
+      const result = await create({ data: { categoryId: selected, title: title.trim(), notes, withCover, audioOnly } });
       onNote({
         text: `Subtema creado como día ${result.dayIndex}, con lección, ejercicio, pasos, tareas, sopa de letras y preguntas. Sube el audio cuando quieras.`,
       });
@@ -416,6 +422,10 @@ function Subtopics({ onNote }: { onNote: Notify }) {
         <label className="flex min-h-11 items-center gap-2 text-[13px] font-semibold text-foreground/80">
           <input type="checkbox" checked={withCover} onChange={(e) => setWithCover(e.target.checked)} className="h-5 w-5" />
           Generar la portada con IA
+        </label>
+        <label className="flex min-h-11 items-start gap-2 text-[13px] font-semibold text-foreground/80">
+          <input type="checkbox" checked={audioOnly} onChange={(e) => setAudioOnly(e.target.checked)} className="mt-0.5 h-5 w-5" />
+          <span>Solo audio (como "Sanar tu niño interior"). Si no la marcas, la IA lo arma como subcategoría completa: lección, pasos, tareas, sopa de letras y preguntas.</span>
         </label>
         <button
           onClick={submit}
@@ -509,6 +519,7 @@ function Limpieza({ onNote }: { onNote: Notify }) {
   const [level, setLevel] = useState(1);
   const [notes, setNotes] = useState("");
   const [withCover, setWithCover] = useState(true);
+  const [audioOnly, setAudioOnly] = useState(false);
   const [busy, setBusy] = useState(false);
 
   const { data: practices = [] } = useQuery({
