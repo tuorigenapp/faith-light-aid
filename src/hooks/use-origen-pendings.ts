@@ -62,18 +62,19 @@ export function useOrigenPendings(userId?: string) {
       ]);
 
       const types = new Set((activity.data ?? []).map((a) => a.activity_type));
+      const seen = (key: string) => types.has(`visto_${key}`);
 
       return {
         notices: (notices.data ?? []).length,
-        camino: !types.has("camino_dia") && !types.has("stage_completed"),
-        ejercicios: !types.has("exercise_completed"),
-        palabra: !types.has("palabra"),
-        visualiza: !types.has("programa_dia") && !types.has("cristo_369"),
-        arbol: (family.data ?? []).length === 0,
-        ruleta: (spins.data ?? []).length === 0,
-        comunidad: (community.data ?? []).length > 0,
-        compras: (purchases.data ?? []).length > 0,
-        transferencias: (transfers.data ?? []).length > 0,
+        camino: !seen("camino") && !types.has("camino_dia") && !types.has("stage_completed"),
+        ejercicios: !seen("ejercicios") && !types.has("exercise_completed"),
+        palabra: !seen("palabra") && !types.has("palabra"),
+        visualiza: !seen("visualiza") && !types.has("programa_dia") && !types.has("cristo_369") && !types.has("manifest_audio"),
+        arbol: !seen("arbol") && (family.data ?? []).length === 0,
+        ruleta: !seen("ruleta") && (spins.data ?? []).length === 0,
+        comunidad: !seen("comunidad") && (community.data ?? []).length > 0,
+        compras: !seen("compras") && (purchases.data ?? []).length > 0,
+        transferencias: !seen("transferencias") && (transfers.data ?? []).length > 0,
       };
     },
   });

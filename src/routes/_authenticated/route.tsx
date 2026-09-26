@@ -1,6 +1,7 @@
 import { useServerFn } from "@tanstack/react-start";
 import { ensureDailyNotice } from "@/lib/notices.functions";
 import { useOrigenPendings } from "@/hooks/use-origen-pendings";
+import { useSectionSeen } from "@/hooks/use-section-seen";
 import { wholeHojas } from "@/lib/gems";
 import { createFileRoute, Link, Outlet, redirect, useLocation, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
@@ -102,6 +103,7 @@ function AuthLayoutInner() {
   const { data: communityNotifications } = useCommunityNotifications(user?.id);
   const communityUnread = (communityNotifications?.length ?? 0) > 0;
   const { data: pendings } = useOrigenPendings(user?.id);
+  useSectionSeen(user?.id, location.pathname, location.searchStr ?? "");
   const ensureNotice = useServerFn(ensureDailyNotice);
   useEffect(() => {
     if (!user?.id) return;

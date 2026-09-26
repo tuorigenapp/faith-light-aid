@@ -70,7 +70,7 @@ export function useSectionSeen(userId: string | undefined, pathname: string, sea
       if (cancelled) return;
       qc.invalidateQueries({ queryKey: ["origen-pendings"] });
       qc.invalidateQueries({ queryKey: ["community-notifications"] });
-      qc.invalidateQueries({ queryKey: ["origen-notices"] });
+      qc.invalidateQueries({ queryKey: ["origen-notifications"] });
     })().catch(() => {});
     return () => {
       cancelled = true;
