@@ -1169,6 +1169,7 @@ export type Database = {
       manifest_audios: {
         Row: {
           affirmation: string
+          audio_only: boolean
           audio_url: string | null
           category_id: string
           cover_url: string | null
@@ -1187,6 +1188,7 @@ export type Database = {
         }
         Insert: {
           affirmation: string
+          audio_only?: boolean
           audio_url?: string | null
           category_id: string
           cover_url?: string | null
@@ -1205,6 +1207,7 @@ export type Database = {
         }
         Update: {
           affirmation?: string
+          audio_only?: boolean
           audio_url?: string | null
           category_id?: string
           cover_url?: string | null
@@ -1234,6 +1237,7 @@ export type Database = {
       manifest_categories: {
         Row: {
           affirmation_ya_tengo: string
+          audio_only: boolean
           color: string | null
           cover_url: string | null
           created_at: string
@@ -1242,6 +1246,7 @@ export type Database = {
           group_key: string
           id: string
           identity_yo_soy: string
+          is_custom: boolean
           is_published: boolean
           pdf_url: string | null
           petition: string
@@ -1254,6 +1259,7 @@ export type Database = {
         }
         Insert: {
           affirmation_ya_tengo: string
+          audio_only?: boolean
           color?: string | null
           cover_url?: string | null
           created_at?: string
@@ -1262,6 +1268,7 @@ export type Database = {
           group_key?: string
           id: string
           identity_yo_soy: string
+          is_custom?: boolean
           is_published?: boolean
           pdf_url?: string | null
           petition: string
@@ -1274,6 +1281,7 @@ export type Database = {
         }
         Update: {
           affirmation_ya_tengo?: string
+          audio_only?: boolean
           color?: string | null
           cover_url?: string | null
           created_at?: string
@@ -1282,6 +1290,7 @@ export type Database = {
           group_key?: string
           id?: string
           identity_yo_soy?: string
+          is_custom?: boolean
           is_published?: boolean
           pdf_url?: string | null
           petition?: string
@@ -1811,6 +1820,42 @@ export type Database = {
           spiritual_level?: string
           updated_at?: string
           verified_level?: number
+        }
+        Relationships: []
+      }
+      promo_campaigns: {
+        Row: {
+          created_at: string
+          ends_at: string | null
+          id: string
+          image_url: string
+          is_active: boolean
+          link_url: string | null
+          starts_at: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          ends_at?: string | null
+          id?: string
+          image_url: string
+          is_active?: boolean
+          link_url?: string | null
+          starts_at?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          ends_at?: string | null
+          id?: string
+          image_url?: string
+          is_active?: boolean
+          link_url?: string | null
+          starts_at?: string | null
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }
