@@ -22,6 +22,7 @@ import {
   ShieldCheck,
   Headphones,
   Send,
+  Receipt,
 } from "lucide-react";
 import { BooksManager } from "@/components/admin/BooksManager";
 import { AudiosManager } from "@/components/admin/AudiosManager";
@@ -32,6 +33,8 @@ import { SalesManager } from "@/components/admin/SalesManager";
 import { UsageManager } from "@/components/admin/UsageManager";
 import { ContentManager } from "@/components/admin/ContentManager";
 import { BackupManager } from "@/components/admin/BackupManager";
+import { ContentStudio } from "@/components/admin/ContentStudio";
+import { WalletManager } from "@/components/admin/WalletManager";
 import { AreaChart, Area, ResponsiveContainer, BarChart, Bar, XAxis, Tooltip } from "recharts";
 
 export const Route = createFileRoute("/admin")({
@@ -154,6 +157,8 @@ type SectionId =
   | "ventas"
   | "uso"
   | "contenido"
+  | "studio"
+  | "wallet"
   | "libros"
   | "audios"
   | "comunidad"
@@ -167,6 +172,8 @@ const NAV: { id: SectionId; label: string; icon: typeof Users }[] = [
   { id: "usuarios", label: "Usuarios", icon: Users },
   { id: "uso", label: "Uso de la app", icon: TrendingUp },
   { id: "contenido", label: "Contenido", icon: Library },
+  { id: "studio", label: "Crear con IA", icon: Sparkles },
+  { id: "wallet", label: "Compras y envíos", icon: Receipt },
   { id: "libros", label: "Libros", icon: BookOpen },
   { id: "audios", label: "Música", icon: Headphones },
   { id: "comunidad", label: "Comunidad", icon: MessageCircle },
@@ -500,6 +507,10 @@ function Admin() {
             <BackupManager />
           </div>
         )}
+
+        {section === "studio" && <ContentStudio />}
+
+        {section === "wallet" && <WalletManager />}
 
         {section === "libros" && <BooksManager />}
 
