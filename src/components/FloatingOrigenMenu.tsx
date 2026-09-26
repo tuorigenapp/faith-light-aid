@@ -48,12 +48,15 @@ const ITEMS: Item[] = [
   { to: "/comprarmonedas", label: "Compras de hojas", icon: Leaf, flag: "compras" },
   { to: "/arbol", search: { vista: "transferir" }, label: "Transferir Balance", icon: Send, flag: "transferencias" },
   { to: "/historial", label: "Historial de movimientos", icon: History },
-  { to: "/chat", label: "Ruth Esther", icon: MessageCircle },
+  { to: "/chat", label: "Hablar con la Mentora", icon: MessageCircle },
+  { to: "/ministracion", label: "Dios te dice hoy", icon: Sparkles },
+  { to: "/pareja", label: "¿Mi pareja es de destino?", icon: HeartHandshake },
+  { to: "/patrones", label: "Patrones generacionales", icon: TreeDeciduous },
   { to: "/categorias", label: "Categorías", icon: Layers },
   { to: "/diario", label: "Diario íntimo", icon: BookHeart },
   { to: "/premiosorigen", label: "Premios ORÍGEN", icon: Trophy },
   { to: "/invita", label: "Invita y gana", icon: HeartHandshake },
-  { to: "/membresia", label: "Camino ORÍGEN", icon: CreditCard },
+  { to: "/membresia", label: "Membresía ORÍGEN (Suscripción)", icon: CreditCard },
   { to: "/perfil", label: "Mi perfil", icon: UserIcon },
 ];
 
