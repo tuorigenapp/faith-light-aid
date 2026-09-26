@@ -109,7 +109,7 @@ function PremiosOrigen() {
               );
             })}
           </div>
-          <p className="mt-3 text-[13px] font-semibold">{stagesDone} de {TOTAL_STAGES} etapas · cada etapa completada te regala un giro extra de ánimo en la ruleta.</p>
+          <p className="mt-3 text-[13px] font-semibold">{stagesDone} de {TOTAL_STAGES} etapas · sigue avanzando para que florezca.</p>
         </section>
 
         <section className="mt-5 app-card p-5">
