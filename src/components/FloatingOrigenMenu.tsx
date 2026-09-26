@@ -31,6 +31,7 @@ type Item = {
   label: string;
   icon: typeof Home;
   flag?: keyof Pendings;
+  search?: Record<string, string>;
 };
 
 const ITEMS: Item[] = [
@@ -41,11 +42,11 @@ const ITEMS: Item[] = [
   { to: "/palabra", label: "Palabra del día", icon: Sparkles, flag: "palabra" },
   { to: "/visualiza", label: "Visualízalo y Vívelo", icon: Headphones, flag: "visualiza" },
   { to: "/arbol", label: "Mi árbol de sanación", icon: TreeDeciduous },
-  { to: "/arbol?vista=mi-arbol", label: "Ver mi árbol generacional", icon: TreeDeciduous, flag: "arbol" },
+  { to: "/arbol", search: { vista: "mi-arbol" }, label: "Ver mi árbol generacional", icon: TreeDeciduous, flag: "arbol" },
   { to: "/ruleta", label: "Ruleta de hoy", icon: Gift, flag: "ruleta" },
   { to: "/comunidad", label: "Comunidad", icon: Users, flag: "comunidad" },
   { to: "/comprarmonedas", label: "Compras de hojas", icon: Leaf, flag: "compras" },
-  { to: "/arbol?vista=transferir", label: "Transferir Balance", icon: Send, flag: "transferencias" },
+  { to: "/arbol", search: { vista: "transferir" }, label: "Transferir Balance", icon: Send, flag: "transferencias" },
   { to: "/historial", label: "Historial de movimientos", icon: History },
   { to: "/chat", label: "Ruth Esther", icon: MessageCircle },
   { to: "/categorias", label: "Categorías", icon: Layers },
@@ -112,6 +113,7 @@ export function FloatingOrigenMenu() {
               <li key={`${item.to}-${item.label}`}>
                 <Link
                   to={item.to}
+                  search={(item.search ?? {}) as never}
                   onClick={() => setOpen(false)}
                   className="flex min-h-12 items-center gap-3 rounded-[12px] px-3 text-sm font-semibold text-foreground/85 hover:bg-secondary/60"
                 >
