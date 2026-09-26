@@ -1,5 +1,4 @@
 import {
-  Bell,
   Flag,
   Trophy,
   ShieldCheck,
@@ -9,7 +8,6 @@ import {
   Lock,
   ChevronRight,
   CalendarDays,
-  User,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -49,13 +47,11 @@ function fmtDate(d: Date) {
 
 export function JourneyHeader({
   name,
-  avatarUrl,
   streak,
   completedCount,
   weekDone,
 }: {
   name: string;
-  avatarUrl?: string | null;
   streak: number;
   completedCount: number;
   weekDone: Set<string>;
@@ -84,19 +80,9 @@ export function JourneyHeader({
             Pequeñas decisiones, grandes cambios.
           </p>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <span className="relative grid h-11 w-11 place-items-center rounded-full border border-primary/45 bg-primary/12 text-primary-foreground">
-            <Bell className="h-[18px] w-[18px]" />
-            <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-gold" />
-          </span>
-          <span className="grid h-11 w-11 place-items-center overflow-hidden rounded-full border border-gold/60 bg-primary/15">
-            {avatarUrl ? (
-              <img src={avatarUrl} alt={name} className="h-full w-full object-cover" />
-            ) : (
-              <User className="h-[18px] w-[18px] text-primary-foreground/80" />
-            )}
-          </span>
-        </div>
+        <span className="shrink-0 rounded-full border border-gold/50 bg-gold/10 px-3 py-1.5 font-display text-[12.5px] font-bold text-gold">
+          {name}
+        </span>
       </div>
 
       {/* Racha */}

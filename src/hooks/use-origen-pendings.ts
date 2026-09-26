@@ -1,0 +1,80 @@
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+
+export type Pendings = {
+  notices: number;
+  camino: boolean;
+  ejercicios: boolean;
+  palabra: boolean;
+  visualiza: boolean;
+  arbol: boolean;
+  ruleta: boolean;
+  comunidad: boolean;
+  compras: boolean;
+  transferencias: boolean;
+};
+
+/** Bolitas rojas: qué tiene pendiente la persona hoy. */
+export function useOrigenPendings(userId?: string) {
+  return useQuery({
+    queryKey: ["origen-pendings", userId],
+    enabled: !!userId,
+    refetchInterval: 45000,
+    queryFn: async (): Promise<Pendings> => {
+      const today = new Date().toISOString().slice(0, 10);
+      const [notices, activity, community, purchases, transfers, family, spins] = await Promise.all([
+        supabase
+          .from("origen_notifications")
+          .select("id")
+          .eq("user_id", userId!)
+          .is("read_at", null)
+          .limit(50),
+        supabase
+          .from("daily_activity")
+          .select("activity_type")
+          .eq("user_id", userId!)
+          .eq("activity_date", today),
+        supabase
+          .from("community_notifications")
+          .select("id")
+          .eq("user_id", userId!)
+          .is("read_at", null)
+          .limit(1),
+        supabase
+          .from("purchase_requests")
+          .select("id")
+          .eq("user_id", userId!)
+          .in("status", ["pendiente", "revision"])
+          .limit(1),
+        supabase
+          .from("hoja_transfers")
+          .select("id")
+          .eq("user_id", userId!)
+          .in("status", ["pending", "pendiente", "revision"])
+          .limit(1),
+        supabase.from("family_members").select("id").eq("user_id", userId!).limit(1),
+        supabase
+          .from("wheel_spins")
+          .select("id")
+          .eq("user_id", userId!)
+          .gte("created_at", `${today}T00:00:00Z`)
+          .limit(1),
+      ]);
+
+      const types = new Set((activity.data ?? []).map((a) => a.activity_type));
+
+      return {
+        notices: (notices.data ?? []).length,
+        camino: !types.has("camino_dia") && !types.has("stage_completed"),
+        ejercicios: !types.has("exercise_completed"),
+        palabra: !types.has("palabra"),
+        visualiza: !types.has("programa_dia") && !types.has("cristo_369"),
+        arbol: (family.data ?? []).length === 0,
+        ruleta: (spins.data ?? []).length === 0,
+        comunidad: (community.data ?? []).length > 0,
+        compras: (purchases.data ?? []).length > 0,
+        transferencias: (transfers.data ?? []).length > 0,
+      };
+    },
+  });
+}

@@ -298,6 +298,32 @@ function LimpiezaPage() {
   const qc = useQueryClient();
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [practiceId, setPracticeId] = useState<string>(PRACTICES[0].id);
+  const { data: extra = [] } = useQuery({
+    queryKey: ["limpieza-practices"],
+    queryFn: async (): Promise<Practice[]> => {
+      const { data } = await supabase
+        .from("limpieza_practices")
+        .select("slug, title, duration, level, objective, info, materials, steps, scripture, scripture_ref, cover_url")
+        .eq("is_published", true)
+        .order("sort_order");
+      return (data ?? []).map((row) => ({
+        id: row.slug,
+        title: row.title,
+        duration: row.duration ?? "20 min",
+        level: (row.level ?? 1) as 1 | 2 | 3,
+        Icon: Droplet,
+        color: "#7C5CFF",
+        bg: "#EDE7FF",
+        bgImage: row.cover_url ?? undefined,
+        objective: row.objective ?? "",
+        info: (row.info as string[] | null) ?? [],
+        materials: ((row.materials as string[] | null) ?? []).map((label) => ({ label, Icon: Leaf })),
+        steps: (row.steps as string[] | null) ?? [],
+        scripture: { text: row.scripture ?? "", ref: row.scripture_ref ?? "" },
+      }));
+    },
+  });
+  const allPractices = [...PRACTICES, ...extra];
   const [affirmationsRead, setAffirmationsRead] = useState<Set<number>>(new Set());
   const [checked, setChecked] = useState<Set<number>>(new Set());
   const [reflection, setReflection] = useState("");
@@ -309,7 +335,7 @@ function LimpiezaPage() {
   });
   const isPaid = plan === "camino";
 
-  const practice = PRACTICES.find((p) => p.id === practiceId)!;
+  const practice = allPractices.find((p) => p.id === practiceId) ?? PRACTICES[0];
 
   async function completePractice() {
     if (!user) return;
@@ -416,7 +442,7 @@ function LimpiezaPage() {
         </div>
 
         <div className="mt-5 grid grid-cols-3 gap-3">
-          {PRACTICES.map((p) => {
+          {allPractices.map((p) => {
             const active = p.id === practiceId;
             const locked = !isPaid && p.level > 1;
             return (

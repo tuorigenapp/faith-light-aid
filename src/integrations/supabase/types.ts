@@ -868,31 +868,49 @@ export type Database = {
       }
       hoja_transfers: {
         Row: {
+          admin_note: string | null
+          appeal_message: string | null
           created_at: string
           id: string
           note: string | null
           points: number
+          reviewed_at: string | null
+          reviewed_by: string | null
           status: string
           to_email: string
+          updated_at: string
           user_id: string
+          user_message: string | null
         }
         Insert: {
+          admin_note?: string | null
+          appeal_message?: string | null
           created_at?: string
           id?: string
           note?: string | null
           points: number
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           status?: string
           to_email: string
+          updated_at?: string
           user_id: string
+          user_message?: string | null
         }
         Update: {
+          admin_note?: string | null
+          appeal_message?: string | null
           created_at?: string
           id?: string
           note?: string | null
           points?: number
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           status?: string
           to_email?: string
+          updated_at?: string
           user_id?: string
+          user_message?: string | null
         }
         Relationships: []
       }
@@ -1019,6 +1037,63 @@ export type Database = {
           slug?: string | null
           sort_order?: number
           title?: string
+        }
+        Relationships: []
+      }
+      limpieza_practices: {
+        Row: {
+          cover_url: string | null
+          created_at: string
+          duration: string
+          id: string
+          info: Json
+          is_published: boolean
+          level: number
+          materials: Json
+          objective: string
+          scripture: string | null
+          scripture_ref: string | null
+          slug: string
+          sort_order: number
+          steps: Json
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          cover_url?: string | null
+          created_at?: string
+          duration?: string
+          id?: string
+          info?: Json
+          is_published?: boolean
+          level?: number
+          materials?: Json
+          objective?: string
+          scripture?: string | null
+          scripture_ref?: string | null
+          slug: string
+          sort_order?: number
+          steps?: Json
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          cover_url?: string | null
+          created_at?: string
+          duration?: string
+          id?: string
+          info?: Json
+          is_published?: boolean
+          level?: number
+          materials?: Json
+          objective?: string
+          scripture?: string | null
+          scripture_ref?: string | null
+          slug?: string
+          sort_order?: number
+          steps?: Json
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -1472,6 +1547,42 @@ export type Database = {
         }
         Relationships: []
       }
+      origen_notifications: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          kind: string
+          link: string | null
+          read_at: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          kind?: string
+          link?: string | null
+          read_at?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          link?: string | null
+          read_at?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       pareja_lecturas: {
         Row: {
           advice: string | null
@@ -1631,6 +1742,60 @@ export type Database = {
           spiritual_level?: string
           updated_at?: string
           verified_level?: number
+        }
+        Relationships: []
+      }
+      purchase_requests: {
+        Row: {
+          admin_note: string | null
+          appeal_message: string | null
+          created_at: string
+          hojas: number
+          id: string
+          method: string
+          pack_id: string
+          receipt_path: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+          usd: number
+          user_id: string
+          user_message: string | null
+        }
+        Insert: {
+          admin_note?: string | null
+          appeal_message?: string | null
+          created_at?: string
+          hojas: number
+          id?: string
+          method?: string
+          pack_id: string
+          receipt_path?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          usd: number
+          user_id: string
+          user_message?: string | null
+        }
+        Update: {
+          admin_note?: string | null
+          appeal_message?: string | null
+          created_at?: string
+          hojas?: number
+          id?: string
+          method?: string
+          pack_id?: string
+          receipt_path?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          usd?: number
+          user_id?: string
+          user_message?: string | null
         }
         Relationships: []
       }

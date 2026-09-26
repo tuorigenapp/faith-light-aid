@@ -48,6 +48,7 @@ import { Route as AuthenticatedComprarmonedasRouteImport } from './routes/_authe
 import { Route as AuthenticatedChatRouteImport } from './routes/_authenticated/chat'
 import { Route as AuthenticatedCategoriasRouteImport } from './routes/_authenticated/categorias'
 import { Route as AuthenticatedBibliotecaRouteImport } from './routes/_authenticated/biblioteca'
+import { Route as AuthenticatedAvisosRouteImport } from './routes/_authenticated/avisos'
 import { Route as AuthenticatedArbolRouteImport } from './routes/_authenticated/arbol'
 import { Route as AuthenticatedJuegosIndexRouteImport } from './routes/_authenticated/juegos.index'
 import { Route as ApiPublicVapidKeyRouteImport } from './routes/api/public/vapid-key'
@@ -274,6 +275,11 @@ const AuthenticatedBibliotecaRoute = AuthenticatedBibliotecaRouteImport.update({
   path: '/biblioteca',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAvisosRoute = AuthenticatedAvisosRouteImport.update({
+  id: '/avisos',
+  path: '/avisos',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedArbolRoute = AuthenticatedArbolRouteImport.update({
   id: '/arbol',
   path: '/arbol',
@@ -435,6 +441,7 @@ export interface FileRoutesByFullPath {
   '/registro': typeof RegistroRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/arbol': typeof AuthenticatedArbolRoute
+  '/avisos': typeof AuthenticatedAvisosRoute
   '/biblioteca': typeof AuthenticatedBibliotecaRoute
   '/categorias': typeof AuthenticatedCategoriasRoute
   '/chat': typeof AuthenticatedChatRoute
@@ -502,6 +509,7 @@ export interface FileRoutesByTo {
   '/registro': typeof RegistroRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/arbol': typeof AuthenticatedArbolRoute
+  '/avisos': typeof AuthenticatedAvisosRoute
   '/biblioteca': typeof AuthenticatedBibliotecaRoute
   '/categorias': typeof AuthenticatedCategoriasRoute
   '/chat': typeof AuthenticatedChatRoute
@@ -570,6 +578,7 @@ export interface FileRoutesById {
   '/registro': typeof RegistroRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/arbol': typeof AuthenticatedArbolRoute
+  '/_authenticated/avisos': typeof AuthenticatedAvisosRoute
   '/_authenticated/biblioteca': typeof AuthenticatedBibliotecaRoute
   '/_authenticated/categorias': typeof AuthenticatedCategoriasRoute
   '/_authenticated/chat': typeof AuthenticatedChatRoute
@@ -639,6 +648,7 @@ export interface FileRouteTypes {
     | '/registro'
     | '/sitemap.xml'
     | '/arbol'
+    | '/avisos'
     | '/biblioteca'
     | '/categorias'
     | '/chat'
@@ -706,6 +716,7 @@ export interface FileRouteTypes {
     | '/registro'
     | '/sitemap.xml'
     | '/arbol'
+    | '/avisos'
     | '/biblioteca'
     | '/categorias'
     | '/chat'
@@ -773,6 +784,7 @@ export interface FileRouteTypes {
     | '/registro'
     | '/sitemap.xml'
     | '/_authenticated/arbol'
+    | '/_authenticated/avisos'
     | '/_authenticated/biblioteca'
     | '/_authenticated/categorias'
     | '/_authenticated/chat'
@@ -1139,6 +1151,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedBibliotecaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/avisos': {
+      id: '/_authenticated/avisos'
+      path: '/avisos'
+      fullPath: '/avisos'
+      preLoaderRoute: typeof AuthenticatedAvisosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/arbol': {
       id: '/_authenticated/arbol'
       path: '/arbol'
@@ -1397,6 +1416,7 @@ const AuthenticatedCaminosCaminoIdRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedArbolRoute: typeof AuthenticatedArbolRoute
+  AuthenticatedAvisosRoute: typeof AuthenticatedAvisosRoute
   AuthenticatedBibliotecaRoute: typeof AuthenticatedBibliotecaRoute
   AuthenticatedCategoriasRoute: typeof AuthenticatedCategoriasRoute
   AuthenticatedChatRoute: typeof AuthenticatedChatRoute
@@ -1428,6 +1448,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedArbolRoute: AuthenticatedArbolRoute,
+  AuthenticatedAvisosRoute: AuthenticatedAvisosRoute,
   AuthenticatedBibliotecaRoute: AuthenticatedBibliotecaRoute,
   AuthenticatedCategoriasRoute: AuthenticatedCategoriasRoute,
   AuthenticatedChatRoute: AuthenticatedChatRoute,
