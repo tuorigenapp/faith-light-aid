@@ -199,7 +199,7 @@ export const adminUpdateSubtopic = createServerFn({ method: "POST" })
     if (data.affirmation !== undefined) patch["affirmation"] = data.affirmation;
     if (data.isPublished !== undefined) patch["is_published"] = data.isPublished;
     if (Object.keys(patch).length === 0) return { ok: true };
-    const { error } = await supabaseAdmin.from("manifest_audios").update(patch).eq("id", data.id);
+    const { error } = await supabaseAdmin.from("manifest_audios").update(patch as never).eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });

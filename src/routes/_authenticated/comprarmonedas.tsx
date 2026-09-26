@@ -7,6 +7,9 @@ import { ArrowLeft, ArrowRight, Check, Clock, Hourglass, Lock, Mail, Send, Shiel
 import { cn } from "@/lib/utils";
 import { HOJA_PACKS, HOJA_PACK_HERO, PAY_METHODS, usd, type HojaPack } from "@/lib/hojas";
 import { formatHojas } from "@/lib/gems";
+import { useServerFn } from "@tanstack/react-start";
+import { createPurchaseRequest } from "@/lib/wallet.functions";
+import { Camera, Loader2 } from "lucide-react";
 import crystals from "@/assets/hojas-crystals.png";
 import treePng from "@/assets/hojas-tree.png";
 
@@ -58,15 +61,13 @@ function HojasFlow() {
     },
   });
 
-  async function submitOrder() {
+  function submitOrder() {
     if (!user || !pack) return;
+    setStep(4);
+  }
+
+  async function afterReceipt() {
     setStep(5);
-    await supabase.from("gem_transactions").insert({
-      user_id: user.id,
-      amount: 0,
-      reason: `Compra de ${pack.hojas} hojas`,
-      meta: { kind: "compra", status: "pendiente", hojas: pack.hojas, usd: pack.usd, method } as never,
-    });
     qc.invalidateQueries({ queryKey: ["hoja-tx"] });
     refetch();
   }
@@ -97,7 +98,7 @@ function HojasFlow() {
           {step === 1 && <StepPacks pack={pack} onPick={(p) => { setPack(p); setStep(2); }} />}
           {step === 2 && pack && <StepSummary pack={pack} onNext={() => setStep(3)} />}
           {step === 3 && pack && <StepPay pack={pack} method={method} setMethod={setMethod} onPay={submitOrder} />}
-          {step === 4 && null}
+          {step === 4 && pack && <StepReceipt pack={pack} method={method} onDone={afterReceipt} />}
           {step === 5 && pack && <StepProcessing pack={pack} onDone={() => setStep(6)} />}
           {step === 6 && <StepHistory tx={tx} />}
         </div>
@@ -443,5 +444,87 @@ function Rules() {
         ))}
       </div>
     </Card>
+  );
+}
+
+function StepReceipt({ pack, method, onDone }: { pack: HojaPack; method: string; onDone: () => void }) {
+  const { user } = useAuth();
+  const send = useServerFn(createPurchaseRequest);
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [message, setMessage] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  function pick(f: File | null) {
+    setFile(f);
+    setPreview(f ? URL.createObjectURL(f) : null);
+  }
+
+  async function submit() {
+    if (!user) return;
+    if (!file) return setError("Agrega la foto de tu pago para continuar.");
+    setBusy(true);
+    setError(null);
+    const ext = (file.name.split(".").pop() ?? "jpg").toLowerCase().slice(0, 5);
+    const path = `${user.id}/${Date.now()}.${ext}`;
+    const up = await supabase.storage.from("payment-receipts").upload(path, file, { upsert: false });
+    if (up.error) {
+      setBusy(false);
+      setError("No pudimos subir la foto. Inténtalo otra vez.");
+      return;
+    }
+    try {
+      await send({
+        data: { packId: pack.id, hojas: pack.hojas, usd: pack.usd, method, receiptPath: path, userMessage: message },
+      });
+      onDone();
+    } catch {
+      setError("No pudimos enviar tu comprobante. Inténtalo otra vez.");
+    }
+    setBusy(false);
+  }
+
+  return (
+    <section className="rounded-[16px] bg-white p-5 shadow-[0_1px_3px_rgba(30,25,20,.06)]">
+      <h2 className="font-display text-[22px] font-bold leading-tight text-[#1B1B27]">Sube la foto de tu pago</h2>
+      <p className="mt-1 text-[15px] leading-relaxed text-[#64667A]">
+        Adjunta la captura o foto del comprobante de {usd(pack.usd)} por {pack.hojas} hojas. Lo revisamos y te avisamos aquí mismo.
+      </p>
+
+      <label className="mt-4 grid min-h-[132px] cursor-pointer place-items-center gap-2 rounded-[16px] border-2 border-dashed border-[#CEBDD8] bg-[#FBFAFF] p-4 text-center">
+        {preview ? (
+          <img src={preview} alt="Comprobante elegido" className="max-h-44 rounded-[12px] object-contain" />
+        ) : (
+          <>
+            <span className="grid h-12 w-12 place-items-center rounded-[12px] bg-[#7C5CFF]/10 text-[#7C5CFF]">
+              <Camera className="h-5 w-5" />
+            </span>
+            <span className="text-[14px] font-bold text-[#1B1B27]">Tocar para elegir la foto</span>
+            <span className="text-[12.5px] text-[#64667A]">Captura de la transferencia o del pago</span>
+          </>
+        )}
+        <input type="file" accept="image/*" className="hidden" onChange={(e) => pick(e.target.files?.[0] ?? null)} />
+      </label>
+
+      <textarea
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        placeholder="¿Quieres contarnos algo del pago? (opcional)"
+        className="mt-3 min-h-20 w-full rounded-[10px] border-[1.5px] border-[#CEBDD8] bg-white px-3 py-2 text-[15px] text-[#1B1B27] placeholder:text-[#9A9CB0] focus:border-[#7C5CFF] focus:outline-none"
+      />
+
+      {error && <p className="mt-3 text-[13px] font-semibold text-[#C2415A]">{error}</p>}
+
+      <button
+        onClick={submit}
+        disabled={busy}
+        className="mt-4 inline-flex min-h-[54px] w-full items-center justify-center gap-2 rounded-[12px] bg-[#7C5CFF] text-[17px] font-bold text-white shadow-[0_4px_14px_rgba(124,92,255,.28)] transition active:scale-[.97] disabled:opacity-60"
+      >
+        {busy ? <Loader2 className="h-5 w-5 animate-spin" /> : <Check className="h-5 w-5" />}
+        Enviar mi comprobante
+      </button>
+      <p className="mt-2 text-center text-[12.5px] text-[#64667A]">Tu foto es privada, solo la ve el equipo de ORÍGEN.</p>
+    </section>
   );
 }

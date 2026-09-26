@@ -101,13 +101,13 @@
 - [x] Respuestas: fotos de cualquier formato, foto + audio juntos
 
 ## Gran actualización (pedido Sep 26)
-- [ ] 1. Admin Visualiza: crear categorías principales (portada + título) y la IA genera imagen de sección
-- [ ] 2. Admin Visualiza: subcategorías dentro de cada principal, IA ordena y rellena tareas, sopa de letras, juegos, afirmaciones, recetas, pasos (usuario sube audio/detalles)
-- [ ] 3. Admin Limpieza espiritual: IA genera portada, recetas y pasos por sección
-- [ ] 4. Compras con comprobante (foto del pago) + panel admin aprobar/denegar
-- [ ] 5. Transferencias de saldo entre usuarios: panel admin aprobar/denegar/apelación
-- [ ] 6. Reemplazar burbuja de ruleta por menú flotante "TODO LO DE ORÍGEN" con flecha
-- [ ] 7. Bolitas rojas de pendientes (Camino, ejercicios, Palabra, Visualízate, árbol, ruleta, comunidad, compras, transferencias) en menú y burbuja
-- [ ] 8. Chat de notificaciones ORÍGEN solo lectura (leído/no leído) + 1 mensaje IA diario personalizado + avisos del sistema
-- [ ] 9. /ejercicios: quitar ícono notificación y foto con error, mapa rediseñado con final, lecciones diarias arriba, 8 por semana, todo funcional
-- [ ] 10. Quitar avatar del niño con hoja de toda la app y Camino ORÍGEN
+- [x] 1. Admin Visualiza: crear categorías principales (portada + título) y la IA genera imagen de sección
+- [x] 2. Admin Visualiza: subcategorías dentro de cada principal, IA ordena y rellena tareas, sopa de letras, juegos, afirmaciones, recetas, pasos (usuario sube audio/detalles)
+- [x] 3. Admin Limpieza espiritual: IA genera portada, recetas y pasos por sección
+- [x] 4. Compras con comprobante (foto del pago) + panel admin aprobar/denegar
+- [x] 5. Transferencias de saldo entre usuarios: panel admin aprobar/denegar/apelación
+- [x] 6. Reemplazar burbuja de ruleta por menú flotante "TODO LO DE ORÍGEN" con flecha
+- [x] 7. Bolitas rojas de pendientes (Camino, ejercicios, Palabra, Visualízate, árbol, ruleta, comunidad, compras, transferencias) en menú y burbuja
+- [x] 8. Chat de notificaciones ORÍGEN solo lectura (leído/no leído) + 1 mensaje IA diario personalizado + avisos del sistema
+- [x] 9. /ejercicios: quitar ícono notificación y foto con error, mapa rediseñado con final, lecciones diarias arriba, 8 por semana, todo funcional
+- [x] 10. Quitar avatar del niño con hoja de toda la app y Camino ORÍGEN

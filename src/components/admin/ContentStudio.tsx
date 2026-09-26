@@ -30,14 +30,14 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-[12px] font-bold text-white/70">{label}</span>
+      <span className="mb-1 block text-[12px] font-bold text-foreground/70">{label}</span>
       {children}
     </label>
   );
 }
 
 const inputClass =
-  "w-full min-h-12 rounded-[10px] border-2 border-white/15 bg-white/[0.06] px-3 text-[14px] text-white placeholder:text-white/40 focus:border-[#7C5CFF] focus:outline-none";
+  "w-full min-h-12 rounded-[10px] border-2 border-white/15 bg-card px-3 text-[14px] text-foreground placeholder:text-muted-foreground focus:border-[#7C5CFF] focus:outline-none";
 
 export function ContentStudio() {
   const [tab, setTab] = useState<Tab>("temas");
@@ -53,8 +53,8 @@ export function ContentStudio() {
             className={cn(
               "min-h-11 rounded-full border-2 px-4 text-[13px] font-bold transition",
               tab === t.id
-                ? "border-[#7C5CFF] bg-[#7C5CFF]/15 text-white"
-                : "border-white/15 bg-white/[0.04] text-white/70",
+                ? "border-[#7C5CFF] bg-[#7C5CFF]/15 text-[#4B32A8]"
+                : "border-white/15 bg-card text-foreground/70",
             )}
           >
             {t.label}
@@ -68,7 +68,7 @@ export function ContentStudio() {
             "rounded-[12px] border px-4 py-3 text-[13px] font-semibold",
             note.error
               ? "border-destructive/40 bg-destructive/10 text-destructive"
-              : "border-[#3FBE8F]/40 bg-[#3FBE8F]/10 text-[#8FE3C4]",
+              : "border-[#3FBE8F]/40 bg-[#3FBE8F]/10 text-[#1B6B4F]",
           )}
         >
           {note.text}
@@ -131,8 +131,8 @@ function MainTopics({ onNote }: { onNote: Notify }) {
 
   return (
     <div className="grid gap-4 lg:grid-cols-2">
-      <div className="rounded-[16px] border border-white/10 bg-white/[0.04] p-5 space-y-3">
-        <h3 className="font-display text-[17px] font-bold text-white">
+      <div className="rounded-[16px] border border-border bg-card p-5 space-y-3">
+        <h3 className="font-display text-[17px] font-bold text-foreground">
           <Sparkles className="mr-2 inline h-4 w-4 text-[#F58BCB]" />
           Crear tema principal
         </h3>
@@ -150,7 +150,7 @@ function MainTopics({ onNote }: { onNote: Notify }) {
             placeholder="Enfocado en personas que sienten culpa al recibir."
           />
         </Field>
-        <label className="flex min-h-11 items-center gap-2 text-[13px] font-semibold text-white/80">
+        <label className="flex min-h-11 items-center gap-2 text-[13px] font-semibold text-foreground/80">
           <input type="checkbox" checked={withCover} onChange={(e) => setWithCover(e.target.checked)} className="h-5 w-5" />
           Generar la portada con IA
         </label>
@@ -164,24 +164,24 @@ function MainTopics({ onNote }: { onNote: Notify }) {
         </button>
       </div>
 
-      <div className="rounded-[16px] border border-white/10 bg-white/[0.04] p-5">
-        <h3 className="font-display text-[17px] font-bold text-white">Temas existentes</h3>
-        {isLoading && <div className="mt-3 h-24 animate-pulse rounded-[12px] bg-white/10" />}
+      <div className="rounded-[16px] border border-border bg-card p-5">
+        <h3 className="font-display text-[17px] font-bold text-foreground">Temas existentes</h3>
+        {isLoading && <div className="mt-3 h-24 animate-pulse rounded-[12px] bg-muted" />}
         <ul className="mt-3 space-y-2">
           {categories.map((c) => (
-            <li key={c.id} className="flex items-center gap-3 rounded-[12px] border border-white/10 bg-white/[0.03] p-3">
+            <li key={c.id} className="flex items-center gap-3 rounded-[12px] border border-border bg-muted/40 p-3">
               {c.cover_url ? (
                 <img src={c.cover_url} alt="" className="h-12 w-12 shrink-0 rounded-[10px] object-cover" />
               ) : (
-                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-[10px] bg-white/10 text-white/50">
+                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-[10px] bg-muted text-foreground/50">
                   <Sparkles className="h-4 w-4" />
                 </span>
               )}
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-[14px] font-bold text-white">{c.title}</span>
-                <span className="block text-[11.5px] text-white/55">{c.group_key}</span>
+                <span className="block truncate text-[14px] font-bold text-foreground">{c.title}</span>
+                <span className="block text-[11.5px] text-foreground/55">{c.group_key}</span>
               </span>
-              <span className={cn("shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold", c.is_published ? "bg-[#3FBE8F]/20 text-[#8FE3C4]" : "bg-white/10 text-white/60")}>
+              <span className={cn("shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold", c.is_published ? "bg-[#3FBE8F]/20 text-[#1B6B4F]" : "bg-muted text-foreground/60")}>
                 {c.is_published ? "Visible" : "Oculto"}
               </span>
             </li>
@@ -257,8 +257,8 @@ function Subtopics({ onNote }: { onNote: Notify }) {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-[16px] border border-white/10 bg-white/[0.04] p-5 space-y-3">
-        <h3 className="font-display text-[17px] font-bold text-white">
+      <div className="rounded-[16px] border border-border bg-card p-5 space-y-3">
+        <h3 className="font-display text-[17px] font-bold text-foreground">
           <Wand2 className="mr-2 inline h-4 w-4 text-[#F58BCB]" />
           Crear subtema dentro de un tema
         </h3>
@@ -277,7 +277,7 @@ function Subtopics({ onNote }: { onNote: Notify }) {
         <Field label="Notas para la IA (opcional)">
           <textarea className={cn(inputClass, "min-h-24 py-2")} value={notes} onChange={(e) => setNotes(e.target.value)} />
         </Field>
-        <label className="flex min-h-11 items-center gap-2 text-[13px] font-semibold text-white/80">
+        <label className="flex min-h-11 items-center gap-2 text-[13px] font-semibold text-foreground/80">
           <input type="checkbox" checked={withCover} onChange={(e) => setWithCover(e.target.checked)} className="h-5 w-5" />
           Generar la portada con IA
         </label>
@@ -289,26 +289,26 @@ function Subtopics({ onNote }: { onNote: Notify }) {
           {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
           Crear subtema con IA
         </button>
-        <p className="text-[12px] leading-snug text-white/55">
+        <p className="text-[12px] leading-snug text-foreground/55">
           La IA lo coloca en el siguiente día libre y escribe lección, ejercicio con pasos, tareas, sopa de letras, preguntas y afirmación. Tú subes el audio.
         </p>
       </div>
 
-      <div className="rounded-[16px] border border-white/10 bg-white/[0.04] p-5">
-        <h3 className="font-display text-[17px] font-bold text-white">Subtemas de este tema</h3>
+      <div className="rounded-[16px] border border-border bg-card p-5">
+        <h3 className="font-display text-[17px] font-bold text-foreground">Subtemas de este tema</h3>
         <ul className="mt-3 space-y-2">
           {subtopics.map((s) => (
-            <li key={s.id} className="rounded-[12px] border border-white/10 bg-white/[0.03] p-3">
+            <li key={s.id} className="rounded-[12px] border border-border bg-muted/40 p-3">
               <div className="flex items-center gap-3">
-                <span className="shrink-0 rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-bold text-white/70">
+                <span className="shrink-0 rounded-full bg-muted px-2.5 py-1 text-[11px] font-bold text-foreground/70">
                   Día {s.day_index}
                 </span>
-                <span className="min-w-0 flex-1 truncate text-[14px] font-bold text-white">{s.title}</span>
+                <span className="min-w-0 flex-1 truncate text-[14px] font-bold text-foreground">{s.title}</span>
                 <button
                   onClick={() => togglePublish(s.id, !s.is_published)}
                   className={cn(
                     "min-h-11 shrink-0 rounded-full px-3 text-[11.5px] font-bold",
-                    s.is_published ? "bg-[#3FBE8F]/20 text-[#8FE3C4]" : "bg-white/10 text-white/60",
+                    s.is_published ? "bg-[#3FBE8F]/20 text-[#1B6B4F]" : "bg-muted text-foreground/60",
                   )}
                 >
                   {s.is_published ? "Visible" : "Oculto"}
@@ -327,7 +327,7 @@ function Subtopics({ onNote }: { onNote: Notify }) {
             </li>
           ))}
           {subtopics.length === 0 && (
-            <li className="rounded-[12px] border border-white/10 bg-white/[0.03] p-4 text-[13px] text-white/60">
+            <li className="rounded-[12px] border border-border bg-muted/40 p-4 text-[13px] text-foreground/60">
               Este tema todavía no tiene subtemas. Crea el primero arriba.
             </li>
           )}
@@ -371,8 +371,8 @@ function Limpieza({ onNote }: { onNote: Notify }) {
 
   return (
     <div className="grid gap-4 lg:grid-cols-2">
-      <div className="rounded-[16px] border border-white/10 bg-white/[0.04] p-5 space-y-3">
-        <h3 className="font-display text-[17px] font-bold text-white">Crear práctica de limpieza</h3>
+      <div className="rounded-[16px] border border-border bg-card p-5 space-y-3">
+        <h3 className="font-display text-[17px] font-bold text-foreground">Crear práctica de limpieza</h3>
         <Field label="Título">
           <input className={inputClass} value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Baño de paz" />
         </Field>
@@ -386,7 +386,7 @@ function Limpieza({ onNote }: { onNote: Notify }) {
         <Field label="Notas para la IA (opcional)">
           <textarea className={cn(inputClass, "min-h-24 py-2")} value={notes} onChange={(e) => setNotes(e.target.value)} />
         </Field>
-        <label className="flex min-h-11 items-center gap-2 text-[13px] font-semibold text-white/80">
+        <label className="flex min-h-11 items-center gap-2 text-[13px] font-semibold text-foreground/80">
           <input type="checkbox" checked={withCover} onChange={(e) => setWithCover(e.target.checked)} className="h-5 w-5" />
           Generar la portada con IA
         </label>
@@ -400,15 +400,15 @@ function Limpieza({ onNote }: { onNote: Notify }) {
         </button>
       </div>
 
-      <div className="rounded-[16px] border border-white/10 bg-white/[0.04] p-5">
-        <h3 className="font-display text-[17px] font-bold text-white">Prácticas creadas</h3>
+      <div className="rounded-[16px] border border-border bg-card p-5">
+        <h3 className="font-display text-[17px] font-bold text-foreground">Prácticas creadas</h3>
         <ul className="mt-3 space-y-2">
           {practices.map((p) => (
-            <li key={p.id} className="flex items-center gap-3 rounded-[12px] border border-white/10 bg-white/[0.03] p-3">
+            <li key={p.id} className="flex items-center gap-3 rounded-[12px] border border-border bg-muted/40 p-3">
               {p.cover_url && <img src={p.cover_url} alt="" className="h-12 w-12 shrink-0 rounded-[10px] object-cover" />}
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-[14px] font-bold text-white">{p.title}</span>
-                <span className="block text-[11.5px] text-white/55">
+                <span className="block truncate text-[14px] font-bold text-foreground">{p.title}</span>
+                <span className="block text-[11.5px] text-foreground/55">
                   Nivel {p.level} · {p.duration}
                 </span>
               </span>
@@ -419,7 +419,7 @@ function Limpieza({ onNote }: { onNote: Notify }) {
                 }}
                 className={cn(
                   "min-h-11 shrink-0 rounded-full px-3 text-[11.5px] font-bold",
-                  p.is_published ? "bg-[#3FBE8F]/20 text-[#8FE3C4]" : "bg-white/10 text-white/60",
+                  p.is_published ? "bg-[#3FBE8F]/20 text-[#1B6B4F]" : "bg-muted text-foreground/60",
                 )}
               >
                 {p.is_published ? "Visible" : "Oculta"}
@@ -427,7 +427,7 @@ function Limpieza({ onNote }: { onNote: Notify }) {
             </li>
           ))}
           {practices.length === 0 && (
-            <li className="rounded-[12px] border border-white/10 bg-white/[0.03] p-4 text-[13px] text-white/60">
+            <li className="rounded-[12px] border border-border bg-muted/40 p-4 text-[13px] text-foreground/60">
               Todavía no hay prácticas creadas desde el panel.
             </li>
           )}
