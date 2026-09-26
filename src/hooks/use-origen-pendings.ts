@@ -72,7 +72,7 @@ export function useOrigenPendings(userId?: string) {
         visualiza: !seen("visualiza") && !types.has("programa_dia") && !types.has("cristo_369") && !types.has("manifest_audio"),
         arbol: !seen("arbol") && (family.data ?? []).length === 0,
         ruleta: !seen("ruleta") && (spins.data ?? []).length === 0,
-        comunidad: !seen("comunidad") && (community.data ?? []).length > 0,
+        comunidad: (community.data ?? []).length > 0,
         compras: !seen("compras") && (purchases.data ?? []).length > 0,
         transferencias: !seen("transferencias") && (transfers.data ?? []).length > 0,
       };
