@@ -1,3 +1,5 @@
+import { useServerFn } from "@tanstack/react-start";
+import { ensureDailyNotice } from "@/lib/notices.functions";
 import { useOrigenPendings } from "@/hooks/use-origen-pendings";
 import { wholeHojas } from "@/lib/gems";
 import { createFileRoute, Link, Outlet, redirect, useLocation, useNavigate } from "@tanstack/react-router";
@@ -100,6 +102,14 @@ function AuthLayoutInner() {
   const { data: communityNotifications } = useCommunityNotifications(user?.id);
   const communityUnread = (communityNotifications?.length ?? 0) > 0;
   const { data: pendings } = useOrigenPendings(user?.id);
+  const ensureNotice = useServerFn(ensureDailyNotice);
+  useEffect(() => {
+    if (!user?.id) return;
+    const key = `origen-notice-${new Date().toISOString().slice(0, 10)}`;
+    if (sessionStorage.getItem(key)) return;
+    sessionStorage.setItem(key, "1");
+    ensureNotice().then(() => qc.invalidateQueries({ queryKey: ["origen-pendings"] })).catch(() => {});
+  }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const { data: isAdmin } = useQuery({
     queryKey: ["isAdmin", user?.id],

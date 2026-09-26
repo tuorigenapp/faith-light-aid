@@ -16,6 +16,7 @@ export const ensureDailyNotice = createServerFn({ method: "POST" })
       .eq("kind", "diario")
       .gte("created_at", `${today}T00:00:00Z`)
       .maybeSingle();
+    await ensureReminders(context.userId, today);
     if (existing) return { created: false };
 
     const { data: profile } = await supabaseAdmin
@@ -62,3 +63,26 @@ export const markNoticesRead = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+const REMINDERS: { type: string[]; title: string; body: string; link: string }[] = [
+  { type: ["camino_dia", "stage_completed"], title: "Tu etapa de hoy en Camino ORÍGEN te espera", body: "Hay una lección nueva disponible. Son pocos minutos y sigues avanzando.", link: "/etapas" },
+  { type: ["exercise_completed"], title: "Tus ejercicios del día están listos", body: "Completa la lección de hoy y suma progreso hacia tu próxima hoja de sanación.", link: "/ejercicios" },
+  { type: ["palabra"], title: "Ya salió la Palabra del día", body: "Léela y juega con ella: cada acierto te acerca a una nueva hoja.", link: "/palabra" },
+  { type: ["game_play", "juego"], title: "Tus juegos de hoy suman hojas", body: "Juega hoy y gana hojas para hablar con la mentora Ruth, Patrones familiares, Consulta de pareja o Dios te dice hoy.", link: "/juegos" },
+  { type: ["programa_dia", "cristo_369", "manifest_audio"], title: "Tienes audio disponible en Visualízate", body: "Continúa con el audio que elegiste. Tu plan gratis incluye 3 audios; con Camino ORÍGEN se abren todos.", link: "/visualiza" },
+];
+
+/** Recordatorios automáticos: uno por sección pendiente al día, sin duplicar. */
+async function ensureReminders(userId: string, today: string) {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const [activity, sent] = await Promise.all([
+    supabaseAdmin.from("daily_activity").select("activity_type").eq("user_id", userId).eq("activity_date", today),
+    supabaseAdmin.from("origen_notifications").select("title").eq("user_id", userId).eq("kind", "sistema").gte("created_at", `${today}T00:00:00Z`),
+  ]);
+  const done = new Set((activity.data ?? []).map((a) => a.activity_type));
+  const already = new Set((sent.data ?? []).map((n) => n.title));
+  const rows = REMINDERS.filter((r) => !r.type.some((t) => done.has(t)) && !already.has(r.title)).map((r) => ({
+    user_id: userId, kind: "sistema", title: r.title, body: r.body, link: r.link,
+  }));
+  if (rows.length) await supabaseAdmin.from("origen_notifications").insert(rows);
+}
