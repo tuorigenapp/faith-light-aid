@@ -1,33 +1,51 @@
 import { Link } from "@tanstack/react-router";
+import { ArrowRight } from "lucide-react";
 import { CAMINOS } from "@/lib/caminos";
+import { ThreeSlider } from "@/components/ThreeSlider";
+import { useContentOverrides, useCustomCaminos } from "@/hooks/use-content-overrides";
 
-/**
- * "Lo nuevo de ORIGEN": una imagen vertical por fila, sin textos superpuestos.
- * Cada imagen abre directamente su camino diario.
- */
+type Item = { key: string; title: string; img?: string | null; slug?: string; caminoId?: string; subtitle?: string | null };
+
+/** Categorías de Camino ORÍGEN: 3 por pantalla, se desliza, y botón para ver todas. */
 export function CategoriaSlider() {
+  const ov = useContentOverrides();
+  const custom = useCustomCaminos();
+  const items: Item[] = [
+    ...CAMINOS.filter((c) => !ov.get(`camino:${c.id}`)?.is_hidden).map((c) => ({
+      key: c.id,
+      caminoId: c.id,
+      title: ov.get(`camino:${c.id}`)?.title || c.title,
+      img: ov.get(`camino:${c.id}`)?.cover_url || c.banner,
+    })),
+    ...(custom.data ?? []).map((c: any) => ({ key: c.id, slug: c.slug, title: c.title, img: c.cover_url, subtitle: c.subtitle })),
+  ];
+  const cls = "block rounded-[20px] overflow-hidden shadow-soft transition-all active:scale-[.98]";
   return (
     <section>
       <h3 className="font-display font-bold text-[19px] leading-tight">Elige el dolor que quieres sanar</h3>
       <p className="text-[13px] text-muted-foreground mt-1">
-        Cada día abre una práctica corta: entiendes algo, lo trabajas y lo cierras. Sin audios largos.
+        Cada día abre una práctica corta: entiendes algo, lo trabajas y lo cierras.
       </p>
       <div className="hairline-brand mt-3 mb-3" />
-
-      <div className="space-y-3">
-        {CAMINOS.map((c, i) => (
-          <Link
-            key={c.id}
-            to="/caminos/$caminoId"
-            params={{ caminoId: c.id }}
-            aria-label={c.title}
-            style={{ animation: `fade-in .4s ease-out ${i * 70}ms both` }}
-            className="block rounded-[20px] overflow-hidden shadow-soft hover:shadow-glow transition-all active:scale-[.98]"
-          >
-            <img src={c.banner} alt={c.title} loading="lazy" className="w-full h-auto block" />
-          </Link>
-        ))}
-      </div>
+      <ThreeSlider
+        items={items}
+        keyOf={(i) => i.key}
+        render={(it) =>
+          it.caminoId ? (
+            <Link to="/caminos/$caminoId" params={{ caminoId: it.caminoId }} aria-label={it.title} className={cls}>
+              <img src={it.img ?? ""} alt={it.title} loading="lazy" className="w-full h-auto block" />
+            </Link>
+          ) : (
+            <Link to="/camino-nuevo/$slug" params={{ slug: it.slug! }} aria-label={it.title} className={`${cls} bg-card border border-border`}>
+              {it.img && <img src={it.img} alt={it.title} loading="lazy" className="w-full h-40 object-cover block" />}
+              <span className="block p-4 font-display text-[16px] font-bold">{it.title}</span>
+            </Link>
+          )
+        }
+      />
+      <Link to="/categorias" className="mt-3 btn-primary-gradient w-full h-[54px] rounded-[14px] flex items-center justify-center gap-2 text-[15px]">
+        Ver todas las categorías <ArrowRight className="w-4 h-4" />
+      </Link>
     </section>
   );
 }
