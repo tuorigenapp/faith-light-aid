@@ -116,7 +116,7 @@ function DayPlayer() {
     doc.save(`metodo-cristo-${categoryId}-dia${day}.pdf`);
   }
 
-  async function useUnlock() {
+  async function applyUnlock() {
     const { data: ok } = await supabase.rpc("claim_audio_unlock", { _category_id: categoryId, _day_index: Number(day) });
     if (!ok) return toast.error("No pudimos usar tu desbloqueo. Intenta de nuevo.");
     qc.invalidateQueries({ queryKey: ["day-audio"] });
@@ -130,7 +130,7 @@ function DayPlayer() {
         <p className="mt-3 font-display text-[20px] font-bold">Tus {FREE_AUDIOS} audios gratis ya están abiertos</p>
         <p className="mt-1 text-[14px] text-muted-foreground">Este audio y el resto del programa se abren con Membresía ORÍGEN.</p>
         {data.credits > 0 && (
-          <button onClick={useUnlock} className="mt-5 flex min-h-[52px] w-full items-center justify-center rounded-[12px] bg-primary/10 font-bold text-primary">Usar mi desbloqueo de la ruleta</button>
+          <button onClick={applyUnlock} className="mt-5 flex min-h-[52px] w-full items-center justify-center rounded-[12px] bg-primary/10 font-bold text-primary">Usar mi desbloqueo de la ruleta</button>
         )}
         <Link to="/membresia" className="mt-3 flex min-h-[52px] items-center justify-center rounded-[12px] bg-primary font-bold text-primary-foreground">Desbloquear todo</Link>
         <Link to="/visualiza/$categoryId" params={{ categoryId }} className="mt-2 inline-flex min-h-11 items-center font-semibold text-primary">Volver al tema</Link>
