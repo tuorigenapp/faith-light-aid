@@ -148,3 +148,9 @@
 - [x] Plantilla tipo Limpieza espiritual para temas futuros con IA
 - [x] Ruleta: desbloquear 1 semana de Camino y 1 audio premium
 - [x] Premios ORÍGEN: árbol seco que florece según el avance
+
+## Compra PayPal y ruleta — Sep 26
+- [x] Compra de Hojas únicamente con PayPal Business dentro de la app
+- [x] Opción «Confirmar pago» para reenviar captura si el flujo se interrumpe
+- [x] Ruleta visual con emoji y cantidad; resultado explica el premio obtenido
+- [ ] Verificación móvil del pago, confirmación manual y ruleta

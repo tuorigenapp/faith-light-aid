@@ -211,8 +211,8 @@ function RuletaPage() {
               {WHEEL_PRIZES.map((p, i) => {
                 const mid = i * SECTOR_ANGLE + SECTOR_ANGLE / 2;
                 const pos = polar(R, R, R * 0.62, mid);
-                const iconSize = Math.max(18, Math.min(30, 220 / SECTORS));
-                const textSize = Math.max(12, Math.min(20, 150 / SECTORS));
+                const iconSize = Math.max(17, Math.min(25, 210 / SECTORS));
+                const textSize = Math.max(10, Math.min(15, 145 / SECTORS));
                 return (
                   <g key={`t-${p.key}`}>
                     <text
@@ -222,11 +222,11 @@ function RuletaPage() {
                       dominantBaseline="middle"
                       fontSize={iconSize}
                     >
-                      {p.icon || <Gift className="h-5 w-5 text-primary" />}
+                      {p.icon}
                     </text>
                     <text
                       x={pos.x}
-                      y={pos.y + iconSize * 0.75}
+                      y={pos.y + iconSize * 0.78}
                       textAnchor="middle"
                       dominantBaseline="middle"
                       fontSize={textSize}
@@ -275,8 +275,9 @@ function RuletaPage() {
       {/* Resultado */}
       {prize && (
         <div className="mx-auto mt-6 w-[min(92vw,420px)] rounded-[16px] border-2 border-primary bg-card p-5 text-center shadow-elevated animate-in fade-in zoom-in-95">
-          <div className="text-5xl">{prize.icon || <Gift className="mx-auto h-12 w-12 text-primary" />}</div>
-          <h2 className="mt-3 font-display text-[22px] font-extrabold">¡Ganaste {prize.label}!</h2>
+           <div className="text-5xl" aria-hidden>{prize.icon}</div>
+           <h2 className="mt-3 font-display text-[22px] font-extrabold">¡Ganaste!</h2>
+           <p className="mt-1 text-[16px] font-bold text-primary">{prize.label}</p>
           <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">{prize.description}</p>
         </div>
       )}
@@ -300,7 +301,7 @@ function RuletaPage() {
               const p = prizeByKey(h.key);
               return (
                 <div key={`${h.at}-${i}`} className="flex items-center gap-3 rounded-[16px] border border-border/60 bg-card p-4 shadow-soft">
-                  <span className="grid h-11 w-11 place-items-center rounded-[12px] bg-primary/10 text-2xl">{p.icon || <Gift className="h-5 w-5 text-primary" />}</span>
+                   <span className="grid h-11 w-11 place-items-center rounded-[12px] bg-primary/10 text-2xl">{p.icon}</span>
                   <div className="min-w-0">
                     <p className="truncate text-[15px] font-semibold">{h.label}</p>
                     <p className="text-[12px] text-muted-foreground">
