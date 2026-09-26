@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
+import { ThreeSlider } from "@/components/ThreeSlider";
 import imgMusica from "@/assets/manifesta-musica.png";
 import imgPermisoMujer from "@/assets/manifesta-permiso-mujer.png";
 import imgPermisoHombre from "@/assets/manifesta-permiso-hombre.png";
@@ -66,27 +67,11 @@ export function ManifestacionSlider() {
       </p>
       <div className="hairline-brand mt-3 mb-3" />
 
-      <div className="-mx-4 px-4 overflow-x-auto no-scrollbar snap-x snap-mandatory">
-        <ul className="flex gap-4">
-          {[GRUPO_1, GRUPO_2].map((grupo, gi) => (
-            <li key={gi} className="w-[calc(100vw-2rem)] max-w-[520px] lg:w-[460px] shrink-0 snap-center space-y-4">
-              {(grupo as Slide[]).map((s, i) => (
-                <div key={s.key} style={{ animation: `fade-in .4s ease-out ${(gi * 4 + i) * 60}ms both` }}>
-                  <SlideLink s={s} />
-                </div>
-              ))}
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <p className="mt-2 text-center text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-        Desliza para ver más
-      </p>
+      <ThreeSlider items={[...GRUPO_1, ...GRUPO_2] as Slide[]} keyOf={(s) => s.key} render={(s) => <SlideLink s={s} />} />
 
       <Link
         to="/visualiza"
-        className="mt-3 btn-primary-gradient w-full h-[54px] rounded-[14px] flex items-center justify-center gap-2 text-[15px] animate-pulse-soft"
+        className="mt-3 btn-primary-gradient w-full h-[54px] rounded-[14px] flex items-center justify-center gap-2 text-[15px]"
       >
         Ver todas las categorías de manifestación <ArrowRight className="w-4 h-4" />
       </Link>
