@@ -123,3 +123,15 @@
 - [x] Usuarios: sumar/quitar hojas, eliminar, selección múltiple con filtros por plan
 - [x] Avisos ORÍGEN de todo (camino, ejercicios, palabra, visualízate, juegos, compras) + bolita en Camino
 - [x] Ocultar burbujas flotantes en secciones de concentración; nuevo ícono TODO EN ORÍGEN
+
+## Pedido Sep 26 (3)
+- [x] Portadas de /explorar en el panel
+- [x] Temas principales creados arriba en Visualízate; subcategorías solo dentro de cada tema (portada propia + lista con número)
+- [x] Casilla "Solo audio" en temas y subtemas; subtemas nuevos visibles al crearse
+- [x] Bolitas rojas y Avisos ORÍGEN se leen al entrar a la sección (Camino, Comunidad, Visualízate, etc.)
+- [x] 3 audios gratis por tema, bloqueo desde el cuarto
+- [x] Menú: Historial, Ver mi árbol generacional (/arbol?vista=mi-arbol), Transferir Balance (/arbol?vista=transferir)
+- [x] Historial sin códigos internos
+- [x] Ayuda: "Para qué sirven las hojas" responde
+- [x] Campañas emergentes (imagen + enlace + X) desde el panel
+- [x] Texto falso "+5 hojas" de la sopa de letras
