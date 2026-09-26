@@ -503,7 +503,7 @@ export const adminSetOverride = createServerFn({ method: "POST" })
   .inputValidator((i) =>
     z.object({
       key: z.string().min(1).max(120),
-      scope: z.enum(["camino", "categoria", "juego"]),
+      scope: z.enum(["camino", "categoria", "juego", "explorar"]),
       title: z.string().trim().max(120).optional(),
       coverUrl: z.string().trim().max(1000).optional(),
       isHidden: z.boolean().optional(),

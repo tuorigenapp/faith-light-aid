@@ -46,3 +46,8 @@ export const EXPLORE_ITEMS: ExploreItem[] = [
   { title: "Magnético", description: "Presencia y atracción sana.", image: magneticoCover, to: "/programas/magnetico", tag: "Programa", locked: true },
   { title: "Permiso para existir", description: "Voz, límites y decisión.", image: permisoCover, to: "/programas/permiso-mujer", tag: "Programa", locked: true },
 ];
+
+/** Llave estable para cambiar la portada/visibilidad de una tarjeta de Explorar desde el panel. */
+export function exploreKey(title: string) {
+  return `explorar:${title.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}`;
+}

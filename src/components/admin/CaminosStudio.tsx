@@ -1,3 +1,4 @@
+import { EXPLORE_ITEMS, exploreKey } from "@/lib/explore-content";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -123,7 +124,7 @@ export function CoversStudio({ onNote }: { onNote: Notify }) {
   const [busy, setBusy] = useState<string | null>(null);
   const [q, setQ] = useState("");
 
-  async function save(key: string, scope: "camino" | "juego", patch: { coverUrl?: string; isHidden?: boolean }) {
+  async function save(key: string, scope: "camino" | "juego" | "explorar", patch: { coverUrl?: string; isHidden?: boolean }) {
     setBusy(key);
     try {
       await setOv({ data: { key, scope, ...patch } });
@@ -138,6 +139,7 @@ export function CoversStudio({ onNote }: { onNote: Notify }) {
   const items = [
     ...CAMINOS.map((c) => ({ key: `camino:${c.id}`, scope: "camino" as const, title: `Categoría · ${c.title}`, image: c.banner as string | null })),
     ...GAMES.map((g) => ({ key: `juego:${g.id}`, scope: "juego" as const, title: `Juego · ${g.title}`, image: null as string | null })),
+    ...EXPLORE_ITEMS.map((e) => ({ key: exploreKey(e.title), scope: "explorar" as const, title: `Explorar · ${e.title}`, image: e.image as string | null })),
   ].filter((i) => i.title.toLowerCase().includes(q.trim().toLowerCase()));
 
   return (
