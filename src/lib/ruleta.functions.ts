@@ -52,6 +52,19 @@ export const spinWheel = createServerFn({ method: "POST" })
       return { ok: false as const, reason: "save_failed" as const, nextAt: 0, serverNow: Date.now() };
     }
 
+    if (prize.key === "semana_camino") {
+      await supabaseAdmin.from("daily_activity").insert({
+        user_id: context.userId,
+        activity_type: "camino_semana",
+        activity_date: new Date().toISOString().slice(0, 10),
+        reference_id: crypto.randomUUID(),
+        metadata: { camino: "*", source: "ruleta" } as never,
+      });
+    }
+    if (prize.key === "audio_premium") {
+      const { count } = await supabaseAdmin.from("audio_unlocks").select("id", { count: "exact", head: true }).eq("user_id", context.userId).is("audio_id", null);
+      if ((count ?? 0) < 1) await supabaseAdmin.from("audio_unlocks").insert({ user_id: context.userId, source: "ruleta" });
+    }
     if (prize.points > 0) {
       await supabaseAdmin.from("gem_transactions").insert({
         user_id: context.userId,

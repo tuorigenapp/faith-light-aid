@@ -48,7 +48,7 @@ function CaminoMapa() {
         .select("activity_type, activity_date, metadata")
         .eq("user_id", user!.id)
         .in("activity_type", ["camino_dia", "camino_semana"]);
-      const mine = (rows ?? []).filter((r: any) => r.metadata?.camino === caminoId);
+      const mine = (rows ?? []).filter((r: any) => r.metadata?.camino === caminoId || (r.activity_type === "camino_semana" && r.metadata?.camino === "*" && r.activity_date >= new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10)));
       return {
         done: mine.filter((r: any) => r.activity_type === "camino_dia").map((r: any) => ({ day: Number(r.metadata?.day), date: r.activity_date as string })),
         weekOpen: mine.some((r: any) => r.activity_type === "camino_semana"),

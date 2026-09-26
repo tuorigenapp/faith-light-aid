@@ -46,7 +46,11 @@ function DayPlayer() {
         const { data: list } = await supabase.from("manifest_audios").select("day_index").eq("category_id", categoryId).order("day_index");
         position = (list ?? []).findIndex((r) => r.day_index === audio.data!.day_index) + 1;
       }
-      return { cat: cat.data, audio: audio.data, entry: entry.data, locked: plan !== "camino" && position > FREE_AUDIOS };
+      const { data: unlocks } = user ? await supabase.from("audio_unlocks").select("audio_id").eq("user_id", user.id) : { data: [] as { audio_id: string | null }[] };
+      const credits = (unlocks ?? []).filter((u) => !u.audio_id).length;
+      const unlocked = !!audio.data && (unlocks ?? []).some((u) => u.audio_id === audio.data!.id);
+      const hiddenByPlan = !audio.data && plan !== "camino" && Number(day) > FREE_AUDIOS;
+      return { cat: cat.data, audio: audio.data, entry: entry.data, credits, locked: hiddenByPlan || (plan !== "camino" && position > FREE_AUDIOS && !unlocked) };
     },
   });
 
@@ -112,7 +116,26 @@ function DayPlayer() {
     doc.save(`metodo-cristo-${categoryId}-dia${day}.pdf`);
   }
 
-  if (!data) return <div className="p-8 text-center text-muted-foreground">Cargando...</div>;
+  async function applyUnlock() {
+    const { data: ok } = await supabase.rpc("claim_audio_unlock", { _category_id: categoryId, _day_index: Number(day) });
+    if (!ok) return toast.error("No pudimos usar tu desbloqueo. Intenta de nuevo.");
+    qc.invalidateQueries({ queryKey: ["day-audio"] });
+  }
+
+  if (!data) return <div className="mx-auto max-w-2xl space-y-3 p-4"><div className="h-56 animate-pulse rounded-[16px] bg-muted" /><div className="h-24 animate-pulse rounded-[16px] bg-muted" /><div className="h-40 animate-pulse rounded-[16px] bg-muted" /></div>;
+  if (data.locked)
+    return (
+      <div className="mx-auto max-w-md p-8 text-center">
+        <span className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-primary/10 text-primary"><Lock className="h-6 w-6" /></span>
+        <p className="mt-3 font-display text-[20px] font-bold">Tus {FREE_AUDIOS} audios gratis ya están abiertos</p>
+        <p className="mt-1 text-[14px] text-muted-foreground">Este audio y el resto del programa se abren con Membresía ORÍGEN.</p>
+        {data.credits > 0 && (
+          <button onClick={applyUnlock} className="mt-5 flex min-h-[52px] w-full items-center justify-center rounded-[12px] bg-primary/10 font-bold text-primary">Usar mi desbloqueo de la ruleta</button>
+        )}
+        <Link to="/membresia" className="mt-3 flex min-h-[52px] items-center justify-center rounded-[12px] bg-primary font-bold text-primary-foreground">Desbloquear todo</Link>
+        <Link to="/visualiza/$categoryId" params={{ categoryId }} className="mt-2 inline-flex min-h-11 items-center font-semibold text-primary">Volver al tema</Link>
+      </div>
+    );
   if (!c || !a)
     return (
       <div className="mx-auto max-w-md p-8 text-center">
@@ -133,6 +156,8 @@ function DayPlayer() {
     );
   const audioOnly = Boolean((a as any).audio_only);
   const tasks: string[] = Array.isArray((a as any).quiz?.tasks) ? (a as any).quiz.tasks : [];
+  const materials: string[] = Array.isArray((a as any).quiz?.materials) ? (a as any).quiz.materials : [];
+  const steps: string[] = Array.isArray((a as any).quiz?.steps) ? (a as any).quiz.steps : [];
 
   return (
     <div className="pb-32">
@@ -188,6 +213,8 @@ function DayPlayer() {
           )}
         </Card>
 
+         {materials.length > 0 && <Card className="rounded-[1.7rem] p-5 shadow-soft"><h2 className="font-display font-bold text-lg">Materiales</h2><ul className="mt-3 grid gap-2 sm:grid-cols-2">{materials.map((m) => <li key={m} className="flex gap-2 text-sm"><span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-primary/12 text-primary"><Check className="h-3 w-3" /></span>{m}</li>)}</ul></Card>}
+         {steps.length > 0 && <Card className="rounded-[1.7rem] p-5 shadow-soft"><h2 className="font-display font-bold text-lg">Paso a paso</h2><ol className="mt-3 space-y-3">{steps.map((st, i) => <li key={st} className="flex gap-3 text-sm"><span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-primary text-[12px] font-bold text-primary-foreground">{i + 1}</span><span className="pt-1">{st}</span></li>)}</ol></Card>}
          {!audioOnly && tasks.length > 0 && <Card className="rounded-[1.7rem] p-5 shadow-soft"><h2 className="font-display font-bold text-lg">Tareas de hoy</h2><ul className="mt-3 space-y-2">{tasks.map((t) => <li key={t} className="flex gap-2 text-sm"><span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-primary/12 text-primary"><Check className="h-3 w-3" /></span>{t}</li>)}</ul></Card>}
          {!audioOnly && (a.lesson || a.exercise || a.pdf_url) && <Card className="rounded-[1.7rem] p-5 md:p-6 shadow-soft space-y-3">
            {a.lesson && <div><h2 className="font-display font-bold text-lg">Lección del día</h2><p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed">{a.lesson}</p></div>}

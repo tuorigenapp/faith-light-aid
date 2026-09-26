@@ -169,7 +169,7 @@ function CategoryInner() {
         <Link to="/visualiza" className="mt-4 inline-flex min-h-11 items-center rounded-[12px] bg-primary/10 px-4 font-bold text-primary">Ver todos los temas</Link>
       </div>
     );
-  if ((c as any).is_custom && (c as any).audio_only) return <CustomTopic cat={c} audios={data.audios as any} entries={data.entries as any} isPaid={isPaid} />;
+  if ((c as any).is_custom && ((c as any).audio_only || (c as any).design === "limpieza")) return <CustomTopic recipe={(c as any).design === "limpieza"} cat={c} audios={data.audios as any} entries={data.entries as any} isPaid={isPaid} />;
 
   const doneCount = data?.audios.filter((a: any) => data.entries.get(a.id)?.completed).length ?? 0;
   const selectedArea = areas.find((a) => a.id === categoryId);

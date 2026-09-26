@@ -5,6 +5,8 @@ import { Award, Crown, Flame, Gift, Lock, Sparkles, Star, Trophy, type LucideIco
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { cn } from "@/lib/utils";
+import { GrowingTree } from "@/components/GrowingTree";
+import { WHEEL_PRIZES } from "@/lib/ruleta";
 import e3dStar from "@/assets/e3d-star.png";
 import e3dCoin from "@/assets/e3d-coin.png";
 import e3dHeart from "@/assets/e3d-heartgem.png";
@@ -43,12 +45,13 @@ function PremiosOrigen() {
     queryKey: ["premios-origen", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const [profile, activities, stageRewards] = await Promise.all([
+      const [profile, activities, stageRewards, stages] = await Promise.all([
         supabase.from("profiles").select("display_name, full_name, gems, consecutive_days").eq("id", user!.id).maybeSingle(),
         supabase.from("daily_activity").select("activity_date, activity_type").eq("user_id", user!.id).order("activity_date", { ascending: false }).limit(180),
         supabase.from("stage_rewards").select("xp, leaves, insignia, created_at").eq("user_id", user!.id).order("created_at", { ascending: false }).limit(80),
+        supabase.from("stage_progress").select("stage_id, status").eq("user_id", user!.id),
       ]);
-      return { profile: profile.data, activities: activities.data ?? [], stageRewards: stageRewards.data ?? [] };
+      return { profile: profile.data, activities: activities.data ?? [], stageRewards: stageRewards.data ?? [], stages: stages.data ?? [] };
     },
   });
 
@@ -63,6 +66,11 @@ function PremiosOrigen() {
   const name = (data?.profile?.display_name || data?.profile?.full_name || "Amigo").split(" ")[0];
   const next = REWARDS.find((r) => actions < r.target) ?? REWARDS[REWARDS.length - 1];
   const nextPct = next ? Math.min(100, Math.round((actions / next.target) * 100)) : 100;
+
+  const TOTAL_STAGES = 8;
+  const stagesDone = (data?.stages ?? []).filter((x: any) => x.status === "completed").length;
+  const treePct = Math.min(100, Math.round((stagesDone / TOTAL_STAGES) * 70 + Math.min(30, actions / 3)));
+  const treeLabel = treePct < 15 ? "Tu árbol está seco, pero tiene raíz" : treePct < 50 ? "Empiezan a salir hojas" : treePct < 85 ? "Tu árbol está tomando vida" : "Tu árbol está florecido";
 
   return (
     <div className="min-h-dvh bg-aura-top">
@@ -82,6 +90,39 @@ function PremiosOrigen() {
             </div>
             <img src={e3dStar} alt="Premio ORÍGEN en 3D" loading="eager" className="mx-auto w-48 h-48 object-contain drop-shadow-[0_18px_30px_color-mix(in_oklab,var(--primary)_28%,transparent)]" />
           </div>
+        </section>
+
+        <section className="mt-5 app-card p-5">
+          <p className="text-[11px] uppercase tracking-widest font-bold text-primary">Tu árbol ORÍGEN</p>
+          <h2 className="font-display font-bold text-[19px] leading-tight">{treeLabel}</h2>
+          <p className="mt-1 text-[13px] text-muted-foreground">Crece con cada etapa de tu Camino ORÍGEN que completas.</p>
+          <GrowingTree pct={treePct} />
+          <div className="grid grid-cols-4 gap-2 sm:grid-cols-8">
+            {Array.from({ length: TOTAL_STAGES }, (_, i) => {
+              const done = i < stagesDone;
+              return (
+                <div key={i} className={cn("rounded-[10px] border p-2 text-center", done ? "border-primary/40 bg-primary/10" : "border-border")}>
+                  <p className="text-[10px] font-bold uppercase text-muted-foreground">Etapa</p>
+                  <p className="font-display text-[16px] font-bold">{i + 1}</p>
+                  <p className={cn("text-[10px] font-semibold", done ? "text-primary" : "text-muted-foreground")}>{done ? "Lista" : i === stagesDone ? "En curso" : "Pendiente"}</p>
+                </div>
+              );
+            })}
+          </div>
+          <p className="mt-3 text-[13px] font-semibold">{stagesDone} de {TOTAL_STAGES} etapas · sigue avanzando para que florezca.</p>
+        </section>
+
+        <section className="mt-5 app-card p-5">
+          <p className="text-[11px] uppercase tracking-widest font-bold text-primary">Lo que puedes ganar en la ruleta</p>
+          <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+            {WHEEL_PRIZES.map((w) => (
+              <li key={w.key} className="flex items-start gap-3 rounded-[12px] border border-border p-3">
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[10px] bg-primary/10 text-primary"><Gift className="h-5 w-5" /></span>
+                <span className="min-w-0"><span className="block text-[14px] font-bold">{w.label}</span><span className="block text-[12.5px] text-muted-foreground">{w.description}</span></span>
+              </li>
+            ))}
+          </ul>
+          <Link to="/ruleta" className="mt-4 btn-primary-gradient flex h-[52px] w-full items-center justify-center rounded-[12px] text-[15px] font-semibold">Girar la ruleta de hoy</Link>
         </section>
 
         <section className="mt-5 app-card p-5">

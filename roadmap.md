@@ -144,7 +144,7 @@
 - [x] Inicio: Camino ORÍGEN y Visualízate en grupos de 3, deslizables, con botón "Ver todas"
 - [x] Comunidad: los avisos de respuestas no se borran solo por entrar
 - [x] Ruleta: premios nuevos (5 consultas del cielo, Mentora, Bono para regalar)
-- [ ] Panel: elegir diseño de Visualízate por tema (hoy se decide con "Solo audio")
-- [ ] Plantilla tipo Limpieza espiritual para temas futuros con IA
-- [ ] Ruleta: desbloquear 1 semana de Camino y 1 audio premium
-- [ ] Premios ORÍGEN: árbol seco que florece según el avance
+- [x] Panel: elegir diseño de Visualízate por tema (hoy se decide con "Solo audio")
+- [x] Plantilla tipo Limpieza espiritual para temas futuros con IA
+- [x] Ruleta: desbloquear 1 semana de Camino y 1 audio premium
+- [x] Premios ORÍGEN: árbol seco que florece según el avance
