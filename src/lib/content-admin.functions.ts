@@ -168,7 +168,7 @@ Devuelve JSON con: affirmation (una frase poderosa en presente, máx 160 caracte
           questions: generated.quiz ?? [],
         } as never,
         word_game: { words: generated.search_words ?? [] } as never,
-        is_published: false,
+        is_published: true,
         audio_only: data.audioOnly ?? Boolean((category as { audio_only?: boolean }).audio_only),
       } as never)
       .select("id")
