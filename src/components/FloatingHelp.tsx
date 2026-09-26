@@ -4,7 +4,6 @@ import { HelpCircle, X, MessageCircle, Mail, Compass, Leaf, ChevronDown } from "
 
 const LINKS = [
   { icon: MessageCircle, label: "Hablar con la mentora", to: "/chat" as const },
-  { icon: Leaf, label: "Cómo funcionan las hojas", to: "/comprarmonedas" as const },
 ];
 
 const FAQ = [
@@ -18,7 +17,7 @@ const FAQ = [
   },
   {
     q: "¿Para qué gasto las hojas?",
-    a: "Para las consultas (Pareja, Patrones familiares y «Dios te dice hoy») y para tu acceso diario a la mentora. Es 1 hoja por consulta y 1 hoja por día de mentora, no por mensaje.",
+    a: "Las hojas sirven para abrir tus consultas: Consulta de pareja, Patrones familiares, Ministración y «Dios te dice hoy» (1 hoja cada una), y para tu día de conversación con la mentora Ruth (1 hoja por día, no por mensaje). También puedes regalarlas a otra persona desde Mi árbol → Transferir Balance, y ver cada movimiento en tu Historial.",
   },
   {
     q: "¿Por qué solo puedo hacer una etapa por día?",
@@ -154,6 +153,15 @@ export function FloatingHelp() {
                 </Link>
               ))}
 
+              <button
+                onClick={() => { setOpen(false); setFaqOpen(true); setItem(1); }}
+                className="flex w-full min-h-11 items-center gap-3 rounded-[10px] px-2 text-left text-sm font-medium hover:bg-secondary"
+              >
+                <span className="grid h-8 w-8 place-items-center rounded-[10px] bg-primary/10 text-primary">
+                  <Leaf className="h-4 w-4" />
+                </span>
+                Para qué sirven las hojas
+              </button>
               <a
                 href="mailto:infodenegociorm@gmail.com"
                 className="flex min-h-11 items-center gap-3 rounded-[10px] px-2 text-sm font-medium hover:bg-secondary"
