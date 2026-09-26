@@ -1,3 +1,4 @@
+import { wholeHojas } from "@/lib/gems";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ArrowRight, Leaf, Pause, Play, User, X } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -51,7 +52,7 @@ export function GameShell({
   const advanced = useRef(false);
   const { data: profile } = useProfile();
   const name = profile?.display_name || profile?.full_name?.split(" ")[0] || "Tú";
-  const hojas = profile?.gems ?? 0;
+  const hojas = wholeHojas(profile?.gems);
   const [gain, setGain] = useState(0);
   const prevHojas = useRef<number | null>(null);
 

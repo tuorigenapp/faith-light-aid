@@ -111,3 +111,15 @@
 - [x] 8. Chat de notificaciones ORÍGEN solo lectura (leído/no leído) + 1 mensaje IA diario personalizado + avisos del sistema
 - [x] 9. /ejercicios: quitar ícono notificación y foto con error, mapa rediseñado con final, lecciones diarias arriba, 8 por semana, todo funcional
 - [x] 10. Quitar avatar del niño con hoja de toda la app y Camino ORÍGEN
+
+## Pedido Sep 26 (2) — panel y avisos
+- [x] Saldo: 1 hoja = 1 hoja en toda la app (barra, etapas, juegos, premios); 1 hoja en ~3 días
+- [ ] Temas principales: visible/oculto, editar título, portada URL o IA, copiar diseño de otro, eliminar, búsqueda, portadas visibles
+- [ ] Subtemas: listar todos los temas (también ocultos) en vivo, regenerar con IA, eliminar
+- [ ] Limpieza: editar, portada URL/IA, mejorar con IA, eliminar
+- [ ] Música (Audios): eliminar y rellenar con IA al subir audio
+- [ ] Camino ORÍGEN: crear caminos con IA, visible/oculto, portada URL
+- [ ] Portadas por URL de /categorias y de los 10 juegos
+- [ ] Usuarios: sumar/quitar hojas, eliminar, selección múltiple con filtros por plan
+- [ ] Avisos ORÍGEN de todo (camino, ejercicios, palabra, visualízate, juegos, compras) + bolita en Camino
+- [ ] Ocultar burbujas flotantes en secciones de concentración; nuevo ícono TODO EN ORÍGEN

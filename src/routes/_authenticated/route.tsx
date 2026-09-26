@@ -1,3 +1,4 @@
+import { wholeHojas } from "@/lib/gems";
 import { createFileRoute, Link, Outlet, redirect, useLocation, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
@@ -273,7 +274,7 @@ function AuthLayoutInner() {
                   <span className="font-display font-bold text-[13px] text-foreground truncate max-w-[90px] leading-none">{displayName}</span>
                   <span className="inline-flex items-center gap-1 pl-2 ml-1 border-l border-border leading-none">
                     <span className="text-base leading-none">🍃</span>
-                    <span className="font-display font-bold text-[13px] text-primary leading-none">{gems.toLocaleString()}</span>
+                    <span className="font-display font-bold text-[13px] text-primary leading-none">{wholeHojas(gems).toLocaleString("es")}</span>
                   </span>
                 </Link>
               </li>

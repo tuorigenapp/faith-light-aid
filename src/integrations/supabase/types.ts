@@ -543,6 +543,33 @@ export type Database = {
         }
         Relationships: []
       }
+      content_overrides: {
+        Row: {
+          cover_url: string | null
+          is_hidden: boolean
+          key: string
+          scope: string
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          cover_url?: string | null
+          is_hidden?: boolean
+          key: string
+          scope: string
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          cover_url?: string | null
+          is_hidden?: boolean
+          key?: string
+          scope?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       conversations: {
         Row: {
           created_at: string
@@ -564,6 +591,48 @@ export type Database = {
           title?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      custom_caminos: {
+        Row: {
+          content: Json
+          cover_url: string | null
+          created_at: string
+          id: string
+          is_published: boolean
+          notes: string | null
+          slug: string
+          sort_order: number
+          subtitle: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content?: Json
+          cover_url?: string | null
+          created_at?: string
+          id?: string
+          is_published?: boolean
+          notes?: string | null
+          slug: string
+          sort_order?: number
+          subtitle?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: Json
+          cover_url?: string | null
+          created_at?: string
+          id?: string
+          is_published?: boolean
+          notes?: string | null
+          slug?: string
+          sort_order?: number
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }

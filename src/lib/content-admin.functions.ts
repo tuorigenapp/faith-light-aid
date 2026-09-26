@@ -296,3 +296,352 @@ export const adminToggleLimpieza = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+/* ───────── Gestión: editar, ocultar, copiar diseño, borrar ───────── */
+
+const idSchema = z.object({ id: z.string().min(1) });
+
+export const adminListCategories = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const [cats, subs] = await Promise.all([
+      supabaseAdmin
+        .from("manifest_categories")
+        .select("id, title, subtitle, group_key, required_plan, cover_url, is_published, sort_order")
+        .order("sort_order"),
+      supabaseAdmin.from("manifest_audios").select("category_id"),
+    ]);
+    const count = new Map<string, number>();
+    for (const s of subs.data ?? []) count.set(s.category_id, (count.get(s.category_id) ?? 0) + 1);
+    return (cats.data ?? []).map((c) => ({ ...c, subtopics: count.get(c.id) ?? 0 }));
+  });
+
+export const adminUpdateCategory = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z
+      .object({
+        id: z.string().min(1),
+        title: z.string().trim().min(3).max(120).optional(),
+        coverUrl: z.string().trim().max(1000).optional(),
+        isPublished: z.boolean().optional(),
+        regenerateCover: z.boolean().optional(),
+        copyFromId: z.string().optional(),
+        notes: z.string().trim().max(1200).optional(),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const patch: Record<string, unknown> = {};
+    if (data.title) patch["title"] = data.title;
+    if (data.coverUrl !== undefined) patch["cover_url"] = data.coverUrl || null;
+    if (data.isPublished !== undefined) patch["is_published"] = data.isPublished;
+    if (data.copyFromId) {
+      const { data: src } = await supabaseAdmin
+        .from("manifest_categories")
+        .select("cover_url, group_key, program_group, required_plan")
+        .eq("id", data.copyFromId)
+        .maybeSingle();
+      if (src) Object.assign(patch, src);
+    }
+    if (data.regenerateCover) {
+      const { uploadCover } = await import("@/lib/ai-content.server");
+      const { data: cur } = await supabaseAdmin
+        .from("manifest_categories").select("title").eq("id", data.id).maybeSingle();
+      const url = await uploadCover(
+        `Spiritual illustration for "${data.title ?? cur?.title ?? ""}". ${data.notes ?? ""}. ${COVER_STYLE}`,
+        slugify(data.title ?? cur?.title ?? "tema"),
+      );
+      if (!url) throw new Error("No pudimos generar la portada. Intenta de nuevo.");
+      patch["cover_url"] = url;
+    }
+    if (Object.keys(patch).length === 0) return { ok: true };
+    const { error } = await supabaseAdmin.from("manifest_categories").update(patch as never).eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const adminDeleteCategory = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) => idSchema.parse(i))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin.from("manifest_audios").delete().eq("category_id", data.id);
+    const { error } = await supabaseAdmin.from("manifest_categories").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const adminListSubtopics = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) => z.object({ categoryId: z.string().min(1) }).parse(i))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: rows } = await supabaseAdmin
+      .from("manifest_audios")
+      .select("id, day_index, title, audio_url, pdf_url, cover_url, is_published")
+      .eq("category_id", data.categoryId)
+      .order("day_index");
+    return rows ?? [];
+  });
+
+export const adminDeleteSubtopic = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) => z.object({ id: z.string().uuid() }).parse(i))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("manifest_audios").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+/** La IA vuelve a escribir todo el subtema (lección, pasos, juegos, afirmación). */
+export const adminRegenerateSubtopic = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) =>
+    z.object({ id: z.string().uuid(), notes: z.string().trim().max(1200).default(""), cover: z.boolean().default(false) }).parse(i),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { aiJson, uploadCover } = await import("@/lib/ai-content.server");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: sub } = await supabaseAdmin
+      .from("manifest_audios").select("id, title, category_id, day_index").eq("id", data.id).maybeSingle();
+    if (!sub) throw new Error("Ese subtema ya no existe.");
+    const { data: cat } = await supabaseAdmin
+      .from("manifest_categories").select("title, description").eq("id", sub.category_id).maybeSingle();
+    const g = await aiJson<{
+      affirmation: string; lesson: string; exercise: string; recipe_steps: string[]; tasks: string[];
+      search_words: string[]; quiz: { question: string; options: string[]; correctIndex: number; explanation: string }[];
+      cover_prompt: string;
+    }>(
+      `Tema principal: "${cat?.title ?? ""}" (${cat?.description ?? ""}). Reescribe completo el subtema "${sub.title}". Notas del editor: ${data.notes || "sin notas"}.
+Devuelve JSON con: affirmation (máx 160 caracteres), lesson (110-170 palabras), exercise (80-130 palabras), recipe_steps (5-8 pasos), tasks (3 tareas máx 90 caracteres), search_words (8 palabras MAYÚSCULAS 4-9 letras sin tildes), quiz (3 objetos question, options de 3, correctIndex 0-2, explanation) y cover_prompt (inglés, sin texto).`,
+    );
+    const patch: Record<string, unknown> = {
+      affirmation: g.affirmation,
+      lesson: g.lesson,
+      exercise: `${g.exercise}\n\nPasos:\n${(g.recipe_steps ?? []).map((s, i) => `${i + 1}. ${s}`).join("\n")}`,
+      quiz: { tasks: g.tasks ?? [], questions: g.quiz ?? [] },
+      word_game: { words: g.search_words ?? [] },
+    };
+    if (data.cover) {
+      const url = await uploadCover(`${g.cover_prompt}. ${COVER_STYLE}`, `${slugify(sub.title)}-${sub.day_index}`);
+      if (url) patch["cover_url"] = url;
+    }
+    const { error } = await supabaseAdmin.from("manifest_audios").update(patch as never).eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const adminUpdateLimpieza = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) =>
+    z.object({
+      id: z.string().uuid(),
+      title: z.string().trim().min(3).max(120).optional(),
+      coverUrl: z.string().trim().max(1000).optional(),
+      regenerateCover: z.boolean().optional(),
+      improve: z.boolean().optional(),
+      notes: z.string().trim().max(1200).default(""),
+    }).parse(i),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { aiJson, uploadCover } = await import("@/lib/ai-content.server");
+    const { data: cur } = await supabaseAdmin
+      .from("limpieza_practices").select("title, level, slug").eq("id", data.id).maybeSingle();
+    if (!cur) throw new Error("Esa práctica ya no existe.");
+    const title = data.title ?? cur.title;
+    const patch: Record<string, unknown> = {};
+    if (data.title) patch["title"] = data.title;
+    if (data.coverUrl !== undefined) patch["cover_url"] = data.coverUrl || null;
+    if (data.improve) {
+      const g = await aiJson<{ duration: string; objective: string; info: string[]; materials: string[]; steps: string[]; scripture: string; scripture_ref: string }>(
+        `Mejora y reescribe la práctica de limpieza espiritual cristiana "${title}", nivel ${cur.level}. Notas: ${data.notes || "sin notas"}.
+JSON: duration, objective, info (4 avisos), materials (4-7 seguros, vela LED), steps (6-8), scripture (versículo real textual), scripture_ref. Sin rituales peligrosos ni promesas médicas.`,
+      );
+      Object.assign(patch, {
+        duration: g.duration, objective: g.objective, info: g.info, materials: g.materials,
+        steps: g.steps, scripture: g.scripture, scripture_ref: g.scripture_ref,
+      });
+    }
+    if (data.regenerateCover) {
+      const url = await uploadCover(`Serene spiritual cleansing scene for "${title}". ${data.notes}. ${COVER_STYLE}`, cur.slug);
+      if (!url) throw new Error("No pudimos generar la portada. Intenta de nuevo.");
+      patch["cover_url"] = url;
+    }
+    if (Object.keys(patch).length === 0) return { ok: true };
+    const { error } = await supabaseAdmin.from("limpieza_practices").update(patch as never).eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const adminDeleteLimpieza = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) => z.object({ id: z.string().uuid() }).parse(i))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("limpieza_practices").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+/* ───────── Portadas por URL y visibilidad de caminos, categorías y juegos ───────── */
+
+export const adminSetOverride = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) =>
+    z.object({
+      key: z.string().min(1).max(120),
+      scope: z.enum(["camino", "categoria", "juego"]),
+      title: z.string().trim().max(120).optional(),
+      coverUrl: z.string().trim().max(1000).optional(),
+      isHidden: z.boolean().optional(),
+    }).parse(i),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: cur } = await supabaseAdmin.from("content_overrides").select("*").eq("key", data.key).maybeSingle();
+    const row = {
+      key: data.key,
+      scope: data.scope,
+      title: data.title !== undefined ? data.title || null : cur?.title ?? null,
+      cover_url: data.coverUrl !== undefined ? data.coverUrl || null : cur?.cover_url ?? null,
+      is_hidden: data.isHidden ?? cur?.is_hidden ?? false,
+      updated_at: new Date().toISOString(),
+    };
+    const { error } = await supabaseAdmin.from("content_overrides").upsert(row);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+/* ───────── Caminos nuevos creados con IA ───────── */
+
+export const adminListCaminos = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data } = await supabaseAdmin
+      .from("custom_caminos").select("id, slug, title, subtitle, cover_url, is_published, content, created_at").order("sort_order");
+    return data ?? [];
+  });
+
+export const adminCreateCamino = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) =>
+    z.object({
+      title: z.string().trim().min(3).max(120),
+      notes: z.string().trim().max(1500).default(""),
+      coverUrl: z.string().trim().max(1000).default(""),
+    }).parse(i),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { aiJson, uploadCover } = await import("@/lib/ai-content.server");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const g = await aiJson<{
+      subtitle: string;
+      cover_prompt: string;
+      stages: {
+        title: string;
+        lessons: {
+          title: string; lesson: string; affirmation: string; tasks: string[]; search_words: string[];
+          quiz: { question: string; options: string[]; correctIndex: number }[];
+        }[];
+      }[];
+    }>(
+      `Crea un camino de sanación emocional con fe llamado "${data.title}", similar a "Camino ORÍGEN". Notas del editor: ${data.notes || "sin notas"}.
+JSON: subtitle (máx 80), cover_prompt (inglés, sin texto), stages: 4 etapas, cada una con title y lessons: 3 lecciones con title, lesson (80-120 palabras), affirmation, tasks (2), search_words (6 palabras MAYÚSCULAS 4-9 letras sin tildes), quiz (2 preguntas con options de 3 y correctIndex).`,
+    );
+    const slug = `${slugify(data.title) || "camino"}-${Date.now().toString(36)}`;
+    const cover = data.coverUrl || (await uploadCover(`${g.cover_prompt}. ${COVER_STYLE}`, slug));
+    const { error } = await supabaseAdmin.from("custom_caminos").insert({
+      slug, title: data.title, subtitle: g.subtitle, notes: data.notes, cover_url: cover,
+      content: { stages: g.stages ?? [] } as never, is_published: false,
+    });
+    if (error) throw new Error(error.message);
+    return { slug };
+  });
+
+export const adminUpdateCamino = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) =>
+    z.object({
+      id: z.string().uuid(),
+      title: z.string().trim().min(3).max(120).optional(),
+      coverUrl: z.string().trim().max(1000).optional(),
+      isPublished: z.boolean().optional(),
+      remove: z.boolean().optional(),
+    }).parse(i),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    if (data.remove) {
+      const { error } = await supabaseAdmin.from("custom_caminos").delete().eq("id", data.id);
+      if (error) throw new Error(error.message);
+      return { ok: true };
+    }
+    const patch: Record<string, unknown> = { updated_at: new Date().toISOString() };
+    if (data.title) patch["title"] = data.title;
+    if (data.coverUrl !== undefined) patch["cover_url"] = data.coverUrl || null;
+    if (data.isPublished !== undefined) patch["is_published"] = data.isPublished;
+    const { error } = await supabaseAdmin.from("custom_caminos").update(patch as never).eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+/* ───────── Usuarios: sumar/quitar hojas y borrar en lote ───────── */
+
+export const adminAdjustHojas = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) =>
+    z.object({ userIds: z.array(z.string().uuid()).min(1).max(500), hojas: z.number().int().min(-100000).max(100000) }).parse(i),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const points = data.hojas * 100;
+    const { data: rows } = await supabaseAdmin.from("profiles").select("id, gems").in("id", data.userIds);
+    for (const r of rows ?? []) {
+      const next = Math.max(0, (r.gems ?? 0) + points);
+      await supabaseAdmin.from("profiles").update({ gems: next }).eq("id", r.id);
+      await supabaseAdmin.from("gem_transactions").insert({
+        user_id: r.id, amount: next - (r.gems ?? 0), reason: "ajuste:admin", meta: { hojas: data.hojas } as never,
+      });
+      await supabaseAdmin.from("origen_notifications").insert({
+        user_id: r.id, kind: "sistema",
+        title: data.hojas >= 0 ? `Recibiste ${data.hojas} hojas de sanación` : `Se ajustó tu saldo de hojas`,
+        body: data.hojas >= 0 ? "El equipo de ORÍGEN sumó hojas a tu saldo." : `Se descontaron ${Math.abs(data.hojas)} hojas de tu saldo.`,
+        link: "/arbol",
+      });
+    }
+    return { updated: rows?.length ?? 0 };
+  });
+
+export const adminDeleteUsers = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) => z.object({ userIds: z.array(z.string().uuid()).min(1).max(500) }).parse(i))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    let deleted = 0;
+    for (const id of data.userIds) {
+      if (id === context.userId) continue;
+      const { error } = await supabaseAdmin.auth.admin.deleteUser(id);
+      if (!error) deleted += 1;
+    }
+    return { deleted };
+  });
