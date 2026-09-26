@@ -2299,7 +2299,10 @@ export type Database = {
         Args: { _amount: number; _meta?: Json; _reason: string }
         Returns: number
       }
-      claim_audio_unlock: { Args: { _audio_id: string }; Returns: boolean }
+      claim_audio_unlock: {
+        Args: { _category_id: string; _day_index: number }
+        Returns: boolean
+      }
       community_anonymous_number: {
         Args: { _user_id: string }
         Returns: number
