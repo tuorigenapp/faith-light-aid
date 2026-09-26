@@ -135,3 +135,16 @@
 - [x] Ayuda: "Para qué sirven las hojas" responde
 - [x] Campañas emergentes (imagen + enlace + X) desde el panel
 - [x] Texto falso "+5 hojas" de la sopa de letras
+
+## Pedido Sep 26 (4)
+- [x] Temas del panel: sin "Solo audio" usan el diseño de 3 pasos de Manifestando con Música; con "Solo audio" el de lista (niño interior)
+- [x] Error de página al abrir subcategorías corregido
+- [x] Menú: Dios te dice hoy, Pareja de destino, Patrones, "Hablar con la Mentora", "Membresía ORÍGEN (Suscripción)"
+- [x] Perfil ya guardado no vuelve a pedir el formulario
+- [x] Inicio: Camino ORÍGEN y Visualízate en grupos de 3, deslizables, con botón "Ver todas"
+- [x] Comunidad: los avisos de respuestas no se borran solo por entrar
+- [x] Ruleta: premios nuevos (5 consultas del cielo, Mentora, Bono para regalar)
+- [ ] Panel: elegir diseño de Visualízate por tema (hoy se decide con "Solo audio")
+- [ ] Plantilla tipo Limpieza espiritual para temas futuros con IA
+- [ ] Ruleta: desbloquear 1 semana de Camino y 1 audio premium
+- [ ] Premios ORÍGEN: árbol seco que florece según el avance
