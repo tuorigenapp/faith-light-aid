@@ -7,6 +7,9 @@ import { ArrowLeft, ArrowRight, Check, Clock, Hourglass, Lock, Mail, Send, Shiel
 import { cn } from "@/lib/utils";
 import { HOJA_PACKS, HOJA_PACK_HERO, PAY_METHODS, usd, type HojaPack } from "@/lib/hojas";
 import { formatHojas } from "@/lib/gems";
+import { useServerFn } from "@tanstack/react-start";
+import { createPurchaseRequest } from "@/lib/wallet.functions";
+import { Camera, Loader2 } from "lucide-react";
 import crystals from "@/assets/hojas-crystals.png";
 import treePng from "@/assets/hojas-tree.png";
 
@@ -58,15 +61,13 @@ function HojasFlow() {
     },
   });
 
-  async function submitOrder() {
+  function submitOrder() {
     if (!user || !pack) return;
+    setStep(4);
+  }
+
+  async function afterReceipt() {
     setStep(5);
-    await supabase.from("gem_transactions").insert({
-      user_id: user.id,
-      amount: 0,
-      reason: `Compra de ${pack.hojas} hojas`,
-      meta: { kind: "compra", status: "pendiente", hojas: pack.hojas, usd: pack.usd, method } as never,
-    });
     qc.invalidateQueries({ queryKey: ["hoja-tx"] });
     refetch();
   }
@@ -97,7 +98,7 @@ function HojasFlow() {
           {step === 1 && <StepPacks pack={pack} onPick={(p) => { setPack(p); setStep(2); }} />}
           {step === 2 && pack && <StepSummary pack={pack} onNext={() => setStep(3)} />}
           {step === 3 && pack && <StepPay pack={pack} method={method} setMethod={setMethod} onPay={submitOrder} />}
-          {step === 4 && null}
+          {step === 4 && pack && <StepReceipt pack={pack} method={method} onDone={afterReceipt} />}
           {step === 5 && pack && <StepProcessing pack={pack} onDone={() => setStep(6)} />}
           {step === 6 && <StepHistory tx={tx} />}
         </div>
