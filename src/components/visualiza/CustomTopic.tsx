@@ -123,10 +123,10 @@ export function CustomTopic({
             </ul>
           )}
 
-          {!isPaid && subs.length > FREE_AUDIOS && (
+          {!isPaid && subs.length >= FREE_AUDIOS && (
             <Link to="/membresia" className="app-card mt-4 flex items-center gap-3 p-4">
               <Lock className="h-5 w-5 shrink-0 text-primary" />
-              <span className="flex-1 text-[13.5px] font-semibold">Desbloquea las {subs.length - FREE_AUDIOS} restantes con Camino ORÍGEN</span>
+              <span className="flex-1 text-[13.5px] font-semibold">Desbloquea el resto de audios con Camino ORÍGEN</span>
               <ArrowRight className="h-4 w-4 text-primary" />
             </Link>
           )}
