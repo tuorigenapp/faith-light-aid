@@ -143,6 +143,28 @@ export const WHEEL_PRIZES: WheelPrize[] = [
     fill: "#FFB38A",
     text: "#3A1A0B",
   },
+  {
+    key: "semana_camino",
+    short: "7",
+    label: "Semana libre en Camino ORÍGEN",
+    description: "Durante 7 días puedes avanzar las lecciones de cualquier categoría sin esperar al día siguiente.",
+    icon: "",
+    points: 0,
+    weight: 4,
+    fill: "#8FD1B8",
+    text: "#0F2C22",
+  },
+  {
+    key: "audio_premium",
+    short: "A",
+    label: "1 audio premium desbloqueado",
+    description: "Abre un audio bloqueado de Visualízate. Toca \"Usar mi desbloqueo\" en el audio que elijas. Máximo 1 a la vez.",
+    icon: "",
+    points: 0,
+    weight: 3,
+    fill: "#C9B8FF",
+    text: "#1B1930",
+  },
 ];
 
 export const SPIN_COOLDOWN_MS = 24 * 60 * 60 * 1000;
