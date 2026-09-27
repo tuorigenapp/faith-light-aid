@@ -153,4 +153,4 @@
 - [x] Compra de Hojas únicamente con PayPal Business dentro de la app
 - [x] Opción «Confirmar pago» para reenviar captura si el flujo se interrumpe
 - [x] Ruleta visual con emoji y cantidad; resultado explica el premio obtenido
-- [ ] Verificación móvil del pago, confirmación manual y ruleta
+- [x] Verificación móvil del pago, confirmación manual y ruleta
