@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState } from "react";
-import { CreditCard, Loader2, ShieldCheck } from "lucide-react";
+import { CreditCard, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usd, type HojaPack } from "@/lib/hojas";
 
@@ -15,7 +15,7 @@ type PayPalActions = {
 
 type PayPalNamespace = {
   Buttons: (options: {
-    style: Record<string, string | boolean>;
+    style: Record<string, string | number | boolean>;
     createOrder: (_data: unknown, actions: PayPalActions) => Promise<string>;
     onApprove: (_data: unknown, actions: PayPalActions) => Promise<void>;
     onCancel: () => void;
@@ -61,7 +61,7 @@ export function PayPalCheckout({ pack, userId, onPaid }: { pack: HojaPack; userI
       .then(async () => {
         if (!active || !window.paypal) return;
         const buttons = window.paypal.Buttons({
-          style: { layout: "vertical", shape: "rect", height: "48", label: "paypal", tagline: false },
+          style: { layout: "vertical", shape: "rect", height: 48, label: "paypal", tagline: false },
           createOrder: (_data, actions) =>
             actions.order.create({
               purchase_units: [{
@@ -106,8 +106,8 @@ export function PayPalCheckout({ pack, userId, onPaid }: { pack: HojaPack; userI
         </div>
       </div>
 
-      {status === "loading" && <div className="flex min-h-14 items-center justify-center gap-2 rounded-[12px] bg-card text-sm font-semibold text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin" /> Preparando tu pago seguro…</div>}
-      <div id={containerId} className={status === "loading" ? "hidden" : "min-h-12 w-full"} />
+      {status === "loading" && <div className="h-12 w-full animate-pulse rounded-[12px] bg-muted" aria-label="Preparando tu pago seguro" />}
+      <div id={containerId} className="min-h-12 w-full" />
       {status === "error" && (
         <div className="rounded-[12px] border border-destructive/30 bg-destructive/10 p-4 text-[14px] text-destructive">
           <p className="font-bold">No pudimos abrir PayPal.</p>
