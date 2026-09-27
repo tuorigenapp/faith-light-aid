@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState } from "react";
-import { CreditCard, Loader2, ShieldCheck } from "lucide-react";
+import { CreditCard, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usd, type HojaPack } from "@/lib/hojas";
 
