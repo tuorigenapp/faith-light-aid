@@ -15,7 +15,7 @@ type PayPalActions = {
 
 type PayPalNamespace = {
   Buttons: (options: {
-    style: Record<string, string | boolean>;
+    style: Record<string, string | number | boolean>;
     createOrder: (_data: unknown, actions: PayPalActions) => Promise<string>;
     onApprove: (_data: unknown, actions: PayPalActions) => Promise<void>;
     onCancel: () => void;
@@ -61,7 +61,7 @@ export function PayPalCheckout({ pack, userId, onPaid }: { pack: HojaPack; userI
       .then(async () => {
         if (!active || !window.paypal) return;
         const buttons = window.paypal.Buttons({
-          style: { layout: "vertical", shape: "rect", height: "48", label: "paypal", tagline: false },
+          style: { layout: "vertical", shape: "rect", height: 48, label: "paypal", tagline: false },
           createOrder: (_data, actions) =>
             actions.order.create({
               purchase_units: [{
