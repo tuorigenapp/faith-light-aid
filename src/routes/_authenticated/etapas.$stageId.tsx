@@ -770,13 +770,19 @@ function Step4({ mood, setMood, notes, setNotes, answers, setAnswers, onNext }: 
           </div>
           <Textarea
             value={f.key === "aprendi" ? notes : answers[f.key] ?? ""}
-            onChange={(e) => f.key === "aprendi" ? setNotes(e.target.value.slice(0, 150)) : setAnswers({ ...answers, [f.key]: e.target.value.slice(0, 150) })}
+            onChange={(e) => f.key === "aprendi" ? setNotes(e.target.value.slice(0, 1000)) : setAnswers({ ...answers, [f.key]: e.target.value.slice(0, 1000) })}
             placeholder={f.ph}
-            className="mt-2.5 min-h-[76px] rounded-[10px] text-[13.5px]"
+            className="mt-2.5 min-h-[110px] rounded-[10px] text-[13.5px]"
           />
           <div className="mt-1 text-right text-[11px] text-muted-foreground">
-            {(f.key === "aprendi" ? notes : answers[f.key] ?? "").length}/150
+            {(f.key === "aprendi" ? notes : answers[f.key] ?? "").length}/1000
           </div>
+          <VoiceAnswer
+            className="mt-2"
+            question={f.q}
+            value={f.key === "aprendi" ? notes : answers[f.key] ?? ""}
+            onChange={(v) => (f.key === "aprendi" ? setNotes(v) : setAnswers({ ...answers, [f.key]: v }))}
+          />
         </div>
       ))}
 
