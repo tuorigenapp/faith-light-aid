@@ -696,10 +696,8 @@ function SquirrelRun({ onWin, level }: GameProps) {
 
     // humano que persigue (decide solo su carril)
     s.obs = s.obs.filter((o) => {
-      if (!s.over) {
-        o.x -= 3.4;
-        if (o.x < w * 0.7 && Math.random() < 0.02) o.lane = s.lane;
-      }
+      // El humano NO persigue: se queda quieto en su carril y solo hay que esquivarlo.
+      if (!s.over) o.x -= 3.2;
       const y = laneY(o.lane);
       ctx.fillStyle = "#7C4DFF";
       ctx.beginPath();
