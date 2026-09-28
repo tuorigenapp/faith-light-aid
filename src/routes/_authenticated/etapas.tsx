@@ -141,16 +141,26 @@ function Etapas() {
           <DuolingoPath
             nodes={orderedStages.map((s: any, i: number) => {
               const state = stageStates.get(s.id) ?? "locked-sequential";
+              const day = (i % 7) + 1;
               return {
                 key: String(s.id),
-                label: s.title as string,
-                note: state === "locked-today" ? "Se abre a medianoche" : undefined,
+                label: `Lección ${i + 1} · Día ${day}: ${s.title as string}`,
+                note:
+                  state === "locked-today"
+                    ? "Se abre mañana: una lección por día"
+                    : state === "locked-sequential"
+                      ? "Termina la lección anterior"
+                      : undefined,
                 state: state === "completed" ? "completed" : state === "open" ? "active" : "locked",
               } as const;
             })}
             onSelect={(node) => {
               if (node.state === "locked") {
-                toast.info(node.note ? "Esta etapa se abre a medianoche." : "Completa la etapa anterior para abrir esta.");
+                toast.info(
+                  node.note?.startsWith("Se abre")
+                    ? "Esta lección se abre mañana: en ORÍGEN se avanza una lección por día."
+                    : "Completa la lección anterior para abrir esta.",
+                );
                 return;
               }
               navigate({ to: "/etapas/$stageId", params: { stageId: node.key } });
