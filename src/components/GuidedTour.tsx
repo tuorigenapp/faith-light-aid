@@ -3,6 +3,7 @@ import { Bell, BellRing, Camera, Check, Loader2, Mail, ShieldCheck, X } from "lu
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
+import { useProfile } from "@/hooks/use-profile";
 import { enablePush, permissionState } from "@/lib/notifications";
 
 const DONE_KEY = "origen_tour_done";
