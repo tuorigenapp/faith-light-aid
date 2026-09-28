@@ -652,9 +652,12 @@ function SquirrelRun({ onWin, level }: GameProps) {
     }
 
     if (!s.over) {
-      if (t - s.spawn > 0.85) {
+      if (t - s.spawn > 1.15) {
         s.spawn = t;
-        s.obs.push({ x: w + 30, lane: rnd(3) });
+        // Nunca se tapan los tres carriles: siempre queda salida.
+        const busy = new Set(s.obs.filter((o) => o.x > w * 0.55).map((o) => o.lane));
+        const free = [0, 1, 2].filter((l) => !busy.has(l));
+        if (free.length > 1) s.obs.push({ x: w + 30, lane: free[rnd(free.length)] });
       }
       if (t - s.cspawn > 0.55) {
         s.cspawn = t;
