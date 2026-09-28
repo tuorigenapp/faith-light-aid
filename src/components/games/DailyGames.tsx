@@ -195,25 +195,31 @@ function WordFind({ words, onWin, level }: GameProps) {
 
 function Memory({ words, onWin, level }: GameProps) {
   const pairs = levelScale(level, 4, 2, 10);
-  const base = useMemo(() => {
-    const src = rotate(
-      [...words.map(clean).filter((w) => w.length > 2), ...POSITIVAS.map(clean)],
-      level * 2,
-    ).slice(0, pairs);
-    return [...src, ...src].map((w, i) => ({ id: i, w })).sort(() => Math.random() - 0.5);
+  const cards = useMemo(() => {
+    // Cada palabra aparece EXACTAMENTE dos veces: sin repetidas ni duplicadas.
+    const uniq = Array.from(
+      new Set([...words.map(clean).filter((w) => w.length > 2), ...POSITIVAS.map(clean)]),
+    );
+    const src = rotate(uniq, level * 2).slice(0, pairs);
+    return src
+      .flatMap((w, p) => [
+        { id: `${p}-a`, w, pair: p },
+        { id: `${p}-b`, w, pair: p },
+      ])
+      .sort(() => Math.random() - 0.5);
   }, [words, level, pairs]);
-  const [cards, setCards] = useState(base);
+  const total = cards.length / 2;
   const [open, setOpen] = useState<number[]>([]);
-  const [done, setDone] = useState<string[]>([]);
+  const [done, setDone] = useState<number[]>([]);
 
   useEffect(() => {
     if (open.length !== 2) return;
     const [a, b] = open.map((i) => cards[i]);
     const t = setTimeout(() => {
-      if (a.w === b.w) {
-        const nd = [...done, a.w];
+      if (a.pair === b.pair) {
+        const nd = [...done, a.pair];
         setDone(nd);
-        if (nd.length === new Set(cards.map((c) => c.w)).size) onWin(60, nd);
+        if (nd.length === total) onWin(60, cards.map((c) => c.w));
       }
       setOpen([]);
     }, 700);
@@ -225,7 +231,7 @@ function Memory({ words, onWin, level }: GameProps) {
     <div>
       <div className="grid grid-cols-3 gap-2">
         {cards.map((c, i) => {
-          const shown = open.includes(i) || done.includes(c.w);
+          const shown = open.includes(i) || done.includes(c.pair);
           return (
             <button
               key={c.id}
@@ -646,9 +652,12 @@ function SquirrelRun({ onWin, level }: GameProps) {
     }
 
     if (!s.over) {
-      if (t - s.spawn > 0.85) {
+      if (t - s.spawn > 1.15) {
         s.spawn = t;
-        s.obs.push({ x: w + 30, lane: rnd(3) });
+        // Nunca se tapan los tres carriles: siempre queda salida.
+        const busy = new Set(s.obs.filter((o) => o.x > w * 0.55).map((o) => o.lane));
+        const free = [0, 1, 2].filter((l) => !busy.has(l));
+        if (free.length > 1) s.obs.push({ x: w + 30, lane: free[rnd(free.length)] });
       }
       if (t - s.cspawn > 0.55) {
         s.cspawn = t;
@@ -690,10 +699,8 @@ function SquirrelRun({ onWin, level }: GameProps) {
 
     // humano que persigue (decide solo su carril)
     s.obs = s.obs.filter((o) => {
-      if (!s.over) {
-        o.x -= 3.4;
-        if (o.x < w * 0.7 && Math.random() < 0.02) o.lane = s.lane;
-      }
+      // El humano NO persigue: se queda quieto en su carril y solo hay que esquivarlo.
+      if (!s.over) o.x -= 3.2;
       const y = laneY(o.lane);
       ctx.fillStyle = "#7C4DFF";
       ctx.beginPath();

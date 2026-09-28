@@ -23,6 +23,8 @@ import { getStageContent, getSolutionSteps, getStageTasks } from "@/lib/stage-co
 import { awardLeaf, ACTION_POINTS, type ActionLevel } from "@/lib/gems";
 import { AnswerFeedback } from "@/components/AnswerFeedback";
 import { StepEvidence } from "@/components/StepEvidence";
+import { StepBreathe } from "@/components/StepBreathe";
+import { VoiceAnswer } from "@/components/VoiceAnswer";
 import { useStagePack, stageVariant, type StagePack } from "@/lib/stage-pack";
 import { msUntilAppDayReset, formatCountdown, APP_DAY_RESET_LABEL } from "@/lib/app-day";
 import { CELEBRATIONS } from "@/lib/celebrate-step";
@@ -295,19 +297,7 @@ function StageFlow() {
         </div>,
       );
     case 17:
-      return shell(
-        <div className="space-y-3">
-          <div className="app-card p-5">
-            <div className="text-[11px] uppercase tracking-widest font-bold text-primary">Respira antes de cerrar</div>
-            <h3 className="font-display font-bold text-[19px] mt-1 leading-tight">Tres respiraciones lentas</h3>
-            <p className="text-[14px] text-muted-foreground mt-2 leading-snug">
-              Inhala contando 4, sostén 4, exhala 6. Hazlo tres veces. Nada que resolver aquí:
-              solo dejar que tu cuerpo registre lo que trabajaste hoy.
-            </p>
-          </div>
-          <Cta onClick={next}>Continuar</Cta>
-        </div>,
-      );
+      return shell(<StepBreathe onNext={next} />);
 
     case 18:
       return shell(<Step11 minutes={minutes} tasksDone={doneTasks.length >= tasks.length} onNext={next} />);
@@ -770,13 +760,19 @@ function Step4({ mood, setMood, notes, setNotes, answers, setAnswers, onNext }: 
           </div>
           <Textarea
             value={f.key === "aprendi" ? notes : answers[f.key] ?? ""}
-            onChange={(e) => f.key === "aprendi" ? setNotes(e.target.value.slice(0, 150)) : setAnswers({ ...answers, [f.key]: e.target.value.slice(0, 150) })}
+            onChange={(e) => f.key === "aprendi" ? setNotes(e.target.value.slice(0, 1000)) : setAnswers({ ...answers, [f.key]: e.target.value.slice(0, 1000) })}
             placeholder={f.ph}
-            className="mt-2.5 min-h-[76px] rounded-[10px] text-[13.5px]"
+            className="mt-2.5 min-h-[110px] rounded-[10px] text-[13.5px]"
           />
           <div className="mt-1 text-right text-[11px] text-muted-foreground">
-            {(f.key === "aprendi" ? notes : answers[f.key] ?? "").length}/150
+            {(f.key === "aprendi" ? notes : answers[f.key] ?? "").length}/1000
           </div>
+          <VoiceAnswer
+            className="mt-2"
+            question={f.q}
+            value={f.key === "aprendi" ? notes : answers[f.key] ?? ""}
+            onChange={(v) => (f.key === "aprendi" ? setNotes(v) : setAnswers({ ...answers, [f.key]: v }))}
+          />
         </div>
       ))}
 

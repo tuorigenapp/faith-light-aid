@@ -207,11 +207,11 @@ export function StepEvidence({
 
       <Textarea
         value={text}
-        onChange={(e) => change(e.target.value.slice(0, 600))}
+        onChange={(e) => change(e.target.value.slice(0, 1000))}
         placeholder="Escribe con tus palabras lo que hiciste hoy…"
         className="min-h-[110px] rounded-[10px] text-[13.5px]"
       />
-      <div className="-mt-2 text-right text-[11px] text-muted-foreground">{text.length}/600</div>
+      <div className="-mt-2 text-right text-[11px] text-muted-foreground">{text.length}/1000</div>
 
       <div className="flex flex-wrap gap-2">
         <button

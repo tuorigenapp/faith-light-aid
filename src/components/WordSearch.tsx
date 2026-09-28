@@ -9,7 +9,7 @@ import { awardGems } from "@/lib/gems";
 type Cell = { r: number; c: number; l: string };
 type Placed = { word: string; cells: Cell[] };
 
-const SIZE = 10;
+const SIZE = 8;
 const DIRS = [
   [0, 1], [1, 0], [1, 1], [-1, 1],
 ];
@@ -145,7 +145,10 @@ export function WordSearch({ words, storageKey, gemsReward = 40 }: { words: stri
           <RotateCcw className="w-3 h-3" /> reiniciar
         </button>
       </div>
-      <div className="grid gap-[3px]" style={{ gridTemplateColumns: `repeat(${SIZE}, 1fr)` }}>
+      <p className="mb-2 text-[12px] text-muted-foreground">
+        Toca la primera letra y después la última letra de la palabra.
+      </p>
+      <div className="grid gap-[6px]" style={{ gridTemplateColumns: `repeat(${SIZE}, 1fr)` }}>
         {grid.map((row, r) =>
           row.map((l, c) => {
             const k = `${r},${c}`;
@@ -159,7 +162,7 @@ export function WordSearch({ words, storageKey, gemsReward = 40 }: { words: stri
                 onFocus={() => setHover({ r, c, l })}
                 onClick={() => onCellClick({ r, c, l })}
                 className={cn(
-                  "aspect-square rounded-md text-[11px] sm:text-xs font-bold transition-all",
+                  "aspect-square min-h-[36px] rounded-[10px] text-[15px] font-extrabold transition-all",
                   "grid place-items-center select-none",
                   isFound ? "bg-primary text-primary-foreground shadow-glow" :
                   isStart ? "bg-accent text-accent-foreground scale-110" :
