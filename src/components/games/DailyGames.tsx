@@ -195,25 +195,31 @@ function WordFind({ words, onWin, level }: GameProps) {
 
 function Memory({ words, onWin, level }: GameProps) {
   const pairs = levelScale(level, 4, 2, 10);
-  const base = useMemo(() => {
-    const src = rotate(
-      [...words.map(clean).filter((w) => w.length > 2), ...POSITIVAS.map(clean)],
-      level * 2,
-    ).slice(0, pairs);
-    return [...src, ...src].map((w, i) => ({ id: i, w })).sort(() => Math.random() - 0.5);
+  const cards = useMemo(() => {
+    // Cada palabra aparece EXACTAMENTE dos veces: sin repetidas ni duplicadas.
+    const uniq = Array.from(
+      new Set([...words.map(clean).filter((w) => w.length > 2), ...POSITIVAS.map(clean)]),
+    );
+    const src = rotate(uniq, level * 2).slice(0, pairs);
+    return src
+      .flatMap((w, p) => [
+        { id: `${p}-a`, w, pair: p },
+        { id: `${p}-b`, w, pair: p },
+      ])
+      .sort(() => Math.random() - 0.5);
   }, [words, level, pairs]);
-  const [cards, setCards] = useState(base);
+  const total = cards.length / 2;
   const [open, setOpen] = useState<number[]>([]);
-  const [done, setDone] = useState<string[]>([]);
+  const [done, setDone] = useState<number[]>([]);
 
   useEffect(() => {
     if (open.length !== 2) return;
     const [a, b] = open.map((i) => cards[i]);
     const t = setTimeout(() => {
-      if (a.w === b.w) {
-        const nd = [...done, a.w];
+      if (a.pair === b.pair) {
+        const nd = [...done, a.pair];
         setDone(nd);
-        if (nd.length === new Set(cards.map((c) => c.w)).size) onWin(60, nd);
+        if (nd.length === total) onWin(60, cards.map((c) => c.w));
       }
       setOpen([]);
     }, 700);
@@ -225,7 +231,7 @@ function Memory({ words, onWin, level }: GameProps) {
     <div>
       <div className="grid grid-cols-3 gap-2">
         {cards.map((c, i) => {
-          const shown = open.includes(i) || done.includes(c.w);
+          const shown = open.includes(i) || done.includes(c.pair);
           return (
             <button
               key={c.id}
