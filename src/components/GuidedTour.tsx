@@ -38,9 +38,19 @@ export function GuidedTour() {
   const [i, setI] = useState(0);
   const [phase, setPhase] = useState<Phase>("slides");
 
+  const { data: profile } = useProfile();
+  // Si la persona ya tiene su perfil registrado, el tour no vuelve a aparecer
+  // en ningún dispositivo.
+  const alreadyRegistered = !!profile?.profile_completed_at;
+
   useEffect(() => {
+    if (alreadyRegistered) {
+      localStorage.setItem(DONE_KEY, "1");
+      setOpen(false);
+      return;
+    }
     if (localStorage.getItem(DONE_KEY) !== "1") setOpen(true);
-  }, []);
+  }, [alreadyRegistered]);
 
   function finish() {
     localStorage.setItem(DONE_KEY, "1");
