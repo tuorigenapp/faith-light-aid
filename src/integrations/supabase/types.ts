@@ -2505,6 +2505,13 @@ export type Database = {
         }
         Returns: boolean
       }
+      resolve_marketing_audience: {
+        Args: { p_audience_type: string; p_list_id: string }
+        Returns: {
+          email: string
+          user_id: string
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "user" | "marketing" | "soporte"
