@@ -3,32 +3,52 @@ import { useQuery } from "@tanstack/react-query";
 import { X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
-/** Campaña emergente de inicio: imagen clicable con X de cierre, una vez al día. */
-export function PromoPopup({ userId }: { userId?: string }) {
+type Placement = "inicio" | "comunidad";
+
+/** Campaña emergente: imagen clicable con X de cierre. Inicio y comunidad son independientes. */
+export function PromoPopup({ userId, placement = "inicio" }: { userId?: string; placement?: Placement }) {
   const [open, setOpen] = useState(false);
   const { data: promo } = useQuery({
-    queryKey: ["promo-active"],
+    queryKey: ["promo-active", placement],
     enabled: !!userId,
     staleTime: 5 * 60_000,
     queryFn: async () => {
       const nowIso = new Date().toISOString();
       const { data } = await supabase
         .from("promo_campaigns")
-        .select("id, title, image_url, link_url, starts_at, ends_at")
+        .select("id, title, image_url, link_url, starts_at, ends_at, placement, days, shows_per_day, created_at")
         .eq("is_active", true)
+        .eq("placement", placement)
         .order("created_at", { ascending: false })
-        .limit(5);
-      return (data ?? []).find((p) => (!p.starts_at || p.starts_at <= nowIso) && (!p.ends_at || p.ends_at >= nowIso)) ?? null;
+        .limit(8);
+      return (
+        (data ?? []).find((p) => {
+          if (p.starts_at && p.starts_at > nowIso) return false;
+          if (p.ends_at && p.ends_at < nowIso) return false;
+          // Duración en días desde su creación
+          const days = Number(p.days ?? 0);
+          if (days > 0 && p.created_at) {
+            const limit = new Date(new Date(p.created_at).getTime() + days * 86400000).toISOString();
+            if (limit < nowIso) return false;
+          }
+          return true;
+        }) ?? null
+      );
     },
   });
 
   useEffect(() => {
     if (!promo) return;
-    const key = `origen-promo-${promo.id}-${new Date().toISOString().slice(0, 10)}`;
-    if (localStorage.getItem(key)) return;
-    const t = setTimeout(() => { setOpen(true); localStorage.setItem(key, "1"); }, 1200);
+    const key = `origen-promo-${placement}-${promo.id}-${new Date().toISOString().slice(0, 10)}`;
+    const shown = Number(localStorage.getItem(key) ?? "0");
+    const max = Math.max(1, Number(promo.shows_per_day ?? 1));
+    if (shown >= max) return;
+    const t = setTimeout(() => {
+      setOpen(true);
+      localStorage.setItem(key, String(shown + 1));
+    }, 1200);
     return () => clearTimeout(t);
-  }, [promo]);
+  }, [promo, placement]);
 
   if (!open || !promo) return null;
   const img = <img src={promo.image_url} alt={promo.title || "Campaña de ORÍGEN"} className="block max-h-[75dvh] w-full rounded-[20px] object-contain" />;

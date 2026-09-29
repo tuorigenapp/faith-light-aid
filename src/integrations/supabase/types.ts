@@ -131,6 +131,48 @@ export type Database = {
         }
         Relationships: []
       }
+      brain_documents: {
+        Row: {
+          chars: number
+          content: string
+          created_at: string
+          created_by: string | null
+          file_path: string | null
+          id: string
+          is_active: boolean
+          scope: string
+          scope_ref: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          chars?: number
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          file_path?: string | null
+          id?: string
+          is_active?: boolean
+          scope?: string
+          scope_ref?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          chars?: number
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          file_path?: string | null
+          id?: string
+          is_active?: boolean
+          scope?: string
+          scope_ref?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       cancellation_surveys: {
         Row: {
           comment: string | null
@@ -658,6 +700,98 @@ export type Database = {
           slug?: string
           sort_order?: number
           subtitle?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      custom_consulta_results: {
+        Row: {
+          answer: Json
+          birthdate: string | null
+          consulta_id: string
+          created_at: string
+          full_name: string | null
+          id: string
+          question: string | null
+          user_id: string
+        }
+        Insert: {
+          answer?: Json
+          birthdate?: string | null
+          consulta_id: string
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          question?: string | null
+          user_id: string
+        }
+        Update: {
+          answer?: Json
+          birthdate?: string | null
+          consulta_id?: string
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          question?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_consulta_results_consulta_id_fkey"
+            columns: ["consulta_id"]
+            isOneToOne: false
+            referencedRelation: "custom_consultas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      custom_consultas: {
+        Row: {
+          cost_hojas: number
+          cover_url: string | null
+          created_at: string
+          id: string
+          intro: string | null
+          is_published: boolean
+          notes: string | null
+          sections: Json
+          slug: string
+          sort_order: number
+          subtitle: string | null
+          system_prompt: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          cost_hojas?: number
+          cover_url?: string | null
+          created_at?: string
+          id?: string
+          intro?: string | null
+          is_published?: boolean
+          notes?: string | null
+          sections?: Json
+          slug: string
+          sort_order?: number
+          subtitle?: string | null
+          system_prompt?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          cost_hojas?: number
+          cover_url?: string | null
+          created_at?: string
+          id?: string
+          intro?: string | null
+          is_published?: boolean
+          notes?: string | null
+          sections?: Json
+          slug?: string
+          sort_order?: number
+          subtitle?: string | null
+          system_prompt?: string
           title?: string
           updated_at?: string
         }
@@ -1856,33 +1990,42 @@ export type Database = {
       promo_campaigns: {
         Row: {
           created_at: string
+          days: number
           ends_at: string | null
           id: string
           image_url: string
           is_active: boolean
           link_url: string | null
+          placement: string
+          shows_per_day: number
           starts_at: string | null
           title: string
           updated_at: string
         }
         Insert: {
           created_at?: string
+          days?: number
           ends_at?: string | null
           id?: string
           image_url: string
           is_active?: boolean
           link_url?: string | null
+          placement?: string
+          shows_per_day?: number
           starts_at?: string | null
           title?: string
           updated_at?: string
         }
         Update: {
           created_at?: string
+          days?: number
           ends_at?: string | null
           id?: string
           image_url?: string
           is_active?: boolean
           link_url?: string | null
+          placement?: string
+          shows_per_day?: number
           starts_at?: string | null
           title?: string
           updated_at?: string
@@ -2361,6 +2504,13 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      resolve_marketing_audience: {
+        Args: { p_audience_type: string; p_list_id: string }
+        Returns: {
+          email: string
+          user_id: string
+        }[]
       }
     }
     Enums: {
