@@ -353,7 +353,8 @@ function AuthLayoutInner() {
          <main className="community-main flex-1 pb-[calc(env(safe-area-inset-bottom)+92px)] lg:pb-0"><Outlet /></main>
 
         {/* Floating chat with Ruth Esther */}
-         {!isCommunity && !focusMode && <><FloatingChatFab /><FloatingHelp /><PromoPopup userId={user?.id} />
+          {isCommunity && <PromoPopup userId={user?.id} placement="comunidad" />}
+          {!isCommunity && !focusMode && <><FloatingChatFab /><FloatingHelp /><PromoPopup userId={user?.id} placement="inicio" />
       <FloatingOrigenMenu /><LiveActivityToasts /><SatisfactionPulse /><MotivationalReminders /></>}
 
 
