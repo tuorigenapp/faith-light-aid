@@ -38,7 +38,11 @@ export const Route = createFileRoute("/api/chat")({
         const gateway = createLovableAiGatewayProvider(key, initialRunId);
         const result = streamText({
           model: gateway("google/gemini-2.5-pro"),
-          system: ORIGEN_SYSTEM,
+          system: await (async () => {
+            const { brainContext } = await import("@/lib/brain.server");
+            const brain = await brainContext("mentora");
+            return brain ? `${brain}\n\n${ORIGEN_SYSTEM}` : ORIGEN_SYSTEM;
+          })(),
           messages: await convertToModelMessages(messages),
         });
 
