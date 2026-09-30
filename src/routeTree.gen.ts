@@ -23,6 +23,7 @@ import { Route as ApiPatronesRouteImport } from './routes/api/patrones'
 import { Route as ApiParejaRouteImport } from './routes/api/pareja'
 import { Route as ApiMinistracionRouteImport } from './routes/api/ministracion'
 import { Route as ApiIntakeClosureRouteImport } from './routes/api/intake-closure'
+import { Route as ApiConsultaRouteImport } from './routes/api/consulta'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as ApiCaminoPackRouteImport } from './routes/api/camino-pack'
 import { Route as AuthenticatedVisualizaRouteImport } from './routes/_authenticated/visualiza'
@@ -145,6 +146,11 @@ const ApiMinistracionRoute = ApiMinistracionRouteImport.update({
 const ApiIntakeClosureRoute = ApiIntakeClosureRouteImport.update({
   id: '/api/intake-closure',
   path: '/api/intake-closure',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiConsultaRoute = ApiConsultaRouteImport.update({
+  id: '/api/consulta',
+  path: '/api/consulta',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiChatRoute = ApiChatRouteImport.update({
@@ -474,6 +480,7 @@ export interface FileRoutesByFullPath {
   '/visualiza': typeof AuthenticatedVisualizaRouteWithChildren
   '/api/camino-pack': typeof ApiCaminoPackRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/consulta': typeof ApiConsultaRoute
   '/api/intake-closure': typeof ApiIntakeClosureRoute
   '/api/ministracion': typeof ApiMinistracionRoute
   '/api/pareja': typeof ApiParejaRoute
@@ -543,6 +550,7 @@ export interface FileRoutesByTo {
   '/visualiza': typeof AuthenticatedVisualizaRouteWithChildren
   '/api/camino-pack': typeof ApiCaminoPackRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/consulta': typeof ApiConsultaRoute
   '/api/intake-closure': typeof ApiIntakeClosureRoute
   '/api/ministracion': typeof ApiMinistracionRoute
   '/api/pareja': typeof ApiParejaRoute
@@ -613,6 +621,7 @@ export interface FileRoutesById {
   '/_authenticated/visualiza': typeof AuthenticatedVisualizaRouteWithChildren
   '/api/camino-pack': typeof ApiCaminoPackRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/consulta': typeof ApiConsultaRoute
   '/api/intake-closure': typeof ApiIntakeClosureRoute
   '/api/ministracion': typeof ApiMinistracionRoute
   '/api/pareja': typeof ApiParejaRoute
@@ -684,6 +693,7 @@ export interface FileRouteTypes {
     | '/visualiza'
     | '/api/camino-pack'
     | '/api/chat'
+    | '/api/consulta'
     | '/api/intake-closure'
     | '/api/ministracion'
     | '/api/pareja'
@@ -753,6 +763,7 @@ export interface FileRouteTypes {
     | '/visualiza'
     | '/api/camino-pack'
     | '/api/chat'
+    | '/api/consulta'
     | '/api/intake-closure'
     | '/api/ministracion'
     | '/api/pareja'
@@ -822,6 +833,7 @@ export interface FileRouteTypes {
     | '/_authenticated/visualiza'
     | '/api/camino-pack'
     | '/api/chat'
+    | '/api/consulta'
     | '/api/intake-closure'
     | '/api/ministracion'
     | '/api/pareja'
@@ -868,6 +880,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiCaminoPackRoute: typeof ApiCaminoPackRoute
   ApiChatRoute: typeof ApiChatRoute
+  ApiConsultaRoute: typeof ApiConsultaRoute
   ApiIntakeClosureRoute: typeof ApiIntakeClosureRoute
   ApiMinistracionRoute: typeof ApiMinistracionRoute
   ApiParejaRoute: typeof ApiParejaRoute
@@ -987,6 +1000,13 @@ declare module '@tanstack/react-router' {
       path: '/api/intake-closure'
       fullPath: '/api/intake-closure'
       preLoaderRoute: typeof ApiIntakeClosureRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/consulta': {
+      id: '/api/consulta'
+      path: '/api/consulta'
+      fullPath: '/api/consulta'
+      preLoaderRoute: typeof ApiConsultaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/chat': {
@@ -1516,6 +1536,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiCaminoPackRoute: ApiCaminoPackRoute,
   ApiChatRoute: ApiChatRoute,
+  ApiConsultaRoute: ApiConsultaRoute,
   ApiIntakeClosureRoute: ApiIntakeClosureRoute,
   ApiMinistracionRoute: ApiMinistracionRoute,
   ApiParejaRoute: ApiParejaRoute,
