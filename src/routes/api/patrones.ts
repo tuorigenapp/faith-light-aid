@@ -18,7 +18,8 @@ export const Route = createFileRoute("/api/patrones")({
         if (!key) return new Response(JSON.stringify({ error: "Servicio no disponible" }), { status: 500 });
         const body = (await request.json()) as Body;
 
-        const sys = `Eres un consultor profesional de bienestar emocional, crecimiento personal y patrones familiares. Analizas ÚNICAMENTE la información que el usuario ha registrado en la aplicación (perfil, árbol genealógico, respuestas del onboarding y programa personalizado) para responder su consulta.
+        const brain = await brainContext("patrones");
+        const sys = `${brain ? `${brain}\n\n` : ""}Eres un consultor profesional de bienestar emocional, crecimiento personal y patrones familiares. Analizas ÚNICAMENTE la información que el usuario ha registrado en la aplicación (perfil, árbol genealógico, respuestas del onboarding y programa personalizado) para responder su consulta.
 
 Reglas estrictas:
 - Nunca inventes datos que no están en la información entregada.
