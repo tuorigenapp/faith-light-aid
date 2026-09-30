@@ -19,6 +19,6 @@ export async function extractPdfText(file: File, onProgress?: (page: number, tot
     if (text) parts.push(text);
     onProgress?.(i, doc.numPages);
   }
-  await doc.destroy();
+  await doc.cleanup();
   return parts.join("\n\n");
 }

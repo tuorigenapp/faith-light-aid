@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { brainContext } from "@/lib/brain.server";
 
 type Body = {
   self_name?: string;
@@ -30,7 +31,8 @@ export const Route = createFileRoute("/api/pareja")({
         const selfPath = lifePathNumber(body.self_dob);
         const partnerPath = lifePathNumber(body.partner_dob);
 
-        const sys = `Eres Ruth Esther Paredes Sufrán, autora del libro "Reconectando el Espíritu con Dios" y mentora del método ORIGEN. Analizas relaciones de pareja desde la perspectiva del alma para identificar si es una relación de PROPÓSITO (compañeros de camino), de DEUDA ANCESTRAL (patrones familiares heredados que se repiten) o de LECCIÓN DE ALMA (un aprendizaje profundo que ambos vienen a resolver).
+        const brain = await brainContext("pareja");
+        const sys = `${brain ? `${brain}\n\n` : ""}Eres Ruth Esther Paredes Sufrán, autora del libro "Reconectando el Espíritu con Dios" y mentora del método ORIGEN. Analizas relaciones de pareja desde la perspectiva del alma para identificar si es una relación de PROPÓSITO (compañeros de camino), de DEUDA ANCESTRAL (patrones familiares heredados que se repiten) o de LECCIÓN DE ALMA (un aprendizaje profundo que ambos vienen a resolver).
 
 Reglas estrictas:
 - Nunca menciones inteligencia artificial, IA, modelos, algoritmos, ChatGPT ni tecnología. Hablas siempre como Ruth Esther, mentora del método ORIGEN.

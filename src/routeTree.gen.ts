@@ -23,6 +23,7 @@ import { Route as ApiPatronesRouteImport } from './routes/api/patrones'
 import { Route as ApiParejaRouteImport } from './routes/api/pareja'
 import { Route as ApiMinistracionRouteImport } from './routes/api/ministracion'
 import { Route as ApiIntakeClosureRouteImport } from './routes/api/intake-closure'
+import { Route as ApiConsultaRouteImport } from './routes/api/consulta'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as ApiCaminoPackRouteImport } from './routes/api/camino-pack'
 import { Route as AuthenticatedVisualizaRouteImport } from './routes/_authenticated/visualiza'
@@ -70,6 +71,7 @@ import { Route as AuthenticatedVisualizaCategoryIdRouteImport } from './routes/_
 import { Route as AuthenticatedProgramasProgramaIdRouteImport } from './routes/_authenticated/programas.$programaId'
 import { Route as AuthenticatedJuegosGameIdRouteImport } from './routes/_authenticated/juegos.$gameId'
 import { Route as AuthenticatedEtapasStageIdRouteImport } from './routes/_authenticated/etapas.$stageId'
+import { Route as AuthenticatedConsultaSlugRouteImport } from './routes/_authenticated/consulta.$slug'
 import { Route as AuthenticatedCaminosCaminoIdRouteImport } from './routes/_authenticated/caminos.$caminoId'
 import { Route as AuthenticatedCaminoNuevoSlugRouteImport } from './routes/_authenticated/camino-nuevo.$slug'
 import { Route as AuthenticatedCaminosCaminoIdIndexRouteImport } from './routes/_authenticated/caminos.$caminoId.index'
@@ -145,6 +147,11 @@ const ApiMinistracionRoute = ApiMinistracionRouteImport.update({
 const ApiIntakeClosureRoute = ApiIntakeClosureRouteImport.update({
   id: '/api/intake-closure',
   path: '/api/intake-closure',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiConsultaRoute = ApiConsultaRouteImport.update({
+  id: '/api/consulta',
+  path: '/api/consulta',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiChatRoute = ApiChatRouteImport.update({
@@ -397,6 +404,12 @@ const AuthenticatedEtapasStageIdRoute =
     path: '/$stageId',
     getParentRoute: () => AuthenticatedEtapasRoute,
   } as any)
+const AuthenticatedConsultaSlugRoute =
+  AuthenticatedConsultaSlugRouteImport.update({
+    id: '/consulta/$slug',
+    path: '/consulta/$slug',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedCaminosCaminoIdRoute =
   AuthenticatedCaminosCaminoIdRouteImport.update({
     id: '/caminos/$caminoId',
@@ -474,6 +487,7 @@ export interface FileRoutesByFullPath {
   '/visualiza': typeof AuthenticatedVisualizaRouteWithChildren
   '/api/camino-pack': typeof ApiCaminoPackRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/consulta': typeof ApiConsultaRoute
   '/api/intake-closure': typeof ApiIntakeClosureRoute
   '/api/ministracion': typeof ApiMinistracionRoute
   '/api/pareja': typeof ApiParejaRoute
@@ -481,6 +495,7 @@ export interface FileRoutesByFullPath {
   '/api/stage-pack': typeof ApiStagePackRoute
   '/camino-nuevo/$slug': typeof AuthenticatedCaminoNuevoSlugRoute
   '/caminos/$caminoId': typeof AuthenticatedCaminosCaminoIdRouteWithChildren
+  '/consulta/$slug': typeof AuthenticatedConsultaSlugRoute
   '/etapas/$stageId': typeof AuthenticatedEtapasStageIdRoute
   '/juegos/$gameId': typeof AuthenticatedJuegosGameIdRoute
   '/programas/$programaId': typeof AuthenticatedProgramasProgramaIdRoute
@@ -543,12 +558,14 @@ export interface FileRoutesByTo {
   '/visualiza': typeof AuthenticatedVisualizaRouteWithChildren
   '/api/camino-pack': typeof ApiCaminoPackRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/consulta': typeof ApiConsultaRoute
   '/api/intake-closure': typeof ApiIntakeClosureRoute
   '/api/ministracion': typeof ApiMinistracionRoute
   '/api/pareja': typeof ApiParejaRoute
   '/api/patrones': typeof ApiPatronesRoute
   '/api/stage-pack': typeof ApiStagePackRoute
   '/camino-nuevo/$slug': typeof AuthenticatedCaminoNuevoSlugRoute
+  '/consulta/$slug': typeof AuthenticatedConsultaSlugRoute
   '/etapas/$stageId': typeof AuthenticatedEtapasStageIdRoute
   '/juegos/$gameId': typeof AuthenticatedJuegosGameIdRoute
   '/programas/$programaId': typeof AuthenticatedProgramasProgramaIdRoute
@@ -613,6 +630,7 @@ export interface FileRoutesById {
   '/_authenticated/visualiza': typeof AuthenticatedVisualizaRouteWithChildren
   '/api/camino-pack': typeof ApiCaminoPackRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/consulta': typeof ApiConsultaRoute
   '/api/intake-closure': typeof ApiIntakeClosureRoute
   '/api/ministracion': typeof ApiMinistracionRoute
   '/api/pareja': typeof ApiParejaRoute
@@ -620,6 +638,7 @@ export interface FileRoutesById {
   '/api/stage-pack': typeof ApiStagePackRoute
   '/_authenticated/camino-nuevo/$slug': typeof AuthenticatedCaminoNuevoSlugRoute
   '/_authenticated/caminos/$caminoId': typeof AuthenticatedCaminosCaminoIdRouteWithChildren
+  '/_authenticated/consulta/$slug': typeof AuthenticatedConsultaSlugRoute
   '/_authenticated/etapas/$stageId': typeof AuthenticatedEtapasStageIdRoute
   '/_authenticated/juegos/$gameId': typeof AuthenticatedJuegosGameIdRoute
   '/_authenticated/programas/$programaId': typeof AuthenticatedProgramasProgramaIdRoute
@@ -684,6 +703,7 @@ export interface FileRouteTypes {
     | '/visualiza'
     | '/api/camino-pack'
     | '/api/chat'
+    | '/api/consulta'
     | '/api/intake-closure'
     | '/api/ministracion'
     | '/api/pareja'
@@ -691,6 +711,7 @@ export interface FileRouteTypes {
     | '/api/stage-pack'
     | '/camino-nuevo/$slug'
     | '/caminos/$caminoId'
+    | '/consulta/$slug'
     | '/etapas/$stageId'
     | '/juegos/$gameId'
     | '/programas/$programaId'
@@ -753,12 +774,14 @@ export interface FileRouteTypes {
     | '/visualiza'
     | '/api/camino-pack'
     | '/api/chat'
+    | '/api/consulta'
     | '/api/intake-closure'
     | '/api/ministracion'
     | '/api/pareja'
     | '/api/patrones'
     | '/api/stage-pack'
     | '/camino-nuevo/$slug'
+    | '/consulta/$slug'
     | '/etapas/$stageId'
     | '/juegos/$gameId'
     | '/programas/$programaId'
@@ -822,6 +845,7 @@ export interface FileRouteTypes {
     | '/_authenticated/visualiza'
     | '/api/camino-pack'
     | '/api/chat'
+    | '/api/consulta'
     | '/api/intake-closure'
     | '/api/ministracion'
     | '/api/pareja'
@@ -829,6 +853,7 @@ export interface FileRouteTypes {
     | '/api/stage-pack'
     | '/_authenticated/camino-nuevo/$slug'
     | '/_authenticated/caminos/$caminoId'
+    | '/_authenticated/consulta/$slug'
     | '/_authenticated/etapas/$stageId'
     | '/_authenticated/juegos/$gameId'
     | '/_authenticated/programas/$programaId'
@@ -868,6 +893,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiCaminoPackRoute: typeof ApiCaminoPackRoute
   ApiChatRoute: typeof ApiChatRoute
+  ApiConsultaRoute: typeof ApiConsultaRoute
   ApiIntakeClosureRoute: typeof ApiIntakeClosureRoute
   ApiMinistracionRoute: typeof ApiMinistracionRoute
   ApiParejaRoute: typeof ApiParejaRoute
@@ -987,6 +1013,13 @@ declare module '@tanstack/react-router' {
       path: '/api/intake-closure'
       fullPath: '/api/intake-closure'
       preLoaderRoute: typeof ApiIntakeClosureRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/consulta': {
+      id: '/api/consulta'
+      path: '/api/consulta'
+      fullPath: '/api/consulta'
+      preLoaderRoute: typeof ApiConsultaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/chat': {
@@ -1318,6 +1351,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEtapasStageIdRouteImport
       parentRoute: typeof AuthenticatedEtapasRoute
     }
+    '/_authenticated/consulta/$slug': {
+      id: '/_authenticated/consulta/$slug'
+      path: '/consulta/$slug'
+      fullPath: '/consulta/$slug'
+      preLoaderRoute: typeof AuthenticatedConsultaSlugRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/caminos/$caminoId': {
       id: '/_authenticated/caminos/$caminoId'
       path: '/caminos/$caminoId'
@@ -1462,6 +1502,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedVisualizaRoute: typeof AuthenticatedVisualizaRouteWithChildren
   AuthenticatedCaminoNuevoSlugRoute: typeof AuthenticatedCaminoNuevoSlugRoute
   AuthenticatedCaminosCaminoIdRoute: typeof AuthenticatedCaminosCaminoIdRouteWithChildren
+  AuthenticatedConsultaSlugRoute: typeof AuthenticatedConsultaSlugRoute
   AuthenticatedJuegosGameIdRoute: typeof AuthenticatedJuegosGameIdRoute
   AuthenticatedProgramasProgramaIdRoute: typeof AuthenticatedProgramasProgramaIdRoute
   AuthenticatedJuegosIndexRoute: typeof AuthenticatedJuegosIndexRoute
@@ -1496,6 +1537,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCaminoNuevoSlugRoute: AuthenticatedCaminoNuevoSlugRoute,
   AuthenticatedCaminosCaminoIdRoute:
     AuthenticatedCaminosCaminoIdRouteWithChildren,
+  AuthenticatedConsultaSlugRoute: AuthenticatedConsultaSlugRoute,
   AuthenticatedJuegosGameIdRoute: AuthenticatedJuegosGameIdRoute,
   AuthenticatedProgramasProgramaIdRoute: AuthenticatedProgramasProgramaIdRoute,
   AuthenticatedJuegosIndexRoute: AuthenticatedJuegosIndexRoute,
@@ -1516,6 +1558,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiCaminoPackRoute: ApiCaminoPackRoute,
   ApiChatRoute: ApiChatRoute,
+  ApiConsultaRoute: ApiConsultaRoute,
   ApiIntakeClosureRoute: ApiIntakeClosureRoute,
   ApiMinistracionRoute: ApiMinistracionRoute,
   ApiParejaRoute: ApiParejaRoute,
