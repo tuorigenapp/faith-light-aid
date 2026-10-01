@@ -135,7 +135,7 @@ export function SonidosHome() {
                   <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground">
                     {active && isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
                   </span>
-                </button>
+                </Link>
               </li>
             );
           })}
