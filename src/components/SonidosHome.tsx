@@ -113,8 +113,10 @@ export function SonidosHome() {
             const cover = signCover(r.cover_url);
             return (
               <li key={r.id}>
-                <button
-                  onClick={() => (active ? toggle() : play(toTrack(r), filtered.map(toTrack)))}
+                <Link
+                  to="/visualiza/$categoryId/$day"
+                  params={{ categoryId: r.category_id, day: String(r.day_index) }}
+                  search={{ reproducir: 1 }}
                   className="grid w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-[12px] border border-border bg-card p-2.5 text-left transition active:scale-[.98] hover:border-primary/40"
                 >
                   {cover ? (
