@@ -67,6 +67,17 @@ function HistorialPage() {
         const price = typeof meta.usd === "number" ? usd(meta.usd) : `${hojas > 0 ? "+" : ""}${Number.isInteger(hojas) ? hojas : hojas.toFixed(2)} hojas`;
         output.push({ id: `tx-${t.id}`, kind, title: humanReason(t.reason ?? ""), detail: kind === "compra" ? "Recarga solicitada" : "Movimiento de hojas", status: (meta.status as string | undefined) ?? "aprobada", amount: price, date: new Date(t.created_at) });
       });
+      (purchases.data ?? []).forEach((p) =>
+        output.push({
+          id: `pr-${p.id}`,
+          kind: "compra",
+          title: `Recarga de ${p.hojas.toLocaleString("es-MX")} hojas`,
+          detail: p.status === "pendiente" ? "Esperando revisión de soporte" : p.status === "revision" ? "En revisión por soporte" : p.status === "aprobada" ? "Aprobada y acreditada" : "No aprobada",
+          status: p.status,
+          amount: usd(Number(p.usd)),
+          date: new Date(p.created_at),
+        }),
+      );
       (transfers.data ?? []).forEach((t) => output.push({ id: `tr-${t.id}`, kind: "transferencia", title: `Transferencia a ${t.to_email}`, detail: `${Math.floor(t.points / 100)} hojas enviadas`, status: t.status, date: new Date(t.created_at) }));
       (family.data ?? []).forEach((m) => output.push({ id: `fam-${m.id}`, kind: "familia", title: m.full_name, detail: `${m.relationship} · ${m.lineage}`, status: "registrado", date: new Date(m.created_at) }));
       (journal.data ?? []).forEach((j) => output.push({ id: `jr-${j.id}`, kind: "diario", title: j.title || "Entrada de diario", detail: `${j.kind}${j.mood ? ` · ${j.mood}` : ""}`, status: "guardado", date: new Date(j.created_at) }));
