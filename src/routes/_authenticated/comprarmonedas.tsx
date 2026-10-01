@@ -53,13 +53,34 @@ function HojasFlow() {
     queryKey: ["hoja-tx", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const { data } = await supabase
-        .from("gem_transactions")
-        .select("id, amount, reason, meta, created_at")
-        .eq("user_id", user!.id)
-        .order("created_at", { ascending: false })
-        .limit(40);
-      return data ?? [];
+      const [gems, requests, transfers] = await Promise.all([
+        supabase.from("gem_transactions").select("id, amount, reason, meta, created_at").eq("user_id", user!.id).order("created_at", { ascending: false }).limit(40),
+        supabase.from("purchase_requests").select("id, hojas, usd, status, created_at").eq("user_id", user!.id).order("created_at", { ascending: false }).limit(40),
+        supabase.from("hoja_transfers").select("id, to_email, points, status, created_at").eq("user_id", user!.id).order("created_at", { ascending: false }).limit(40),
+      ]);
+      const rows: Tx[] = [];
+      (requests.data ?? []).forEach((p) =>
+        rows.push({
+          id: `pr-${p.id}`,
+          amount: p.hojas,
+          reason: "Recarga de hojas",
+          meta: { kind: "compra", status: p.status, hojas: p.hojas, usd: Number(p.usd) },
+          created_at: p.created_at,
+        }),
+      );
+      (transfers.data ?? []).forEach((t) =>
+        rows.push({
+          id: `tr-${t.id}`,
+          amount: -Math.floor(t.points / 100),
+          reason: `Envío a ${t.to_email}`,
+          meta: { kind: "transferencia", status: t.status, hojas: -Math.floor(t.points / 100) },
+          created_at: t.created_at,
+        }),
+      );
+      (gems.data ?? [])
+        .filter((g) => !String(g.reason ?? "").startsWith("compra:"))
+        .forEach((g) => rows.push({ id: g.id, amount: g.amount, reason: g.reason, meta: g.meta, created_at: g.created_at }));
+      return rows.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 80);
     },
   });
 
@@ -374,15 +395,17 @@ function StepHistory({ tx }: { tx: Tx[] }) {
               <div className="font-display font-bold text-[15px] text-[#1B1B27] truncate">
                 {r.hojas > 0 ? `${r.hojas.toLocaleString()} hojas` : `${r.hojas.toLocaleString()} hojas`}
               </div>
-              <div className="text-[12px] text-[#64667A] capitalize">{r.kind}</div>
+              <div className="text-[12px] text-[#64667A] truncate">{r.reason}</div>
               <div className="text-[11px] text-[#9A97AC] mt-0.5">
                 {r.date.toLocaleDateString("es-ES", { day: "2-digit", month: "short", year: "numeric" })} · {r.date.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}
               </div>
             </div>
             <div className="text-right shrink-0">
               <span className={cn("inline-block rounded-full px-2.5 py-1 text-[11px] font-black",
-                r.status === "pendiente" ? "bg-[#F7B955]/15 text-[#B77B12]" : "bg-[#3FBE8F]/15 text-[#2FA574]")}>
-                {r.status === "pendiente" ? "Pendiente" : "Aprobada"}
+                r.status === "pendiente" || r.status === "revision" ? "bg-[#F7B955]/15 text-[#B77B12]"
+                  : r.status === "rechazada" ? "bg-[#E05A5A]/15 text-[#B13636]"
+                  : "bg-[#3FBE8F]/15 text-[#2FA574]")}>
+                {r.status === "pendiente" ? "Pendiente" : r.status === "revision" ? "En revisión" : r.status === "rechazada" ? "No aprobada" : "Aprobada"}
               </span>
               <div className="mt-1 text-[13px] font-semibold text-[#1B1B27]">{r.price !== undefined ? usd(r.price) : "—"}</div>
             </div>

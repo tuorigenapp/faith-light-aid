@@ -21,7 +21,7 @@ type Row = {
 /** Buscador de sonidos del Home: reproduce con el reproductor global (sigue en segundo plano). */
 export function SonidosHome() {
   const [q, setQ] = useState("");
-  const { current, isPlaying, play, toggle } = usePlayer();
+  const { current, isPlaying } = usePlayer();
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["sonidos_home"],
@@ -113,8 +113,10 @@ export function SonidosHome() {
             const cover = signCover(r.cover_url);
             return (
               <li key={r.id}>
-                <button
-                  onClick={() => (active ? toggle() : play(toTrack(r), filtered.map(toTrack)))}
+                <Link
+                  to="/visualiza/$categoryId/$day"
+                  params={{ categoryId: r.category_id, day: String(r.day_index) }}
+                  search={{ reproducir: 1 }}
                   className="grid w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-[12px] border border-border bg-card p-2.5 text-left transition active:scale-[.98] hover:border-primary/40"
                 >
                   {cover ? (
@@ -133,7 +135,7 @@ export function SonidosHome() {
                   <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground">
                     {active && isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
                   </span>
-                </button>
+                </Link>
               </li>
             );
           })}

@@ -46,7 +46,7 @@ function HistorialPage() {
     queryFn: async () => {
       const userId = user?.id;
       if (!userId) return [];
-      const [tx, transfers, family, journal, pareja, patrones, ministracion, messages, ratings] = await Promise.all([
+      const [tx, transfers, family, journal, pareja, patrones, ministracion, messages, ratings, purchases] = await Promise.all([
         supabase.from("gem_transactions").select("id, amount, reason, meta, created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(200),
         supabase.from("hoja_transfers").select("id, to_email, points, status, created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(100),
         supabase.from("family_members").select("id, full_name, relationship, lineage, created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(100),
@@ -56,6 +56,7 @@ function HistorialPage() {
         supabase.from("ministracion_lecturas").select("id, name, question, created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(60),
         supabase.from("messages").select("id, role, created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(80),
         supabase.from("satisfaction_ratings").select("id, section, stars, created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(50),
+        supabase.from("purchase_requests").select("id, pack_id, hojas, usd, status, created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(100),
       ]);
 
       const output: Row[] = [];
@@ -66,6 +67,17 @@ function HistorialPage() {
         const price = typeof meta.usd === "number" ? usd(meta.usd) : `${hojas > 0 ? "+" : ""}${Number.isInteger(hojas) ? hojas : hojas.toFixed(2)} hojas`;
         output.push({ id: `tx-${t.id}`, kind, title: humanReason(t.reason ?? ""), detail: kind === "compra" ? "Recarga solicitada" : "Movimiento de hojas", status: (meta.status as string | undefined) ?? "aprobada", amount: price, date: new Date(t.created_at) });
       });
+      (purchases.data ?? []).forEach((p) =>
+        output.push({
+          id: `pr-${p.id}`,
+          kind: "compra",
+          title: `Recarga de ${p.hojas.toLocaleString("es-MX")} hojas`,
+          detail: p.status === "pendiente" ? "Esperando revisión de soporte" : p.status === "revision" ? "En revisión por soporte" : p.status === "aprobada" ? "Aprobada y acreditada" : "No aprobada",
+          status: p.status,
+          amount: usd(Number(p.usd)),
+          date: new Date(p.created_at),
+        }),
+      );
       (transfers.data ?? []).forEach((t) => output.push({ id: `tr-${t.id}`, kind: "transferencia", title: `Transferencia a ${t.to_email}`, detail: `${Math.floor(t.points / 100)} hojas enviadas`, status: t.status, date: new Date(t.created_at) }));
       (family.data ?? []).forEach((m) => output.push({ id: `fam-${m.id}`, kind: "familia", title: m.full_name, detail: `${m.relationship} · ${m.lineage}`, status: "registrado", date: new Date(m.created_at) }));
       (journal.data ?? []).forEach((j) => output.push({ id: `jr-${j.id}`, kind: "diario", title: j.title || "Entrada de diario", detail: `${j.kind}${j.mood ? ` · ${j.mood}` : ""}`, status: "guardado", date: new Date(j.created_at) }));

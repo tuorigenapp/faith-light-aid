@@ -36,7 +36,9 @@ import { BackupManager } from "@/components/admin/BackupManager";
 import { ContentStudio } from "@/components/admin/ContentStudio";
 import { WalletManager } from "@/components/admin/WalletManager";
 import { PromoManager } from "@/components/admin/PromoManager";
-import { Megaphone } from "lucide-react";
+import { Megaphone, BrainCircuit, Wand2 } from "lucide-react";
+import { BrainManager } from "@/components/admin/BrainManager";
+import { ConsultasStudio } from "@/components/admin/ConsultasStudio";
 import { AreaChart, Area, ResponsiveContainer, BarChart, Bar, XAxis, Tooltip } from "recharts";
 
 export const Route = createFileRoute("/admin")({
@@ -520,6 +522,8 @@ function Admin() {
 
         {section === "wallet" && <WalletManager />}
         {section === "promos" && <PromoManager />}
+        {section === "cerebro" && <BrainManager />}
+        {section === "consultas" && <ConsultasStudio />}
 
         {section === "libros" && <BooksManager />}
 
