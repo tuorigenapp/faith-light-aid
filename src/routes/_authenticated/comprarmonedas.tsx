@@ -402,8 +402,10 @@ function StepHistory({ tx }: { tx: Tx[] }) {
             </div>
             <div className="text-right shrink-0">
               <span className={cn("inline-block rounded-full px-2.5 py-1 text-[11px] font-black",
-                r.status === "pendiente" ? "bg-[#F7B955]/15 text-[#B77B12]" : "bg-[#3FBE8F]/15 text-[#2FA574]")}>
-                {r.status === "pendiente" ? "Pendiente" : "Aprobada"}
+                r.status === "pendiente" || r.status === "revision" ? "bg-[#F7B955]/15 text-[#B77B12]"
+                  : r.status === "rechazada" ? "bg-[#E05A5A]/15 text-[#B13636]"
+                  : "bg-[#3FBE8F]/15 text-[#2FA574]")}>
+                {r.status === "pendiente" ? "Pendiente" : r.status === "revision" ? "En revisión" : r.status === "rechazada" ? "No aprobada" : "Aprobada"}
               </span>
               <div className="mt-1 text-[13px] font-semibold text-[#1B1B27]">{r.price !== undefined ? usd(r.price) : "—"}</div>
             </div>
