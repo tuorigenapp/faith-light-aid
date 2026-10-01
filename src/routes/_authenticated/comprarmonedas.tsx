@@ -53,13 +53,34 @@ function HojasFlow() {
     queryKey: ["hoja-tx", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const { data } = await supabase
-        .from("gem_transactions")
-        .select("id, amount, reason, meta, created_at")
-        .eq("user_id", user!.id)
-        .order("created_at", { ascending: false })
-        .limit(40);
-      return data ?? [];
+      const [gems, requests, transfers] = await Promise.all([
+        supabase.from("gem_transactions").select("id, amount, reason, meta, created_at").eq("user_id", user!.id).order("created_at", { ascending: false }).limit(40),
+        supabase.from("purchase_requests").select("id, hojas, usd, status, created_at").eq("user_id", user!.id).order("created_at", { ascending: false }).limit(40),
+        supabase.from("hoja_transfers").select("id, to_email, points, status, created_at").eq("user_id", user!.id).order("created_at", { ascending: false }).limit(40),
+      ]);
+      const rows: Tx[] = [];
+      (requests.data ?? []).forEach((p) =>
+        rows.push({
+          id: `pr-${p.id}`,
+          amount: p.hojas,
+          reason: "Recarga de hojas",
+          meta: { kind: "compra", status: p.status, hojas: p.hojas, usd: Number(p.usd) },
+          created_at: p.created_at,
+        }),
+      );
+      (transfers.data ?? []).forEach((t) =>
+        rows.push({
+          id: `tr-${t.id}`,
+          amount: -Math.floor(t.points / 100),
+          reason: `Envío a ${t.to_email}`,
+          meta: { kind: "transferencia", status: t.status, hojas: -Math.floor(t.points / 100) },
+          created_at: t.created_at,
+        }),
+      );
+      (gems.data ?? [])
+        .filter((g) => !String(g.reason ?? "").startsWith("compra:"))
+        .forEach((g) => rows.push({ id: g.id, amount: g.amount, reason: g.reason, meta: g.meta, created_at: g.created_at }));
+      return rows.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 80);
     },
   });
 
