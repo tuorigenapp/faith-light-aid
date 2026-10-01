@@ -395,7 +395,7 @@ function StepHistory({ tx }: { tx: Tx[] }) {
               <div className="font-display font-bold text-[15px] text-[#1B1B27] truncate">
                 {r.hojas > 0 ? `${r.hojas.toLocaleString()} hojas` : `${r.hojas.toLocaleString()} hojas`}
               </div>
-              <div className="text-[12px] text-[#64667A] capitalize">{r.kind}</div>
+              <div className="text-[12px] text-[#64667A] truncate">{r.reason}</div>
               <div className="text-[11px] text-[#9A97AC] mt-0.5">
                 {r.date.toLocaleDateString("es-ES", { day: "2-digit", month: "short", year: "numeric" })} · {r.date.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}
               </div>
