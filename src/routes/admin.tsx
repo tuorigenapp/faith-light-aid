@@ -162,6 +162,8 @@ type SectionId =
   | "studio"
   | "wallet"
   | "promos"
+  | "cerebro"
+  | "consultas"
   | "libros"
   | "audios"
   | "comunidad"
