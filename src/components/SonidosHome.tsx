@@ -21,7 +21,7 @@ type Row = {
 /** Buscador de sonidos del Home: reproduce con el reproductor global (sigue en segundo plano). */
 export function SonidosHome() {
   const [q, setQ] = useState("");
-  const { current, isPlaying, play, toggle } = usePlayer();
+  const { current, isPlaying } = usePlayer();
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["sonidos_home"],
