@@ -162,6 +162,8 @@ type SectionId =
   | "studio"
   | "wallet"
   | "promos"
+  | "cerebro"
+  | "consultas"
   | "libros"
   | "audios"
   | "comunidad"
@@ -178,6 +180,8 @@ const NAV: { id: SectionId; label: string; icon: typeof Users }[] = [
   { id: "studio", label: "Crear con IA", icon: Sparkles },
   { id: "wallet", label: "Compras y envíos", icon: Receipt },
   { id: "promos", label: "Campañas emergentes", icon: Megaphone },
+  { id: "cerebro", label: "Cerebro ORÍGEN", icon: BrainCircuit },
+  { id: "consultas", label: "Crear consultas", icon: Wand2 },
   { id: "libros", label: "Libros", icon: BookOpen },
   { id: "audios", label: "Música", icon: Headphones },
   { id: "comunidad", label: "Comunidad", icon: MessageCircle },
