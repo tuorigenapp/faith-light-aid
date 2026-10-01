@@ -522,6 +522,8 @@ function Admin() {
 
         {section === "wallet" && <WalletManager />}
         {section === "promos" && <PromoManager />}
+        {section === "cerebro" && <BrainManager />}
+        {section === "consultas" && <ConsultasStudio />}
 
         {section === "libros" && <BooksManager />}
 
