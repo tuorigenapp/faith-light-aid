@@ -46,7 +46,7 @@ function HistorialPage() {
     queryFn: async () => {
       const userId = user?.id;
       if (!userId) return [];
-      const [tx, transfers, family, journal, pareja, patrones, ministracion, messages, ratings] = await Promise.all([
+      const [tx, transfers, family, journal, pareja, patrones, ministracion, messages, ratings, purchases] = await Promise.all([
         supabase.from("gem_transactions").select("id, amount, reason, meta, created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(200),
         supabase.from("hoja_transfers").select("id, to_email, points, status, created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(100),
         supabase.from("family_members").select("id, full_name, relationship, lineage, created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(100),
