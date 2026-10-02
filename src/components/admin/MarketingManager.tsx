@@ -20,7 +20,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
-import { getAudienceCount, sendCampaignNow, scheduleCampaign, pauseCampaign } from "@/lib/marketing.functions";
+import { getAudienceCount, sendCampaignNow, scheduleCampaign, pauseCampaign, getAiPush, setAiPush } from "@/lib/marketing.functions";
 
 type Channel = "email" | "push";
 
@@ -296,6 +296,8 @@ export function MarketingManager() {
   const maxHour = Math.max(1, ...(hours ?? [1]));
 
   return (
+    <>
+    <AiPushPanel />
     <section className="mt-4 grid gap-4 lg:grid-cols-[260px_minmax(0,1fr)]">
       {/* Barra lateral estilo MailerLite */}
       <aside className="rounded-[16px] border border-border/60 bg-card p-4 shadow-soft">
@@ -739,6 +741,7 @@ export function MarketingManager() {
         </div>
       </div>
     </section>
+    </>
   );
 }
 
@@ -753,5 +756,44 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       <span className="mb-1 block text-[12px] font-semibold text-muted-foreground">{label}</span>
       {children}
     </label>
+  );
+}
+
+function AiPushPanel() {
+  const qc = useQueryClient();
+  const fetchIt = useServerFn(getAiPush);
+  const save = useServerFn(setAiPush);
+  const { data } = useQuery({ queryKey: ["ai-push"], queryFn: () => fetchIt() });
+  const toggle = useMutation({
+    mutationFn: (enabled: boolean) => save({ data: { enabled } }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["ai-push"] }); toast.success("Listo, guardado."); },
+    onError: () => toast.error("No se pudo guardar. Intenta de nuevo."),
+  });
+  return (
+    <section className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto]">
+      <div className="rounded-[16px] border border-border/60 bg-card p-4 shadow-soft">
+        <p className="inline-flex items-center gap-2 font-display text-[15px] font-bold"><Users className="h-4 w-4 text-primary" /> Personas registradas</p>
+        <div className="mt-2 grid grid-cols-3 gap-2 text-center">
+          {[["Total", data?.total], ["Con pago", data?.paid], ["Sin pago", data?.free]].map(([l, v]) => (
+            <div key={String(l)} className="rounded-[10px] bg-muted p-2">
+              <p className="font-display text-[20px] font-bold">{v ?? "–"}</p>
+              <p className="text-[12px] text-muted-foreground">{l}</p>
+            </div>
+          ))}
+        </div>
+        <p className="mt-2 text-[12px] text-muted-foreground">Elige "Compradores" o "No compradores" como audiencia para separar tus campañas.</p>
+      </div>
+      <div className="rounded-[16px] border border-border/60 bg-card p-4 shadow-soft sm:w-[300px]">
+        <p className="inline-flex items-center gap-2 font-display text-[15px] font-bold"><Bell className="h-4 w-4 text-primary" /> Avisos push con IA</p>
+        <p className="mt-1 text-[12.5px] text-muted-foreground">Cada día recomienda al azar algo de ORÍGEN según los intereses de cada persona.</p>
+        <button
+          disabled={!data || toggle.isPending}
+          onClick={() => toggle.mutate(!data?.enabled)}
+          className={cn("mt-3 min-h-11 w-full rounded-[12px] text-[14px] font-bold", data?.enabled ? "bg-primary text-primary-foreground" : "bg-muted text-foreground")}
+        >
+          {data?.enabled ? "Encendido" : "Apagado"}
+        </button>
+      </div>
+    </section>
   );
 }
