@@ -100,8 +100,9 @@ export async function dispatchEmail(
           subject: campaign.subject || "Novedades de ORÍGEN",
           html,
           text: personalize(campaign.content, null),
-          purpose: "marketing",
-        },
+          purpose: "transactional",
+          idempotency_key: `origen-camp-${(campaign as { id?: string }).id ?? "x"}-${person.user_id}-${new Date().toISOString().slice(0, 10)}`,
+        } as Parameters<typeof sendLovableEmail>[0],
         { apiKey },
       );
       if (res.success) sent += 1;
