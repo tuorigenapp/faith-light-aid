@@ -129,3 +129,26 @@ export const pauseCampaign = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+export const getAiPush = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const [s, total, paid] = await Promise.all([
+      supabaseAdmin.from("community_settings").select("value").eq("key", "ai_push").maybeSingle(),
+      resolveAudience(supabaseAdmin, "all", null),
+      resolveAudience(supabaseAdmin, "buyers", null),
+    ]);
+    return { enabled: s.data?.value !== false, total: total.length, paid: paid.length, free: total.length - paid.length };
+  });
+
+export const setAiPush = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ enabled: z.boolean() }).parse(input))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin.from("community_settings").upsert({ key: "ai_push", value: data.enabled, updated_at: new Date().toISOString() });
+    return { ok: true };
+  });
