@@ -2,7 +2,8 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowLeft, ArrowRight, Check, Leaf, RefreshCw, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Leaf, Pause, Play, RefreshCw, Sparkles } from "lucide-react";
+import { installGamePause, uninstallGamePause, pauseGames, resumeGames } from "@/lib/game-pause";
 import { GAMES, MAX_LEVEL } from "@/components/games/DailyGames";
 import { MIN_PLAYS, useGamePlays } from "@/lib/game-plays";
 import { dailyWords } from "@/lib/daily-challenge";
@@ -67,6 +68,16 @@ function GamePage() {
   const [runId, setRunId] = useState(0);
   const [won, setWon] = useState(false);
   const [granted, setGranted] = useState<number | null>(null);
+  const [paused, setPaused] = useState(false);
+
+  useEffect(() => {
+    installGamePause();
+    const onHide = () => { if (document.hidden) setPaused(true); };
+    document.addEventListener("visibilitychange", onHide);
+    return () => { document.removeEventListener("visibilitychange", onHide); uninstallGamePause(); };
+  }, []);
+  useEffect(() => { if (paused) pauseGames(); else resumeGames(); }, [paused]);
+
 
   useEffect(() => {
     const raw = Number(localStorage.getItem(`origen_game_level_${gameId}`) ?? "1");
@@ -162,8 +173,33 @@ function GamePage() {
 
       <section className="mt-4 px-5">
         <div className="rounded-[16px] border border-border/60 bg-card p-4 shadow-soft">
-          <div key={`${gameId}-${level}-${runId}`}>
-            {game.render({ words, level, onWin: handleWin })}
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <span className="text-[12.5px] font-semibold text-muted-foreground">Tu nivel queda guardado</span>
+            <button
+              onClick={() => setPaused((p) => !p)}
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-[12px] bg-primary/10 px-4 text-[13px] font-bold text-primary active:scale-[.97]"
+            >
+              {paused ? <><Play className="h-4 w-4" /> Reanudar</> : <><Pause className="h-4 w-4" /> Pausar</>}
+            </button>
+          </div>
+          <div className="relative">
+            <div key={`${gameId}-${level}-${runId}`} className={cn(paused && "pointer-events-none select-none blur-[2px]")}>
+              {game.render({ words, level, onWin: handleWin })}
+            </div>
+            {paused && (
+              <div className="absolute inset-0 grid place-items-center rounded-[12px] bg-background/70">
+                <div className="text-center">
+                  <p className="font-display text-[20px] font-bold">Juego en pausa</p>
+                  <p className="mt-1 text-[13px] text-muted-foreground">Todo quedó tal cual. Sigue cuando quieras.</p>
+                  <button
+                    onClick={() => setPaused(false)}
+                    className="mt-3 inline-flex min-h-12 items-center gap-2 rounded-[12px] bg-primary px-6 font-bold text-primary-foreground"
+                  >
+                    <Play className="h-4 w-4" /> Reanudar
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
