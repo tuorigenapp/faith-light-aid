@@ -4,7 +4,7 @@ import { Link } from "@tanstack/react-router";
 import { Headphones, Pause, Play, Search, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSignedUrls } from "@/hooks/use-signed-urls";
-import { usePlayer, type Track } from "@/lib/player";
+import { usePlayer } from "@/lib/player";
 import { normalizeText } from "@/lib/biblioteca";
 import { EmptyState } from "@/components/EmptyState";
 
@@ -43,7 +43,6 @@ export function SonidosHome() {
 
   const rows = data?.rows ?? [];
   const signCover = useSignedUrls("manifest-audios", rows.map((r) => r.cover_url));
-  const signAudio = useSignedUrls("manifest-audios", rows.map((r) => r.audio_url));
 
   const filtered = useMemo(() => {
     const needle = normalizeText(q);
@@ -54,14 +53,6 @@ export function SonidosHome() {
       )
       .slice(0, 20);
   }, [q, rows, data]);
-
-  const toTrack = (r: Row): Track => ({
-    id: r.id,
-    title: r.title,
-    subtitle: `${data?.names.get(r.category_id) ?? "Manifestación"} · Día ${r.day_index}`,
-    url: signAudio(r.audio_url) ?? r.audio_url ?? "",
-    cover: signCover(r.cover_url) ?? null,
-  });
 
   return (
     <section className="app-card p-5">

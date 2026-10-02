@@ -16,6 +16,7 @@ import { CELEBRATIONS } from "@/lib/celebrate-step";
 
 export const Route = createFileRoute("/_authenticated/visualiza/$categoryId/$day")({
   head: () => ({ meta: [{ title: "Práctica de Visualízalo y Vívelo — ORÍGEN" }, { name: "description", content: "Audio, afirmación y práctica guiada del día." }, { property: "og:title", content: "Práctica de Visualízalo y Vívelo — ORÍGEN" }, { property: "og:description", content: "Audio, afirmación y práctica guiada del día." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
+  validateSearch: (s: Record<string, unknown>): { reproducir?: number } => (s.reproducir ? { reproducir: 1 } : {}),
   component: DayPlayer,
 });
 
@@ -64,6 +65,18 @@ function DayPlayer() {
 
   const c = data?.cat;
   const a = data?.audio;
+
+  const { reproducir } = Route.useSearch();
+  const autoplayed = useRef(false);
+  useEffect(() => {
+    if (!reproducir || autoplayed.current || !a?.audio_url) return;
+    const el = audioRef.current;
+    if (!el) return;
+    autoplayed.current = true;
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+    el.play().then(() => { setPlaying(true); markPlayed(); }).catch(() => { /* el navegador pidió un toque: queda listo el botón */ });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reproducir, a?.audio_url]);
 
   function togglePlay() {
     if (!audioRef.current || !a?.audio_url) return;
