@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { authorizedCaller } from "@/lib/cron-auth.server";
 import { runCampaignSend } from "@/lib/marketing.functions";
 
 /**
@@ -10,7 +11,7 @@ export const Route = createFileRoute("/api/public/marketing-dispatch")({
     handlers: {
       POST: async ({ request }) => {
         const secret = process.env["PUSH_CRON_SECRET"];
-        if (!secret || request.headers.get("x-push-secret") !== secret) {
+        if (!(await authorizedCaller(request, secret))) {
           return new Response("Unauthorized", { status: 401 });
         }
 
