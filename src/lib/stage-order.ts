@@ -61,12 +61,19 @@ export function resolveStageStates(orderedIds: number[], progress: ProgressRow[]
   const completed = new Set(progress.filter((p) => p.status === "completed").map((p) => p.stage_id));
   const doneToday = progress.some((p) => p.status === "completed" && completedInAppDay(p.completed_at));
   const states = new Map<number, StageState>();
+  // Regla fija: solo UNA lección abierta por día (se abre a las 12:00 a. m.).
+  let nextAssigned = false;
   for (const id of orderedIds) {
     if (completed.has(id)) {
       states.set(id, "completed");
       continue;
     }
-    states.set(id, doneToday ? "locked-today" : "open");
+    if (!nextAssigned) {
+      nextAssigned = true;
+      states.set(id, doneToday ? "locked-today" : "open");
+    } else {
+      states.set(id, "locked-sequential");
+    }
   }
   return states;
 }
