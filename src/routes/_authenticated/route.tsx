@@ -45,7 +45,7 @@ export const Route = createFileRoute("/_authenticated")({
 });
 
 const TOP_CHIPS = [
-  { to: "/dashboard", label: "Inicio", icon: Home },
+  { to: "/dashboard", label: "Inicio", icon: OrigenLogoIcon },
   { to: "/etapas", label: "Mi Camino", icon: MoveUpRight },
   { to: "/chat", label: "Ruth Esther", icon: MessageCircle },
   { to: "/comunidad", label: "Comunidad", icon: Users },
@@ -66,7 +66,7 @@ const TOP_CHIPS = [
 
 
 const FULL_NAV = [
-  { to: "/dashboard", label: "Inicio", icon: Home },
+  { to: "/dashboard", label: "Inicio", icon: OrigenLogoIcon },
   { to: "/chat", label: "Conversa con Ruth Esther", icon: MessageCircle },
   { to: "/pareja", label: "¿Deuda o propósito?", icon: HeartHandshake },
   { to: "/patrones", label: "Patrones familiares", icon: Sparkles },
@@ -418,3 +418,7 @@ function BottomItem({
   );
 }
 
+
+function OrigenLogoIcon({ className }: { className?: string }) {
+  return <img src={origenIcon} alt="" aria-hidden className={cn(className, "object-contain")} />;
+}
