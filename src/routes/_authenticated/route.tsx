@@ -3,6 +3,7 @@ import { ensureDailyNotice } from "@/lib/notices.functions";
 import { useOrigenPendings } from "@/hooks/use-origen-pendings";
 import { useSectionSeen } from "@/hooks/use-section-seen";
 import { PromoPopup } from "@/components/PromoPopup";
+import { RoulettePrompt } from "@/components/RoulettePrompt";
 import { wholeHojas } from "@/lib/gems";
 import { createFileRoute, Link, Outlet, redirect, useLocation, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
@@ -354,7 +355,7 @@ function AuthLayoutInner() {
 
         {/* Floating chat with Ruth Esther */}
           {isCommunity && <PromoPopup userId={user?.id} placement="comunidad" />}
-          {!isCommunity && !focusMode && <><FloatingChatFab /><FloatingHelp /><PromoPopup userId={user?.id} placement="inicio" />
+          {!isCommunity && !focusMode && <><FloatingChatFab /><FloatingHelp /><PromoPopup userId={user?.id} placement="inicio" /><RoulettePrompt userId={user?.id} />
       <FloatingOrigenMenu /><LiveActivityToasts /><SatisfactionPulse /><MotivationalReminders /></>}
 
 

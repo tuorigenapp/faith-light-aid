@@ -166,8 +166,8 @@ function RuletaPage() {
 
   return (
     <div className="mx-auto w-full max-w-[1100px] px-4 pb-28 pt-4 sm:px-5">
-      <Link to="/comprarmonedas" className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-muted-foreground">
-        <ArrowLeft className="h-4 w-4" /> Hojas de sanación
+      <Link to="/dashboard" className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-muted-foreground">
+        <ArrowLeft className="h-4 w-4" /> Volver al inicio
       </Link>
 
       <div className="mt-2 rounded-[16px] border border-border/60 bg-card p-5 text-center shadow-soft">
