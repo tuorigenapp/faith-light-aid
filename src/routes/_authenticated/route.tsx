@@ -3,6 +3,7 @@ import { ensureDailyNotice } from "@/lib/notices.functions";
 import { useOrigenPendings } from "@/hooks/use-origen-pendings";
 import { useSectionSeen } from "@/hooks/use-section-seen";
 import { PromoPopup } from "@/components/PromoPopup";
+import { RoulettePrompt } from "@/components/RoulettePrompt";
 import { wholeHojas } from "@/lib/gems";
 import { createFileRoute, Link, Outlet, redirect, useLocation, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
@@ -44,7 +45,7 @@ export const Route = createFileRoute("/_authenticated")({
 });
 
 const TOP_CHIPS = [
-  { to: "/dashboard", label: "Inicio", icon: Home },
+  { to: "/dashboard", label: "Inicio", icon: OrigenLogoIcon },
   { to: "/etapas", label: "Mi Camino", icon: MoveUpRight },
   { to: "/chat", label: "Ruth Esther", icon: MessageCircle },
   { to: "/comunidad", label: "Comunidad", icon: Users },
@@ -65,7 +66,7 @@ const TOP_CHIPS = [
 
 
 const FULL_NAV = [
-  { to: "/dashboard", label: "Inicio", icon: Home },
+  { to: "/dashboard", label: "Inicio", icon: OrigenLogoIcon },
   { to: "/chat", label: "Conversa con Ruth Esther", icon: MessageCircle },
   { to: "/pareja", label: "¿Deuda o propósito?", icon: HeartHandshake },
   { to: "/patrones", label: "Patrones familiares", icon: Sparkles },
@@ -354,7 +355,7 @@ function AuthLayoutInner() {
 
         {/* Floating chat with Ruth Esther */}
           {isCommunity && <PromoPopup userId={user?.id} placement="comunidad" />}
-          {!isCommunity && !focusMode && <><FloatingChatFab /><FloatingHelp /><PromoPopup userId={user?.id} placement="inicio" />
+          {!isCommunity && !focusMode && <><FloatingChatFab /><FloatingHelp /><PromoPopup userId={user?.id} placement="inicio" /><RoulettePrompt userId={user?.id} />
       <FloatingOrigenMenu /><LiveActivityToasts /><SatisfactionPulse /><MotivationalReminders /></>}
 
 
@@ -417,3 +418,7 @@ function BottomItem({
   );
 }
 
+
+function OrigenLogoIcon({ className }: { className?: string }) {
+  return <img src={origenIcon} alt="" aria-hidden className={cn(className, "object-contain")} />;
+}

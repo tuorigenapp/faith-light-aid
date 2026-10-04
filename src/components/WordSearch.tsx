@@ -61,21 +61,7 @@ function build(words: string[], seed: number) {
   return { grid, placed };
 }
 
-function sameLine(a: Cell, b: Cell) {
-  const dr = Math.sign(b.r - a.r);
-  const dc = Math.sign(b.c - a.c);
-  return dr !== 0 || dc !== 0;
-}
 
-function lineCells(a: Cell, b: Cell): Cell[] {
-  const dr = Math.sign(b.r - a.r);
-  const dc = Math.sign(b.c - a.c);
-  const steps = Math.max(Math.abs(b.r - a.r), Math.abs(b.c - a.c));
-  if (dr !== 0 && dc !== 0 && Math.abs(b.r - a.r) !== Math.abs(b.c - a.c)) return [];
-  const out: Cell[] = [];
-  for (let i = 0; i <= steps; i++) out.push({ r: a.r + dr * i, c: a.c + dc * i, l: "" });
-  return out;
-}
 
 export function WordSearch({ words, storageKey, gemsReward = 40 }: { words: string[]; storageKey: string; gemsReward?: number }) {
   const queryClient = useQueryClient();
@@ -86,8 +72,7 @@ export function WordSearch({ words, storageKey, gemsReward = 40 }: { words: stri
     try { return JSON.parse(localStorage.getItem(`ws:${storageKey}`) || "[]") as string[]; } catch { return []; }
   })();
   const [found, setFound] = useState<string[]>(initialFound);
-  const [start, setStart] = useState<Cell | null>(null);
-  const [hover, setHover] = useState<Cell | null>(null);
+  const [sel, setSel] = useState<string[]>([]);
   const [awarded, setAwarded] = useState(initialFound.length >= placed.length);
   const [feedback, setFeedback] = useState<string | null>(null);
 
@@ -103,35 +88,30 @@ export function WordSearch({ words, storageKey, gemsReward = 40 }: { words: stri
     }
   }, [found, awarded, gemsReward, placed.length, queryClient, storageKey]);
 
-  const preview = start && hover && sameLine(start, hover) ? lineCells(start, hover) : [];
-
   function onCellClick(cell: Cell) {
-    if (!start) { setStart(cell); return; }
-    const line = lineCells(start, cell);
-    if (!line.length) { setStart(cell); return; }
-    const word = line.map((p) => grid[p.r][p.c]).join("");
-    const rev = word.split("").reverse().join("");
-    const hit = placed.find((p) => (p.word === word || p.word === rev) && !found.includes(p.word));
+    const key = `${cell.r},${cell.c}`;
+    const next = sel.includes(key) ? sel.filter((k) => k !== key) : [...sel, key];
+    const hit = placed.find((p) => !found.includes(p.word) && p.cells.every((c) => next.includes(`${c.r},${c.c}`)));
     if (hit) {
       setFound((f) => [...f, hit.word]);
+      setSel([]);
       celebrate(900);
       setFeedback(`Encontraste ${hit.word}. ¡Bien hecho!`);
       awardGems(5, "wordsearch_word", { word: hit.word }).then(() => {
         queryClient.invalidateQueries({ queryKey: ["profile"] });
         queryClient.invalidateQueries({ queryKey: ["dashboard"] });
       });
+      return;
     }
-    setStart(null);
+    setSel(next);
   }
 
   const foundCells = new Set(
     placed.filter((p) => found.includes(p.word)).flatMap((p) => p.cells.map((c) => `${c.r},${c.c}`))
   );
-  const startKey = start ? `${start.r},${start.c}` : "";
-  const previewKeys = new Set(preview.map((c) => `${c.r},${c.c}`));
 
   function reset() {
-    setFound([]); setStart(null); setAwarded(false); setFeedback(null);
+    setFound([]); setSel([]); setAwarded(false); setFeedback(null);
     try { localStorage.removeItem(`ws:${storageKey}`); } catch {}
   }
 
@@ -146,27 +126,23 @@ export function WordSearch({ words, storageKey, gemsReward = 40 }: { words: stri
         </button>
       </div>
       <p className="mb-2 text-[12px] text-muted-foreground">
-        Toca la primera letra y después la última letra de la palabra.
+        Toca cada letra de la palabra, una por una. Si te equivocas, tócala otra vez para quitarla.
       </p>
       <div className="grid gap-[6px]" style={{ gridTemplateColumns: `repeat(${SIZE}, 1fr)` }}>
         {grid.map((row, r) =>
           row.map((l, c) => {
             const k = `${r},${c}`;
             const isFound = foundCells.has(k);
-            const isStart = k === startKey;
-            const isPreview = previewKeys.has(k);
+            const isSel = sel.includes(k);
             return (
               <button
                 key={k}
-                onMouseEnter={() => setHover({ r, c, l })}
-                onFocus={() => setHover({ r, c, l })}
                 onClick={() => onCellClick({ r, c, l })}
                 className={cn(
-                  "aspect-square min-h-[36px] rounded-[10px] text-[15px] font-extrabold transition-all",
+                  "aspect-square min-h-[36px] rounded-[10px] text-[15px] font-extrabold transition active:scale-95",
                   "grid place-items-center select-none",
                   isFound ? "bg-primary text-primary-foreground shadow-glow" :
-                  isStart ? "bg-accent text-accent-foreground scale-110" :
-                  isPreview ? "bg-primary/25" :
+                  isSel ? "bg-accent text-accent-foreground" :
                   "bg-secondary hover:bg-primary/15"
                 )}
               >
