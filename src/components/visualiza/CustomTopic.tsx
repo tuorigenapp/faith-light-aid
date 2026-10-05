@@ -33,20 +33,21 @@ export function CustomTopic({
   const subs = audios.filter((a) => a.is_published !== false).sort((a, b) => a.day_index - b.day_index);
   const done = subs.filter((s) => entries.get(s.id)?.completed).length;
   const pct = subs.length ? Math.round((done / subs.length) * 100) : 0;
+  const page = (cat.page ?? {}) as Record<string, any>;
   const affirmations = [cat.affirmation_ya_tengo, cat.identity_yo_soy, cat.gratitude_gracias].filter(Boolean) as string[];
 
   return (
     <div className="pb-32">
       <section className="relative overflow-hidden rounded-b-[28px]">
-        <img src={cat.cover_url || heroFallback} alt="" className="absolute inset-0 h-full w-full object-cover" />
+        <img src={page.cover_home || page.cover_step1 || cat.cover_url || heroFallback} alt="" className="absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-b from-foreground/30 via-foreground/55 to-foreground/85" />
         <div className="relative mx-auto max-w-3xl px-5 pt-6 pb-8 text-background">
           <Link to="/visualiza" className="inline-flex min-h-11 items-center gap-1 text-[13px] font-bold">
             <ArrowLeft className="h-4 w-4" /> Visualízalo y Vívelo
           </Link>
-          <p className="mt-10 text-[12px] font-bold uppercase tracking-widest opacity-85">Tema principal</p>
-          <h1 className="mt-1 font-display text-[32px] font-extrabold leading-[1.1]">{cat.title}</h1>
-          {cat.subtitle && <p className="mt-2 text-[15px] opacity-90">{cat.subtitle}</p>}
+          <p className="mt-10 text-[12px] font-bold uppercase tracking-widest opacity-85">{recipe ? "Tema principal" : "Página principal"}</p>
+          <h1 className="mt-1 font-display text-[32px] font-extrabold leading-[1.1]">{page.hero_title || cat.title}</h1>
+          {(page.hero_text || cat.subtitle) && <p className="mt-2 text-[15px] opacity-90">{page.hero_text || cat.subtitle}</p>}
           <div className="mt-5 flex items-center gap-3">
             <div className="h-2 flex-1 overflow-hidden rounded-full bg-background/25">
               <div className="h-full rounded-full bg-background transition-[width] duration-500" style={{ width: `${pct}%` }} />
@@ -76,7 +77,9 @@ export function CustomTopic({
         )}
 
         <section>
-          <h2 className="font-display text-[20px] font-extrabold">{recipe ? "Recetas y prácticas" : "Audios del tema"}</h2>
+          {(page.cover_playlist || page.cover_step2) && <img src={page.cover_playlist || page.cover_step2} alt="" className="mb-3 h-36 w-full rounded-[16px] object-cover" loading="lazy" />}
+          <h2 className="font-display text-[20px] font-extrabold">{page.playlist_title || (recipe ? "Recetas y prácticas" : "Sección de playlists")}</h2>
+          {page.playlist_text && <p className="mt-1 text-[14px] text-foreground/80">{page.playlist_text}</p>}
           <p className="mt-1 text-[13px] text-muted-foreground">
             {isPaid ? "Tienes acceso a todas." : `Las primeras ${FREE_AUDIOS} están abiertas en tu plan gratis.`}
           </p>
