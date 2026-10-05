@@ -16,6 +16,7 @@ import {
   adminRegenerateSubtopic,
   adminUpdateLimpieza,
   adminDeleteLimpieza,
+  adminRebuildTopicDesign,
 } from "@/lib/content-admin.functions";
 import { Copy, Eye, EyeOff, ImageIcon, Loader2, Pencil, Plus, RefreshCw, Search, Sparkles, Trash2, Upload, Wand2 } from "lucide-react";
 import { CaminosStudio, CoversStudio } from "@/components/admin/CaminosStudio";
@@ -189,9 +190,9 @@ function MainTopics({ onNote }: { onNote: Notify }) {
         <Field label="Diseño del tema en Visualízate">
           <div className="grid gap-2">
             {([
-              ["musica", "Como \"Manifestando con Música\"", "3 pasos, audios, afirmaciones y ejercicio completo."],
-              ["audio", "Como \"Sanar al niño interior\" (solo audio)", "Lista de audios numerados, sin tareas."],
-              ["limpieza", "Como \"Limpieza espiritual\"", "Recetas con portada, materiales y pasos que arma la IA."],
+              ["musica", "Como \"Manifestando con Música\"", "Toma solo la forma de 3 pasos. La IA escribe todo nuevo sobre tu tema y crea una portada para cada paso."],
+              ["audio", "Como \"Sanar al niño interior\" (solo audio)", "Toma solo la forma: página principal y sección de playlists, con textos y portadas nuevas de tu tema."],
+              ["limpieza", "Como \"Limpieza espiritual\"", "Toma solo la forma de recetas: la IA crea portada, materiales y pasos de tu tema."],
             ] as const).map(([v, t, d]) => (
               <button key={v} type="button" onClick={() => setDesign(v)} className={cn("rounded-[12px] border p-3 text-left", design === v ? "border-2 border-[#7C5CFF] bg-[#7C5CFF]/5" : "border-border")}>
                 <span className="block text-[14px] font-bold text-foreground">{t}</span>
@@ -221,6 +222,7 @@ function TopicList({ categories, loading, onNote }: { categories: Cat[]; loading
   const qc = useQueryClient();
   const update = useServerFn(adminUpdateCategory);
   const remove = useServerFn(adminDeleteCategory);
+  const rebuild = useServerFn(adminRebuildTopicDesign);
   const [q, setQ] = useState("");
   const [edit, setEdit] = useState<Cat | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -271,6 +273,9 @@ function TopicList({ categories, loading, onNote }: { categories: Cat[]; loading
                   <>
                     <IconAction label={c.is_published ? "Ocultar" : "Hacer visible"} onClick={() => run(c.id, () => update({ data: { id: c.id, isPublished: !c.is_published } }), c.is_published ? "Tema oculto." : "Tema visible en la app.")}>
                       {c.is_published ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                    </IconAction>
+                    <IconAction label="Rehacer diseño propio con IA (textos y portadas de cada paso)" onClick={() => run(c.id, () => rebuild({ data: { id: c.id } }), "Listo: el tema tiene textos y portadas propias en cada paso.")}>
+                      <Sparkles className="h-4 w-4" />
                     </IconAction>
                     <IconAction label="Editar" onClick={() => setEdit(c)}><Pencil className="h-4 w-4" /></IconAction>
                     <IconAction label="Nueva portada con IA" onClick={() => run(c.id, () => update({ data: { id: c.id, regenerateCover: true } }), "Portada nueva generada.")}>
