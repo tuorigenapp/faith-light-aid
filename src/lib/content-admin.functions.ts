@@ -24,6 +24,55 @@ function slugify(text: string) {
 const COVER_STYLE =
   "Ilustración espiritual cálida y luminosa, estilo pintura digital suave, tonos lavanda, durazno y dorado, sin texto, sin letras, sin marcas de agua, composición centrada, atmósfera de paz y esperanza.";
 
+
+/* ───────── Diseño propio de cada tema (inspirado en la estructura, nunca copiado) ───────── */
+export type TopicPage = {
+  hero_title?: string; hero_text?: string; includes?: string[]; verse?: string; verse_ref?: string; cta?: string;
+  step2_title?: string; step2_text?: string; step2_hint?: string; step2_note?: string;
+  step3_text?: string; playlist_title?: string; playlist_text?: string;
+  accent?: string; cover_step1?: string | null; cover_step2?: string | null; cover_step3?: string | null;
+  cover_home?: string | null; cover_playlist?: string | null;
+};
+
+async function buildTopicPage(title: string, notes: string, design: "musica" | "audio" | "limpieza", slug: string): Promise<TopicPage> {
+  const { aiJson, uploadCover } = await import("@/lib/ai-content.server");
+  const structure =
+    design === "musica"
+      ? "un programa en 3 pasos: Paso 1 Bienvenida (portada, título con gancho, texto breve, lista 'Este programa incluye' de 6 puntos, versículo y botón), Paso 2 Elige un área (pregunta, texto, pista de cómo elegir, nota amable) y Paso 3 Tu lección (texto corto de bienvenida a la lección)"
+      : design === "audio"
+        ? "una página principal de audios (título, texto, versículo, botón) y una sección de playlists (título y texto)"
+        : "una página de recetas o prácticas guiadas con instrucciones paso a paso (título, texto, lista de 6 cosas que incluye, versículo y botón)";
+  const page = await aiJson<TopicPage & { cover_prompts: string[] }>(
+    `Vas a escribir TODO el contenido NUEVO de un tema de la app ORÍGEN llamado "${title}". Notas del editor: ${notes || "sin notas"}.
+Solo se reutiliza la ESTRUCTURA visual de ${structure}. Está PROHIBIDO copiar textos, títulos o frases de otros temas (como "Manifestar con Música", "Sanar al niño interior" o "Limpieza espiritual"): todo debe hablar únicamente de "${title}".
+Devuelve JSON con: hero_title (máx 50 caracteres), hero_text (máx 200), includes (array de 6 frases cortas, máx 45 caracteres cada una), verse (versículo bíblico real relacionado), verse_ref, cta (texto del botón, máx 28), step2_title (pregunta, máx 50), step2_text (máx 140), step2_hint (máx 80), step2_note (máx 120), step3_text (máx 120), playlist_title (máx 40), playlist_text (máx 120), accent (color hex suave que represente el tema, distinto de #7C5CFF) y cover_prompts (array de 3 descripciones visuales DIFERENTES en inglés, sin texto: 1) portada principal, 2) portada para elegir área o playlists, 3) portada de la lección).`,
+  );
+  const prompts = (page.cover_prompts ?? []).slice(0, 3);
+  const covers = await Promise.all(
+    prompts.map((cp, i) => uploadCover(`${cp}. ${COVER_STYLE}`, `${slug}-paso-${i + 1}`).catch(() => null)),
+  );
+  const { cover_prompts: _c, ...rest } = page;
+  return design === "audio"
+    ? { ...rest, cover_home: covers[0] ?? null, cover_playlist: covers[1] ?? null, cover_step3: covers[2] ?? null }
+    : { ...rest, cover_step1: covers[0] ?? null, cover_step2: covers[1] ?? null, cover_step3: covers[2] ?? null };
+}
+
+/** Rehace el diseño propio de un tema ya creado (textos y portadas nuevas). */
+export const adminRebuildTopicDesign = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ id: z.string().min(1), design: z.enum(["musica", "audio", "limpieza"]).optional() }).parse(input))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: cat } = await supabaseAdmin.from("manifest_categories").select("id, title, description, design").eq("id", data.id).maybeSingle();
+    if (!cat) throw new Error("Ese tema ya no existe.");
+    const design = (data.design ?? (cat as { design?: string }).design ?? "musica") as "musica" | "audio" | "limpieza";
+    const page = await buildTopicPage(cat.title, cat.description ?? "", design, slugify(cat.title) || "tema");
+    const { error } = await supabaseAdmin.from("manifest_categories").update({ page, design, audio_only: design === "audio", cover_url: page.cover_step1 ?? page.cover_home ?? undefined } as never).eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 /* ───────── 1 · Tema principal de Visualízate ───────── */
 
 export const adminCreateVisualizaCategory = createServerFn({ method: "POST" })
@@ -74,8 +123,11 @@ Devuelve JSON con: subtitle (máx 70 caracteres), description (2 a 3 frases, má
       .limit(1)
       .maybeSingle();
 
+    const design = data.design ?? (data.audioOnly ? "audio" : "musica");
+    const page = await buildTopicPage(data.title, data.notes, design, slug).catch(() => ({}) as TopicPage);
     const { error } = await supabaseAdmin.from("manifest_categories").insert({
       id,
+      page,
       title: data.title,
       subtitle: generated.subtitle,
       description: generated.description,
@@ -86,12 +138,12 @@ Devuelve JSON con: subtitle (máx 70 caracteres), description (2 a 3 frases, má
       group_key: data.groupKey,
       program_group: data.programGroup,
       required_plan: data.requiredPlan,
-      cover_url: cover,
+      cover_url: page.cover_step1 ?? page.cover_home ?? cover,
       sort_order: (last?.sort_order ?? 0) + 1,
       is_published: false,
       is_custom: true,
       audio_only: data.design ? data.design === "audio" : data.audioOnly,
-      design: data.design ?? (data.audioOnly ? "audio" : "musica"),
+      design,
     } as never);
     if (error) throw new Error(error.message);
     return { id, cover: Boolean(cover) };

@@ -1,0 +1,1 @@
+ALTER TABLE public.manifest_categories ADD COLUMN IF NOT EXISTS page jsonb NOT NULL DEFAULT '{}'::jsonb;

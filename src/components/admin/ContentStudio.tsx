@@ -16,10 +16,12 @@ import {
   adminRegenerateSubtopic,
   adminUpdateLimpieza,
   adminDeleteLimpieza,
+  adminRebuildTopicDesign,
 } from "@/lib/content-admin.functions";
-import { Copy, Eye, EyeOff, ImageIcon, Loader2, Pencil, Plus, RefreshCw, Search, Sparkles, Trash2, Wand2 } from "lucide-react";
+import { Copy, Eye, EyeOff, ImageIcon, Loader2, Pencil, Plus, RefreshCw, Search, Sparkles, Trash2, Upload, Wand2 } from "lucide-react";
 import { CaminosStudio, CoversStudio } from "@/components/admin/CaminosStudio";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 
 type Tab = "temas" | "subtemas" | "limpieza" | "caminos" | "portadas";
 
@@ -188,9 +190,9 @@ function MainTopics({ onNote }: { onNote: Notify }) {
         <Field label="Diseño del tema en Visualízate">
           <div className="grid gap-2">
             {([
-              ["musica", "Como \"Manifestando con Música\"", "3 pasos, audios, afirmaciones y ejercicio completo."],
-              ["audio", "Como \"Sanar al niño interior\" (solo audio)", "Lista de audios numerados, sin tareas."],
-              ["limpieza", "Como \"Limpieza espiritual\"", "Recetas con portada, materiales y pasos que arma la IA."],
+              ["musica", "Como \"Manifestando con Música\"", "Toma solo la forma de 3 pasos. La IA escribe todo nuevo sobre tu tema y crea una portada para cada paso."],
+              ["audio", "Como \"Sanar al niño interior\" (solo audio)", "Toma solo la forma: página principal y sección de playlists, con textos y portadas nuevas de tu tema."],
+              ["limpieza", "Como \"Limpieza espiritual\"", "Toma solo la forma de recetas: la IA crea portada, materiales y pasos de tu tema."],
             ] as const).map(([v, t, d]) => (
               <button key={v} type="button" onClick={() => setDesign(v)} className={cn("rounded-[12px] border p-3 text-left", design === v ? "border-2 border-[#7C5CFF] bg-[#7C5CFF]/5" : "border-border")}>
                 <span className="block text-[14px] font-bold text-foreground">{t}</span>
@@ -220,6 +222,7 @@ function TopicList({ categories, loading, onNote }: { categories: Cat[]; loading
   const qc = useQueryClient();
   const update = useServerFn(adminUpdateCategory);
   const remove = useServerFn(adminDeleteCategory);
+  const rebuild = useServerFn(adminRebuildTopicDesign);
   const [q, setQ] = useState("");
   const [edit, setEdit] = useState<Cat | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -270,6 +273,9 @@ function TopicList({ categories, loading, onNote }: { categories: Cat[]; loading
                   <>
                     <IconAction label={c.is_published ? "Ocultar" : "Hacer visible"} onClick={() => run(c.id, () => update({ data: { id: c.id, isPublished: !c.is_published } }), c.is_published ? "Tema oculto." : "Tema visible en la app.")}>
                       {c.is_published ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                    </IconAction>
+                    <IconAction label="Rehacer diseño propio con IA (textos y portadas de cada paso)" onClick={() => run(c.id, () => rebuild({ data: { id: c.id } }), "Listo: el tema tiene textos y portadas propias en cada paso.")}>
+                      <Sparkles className="h-4 w-4" />
                     </IconAction>
                     <IconAction label="Editar" onClick={() => setEdit(c)}><Pencil className="h-4 w-4" /></IconAction>
                     <IconAction label="Nueva portada con IA" onClick={() => run(c.id, () => update({ data: { id: c.id, regenerateCover: true } }), "Portada nueva generada.")}>
@@ -483,16 +489,7 @@ function Subtopics({ onNote }: { onNote: Notify }) {
                   </>
                 )}
               </div>
-              <div className="mt-2 flex gap-2">
-                <input
-                  defaultValue={s.audio_url ?? ""}
-                  onBlur={(e) => {
-                    if (e.target.value !== (s.audio_url ?? "")) saveAudio(s.id, e.target.value.trim());
-                  }}
-                  placeholder="Enlace del audio (mp3)"
-                  className={inputClass}
-                />
-              </div>
+              <AudioInput current={s.audio_url} onSave={(url) => saveAudio(s.id, url)} onNote={onNote} />
             </li>
           ))}
           {subtopics.length === 0 && (
@@ -640,6 +637,56 @@ function Limpieza({ onNote }: { onNote: Notify }) {
           )}
         </ul>
       </div>
+    </div>
+  );
+}
+
+/** Convierte enlaces de Google Drive o Dropbox en enlaces que se reproducen directo. */
+export function directAudioUrl(raw: string) {
+  const url = raw.trim();
+  const drive = url.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:export=\w+&)?id=)([\w-]{10,})/);
+  if (drive) return `https://drive.google.com/uc?export=download&id=${drive[1]}`;
+  if (/dropbox\.com/.test(url)) return url.replace(/[?&]dl=0/, "").replace("www.dropbox.com", "dl.dropboxusercontent.com");
+  return url;
+}
+
+function AudioInput({ current, onSave, onNote }: { current: string | null; onSave: (url: string) => void; onNote: Notify }) {
+  const [busy, setBusy] = useState(false);
+  async function upload(file: File) {
+    if (!/audio|mpeg|mp3|m4a|wav/i.test(file.type + file.name)) return onNote({ text: "Elige un archivo de audio (mp3, m4a o wav).", error: true });
+    setBusy(true);
+    try {
+      const path = `subtemas/${Date.now()}-${file.name.replace(/[^\w.-]/g, "_")}`;
+      const up = await supabase.storage.from("manifest-audios").upload(path, file, { contentType: file.type || "audio/mpeg", upsert: true });
+      if (up.error) throw up.error;
+      const signed = await supabase.storage.from("manifest-audios").createSignedUrl(path, 60 * 60 * 24 * 365 * 5);
+      if (signed.error || !signed.data) throw signed.error;
+      onSave(signed.data.signedUrl);
+    } catch {
+      onNote({ text: "No pudimos subir el audio. Revisa tu conexión e intenta otra vez.", error: true });
+    }
+    setBusy(false);
+  }
+  return (
+    <div className="mt-2 space-y-2">
+      <div className="flex gap-2">
+        <input
+          defaultValue={current ?? ""}
+          onBlur={(e) => {
+            const v = directAudioUrl(e.target.value);
+            if (v !== e.target.value) e.target.value = v;
+            if (v !== (current ?? "")) onSave(v);
+          }}
+          placeholder="Pega el enlace del audio (mp3, Google Drive o Dropbox)"
+          className={inputClass}
+        />
+        <label className="inline-flex min-h-11 shrink-0 cursor-pointer items-center gap-1.5 rounded-[12px] bg-[#7C5CFF]/10 px-3 text-[13px] font-bold text-[#5B3FD6]">
+          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />} Subir mp3
+          <input type="file" accept="audio/*,.mp3" className="hidden" onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])} />
+        </label>
+      </div>
+      <p className="text-[11.5px] text-foreground/55">En Google Drive comparte el archivo como "Cualquier persona con el enlace" y pega el enlace aquí: se convierte solo para que suene dentro de la app.</p>
+      {current && <audio src={current} controls preload="none" className="h-10 w-full" />}
     </div>
   );
 }

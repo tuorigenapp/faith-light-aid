@@ -1428,6 +1428,7 @@ export type Database = {
           identity_yo_soy: string
           is_custom: boolean
           is_published: boolean
+          page: Json
           pdf_url: string | null
           petition: string
           program_group: string
@@ -1451,6 +1452,7 @@ export type Database = {
           identity_yo_soy: string
           is_custom?: boolean
           is_published?: boolean
+          page?: Json
           pdf_url?: string | null
           petition: string
           program_group?: string
@@ -1474,6 +1476,7 @@ export type Database = {
           identity_yo_soy?: string
           is_custom?: boolean
           is_published?: boolean
+          page?: Json
           pdf_url?: string | null
           petition?: string
           program_group?: string
