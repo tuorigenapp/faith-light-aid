@@ -17,9 +17,10 @@ import {
   adminUpdateLimpieza,
   adminDeleteLimpieza,
 } from "@/lib/content-admin.functions";
-import { Copy, Eye, EyeOff, ImageIcon, Loader2, Pencil, Plus, RefreshCw, Search, Sparkles, Trash2, Wand2 } from "lucide-react";
+import { Copy, Eye, EyeOff, ImageIcon, Loader2, Pencil, Plus, RefreshCw, Search, Sparkles, Trash2, Upload, Wand2 } from "lucide-react";
 import { CaminosStudio, CoversStudio } from "@/components/admin/CaminosStudio";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 
 type Tab = "temas" | "subtemas" | "limpieza" | "caminos" | "portadas";
 
