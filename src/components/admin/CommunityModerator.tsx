@@ -38,6 +38,8 @@ export function CommunityModerator() {
   const qc = useQueryClient();
   const { user } = useAuth();
   const [view, setView] = useState<"publicar" | "preguntas" | "automatizacion" | "publicaciones" | "denuncias" | "suspensiones" | "verificados">("publicar");
+  const [pubKind, setPubKind] = useState<"user" | "ai" | "admin">("user");
+  const [qaView, setQaView] = useState<"preguntas" | "respuestas">("preguntas");
   const [mode, setMode] = useState<"texto" | "encuesta">("texto");
   const [topic, setTopic] = useState("general");
   const [title, setTitle] = useState("");
@@ -174,7 +176,9 @@ export function CommunityModerator() {
 
     {view === "preguntas" && <Section icon={Users} title="Preguntas de la administración y respuestas recibidas" hint="Cada pregunta del panel con las respuestas de la comunidad debajo. Tu respuesta aparece como ORÍGEN · Administración.">
       <div className="mt-4 flex items-center justify-between gap-3 rounded-xl border p-3"><div><p className="font-bold">Respuestas automáticas 24/7</p><p className="text-xs text-muted-foreground">{data?.autoReply ? "Encendido: la IA contesta preguntas y comentarios en toda la comunidad." : "Apagado: modo manual, solo responde la administración."}</p></div><button type="button" role="switch" aria-checked={!!data?.autoReply} aria-label="Respuestas automáticas" onClick={() => void act({ action: "auto-reply", enabled: !data?.autoReply })} className={`relative h-8 w-14 shrink-0 rounded-full transition-colors ${data?.autoReply ? "bg-primary" : "bg-muted"}`}><span className={`absolute top-1 h-6 w-6 rounded-full bg-background shadow transition-all ${data?.autoReply ? "left-7" : "left-1"}`} /></button></div>
-      <div className="mt-4 space-y-4">{adminThreads.length === 0 ? <p className="text-muted-foreground">Todavía no has publicado preguntas desde el panel.</p> : adminThreads.map(p => <Thread key={p.id} post={p} empty="Nadie ha respondido esta pregunta todavía." />)}</div>
+      <div className="mt-4 flex gap-2">{([["preguntas", "Mis preguntas"], ["respuestas", "Respuestas de usuarios"]] as const).map(([k, l]) => <Button key={k} type="button" variant={qaView === k ? "secondary" : "ghost"} onClick={() => setQaView(k)} className="min-h-11 rounded-full px-4 text-xs">{l}</Button>)}</div>
+      {qaView === "respuestas" ? <div className="mt-4 space-y-2">{adminThreads.flatMap(p => repliesOf(p.id).filter(r => r.author_kind === "user").map(r => ({ p, r }))).sort((a, b) => b.r.created_at.localeCompare(a.r.created_at)).map(({ p, r }) => <div key={r.id} className="rounded-xl border p-3"><p className="text-xs text-muted-foreground">En: <span className="font-semibold text-foreground">{p.title}</span> · {fecha(r.created_at)}</p><p className="mt-1 text-xs font-semibold">{r.author_name}</p><p className="mt-1 whitespace-pre-wrap">{r.body || "Respuesta con adjunto"}</p><button onClick={() => { setQaView("preguntas"); setAnswerFor(p.id); setAnswer(""); setAnswerParent({ id: r.id, name: r.author_name }); }} className="mt-1 text-xs font-semibold text-primary">Responder</button></div>)}</div> :
+      <div className="mt-4 space-y-4">{adminThreads.length === 0 ? <p className="text-muted-foreground">Todavía no has publicado preguntas desde el panel.</p> : adminThreads.map(p => <Thread key={p.id} post={p} empty="Nadie ha respondido esta pregunta todavía." />)}</div>}
     </Section>}
 
     {view === "automatizacion" && <Section icon={Sparkles} title="Automatización de la IA" hint="Publicaciones con portada, encuestas y respuestas generadas automáticamente. Puedes responder como Administración.">
@@ -183,7 +187,8 @@ export function CommunityModerator() {
 
     {view === "publicaciones" && <Section icon={ShieldCheck} title="Publicaciones y noticias" hint="Separadas por origen para que sepas qué publicó cada quién.">
       <div className="relative mt-4"><Search className="absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" /><input type="search" aria-label="Buscar publicaciones" value={search} onChange={e => setSearch(e.target.value)} placeholder="Busca por título, texto, autor o tema…" className="h-12 w-full rounded-xl border bg-background pl-10 pr-3" /></div>
-      {(["user", "ai", "admin"] as const).map(kind => {
+      <div className="mt-4 flex flex-wrap gap-2">{([["user", "De usuarios"], ["admin", "Noticias de la administración"], ["ai", "Publicadas por la IA"]] as const).map(([k, l]) => <Button key={k} type="button" variant={pubKind === k ? "secondary" : "ghost"} onClick={() => setPubKind(k)} className="min-h-11 rounded-full px-4 text-xs">{l} · {filtered.filter(p => p.author_kind === k).length}</Button>)}</div>
+      {([pubKind] as const).map(kind => {
         const list = filtered.filter(p => p.author_kind === kind);
         return <div key={kind} className="mt-5">
           <h3 className="flex items-center gap-2 font-bold"><KindTag kind={kind} /> {list.length} publicaciones</h3>
