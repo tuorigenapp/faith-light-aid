@@ -1,5 +1,14 @@
 # Checklist ORÍGEN — juegos y prácticas
 
+## Correcciones administrativas — octubre 6
+- [ ] Restaurar logo ORÍGEN correcto en inicio y ruleta.
+- [ ] Reparar generación IA de consultas, caminos y temas, conservando diseños completos y contenido propio.
+- [ ] Consultas existentes y nuevas: inicio, preparación, resultados, PDF e impresión.
+- [ ] Pausa global de publicación y respuestas automáticas de comunidad.
+- [ ] Pagos y ventas: pendientes/aprobados/rechazados, búsqueda, fecha, orden y comprobantes cerrados.
+- [ ] Cerebro: lista sincronizada de consultas, caminos y temas existentes.
+- [ ] Verificar flujos reales y errores actuales.
+
 ## Bloque 1 — Congelamientos (LISTO)
 - [x] `/ejercicios` paso 4: el juego a pantalla completa ya no queda atrapado.
 - [x] `GameShell`: "Siguiente paso" y el avance automático usan `onNext ?? onClose`.
