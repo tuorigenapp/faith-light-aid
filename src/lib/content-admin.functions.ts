@@ -614,20 +614,35 @@ export const adminCreateCamino = createServerFn({ method: "POST" })
     await assertAdmin(context);
     const { aiJson, uploadCover } = await import("@/lib/ai-content.server");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const g = await aiJson<{
-      subtitle: string;
-      cover_prompt: string;
-      stages: {
-        title: string;
-        lessons: {
-          title: string; lesson: string; affirmation: string; tasks: string[]; search_words: string[];
-          quiz: { question: string; options: string[]; correctIndex: number }[];
-        }[];
-      }[];
-    }>(
-      `Crea un camino de sanación emocional con fe llamado "${data.title}", similar a "Camino ORÍGEN". Notas del editor: ${data.notes || "sin notas"}.
-JSON: subtitle (máx 80), cover_prompt (inglés, sin texto), stages: 4 etapas, cada una con title y lessons: 3 lecciones con title, lesson (80-120 palabras), affirmation, tasks (2), search_words (6 palabras MAYÚSCULAS 4-9 letras sin tildes), quiz (2 preguntas con options de 3 y correctIndex).`,
+    type Lesson = {
+      title: string; lesson: string; affirmation: string; tasks: string[]; search_words: string[];
+      quiz: { question: string; options: string[]; correctIndex: number }[];
+    };
+    // Misma secuencia que /etapas: 20 etapas; cada etapa tiene 7 lecciones diarias (Día 1 a Día 7) y 1 cierre.
+    const outline = await aiJson<{ subtitle: string; cover_prompt: string; stages: string[] }>(
+      `Diseña un camino de sanación emocional con fe llamado "${data.title}", con la misma secuencia de "Camino ORÍGEN". Notas del editor: ${data.notes || "sin notas"}.
+JSON: subtitle (máx 80), cover_prompt (inglés, sin texto), stages: exactamente 20 títulos de etapa en orden progresivo (máx 50 caracteres cada uno).`,
     );
+    const titles = (outline.stages ?? []).slice(0, 20);
+    while (titles.length < 20) titles.push(`Etapa ${titles.length + 1}`);
+    const chunk = async (from: number): Promise<{ lessons: Lesson[] }[]> => {
+      const part = titles.slice(from, from + 4);
+      const prompt = `Camino de sanación "${data.title}". Notas: ${data.notes || "sin notas"}.
+Escribe el contenido de estas etapas: ${part.map((t, i) => `${from + i + 1}. ${t}`).join(" | ")}.
+JSON: stages: arreglo de ${part.length} objetos en el mismo orden, cada uno con lessons: exactamente 8 lecciones. Las lecciones 1 a 7 llevan title "Día N: <nombre de la lección>" y la 8 lleva title "Cierre: <nombre>". Cada lección: lesson (60-90 palabras), affirmation, tasks (2), search_words (5 palabras MAYÚSCULAS 4-8 letras sin tildes, sin repetir), quiz (1 pregunta con options de 3 y correctIndex).`;
+      try {
+        return (await aiJson<{ stages: { lessons: Lesson[] }[] }>(prompt)).stages ?? [];
+      } catch {
+        return (await aiJson<{ stages: { lessons: Lesson[] }[] }>(prompt)).stages ?? [];
+      }
+    };
+    const parts = await Promise.all([0, 4, 8, 12, 16].map(chunk));
+    const bodies = parts.flat();
+    const g = {
+      subtitle: outline.subtitle,
+      cover_prompt: outline.cover_prompt,
+      stages: titles.map((title, i) => ({ title, lessons: (bodies[i]?.lessons ?? []).slice(0, 8) })),
+    };
     const slug = `${slugify(data.title) || "camino"}-${Date.now().toString(36)}`;
     const cover = data.coverUrl || (await uploadCover(`${g.cover_prompt}. ${COVER_STYLE}`, slug));
     const { error } = await supabaseAdmin.from("custom_caminos").insert({
