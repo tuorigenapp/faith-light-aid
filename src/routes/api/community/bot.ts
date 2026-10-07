@@ -13,8 +13,8 @@ export const Route = createFileRoute("/api/community/bot")({ server: { handlers:
     if (!auth.user) return send({ error: "Inicia sesión." }, 401);
     const admin = createClient(url, secret, { auth: { persistSession: false } });
     const { postId, replyId } = await request.json() as { postId?: string; replyId?: string };
-    const { data: setting } = await admin.from("community_settings").select("value").eq("key", "auto_reply").maybeSingle();
-    if (setting && setting.value === false) return send({ ok: true, manual: true });
+    const { data: setting, error: settingError } = await admin.from("community_settings").select("value").eq("key", "auto_reply").maybeSingle();
+    if (settingError || setting?.value !== true) return send({ ok: true, manual: true });
     if (!postId || !/^[0-9a-f-]{36}$/i.test(postId)) return send({ error: "Pregunta inválida." }, 400);
     const { data: post } = await admin.from("community_posts").select("id,user_id,title,body,topic").eq("id", postId).maybeSingle();
     if (!post) return send({ error: "Pregunta no encontrada." }, 404);
@@ -47,7 +47,7 @@ export const Route = createFileRoute("/api/community/bot")({ server: { handlers:
     for (;;) { const { done, value } = await reader.read(); if (done) break; buffer += decoder.decode(value, { stream: true }); const lines = buffer.split("\n"); buffer = lines.pop() ?? ""; for (const line of lines) if (line.startsWith("data:")) { try { const evt = JSON.parse(line.slice(5)); if (evt.type === "response.output_text.delta") answer += evt.delta ?? ""; } catch { /* incomplete */ } } }
     if (answer.trim().length < 15) return send({ error: "La respuesta de ORÍGEN no pudo generarse." }, 503);
     const { data: latestSetting } = await admin.from("community_settings").select("value").eq("key", "auto_reply").maybeSingle();
-    if (latestSetting?.value === false) return send({ ok: true, manual: true });
+    if (latestSetting?.value !== true) return send({ ok: true, manual: true });
     if (replyId) {
       const { data: latest, error: latestError } = await admin.from("community_replies").select("id,user_id,parent_reply_id,is_bot,bot_target_user_id").eq("post_id", post.id).limit(3000);
       if (latestError) return send({ error: "No se pudo revisar la conversación." }, 503);

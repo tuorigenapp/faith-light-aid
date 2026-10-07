@@ -25,7 +25,7 @@ export async function brainContext(scope = "origen", scopeRef?: string | null): 
     const { data } = await query;
     const rows = (data ?? []).filter(
       (r: { scope: string; scope_ref: string | null }) =>
-        r.scope === "origen" || !r.scope_ref || !scopeRef || r.scope_ref === scopeRef,
+        r.scope === "origen" || !r.scope_ref || r.scope_ref === scopeRef,
     );
     if (rows.length === 0) return "";
     let body = "";

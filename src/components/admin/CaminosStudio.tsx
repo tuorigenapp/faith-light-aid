@@ -71,7 +71,7 @@ export function CaminosStudio({ onNote }: { onNote: Notify }) {
             run("new", async () => {
               await create({ data: { title: title.trim(), notes, coverUrl: cover.trim() } });
               setTitle(""); setNotes(""); setCover("");
-            }, "Camino creado con 4 etapas, lecciones, afirmaciones, sopa de letras y preguntas. Queda oculto hasta que lo hagas visible.");
+            }, "Camino creado con 20 etapas y 8 lecciones por etapa, afirmaciones, sopa de letras y preguntas. Queda oculto hasta que lo hagas visible.");
           }}
           className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-[12px] bg-[#7C5CFF] text-[15px] font-bold text-white disabled:opacity-60"
         >

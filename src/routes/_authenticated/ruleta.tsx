@@ -10,7 +10,7 @@ import { celebrate } from "@/lib/celebrate";
 import { EmptyState } from "@/components/EmptyState";
 import { WHEEL_PRIZES, formatRemaining, prizeByKey } from "@/lib/ruleta";
 import { getWheelState, spinWheel } from "@/lib/ruleta.functions";
-import origenIcon from "@/assets/origen-o-icon.png";
+import origenIcon from "@/assets/logo-origen.png";
 
 export const Route = createFileRoute("/_authenticated/ruleta")({
   head: () => ({
