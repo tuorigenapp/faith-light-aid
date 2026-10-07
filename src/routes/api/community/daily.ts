@@ -65,6 +65,8 @@ export const Route = createFileRoute("/api/community/daily")({ server: { handler
   const { data: { user } } = await auth.auth.getUser(token);
   if (!user) return Response.json({ error: "Sesión inválida." }, { status: 401 });
   const db = createClient(url, service, { auth: { persistSession: false } });
+  const { data: automation, error: automationError } = await db.from("community_settings").select("value").eq("key", "auto_reply").maybeSingle();
+  if (automationError || automation?.value !== true) return Response.json({ created: false, paused: true });
   const now = new Date();
   const local = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Santo_Domingo", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", hourCycle: "h23" }).formatToParts(now);
   const parts = Object.fromEntries(local.map(p => [p.type, p.value]));
@@ -81,6 +83,8 @@ export const Route = createFileRoute("/api/community/daily")({ server: { handler
     for (const [index, topic] of TOPICS.entries()) {
       for (const kind of ["cover", "poll"] as const) {
         if (seen.has(`${topic}:${moment}:${kind}`)) continue;
+        const { data: latest, error: pauseError } = await db.from("community_settings").select("value").eq("key", "auto_reply").maybeSingle();
+        if (pauseError || latest?.value !== true) return Response.json({ created, paused: true });
          const quiz = (day + moment) % 4 === 0 ? TRUE_FALSE[index] : QUIZZES[index][(moment + day) % QUIZZES[index].length];
         const title = kind === "cover" ? COVER_QUESTIONS[index][(moment + day) % 3] : quiz.title;
          const opts = kind === "poll" ? quiz.options : null;

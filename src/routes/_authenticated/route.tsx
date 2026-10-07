@@ -30,7 +30,7 @@ import { MiniPlayer } from "@/components/MiniPlayer";
 
 import { useSignedUrls } from "@/hooks/use-signed-urls";
 import { useCommunityNotifications } from "@/hooks/use-community-notifications";
-import origenIcon from "@/assets/origen-o-icon.png";
+import origenIcon from "@/assets/logo-origen.png";
 
 
 

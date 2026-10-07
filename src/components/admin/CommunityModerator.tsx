@@ -182,6 +182,7 @@ export function CommunityModerator() {
     </Section>}
 
     {view === "automatizacion" && <Section icon={Sparkles} title="Automatización de la IA" hint="Publicaciones con portada, encuestas y respuestas generadas automáticamente. Puedes responder como Administración.">
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4"><div><p className="font-bold">Automatización completa 24/7</p><p className="text-muted-foreground">{data?.autoReply ? "Encendida: publicaciones y respuestas activas." : "Apagada: todas las publicaciones y respuestas de IA están en pausa."}</p></div><Button role="switch" aria-checked={!!data?.autoReply} aria-label="Automatización completa" variant={data?.autoReply ? "default" : "secondary"} onClick={() => void act({ action: "auto-reply", enabled: !data?.autoReply })}>{data?.autoReply ? "Apagar IA" : "Encender IA"}</Button></div>
       <div className="mt-4 space-y-4">{aiThreads.length === 0 ? <p className="text-muted-foreground">La IA todavía no ha publicado contenido.</p> : aiThreads.slice(0, 40).map(p => <Thread key={p.id} post={p} empty="Sin respuestas de la comunidad todavía." />)}</div>
     </Section>}
 
