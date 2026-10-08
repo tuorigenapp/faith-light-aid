@@ -36,6 +36,8 @@ export type TopicPage = {
 
 async function buildTopicPage(title: string, notes: string, design: "musica" | "audio" | "limpieza", slug: string): Promise<TopicPage> {
   const { aiJson, uploadCover } = await import("@/lib/ai-content.server");
+  const { brainContext } = await import("@/lib/brain.server");
+  notes = `${notes}\n${await brainContext("visualiza", slug)}`;
   const structure =
     design === "musica"
       ? "un programa en 3 pasos: Paso 1 Bienvenida (portada, título con gancho, texto breve, lista 'Este programa incluye' de 6 puntos, versículo y botón), Paso 2 Elige un área (pregunta, texto, pista de cómo elegir, nota amable) y Paso 3 Tu lección (texto corto de bienvenida a la lección)"
@@ -607,6 +609,7 @@ export const adminCreateCamino = createServerFn({ method: "POST" })
       title: z.string().trim().min(3).max(120),
       notes: z.string().trim().max(1500).default(""),
       coverUrl: z.string().trim().max(1000).default(""),
+      existingId: z.string().uuid().optional(),
     }).parse(i),
   )
   .handler(async ({ data, context }) => {
@@ -642,10 +645,13 @@ JSON: stages: arreglo de ${part.length} objetos en el mismo orden, cada uno con 
     if (g.stages.some(s => s.lessons.length !== 8 || s.lessons.some(l => !l.lesson || !l.title))) throw new Error("El camino no quedó completo. No se guardó contenido incompleto.");
     const slug = `${slugify(data.title) || "camino"}-${Date.now().toString(36)}`;
     const cover = data.coverUrl || (await uploadCover(`${g.cover_prompt}. ${COVER_STYLE}`, slug));
-    const { error } = await supabaseAdmin.from("custom_caminos").insert({
+    const row = {
       slug, title: data.title, subtitle: g.subtitle, notes: data.notes, cover_url: cover,
       content: { stages: g.stages ?? [] } as never, is_published: false,
-    });
+    };
+    const { error } = data.existingId
+      ? await supabaseAdmin.from("custom_caminos").update({ title: row.title, subtitle: row.subtitle, notes: row.notes, cover_url: row.cover_url, content: row.content }).eq("id", data.existingId)
+      : await supabaseAdmin.from("custom_caminos").insert(row);
     if (error) throw new Error(error.message);
     return { slug };
   });

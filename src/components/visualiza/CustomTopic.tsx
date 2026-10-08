@@ -120,7 +120,7 @@ export function CustomTopic({
                     {locked ? (
                       <Link to="/membresia">{inner}</Link>
                     ) : (
-                      <Link to="/visualiza/$categoryId/$day" params={{ categoryId: cat.id, day: String(s.day_index) }}>{inner}</Link>
+                      <Link to="/visualiza/$categoryId/$day" params={{ categoryId: cat.id, day: String(s.day_index) }} search={{ reproducir: 1 }}>{inner}</Link>
                     )}
                   </li>
                 );

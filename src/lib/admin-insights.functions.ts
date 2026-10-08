@@ -73,6 +73,7 @@ export const adminSales = createServerFn({ method: "POST" })
       canceledCount: canceled.length,
       series: [...byDay.entries()].map(([day, value]) => ({ day: day.slice(5), value })),
       table: rows.slice(0, 200).map((s) => ({
+        name: (profiles.data ?? []).find(p => p.id === s.user_id)?.full_name ?? "",
         email: emailById.get(s.user_id) ?? "Sin correo",
         plan: s.plan,
         status: s.status,
