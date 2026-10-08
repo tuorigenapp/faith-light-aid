@@ -34,6 +34,10 @@ export function BrainManager() {
   const [scopeRef, setScopeRef] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
   const [note, setNote] = useState<{ text: string; error?: boolean } | null>(null);
+  const { data: targets = [] } = useQuery({ queryKey: ["brain-targets"], queryFn: async () => {
+    const [consultas, caminos, temas] = await Promise.all([supabase.from("custom_consultas").select("slug,title"), supabase.from("custom_caminos").select("slug,title"), supabase.from("manifest_categories").select("id,title")]);
+    return [...(consultas.data ?? []).map(x => ({ scope: "consulta", ref: x.slug, title: x.title })), ...(caminos.data ?? []).map(x => ({ scope: "camino", ref: x.slug, title: x.title })), ...(temas.data ?? []).map(x => ({ scope: "visualiza", ref: x.id, title: x.title }))];
+  }, refetchInterval: 20000 });
 
   const { data: docs = [], isLoading } = useQuery({
     queryKey: ["admin-brain"],
@@ -100,12 +104,13 @@ export function BrainManager() {
 
         <div className="mt-4 grid gap-3">
           <label className="text-[13px] font-semibold text-foreground/80">¿Para qué sección es este material?
-            <select className={cn(input, "mt-1")} value={scope} onChange={(e) => setScope(e.target.value)}>
+            <select className={cn(input, "mt-1")} value={scope} onChange={(e) => { setScope(e.target.value); setScopeRef(""); }}>
               {SCOPES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
+              <option value="camino">Caminos ORÍGEN</option><option value="visualiza">Visualízalo y Vívelo</option>
             </select>
           </label>
-          {scope === "consulta" && (
-            <input className={input} placeholder="Nombre corto de la consulta (opcional)" value={scopeRef} onChange={(e) => setScopeRef(e.target.value)} />
+          {["consulta", "camino", "visualiza"].includes(scope) && (
+            <select aria-label="Sección específica" className={input} value={scopeRef} onChange={(e) => setScopeRef(e.target.value)}><option value="">Todas las secciones de este grupo</option>{targets.filter(x => x.scope === scope).map(x => <option key={x.ref} value={x.ref}>{x.title}</option>)}</select>
           )}
           <label className="flex min-h-24 cursor-pointer flex-col items-center justify-center gap-2 rounded-[12px] border-2 border-dashed border-border bg-muted/30 p-4 text-center text-[13px] font-semibold text-muted-foreground">
             {busy ? <><span className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />{busy}</> : <><Upload className="h-6 w-6" /> Elegir PDF (puedes elegir varios)</>}
@@ -126,7 +131,7 @@ export function BrainManager() {
             <div className="min-w-0 flex-1">
               <p className="truncate font-bold">{d.title}</p>
               <p className="truncate text-[12px] text-muted-foreground">
-                {label(d.scope)}{d.scope_ref ? ` · ${d.scope_ref}` : ""} · {d.chars.toLocaleString("es")} letras · {d.is_active ? "activo" : "desactivado"}
+                {label(d.scope)}{d.scope_ref ? ` · ${targets.find(x => x.ref === d.scope_ref)?.title ?? d.scope_ref}` : ""} · {d.chars.toLocaleString("es")} letras · {d.is_active ? "activo" : "desactivado"}
               </p>
             </div>
             <button onClick={() => toggle(d)} aria-label={d.is_active ? "Desactivar" : "Activar"} className="grid min-h-11 w-11 place-items-center rounded-[10px] bg-primary/10 text-primary">
