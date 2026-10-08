@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { brainContext } from "@/lib/brain.server";
+import { aiJson } from "@/lib/ai-content.server";
+import { z } from "zod";
 
 type Body = {
   slug?: string;
@@ -14,10 +16,16 @@ export const Route = createFileRoute("/api/consulta")({
       POST: async ({ request }) => {
         const key = process.env["LOVABLE_API_KEY"];
         if (!key) return new Response(JSON.stringify({ error: "Servicio no disponible" }), { status: 500 });
-        const body = (await request.json()) as Body;
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const token = request.headers.get("Authorization")?.match(/^Bearer (.+)$/)?.[1];
+        if (!token) return Response.json({ error: "Inicia sesión para ver tu respuesta." }, { status: 401 });
+        const { data: auth } = await supabaseAdmin.auth.getUser(token);
+        if (!auth.user) return Response.json({ error: "Tu sesión venció. Vuelve a entrar." }, { status: 401 });
+        const parsedBody = z.object({ slug: z.string().min(1).max(100), name: z.string().trim().min(3).max(200), birthdate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), question: z.string().trim().min(5).max(1000) }).safeParse(await request.json());
+        if (!parsedBody.success) return Response.json({ error: "Revisa tu nombre, fecha y pregunta." }, { status: 400 });
+        const body = parsedBody.data;
         if (!body.slug) return new Response(JSON.stringify({ error: "Falta la consulta" }), { status: 400 });
 
-        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { data: consulta } = await supabaseAdmin
           .from("custom_consultas")
           .select("slug, title, system_prompt, sections, is_published")
@@ -47,30 +55,7 @@ Fecha de nacimiento: ${body.birthdate || "(no indicada)"}
 Lo que quiere saber: ${body.question || "(sin pregunta)"}`;
 
         try {
-          const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-            method: "POST",
-            headers: { "Content-Type": "application/json", "Lovable-API-Key": key, "X-Lovable-AIG-SDK": "fetch" },
-            body: JSON.stringify({
-              model: "google/gemini-2.5-flash",
-              messages: [{ role: "system", content: sys }, { role: "user", content: userMsg }],
-              response_format: { type: "json_object" },
-            }),
-          });
-          if (!r.ok) {
-            return new Response(
-              JSON.stringify({
-                error:
-                  r.status === 402
-                    ? "Servicio temporalmente ocupado. Intenta más tarde."
-                    : r.status === 429
-                      ? "Muchas personas están pidiendo respuesta ahora. Intenta en un momento."
-                      : "No pudimos preparar tu respuesta ahora.",
-              }),
-              { status: r.status },
-            );
-          }
-          const j = (await r.json()) as { choices?: { message?: { content?: string } }[] };
-          const parsed = JSON.parse(j.choices?.[0]?.message?.content ?? "{}");
+          const parsed = await aiJson<Record<string, string>>(userMsg, sys);
           return new Response(JSON.stringify(parsed), { headers: { "Content-Type": "application/json" } });
         } catch (e) {
           return new Response(JSON.stringify({ error: (e as Error).message }), { status: 500 });

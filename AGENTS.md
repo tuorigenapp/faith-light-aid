@@ -10,3 +10,5 @@
 <!-- LOVABLE:END -->
 
 - Hojas de Sanación use PayPal Checkout for payment and manual receipt review for crediting; this prevents unverified browser payment data from changing balances.
+- Admin AI generation uses server-only streamed Responses with request-local gateway correlation and sequential batches; this prevents unsupported models and concurrent quota overload.
+- All community automation checks the same persisted master switch before writing; this makes a pause apply to both posts and replies.

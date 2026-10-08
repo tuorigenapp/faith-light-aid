@@ -1,7 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Sparkles } from "lucide-react";
+import { ArrowLeft, Sparkles, Download, Printer } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { printConsulta } from "@/lib/print-pdf";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { cn } from "@/lib/utils";
@@ -43,6 +45,7 @@ function ConsultaPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [answer, setAnswer] = useState<Record<string, string> | null>(null);
+  const [step, setStep] = useState<1 | 2 | 3>(1);
 
   const { data: consulta, isLoading } = useQuery({
     queryKey: ["consulta", slug],
@@ -66,14 +69,16 @@ function ConsultaPage() {
     setError(null);
     setAnswer(null);
     try {
+      const { data: session } = await supabase.auth.getSession();
       const res = await fetch("/api/consulta", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.session?.access_token ?? ""}` },
         body: JSON.stringify({ slug, name: name.trim(), birthdate, question: question.trim() }),
       });
       const json = (await res.json()) as Record<string, string> & { error?: string };
       if (!res.ok || json.error) throw new Error(json.error || "No pudimos preparar tu respuesta.");
       setAnswer(json);
+      setStep(3);
       if (user?.id && consulta?.id) {
         await supabase.from("custom_consulta_results").insert({
           user_id: user.id,
@@ -125,7 +130,9 @@ function ConsultaPage() {
         </div>
       </header>
 
-      <section className="space-y-3 rounded-[16px] border border-border bg-card p-4">
+      {step === 1 && <section className="space-y-4"><h2 className="font-display text-[20px] font-bold">Lo que recibirás</h2><div className="grid gap-3 sm:grid-cols-2">{consulta.sections.map(s => <article key={s.key} className="rounded-xl border border-border bg-card p-4"><Sparkles className="mb-2 h-5 w-5 text-primary" /><h3 className="font-semibold">{s.label}</h3>{s.hint && <p className="mt-1 text-sm text-muted-foreground">{s.hint}</p>}</article>)}</div><Button className="min-h-14 w-full" onClick={() => setStep(2)}>Preparar mi respuesta</Button></section>}
+      {step === 2 && <section className="space-y-3 rounded-[16px] border border-border bg-card p-4">
+        <Button variant="ghost" onClick={() => setStep(1)}><ArrowLeft className="h-4 w-4" /> Presentación</Button>
         <label className="block text-[13px] font-semibold text-foreground/80">Tu nombre completo
           <input className={cn(input, "mt-1")} value={name} onChange={(e) => setName(e.target.value)} placeholder="Como aparece en tu documento" />
         </label>
@@ -146,7 +153,7 @@ function ConsultaPage() {
         <button onClick={ask} disabled={busy} className="inline-flex min-h-[54px] w-full items-center justify-center gap-2 rounded-[12px] bg-primary text-[16px] font-bold text-primary-foreground shadow-elev disabled:opacity-60">
           {busy ? "Preparando tu respuesta…" : <><Sparkles className="h-5 w-5" /> Ver mi respuesta</>}
         </button>
-      </section>
+      </section>}
 
       {busy && (
         <div className="space-y-2">
@@ -156,6 +163,8 @@ function ConsultaPage() {
 
       {answer && (
         <section className="space-y-3">
+          <h2 className="font-display text-[22px] font-bold">Tu respuesta personal</h2>
+          <div className="flex flex-wrap gap-2">{[["Descargar PDF", Download], ["Imprimir", Printer]].map(([label, Icon]) => { const ExportIcon = Icon as typeof Download; return <Button key={String(label)} variant="outline" onClick={() => printConsulta({ kind: "Respuesta personal", title: consulta.title, userName: name, userEmail: user?.email, sections: consulta.sections.map(s => ({ title: s.label, body: answer[s.key] ?? "" })) })}><ExportIcon className="h-4 w-4" /> {String(label)}</Button>; })}<Button variant="secondary" onClick={() => { setAnswer(null); setStep(2); }}>Nueva pregunta</Button></div>
           {consulta.sections.map((s) =>
             answer[s.key] ? (
               <article key={s.key} className="rounded-[16px] border border-border bg-card p-4">

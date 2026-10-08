@@ -48,9 +48,8 @@ Solo se reutiliza la ESTRUCTURA visual de ${structure}. Está PROHIBIDO copiar t
 Devuelve JSON con: hero_title (máx 50 caracteres), hero_text (máx 200), includes (array de 6 frases cortas, máx 45 caracteres cada una), verse (versículo bíblico real relacionado), verse_ref, cta (texto del botón, máx 28), step2_title (pregunta, máx 50), step2_text (máx 140), step2_hint (máx 80), step2_note (máx 120), step3_text (máx 120), playlist_title (máx 40), playlist_text (máx 120), accent (color hex suave que represente el tema, distinto de #7C5CFF) y cover_prompts (array de 3 descripciones visuales DIFERENTES en inglés, sin texto: 1) portada principal, 2) portada para elegir área o playlists, 3) portada de la lección).`,
   );
   const prompts = (page.cover_prompts ?? []).slice(0, 3);
-  const covers = await Promise.all(
-    prompts.map((cp, i) => uploadCover(`${cp}. ${COVER_STYLE}`, `${slug}-paso-${i + 1}`).catch(() => null)),
-  );
+  const covers: (string | null)[] = [];
+  for (const [i, cp] of prompts.entries()) covers.push(await uploadCover(`${cp}. ${COVER_STYLE}`, `${slug}-paso-${i + 1}`));
   const { cover_prompts: _c, ...rest } = page;
   return design === "audio"
     ? { ...rest, cover_home: covers[0] ?? null, cover_playlist: covers[1] ?? null, cover_step3: covers[2] ?? null }
@@ -124,17 +123,17 @@ Devuelve JSON con: subtitle (máx 70 caracteres), description (2 a 3 frases, má
       .maybeSingle();
 
     const design = data.design ?? (data.audioOnly ? "audio" : "musica");
-    const page = await buildTopicPage(data.title, data.notes, design, slug).catch(() => ({}) as TopicPage);
+    const page = await buildTopicPage(data.title, data.notes, design, slug);
     const { error } = await supabaseAdmin.from("manifest_categories").insert({
       id,
       page,
       title: data.title,
       subtitle: generated.subtitle,
       description: generated.description,
-      affirmation_ya_tengo: generated.affirmation_ya_tengo,
-      identity_yo_soy: generated.identity_yo_soy,
-      gratitude_gracias: generated.gratitude_gracias,
-      petition: generated.petition,
+      affirmation_ya_tengo: generated.affirmation_ya_tengo || `Ya tengo espacio para trabajar ${data.title.toLowerCase()}.`,
+      identity_yo_soy: generated.identity_yo_soy || "Yo soy una persona capaz de avanzar con calma.",
+      gratitude_gracias: generated.gratitude_gracias || "Gracias por cada paso de mi proceso.",
+      petition: generated.petition || "Guíame para avanzar con paz y claridad.",
       group_key: data.groupKey,
       program_group: data.programGroup,
       required_plan: data.requiredPlan,
@@ -630,19 +629,17 @@ JSON: subtitle (máx 80), cover_prompt (inglés, sin texto), stages: exactamente
       const prompt = `Camino de sanación "${data.title}". Notas: ${data.notes || "sin notas"}.
 Escribe el contenido de estas etapas: ${part.map((t, i) => `${from + i + 1}. ${t}`).join(" | ")}.
 JSON: stages: arreglo de ${part.length} objetos en el mismo orden, cada uno con lessons: exactamente 8 lecciones. Las lecciones 1 a 7 llevan title "Día N: <nombre de la lección>" y la 8 lleva title "Cierre: <nombre>". Cada lección: lesson (60-90 palabras), affirmation, tasks (2), search_words (5 palabras MAYÚSCULAS 4-8 letras sin tildes, sin repetir), quiz (1 pregunta con options de 3 y correctIndex).`;
-      try {
-        return (await aiJson<{ stages: { lessons: Lesson[] }[] }>(prompt)).stages ?? [];
-      } catch {
-        return (await aiJson<{ stages: { lessons: Lesson[] }[] }>(prompt)).stages ?? [];
-      }
+      return (await aiJson<{ stages: { lessons: Lesson[] }[] }>(prompt)).stages ?? [];
     };
-    const parts = await Promise.all([0, 4, 8, 12, 16].map(chunk));
+    const parts: { lessons: Lesson[] }[][] = [];
+    for (const from of [0, 4, 8, 12, 16]) parts.push(await chunk(from));
     const bodies = parts.flat();
     const g = {
       subtitle: outline.subtitle,
       cover_prompt: outline.cover_prompt,
       stages: titles.map((title, i) => ({ title, lessons: (bodies[i]?.lessons ?? []).slice(0, 8) })),
     };
+    if (g.stages.some(s => s.lessons.length !== 8 || s.lessons.some(l => !l.lesson || !l.title))) throw new Error("El camino no quedó completo. No se guardó contenido incompleto.");
     const slug = `${slugify(data.title) || "camino"}-${Date.now().toString(36)}`;
     const cover = data.coverUrl || (await uploadCover(`${g.cover_prompt}. ${COVER_STYLE}`, slug));
     const { error } = await supabaseAdmin.from("custom_caminos").insert({

@@ -13,6 +13,8 @@ import { FREE_AUDIOS } from "@/components/visualiza/CustomTopic";
 import { jsPDF } from "jspdf";
 import { awardLeaf } from "@/lib/gems";
 import { CELEBRATIONS } from "@/lib/celebrate-step";
+import { WordSearch } from "@/components/WordSearch";
+import { StageQuiz } from "@/components/StageQuiz";
 
 export const Route = createFileRoute("/_authenticated/visualiza/$categoryId/$day")({
   head: () => ({ meta: [{ title: "Práctica de Visualízalo y Vívelo — ORÍGEN" }, { name: "description", content: "Audio, afirmación y práctica guiada del día." }, { property: "og:title", content: "Práctica de Visualízalo y Vívelo — ORÍGEN" }, { property: "og:description", content: "Audio, afirmación y práctica guiada del día." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
@@ -125,7 +127,7 @@ function DayPlayer() {
     section("Escribe 9 veces una declaración de gratitud conforme a la voluntad de Dios", 60);
     section("Finaliza cada ejercicio escribiendo una petición sencilla y directa", 18);
     doc.setFont("helvetica", "italic"); doc.setFontSize(9); doc.setTextColor(120);
-    doc.text("Guía del libro: Reconectando el Espíritu con Dios", w / 2, 285, { align: "center" });
+    doc.text("Tu práctica personal — ORÍGEN", w / 2, 285, { align: "center" });
     doc.save(`metodo-cristo-${categoryId}-dia${day}.pdf`);
   }
 
@@ -168,6 +170,8 @@ function DayPlayer() {
       </div>
     );
   const audioOnly = Boolean((a as any).audio_only);
+  const game = a.word_game as { words?: string[] } | null;
+  const questions = (a.quiz as { questions?: { question: string; options: string[]; correctIndex: number; explanation?: string }[] } | null)?.questions ?? [];
   const tasks: string[] = Array.isArray((a as any).quiz?.tasks) ? (a as any).quiz.tasks : [];
   const materials: string[] = Array.isArray((a as any).quiz?.materials) ? (a as any).quiz.materials : [];
   const steps: string[] = Array.isArray((a as any).quiz?.steps) ? (a as any).quiz.steps : [];
@@ -193,6 +197,9 @@ function DayPlayer() {
       </div>
 
       <div className="max-w-3xl mx-auto px-4 md:px-8 space-y-5">
+        {a.cover_url && <img src={a.cover_url} alt={a.title} className="aspect-video w-full rounded-xl object-cover" />}
+        {!audioOnly && (game?.words?.length ?? 0) >= 3 && <WordSearch words={game?.words ?? []} storageKey={`practice-words-${a.id}`} gemsReward={5} />}
+        {!audioOnly && questions.length > 0 && <StageQuiz storageKey={`practice-quiz-${a.id}`} gemsPerCorrect={2} items={questions.map(q => ({ q: q.question, options: q.options, correct: q.correctIndex, tip: q.explanation ?? "" }))} />}
         <Card className="rounded-[1.7rem] p-5 shadow-soft">
           {a.audio_url ? (
             <>
@@ -246,7 +253,7 @@ function DayPlayer() {
             <Button onClick={saveAndComplete} className="flex-1 rounded-full h-12 bg-primary"><Check className="w-4 h-4 mr-2" /> Guardar y marcar completado</Button>
             <Button onClick={downloadPdf} variant="outline" className="rounded-full h-12"><Download className="w-4 h-4 mr-2" /> Descargar PDF imprimible</Button>
           </div>
-          <p className="text-[11px] text-muted-foreground text-center mt-3">El PDF sigue el formato blanco y negro del libro para llenarlo a mano.</p>
+          <p className="text-[11px] text-muted-foreground text-center mt-3">Tu práctica queda guardada en ORÍGEN.</p>
         </Card>}
       </div>
     </div>

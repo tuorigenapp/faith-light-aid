@@ -6,11 +6,12 @@ import { WordSearch } from "@/components/WordSearch";
 import { cn } from "@/lib/utils";
 import heroFallback from "@/assets/visualiza-hero.jpg";
 import { FREE_AUDIOS } from "@/components/visualiza/CustomTopic";
+import { StageQuiz } from "@/components/StageQuiz";
 
 type Sub = {
   id: string; day_index: number; title: string; affirmation: string | null; lesson: string | null;
   exercise: string | null; audio_url: string | null; cover_url: string | null; is_published?: boolean | null;
-  word_game?: { words?: string[] } | null; quiz?: { tasks?: string[] } | null;
+  word_game?: { words?: string[] } | null; quiz?: { tasks?: string[]; questions?: { question: string; options: string[]; correctIndex: number; explanation?: string }[] } | null;
 };
 
 /** Mismo formato de 3 pasos que "Manifestar con Música", con el contenido propio del tema creado. */
@@ -145,6 +146,8 @@ export function CustomMusicTopic({ cat, audios, entries, isPaid }: { cat: any; a
             <Play className="h-5 w-5" /> {sel.audio_url ? "Escuchar y practicar" : "Hacer la práctica"}
           </Link>
           {words.length >= 3 && <WordSearch words={words} storageKey={`custom-${cat.id}-${sel.day_index}`} gemsReward={20} />}
+          {(sel.quiz?.questions?.length ?? 0) > 0 && <StageQuiz storageKey={`custom-quiz-${sel.id}`} gemsPerCorrect={2} items={(sel.quiz?.questions ?? []).map(q => ({ q: q.question, options: q.options, correct: q.correctIndex, tip: q.explanation ?? "" }))} />}
+          {sel.exercise && <section className="border-t border-border py-4"><h3 className="font-display text-lg font-bold">Tu práctica</h3><p className="mt-2 whitespace-pre-wrap text-sm">{sel.exercise}</p></section>}
         </div>
       )}
       {Dots}

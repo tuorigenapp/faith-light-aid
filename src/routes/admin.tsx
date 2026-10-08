@@ -43,7 +43,7 @@ import { AreaChart, Area, ResponsiveContainer, BarChart, Bar, XAxis, Tooltip } f
 
 export const Route = createFileRoute("/admin")({
   ssr: false,
-  head: () => ({ meta: [{ title: "Panel de administración — ORÍGEN" }] }),
+  head: () => ({ meta: [{ title: "Panel de administración — ORÍGEN" }, { name: "description", content: "Gestión privada de contenidos, comunidad y pagos de ORÍGEN." }, { property: "og:title", content: "Administración — ORÍGEN" }, { property: "og:description", content: "Gestión privada de la plataforma ORÍGEN." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: AdminGate,
 });
 

@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { adminListWallet, adminReviewPurchase, adminReviewTransfer } from "@/lib/wallet.functions";
 import { Check, Loader2, Receipt, RefreshCw, Send, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 type Tab = "compras" | "transferencias";
 
@@ -32,6 +33,12 @@ export function WalletManager() {
   const reviewPurchase = useServerFn(adminReviewPurchase);
   const reviewTransfer = useServerFn(adminReviewTransfer);
   const [tab, setTab] = useState<Tab>("compras");
+  const [bucket, setBucket] = useState("pendientes");
+  const [search, setSearch] = useState("");
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const [order, setOrder] = useState("arrival");
+  const [receipt, setReceipt] = useState<string | null>(null);
   const [note, setNote] = useState<{ text: string; error?: boolean } | null>(null);
   const [messages, setMessages] = useState<Record<string, string>>({});
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -75,9 +82,22 @@ export function WalletManager() {
 
   const pendingPurchases = (data?.purchases ?? []).filter((p) => p.status === "pendiente" || p.status === "revision").length;
   const pendingTransfers = (data?.transfers ?? []).filter((t) => t.status === "pending" || t.status === "pendiente" || t.status === "revision").length;
+  const matches = (p: { user_id: string; status: string; created_at: string }) => {
+    const person = data?.people.find(x => x.id === p.user_id);
+    const day = p.created_at.slice(0, 10);
+    return (bucket === "pendientes" ? ["pending", "pendiente", "revision"].includes(p.status) : p.status === bucket)
+      && (!search || `${person?.full_name ?? ""} ${person?.email ?? ""}`.toLowerCase().includes(search.toLowerCase()))
+      && (!from || day >= from) && (!to || day <= to);
+  };
+  const sortRows = (a: { created_at: string }, b: { created_at: string }) => order === "arrival" ? a.created_at.localeCompare(b.created_at) : b.created_at.localeCompare(a.created_at);
+  const purchases = (data?.purchases ?? []).filter(matches).sort(sortRows);
+  const transfers = (data?.transfers ?? []).filter(matches).sort(sortRows);
 
   return (
     <div className="space-y-4">
+      {receipt && <div className="fixed inset-0 z-50 grid place-items-center bg-foreground/70 p-4" onClick={() => setReceipt(null)}><section role="dialog" aria-modal="true" aria-label="Comprobante de pago" className="w-full max-w-2xl rounded-xl bg-card p-4" onClick={e => e.stopPropagation()}><div className="mb-3 flex items-center justify-between"><h2 className="font-bold">Comprobante de pago</h2><Button size="icon" variant="ghost" aria-label="Cerrar comprobante" onClick={() => setReceipt(null)}><X /></Button></div><img src={receipt} alt="Comprobante de pago" className="max-h-[75vh] w-full object-contain" /></section></div>}
+      <div className="flex flex-wrap gap-2">{[["pendientes", "Pendientes"], ["aprobada", "Aprobados"], ["rechazada", "Rechazados"]].map(([key, label]) => <Button key={key} variant={bucket === key ? "default" : "secondary"} onClick={() => setBucket(key)}>{label}</Button>)}</div>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"><label className="text-sm">Nombre o correo<input aria-label="Buscar pagos" value={search} onChange={e => setSearch(e.target.value)} className="mt-1 h-12 w-full rounded-lg border border-border bg-card px-3" /></label><label className="text-sm">Desde<input aria-label="Pagos desde" type="date" value={from} onChange={e => setFrom(e.target.value)} className="mt-1 h-12 w-full rounded-lg border border-border bg-card px-3" /></label><label className="text-sm">Hasta<input aria-label="Pagos hasta" type="date" value={to} onChange={e => setTo(e.target.value)} className="mt-1 h-12 w-full rounded-lg border border-border bg-card px-3" /></label><label className="text-sm">Orden<select value={order} onChange={e => setOrder(e.target.value)} className="mt-1 h-12 w-full rounded-lg border border-border bg-card px-3"><option value="arrival">Primero en llegar</option><option value="recent">Más recientes</option></select></label></div>
       <div className="flex flex-wrap gap-2">
         {([
           { id: "compras" as Tab, label: "Compras", count: pendingPurchases, icon: Receipt },
@@ -128,16 +148,17 @@ export function WalletManager() {
 
       {tab === "compras" && (
         <ul className="space-y-3">
-          {(data?.purchases ?? []).map((p) => (
+          {purchases.map((p) => (
             <li key={p.id} className="rounded-[16px] border border-border bg-card p-4">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-[15px] font-bold text-foreground">{nameOf(p.user_id)}</span>
                 <span className={cn("rounded-full px-2.5 py-1 text-[11px] font-bold", STATUS_STYLE[p.status] ?? "bg-muted text-foreground/60")}>
                   {p.status}
                 </span>
-                <span className="text-[11.5px] text-foreground/50">{whenLabel(p.created_at)}</span>
+                <span className="text-[11.5px] text-foreground/50">{new Date(p.created_at).toLocaleString("es")}</span>
               </div>
               <p className="mt-1 text-[13px] text-foreground/70">
+                {data?.people.find(x => x.id === p.user_id)?.email} ·
                 {p.hojas} hojas · US${Number(p.usd).toFixed(2)} · {p.method}
               </p>
               {p.user_message && <p className="mt-1 text-[13px] italic text-foreground/60">“{p.user_message}”</p>}
@@ -147,12 +168,10 @@ export function WalletManager() {
                 </p>
               )}
               {data?.receipts[p.id] && (
-                <a href={data.receipts[p.id]} target="_blank" rel="noreferrer" className="mt-3 block">
-                  <img src={data.receipts[p.id]} alt="Comprobante de pago" className="max-h-56 w-full rounded-[12px] object-contain" />
-                </a>
+                <Button variant="outline" className="mt-3" onClick={() => setReceipt(data.receipts[p.id] ?? null)}><Receipt className="h-4 w-4" /> Abrir comprobante</Button>
               )}
               {p.admin_note && <p className="mt-2 text-[12.5px] text-foreground/55">Nota: {p.admin_note}</p>}
-              {p.status !== "aprobada" && (
+              {["pendiente", "pending", "revision"].includes(p.status) && (
                 <div className="mt-3 space-y-2">
                   <input
                     value={messages[p.id] ?? ""}
@@ -189,9 +208,9 @@ export function WalletManager() {
               )}
             </li>
           ))}
-          {!isLoading && (data?.purchases ?? []).length === 0 && (
+          {!isLoading && purchases.length === 0 && (
             <li className="rounded-[16px] border border-border bg-card p-5 text-[13px] text-foreground/60">
-              Todavía nadie ha subido un comprobante de pago.
+              No hay pagos que coincidan con esta búsqueda.
             </li>
           )}
         </ul>
@@ -199,14 +218,14 @@ export function WalletManager() {
 
       {tab === "transferencias" && (
         <ul className="space-y-3">
-          {(data?.transfers ?? []).map((t) => (
+          {transfers.map((t) => (
             <li key={t.id} className="rounded-[16px] border border-border bg-card p-4">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-[15px] font-bold text-foreground">{nameOf(t.user_id)}</span>
                 <span className={cn("rounded-full px-2.5 py-1 text-[11px] font-bold", STATUS_STYLE[t.status] ?? "bg-muted text-foreground/60")}>
                   {t.status}
                 </span>
-                <span className="text-[11.5px] text-foreground/50">{whenLabel(t.created_at)}</span>
+                <span className="text-[11.5px] text-foreground/50">{new Date(t.created_at).toLocaleString("es")}</span>
               </div>
               <p className="mt-1 text-[13px] text-foreground/70">
                 Envía {Math.round(t.points / 100)} hojas a {t.to_email}
@@ -254,7 +273,7 @@ export function WalletManager() {
               )}
             </li>
           ))}
-          {!isLoading && (data?.transfers ?? []).length === 0 && (
+          {!isLoading && transfers.length === 0 && (
             <li className="rounded-[16px] border border-border bg-card p-5 text-[13px] text-foreground/60">
               Todavía no hay envíos de hojas entre personas.
             </li>
