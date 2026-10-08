@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { AreaChart, Area, ResponsiveContainer, Tooltip, XAxis } from "recharts";
 import { DollarSign, Loader2, TrendingUp, Users, XCircle } from "lucide-react";
 import { adminSales } from "@/lib/admin-insights.functions";
+import { Button } from "@/components/ui/button";
 
 const RANGES = [
   { label: "7 días", days: 7 },
@@ -22,6 +23,10 @@ const STATUS_LABEL: Record<string, string> = {
 export function SalesManager() {
   const sales = useServerFn(adminSales);
   const [days, setDays] = useState(30);
+  const [search, setSearch] = useState("");
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const [oldest, setOldest] = useState(true);
 
   const { data, isLoading } = useQuery({
     queryKey: ["admin-sales", days],
@@ -89,6 +94,7 @@ export function SalesManager() {
 
           <section className="rounded-[16px] border border-border/60 bg-card p-5 shadow-soft">
             <h2 className="font-display text-[17px] font-bold">Detalle de ventas</h2>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2"><input aria-label="Buscar ventas por nombre o correo" placeholder="Nombre o correo" value={search} onChange={e => setSearch(e.target.value)} className="h-12 rounded-lg border border-border bg-background px-3" /><Button variant="outline" onClick={() => setOldest(!oldest)}>{oldest ? "Primero en llegar" : "Más recientes"}</Button><label className="text-sm">Desde<input type="date" value={from} onChange={e => setFrom(e.target.value)} className="ml-2 h-12 rounded-lg border border-border bg-background px-3" /></label><label className="text-sm">Hasta<input type="date" value={to} onChange={e => setTo(e.target.value)} className="ml-2 h-12 rounded-lg border border-border bg-background px-3" /></label></div>
             {data.table.length === 0 ? (
               <p className="mt-3 rounded-[12px] bg-muted/40 p-4 text-[13px] text-muted-foreground">
                 Todavía no hay ventas en este periodo.
@@ -106,9 +112,9 @@ export function SalesManager() {
                     </tr>
                   </thead>
                   <tbody>
-                    {data.table.map((row, i) => (
+                    {data.table.filter(row => `${row.name} ${row.email}`.toLowerCase().includes(search.toLowerCase()) && (!from || row.created_at.slice(0,10) >= from) && (!to || row.created_at.slice(0,10) <= to)).sort((a,b) => oldest ? a.created_at.localeCompare(b.created_at) : b.created_at.localeCompare(a.created_at)).map((row, i) => (
                       <tr key={i} className="border-t border-border/50">
-                        <td className="py-2 pr-3">{row.email}</td>
+                        <td className="py-2 pr-3">{row.name}<br />{row.email}</td>
                         <td className="py-2 pr-3 capitalize">{row.plan}</td>
                         <td className="py-2 pr-3">{STATUS_LABEL[row.status] ?? row.status}</td>
                         <td className="py-2 pr-3">

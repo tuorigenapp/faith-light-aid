@@ -13,6 +13,7 @@ import {
 import { CAMINOS } from "@/lib/caminos";
 import { GAMES } from "@/components/games/DailyGames";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 type Notify = (n: { text: string; error?: boolean } | null) => void;
 
@@ -97,7 +98,7 @@ export function CaminosStudio({ onNote }: { onNote: Notify }) {
               />
             );
           })}
-          {custom.map((c) => (
+          {custom.map((c) => <div key={c.id} className="space-y-2"><Button variant="outline" className="w-full" disabled={busy === c.id} onClick={() => run(c.id, () => create({ data: { title: c.title, notes: "Conservar el tema propio y actualizar a 20 etapas con 8 lecciones cada una.", coverUrl: c.cover_url ?? "", existingId: c.id } }), "Camino actualizado a 20 etapas y 8 lecciones por etapa.")}>Actualizar camino completo con IA</Button>
             <CoverCard
               key={c.id}
               title={c.title}
@@ -109,7 +110,7 @@ export function CaminosStudio({ onNote }: { onNote: Notify }) {
               onSaveCover={(url) => run(c.id, () => update({ data: { id: c.id, coverUrl: url } }), "Portada guardada.")}
               onDelete={() => window.confirm(`¿Eliminar "${c.title}"?`) && run(c.id, () => update({ data: { id: c.id, remove: true } }), "Camino eliminado.")}
             />
-          ))}
+          </div>)}
         </div>
       </div>
     </div>
