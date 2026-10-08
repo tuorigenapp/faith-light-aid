@@ -1,8 +1,13 @@
 /** Generación de contenido con la pasarela de IA de Lovable (solo servidor). */
 
-const GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
-const TEXT_MODEL = "google/gemini-2.5-flash";
-const IMAGE_MODEL = "google/gemini-2.5-flash-image";
+import { createOpenAI } from "@ai-sdk/openai";
+import { Output, streamText } from "ai";
+import { z } from "zod";
+import { createLovableAiGatewayRunIdFetch } from "./ai-run-id.server.ts";
+
+const GATEWAY = "https://ai.gateway.lovable.dev/v1";
+const TEXT_MODEL = "openai/gpt-6-astra";
+const IMAGE_MODEL = "openai/gpt-image-2.5-sunburst";
 
 function apiKey() {
   const key = process.env["LOVABLE_API_KEY"];
@@ -12,40 +17,25 @@ function apiKey() {
 
 /** Pide un JSON al modelo y lo devuelve ya parseado. */
 export async function aiJson<T>(prompt: string, system?: string): Promise<T> {
-  const res = await fetch(GATEWAY, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Lovable-API-Key": apiKey(),
-      "X-Lovable-AIG-SDK": "fetch",
-    },
-    body: JSON.stringify({
-      model: TEXT_MODEL,
-      messages: [
-        {
-          role: "system",
-          content:
-            system ??
-            "Escribes contenido de sanación emocional y fe en español latinoamericano para la plataforma ORÍGEN. Nunca inventes citas bíblicas inexistentes, cifras ni promesas médicas. Responde SOLO con JSON válido, sin markdown.",
-        },
-        { role: "user", content: prompt },
-      ],
-    }),
+  const key = apiKey();
+  const run = createLovableAiGatewayRunIdFetch();
+  const provider = createOpenAI({ baseURL: GATEWAY, apiKey: key, headers: { "Lovable-API-Key": key, "X-Lovable-AIG-SDK": "vercel-ai-sdk" }, fetch: run.fetch });
+  const result = streamText({
+    model: provider.responses(TEXT_MODEL),
+    maxRetries: 0,
+    system: system ?? "Escribes contenido original de sanación emocional y fe en español LATAM para ORÍGEN. No inventes citas bíblicas, cifras ni promesas médicas.",
+    prompt: `${prompt}\nDevuelve el objeto JSON solicitado serializado dentro del campo json. Sin markdown.`,
+    output: Output.object({ schema: z.object({ json: z.string() }) }),
+    providerOptions: { openai: { forceReasoning: true, reasoningEffort: "low", reasoningSummary: "auto", store: false, include: ["reasoning.encrypted_content"] } },
   });
-  if (!res.ok) throw new Error("No pudimos generar el contenido. Intenta de nuevo.");
-  const data = (await res.json()) as {
-    choices?: { message?: { content?: string } }[];
-  };
-  const text = data.choices?.[0]?.message?.content ?? "";
-  const start = text.indexOf("{");
-  const end = text.lastIndexOf("}");
-  if (start < 0 || end <= start) throw new Error("La generación no devolvió contenido legible.");
-  return JSON.parse(text.slice(start, end + 1)) as T;
+  const output = await result.output;
+  try { return JSON.parse(output.json) as T; }
+  catch { throw new Error("No pudimos leer el contenido generado. Tus datos no se han cambiado."); }
 }
 
 /** Genera una imagen y devuelve sus bytes en PNG. */
 export async function aiImage(prompt: string): Promise<Uint8Array> {
-  const res = await fetch(GATEWAY, {
+  const res = await fetch(`${GATEWAY}/images/generations`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -54,17 +44,15 @@ export async function aiImage(prompt: string): Promise<Uint8Array> {
     },
     body: JSON.stringify({
       model: IMAGE_MODEL,
-      messages: [{ role: "user", content: prompt }],
-      modalities: ["image", "text"],
+      prompt,
     }),
   });
   if (!res.ok) throw new Error("No pudimos generar la portada. Intenta de nuevo.");
   const data = (await res.json()) as {
-    choices?: { message?: { images?: { image_url?: { url?: string } }[] } }[];
+    data?: { b64_json?: string }[];
   };
-  const url = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
-  if (!url) throw new Error("La generación no devolvió una portada.");
-  const base64 = url.includes(";base64,") ? url.split(";base64,")[1]! : url;
+  const base64 = data.data?.[0]?.b64_json;
+  if (!base64) throw new Error("La generación no devolvió una portada.");
   const binary = atob(base64);
   const bytes = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
