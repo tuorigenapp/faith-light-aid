@@ -5,6 +5,7 @@ import { Eye, EyeOff, Sparkles, Trash2, Wand2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { adminCreateConsulta, adminToggleConsulta, adminDeleteConsulta } from "@/lib/consultas.functions";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 type Row = {
   id: string;
@@ -28,6 +29,7 @@ export function ConsultasStudio() {
   const [title, setTitle] = useState("");
   const [notes, setNotes] = useState("");
   const [cost, setCost] = useState("1");
+  const [design, setDesign] = useState<"patrones" | "ministracion">("patrones");
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<{ text: string; error?: boolean } | null>(null);
 
@@ -48,7 +50,7 @@ export function ConsultasStudio() {
     setBusy(true);
     setNote(null);
     try {
-      await create({ data: { title: title.trim(), notes: notes.trim(), costHojas: Math.max(0, Number(cost) || 1), withCover: true } });
+      await create({ data: { title: title.trim(), notes: notes.trim(), costHojas: Math.max(0, Number(cost)), withCover: true, design } });
       setTitle(""); setNotes(""); setCost("1");
       setNote({ text: "Lista. Ya aparece en el menú de ORÍGEN para las personas." });
       qc.invalidateQueries({ queryKey: ["admin-consultas"] });
@@ -71,6 +73,7 @@ export function ConsultasStudio() {
           </div>
         </div>
         <div className="mt-4 grid gap-3">
+          <label className="text-sm font-semibold">Inspiración del diseño<select className={cn(input, "mt-1")} value={design} onChange={e => setDesign(e.target.value as typeof design)}><option value="patrones">Patrones generacionales</option><option value="ministracion">Dios te dice hoy</option></select></label>
           <input className={input} placeholder='Título (ej. "Qué dice tu año de nacimiento")' value={title} onChange={(e) => setTitle(e.target.value)} />
           <textarea className={cn(input, "min-h-24 py-2")} placeholder="Nota para la IA: de qué habla, qué tono, qué debe incluir…" value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={1500} />
           <label className="text-[13px] font-semibold text-foreground/80">Cuántas hojas cuesta (0 = gratis)
@@ -96,6 +99,7 @@ export function ConsultasStudio() {
                 {(r.sections ?? []).length} bloques · {r.cost_hojas} hoja(s) · {r.is_published ? "visible" : "oculta"}
               </p>
               <div className="mt-2 flex gap-2">
+                <Button variant="outline" disabled={busy} onClick={async () => { setBusy(true); try { await create({ data: { title: r.title, notes: "Actualizar presentación y bloques con contenido original del mismo tema.", costHojas: r.cost_hojas, withCover: true, existingId: r.id, design } }); await qc.invalidateQueries({ queryKey: ["admin-consultas"] }); setNote({ text: "Diseño actualizado." }); } catch (e) { setNote({ text: e instanceof Error ? e.message : "No pudimos actualizar.", error: true }); } finally { setBusy(false); } }}>Actualizar diseño</Button>
                 <button
                   onClick={async () => { await toggle({ data: { id: r.id, isPublished: !r.is_published } }); qc.invalidateQueries({ queryKey: ["admin-consultas"] }); }}
                   className="inline-flex min-h-11 flex-1 items-center justify-center gap-1 rounded-[10px] bg-primary/10 text-[13px] font-bold text-primary"

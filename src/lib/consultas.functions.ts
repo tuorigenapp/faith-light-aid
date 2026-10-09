@@ -31,6 +31,8 @@ export const adminCreateConsulta = createServerFn({ method: "POST" })
         notes: z.string().trim().max(1500).default(""),
         costHojas: z.number().int().min(0).max(20).default(1),
         withCover: z.boolean().default(true),
+        existingId: z.string().uuid().optional(),
+        design: z.enum(["patrones", "ministracion"]).default("patrones"),
       })
       .parse(input),
   )
@@ -48,6 +50,7 @@ export const adminCreateConsulta = createServerFn({ method: "POST" })
     }>(
       `Diseña una sección de respuestas personalizadas para la plataforma ORÍGEN (sanación emocional, patrones familiares y fe, español latinoamericano).
 Título: "${data.title}". Notas de la dueña del producto: ${data.notes || "sin notas"}.
+Inspírate SOLO en la estructura visual de ${data.design === "patrones" ? "Patrones generacionales: observación, patrones, reflexión y recomendaciones" : "Dios te dice hoy: palabra, reflexión, señales y pasos de cierre"}. La página tiene inicio, presentación con formulario y resultados con PDF e impresión. Todos los textos son originales sobre este título; no copies contenido de otras secciones.
 
 La persona SIEMPRE entrega: nombre completo, fecha de nacimiento y lo que quiere saber.
 Prohibido usar las palabras "consultar" o "canalizar" en cualquier texto visible; se dice "ver respuesta", "lo que dice tu historia", etc.
@@ -75,9 +78,7 @@ Devuelve JSON con:
       .slice(0, 6)
       .map((s) => ({ key: slugify(s.key).replace(/-/g, "_") || "bloque", label: s.label, hint: s.hint ?? s.label }));
 
-    const { data: row, error } = await supabaseAdmin
-      .from("custom_consultas")
-      .insert({
+    const payload = {
         slug,
         title: data.title,
         subtitle: generated.subtitle ?? null,
@@ -88,9 +89,11 @@ Devuelve JSON con:
         system_prompt: generated.system_prompt ?? "",
         cost_hojas: data.costHojas,
         is_published: true,
-      })
-      .select("id, slug, title")
-      .single();
+      };
+    const query = data.existingId
+      ? supabaseAdmin.from("custom_consultas").update({ subtitle: payload.subtitle, notes: payload.notes, cover_url: payload.cover_url, intro: payload.intro, sections: payload.sections, system_prompt: payload.system_prompt }).eq("id", data.existingId)
+      : supabaseAdmin.from("custom_consultas").insert(payload);
+    const { data: row, error } = await query.select("id, slug, title").single();
     if (error) throw new Error(error.message);
     return row;
   });

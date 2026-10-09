@@ -1,13 +1,13 @@
 # Checklist ORÍGEN — juegos y prácticas
 
 ## Correcciones administrativas — octubre 6
-- [ ] Restaurar logo ORÍGEN correcto en inicio y ruleta.
-- [ ] Reparar generación IA de consultas, caminos y temas, conservando diseños completos y contenido propio.
-- [ ] Consultas existentes y nuevas: inicio, preparación, resultados, PDF e impresión.
-- [ ] Pausa global de publicación y respuestas automáticas de comunidad.
-- [ ] Pagos y ventas: pendientes/aprobados/rechazados, búsqueda, fecha, orden y comprobantes cerrados.
-- [ ] Cerebro: lista sincronizada de consultas, caminos y temas existentes.
-- [ ] Verificar flujos reales y errores actuales.
+- [x] Cambiar imagen de inicio y ruleta al archivo logo ORÍGEN; comprobado en ruleta.
+- [ ] Generación y actualización de consultas, caminos y temas: cambios implementados; verificación bloqueada por respuesta 402 (créditos de IA insuficientes). No actualizar contenido existente hasta superar este bloqueo.
+- [ ] Consultas: inicio y formulario comprobados con consulta existente; resultados, PDF e impresión pendientes de una generación real (bloqueo de créditos).
+- [x] Pausa compartida para publicaciones y respuestas; interruptor comprobado apagado en cuenta administradora.
+- [x] Pagos separados por estado y comprobantes cerrados comprobados en cuenta administradora; ventas con búsqueda y orden implementados.
+- [x] Cerebro: selector de consultas sincronizado comprobado en cuenta administradora; incluye también caminos y temas.
+- [ ] Verificación completa de creación y reconstrucción pendiente de créditos de Lovable AI; no se cambiaron roles ni se publicaron cambios.
 
 ## Bloque 1 — Congelamientos (LISTO)
 - [x] `/ejercicios` paso 4: el juego a pantalla completa ya no queda atrapado.
