@@ -5,7 +5,7 @@ import { useCamino } from "@/hooks/use-content-overrides";
 import { useAuth } from "@/lib/use-auth";
 import { useProfile } from "@/hooks/use-profile";
 import { hasHojas, spendHojas, wholeHojas } from "@/lib/gems";
-import { CAMINO_TOTAL_DAYS, WEEK_UNLOCK_COST, getCamino } from "@/lib/caminos";
+import { CAMINO_TOTAL_DAYS, WEEK_UNLOCK_COST } from "@/lib/caminos";
 import { cn } from "@/lib/utils";
 import { DuolingoPath } from "@/components/DuolingoPath";
 import { toast } from "sonner";
@@ -57,6 +57,7 @@ function CaminoMapa() {
     },
   });
 
+  if (!camino && caminoLoading) return <div className="mx-auto max-w-[520px] px-4 pt-6"><div className="h-56 animate-pulse rounded-[16px] bg-muted" /></div>;
   if (!camino) {
     return (
       <div className="px-4 py-12 max-w-md mx-auto text-center">

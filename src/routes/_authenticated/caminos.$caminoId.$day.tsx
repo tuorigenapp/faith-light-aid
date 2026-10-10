@@ -7,7 +7,7 @@ import { useAuth } from "@/lib/use-auth";
 import { useProfile } from "@/hooks/use-profile";
 import { awardLeaf, wholeHojas, type ActionLevel } from "@/lib/gems";
 import { AnswerFeedback } from "@/components/AnswerFeedback";
-import { CAMINO_TOTAL_DAYS, getCamino, getEtapa } from "@/lib/caminos";
+import { CAMINO_TOTAL_DAYS, getEtapa } from "@/lib/caminos";
 import { DailyGames } from "@/components/games/DailyGames";
 import { MemoryPairs, StageGameStep, type GameKind } from "@/components/StageGames";
 import { AffirmationSlider } from "@/components/AffirmationSlider";
@@ -123,6 +123,7 @@ const [feedback, setFeedback] = useState<"ok" | "fail" | null>(null);
     return deck;
   }, [pack.data?.promesas, caminoId, dayNum]);
 
+  if (!camino && caminoLoading) return <div className="mx-auto max-w-[520px] px-4 pt-6"><div className="h-56 animate-pulse rounded-[16px] bg-muted" /></div>;
   if (!camino || !etapa) {
     return (
       <div className="px-4 py-12 max-w-md mx-auto text-center">
