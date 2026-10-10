@@ -1,10 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useCamino } from "@/hooks/use-content-overrides";
 import { useAuth } from "@/lib/use-auth";
 import { useProfile } from "@/hooks/use-profile";
 import { hasHojas, spendHojas, wholeHojas } from "@/lib/gems";
-import { CAMINO_TOTAL_DAYS, WEEK_UNLOCK_COST, getCamino } from "@/lib/caminos";
+import { CAMINO_TOTAL_DAYS, WEEK_UNLOCK_COST } from "@/lib/caminos";
 import { cn } from "@/lib/utils";
 import { DuolingoPath } from "@/components/DuolingoPath";
 import { toast } from "sonner";
@@ -37,7 +38,7 @@ function CaminoMapa() {
   const qc = useQueryClient();
   const navigate = useNavigate();
   const { data: profile } = useProfile();
-  const camino = getCamino(caminoId);
+  const { camino, isLoading: caminoLoading } = useCamino(caminoId);
 
   const { data } = useQuery({
     queryKey: ["camino", caminoId, user?.id],
@@ -56,6 +57,7 @@ function CaminoMapa() {
     },
   });
 
+  if (!camino && caminoLoading) return <div className="mx-auto max-w-[520px] px-4 pt-6"><div className="h-56 animate-pulse rounded-[16px] bg-muted" /></div>;
   if (!camino) {
     return (
       <div className="px-4 py-12 max-w-md mx-auto text-center">

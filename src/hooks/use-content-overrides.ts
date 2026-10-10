@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { getCamino, customToCamino, type Camino } from "@/lib/caminos";
 
 export type ContentOverride = {
   key: string;
@@ -31,7 +32,7 @@ export type CustomCamino = {
   title: string;
   subtitle: string | null;
   cover_url: string | null;
-  content: {
+  content: import("@/lib/caminos").CustomCaminoContent & {
     stages?: {
       title: string;
       lessons: {
@@ -59,4 +60,13 @@ export function useCustomCaminos() {
       return (data ?? []) as unknown as CustomCamino[];
     },
   });
+}
+
+/** Busca un camino por id: primero los fijos, luego los creados en el panel. */
+export function useCamino(id: string) {
+  const fixed = getCamino(id);
+  const custom = useCustomCaminos();
+  if (fixed) return { camino: fixed as Camino, isLoading: false };
+  const row = custom.data?.find((c) => c.slug === id);
+  return { camino: row ? customToCamino(row) : null, isLoading: custom.isLoading };
 }

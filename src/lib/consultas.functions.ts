@@ -72,7 +72,11 @@ Devuelve JSON con:
       }
     }
 
-    const slug = `${slugify(data.title)}-${Math.random().toString(36).slice(2, 7)}`;
+    const baseSlug = slugify(data.title) || "consulta";
+    const { data: takenRows } = await supabaseAdmin.from("custom_consultas").select("slug").like("slug", `${baseSlug}%`);
+    const taken = new Set((takenRows ?? []).map((r) => r.slug));
+    let slug = baseSlug;
+    for (let n = 2; taken.has(slug); n += 1) slug = `${baseSlug}-${n}`;
     const sections = (generated.sections ?? [])
       .filter((s) => s?.key && s?.label)
       .slice(0, 6)

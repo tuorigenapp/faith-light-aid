@@ -52,15 +52,16 @@ function CategoriasPage() {
           {(custom.data ?? []).map((c) => (
             <Link
               key={c.id}
-              to="/camino-nuevo/$slug"
-              params={{ slug: c.slug }}
-              className="block overflow-hidden rounded-[16px] border border-border bg-card shadow-soft active:scale-[.98] transition-transform"
+              to="/caminos/$caminoId"
+              params={{ caminoId: c.slug }}
+              aria-label={c.title}
+              className="block rounded-[16px] overflow-hidden shadow-soft active:scale-[.98] transition-transform"
             >
-              {c.cover_url && <img src={c.cover_url} alt="" loading="lazy" className="h-44 w-full object-cover" />}
-              <span className="block p-4">
-                <span className="block font-display text-[17px] font-bold">{c.title}</span>
-                {c.subtitle && <span className="mt-1 block text-[13px] text-muted-foreground">{c.subtitle}</span>}
-              </span>
+              {c.cover_url ? (
+                <img src={c.cover_url} alt={c.title} loading="lazy" className="w-full aspect-[16/9] object-cover block" />
+              ) : (
+                <div className="w-full aspect-[16/9] bg-gradient-to-br from-primary/30 to-accent-pink/30" />
+              )}
             </Link>
           ))}
 

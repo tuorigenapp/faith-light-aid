@@ -2,11 +2,12 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useCamino } from "@/hooks/use-content-overrides";
 import { useAuth } from "@/lib/use-auth";
 import { useProfile } from "@/hooks/use-profile";
 import { awardLeaf, wholeHojas, type ActionLevel } from "@/lib/gems";
 import { AnswerFeedback } from "@/components/AnswerFeedback";
-import { CAMINO_TOTAL_DAYS, getCamino, getEtapa } from "@/lib/caminos";
+import { CAMINO_TOTAL_DAYS, getEtapa } from "@/lib/caminos";
 import { DailyGames } from "@/components/games/DailyGames";
 import { MemoryPairs, StageGameStep, type GameKind } from "@/components/StageGames";
 import { AffirmationSlider } from "@/components/AffirmationSlider";
@@ -54,7 +55,7 @@ function todayIso() { return new Date().toISOString().slice(0, 10); }
 function CaminoDia() {
   const { caminoId, day } = Route.useParams();
   const dayNum = Math.min(Math.max(Number(day) || 1, 1), CAMINO_TOTAL_DAYS);
-  const camino = getCamino(caminoId);
+  const { camino, isLoading: caminoLoading } = useCamino(caminoId);
   const etapa = camino ? getEtapa(camino, dayNum) : null;
   const { user } = useAuth();
   const { data: profile } = useProfile();
@@ -122,6 +123,7 @@ const [feedback, setFeedback] = useState<"ok" | "fail" | null>(null);
     return deck;
   }, [pack.data?.promesas, caminoId, dayNum]);
 
+  if (!camino && caminoLoading) return <div className="mx-auto max-w-[520px] px-4 pt-6"><div className="h-56 animate-pulse rounded-[16px] bg-muted" /></div>;
   if (!camino || !etapa) {
     return (
       <div className="px-4 py-12 max-w-md mx-auto text-center">

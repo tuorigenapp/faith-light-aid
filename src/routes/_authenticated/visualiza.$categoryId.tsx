@@ -59,6 +59,8 @@ const EX_HINTS = [
   { label: "Confía", sub: "Todo fluye", Icon: Sparkles },
 ];
 
+export const MANIFEST_SLUG = "manifestando-con-musica";
+
 const MANIFEST_WORDS = ["FE", "GRATITUD", "ABUNDANCIA", "MILAGRO", "CREO", "LUZ", "PAZ", "AMOR"];
 
 const MANIFEST_QUIZ: QuizItem[] = [
@@ -90,7 +92,9 @@ function CategoryPage() {
 }
 
 function CategoryInner() {
-  const { categoryId } = useParams({ from: "/_authenticated/visualiza/$categoryId" });
+  const { categoryId: rawId } = useParams({ from: "/_authenticated/visualiza/$categoryId" });
+  // "Manifestando con Música" tiene su propio nombre en la dirección.
+  const categoryId = rawId === MANIFEST_SLUG ? "dinero" : rawId;
   const { user } = useAuth();
   const navigate = useNavigate();
   const qc = useQueryClient();
@@ -113,7 +117,7 @@ function CategoryInner() {
   const { data: areas = [] } = useQuery({
     queryKey: ["manifest-area-list"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("manifest_categories").select("id,title,description,cover_url,color,sort_order").eq("group_key", "abundancia").order("sort_order", { ascending: true });
+      const { data, error } = await supabase.from("manifest_categories").select("id,title,description,cover_url,color,sort_order").eq("group_key", "abundancia").eq("is_custom", false).neq("is_published", false).order("sort_order", { ascending: true });
       if (error) throw error;
       return data ?? [];
     },

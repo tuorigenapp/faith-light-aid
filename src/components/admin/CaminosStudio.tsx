@@ -62,6 +62,19 @@ export function CaminosStudio({ onNote }: { onNote: Notify }) {
     <div className="space-y-4">
       <div className="space-y-3 rounded-[16px] border border-border bg-card p-5">
         <h3 className="font-display text-[17px] font-bold">Crear camino nuevo con IA</h3>
+        <div className="rounded-[12px] bg-[#7C5CFF]/8 p-4">
+          <p className="text-[13px] font-bold text-[#5B3FD9]">Sale idéntico a CAMINO ORÍGEN</p>
+          <div className="mt-2 grid grid-cols-8 gap-1" aria-hidden>
+            {Array.from({ length: 8 }).map((_, i) => (
+              <span key={i} className="grid h-9 place-items-center rounded-full bg-card text-[12px] font-bold text-[#5B3FD9] shadow-soft">{i + 1}</span>
+            ))}
+          </div>
+          <ul className="mt-3 space-y-1 text-[12.5px] text-foreground/80">
+            <li>• Mapa con <b>8 etapas diarias</b>: se abre una por día a las 12:00 a. m.</li>
+            <li>• Cada etapa se vive en <b>20 pasos</b> (Paso 1 de 20): lección, soluciones, tareas, sopa de letras, preguntas, juegos, oración y premio.</li>
+            <li>• Portada sin letras, solo imagen. La IA escribe todo según el nombre y la nota.</li>
+          </ul>
+        </div>
         <input className={input} value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Título: Sanar la herida de abandono" />
         <textarea className={cn(input, "min-h-24 py-2")} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Nota para la IA: a quién va dirigido y qué debe lograr" />
         <input className={input} value={cover} onChange={(e) => setCover(e.target.value)} placeholder="Portada por enlace (vacío = la IA la crea)" />
@@ -72,7 +85,7 @@ export function CaminosStudio({ onNote }: { onNote: Notify }) {
             run("new", async () => {
               await create({ data: { title: title.trim(), notes, coverUrl: cover.trim() } });
               setTitle(""); setNotes(""); setCover("");
-            }, "Camino creado con 20 etapas y 8 lecciones por etapa, afirmaciones, sopa de letras y preguntas. Queda oculto hasta que lo hagas visible.");
+            }, "Camino creado con 8 etapas diarias de 20 pasos cada una, igual a CAMINO ORÍGEN. Queda oculto hasta que lo hagas visible.");
           }}
           className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-[12px] bg-[#7C5CFF] text-[15px] font-bold text-white disabled:opacity-60"
         >
@@ -98,7 +111,9 @@ export function CaminosStudio({ onNote }: { onNote: Notify }) {
               />
             );
           })}
-          {custom.map((c) => <div key={c.id} className="space-y-2"><Button variant="outline" className="w-full" disabled={busy === c.id} onClick={() => run(c.id, () => create({ data: { title: c.title, notes: "Conservar el tema propio y actualizar a 20 etapas con 8 lecciones cada una.", coverUrl: c.cover_url ?? "", existingId: c.id } }), "Camino actualizado a 20 etapas y 8 lecciones por etapa.")}>Actualizar camino completo con IA</Button>
+          {custom.map((c) => <div key={c.id} className="space-y-2"><Button variant="outline" className="w-full" disabled={busy === c.id} onClick={() => run(c.id, () => create({ data: { title: c.title, notes: "Conservar el tema propio con el formato de CAMINO ORÍGEN.", coverUrl: c.cover_url ?? "", existingId: c.id } }), "Camino actualizado al diseño de CAMINO ORÍGEN.")}>Rehacer con IA (8 etapas · 20 pasos)</Button>
+            <a href={`/caminos/${c.slug}`} target="_blank" rel="noreferrer" className="flex min-h-11 items-center justify-center rounded-[10px] border border-border bg-card text-[13px] font-bold">Ver cómo lo ve la persona</a>
+            <ol className="rounded-[10px] bg-muted/40 p-3 text-[12px] text-foreground/80">{(((c.content as { etapas?: { title: string }[] })?.etapas) ?? []).map((e, i) => <li key={i}>Etapa {i + 1}: {e.title}</li>)}</ol>
             <CoverCard
               key={c.id}
               title={c.title}

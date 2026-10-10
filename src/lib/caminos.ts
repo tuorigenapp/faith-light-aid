@@ -179,3 +179,33 @@ export function getCamino(id: string) {
 export function getEtapa(camino: Camino, day: number) {
   return camino.etapas.find((e) => e.day === day) ?? camino.etapas[0];
 }
+
+/** Datos que guarda un camino creado en el panel (mismo formato que los de arriba). */
+export type CustomCaminoContent = {
+  short?: string;
+  claim?: string;
+  scripture?: { text: string; ref: string };
+  etapas?: CaminoEtapa[];
+  stages?: { title: string; lessons?: { title: string }[] }[];
+};
+
+/** Convierte un camino creado en el panel en un Camino con las 8 etapas diarias. */
+export function customToCamino(c: { slug: string; title: string; subtitle: string | null; cover_url: string | null; content: CustomCaminoContent }): Camino {
+  const ct = c.content ?? {};
+  let etapas = (ct.etapas ?? []).slice(0, CAMINO_TOTAL_DAYS);
+  if (etapas.length < CAMINO_TOTAL_DAYS) {
+    const titles = (ct.stages ?? []).flatMap((s) => (s.lessons ?? []).map((l) => l.title.replace(/^(Día \d+|Cierre)\s*:\s*/i, "")));
+    etapas = Array.from({ length: CAMINO_TOTAL_DAYS }, (_, i) => etapas[i] ?? { day: i + 1, title: titles[i] || `Etapa ${i + 1}`, focus: c.title, insignia: `Etapa ${i + 1}` });
+  }
+  return {
+    id: c.slug,
+    title: c.title,
+    short: ct.short || c.subtitle || c.title,
+    claim: ct.claim || c.subtitle || "",
+    banner: c.cover_url ?? "",
+    gradient: "from-primary via-accent-pink to-gold",
+    tint: "text-primary",
+    scripture: ct.scripture ?? { text: "Él sana a los quebrantados de corazón y venda sus heridas.", ref: "Salmos 147:3" },
+    etapas: etapas.map((e, i) => ({ ...e, day: i + 1 })),
+  };
+}

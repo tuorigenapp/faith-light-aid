@@ -1,12 +1,19 @@
 import { useState } from "react";
-import { Link } from "@tanstack/react-router";
-import { ArrowLeft, Check, Headphones, Heart, Lock, MousePointerClick, Sparkles, Play, BookOpen } from "lucide-react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { ArrowLeft, ArrowRight, Check, Eye, Flower2, HandHeart, Headphones, Heart, Lock, MousePointerClick, Pause, Play, Smile, Sparkles, Waves } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/use-auth";
+import { usePlayer } from "@/lib/player";
+import { awardGems } from "@/lib/gems";
+import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { WordSearch } from "@/components/WordSearch";
 import { cn } from "@/lib/utils";
 import heroFallback from "@/assets/visualiza-hero.jpg";
 import { FREE_AUDIOS } from "@/components/visualiza/CustomTopic";
-import { StageQuiz } from "@/components/StageQuiz";
+import { StageQuiz, type QuizItem } from "@/components/StageQuiz";
 
 type Sub = {
   id: string; day_index: number; title: string; affirmation: string | null; lesson: string | null;
@@ -116,41 +123,222 @@ export function CustomMusicTopic({ cat, audios, entries, isPaid }: { cat: any; a
     );
 
   if (!sel) return null;
+  return <LessonStep cat={cat} page={page} accent={accent} subs={subs} sel={sel} entries={entries} isPaid={isPaid} onBack={() => setStep(2)} onPick={setSelId} dots={Dots} />;
+}
+
+const STOP = new Set(["PARA", "COMO", "CADA", "ESTA", "ESTE", "ESTOY", "TODO", "TODA", "TODOS", "DESDE", "SOBRE", "ENTRE", "HACIA", "PORQUE", "TENGO", "SOLO", "MUCHO", "AHORA", "DONDE", "CUANDO", "QUIEN", "TAMBIEN", "HASTA", "TUYO", "MISMO", "MISMA", "SIENTO", "PUEDO", "QUE", "LOS", "LAS", "DEL", "CON", "UNA", "UNO", "MIS", "TUS", "SUS", "POR", "SIN", "YA", "MAS", "SER", "HOY", "MUY", "ESA", "ESE", "ELLA", "ELLO", "NADA"]);
+const BASE_WORDS = ["FE", "PAZ", "LUZ", "AMOR", "SANAR", "GRACIAS", "CREO", "VIDA"];
+
+/** Palabras de la sopa: las del subtema o, si faltan, las sacadas de sus propios textos. */
+export function lessonWords(own: string[] | undefined, texts: (string | null | undefined)[]) {
+  const norm = (w: string) => w.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().replace(/[^A-Z]/g, "");
+  const out: string[] = [];
+  for (const w of [...(own ?? []), ...texts.filter(Boolean).join(" ").split(/\s+/)]) {
+    const n = norm(w);
+    if (n.length >= 3 && n.length <= 9 && !STOP.has(n) && !out.includes(n)) out.push(n);
+    if (out.length >= 8) break;
+  }
+  for (const b of BASE_WORDS) if (out.length < 6 && !out.includes(b)) out.push(b);
+  return out.slice(0, 8);
+}
+
+function lessonQuiz(sel: Sub, cat: any): QuizItem[] {
+  const own = (sel.quiz?.questions ?? []).filter((q) => q?.question && q.options?.length >= 2);
+  if (own.length) return own.map((q) => ({ q: q.question, options: q.options, correct: q.correctIndex, tip: q.explanation ?? "" }));
+  const aff = sel.affirmation || cat.affirmation_ya_tengo || "Hoy elijo creer que lo nuevo ya empezó en mí.";
+  return [
+    { q: "¿Cuál de estas frases es la afirmación de tu lección?", options: ["Nada va a cambiar en mi vida", aff, "Mi pasado decide quién soy"], correct: 1, tip: "Repítela en voz alta tres veces, despacio y sintiéndola." },
+    { q: `¿Qué te ayuda a vivir «${sel.title}»?`, options: ["Esperar sin hacer nada", "Sentirlo como real y dar un paso hoy", "Compararte con otras personas"], correct: 1, tip: "La fe se vuelve real cuando das un paso pequeño hoy." },
+    { q: "¿Con qué cierras tu práctica de hoy?", options: ["Con culpa por lo que falta", "Con gratitud por lo que ya empezó", "Con prisa por terminar"], correct: 1, tip: "Agradecer antes de ver el resultado abre espacio para recibirlo." },
+  ];
+}
+
+const AFF_STYLE = [
+  { Icon: Sparkles, color: "#C98A12", bg: "#FFF3D6" },
+  { Icon: Heart, color: "#D9468F", bg: "#FFE1F1" },
+  { Icon: Flower2, color: "#1F8A63", bg: "#DFF6EA" },
+  { Icon: HandHeart, color: "#6D4FE0", bg: "#EDE7FF" },
+];
+const EX_HINTS = [
+  { label: "Visualiza", sub: "Tu vida ideal", Icon: Eye },
+  { label: "Siente", sub: "La emoción", Icon: Waves },
+  { label: "Agradece", sub: "Ya es tuyo", Icon: Smile },
+  { label: "Confía", sub: "Todo fluye", Icon: Sparkles },
+];
+
+/** Paso 3 de 3 con la misma estructura de "Manifestar con Música": playlist, afirmaciones, sopa de letras, preguntas y ejercicio. */
+function LessonStep({ cat, page, accent, subs, sel, entries, isPaid, onBack, onPick, dots }: {
+  cat: any; page: Record<string, any>; accent: string; subs: Sub[]; sel: Sub; entries: Map<string, { completed?: boolean }>;
+  isPaid: boolean; onBack: () => void; onPick: (id: string) => void; dots: React.ReactNode;
+}) {
+  const { user } = useAuth();
+  const qc = useQueryClient();
+  const navigate = useNavigate();
+  const player = usePlayer();
+  const [exercise, setExercise] = useState("");
+  const [saving, setSaving] = useState(false);
   const locked = !isPaid && sel.day_index > FREE_AUDIOS;
-  const words = (sel.word_game?.words ?? []).slice(0, 8);
+  const playingId = player.current?.id ?? null;
+  const toTrack = (a: Sub) => ({ id: a.id, title: `#${String(a.day_index).padStart(2, "0")} — ${a.title}`, subtitle: cat.title, url: a.audio_url ?? "", cover: a.cover_url ?? null });
+  const affirmations = Array.from(new Set([sel.affirmation, ...(page.affirmations ?? []), cat.affirmation_ya_tengo, cat.identity_yo_soy, cat.gratitude_gracias].filter(Boolean) as string[])).slice(0, 4);
+  const words = lessonWords(sel.word_game?.words, [sel.title, sel.affirmation, cat.title, ...affirmations, sel.lesson]);
+  const quiz = lessonQuiz(sel, cat);
+  const doneCount = subs.filter((s) => entries.get(s.id)?.completed).length;
+
+  function open(a: Sub) {
+    if (!isPaid && a.day_index > FREE_AUDIOS) return navigate({ to: "/membresia" });
+    onPick(a.id);
+    if (!a.audio_url) return navigate({ to: "/visualiza/$categoryId/$day", params: { categoryId: cat.id, day: String(a.day_index) } });
+    if (playingId === a.id) return player.toggle();
+    player.play(toTrack(a), subs.filter((x) => x.audio_url && (isPaid || x.day_index <= FREE_AUDIOS)).map(toTrack));
+  }
+
+  async function finish() {
+    if (!user) return;
+    if (exercise.trim().length < 10) return toast.error("Escribe al menos una intención para completar la lección.");
+    setSaving(true);
+    const { error } = await supabase.from("manifest_entries").upsert({ user_id: user.id, audio_id: sel.id, played: true, completed: true, peticion: exercise.trim() }, { onConflict: "user_id,audio_id" });
+    setSaving(false);
+    if (error) return toast.error("No pudimos guardar tu ejercicio. Revisa tu conexión e intenta de nuevo.");
+    await awardGems(40, "manifest_exercise", { category: cat.id, day: sel.day_index });
+    toast.success("Lección completada. +40 hojas");
+    setExercise("");
+    qc.invalidateQueries();
+  }
+
   return (
-    <div className="mx-auto max-w-3xl px-4 pb-32 pt-6">
-      <button onClick={() => setStep(2)} className="inline-flex min-h-11 items-center gap-1 text-xs font-bold" style={{ color: accent }}><ArrowLeft className="h-3.5 w-3.5" /> Cambiar área</button>
-      <img src={sel.cover_url || page.cover_step3 || cat.cover_url || heroFallback} alt="" className="mt-2 h-44 w-full rounded-[16px] object-cover" />
-      <div className="mt-4 text-center">
-        <div className="text-xs font-bold uppercase tracking-widest" style={{ color: accent }}>Paso 3 de 3 · Tu lección</div>
-        <h2 className="mt-2 font-display text-2xl font-extrabold leading-tight">{sel.title}</h2>
-        <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">{page.step3_text || "Escucha, siente y practica. Todo en un solo lugar."}</p>
-      </div>
-      {locked ? (
-        <Card className="mt-5 rounded-[16px] p-5 text-center shadow-soft">
-          <Lock className="mx-auto h-6 w-6 text-muted-foreground" />
-          <p className="mt-2 font-bold">Esta lección se abre con Camino ORÍGEN</p>
-          <Link to="/membresia" className="mt-3 inline-flex min-h-11 items-center rounded-[12px] px-4 font-bold text-primary-foreground" style={{ background: accent }}>Ver Camino ORÍGEN</Link>
-        </Card>
-      ) : (
-        <div className="mt-5 space-y-4">
-          {sel.affirmation && <Card className="rounded-[16px] p-5 text-center shadow-soft"><Sparkles className="mx-auto h-5 w-5" style={{ color: accent }} /><p className="mt-2 font-display text-[18px] font-bold leading-snug">"{sel.affirmation}"</p></Card>}
-          {sel.lesson && (
-            <Card className="rounded-[16px] p-5 shadow-soft">
-              <p className="inline-flex items-center gap-2 font-display text-[17px] font-bold"><BookOpen className="h-4 w-4" style={{ color: accent }} /> Tu lección</p>
-              <p className="mt-2 whitespace-pre-line text-[15px] leading-relaxed text-foreground/85">{sel.lesson}</p>
-            </Card>
-          )}
-          <Link to="/visualiza/$categoryId/$day" params={{ categoryId: cat.id, day: String(sel.day_index) }} search={{ reproducir: 1 }} className="inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-[12px] text-[16px] font-bold text-primary-foreground active:scale-[.97]" style={{ background: accent }}>
-            <Play className="h-5 w-5" /> {sel.audio_url ? "Escuchar y practicar" : "Hacer la práctica"}
-          </Link>
-          {words.length >= 3 && <WordSearch words={words} storageKey={`custom-${cat.id}-${sel.day_index}`} gemsReward={20} />}
-          {(sel.quiz?.questions?.length ?? 0) > 0 && <StageQuiz storageKey={`custom-quiz-${sel.id}`} gemsPerCorrect={2} items={(sel.quiz?.questions ?? []).map(q => ({ q: q.question, options: q.options, correct: q.correctIndex, tip: q.explanation ?? "" }))} />}
-          {sel.exercise && <section className="border-t border-border py-4"><h3 className="font-display text-lg font-bold">Tu práctica</h3><p className="mt-2 whitespace-pre-wrap text-sm">{sel.exercise}</p></section>}
+    <div className="pb-32">
+      <div className="mx-auto max-w-3xl px-4 pt-6">
+        <button onClick={onBack} className="inline-flex min-h-11 items-center gap-1 text-xs font-bold" style={{ color: accent }}><ArrowLeft className="h-3.5 w-3.5" /> Cambiar área</button>
+        {(sel.cover_url || page.cover_step3) && <img src={sel.cover_url || page.cover_step3} alt="" className="mt-2 h-44 w-full rounded-[16px] object-cover" />}
+        <div className="mt-3 text-center">
+          <div className="text-xs font-bold uppercase tracking-widest" style={{ color: accent }}>Paso 3 de 3 · Tu lección</div>
+          <h2 className="mt-2 font-display text-2xl font-extrabold leading-tight">{sel.title} <span>💗</span></h2>
+          <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">Escucha, siente y practica. Todo en un solo lugar.</p>
         </div>
+      </div>
+
+      {/* Playlist */}
+      <section className="mx-auto mt-6 max-w-3xl px-4">
+        <Card className="rounded-[16px] border border-border/60 p-4 shadow-soft">
+          <div className="flex items-center gap-3">
+            <div className="grid h-14 w-14 shrink-0 place-items-center rounded-[12px]" style={{ background: `linear-gradient(135deg, ${accent}, ${accent}CC)` }}>
+              <Headphones className="h-6 w-6 text-primary-foreground" />
+            </div>
+            <div className="min-w-0">
+              <h3 className="truncate font-display text-base font-extrabold leading-tight">{page.playlist_title || (subs.some((a) => a.audio_url) ? "Playlist y prácticas" : "Prácticas guiadas")}</h3>
+              <p className="mt-0.5 text-xs text-muted-foreground">{cat.title} · {page.playlist_text || "Escucha y practica a tu ritmo."}</p>
+            </div>
+          </div>
+          {sel.lesson && !locked && <p className="mt-3 whitespace-pre-line text-[14px] leading-relaxed text-foreground/80">{sel.lesson}</p>}
+        </Card>
+        <div className="mt-3 overflow-hidden rounded-[16px] border border-border/60 bg-card">
+          {subs.map((a) => {
+            const l = !isPaid && a.day_index > FREE_AUDIOS;
+            const active = playingId === a.id || (!playingId && a.id === sel.id);
+            return (
+              <button key={a.id} onClick={() => open(a)} className={cn("flex w-full items-center gap-3 border-b border-border/40 px-4 py-3 text-left transition-colors last:border-b-0", active ? "bg-primary/10" : "hover:bg-muted/40")}>
+                <div className="w-12 shrink-0 text-[11px] font-bold uppercase tracking-wide" style={{ color: active ? accent : undefined }}>#{String(a.day_index).padStart(2, "0")}</div>
+                <div className={cn("min-w-0 flex-1", l && "select-none blur-[3px]")}><div className="truncate text-sm font-semibold">{a.title}</div></div>
+                {entries.get(a.id)?.completed && <Check className="h-4 w-4 text-[#2F9C74]" />}
+                <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full" style={{ background: l ? "#94A3B822" : accent, color: l ? "#64748B" : "white" }}>
+                  {l ? <Lock className="h-4 w-4" /> : !a.audio_url ? <ArrowRight className="h-4 w-4" /> : playingId === a.id && player.playing ? <Pause className="h-4 w-4" /> : <Play className="ml-0.5 h-4 w-4" />}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+        {!isPaid && subs.length > FREE_AUDIOS && (
+          <Card className="mt-3 rounded-[16px] border p-4" style={{ borderColor: `${accent}50`, background: `${accent}10` }}>
+            <div className="flex items-start gap-3">
+              <Lock className="mt-0.5 h-5 w-5 shrink-0" style={{ color: accent }} />
+              <div>
+                <p className="text-sm font-bold">Desbloquea todas las prácticas</p>
+                <p className="mt-1 text-xs text-muted-foreground">Con Camino ORÍGEN accedes a toda la playlist y a los demás temas.</p>
+                <Link to="/membresia" className="mt-3 inline-flex min-h-11 items-center gap-1 rounded-[12px] px-4 text-[13px] font-bold text-primary-foreground" style={{ background: accent }}>Ver planes <ArrowRight className="h-3.5 w-3.5" /></Link>
+              </div>
+            </div>
+          </Card>
+        )}
+      </section>
+
+      {locked ? (
+        <section className="mx-auto mt-8 max-w-3xl px-4">
+          <Card className="rounded-[16px] p-5 text-center shadow-soft">
+            <Lock className="mx-auto h-6 w-6 text-muted-foreground" />
+            <p className="mt-2 font-bold">Esta lección se abre con Camino ORÍGEN</p>
+            <Link to="/membresia" className="mt-3 inline-flex min-h-11 items-center rounded-[12px] px-4 font-bold text-primary-foreground" style={{ background: accent }}>Ver Camino ORÍGEN</Link>
+          </Card>
+        </section>
+      ) : (
+        <>
+          {/* Afirmaciones */}
+          <section className="mx-auto mt-10 max-w-3xl px-4">
+            <div className="text-center">
+              <h2 className="font-display text-xl font-extrabold">Afirmaciones del día <span>💗</span></h2>
+              <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">Repite estas afirmaciones con fe y convicción.</p>
+            </div>
+            <div className="no-scrollbar -mx-4 mt-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2">
+              {affirmations.map((t, i) => {
+                const st = AFF_STYLE[i % AFF_STYLE.length];
+                return (
+                  <Card key={t} className="w-[62%] max-w-[220px] shrink-0 snap-center rounded-[16px] border border-border/60 p-4 text-center shadow-soft sm:w-[45%]" style={{ background: st.bg }}>
+                    <div className="mx-auto grid h-10 w-10 place-items-center rounded-[12px] bg-card/70" style={{ color: st.color }}><st.Icon className="h-5 w-5" /></div>
+                    <p className="mt-3 text-[13px] font-medium leading-relaxed text-[#2A2238]">{t}</p>
+                  </Card>
+                );
+              })}
+            </div>
+          </section>
+
+          {/* Sopa de letras */}
+          <section className="mx-auto mt-10 max-w-3xl px-4">
+            <div className="mb-4 text-center">
+              <h2 className="font-display text-xl font-extrabold">Sopa de letras de la lección <span>🔎</span></h2>
+              <p className="mt-2 text-sm text-muted-foreground">Encuentra las palabras que activan tu manifestación.</p>
+            </div>
+            <WordSearch words={words} storageKey={`custom-${cat.id}-${sel.day_index}`} gemsReward={40} />
+          </section>
+
+          {/* Preguntas */}
+          <section className="mx-auto mt-10 max-w-3xl px-4">
+            <div className="mb-4 text-center">
+              <h2 className="font-display text-xl font-extrabold">Preguntas de la lección <span>🧠</span></h2>
+              <p className="mt-2 text-sm text-muted-foreground">Responde desde el corazón. Cada acierto suma hojas.</p>
+            </div>
+            <StageQuiz items={quiz} storageKey={`custom-quiz-${sel.id}`} gemsPerCorrect={15} />
+          </section>
+
+          {/* Ejercicio */}
+          <section className="mx-auto mt-10 max-w-3xl px-4">
+            <Card className="rounded-[16px] border border-border/60 p-5 shadow-soft">
+              <div className="text-center">
+                <h2 className="font-display text-xl font-extrabold">Ejercicio de Manifestación <span>✍️</span></h2>
+                <p className="mt-2 text-sm text-muted-foreground">Reflexiona y escribe con intención.</p>
+              </div>
+              <label htmlFor="ex-text" className="mb-2 mt-5 block text-sm font-semibold">{sel.exercise || `¿Qué deseas manifestar con «${sel.title}» y por qué es importante para ti?`}</label>
+              <div className="relative">
+                <Textarea id="ex-text" value={exercise} onChange={(e) => setExercise(e.target.value.slice(0, 1000))} placeholder="Escribe aquí con libertad..." className="min-h-32 resize-none rounded-[12px] pr-16" />
+                <span className="absolute bottom-2 right-3 text-[11px] tabular-nums text-muted-foreground">{exercise.length}/1000</span>
+              </div>
+              <div className="mt-4 grid grid-cols-4 gap-2">
+                {EX_HINTS.map((h) => (
+                  <div key={h.label} className="rounded-[12px] border border-border/60 bg-muted/30 py-3 text-center">
+                    <h.Icon className="mx-auto h-4 w-4" style={{ color: accent }} />
+                    <div className="mt-1 text-[11px] font-bold">{h.label}</div>
+                    <div className="text-[10px] text-muted-foreground">{h.sub}</div>
+                  </div>
+                ))}
+              </div>
+              <button onClick={() => void finish()} disabled={saving} className="mt-5 inline-flex h-14 w-full items-center justify-center gap-2 rounded-[12px] text-base font-bold text-primary-foreground active:scale-[.97] disabled:opacity-60" style={{ background: `linear-gradient(180deg, ${accent}, ${accent}DD)` }}>
+                <Check className="h-5 w-5" /> {saving ? "Guardando…" : "Finalizar tarea del día"}
+              </button>
+              {doneCount > 0 && <p className="mt-3 text-center text-xs text-muted-foreground">Has completado <b style={{ color: accent }}>{doneCount}</b> de {subs.length} lecciones.</p>}
+            </Card>
+            {dots}
+          </section>
+        </>
       )}
-      {Dots}
     </div>
   );
 }

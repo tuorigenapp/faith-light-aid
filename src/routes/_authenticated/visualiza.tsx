@@ -135,13 +135,12 @@ function Visualiza() {
   const streak = useMemo(() => computeStreak(completedDates), [data]);
 
   const cats = data?.cats ?? [];
-  const firstCatId = cats[0]?.id ?? null;
   const selectedCatTitle = cats.find((c: any) => (doneByCat.get(c.id) ?? 0) > 0)?.title ?? null;
   const progressPct = Math.min(100, Math.round((totalDone / 21) * 100));
   const hasAnyProgress = totalDone > 0;
 
   const methodTargets: { to: string; params?: Record<string, string> }[] = [
-    firstCatId ? { to: "/visualiza/$categoryId", params: { categoryId: firstCatId } } : { to: "/visualiza" },
+    { to: "/visualiza/$categoryId", params: { categoryId: "manifestando-con-musica" } },
     { to: "/visualiza/limpieza" },
     { to: "/visualiza/identidad" },
     { to: "/visualiza/cristo" },
@@ -163,7 +162,7 @@ function Visualiza() {
         tint: m.tint,
         emoji: m.emoji,
         days: 21,
-        done: catId ? doneByCat.get(catId) ?? 0 : 0,
+        done: catId ? doneByCat.get(catId === "manifestando-con-musica" ? "dinero" : catId) ?? 0 : 0,
         to: target.to,
         params: target.params,
         tag: m.tag,
