@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useCamino } from "@/hooks/use-content-overrides";
 import { useAuth } from "@/lib/use-auth";
 import { useProfile } from "@/hooks/use-profile";
 import { awardLeaf, wholeHojas, type ActionLevel } from "@/lib/gems";
@@ -54,7 +55,7 @@ function todayIso() { return new Date().toISOString().slice(0, 10); }
 function CaminoDia() {
   const { caminoId, day } = Route.useParams();
   const dayNum = Math.min(Math.max(Number(day) || 1, 1), CAMINO_TOTAL_DAYS);
-  const camino = getCamino(caminoId);
+  const { camino, isLoading: caminoLoading } = useCamino(caminoId);
   const etapa = camino ? getEtapa(camino, dayNum) : null;
   const { user } = useAuth();
   const { data: profile } = useProfile();

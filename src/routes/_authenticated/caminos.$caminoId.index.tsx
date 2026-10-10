@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useCamino } from "@/hooks/use-content-overrides";
 import { useAuth } from "@/lib/use-auth";
 import { useProfile } from "@/hooks/use-profile";
 import { hasHojas, spendHojas, wholeHojas } from "@/lib/gems";
@@ -37,7 +38,7 @@ function CaminoMapa() {
   const qc = useQueryClient();
   const navigate = useNavigate();
   const { data: profile } = useProfile();
-  const camino = getCamino(caminoId);
+  const { camino, isLoading: caminoLoading } = useCamino(caminoId);
 
   const { data } = useQuery({
     queryKey: ["camino", caminoId, user?.id],
