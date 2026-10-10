@@ -36,9 +36,8 @@ export function CategoriaSlider() {
               <img src={it.img ?? ""} alt={it.title} loading="lazy" className="w-full h-auto block" />
             </Link>
           ) : (
-            <Link to="/camino-nuevo/$slug" params={{ slug: it.slug! }} aria-label={it.title} className={`${cls} bg-card border border-border`}>
-              {it.img && <img src={it.img} alt={it.title} loading="lazy" className="w-full h-40 object-cover block" />}
-              <span className="block p-4 font-display text-[16px] font-bold">{it.title}</span>
+            <Link to="/caminos/$caminoId" params={{ caminoId: it.slug! }} aria-label={it.title} className={cls}>
+              {it.img ? <img src={it.img} alt={it.title} loading="lazy" className="w-full aspect-[16/9] object-cover block" /> : <div className="w-full aspect-[16/9] bg-gradient-to-br from-primary/30 to-accent-pink/30" />}
             </Link>
           )
         }
