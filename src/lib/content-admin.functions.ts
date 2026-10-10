@@ -21,6 +21,18 @@ function slugify(text: string) {
     .slice(0, 48);
 }
 
+/** Nombre limpio y único para la dirección (sin códigos raros): tema, tema-2, tema-3… */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function uniqueSlug(db: any, table: string, column: string, base: string) {
+  const clean = base || "tema";
+  const { data } = await db.from(table).select(column).like(column, `${clean}%`);
+  const taken = new Set(((data ?? []) as Record<string, string>[]).map((r) => r[column]));
+  if (!taken.has(clean)) return clean;
+  let n = 2;
+  while (taken.has(`${clean}-${n}`)) n += 1;
+  return `${clean}-${n}`;
+}
+
 const COVER_STYLE =
   "Ilustración espiritual cálida y luminosa, estilo pintura digital suave, tonos lavanda, durazno y dorado, sin texto, sin letras, sin marcas de agua, composición centrada, atmósfera de paz y esperanza.";
 
@@ -110,8 +122,8 @@ export const adminCreateVisualizaCategory = createServerFn({ method: "POST" })
 Devuelve JSON con: subtitle (máx 70 caracteres), description (2 a 3 frases, máx 320 caracteres), affirmation_ya_tengo (frase en presente que empieza con "Ya tengo"), identity_yo_soy (frase que empieza con "Yo soy"), gratitude_gracias (frase que empieza con "Gracias"), petition (una oración breve de petición) y cover_prompt (descripción visual en inglés de una ilustración, sin texto).`,
     );
 
-    const slug = slugify(data.title) || `tema-${Date.now()}`;
-    const id = `${slug}-${Date.now().toString(36)}`;
+    const slug = slugify(data.title) || "tema";
+    const id = await uniqueSlug(supabaseAdmin, "manifest_categories", "id", slug);
 
     const cover = data.withCover
       ? await uploadCover(`${generated.cover_prompt}. ${COVER_STYLE}`, slug)
@@ -314,7 +326,7 @@ Devuelve JSON con: duration (por ejemplo "20 min"), objective (1 o 2 frases), in
 No incluyas rituales peligrosos, sustancias, ni promesas de curación física.`,
     );
 
-    const slug = `${slugify(data.title) || "practica"}-${Date.now().toString(36)}`;
+    const slug = await uniqueSlug(supabaseAdmin, "limpieza_practices", "slug", slugify(data.title) || "practica");
     const cover = data.withCover
       ? await uploadCover(`${generated.cover_prompt}. ${COVER_STYLE}`, slug)
       : null;
@@ -616,42 +628,30 @@ export const adminCreateCamino = createServerFn({ method: "POST" })
     await assertAdmin(context);
     const { aiJson, uploadCover } = await import("@/lib/ai-content.server");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    type Lesson = {
-      title: string; lesson: string; affirmation: string; tasks: string[]; search_words: string[];
-      quiz: { question: string; options: string[]; correctIndex: number }[];
-    };
-    // Misma secuencia que /etapas: 20 etapas; cada etapa tiene 7 lecciones diarias (Día 1 a Día 7) y 1 cierre.
-    const outline = await aiJson<{ subtitle: string; cover_prompt: string; stages: string[] }>(
-      `Diseña un camino de sanación emocional con fe llamado "${data.title}", con la misma secuencia de "Camino ORÍGEN". Notas del editor: ${data.notes || "sin notas"}.
-JSON: subtitle (máx 80), cover_prompt (inglés, sin texto), stages: exactamente 20 títulos de etapa en orden progresivo (máx 50 caracteres cada uno).`,
+    // Mismo formato que CAMINO ORÍGEN: 8 etapas diarias; cada día se vive en 20 pasos
+    // (lección, soluciones, tareas, juegos y recompensa) que la app arma al abrirlo.
+    const g = await aiJson<{
+      subtitle: string; short: string; claim: string; cover_prompt: string;
+      scripture: { text: string; ref: string };
+      etapas: { title: string; focus: string; insignia: string }[];
+    }>(
+      `Diseña un camino de sanación emocional con fe llamado "${data.title}" con el mismo formato de CAMINO ORÍGEN. Notas del editor: ${data.notes || "sin notas"}.
+JSON: subtitle (máx 80 caracteres), short (máx 32, frase corta del tema), claim (1 frase de máx 110 caracteres que nombre la transformación), scripture { text (versículo bíblico real y textual, máx 90 caracteres), ref (referencia exacta) }, etapas: EXACTAMENTE 8 objetos en orden progresivo { title (máx 38 caracteres), focus (2 a 3 palabras del enfoque emocional del día), insignia (2 a 3 palabras de logro) }, cover_prompt (descripción visual en inglés de una portada SIN texto, sin letras, sin personas reconocibles).
+Todo debe ser original y hablar solo de "${data.title}".`,
     );
-    const titles = (outline.stages ?? []).slice(0, 20);
-    while (titles.length < 20) titles.push(`Etapa ${titles.length + 1}`);
-    const chunk = async (from: number): Promise<{ lessons: Lesson[] }[]> => {
-      const part = titles.slice(from, from + 4);
-      const prompt = `Camino de sanación "${data.title}". Notas: ${data.notes || "sin notas"}.
-Escribe el contenido de estas etapas: ${part.map((t, i) => `${from + i + 1}. ${t}`).join(" | ")}.
-JSON: stages: arreglo de ${part.length} objetos en el mismo orden, cada uno con lessons: exactamente 8 lecciones. Las lecciones 1 a 7 llevan title "Día N: <nombre de la lección>" y la 8 lleva title "Cierre: <nombre>". Cada lección: lesson (60-90 palabras), affirmation, tasks (2), search_words (5 palabras MAYÚSCULAS 4-8 letras sin tildes, sin repetir), quiz (1 pregunta con options de 3 y correctIndex).`;
-      return (await aiJson<{ stages: { lessons: Lesson[] }[] }>(prompt)).stages ?? [];
+    const etapas = (g.etapas ?? []).slice(0, 8).filter((e) => e?.title);
+    if (etapas.length !== 8) throw new Error("La IA no devolvió las 8 etapas del camino. No se guardó nada; intenta otra vez.");
+    const content = {
+      short: g.short, claim: g.claim, scripture: g.scripture,
+      etapas: etapas.map((e, i) => ({ day: i + 1, title: e.title, focus: e.focus || data.title, insignia: e.insignia || `Etapa ${i + 1}` })),
     };
-    const parts: { lessons: Lesson[] }[][] = [];
-    for (const from of [0, 4, 8, 12, 16]) parts.push(await chunk(from));
-    const bodies = parts.flat();
-    const g = {
-      subtitle: outline.subtitle,
-      cover_prompt: outline.cover_prompt,
-      stages: titles.map((title, i) => ({ title, lessons: (bodies[i]?.lessons ?? []).slice(0, 8) })),
-    };
-    if (g.stages.some(s => s.lessons.length !== 8 || s.lessons.some(l => !l.lesson || !l.title))) throw new Error("El camino no quedó completo. No se guardó contenido incompleto.");
-    const slug = `${slugify(data.title) || "camino"}-${Date.now().toString(36)}`;
-    const cover = data.coverUrl || (await uploadCover(`${g.cover_prompt}. ${COVER_STYLE}`, slug));
-    const row = {
-      slug, title: data.title, subtitle: g.subtitle, notes: data.notes, cover_url: cover,
-      content: { stages: g.stages ?? [] } as never, is_published: false,
-    };
+    const slug = data.existingId
+      ? undefined
+      : await uniqueSlug(supabaseAdmin, "custom_caminos", "slug", slugify(data.title) || "camino");
+    const cover = data.coverUrl || (await uploadCover(`${g.cover_prompt}. ${COVER_STYLE}`, slug ?? (slugify(data.title) || "camino")));
     const { error } = data.existingId
-      ? await supabaseAdmin.from("custom_caminos").update({ title: row.title, subtitle: row.subtitle, notes: row.notes, cover_url: row.cover_url, content: row.content }).eq("id", data.existingId)
-      : await supabaseAdmin.from("custom_caminos").insert(row);
+      ? await supabaseAdmin.from("custom_caminos").update({ title: data.title, subtitle: g.subtitle, notes: data.notes, cover_url: cover, content: content as never }).eq("id", data.existingId)
+      : await supabaseAdmin.from("custom_caminos").insert({ slug: slug!, title: data.title, subtitle: g.subtitle, notes: data.notes, cover_url: cover, content: content as never, is_published: false });
     if (error) throw new Error(error.message);
     return { slug };
   });
