@@ -135,7 +135,6 @@ function Visualiza() {
   const streak = useMemo(() => computeStreak(completedDates), [data]);
 
   const cats = data?.cats ?? [];
-  const firstCatId = cats[0]?.id ?? null;
   const selectedCatTitle = cats.find((c: any) => (doneByCat.get(c.id) ?? 0) > 0)?.title ?? null;
   const progressPct = Math.min(100, Math.round((totalDone / 21) * 100));
   const hasAnyProgress = totalDone > 0;
