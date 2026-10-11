@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -169,7 +169,7 @@ const EX_HINTS = [
 /** Paso 3 de 3 con la misma estructura de "Manifestar con Música": playlist, afirmaciones, sopa de letras, preguntas y ejercicio. */
 function LessonStep({ cat, page, accent, subs, sel, entries, isPaid, onBack, onPick, dots }: {
   cat: any; page: Record<string, any>; accent: string; subs: Sub[]; sel: Sub; entries: Map<string, { completed?: boolean }>;
-  isPaid: boolean; onBack: () => void; onPick: (id: string) => void; dots: React.ReactNode;
+  isPaid: boolean; onBack: () => void; onPick: (id: string) => void; dots: ReactNode;
 }) {
   const { user } = useAuth();
   const qc = useQueryClient();
@@ -242,7 +242,7 @@ function LessonStep({ cat, page, accent, subs, sel, entries, isPaid, onBack, onP
                 <div className={cn("min-w-0 flex-1", l && "select-none blur-[3px]")}><div className="truncate text-sm font-semibold">{a.title}</div></div>
                 {entries.get(a.id)?.completed && <Check className="h-4 w-4 text-[#2F9C74]" />}
                 <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full" style={{ background: l ? "#94A3B822" : accent, color: l ? "#64748B" : "white" }}>
-                  {l ? <Lock className="h-4 w-4" /> : !a.audio_url ? <ArrowRight className="h-4 w-4" /> : playingId === a.id && player.playing ? <Pause className="h-4 w-4" /> : <Play className="ml-0.5 h-4 w-4" />}
+                  {l ? <Lock className="h-4 w-4" /> : !a.audio_url ? <ArrowRight className="h-4 w-4" /> : playingId === a.id && player.isPlaying ? <Pause className="h-4 w-4" /> : <Play className="ml-0.5 h-4 w-4" />}
                 </div>
               </button>
             );
