@@ -39,6 +39,7 @@ import { PromoManager } from "@/components/admin/PromoManager";
 import { Megaphone, BrainCircuit, Wand2 } from "lucide-react";
 import { BrainManager } from "@/components/admin/BrainManager";
 import { ConsultasStudio } from "@/components/admin/ConsultasStudio";
+import { UsagePanel } from "@/components/admin/UsagePanel";
 import { AreaChart, Area, ResponsiveContainer, BarChart, Bar, XAxis, Tooltip } from "recharts";
 
 export const Route = createFileRoute("/admin")({
@@ -401,6 +402,7 @@ function Admin() {
           </div>
         )}
 
+        {section === "resumen" && <div className="mb-4 grid gap-3 sm:grid-cols-2"><UsagePanel kind="ai" /><UsagePanel kind="email" /></div>}
         {data && section === "resumen" && (
           <>
             <div className="mt-5 space-y-2">
@@ -518,19 +520,19 @@ function Admin() {
           </div>
         )}
 
-        {section === "studio" && <ContentStudio />}
+        {section === "studio" && <><UsagePanel kind="ai" className="mb-4" /><ContentStudio /></>}
 
         {section === "wallet" && <WalletManager />}
         {section === "promos" && <PromoManager />}
         {section === "cerebro" && <BrainManager />}
-        {section === "consultas" && <ConsultasStudio />}
+        {section === "consultas" && <><UsagePanel kind="ai" className="mb-4" /><ConsultasStudio /></>}
 
         {section === "libros" && <BooksManager />}
 
         {section === "audios" && <AudiosManager />}
         {section === "comunidad" && <CommunityModerator />}
 
-        {section === "marketing" && <MarketingManager />}
+        {section === "marketing" && <><UsagePanel kind="email" className="mb-3" /><UsagePanel kind="ai" className="mb-4" /><MarketingManager /></>}
 
         {data && section === "opiniones" && (
           <>
