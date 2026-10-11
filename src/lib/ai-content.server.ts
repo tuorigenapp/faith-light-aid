@@ -4,6 +4,7 @@ import { createOpenAI } from "@ai-sdk/openai";
 import { APICallError, Output, streamText } from "ai";
 import { z } from "zod";
 import { createLovableAiGatewayRunIdFetch } from "./ai-run-id.server.ts";
+import { logUsage } from "./usage-log.server.ts";
 
 const GATEWAY = "https://ai.gateway.lovable.dev/v1";
 const TEXT_MODEL = "openai/gpt-6-astra";
@@ -15,11 +16,34 @@ function apiKey() {
   return key;
 }
 
+/** Traduce un fallo de la IA a un mensaje claro para el panel. */
+function friendly(status: number | undefined) {
+  if (status === 402) return "Se acabaron los créditos de IA disponibles. Mira «Créditos de IA» en el panel para ver cuándo se recargan. No se guardó nada.";
+  if (status === 403) return "La IA está bloqueada por un límite del espacio de trabajo. Revisa «Créditos de IA» en el panel. No se guardó nada.";
+  if (status === 429) return "La IA está recibiendo muchas solicitudes. Espera un minuto y vuelve a intentar. No se guardó nada.";
+  if (status && status >= 500) return "La IA tuvo una falla temporal. Intenta de nuevo en unos minutos. No se guardó nada.";
+  return "La IA no devolvió contenido esta vez. Intenta de nuevo; no se guardó nada.";
+}
+
+function statusOf(e: unknown): number | undefined {
+  if (APICallError.isInstance(e)) return e.statusCode;
+  const c = (e as { cause?: unknown })?.cause;
+  return c && c !== e ? statusOf(c) : undefined;
+}
+
 /** Pide un JSON al modelo y lo devuelve ya parseado. */
-export async function aiJson<T>(prompt: string, system?: string): Promise<T> {
+export async function aiJson<T>(prompt: string, system?: string, feature = "crear-con-ia"): Promise<T> {
   const key = apiKey();
+  const started = Date.now();
   const run = createLovableAiGatewayRunIdFetch();
-  const provider = createOpenAI({ baseURL: GATEWAY, apiKey: key, headers: { "Lovable-API-Key": key, "X-Lovable-AIG-SDK": "vercel-ai-sdk" }, fetch: run.fetch });
+  let lastStatus: number | undefined;
+  const trackFetch: typeof fetch = async (input, init) => {
+    const res = await run.fetch(input as RequestInfo, init);
+    lastStatus = res.status;
+    return res;
+  };
+  let streamError: unknown;
+  const provider = createOpenAI({ baseURL: GATEWAY, apiKey: key, headers: { "Lovable-API-Key": key, "X-Lovable-AIG-SDK": "vercel-ai-sdk" }, fetch: trackFetch });
   const result = streamText({
     model: provider.responses(TEXT_MODEL),
     maxRetries: 0,
@@ -27,19 +51,28 @@ export async function aiJson<T>(prompt: string, system?: string): Promise<T> {
     prompt: `${prompt}\nDevuelve el objeto JSON solicitado serializado dentro del campo json. Sin markdown.`,
     output: Output.object({ schema: z.object({ json: z.string() }) }),
     providerOptions: { openai: { forceReasoning: true, reasoningEffort: "low", reasoningSummary: "auto", store: false, include: ["reasoning.encrypted_content"] } },
+    onError: ({ error }) => { streamError = error; },
   });
   let output: { json: string };
   try { output = await result.output; }
   catch (error) {
-    if (APICallError.isInstance(error) && error.statusCode === 402) throw new Error("La IA está en pausa porque faltan créditos de Lovable AI. Recarga créditos en Configuración → Planes y créditos antes de volver a crear.");
-    throw error;
+    const status = statusOf(streamError) ?? statusOf(error) ?? (lastStatus && lastStatus >= 400 ? lastStatus : undefined);
+    await logUsage({ kind: "ai", feature, ok: false, status, durationMs: Date.now() - started, error: String((streamError as Error)?.message ?? (error as Error)?.message ?? "") });
+    throw new Error(friendly(status));
   }
-  try { return JSON.parse(output.json) as T; }
-  catch { throw new Error("No pudimos leer el contenido generado. Tus datos no se han cambiado."); }
+  try {
+    const parsed = JSON.parse(output.json) as T;
+    await logUsage({ kind: "ai", feature, ok: true, status: 200, durationMs: Date.now() - started });
+    return parsed;
+  } catch {
+    await logUsage({ kind: "ai", feature, ok: false, status: 200, durationMs: Date.now() - started, error: "json" });
+    throw new Error("No pudimos leer el contenido generado. Tus datos no se han cambiado.");
+  }
 }
 
 /** Genera una imagen y devuelve sus bytes en PNG. */
 export async function aiImage(prompt: string): Promise<Uint8Array> {
+  const started = Date.now();
   const res = await fetch(`${GATEWAY}/images/generations`, {
     method: "POST",
     headers: {
@@ -52,7 +85,8 @@ export async function aiImage(prompt: string): Promise<Uint8Array> {
       prompt,
     }),
   });
-  if (!res.ok) throw new Error("No pudimos generar la portada. Intenta de nuevo.");
+  await logUsage({ kind: "ai", feature: "portada", ok: res.ok, status: res.status, durationMs: Date.now() - started });
+  if (!res.ok) throw new Error(friendly(res.status));
   const data = (await res.json()) as {
     data?: { b64_json?: string }[];
   };
