@@ -1,3 +1,4 @@
+import { logUsage } from "./usage-log.server.ts";
 import { sendPush, type PushSubscriptionRow } from "@/lib/webpush.server";
 
 export type AudienceRow = { user_id: string; email: string | null };
@@ -107,8 +108,10 @@ export async function dispatchEmail(
       );
       if (res.success) sent += 1;
       else failed += 1;
-    } catch {
+      await logUsage({ kind: "email", feature: "campaña", ok: !!res.success });
+    } catch (e) {
       failed += 1;
+      await logUsage({ kind: "email", feature: "campaña", ok: false, error: e instanceof Error ? e.message : "error" });
     }
   }
   return { sent, failed, unconfigured: false };
