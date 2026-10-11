@@ -74,6 +74,24 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value?: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
       appointments: {
         Row: {
           created_at: string
@@ -2406,6 +2424,39 @@ export type Database = {
           stripe_subscription_id?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      usage_log: {
+        Row: {
+          created_at: string
+          duration_ms: number | null
+          error: string | null
+          feature: string
+          id: string
+          kind: string
+          ok: boolean
+          status: number | null
+        }
+        Insert: {
+          created_at?: string
+          duration_ms?: number | null
+          error?: string | null
+          feature: string
+          id?: string
+          kind: string
+          ok: boolean
+          status?: number | null
+        }
+        Update: {
+          created_at?: string
+          duration_ms?: number | null
+          error?: string | null
+          feature?: string
+          id?: string
+          kind?: string
+          ok?: boolean
+          status?: number | null
         }
         Relationships: []
       }
