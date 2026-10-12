@@ -163,3 +163,15 @@
 - [x] Opción «Confirmar pago» para reenviar captura si el flujo se interrumpe
 - [x] Ruleta visual con emoji y cantidad; resultado explica el premio obtenido
 - [x] Verificación móvil del pago, confirmación manual y ruleta
+
+## Pedido Oct 8 — Caminos, Visualízate y créditos
+- [x] Caminos creados en el panel usan el mismo mapa de CAMINO ORÍGEN (8 etapas diarias, Paso 1 de 20)
+- [x] "Sanar el dolor de una pérdida" (ambos) con 8 etapas, portada sin letras y dirección limpia
+- [x] /categorias e Inicio: caminos nuevos solo con portada
+- [x] Crear camino con IA: vista previa de la estructura y una sola petición a la IA
+- [x] Paso 3 de 3 de temas creados: playlist, afirmaciones, sopa de letras, preguntas y ejercicio
+- [x] Temas creados ya no aparecen dentro de Manifestando con Música
+- [x] Direcciones limpias: /visualiza/manifestando-con-musica, liberate-del-narcisista, sana-tu-arbol-familiar
+- [x] Mensaje claro en vez de "No output generated"
+- [x] Créditos de IA y límite de correos con ventana de detalles por periodo (Inicio, Crear con IA, Crear consultas, Marketing)
+- [ ] Rehacer portadas/textos con IA de temas viejos — espera créditos de IA

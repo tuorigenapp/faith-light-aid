@@ -12,3 +12,6 @@
 - Hojas de Sanación use PayPal Checkout for payment and manual receipt review for crediting; this prevents unverified browser payment data from changing balances.
 - Admin AI generation uses server-only streamed Responses with request-local gateway correlation and sequential batches; this prevents unsupported models and concurrent quota overload.
 - All community automation checks the same persisted master switch before writing; this makes a pause apply to both posts and replies.
+- Panel-created caminos are rendered by the fixed CAMINO ORÍGEN routes via `useCamino` + `customToCamino` (content.etapas, 8 days); this keeps one design for every camino.
+- Content ids/slugs are clean title slugs with -2, -3 suffixes on collision; random suffixes made URLs unreadable.
+- AI and email calls are recorded in `usage_log` and admin-entered balances in `admin_settings`; the app cannot read the workspace credit balance directly.
