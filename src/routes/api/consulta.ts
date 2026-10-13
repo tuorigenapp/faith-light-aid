@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { brainContext } from "@/lib/brain.server";
-import { aiJson } from "@/lib/ai-content.server";
+import { engineSections, logAssistant } from "@/lib/origen-engine.server";
 import { z } from "zod";
 
 type Body = {
@@ -14,8 +13,6 @@ export const Route = createFileRoute("/api/consulta")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const key = process.env["LOVABLE_API_KEY"];
-        if (!key) return new Response(JSON.stringify({ error: "Servicio no disponible" }), { status: 500 });
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const token = request.headers.get("Authorization")?.match(/^Bearer (.+)$/)?.[1];
         if (!token) return Response.json({ error: "Inicia sesión para ver tu respuesta." }, { status: 401 });
@@ -36,30 +33,9 @@ export const Route = createFileRoute("/api/consulta")({
         }
 
         const sections = (consulta.sections ?? []) as { key: string; label: string; hint?: string }[];
-        const brain = await brainContext("consulta", consulta.slug);
-        const shape = sections.map((s) => `  "${s.key}": "string — ${s.hint || s.label}"`).join(",\n");
-
-        const sys = `${brain ? `${brain}\n\n` : ""}${consulta.system_prompt}
-
-Reglas de ORÍGEN (obligatorias):
-- Español latinoamericano, cálido, claro y profesional. Nunca uses las palabras "consultar" ni "canalizar".
-- Nunca menciones libros, autores, documentos ni fuentes de información.
-- Nunca des diagnósticos médicos ni promesas absolutas. Habla de posibles patrones y de pasos concretos.
-- Responde SOLO con JSON válido, sin markdown, con este shape exacto:
-{
-${shape}
-}`;
-
-        const userMsg = `Nombre completo: ${body.name || "(no indicado)"}
-Fecha de nacimiento: ${body.birthdate || "(no indicada)"}
-Lo que quiere saber: ${body.question || "(sin pregunta)"}`;
-
-        try {
-          const parsed = await aiJson<Record<string, string>>(userMsg, sys);
-          return new Response(JSON.stringify(parsed), { headers: { "Content-Type": "application/json" } });
-        } catch (e) {
-          return new Response(JSON.stringify({ error: (e as Error).message }), { status: 500 });
-        }
+        const parsed = await engineSections({ scope: "consulta", scopeRef: consulta.slug, name: body.name, birthdate: body.birthdate, question: body.question, title: consulta.title }, sections);
+        await logAssistant("consulta", auth.user.id, body.question, consulta.slug, consulta.title);
+        return Response.json(parsed);
       },
     },
   },
