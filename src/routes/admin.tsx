@@ -38,6 +38,7 @@ import { WalletManager } from "@/components/admin/WalletManager";
 import { PromoManager } from "@/components/admin/PromoManager";
 import { Megaphone, BrainCircuit, Wand2 } from "lucide-react";
 import { BrainManager } from "@/components/admin/BrainManager";
+import { AssistantDashboard } from "@/components/admin/AssistantDashboard";
 import { ConsultasStudio } from "@/components/admin/ConsultasStudio";
 import { UsagePanel } from "@/components/admin/UsagePanel";
 import { AreaChart, Area, ResponsiveContainer, BarChart, Bar, XAxis, Tooltip } from "recharts";
@@ -183,6 +184,7 @@ const NAV: { id: SectionId; label: string; icon: typeof Users }[] = [
   { id: "studio", label: "Crear con IA", icon: Sparkles },
   { id: "wallet", label: "Compras y envíos", icon: Receipt },
   { id: "promos", label: "Campañas emergentes", icon: Megaphone },
+  { id: "asistente", label: "Asistente ORÍGEN", icon: BrainCircuit },
   { id: "cerebro", label: "Cerebro ORÍGEN", icon: BrainCircuit },
   { id: "consultas", label: "Crear consultas", icon: Wand2 },
   { id: "libros", label: "Libros", icon: BookOpen },
@@ -525,6 +527,7 @@ function Admin() {
         {section === "wallet" && <WalletManager />}
         {section === "promos" && <PromoManager />}
         {section === "cerebro" && <BrainManager />}
+        {section === "asistente" && <AssistantDashboard />}
         {section === "consultas" && <><UsagePanel kind="ai" className="mb-4" /><ConsultasStudio /></>}
 
         {section === "libros" && <BooksManager />}
