@@ -122,6 +122,39 @@ export type Database = {
         }
         Relationships: []
       }
+      assistant_events: {
+        Row: {
+          created_at: string
+          id: string
+          keywords: string[]
+          kind: string
+          question: string
+          scope_ref: string | null
+          title: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          keywords?: string[]
+          kind: string
+          question?: string
+          scope_ref?: string | null
+          title?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          keywords?: string[]
+          kind?: string
+          question?: string
+          scope_ref?: string | null
+          title?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       audio_unlocks: {
         Row: {
           audio_id: string | null
