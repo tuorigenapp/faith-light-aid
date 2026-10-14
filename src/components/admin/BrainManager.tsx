@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Brain, FileText, Trash2, Eye, EyeOff, Upload } from "lucide-react";
+import { Brain, FileText, Trash2, Eye, EyeOff, Upload, RefreshCw, Pencil, FolderOpen } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { extractPdfText } from "@/lib/pdf-text";
 import { cn } from "@/lib/utils";
@@ -87,7 +87,29 @@ export function BrainManager() {
     qc.invalidateQueries({ queryKey: ["admin-brain"] });
   }
 
-  const label = (v: string) => SCOPES.find((s) => s.value === v)?.label ?? v;
+  async function replace(d: Doc, file: File | undefined) {
+    if (!file) return;
+    setBusy(file.name); setNote(null);
+    try {
+      const text = await extractPdfText(file, (p, t) => setBusy(`${file.name} — página ${p} de ${t}`));
+      if (text.trim().length < 40) throw new Error(`${file.name}: no pudimos leer texto (parece escaneado como imagen).`);
+      const { error } = await supabase.from("brain_documents").update({ content: text, chars: text.length, is_active: true }).eq("id", d.id);
+      if (error) throw error;
+      setNote({ text: `"${d.title}" quedó reemplazado con el PDF nuevo.` });
+      qc.invalidateQueries({ queryKey: ["admin-brain"] });
+    } catch (e) { setNote({ text: e instanceof Error ? e.message : "No pudimos reemplazar el PDF.", error: true }); }
+    setBusy(null);
+  }
+  async function rename(d: Doc) {
+    const t = prompt("Nuevo nombre del material", d.title)?.trim();
+    if (!t) return;
+    await supabase.from("brain_documents").update({ title: t }).eq("id", d.id);
+    qc.invalidateQueries({ queryKey: ["admin-brain"] });
+  }
+  const where = (d: Doc) => `${label(d.scope)}${d.scope_ref ? ` · ${targets.find(x => x.ref === d.scope_ref)?.title ?? d.scope_ref}` : ""}`;
+  const groups = Array.from(new Set(docs.map(where))).map(g => ({ g, items: docs.filter(d => where(d) === g) }));
+
+  function label(v: string) { return v === "camino" ? "Caminos ORÍGEN" : v === "visualiza" ? "Visualízalo y Vívelo" : SCOPES.find((s) => s.value === v)?.label ?? v; }
 
   return (
     <div className="space-y-5">
@@ -123,22 +145,28 @@ export function BrainManager() {
       <div className="grid gap-2">
         {isLoading && <div className="h-16 animate-pulse rounded-[16px] bg-muted" />}
         {!isLoading && docs.length === 0 && <p className="text-[14px] text-muted-foreground">Todavía no hay material. El primer PDF que subas aparecerá aquí.</p>}
-        {docs.map((d) => (
-          <article key={d.id} className="flex items-center gap-3 rounded-[14px] border border-border bg-card p-3">
-            <span className={cn("grid h-11 w-11 shrink-0 place-items-center rounded-[10px]", d.is_active ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")}>
-              <FileText className="h-5 w-5" />
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="truncate font-bold">{d.title}</p>
-              <p className="truncate text-[12px] text-muted-foreground">
-                {label(d.scope)}{d.scope_ref ? ` · ${targets.find(x => x.ref === d.scope_ref)?.title ?? d.scope_ref}` : ""} · {d.chars.toLocaleString("es")} letras · {d.is_active ? "activo" : "desactivado"}
-              </p>
+        {groups.map(({ g, items }) => (
+          <section key={g} className="space-y-2">
+            <h3 className="flex items-center gap-2 pt-2 text-[13px] font-bold text-foreground/80"><FolderOpen className="h-4 w-4 text-primary" /> Trabaja en: {g} <span className="text-muted-foreground">({items.length})</span></h3>
+            {items.map((d) => (
+          <article key={d.id} className="rounded-[14px] border border-border bg-card p-3">
+            <div className="flex items-center gap-3">
+              <span className={cn("grid h-11 w-11 shrink-0 place-items-center rounded-[10px]", d.is_active ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")}><FileText className="h-5 w-5" /></span>
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-bold">{d.title}</p>
+                <p className="truncate text-[12px] text-muted-foreground">{d.chars.toLocaleString("es")} letras · {d.is_active ? "activo" : "desactivado"} · {new Date(d.created_at).toLocaleDateString("es", { day: "numeric", month: "short" })}</p>
+                {d.chars < 200 && <p className="text-[12px] font-semibold text-destructive">Este PDF casi no tiene texto: reemplázalo.</p>}
+              </div>
             </div>
-            <button onClick={() => toggle(d)} aria-label={d.is_active ? "Desactivar" : "Activar"} className="grid min-h-11 w-11 place-items-center rounded-[10px] bg-primary/10 text-primary">
-              {d.is_active ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-            </button>
-            <button onClick={() => remove(d)} aria-label="Eliminar" className="grid min-h-11 w-11 place-items-center rounded-[10px] bg-destructive/10 text-destructive"><Trash2 className="h-4 w-4" /></button>
+            <div className="mt-3 grid grid-cols-4 gap-2 text-[12px] font-semibold">
+              <label className={cn("flex min-h-11 cursor-pointer flex-col items-center justify-center rounded-[10px] bg-primary/10 text-primary", busy && "pointer-events-none opacity-50")}><RefreshCw className="h-4 w-4" />Reemplazar<input type="file" accept="application/pdf" className="hidden" onChange={(e) => replace(d, e.target.files?.[0])} /></label>
+              <button onClick={() => rename(d)} className="flex min-h-11 flex-col items-center justify-center rounded-[10px] bg-primary/10 text-primary"><Pencil className="h-4 w-4" />Renombrar</button>
+              <button onClick={() => toggle(d)} className="flex min-h-11 flex-col items-center justify-center rounded-[10px] bg-primary/10 text-primary">{d.is_active ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}{d.is_active ? "Pausar" : "Activar"}</button>
+              <button onClick={() => remove(d)} className="flex min-h-11 flex-col items-center justify-center rounded-[10px] bg-destructive/10 text-destructive"><Trash2 className="h-4 w-4" />Borrar</button>
+            </div>
           </article>
+            ))}
+          </section>
         ))}
       </div>
     </div>
