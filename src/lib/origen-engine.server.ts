@@ -131,8 +131,10 @@ export async function engineReading(inp: EngineInput) {
   const b = await base(inp);
   const tone = b.lp && PATH_TONE[b.lp] ? ` Por tu fecha de nacimiento cargas ${PATH_TONE[b.lp]}.` : "";
   const focus = b.words.length ? ` Lo que preguntas sobre «${b.words.slice(0, 2).join(" y ")}» toca justo ese punto.` : "";
-  const energia = clean(`${b.first ? `${b.first}, ` : ""}${pick(b.r, BANK.energia[b.topic])}${tone}${focus}${b.brain[0] ? ` ${b.brain[0]}` : ""}`);
-  const tiempo = clean(`${pick(b.r, BANK.tiempo)} ${pick(b.r, BANK.tiempo.filter(Boolean))}`.replace(/(.+?\.)\s\1/, "$1"));
+  const e0 = pick(b.r, BANK.energia[b.topic]);
+  const energia = clean(`${b.first ? `${b.first}, ${e0.charAt(0).toLowerCase()}${e0.slice(1)}` : e0}${tone}${focus}${b.brain[0] ? ` ${b.brain[0]}` : ""}`);
+  const t1 = pick(b.r, BANK.tiempo);
+  const tiempo = clean(`${t1} ${pick(b.r, BANK.tiempo.filter(x => x !== t1))}`);
   const s1 = pick(b.r, BANK.senal);
   const senales = clean(`${s1} ${pick(b.r, BANK.senal.filter(x => x !== s1))}`);
   const mensaje = clean(`${pick(b.r, BANK.mandato[b.topic])}${b.brain[1] ? ` ${b.brain[1]}` : ""} ${pick(b.r, BANK.manana)}`);
