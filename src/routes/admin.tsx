@@ -167,6 +167,7 @@ type SectionId =
   | "wallet"
   | "promos"
   | "cerebro"
+  | "asistente"
   | "consultas"
   | "libros"
   | "audios"

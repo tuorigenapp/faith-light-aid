@@ -15,3 +15,4 @@
 - Panel-created caminos are rendered by the fixed CAMINO ORÍGEN routes via `useCamino` + `customToCamino` (content.etapas, 8 days); this keeps one design for every camino.
 - Content ids/slugs are clean title slugs with -2, -3 suffixes on collision; random suffixes made URLs unreadable.
 - AI and email calls are recorded in `usage_log` and admin-entered balances in `admin_settings`; the app cannot read the workspace credit balance directly.
+- User-facing consultas (ministración, pareja, patrones, panel consultas) run on the local `origen-engine.server.ts` composer + Cerebro ORÍGEN, logging to `assistant_events`; this keeps them free of AI credits at any user volume.
