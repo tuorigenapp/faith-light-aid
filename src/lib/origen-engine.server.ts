@@ -246,7 +246,8 @@ const ORIGEN_LINES = [
 function compose(kind: Kind, b: Awaited<ReturnType<typeof base>>, used: Set<string>, title?: string, question?: string) {
   const r = b.r, n = b.first || "alma querida";
   const t = (arr: string[]) => take(r, arr, used).replace(/\{n\}/g, n);
-  const focus = b.words.length ? `Lo que preguntas sobre «${b.words.slice(0, 3).join(", ")}» ` : "Lo que hoy te inquieta ";
+  const qq = (question || "").trim().replace(/[¿?]/g, "").slice(0, 80);
+  const focus = qq ? `Lo que preguntas —«${qq}»— ` : "Lo que hoy te inquieta ";
   const brain = () => { const x = b.brain.find(s => !used.has(s)); if (x) { used.add(x); return ` ${x}`; } return ""; };
   switch (kind) {
     case "energia": {
@@ -270,9 +271,9 @@ export async function engineReading(inp: EngineInput) {
   const used = new Set<string>();
   return {
     energia: compose("energia", b, used, inp.title, inp.question),
-    tiempo: compose("tiempo", b, used),
-    senales: compose("senales", b, used),
-    mensaje: compose("mensaje", b, used),
+    tiempo: compose("tiempo", b, used, inp.title, inp.question),
+    senales: compose("senales", b, used, inp.title, inp.question),
+    mensaje: compose("mensaje", b, used, inp.title, inp.question),
     verso: take(b.r, VERSES, used),
     topic: b.topic,
     b, used,
