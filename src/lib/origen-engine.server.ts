@@ -115,10 +115,14 @@ async function brainLines(scope: string, scopeRef: string | null | undefined, wo
   } catch { return []; }
 }
 
+function nonce() {
+  try { const a = new Uint32Array(1); crypto.getRandomValues(a); return a[0]; } catch { return Math.floor(Math.random() * 4294967295); }
+}
+
 async function base(inp: EngineInput) {
   const words = keywords(inp.question);
-  const today = new Date().toISOString().slice(0, 10);
-  const r = rng(hash(`${inp.name}|${inp.birthdate}|${inp.question}|${today}|${inp.scopeRef ?? inp.scope}`));
+  // Semilla única por consulta + petición: nunca dos respuestas iguales.
+  const r = rng(hash(`${inp.name}|${inp.birthdate}|${inp.question}|${inp.scopeRef ?? inp.scope}|${Date.now()}|${nonce()}`));
   const topic = topicOf(words, inp.scope);
   const lp = lifePath(inp.birthdate);
   const first = (inp.name || "").trim().split(/\s+/)[0] || "";
@@ -126,34 +130,168 @@ async function base(inp: EngineInput) {
   return { words, r, topic, lp, first, brain };
 }
 
+/** Toma un elemento que no se haya usado antes en esta misma respuesta. */
+function take(r: () => number, arr: string[], used: Set<string>) {
+  const free = arr.filter(x => !used.has(x));
+  const v = pick(r, free.length ? free : arr);
+  used.add(v);
+  return v;
+}
+
+const VOICE = {
+  apertura: [
+    "Al sostener tu nombre en silencio, {n}, lo primero que llega es una imagen muy nítida.",
+    "{n}, cuando me conecto con lo que escribiste, el ambiente se vuelve denso y luego se abre, como una ventana que alguien empuja desde afuera.",
+    "Antes de leer tu pregunta completa ya sentí el peso que traes, {n}.",
+    "{n}, me detengo en tu nombre y percibo que no es la primera vez que haces esta pregunta; la has repetido muchas noches por dentro.",
+    "Lo que tu historia muestra hoy, {n}, llega con fuerza y sin rodeos.",
+    "{n}, al abrir esta lectura siento calor en las manos: es señal de que lo que viene es verdad y necesitas escucharlo así, directo.",
+    "Respiro contigo un momento, {n}, y lo que se presenta primero no es miedo, es cansancio.",
+  ],
+  clarisintencia: [
+    "Siento una presión en el pecho, del lado izquierdo: es lo que estás guardando para no preocupar a nadie.",
+    "Percibo un nudo en el estómago cada vez que piensas en esto; tu cuerpo lo sabe antes que tu mente.",
+    "Me llega una sensación de frío en la espalda, como quien carga algo que no le pertenece desde hace años.",
+    "Siento que la garganta se te cierra cuando intentas decir lo que de verdad quieres; ahí está el bloqueo.",
+    "Hay una tensión en los hombros que no es física: es la responsabilidad de sostener a otros mientras nadie te sostiene a ti.",
+    "Percibo un latido acelerado al final del día, justo cuando todo queda en silencio y vuelve el pensamiento.",
+  ],
+  vision: [
+    "Veo una puerta entreabierta con luz al otro lado, y tú de pie sin decidir cruzar.",
+    "Se me muestra un camino de tierra que se divide en dos; uno está iluminado y el otro es el conocido.",
+    "Veo una mesa con una silla vacía: alguien o algo dejó un espacio que todavía no has vuelto a ocupar.",
+    "Aparece la imagen de una ventana con lluvia que se detiene de golpe y deja ver un cielo limpio.",
+    "Veo tus manos soltando una cuerda muy gastada; del otro lado no hay caída, hay suelo firme.",
+    "Se presenta un reloj detenido que vuelve a avanzar: algo que estaba pausado en tu vida retoma su curso.",
+    "Veo una casa con las luces encendidas y una conversación pendiente en la cocina.",
+    "Aparece un sobre cerrado sobre una mesa: es una noticia que ya está escrita y aún no llega a tus manos.",
+  ],
+  clariaudiencia: [
+    "Escucho con claridad una frase: «ya no tienes que demostrar nada».",
+    "Llega una palabra que se repite tres veces: «suelta, suelta, suelta».",
+    "Oigo una voz suave que dice: «lo que es para ti no se va a perder aunque te detengas a respirar».",
+    "Escucho: «no es un castigo, es una preparación».",
+    "Me llega la frase: «deja de pedir permiso para estar en paz».",
+    "Escucho tu propio nombre dicho con ternura, como lo diría alguien que te ama y ya no está cerca.",
+  ],
+  tiempo: [
+    "En los próximos 3 días algo que estaba quieto se mueve: una noticia, una conversación o una puerta que creías cerrada.",
+    "Hacia el fin de semana vas a sentir con claridad cuál es el paso correcto; no lo fuerces antes.",
+    "Antes de que termine este mes se completa un ciclo que llevas tiempo sosteniendo.",
+    "En los próximos 7 días se revela una intención que hoy está oculta; obsérvala sin reaccionar.",
+    "En unas dos semanas madura lo que hoy se está gestando en silencio.",
+    "Un martes o un jueves cercano llega una respuesta por un canal sencillo: un mensaje, una llamada o un encuentro casual.",
+    "En 21 días vas a mirar atrás y notarás que esta pregunta ya no te pesa igual.",
+    "Al cambiar la luna, en los próximos días, se cierra una etapa y se abre otra más liviana.",
+  ],
+  senal: [
+    "Vas a notar el 11:11 o el 111 repetido en un reloj, una placa o un recibo: es confirmación de que vas por buen camino.",
+    "Una palabra va a repetirse en conversaciones distintas; presta atención a ella, es tu respuesta.",
+    "Una canción que te recuerda a alguien sonará sin que la busques; tómala como recordatorio, no como orden de volver atrás.",
+    "Si ves las 3:33 o las 4:44 en el reloj, detente y respira: es momento de soltar, no de insistir.",
+    "Una persona inesperada te escribirá con un mensaje sencillo que te dará paz.",
+    "Verás una pluma blanca o una mariposa cerca de tu casa; es señal de protección.",
+    "Vas a encontrar una moneda o un objeto perdido: lo que creías perdido vuelve de otra forma.",
+    "Soñarás con agua clara; ese sueño confirma limpieza en lo que hoy te preocupa.",
+    "Alerta: si sientes prisa por responder algo importante, espera un día. La impaciencia es tu único tropiezo esta semana.",
+    "El número 7 aparecerá en una fecha, una dirección o una cuenta; marca el día en que llega el cambio.",
+  ],
+  cierre: [
+    "No estás sola en esto; lo que hoy se te muestra es para que camines más liviana.",
+    "Confía en lo que sentiste al leer estas palabras: esa reacción es tu verdad.",
+    "Guarda esta lectura y vuelve a ella en una semana; vas a reconocer lo que se cumplió.",
+    "Tu historia no termina aquí, está cambiando de capítulo.",
+    "Lo que se rompe hoy deja espacio para algo que sí te corresponde.",
+  ],
+};
+
+const ESSENCE: Record<number, string> = {
+  1: "Tu esencia trae fuerza de inicio: te toca abrir el camino sin esperar aprobación.",
+  2: "Tu esencia es sensible: percibes lo que otros callan y por eso terminas cargando lo ajeno.",
+  3: "Tu esencia es expresiva: cuando callas te apagas y cuando hablas con verdad todo se ordena.",
+  4: "Tu esencia busca suelo firme: necesitas orden antes de abrir puertas nuevas.",
+  5: "Tu esencia pide libertad y choca con lo que se repite por costumbre.",
+  6: "Tu esencia cuida a todos y olvida cuidarse a sí misma.",
+  7: "Tu esencia es profunda: necesitas silencio para escuchar lo que Dios ya te está diciendo.",
+  8: "Tu esencia tiene autoridad: tu reto es no cederla por miedo a perder.",
+  9: "Tu esencia está cerrando ciclos: te toca soltar con gratitud lo que ya cumplió su tiempo.",
+  11: "Tu esencia intuye antes de que las cosas pasen; no dudes de lo que presientes.",
+  22: "Tu esencia construye en grande cuando deja de dudar de sí.",
+};
+
+type Kind = "energia" | "tiempo" | "senales" | "mensaje" | "verso" | "vision" | "sentir" | "origen" | "consejo";
+
+function kindOf(label: string): Kind {
+  const l = label.toLowerCase();
+  if (/vers[íi]culo|biblia|escritura/.test(l)) return "verso";
+  if (/tiempo|cu[áa]ndo|fecha|plazo|futuro|pr[óo]xim/.test(l)) return "tiempo";
+  if (/se[ñn]al|confirm|n[úu]mero|sincron/.test(l)) return "senales";
+  if (/visi[óo]n|veo|imagen|revela/.test(l)) return "vision";
+  if (/sient|emoci|coraz[óo]n|cuerpo/.test(l)) return "sentir";
+  if (/origen|ra[íi]z|linaje|famil|patr[óo]n|herenc/.test(l)) return "origen";
+  if (/mensaje|gu[íi]a|dios te|palabra/.test(l)) return "mensaje";
+  if (/consejo|acci[óo]n|paso|soltar|recomend|qu[ée] hacer/.test(l)) return "consejo";
+  return "energia";
+}
+
+const ORIGEN_LINES = [
+  "Esto no empezó contigo. Del lado materno viene una forma de amar que aguanta en silencio, y tú la aprendiste antes de saber hablar.",
+  "En tu línea paterna se repite la idea de que pedir es debilidad; por eso te cuesta recibir aunque lo necesites.",
+  "Se muestra una abuela o bisabuela que tuvo que callar algo grande para proteger a la familia; esa lealtad invisible sigue viva en ti.",
+  "Hay un patrón de abandono que se repite cada generación de forma distinta: a veces es alguien que se va, a veces es alguien que está pero no se queda emocionalmente.",
+  "Tu familia te enseñó a ser fuerte para todos; hoy tu historia te pide ser fuerte para ti.",
+];
+
+/** Arma una sección de 4 a 6 frases según su tipo, sin repetir piezas dentro de la respuesta. */
+function compose(kind: Kind, b: Awaited<ReturnType<typeof base>>, used: Set<string>, title?: string, question?: string) {
+  const r = b.r, n = b.first || "alma querida";
+  const t = (arr: string[]) => take(r, arr, used).replace(/\{n\}/g, n);
+  const qq = (question || "").trim().replace(/[¿?]/g, "").slice(0, 80);
+  const focus = qq ? `Lo que preguntas —«${qq}»— ` : "Lo que hoy te inquieta ";
+  const brain = () => { const x = b.brain.find(s => !used.has(s)); if (x) { used.add(x); return ` ${x}`; } return ""; };
+  switch (kind) {
+    case "energia": {
+      const ess = b.lp && ESSENCE[b.lp] && !used.has("ess") ? (used.add("ess"), ` ${ESSENCE[b.lp]}`) : "";
+      return clean(`${t(VOICE.apertura)} ${take(r, BANK.energia[b.topic], used)} ${t(VOICE.clarisintencia)}${ess} ${focus}toca justo este punto${title ? ` de «${title}»` : ""}.${brain()}`);
+    }
+    case "vision": return clean(`${t(VOICE.vision)} ${t(VOICE.vision)} ${t(VOICE.clariaudiencia)} ${focus}tiene respuesta, y esa imagen es la respuesta.${brain()}`);
+    case "sentir": return clean(`${t(VOICE.clarisintencia)} ${t(VOICE.clarisintencia)} ${take(r, BANK.energia[b.topic], used)} No es debilidad: es tu interior pidiendo que lo escuches.`);
+    case "origen": return clean(`${t(ORIGEN_LINES)} ${t(ORIGEN_LINES)} ${t(VOICE.vision)}${brain()}`);
+    case "tiempo": return clean(`${t(VOICE.tiempo)} ${t(VOICE.tiempo)} ${t(VOICE.tiempo)} No adelantes lo que todavía se está acomodando.`);
+    case "senales": return clean(`${t(VOICE.senal)} ${t(VOICE.senal)} ${t(VOICE.senal)}`);
+    case "mensaje": return clean(`${t(VOICE.clariaudiencia)} ${take(r, BANK.mandato[b.topic], used)} ${t(VOICE.cierre)}${brain()}`);
+    case "consejo": return clean(`${take(r, BANK.mandato[b.topic], used)} ${take(r, BANK.mandato.general, used)} ${take(r, BANK.manana, used)}`);
+    case "verso": { const v = take(r, VERSES, used); return `«Confía en el Señor con todo tu corazón y no te apoyes en tu propia prudencia» — ${v}. Lee este pasaje esta noche${question ? " pensando en lo que preguntaste" : ""}; una frase te hablará directo.`; }
+  }
+}
+
 /** Respuesta de 4 puntos para cualquier consulta (incluye las creadas en el panel). */
 export async function engineReading(inp: EngineInput) {
   const b = await base(inp);
-  const tone = b.lp && PATH_TONE[b.lp] ? ` Por tu fecha de nacimiento cargas ${PATH_TONE[b.lp]}.` : "";
-  const focus = b.words.length ? ` Lo que preguntas sobre «${b.words.slice(0, 2).join(" y ")}» toca justo ese punto.` : "";
-  const e0 = pick(b.r, BANK.energia[b.topic]);
-  const energia = clean(`${b.first ? `${b.first}, ${e0.charAt(0).toLowerCase()}${e0.slice(1)}` : e0}${tone}${focus}${b.brain[0] ? ` ${b.brain[0]}` : ""}`);
-  const t1 = pick(b.r, BANK.tiempo);
-  const tiempo = clean(`${t1} ${pick(b.r, BANK.tiempo.filter(x => x !== t1))}`);
-  const s1 = pick(b.r, BANK.senal);
-  const senales = clean(`${s1} ${pick(b.r, BANK.senal.filter(x => x !== s1))}`);
-  const mensaje = clean(`${pick(b.r, BANK.mandato[b.topic])}${b.brain[1] ? ` ${b.brain[1]}` : ""} ${pick(b.r, BANK.manana)}`);
-  return { energia, tiempo, senales, mensaje, verso: pick(b.r, VERSES), topic: b.topic };
+  const used = new Set<string>();
+  return {
+    energia: compose("energia", b, used, inp.title, inp.question),
+    tiempo: compose("tiempo", b, used, inp.title, inp.question),
+    senales: compose("senales", b, used, inp.title, inp.question),
+    mensaje: compose("mensaje", b, used, inp.title, inp.question),
+    verso: take(b.r, VERSES, used),
+    topic: b.topic,
+    b, used,
+  };
 }
 
-/** Llena las secciones definidas en el panel según su nombre. */
+/** Llena las secciones definidas en el panel según su nombre; cada una con texto propio. */
 export async function engineSections(inp: EngineInput, sections: { key: string; label: string; hint?: string }[]) {
-  const x = await engineReading(inp);
-  const pool = [x.energia, x.tiempo, x.senales, x.mensaje];
+  const b = await base(inp);
+  const used = new Set<string>();
   const out: Record<string, string> = {};
+  const order: Kind[] = ["energia", "vision", "origen", "sentir", "tiempo", "senales", "consejo", "mensaje"];
+  const seen = new Set<Kind>();
   sections.forEach((s, i) => {
-    const l = `${s.label} ${s.hint ?? ""}`.toLowerCase();
-    out[s.key] = /energ|vibra|canaliz|situaci|present|hoy/.test(l) ? x.energia
-      : /tiempo|cu[áa]ndo|fecha|plazo|futuro/.test(l) ? x.tiempo
-      : /se[ñn]al|confirm|n[úu]mero/.test(l) ? x.senales
-      : /mensaje|gu[íi]a|consejo|acci[óo]n|paso|soltar/.test(l) ? x.mensaje
-      : /vers[íi]culo|palabra|biblia/.test(l) ? `«Confía en el Señor con todo tu corazón» — ${x.verso}`
-      : pool[i % pool.length];
+    let k = kindOf(`${s.label} ${s.hint ?? ""}`);
+    if (seen.has(k)) k = order.find(o => !seen.has(o)) ?? order[i % order.length];
+    seen.add(k);
+    out[s.key] = compose(k, b, used, inp.title, inp.question);
   });
   return out;
 }

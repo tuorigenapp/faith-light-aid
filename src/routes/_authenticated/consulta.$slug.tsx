@@ -7,6 +7,41 @@ import { printConsulta } from "@/lib/print-pdf";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { cn } from "@/lib/utils";
+import { useEffect } from "react";
+import i1 from "@/assets/e3d-star.png";
+import i2 from "@/assets/e3d-heartgem.png";
+import i3 from "@/assets/e3d-clouds.png";
+import i4 from "@/assets/e3d-butterfly.png";
+import i5 from "@/assets/e3d-cross.png";
+import i6 from "@/assets/e3d-heart-purple.png";
+import i7 from "@/assets/e3d-book.png";
+
+const ICONS3D = [i1, i2, i3, i4, i5, i6, i7];
+
+function LoadingReading({ name, question }: { name: string; question: string }) {
+  const first = name.trim().split(/\s+/)[0] || "";
+  const q = question.trim().slice(0, 60);
+  const lines = [
+    `Conectando con tu nombre${first ? `, ${first}` : ""}…`,
+    `Sosteniendo tu pregunta: «${q}${question.length > 60 ? "…" : ""}»`,
+    "Escuchando lo que tu historia quiere decirte…",
+    "Preparando tu respuesta personal…",
+  ];
+  const [i, setI] = useState(0);
+  useEffect(() => { const t = setInterval(() => setI((x) => Math.min(x + 1, lines.length - 1)), 1300); return () => clearInterval(t); }, [lines.length]);
+  return (
+    <section className="flex flex-col items-center gap-5 rounded-[16px] border border-border bg-card px-4 py-10 text-center">
+      <div className="relative h-28 w-28">
+        <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90">
+          <circle cx="50" cy="50" r="44" className="fill-none stroke-muted" strokeWidth="6" />
+          <circle cx="50" cy="50" r="44" className="fill-none stroke-primary transition-all duration-1000" strokeWidth="6" strokeLinecap="round" strokeDasharray="276" strokeDashoffset={276 - (276 * (i + 1)) / lines.length} />
+        </svg>
+        <img src={i1} alt="" className="absolute inset-0 m-auto h-14 w-14 animate-pulse object-contain" />
+      </div>
+      <p key={i} className="animate-in fade-in min-h-12 max-w-[320px] text-[16px] font-semibold">{lines[i]}</p>
+    </section>
+  );
+}
 
 export const Route = createFileRoute("/_authenticated/consulta/$slug")({
   head: () => ({
@@ -45,7 +80,7 @@ function ConsultaPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [answer, setAnswer] = useState<Record<string, string> | null>(null);
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useState<1 | 2 | 3>(2);
 
   const { data: consulta, isLoading } = useQuery({
     queryKey: ["consulta", slug],
@@ -68,6 +103,7 @@ function ConsultaPage() {
     setBusy(true);
     setError(null);
     setAnswer(null);
+    const started = Date.now();
     try {
       const { data: session } = await supabase.auth.getSession();
       const res = await fetch("/api/consulta", {
@@ -77,6 +113,8 @@ function ConsultaPage() {
       });
       const json = (await res.json()) as Record<string, string> & { error?: string };
       if (!res.ok || json.error) throw new Error(json.error || "No pudimos preparar tu respuesta.");
+      const wait = 4500 - (Date.now() - started);
+      if (wait > 0) await new Promise((r) => setTimeout(r, wait));
       setAnswer(json);
       setStep(3);
       if (user?.id && consulta?.id) {
@@ -130,9 +168,7 @@ function ConsultaPage() {
         </div>
       </header>
 
-      {step === 1 && <section className="space-y-4"><h2 className="font-display text-[20px] font-bold">Lo que recibirás</h2><div className="grid gap-3 sm:grid-cols-2">{consulta.sections.map(s => <article key={s.key} className="rounded-xl border border-border bg-card p-4"><Sparkles className="mb-2 h-5 w-5 text-primary" /><h3 className="font-semibold">{s.label}</h3>{s.hint && <p className="mt-1 text-sm text-muted-foreground">{s.hint}</p>}</article>)}</div><Button className="min-h-14 w-full" onClick={() => setStep(2)}>Preparar mi respuesta</Button></section>}
-      {step === 2 && <section className="space-y-3 rounded-[16px] border border-border bg-card p-4">
-        <Button variant="ghost" onClick={() => setStep(1)}><ArrowLeft className="h-4 w-4" /> Presentación</Button>
+      {step !== 3 && !busy && <section className="space-y-3 rounded-[16px] border border-border bg-card p-4">
         <label className="block text-[13px] font-semibold text-foreground/80">Tu nombre completo
           <input className={cn(input, "mt-1")} value={name} onChange={(e) => setName(e.target.value)} placeholder="Como aparece en tu documento" />
         </label>
@@ -150,26 +186,25 @@ function ConsultaPage() {
           <span className="mt-1 block text-right text-[12px] text-muted-foreground">{question.length}/1000</span>
         </label>
         {error && <p className="text-[13px] font-semibold text-destructive">{error}</p>}
-        <button onClick={ask} disabled={busy} className="inline-flex min-h-[54px] w-full items-center justify-center gap-2 rounded-[12px] bg-primary text-[16px] font-bold text-primary-foreground shadow-elev disabled:opacity-60">
-          {busy ? "Preparando tu respuesta…" : <><Sparkles className="h-5 w-5" /> Ver mi respuesta</>}
+        <button onClick={ask} disabled={busy} className="inline-flex min-h-[54px] w-full items-center justify-center gap-2 rounded-[12px] bg-primary text-[16px] font-bold text-primary-foreground shadow-elev active:scale-[.97] disabled:opacity-60">
+          <Sparkles className="h-5 w-5" /> Ver mi respuesta
         </button>
       </section>}
 
-      {busy && (
-        <div className="space-y-2">
-          {[0, 1, 2].map((i) => <div key={i} className="h-20 animate-pulse rounded-[16px] bg-muted" />)}
-        </div>
-      )}
+      {busy && <LoadingReading name={name} question={question} />}
 
-      {answer && (
+      {answer && !busy && (
         <section className="space-y-3">
           <h2 className="font-display text-[22px] font-bold">Tu respuesta personal</h2>
-          <div className="flex flex-wrap gap-2">{[["Descargar PDF", Download], ["Imprimir", Printer]].map(([label, Icon]) => { const ExportIcon = Icon as typeof Download; return <Button key={String(label)} variant="outline" onClick={() => printConsulta({ kind: "Respuesta personal", title: consulta.title, userName: name, userEmail: user?.email, sections: consulta.sections.map(s => ({ title: s.label, body: answer[s.key] ?? "" })) })}><ExportIcon className="h-4 w-4" /> {String(label)}</Button>; })}<Button variant="secondary" onClick={() => { setAnswer(null); setStep(2); }}>Nueva pregunta</Button></div>
-          {consulta.sections.map((s) =>
+          <div className="flex flex-wrap gap-2">{[["Descargar PDF", Download], ["Imprimir", Printer]].map(([label, Icon]) => { const ExportIcon = Icon as typeof Download; return <Button key={String(label)} variant="outline" onClick={() => printConsulta({ kind: "Respuesta personal", title: consulta.title, userName: name, userEmail: user?.email, sections: consulta.sections.map(s => ({ title: s.label, body: answer[s.key] ?? "" })) })}><ExportIcon className="h-4 w-4" /> {String(label)}</Button>; })}<Button variant="secondary" onClick={() => { setAnswer(null); setQuestion(""); setStep(2); }}>Nueva pregunta</Button></div>
+          {consulta.sections.map((s, i) =>
             answer[s.key] ? (
-              <article key={s.key} className="rounded-[16px] border border-border bg-card p-4">
-                <p className="text-[12px] font-bold uppercase tracking-wide text-primary">{s.label}</p>
-                <p className="mt-1 whitespace-pre-wrap text-[15px] leading-[1.55] text-foreground/90">{answer[s.key]}</p>
+              <article key={s.key} className="animate-in fade-in slide-in-from-bottom-2 rounded-[16px] border border-border bg-card p-4" style={{ animationDelay: `${i * 70}ms`, animationFillMode: "both" }}>
+                <div className="flex items-center gap-3">
+                  <img src={ICONS3D[i % ICONS3D.length]} alt="" className="h-12 w-12 shrink-0 object-contain" />
+                  <p className="font-display text-[17px] font-bold text-primary">{s.label}</p>
+                </div>
+                <p className="mt-2 whitespace-pre-wrap text-[15px] leading-[1.6] text-foreground/90">{answer[s.key]}</p>
               </article>
             ) : null,
           )}
