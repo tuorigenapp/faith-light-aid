@@ -80,7 +80,7 @@ function ConsultaPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [answer, setAnswer] = useState<Record<string, string> | null>(null);
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useState<1 | 2 | 3>(2);
 
   const { data: consulta, isLoading } = useQuery({
     queryKey: ["consulta", slug],
@@ -103,6 +103,7 @@ function ConsultaPage() {
     setBusy(true);
     setError(null);
     setAnswer(null);
+    const started = Date.now();
     try {
       const { data: session } = await supabase.auth.getSession();
       const res = await fetch("/api/consulta", {
@@ -112,6 +113,8 @@ function ConsultaPage() {
       });
       const json = (await res.json()) as Record<string, string> & { error?: string };
       if (!res.ok || json.error) throw new Error(json.error || "No pudimos preparar tu respuesta.");
+      const wait = 4500 - (Date.now() - started);
+      if (wait > 0) await new Promise((r) => setTimeout(r, wait));
       setAnswer(json);
       setStep(3);
       if (user?.id && consulta?.id) {
