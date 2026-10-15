@@ -7,6 +7,41 @@ import { printConsulta } from "@/lib/print-pdf";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { cn } from "@/lib/utils";
+import { useEffect } from "react";
+import i1 from "@/assets/e3d-star.png";
+import i2 from "@/assets/e3d-heartgem.png";
+import i3 from "@/assets/e3d-clouds.png";
+import i4 from "@/assets/e3d-butterfly.png";
+import i5 from "@/assets/e3d-cross.png";
+import i6 from "@/assets/e3d-heart-purple.png";
+import i7 from "@/assets/e3d-book.png";
+
+const ICONS3D = [i1, i2, i3, i4, i5, i6, i7];
+
+function LoadingReading({ name, question }: { name: string; question: string }) {
+  const first = name.trim().split(/\s+/)[0] || "";
+  const q = question.trim().slice(0, 60);
+  const lines = [
+    `Conectando con tu nombre${first ? `, ${first}` : ""}…`,
+    `Sosteniendo tu pregunta: «${q}${question.length > 60 ? "…" : ""}»`,
+    "Escuchando lo que tu historia quiere decirte…",
+    "Preparando tu respuesta personal…",
+  ];
+  const [i, setI] = useState(0);
+  useEffect(() => { const t = setInterval(() => setI((x) => Math.min(x + 1, lines.length - 1)), 1300); return () => clearInterval(t); }, [lines.length]);
+  return (
+    <section className="flex flex-col items-center gap-5 rounded-[16px] border border-border bg-card px-4 py-10 text-center">
+      <div className="relative h-28 w-28">
+        <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90">
+          <circle cx="50" cy="50" r="44" className="fill-none stroke-muted" strokeWidth="6" />
+          <circle cx="50" cy="50" r="44" className="fill-none stroke-primary transition-all duration-1000" strokeWidth="6" strokeLinecap="round" strokeDasharray="276" strokeDashoffset={276 - (276 * (i + 1)) / lines.length} />
+        </svg>
+        <img src={i1} alt="" className="absolute inset-0 m-auto h-14 w-14 animate-pulse object-contain" />
+      </div>
+      <p key={i} className="animate-in fade-in min-h-12 max-w-[320px] text-[16px] font-semibold">{lines[i]}</p>
+    </section>
+  );
+}
 
 export const Route = createFileRoute("/_authenticated/consulta/$slug")({
   head: () => ({
