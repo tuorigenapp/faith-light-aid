@@ -177,7 +177,7 @@ function AuthLayoutInner() {
   const isActive = (to: string) =>
     location.pathname === to || (to !== "/dashboard" && location.pathname.startsWith(to));
 
-  const FOCUS = ["/visualiza", "/ejercicios", "/caminos", "/camino-nuevo", "/etapas", "/juegos/", "/palabra", "/programas", "/chat", "/patrones", "/pareja", "/ministracion", "/diagnostico"];
+  const FOCUS = ["/visualiza", "/ejercicios", "/caminos", "/camino-nuevo", "/etapas", "/juegos/", "/palabra", "/programas", "/chat", "/patrones", "/pareja", "/ministracion", "/consulta/", "/diagnostico"];
   const focusMode = FOCUS.some((f) => location.pathname.startsWith(f));
   const immersive = location.pathname.startsWith("/onboarding") || location.pathname.startsWith("/ruleta");
   if (immersive) {
