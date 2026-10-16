@@ -280,11 +280,34 @@ export async function engineReading(inp: EngineInput) {
   };
 }
 
+const TITLE_BY_KIND: Record<Kind, string[]> = {
+  energia: ["Lo que se percibe en ti hoy", "Tu estado interior en este momento", "Cómo está tu energía hoy"],
+  vision: ["Lo que se revela de tu situación", "Lo que se ve con claridad", "Lo que hay detrás de tu pregunta"],
+  origen: ["De dónde viene lo que vives", "La raíz de lo que se repite", "Lo que tu historia te muestra"],
+  sentir: ["Lo que tu corazón está cargando", "Lo que sientes y no has dicho", "Lo que tu cuerpo te avisa"],
+  tiempo: ["Lo que viene en los próximos días", "Tu línea de tiempo", "Cuándo se mueve lo que esperas"],
+  senales: ["Señales para confirmar", "Presta atención a esto", "Lo que te va a confirmar el camino"],
+  consejo: ["Lo que te toca hacer hoy", "Tu paso concreto", "Qué soltar y qué abrazar"],
+  mensaje: ["El mensaje de tus guías", "Lo que Dios quiere que escuches", "Tu palabra para hoy"],
+  verso: ["Una palabra para sostenerte", "Tu versículo de hoy", "Escritura para tu camino"],
+};
+const HEADLINE: Record<Topic, string[]> = {
+  pareja: ["El amor que buscas empieza por cómo te tratas a ti", "Lo que está entre ustedes ya se está revelando", "Tu corazón merece una respuesta clara"],
+  familia: ["Lo que se repite en tu familia puede terminar contigo", "Tu historia no te condena, te prepara", "Hoy puedes soltar lo que heredaste sin elegir"],
+  dinero: ["Tu abundancia se desbloquea cuando dejas de dudar", "La puerta que esperas ya se está moviendo", "Mereces crecer sin pedir permiso"],
+  salud: ["Tu paz vuelve cuando te escuchas de verdad", "Lo que sientes tiene un origen y tiene salida", "Tu interior te está pidiendo una pausa sagrada"],
+  decision: ["La respuesta ya vive dentro de ti", "Es tiempo de elegir sin miedo", "Tu siguiente paso está más claro de lo que crees"],
+  perdida: ["El amor que perdiste sigue vivo de otra forma", "Tu dolor también es un camino de regreso a ti", "Lo que partió te dejó una misión"],
+  fe: ["Dios no se ha ido: te está hablando distinto", "Tu propósito está despertando", "Hoy el Cielo te responde"],
+  general: ["Lo que necesitas saber hoy ya está aquí", "Tu camino se aclara un paso a la vez", "Hoy tu historia te habla con claridad"],
+};
+
 /** Llena las secciones definidas en el panel según su nombre; cada una con texto propio. */
 export async function engineSections(inp: EngineInput, sections: { key: string; label: string; hint?: string }[]) {
   const b = await base(inp);
   const used = new Set<string>();
   const out: Record<string, string> = {};
+  const titles: Record<string, string> = {};
   const order: Kind[] = ["energia", "vision", "origen", "sentir", "tiempo", "senales", "consejo", "mensaje"];
   const seen = new Set<Kind>();
   sections.forEach((s, i) => {
@@ -292,7 +315,10 @@ export async function engineSections(inp: EngineInput, sections: { key: string; 
     if (seen.has(k)) k = order.find(o => !seen.has(o)) ?? order[i % order.length];
     seen.add(k);
     out[s.key] = compose(k, b, used, inp.title, inp.question);
+    titles[s.key] = pick(b.r, TITLE_BY_KIND[k]);
   });
+  out.__headline = pick(b.r, HEADLINE[b.topic as Topic] ?? HEADLINE.general);
+  out.__titles = JSON.stringify(titles);
   return out;
 }
 
