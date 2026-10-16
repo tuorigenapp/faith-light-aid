@@ -824,6 +824,7 @@ export type Database = {
           intro: string | null
           is_published: boolean
           notes: string | null
+          question_required: boolean
           sections: Json
           slug: string
           sort_order: number
@@ -840,6 +841,7 @@ export type Database = {
           intro?: string | null
           is_published?: boolean
           notes?: string | null
+          question_required?: boolean
           sections?: Json
           slug: string
           sort_order?: number
@@ -856,6 +858,7 @@ export type Database = {
           intro?: string | null
           is_published?: boolean
           notes?: string | null
+          question_required?: boolean
           sections?: Json
           slug?: string
           sort_order?: number
