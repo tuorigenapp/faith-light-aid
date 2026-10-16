@@ -18,7 +18,7 @@ export const Route = createFileRoute("/api/consulta")({
         if (!token) return Response.json({ error: "Inicia sesión para ver tu respuesta." }, { status: 401 });
         const { data: auth } = await supabaseAdmin.auth.getUser(token);
         if (!auth.user) return Response.json({ error: "Tu sesión venció. Vuelve a entrar." }, { status: 401 });
-        const parsedBody = z.object({ slug: z.string().min(1).max(100), name: z.string().trim().min(3).max(200), birthdate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), question: z.string().trim().min(5).max(1000) }).safeParse(await request.json());
+        const parsedBody = z.object({ slug: z.string().min(1).max(100), name: z.string().trim().min(3).max(200), birthdate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), question: z.string().trim().max(1000).default("") }).safeParse(await request.json());
         if (!parsedBody.success) return Response.json({ error: "Revisa tu nombre, fecha y pregunta." }, { status: 400 });
         const body = parsedBody.data;
         if (!body.slug) return new Response(JSON.stringify({ error: "Falta la consulta" }), { status: 400 });
@@ -33,8 +33,8 @@ export const Route = createFileRoute("/api/consulta")({
         }
 
         const sections = (consulta.sections ?? []) as { key: string; label: string; hint?: string }[];
-        const parsed = await engineSections({ scope: "consulta", scopeRef: consulta.slug, name: body.name, birthdate: body.birthdate, question: body.question, title: consulta.title }, sections);
-        await logAssistant("consulta", auth.user.id, body.question, consulta.slug, consulta.title);
+        const parsed = await engineSections({ scope: "consulta", scopeRef: consulta.slug, name: body.name, birthdate: body.birthdate, question: body.question || consulta.title, title: consulta.title }, sections);
+        await logAssistant("consulta", auth.user.id, body.question || consulta.title, consulta.slug, consulta.title);
         return Response.json(parsed);
       },
     },
