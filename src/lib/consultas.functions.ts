@@ -33,6 +33,7 @@ export const adminCreateConsulta = createServerFn({ method: "POST" })
         withCover: z.boolean().default(true),
         existingId: z.string().uuid().optional(),
         design: z.enum(["patrones", "ministracion"]).default("patrones"),
+        questionRequired: z.boolean().default(true),
       })
       .parse(input),
   )
@@ -94,9 +95,10 @@ Devuelve JSON con:
         cost_hojas: data.costHojas,
         is_published: true,
       };
+    const qr = { question_required: data.questionRequired } as Record<string, unknown>;
     const query = data.existingId
-      ? supabaseAdmin.from("custom_consultas").update({ subtitle: payload.subtitle, notes: payload.notes, cover_url: payload.cover_url, intro: payload.intro, sections: payload.sections, system_prompt: payload.system_prompt }).eq("id", data.existingId)
-      : supabaseAdmin.from("custom_consultas").insert(payload);
+      ? supabaseAdmin.from("custom_consultas").update({ subtitle: payload.subtitle, notes: payload.notes, cover_url: payload.cover_url, intro: payload.intro, sections: payload.sections, system_prompt: payload.system_prompt, ...qr }).eq("id", data.existingId)
+      : supabaseAdmin.from("custom_consultas").insert({ ...payload, ...qr });
     const { data: row, error } = await query.select("id, slug, title").single();
     if (error) throw new Error(error.message);
     return row;
