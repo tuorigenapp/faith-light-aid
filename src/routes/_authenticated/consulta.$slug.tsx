@@ -192,9 +192,13 @@ function ConsultaPage() {
     }
   }
 
+  function titlesOf(ans: Record<string, string>): Record<string, string> {
+    try { return ans.__titles ? JSON.parse(ans.__titles) : {}; } catch { return {}; }
+  }
   function exportPdf(ans: Record<string, string>, who: string) {
     if (!consulta) return;
-    printConsulta({ kind: "Respuesta personal", title: consulta.title, userName: who, userEmail: user?.email, sections: consulta.sections.map((s) => ({ title: s.label, body: ans[s.key] ?? "" })) });
+    const t = titlesOf(ans);
+    printConsulta({ kind: consulta.title, title: ans.__headline || consulta.title, userName: who, userEmail: user?.email, sections: consulta.sections.filter((s) => ans[s.key]).map((s) => ({ title: t[s.key] || s.label, body: ans[s.key] ?? "" })) });
   }
 
   if (isLoading) {
