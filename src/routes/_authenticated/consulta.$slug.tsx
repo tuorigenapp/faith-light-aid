@@ -301,21 +301,24 @@ function ConsultaPage() {
 
       {step === 3 && answer && (
         <section className="space-y-3">
-          <h2 className="font-display text-[24px] font-bold leading-tight">Tu respuesta personal</h2>
+          <div className="rounded-[16px] bg-primary/10 p-5 text-center">
+            <p className="text-[12px] font-semibold uppercase tracking-widest text-primary">{consulta.title}</p>
+            <h2 className="mt-2 font-display text-[26px] font-bold leading-[1.15]">{answer.__headline || consulta.subtitle || consulta.title}</h2>
+          </div>
           {consulta.sections.map((s, i) =>
             answer[s.key] ? (
               <article key={s.key} className="animate-in fade-in slide-in-from-bottom-2 rounded-[16px] border border-border bg-card p-4" style={{ animationDelay: `${i * 70}ms`, animationFillMode: "both" }}>
                 <div className="flex items-center gap-3">
                   <img src={ICONS3D[i % ICONS3D.length]} alt="" className="h-12 w-12 shrink-0 object-contain" />
-                  <p className="font-display text-[17px] font-bold text-primary">{s.label}</p>
+                  <p className="font-display text-[17px] font-bold text-primary">{titlesOf(answer)[s.key] || s.label}</p>
                 </div>
                 <p className="mt-2 whitespace-pre-wrap text-[15px] leading-[1.6] text-foreground/90">{answer[s.key]}</p>
               </article>
             ) : null,
           )}
-          <div className="grid grid-cols-2 gap-2 pt-2">
-            <Button variant="outline" className="min-h-12" onClick={() => exportPdf(answer, answerName)}><Download className="h-4 w-4" /> Descargar PDF</Button>
-            <Button variant="outline" className="min-h-12" onClick={() => exportPdf(answer, answerName)}><Printer className="h-4 w-4" /> Imprimir</Button>
+          <div className="relative z-10 grid grid-cols-2 gap-2 pt-2">
+            <button type="button" className="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-[12px] border-[1.5px] border-border bg-card text-[15px] font-semibold active:scale-[.97]" onClick={() => exportPdf(answer, answerName)}><Download className="h-4 w-4" /> Descargar PDF</button>
+            <button type="button" className="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-[12px] border-[1.5px] border-border bg-card text-[15px] font-semibold active:scale-[.97]" onClick={() => exportPdf(answer, answerName)}><Printer className="h-4 w-4" /> Imprimir</button>
           </div>
           <button onClick={() => { setAnswer(null); setQuestion(""); setStep(1); }} className="inline-flex min-h-[54px] w-full items-center justify-center gap-2 rounded-[12px] bg-primary text-[16px] font-bold text-primary-foreground active:scale-[.97]">
             <Sparkles className="h-5 w-5" /> Hacer otra pregunta
