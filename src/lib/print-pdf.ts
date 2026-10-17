@@ -73,7 +73,14 @@ export type ConsultaPDFOptions = {
  * (pareja, patrones, ministración). Usa la técnica de ventana + window.print().
  */
 export function printConsulta(opts: ConsultaPDFOptions) {
-  const w = window.open("", "_blank", "width=800,height=1000");
+  // Hidden iframe: works inside the app preview and on phones where popups are blocked.
+  document.getElementById("origen-print-frame")?.remove();
+  const frame = document.createElement("iframe");
+  frame.id = "origen-print-frame";
+  frame.setAttribute("aria-hidden", "true");
+  frame.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0;opacity:0;";
+  document.body.appendChild(frame);
+  const w = frame.contentWindow;
   if (!w) return;
   const planLabel = opts.plan ?? "Explorador";
   const dateStr = opts.date ?? new Date().toLocaleDateString("es", { dateStyle: "long" });
