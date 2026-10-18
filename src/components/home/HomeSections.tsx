@@ -61,7 +61,7 @@ export function HomeHero({ name, stage, total, to }: { name: string; stage: numb
         </span>
         <h2 className="mt-2 font-serif text-[32px] sm:text-[40px] leading-[1.05] text-[#211C32]">Tu camino continúa</h2>
         <p className="mt-2 text-[13px] leading-snug text-[#45405a]">
-          {name}, Ruth Esther ya adaptó tu camino a ti. Sigue avanzando y descubre lo que viene.
+          Hola {name}: Ruth Esther ya adaptó tu camino a ti. Sigue avanzando y descubre lo que viene para ti.
         </p>
         <div className="mt-3 flex items-center gap-1" aria-label={`Etapa ${stage} de ${total}`}>
           {Array.from({ length: Math.min(total, 8) }).map((_, i) => (
@@ -182,7 +182,7 @@ export function OrigenCommunityBanner() {
           ))}
         </div>
         <p className="text-[10.5px] font-bold uppercase tracking-wider text-white/80">Comunidad ORÍGEN · Abierta para todos</p>
-        <h3 className="mt-1 font-display font-bold text-[20px] leading-tight">No tienes que vivirlo en soledad.</h3>
+        <h3 className="mt-1 font-display font-bold text-[20px] leading-tight text-white">No tienes que vivirlo en soledad.</h3>
         <p className="mt-1 text-[12.5px] text-white/85 max-w-[80%]">Comparte una pregunta, acompaña a alguien y encuentra nuevas perspectivas.</p>
         <div className="mt-3 flex items-center justify-between gap-2">
           <span className="inline-flex h-10 items-center gap-2 rounded-full bg-white px-4 text-[13px] font-bold text-[#45258E]">Entrar a la comunidad <ArrowRight className="w-4 h-4" /></span>
