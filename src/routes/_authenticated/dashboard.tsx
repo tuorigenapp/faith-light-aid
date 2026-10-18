@@ -6,12 +6,9 @@ import { useQuery } from "@tanstack/react-query";
 import { HealingTree } from "@/components/HealingTree";
 import { DailyReflection } from "@/components/DailyReflection";
 import { DailyQuiz } from "@/components/DailyQuiz";
-import { DailyExercises } from "@/components/DailyExercises";
 import { CategoriaSlider } from "@/components/CategoriaSlider";
 import { ManifestacionSlider } from "@/components/ManifestacionSlider";
 import { SonidosHome } from "@/components/SonidosHome";
-import { PalabrasHoy } from "@/components/PalabrasHoy";
-import { BibliotecaSlider } from "@/components/BibliotecaSlider";
 import { PrimerosPasos } from "@/components/PrimerosPasos";
 import { GuidedTour } from "@/components/GuidedTour";
 import { useEffect } from "react";
@@ -20,18 +17,14 @@ import { checkLocalReminder, showLocalNotification } from "@/lib/notifications";
 import { celebrateOnce, milestoneMessage } from "@/lib/celebrate";
 
 
-import { DailyGames } from "@/components/games/DailyGames";
+import { HomeHero, OrigenPillars, DailyExerciseBanner, DigitalLibraryCarousel, DailyMessageBanner, OrigenCommunityBanner, HealingPracticesCarousel, VisualizeAndLiveCarousel, DailyGamesSection } from "@/components/home/HomeSections";
+import arbolImg from "@/assets/home/arbol.jpg";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import {
   ArrowRight, Flame,
   Layers, Lock, Sparkles, Trophy,
 } from "lucide-react";
-import pilarMentora from "@/assets/pilar-mentora.png";
-import pilarPareja from "@/assets/pilar-pareja.png";
-import pilarPatron from "@/assets/pilar-patron.png";
-import pilarMinistracion from "@/assets/dios-te-dice-hoy.png";
-import visualizaBanner from "@/assets/visualiza-banner-home-v2.png";
 import afiliacionBanner from "@/assets/afiliacion-origen-home.png";
 import { FEATURED_EXPLORE } from "@/lib/explore-content";
 import { cn } from "@/lib/utils";
@@ -195,15 +188,4 @@ function Dashboard() {
     </div>
   );
 }
-
-function PilarBanner({ to, image, alt }: { to: string; image: string; alt: string }) {
-  return (
-    <Link to={to} className="block rounded-[20px] overflow-hidden shadow-soft hover:shadow-glow transition-all hover-scale">
-      <img src={image} alt={alt} loading="lazy" className="w-full h-auto block" />
-    </Link>
-  );
-}
-
-
-
 
