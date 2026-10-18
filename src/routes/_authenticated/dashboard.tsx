@@ -6,12 +6,9 @@ import { useQuery } from "@tanstack/react-query";
 import { HealingTree } from "@/components/HealingTree";
 import { DailyReflection } from "@/components/DailyReflection";
 import { DailyQuiz } from "@/components/DailyQuiz";
-import { DailyExercises } from "@/components/DailyExercises";
 import { CategoriaSlider } from "@/components/CategoriaSlider";
 import { ManifestacionSlider } from "@/components/ManifestacionSlider";
 import { SonidosHome } from "@/components/SonidosHome";
-import { PalabrasHoy } from "@/components/PalabrasHoy";
-import { BibliotecaSlider } from "@/components/BibliotecaSlider";
 import { PrimerosPasos } from "@/components/PrimerosPasos";
 import { GuidedTour } from "@/components/GuidedTour";
 import { useEffect } from "react";
@@ -20,18 +17,14 @@ import { checkLocalReminder, showLocalNotification } from "@/lib/notifications";
 import { celebrateOnce, milestoneMessage } from "@/lib/celebrate";
 
 
-import { DailyGames } from "@/components/games/DailyGames";
+import { HomeHero, OrigenPillars, DailyExerciseBanner, DigitalLibraryCarousel, DailyMessageBanner, OrigenCommunityBanner, HealingPracticesCarousel, VisualizeAndLiveCarousel, DailyGamesSection } from "@/components/home/HomeSections";
+import arbolImg from "@/assets/home/arbol.jpg";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import {
   ArrowRight, Flame,
   Layers, Lock, Sparkles, Trophy,
 } from "lucide-react";
-import pilarMentora from "@/assets/pilar-mentora.png";
-import pilarPareja from "@/assets/pilar-pareja.png";
-import pilarPatron from "@/assets/pilar-patron.png";
-import pilarMinistracion from "@/assets/dios-te-dice-hoy.png";
-import visualizaBanner from "@/assets/visualiza-banner-home-v2.png";
 import afiliacionBanner from "@/assets/afiliacion-origen-home.png";
 import { FEATURED_EXPLORE } from "@/lib/explore-content";
 import { cn } from "@/lib/utils";
@@ -115,131 +108,28 @@ function Dashboard() {
         {/* Primeros pasos — solo mientras falte algo */}
         <PrimerosPasos />
 
-        {/* Hero mission */}
+        <HomeHero
+          name={displayName}
+          stage={Math.min(20, completed + 1)}
+          total={20}
+          to={hasOnboarding ? "/etapas" : "/onboarding"}
+        />
+        <OrigenPillars />
+        <DailyExerciseBanner done={streakDates.has(todayIso())} streak={activeCount} />
+        <DigitalLibraryCarousel />
+        <DailyMessageBanner name={displayName} />
+        <OrigenCommunityBanner />
+        <HealingTree bannerImage={arbolImg} />
+        <HealingPracticesCarousel />
+        <VisualizeAndLiveCarousel />
+        <DailyGamesSection />
 
-        <div className="hero-card">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] uppercase tracking-widest font-bold text-primary">Tu misión de hoy</span>
-            <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-secondary text-primary">
-              {aiPlan.pattern_name ?? "Personalizado"}
-            </span>
-          </div>
-          <h2 className="font-display font-bold text-[20px] leading-tight">
-            {hasOnboarding ? "Continúa tu Camino ORIGEN" : "Primero personalizamos tu caso"}
-          </h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            {hasOnboarding
-              ? `Ruth Esther ya adaptó tu camino. Llevas ${completed} etapas completadas.`
-              : "El onboarding recoge tu historia para que ORIGEN encuentre tu punto de partida."}
-          </p>
-          <Link
-            to={hasOnboarding ? "/etapas" : "/onboarding"}
-            className="mt-4 btn-primary-gradient w-full h-[54px] rounded-[14px] flex items-center justify-center gap-2 text-[15px]"
-          >
-            {hasOnboarding ? "Ver mis etapas" : "Completar onboarding"}
-            <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
-
-        {/* 3 pilares principales */}
-        <section>
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="font-display font-bold text-[15px]">Los 4 pilares más TOP del Método ORIGEN🔥</h3>
-          </div>
-          <div className="hairline-brand mb-3" />
-
-          <div className="space-y-3">
-            <PilarBanner to="/chat" image={pilarMentora} alt="Conversa con Ruth Esther" />
-            <PilarBanner to="/pareja" image={pilarPareja} alt="¿Tu pareja es deuda o propósito?" />
-            <PilarBanner to="/patrones" image={pilarPatron} alt="Encuentra tu patrón familiar" />
-            <PilarBanner to="/ministracion" image={pilarMinistracion} alt="Dios te dice hoy — Ministración desde la Corte Celestial" />
-          </div>
-        </section>
-
-
-        {/* Racha + Progreso */}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="app-card p-4">
-            <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-xl bg-[#F58BCB]/15 grid place-items-center">
-                <Flame className="w-5 h-5 text-[#F58BCB]" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Racha</p>
-                <p className="font-display font-bold text-base">{activeCount} días</p>
-              </div>
-            </div>
-            <div className="mt-3 flex gap-1 items-center">
-              {week.map((w, i) => (
-                <span key={i} className={"w-2 h-2 rounded-full " + (w.active ? "bg-primary" : "bg-border")} />
-              ))}
-            </div>
-          </div>
-          <Link to="/etapas" className="app-card p-4">
-            <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-xl bg-secondary grid place-items-center">
-                <Layers className="w-5 h-5 text-primary" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Camino 365</p>
-                <p className="font-display font-bold text-base">Día {Math.min(365, Math.max(1, data?.streakActivities?.length || 1))} / 365</p>
-              </div>
-            </div>
-            <div className="mt-3 h-2 bg-secondary rounded-full overflow-hidden">
-              <div className="h-full bg-brand-gradient" style={{ width: `${Math.min(100, ((data?.streakActivities?.length ?? 0) / 365) * 100)}%` }} />
-            </div>
-            <p className="mt-2 text-[10px] text-muted-foreground">Semana {Math.max(1, Math.ceil((data?.streakActivities?.length || 1) / 7))} de 52 · {completed} etapas</p>
-          </Link>
-
-        </div>
-
-        {/* Ejercicios del día — justo debajo del cuadro MI CAMINO */}
-        <DailyExercises />
-
-        {/* Biblioteca Digital — encima de Palabras para ti hoy */}
-        <BibliotecaSlider />
-
-        {/* Palabras para ti Hoy */}
-        <PalabrasHoy name={displayName} />
-
-        <Link to="/comunidad" className="block rounded-[24px] bg-gradient-to-r from-[#44317b] via-primary to-[#c579be] p-6 text-white shadow-soft transition hover:shadow-glow">
-          <span className="text-xs font-bold uppercase tracking-widest text-white/75">Comunidad ORÍGEN · Abierta para todos</span>
-          <h2 className="mt-2 font-display text-xl font-bold">No tienes que vivirlo en soledad.</h2>
-          <p className="mt-1 text-sm text-white/85">Comparte una pregunta, acompaña a alguien y encuentra nuevas perspectivas.</p>
-          <span className="mt-4 inline-flex min-h-11 items-center rounded-full bg-white px-5 text-sm font-bold text-primary">Entrar a la comunidad →</span>
-        </Link>
-
-
-        {/* Árbol de Sanación */}
-        <HealingTree />
-
-        {/* Lo nuevo de ORIGEN — categorías verticales (una lección por día) */}
+        {/* Contenido adicional existente */}
         <CategoriaSlider />
-
-        {/* Manifestación con mentor + música + ejercicios */}
         <ManifestacionSlider />
-
-        {/* Buscador de sonidos con reproductor en segundo plano */}
         <SonidosHome />
-
-
-        {/* Reflexión del día */}
         <DailyReflection />
-
-        {/* Banner Visualízalo y Vívelo — justo arriba del quiz */}
-        <Link
-          to="/visualiza"
-          aria-label="Visualízalo y Vívelo — descubre todas nuestras categorías"
-          className="block rounded-[24px] overflow-hidden shadow-soft hover:shadow-glow transition-all hover-scale"
-        >
-          <img src={visualizaBanner} alt="Descubre todas nuestras categorías — Visualízalo y Vívelo" loading="lazy" className="w-full h-auto block" />
-        </Link>
-
-        {/* Quiz diario */}
         <DailyQuiz />
-
-        {/* Juegos del día */}
-        <DailyGames words={[aiPlan.pattern_name ?? "", ...(data?.intake?.primary_focus ? [data.intake.primary_focus] : [])].filter(Boolean)} />
 
 
 
@@ -298,15 +188,4 @@ function Dashboard() {
     </div>
   );
 }
-
-function PilarBanner({ to, image, alt }: { to: string; image: string; alt: string }) {
-  return (
-    <Link to={to} className="block rounded-[20px] overflow-hidden shadow-soft hover:shadow-glow transition-all hover-scale">
-      <img src={image} alt={alt} loading="lazy" className="w-full h-auto block" />
-    </Link>
-  );
-}
-
-
-
 

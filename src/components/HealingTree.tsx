@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 
 function todayIso() { return new Date().toISOString().slice(0, 10); }
 
-export function HealingTree() {
+export function HealingTree({ bannerImage }: { bannerImage?: string } = {}) {
   const { user } = useAuth();
   const qc = useQueryClient();
   const [shaking, setShaking] = useState(false);
@@ -49,6 +49,41 @@ export function HealingTree() {
     setReward(amount);
     qc.invalidateQueries({ queryKey: ["profile"] });
     setTimeout(() => { setShaking(false); refetch(); }, 900);
+  }
+
+  if (bannerImage) {
+    return (
+      <section className="relative min-h-[170px] rounded-[22px] overflow-hidden shadow-[0_8px_30px_rgba(69,37,142,.12)]">
+        <img src={bannerImage} alt="" loading="lazy" className={cn("absolute inset-0 h-full w-full object-cover object-left origin-bottom-left", shaking && "animate-[shake_0.6s_ease-in-out]")} />
+        <div className="absolute inset-0 bg-gradient-to-l from-[#FFFCFF] via-[#FFFCFF]/80 to-transparent" />
+        {shaking && (
+          <>
+            <span className="absolute left-[18%] top-6 text-2xl animate-[fall_1s_ease-in]">🍃</span>
+            <span className="absolute left-[30%] top-10 text-xl animate-[fall_1.2s_ease-in]">🍃</span>
+            <span className="absolute left-[8%] top-12 text-lg animate-[fall_0.9s_ease-in]">🍃</span>
+          </>
+        )}
+        {reward !== null && (
+          <div className="absolute top-3 left-3 rounded-full bg-success text-white text-xs font-bold px-3 py-1 shadow-glow">
+            +{reward >= 100 ? Math.floor(reward / 100) + " hojas" : "progreso"} 🍃
+          </div>
+        )}
+        <div className="relative ml-auto p-5 max-w-[60%]">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-[#25B9A9]">Árbol de Sanación</span>
+          <h3 className="mt-1 font-display font-bold text-[18px] leading-tight text-[#211C32]">{shakenToday ? "Ya recogiste hoy" : "Agita el árbol y gana hojas"}</h3>
+          <p className="mt-1 text-[12.5px] text-[#45405a]">{shakenToday ? "Vuelve mañana para nuevas hojas." : "Cada día una lluvia de hojas para tu camino."}</p>
+          <button onClick={shake} disabled={!!shakenToday || shaking}
+            className={cn("mt-3 inline-flex h-11 items-center gap-2 rounded-full px-5 text-[13px] font-bold transition active:scale-[.97]",
+              shakenToday ? "bg-secondary text-muted-foreground" : "bg-gradient-to-r from-[#7950F5] to-[#9d7bff] text-white shadow-[0_4px_14px_rgba(121,80,245,.3)]")}>
+            {shakenToday ? "Vuelve mañana" : "Agitar hoy"} <Sparkles className="w-4 h-4" />
+          </button>
+        </div>
+        <style>{`
+          @keyframes shake { 0%,100%{transform:rotate(0)} 25%{transform:rotate(-1.5deg)} 75%{transform:rotate(1.5deg)} }
+          @keyframes fall { 0%{transform:translateY(0);opacity:0} 30%{opacity:1} 100%{transform:translateY(90px) rotate(180deg);opacity:0} }
+        `}</style>
+      </section>
+    );
   }
 
   return (
