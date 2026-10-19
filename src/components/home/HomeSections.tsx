@@ -1,8 +1,23 @@
 import { Link } from "@tanstack/react-router";
 import { useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useGamePlays, MIN_PLAYS } from "@/lib/game-plays";
+import vivMusic from "@/assets/viv-music.jpg";
+import vivClean from "@/assets/viv-clean.jpg";
+import vivIdentity from "@/assets/viv-identity.jpg";
+import vivCristo from "@/assets/viv-cristo.jpg";
+import gSopa from "@/assets/home/g-sopa.jpg";
+import gMemoria from "@/assets/home/g-memoria.jpg";
+import gHojas from "@/assets/home/g-hojas.jpg";
+import gEscribe from "@/assets/home/g-escribe.jpg";
+import exEjercicios from "@/assets/home/ex-ejercicios.jpg";
+import exPremios from "@/assets/home/ex-premios.jpg";
+import afiliacion from "@/assets/home/afiliacion.jpg";
+import balanceImg from "@/assets/home/balance.jpg";
 import {
   ArrowRight, BookOpen, Check, ChevronLeft, ChevronRight, Flame, Heart, Library,
-  Mic, Network, Sparkles, Baby, Gem, Shield, Magnet, Search, Brain, TreePine, Star,
+  Mic, Network, Sparkles, Baby, Gem, Shield, Magnet, Headphones, Gamepad2, Leaf, HeartHandshake, LayoutGrid,
 } from "lucide-react";
 import { EBOOKS } from "@/lib/biblioteca";
 import coverFallback from "@/assets/e3d-book.png";
@@ -88,7 +103,7 @@ export function OrigenPillars() {
   return (
     <section>
       <SectionHead title="Los 4 pilares más TOP del Método ORÍGEN 🔥" />
-      <div className={scroller + " sm:grid sm:grid-cols-4 sm:overflow-visible sm:mx-0 sm:px-0"}>
+      <div className={scroller + " sm:grid sm:grid-cols-5 sm:overflow-visible sm:mx-0 sm:px-0"}>
         {PILLARS.map((p, i) => (
           <Link key={p.to} to={p.to} className={`relative snap-start shrink-0 w-[44%] sm:w-auto aspect-[3/4] ${card}`} style={{ animation: `fade-in .4s ease-out ${i * 60}ms both` }}>
             <img src={p.img} alt="" loading="lazy" width={768} height={1024} className="absolute inset-0 h-full w-full object-cover" />
@@ -103,6 +118,13 @@ export function OrigenPillars() {
             </div>
           </Link>
         ))}
+        <Link to="/explorar" className={`relative snap-start shrink-0 w-[44%] sm:w-auto aspect-[3/4] ${card} bg-gradient-to-br from-[#7950F5] to-[#F4A1D1] grid place-items-center text-white text-center p-4`}>
+          <span>
+            <span className="mx-auto grid place-items-center w-12 h-12 rounded-full bg-white/25 border border-white/40"><LayoutGrid className="w-6 h-6" /></span>
+            <span className="block mt-3 font-display font-bold text-[15px] leading-tight">Ver todas las consultas</span>
+            <span className="block mt-1 text-[11.5px] opacity-90">Descubre todo lo que hay para ti</span>
+          </span>
+        </Link>
       </div>
     </section>
   );
@@ -224,27 +246,47 @@ export function HealingPracticesCarousel() {
   );
 }
 
-/* 9 · VISUALÍZALO */
-const VISUALIZE = [
-  { img: vvVis, title: "Visualización" },
-  { img: vvMed, title: "Meditación" },
-  { img: vvMan, title: "Manifestación" },
-  { img: vvAbu, title: "Abundancia" },
-  { img: vvBien, title: "Bienestar" },
-];
+/* 9 · VISUALÍZALO — categorías principales reales de /visualiza */
+const VV_METHODS = [
+  { key: "musica", title: "Manifestación con Música", desc: "Playlists guiadas de 21 días.", img: vivMusic, from: "from-[#4b2fb0]", to: "/visualiza/$categoryId", params: { categoryId: "manifestando-con-musica" } },
+  { key: "limpieza", title: "Limpieza Espiritual", desc: "Oración, gratitud y renovación.", img: vivClean, from: "from-[#11786d]", to: "/visualiza/limpieza" },
+  { key: "identidad", title: "Salto de Identidad", desc: "Hábitos para tu mejor versión.", img: vivIdentity, from: "from-[#b06a12]", to: "/visualiza/identidad" },
+  { key: "cristo", title: "Método de Cristo 3·6·9", desc: "Fe, escritura y afirmación.", img: vivCristo, from: "from-[#2b3a9e]", to: "/visualiza/cristo" },
+] as const;
+const VV_FALLBACK = [vvVis, vvMed, vvMan, vvAbu, vvBien];
+const VV_TINTS = ["from-[#5b2fc9]", "from-[#c0397f]", "from-[#1a7e9e]", "from-[#7a3fb0]", "from-[#2f8a5b]"];
 export function VisualizeAndLiveCarousel() {
+  const { data } = useQuery({
+    queryKey: ["home-vv-cats"],
+    staleTime: 1000 * 60 * 10,
+    queryFn: async () => {
+      const { data } = await supabase.from("manifest_categories").select("id,title,subtitle,description,cover_url,is_custom,is_published").eq("is_custom", true).order("sort_order");
+      return (data ?? []).filter((c) => c.is_published !== false && c.id !== "manifestando-con-musica");
+    },
+  });
+  const items = [
+    ...VV_METHODS.map((m) => ({ ...m })),
+    ...(data ?? []).map((c, i) => ({
+      key: c.id, title: c.title, desc: (c.subtitle || c.description || "Tema guiado con audios y práctica.").slice(0, 60),
+      img: c.cover_url || VV_FALLBACK[i % VV_FALLBACK.length], from: VV_TINTS[i % VV_TINTS.length],
+      to: "/visualiza/$categoryId" as const, params: { categoryId: c.id },
+    })),
+  ];
   return (
     <section>
-      <SectionHead title="Visualízalo y Vívelo" sub="Crea la vida que deseas con el poder de tu mente y tu energía." to="/visualiza" cta="Ver todos"
-        icon={<span className="grid place-items-center w-9 h-9 rounded-[12px] bg-primary/10 text-primary shrink-0"><Shield className="w-5 h-5" /></span>} />
+      <SectionHead title="Visualízalo y Vívelo" sub="Crea la vida que deseas con el poder de tu mente y tu fe." to="/visualiza" cta="Ver todos" />
       <div className={scroller}>
-        {VISUALIZE.map((v) => (
-          <Link key={v.title} to="/visualiza" className={`relative snap-start shrink-0 w-[40%] sm:w-[19%] aspect-[6/5] ${card}`}>
-            <img src={v.img} alt="" loading="lazy" width={896} height={752} className="absolute inset-0 h-full w-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#211C32]/80 via-transparent to-transparent" />
-            <div className="absolute inset-x-0 bottom-0 p-2.5 flex items-center justify-between text-white">
-              <span className="font-display font-bold text-[13px]">{v.title}</span>
-              <ArrowRight className="w-4 h-4" />
+        {items.map((p) => (
+          <Link key={p.key} to={p.to as "/visualiza"} params={("params" in p ? p.params : undefined) as never} className={`relative snap-start shrink-0 w-[46%] sm:w-[23.5%] aspect-[4/5] ${card}`}>
+            <img src={p.img} alt="" loading="lazy" width={768} height={1024} className="absolute inset-0 h-full w-full object-cover" />
+            <div className={`absolute inset-0 bg-gradient-to-t ${p.from} via-black/10 to-transparent`} />
+            <div className="absolute inset-x-0 bottom-0 p-3 text-white">
+              <span className="grid place-items-center w-8 h-8 rounded-full bg-white/25 backdrop-blur border border-white/40"><Headphones className="w-4 h-4" /></span>
+              <h4 className="mt-1.5 font-display font-bold text-[14px] leading-tight">{p.title}</h4>
+              <div className="flex items-end justify-between gap-1">
+                <p className="text-[11px] leading-snug opacity-90 line-clamp-2">{p.desc}</p>
+                <ArrowRight className="w-4 h-4 shrink-0" />
+              </div>
             </div>
           </Link>
         ))}
@@ -254,28 +296,102 @@ export function VisualizeAndLiveCarousel() {
 }
 
 /* 10 · JUEGOS */
-const GAMES = [
-  { id: "sopa", title: "Encuentra la palabra", desc: "Sopa de letras · 2 min", Icon: Search, bg: "from-[#7950F5] to-[#9d7bff]" },
-  { id: "memoria", title: "Memoria del alma", desc: "Empareja las palabras", Icon: Brain, bg: "from-[#e85fa5] to-[#F4A1D1]" },
-  { id: "hojas", title: "El árbol de los sueños", desc: "Recoge hojas de sanación", Icon: TreePine, bg: "from-[#1a9e90] to-[#25B9A9]" },
-  { id: "escribe", title: "Si lo crees, lo creas", desc: "El poder de tu mente", Icon: Star, bg: "from-[#d9a23f] to-[#E8C47C]" },
+const HOME_GAMES = [
+  { id: "sopa", title: "Encuentra la palabra", desc: "Busca las palabras que sanan", img: gSopa, from: "from-[#4b2fb0]" },
+  { id: "memoria", title: "Memoria del alma", desc: "Empareja lo que te sostiene", img: gMemoria, from: "from-[#b83b7f]" },
+  { id: "hojas", title: "Come-hojas", desc: "Recoge hojas sin que te atrape la culpa", img: gHojas, from: "from-[#11786d]" },
+  { id: "escribe", title: "Escríbelo y créelo", desc: "Escribe tu declaración del día", img: gEscribe, from: "from-[#8a5a12]" },
 ];
+function GameTile({ g }: { g: (typeof HOME_GAMES)[number] }) {
+  const plays = useGamePlays(g.id);
+  return (
+    <Link to="/juegos/$gameId" params={{ gameId: g.id }} className={`relative snap-start shrink-0 w-[46%] sm:w-auto aspect-[4/5] ${card}`}>
+      <img src={g.img} alt="" loading="lazy" width={816} height={816} className="absolute inset-0 h-full w-full object-cover" />
+      <div className={`absolute inset-0 bg-gradient-to-t ${g.from} via-black/15 to-transparent`} />
+      <span className="absolute left-2.5 top-2.5 inline-flex items-center gap-1 rounded-full bg-black/40 backdrop-blur px-2.5 h-7 text-[11px] font-bold text-white">
+        {plays.unlocked ? <><Check className="w-3.5 h-3.5" /> Hoja liberada</> : <><Leaf className="w-3.5 h-3.5" /> {plays.plays}/{MIN_PLAYS} hoy</>}
+      </span>
+      <div className="absolute inset-x-0 bottom-0 p-3 text-white">
+        <span className="grid place-items-center w-8 h-8 rounded-full bg-white/25 backdrop-blur border border-white/40"><Gamepad2 className="w-4 h-4" /></span>
+        <h4 className="mt-1.5 font-display font-bold text-[14px] leading-tight">{g.title}</h4>
+        <div className="flex items-end justify-between gap-1">
+          <p className="text-[11px] leading-snug opacity-90 line-clamp-2">{g.desc}</p>
+          <ArrowRight className="w-4 h-4 shrink-0" />
+        </div>
+      </div>
+    </Link>
+  );
+}
 export function DailyGamesSection() {
   return (
     <section>
-      <SectionHead title="Juegos del día" sub="Diez juegos mentales que trabajan justo lo que estás sanando." to="/juegos" cta="Ver los 10" />
+      <SectionHead title="Juegos del día" sub="Juegos mentales que trabajan justo lo que estás sanando." to="/juegos" cta="Ver los 10" />
       <div className={scroller + " sm:grid sm:grid-cols-4 sm:overflow-visible sm:mx-0 sm:px-0"}>
-        {GAMES.map((g) => (
-          <Link key={g.id} to="/juegos/$gameId" params={{ gameId: g.id }} className={`snap-start shrink-0 w-[62%] sm:w-auto rounded-[18px] bg-gradient-to-br ${g.bg} p-3.5 text-white flex items-center gap-3 shadow-[0_4px_14px_rgba(69,37,142,.2)] active:scale-[.97] transition-transform`}>
-            <span className="grid place-items-center w-11 h-11 rounded-[14px] bg-white/25 shrink-0"><g.Icon className="w-6 h-6" /></span>
-            <span className="min-w-0 flex-1">
-              <span className="block font-display font-bold text-[13.5px] leading-tight">{g.title}</span>
-              <span className="block text-[11px] opacity-85">{g.desc}</span>
-            </span>
-            <ArrowRight className="w-4 h-4 shrink-0" />
+        {HOME_GAMES.map((g) => <GameTile key={g.id} g={g} />)}
+      </div>
+    </section>
+  );
+}
+
+/* 11 · EXPLORA */
+const EXPLORE = [
+  { title: "Ruth Esther", desc: "Habla con tu mentora espiritual.", img: pMentora, to: "/chat", tag: "Mentora" },
+  { title: "Patrones familiares", desc: "Mira qué se repite en tu historia.", img: pPatron, to: "/patrones", tag: "Consulta" },
+  { title: "Ejercicios diarios", desc: "Un ejercicio nuevo cada día.", img: exEjercicios, to: "/ejercicios", tag: "Diario" },
+  { title: "Premios ORÍGEN", desc: "Racha, logros y bonificaciones.", img: exPremios, to: "/premiosorigen", tag: "Premios" },
+];
+export function ExploreOrigen() {
+  return (
+    <section>
+      <SectionHead title="Explora todo el contenido de ORÍGEN" sub="Todo lo que tienes para sanar, en un solo lugar." to="/explorar" cta="Explorar" />
+      <div className="grid grid-cols-2 gap-3">
+        {EXPLORE.map((e) => (
+          <Link key={e.title} to={e.to} className={`relative aspect-[4/5] ${card}`}>
+            <img src={e.img} alt="" loading="lazy" width={816} height={816} className="absolute inset-0 h-full w-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+            <span className="absolute left-2.5 top-2.5 rounded-full bg-white/90 px-2.5 h-6 inline-flex items-center text-[10.5px] font-bold text-[#45258E]">{e.tag}</span>
+            <div className="absolute inset-x-0 bottom-0 p-3 text-white">
+              <h4 className="font-display font-bold text-[15px] leading-tight">{e.title}</h4>
+              <div className="flex items-end justify-between gap-1 mt-0.5">
+                <p className="text-[11.5px] leading-snug opacity-90">{e.desc}</p>
+                <ArrowRight className="w-4 h-4 shrink-0" />
+              </div>
+            </div>
           </Link>
         ))}
       </div>
     </section>
+  );
+}
+
+/* 12 · AFILIACIÓN */
+export function AffiliateBanner() {
+  return (
+    <Link to="/invita" className={`relative block min-h-[190px] ${card}`}>
+      <img src={afiliacion} alt="" loading="lazy" width={1536} height={768} className="absolute inset-0 h-full w-full object-cover object-[70%_center]" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#2a1760]/95 via-[#2a1760]/70 to-transparent" />
+      <div className="relative p-5 max-w-[68%] text-white">
+        <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-white/85"><HeartHandshake className="w-3.5 h-3.5" /> Programa de afiliados</span>
+        <h3 className="mt-1 font-display font-bold text-[20px] leading-tight">Recomienda ORÍGEN y gana comisiones</h3>
+        <p className="mt-1 text-[12.5px] text-white/85">Afíliate en Hotmart y comparte con quien lo necesita.</p>
+        <span className="mt-3 inline-flex h-10 items-center gap-2 rounded-full bg-white px-4 text-[13px] font-bold text-[#45258E]">Conocer el programa <ArrowRight className="w-4 h-4" /></span>
+      </div>
+    </Link>
+  );
+}
+
+/* 13 · BALANCE */
+export function BalanceCard({ hojas }: { hojas: number }) {
+  return (
+    <Link to="/comprarmonedas" className={`relative block min-h-[160px] ${card}`}>
+      <img src={balanceImg} alt="" loading="lazy" width={1536} height={768} className="absolute inset-0 h-full w-full object-cover object-right" />
+      <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-transparent" />
+      <div className="relative p-5 max-w-[64%]">
+        <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-primary"><Leaf className="w-3.5 h-3.5" /> Tus Hojas de Sanación</span>
+        <p className="mt-1 font-display font-extrabold text-[34px] leading-none text-foreground">{hojas.toLocaleString("es")}</p>
+        <p className="mt-1 text-[12.5px] text-foreground/75">Úsalas en consultas, audios y premios.</p>
+        <span className="mt-3 inline-flex h-10 items-center gap-2 rounded-full bg-gradient-to-r from-[#7950F5] to-[#F4A1D1] px-4 text-[13px] font-bold text-white shadow-[0_4px_14px_rgba(121,80,245,.3)]">Recargar hojas <ArrowRight className="w-4 h-4" /></span>
+      </div>
+    </Link>
   );
 }
