@@ -36,12 +36,12 @@ function SectionHead({ title, sub, to, cta, icon }: { title: string; sub?: strin
       <div className="min-w-0 flex gap-2">
         {icon}
         <div className="min-w-0">
-          <h3 className="font-display font-bold text-[17px] leading-tight text-[#211C32] dark:text-foreground">{title}</h3>
-          {sub && <p className="text-[12.5px] text-[#777487] dark:text-muted-foreground mt-0.5">{sub}</p>}
+          <h3 className="font-display font-bold text-[17px] leading-tight text-foreground">{title}</h3>
+          {sub && <p className="text-[12.5px] text-muted-foreground mt-0.5">{sub}</p>}
         </div>
       </div>
       {to && cta && (
-        <Link to={to} className="shrink-0 inline-flex items-center gap-1 rounded-full bg-[#7950F5]/10 px-3 h-8 text-[12px] font-bold text-[#7950F5]">
+        <Link to={to} className="shrink-0 inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 h-8 text-[12px] font-bold text-primary">
           {cta} <ArrowRight className="w-3.5 h-3.5" />
         </Link>
       )}
@@ -54,21 +54,21 @@ export function HomeHero({ name, stage, total, to }: { name: string; stage: numb
   return (
     <section className={`relative ${card} min-h-[300px] sm:min-h-[340px]`}>
       <img src={hero} alt="" width={1536} height={768} className="absolute inset-0 h-full w-full object-cover object-[70%_center]" />
-      <div className="absolute inset-0 bg-gradient-to-r from-[#FFFCFF] via-[#FFFCFF]/85 to-transparent sm:via-[#FFFCFF]/70" />
+      <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-transparent sm:via-background/70" />
       <div className="relative p-5 sm:p-7 max-w-[64%] sm:max-w-[48%]">
-        <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-[#7950F5]">
+        <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-primary">
           <Sparkles className="w-3.5 h-3.5" /> Personalizado para ti
         </span>
-        <h2 className="mt-2 font-serif text-[32px] sm:text-[40px] leading-[1.05] text-[#211C32]">Tu camino continúa</h2>
-        <p className="mt-2 text-[13px] leading-snug text-[#45405a]">
+        <h2 className="mt-2 font-serif text-[32px] sm:text-[40px] leading-[1.05] text-foreground">Tu camino continúa</h2>
+        <p className="mt-2 text-[13px] leading-snug text-foreground/75">
           Hola {name}: Ruth Esther ya adaptó tu camino a ti. Sigue avanzando y descubre lo que viene para ti.
         </p>
         <div className="mt-3 flex items-center gap-1" aria-label={`Etapa ${stage} de ${total}`}>
           {Array.from({ length: Math.min(total, 8) }).map((_, i) => (
-            <span key={i} className={"h-1.5 flex-1 rounded-full " + (i < Math.ceil((stage / total) * Math.min(total, 8)) ? "bg-[#7950F5]" : "bg-[#7950F5]/20")} />
+            <span key={i} className={"h-1.5 flex-1 rounded-full " + (i < Math.ceil((stage / total) * Math.min(total, 8)) ? "bg-[#7950F5]" : "bg-primary/20")} />
           ))}
         </div>
-        <p className="mt-1 text-[11px] font-semibold text-[#777487]">Etapa {stage} de {total}</p>
+        <p className="mt-1 text-[11px] font-semibold text-muted-foreground">Etapa {stage} de {total}</p>
         <Link to={to} className="mt-4 inline-flex h-12 items-center gap-2 rounded-full bg-gradient-to-r from-[#7950F5] to-[#F4A1D1] px-5 text-[14px] font-bold text-white shadow-[0_4px_14px_rgba(121,80,245,.35)]">
           Continuar mi camino <ArrowRight className="w-4 h-4" />
         </Link>
@@ -113,15 +113,15 @@ export function DailyExerciseBanner({ done, streak }: { done: boolean; streak: n
   return (
     <Link to="/ejercicios" className={`relative block min-h-[170px] ${card}`}>
       <img src={ejercicio} alt="" loading="lazy" width={1536} height={640} className="absolute inset-0 h-full w-full object-cover object-[75%_center]" />
-      <div className="absolute inset-0 bg-gradient-to-r from-[#FFFCFF] via-[#FFFCFF]/80 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent" />
       <span className={"absolute right-3 top-3 inline-flex items-center gap-1 rounded-full px-3 h-8 text-[12px] font-bold shadow " + (done ? "bg-white text-[#1f8a5b]" : "bg-[#7950F5] text-white")}>
         {done ? <><Check className="w-4 h-4" /> Hecho</> : <>Comenzar <ArrowRight className="w-3.5 h-3.5" /></>}
       </span>
       <div className="relative p-5 max-w-[66%]">
-        <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-[#7950F5]"><Sparkles className="w-3.5 h-3.5" /> Ejercicio de hoy</span>
-        <h3 className="mt-1 font-display font-bold text-[18px] leading-tight text-[#211C32]">{done ? "Completaste tu ejercicio de hoy 🌿" : "Completa este ejercicio de hoy 🌿"}</h3>
-        <p className="mt-1 text-[12.5px] text-[#45405a]">Recuperar la capacidad de disfrutar sin culpa, como cuando eras niño.</p>
-        <span className="mt-3 inline-flex items-center gap-2 rounded-full bg-[#7950F5]/10 px-3 h-8 text-[12px] font-bold text-[#7950F5]">
+        <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-primary"><Sparkles className="w-3.5 h-3.5" /> Ejercicio de hoy</span>
+        <h3 className="mt-1 font-display font-bold text-[18px] leading-tight text-foreground">{done ? "Completaste tu ejercicio de hoy 🌿" : "Completa este ejercicio de hoy 🌿"}</h3>
+        <p className="mt-1 text-[12.5px] text-foreground/75">Recuperar la capacidad de disfrutar sin culpa, como cuando eras niño.</p>
+        <span className="mt-3 inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 h-8 text-[12px] font-bold text-primary">
           <Flame className="w-4 h-4" /> Racha · {streak} {streak === 1 ? "día" : "días"}
         </span>
       </div>
@@ -134,9 +134,9 @@ export function DigitalLibraryCarousel() {
   const ref = useRef<HTMLDivElement>(null);
   const by = (d: number) => ref.current?.scrollBy({ left: d * 240, behavior: "smooth" });
   return (
-    <section className="rounded-[22px] bg-gradient-to-br from-[#FFFCFF] to-[#F1EBFF] dark:from-card dark:to-card border border-[#7950F5]/10 p-4 shadow-[0_1px_3px_rgba(30,25,20,.06)]">
+    <section className="rounded-[22px] bg-gradient-to-br from-background to-secondary border border-[#7950F5]/10 p-4 shadow-[0_1px_3px_rgba(30,25,20,.06)]">
       <SectionHead title="Biblioteca Digital" sub={`Lecturas que acompañan tu proceso · ${EBOOKS.length} libros`} to="/biblioteca" cta="Ver biblioteca"
-        icon={<span className="grid place-items-center w-9 h-9 rounded-[12px] bg-[#7950F5]/10 text-[#7950F5] shrink-0"><Library className="w-5 h-5" /></span>} />
+        icon={<span className="grid place-items-center w-9 h-9 rounded-[12px] bg-primary/10 text-primary shrink-0"><Library className="w-5 h-5" /></span>} />
       <div className="relative">
         <div ref={ref} className={scroller}>
           {EBOOKS.slice(0, 16).map((b) => (
@@ -146,8 +146,8 @@ export function DigitalLibraryCarousel() {
             </Link>
           ))}
         </div>
-        <button type="button" aria-label="Anterior" onClick={() => by(-1)} className="hidden sm:grid absolute -left-2 top-1/2 -translate-y-1/2 w-9 h-9 place-items-center rounded-full bg-white shadow text-[#7950F5]"><ChevronLeft className="w-5 h-5" /></button>
-        <button type="button" aria-label="Siguiente" onClick={() => by(1)} className="grid absolute -right-2 top-1/2 -translate-y-1/2 w-9 h-9 place-items-center rounded-full bg-white shadow text-[#7950F5]"><ChevronRight className="w-5 h-5" /></button>
+        <button type="button" aria-label="Anterior" onClick={() => by(-1)} className="hidden sm:grid absolute -left-2 top-1/2 -translate-y-1/2 w-9 h-9 place-items-center rounded-full bg-card shadow text-primary"><ChevronLeft className="w-5 h-5" /></button>
+        <button type="button" aria-label="Siguiente" onClick={() => by(1)} className="grid absolute -right-2 top-1/2 -translate-y-1/2 w-9 h-9 place-items-center rounded-full bg-card shadow text-primary"><ChevronRight className="w-5 h-5" /></button>
       </div>
     </section>
   );
@@ -160,9 +160,9 @@ export function DailyMessageBanner({ name }: { name: string }) {
       <img src={mensaje} alt="" loading="lazy" width={1536} height={640} className="absolute inset-0 h-full w-full object-cover object-[80%_center]" />
       <div className="absolute inset-0 bg-gradient-to-r from-[#fbf6ee] via-[#fbf6ee]/85 to-transparent" />
       <div className="relative p-5 max-w-[72%] sm:max-w-[55%]">
-        <span className="text-[11px] font-bold uppercase tracking-wider text-[#7950F5]">Mensaje de hoy</span>
-        <h3 className="mt-1 font-serif text-[21px] leading-tight text-[#211C32]">{name}, vuelve hoy a tu memoria sana</h3>
-        <p className="mt-1 text-[12.5px] leading-snug text-[#45405a] line-clamp-3">A veces la mente corre más rápido que el corazón, y ahí es donde volver al centro se vuelve necesario. No se trata de negar lo que sientes, sino de darte espacio para comprenderlo.</p>
+        <span className="text-[11px] font-bold uppercase tracking-wider text-primary">Mensaje de hoy</span>
+        <h3 className="mt-1 font-serif text-[21px] leading-tight text-foreground">{name}, vuelve hoy a tu memoria sana</h3>
+        <p className="mt-1 text-[12.5px] leading-snug text-foreground/75 line-clamp-3">A veces la mente corre más rápido que el corazón, y ahí es donde volver al centro se vuelve necesario. No se trata de negar lo que sientes, sino de darte espacio para comprenderlo.</p>
         <Link to="/palabra" className="mt-3 inline-flex h-10 items-center gap-2 rounded-full bg-[#45258E] px-4 text-[13px] font-bold text-white">Ver completo <ArrowRight className="w-4 h-4" /></Link>
       </div>
     </section>
@@ -236,7 +236,7 @@ export function VisualizeAndLiveCarousel() {
   return (
     <section>
       <SectionHead title="Visualízalo y Vívelo" sub="Crea la vida que deseas con el poder de tu mente y tu energía." to="/visualiza" cta="Ver todos"
-        icon={<span className="grid place-items-center w-9 h-9 rounded-[12px] bg-[#7950F5]/10 text-[#7950F5] shrink-0"><Shield className="w-5 h-5" /></span>} />
+        icon={<span className="grid place-items-center w-9 h-9 rounded-[12px] bg-primary/10 text-primary shrink-0"><Shield className="w-5 h-5" /></span>} />
       <div className={scroller}>
         {VISUALIZE.map((v) => (
           <Link key={v.title} to="/visualiza" className={`relative snap-start shrink-0 w-[40%] sm:w-[19%] aspect-[6/5] ${card}`}>
