@@ -30,7 +30,7 @@ export function HealingTree({ bannerImage }: { bannerImage?: string } = {}) {
 
   useEffect(() => {
     if (reward === null) return;
-    const t = setTimeout(() => setReward(null), 2600);
+    const t = setTimeout(() => setReward(null), 5000);
     return () => clearTimeout(t);
   }, [reward]);
 
@@ -65,7 +65,7 @@ export function HealingTree({ bannerImage }: { bannerImage?: string } = {}) {
         )}
         {reward !== null && (
           <div className="absolute top-3 left-3 rounded-full bg-success text-white text-xs font-bold px-3 py-1 shadow-glow">
-            +{reward >= 100 ? Math.floor(reward / 100) + " hojas" : "progreso"} 🍃
+            +{reward >= 100 ? `${Math.floor(reward / 100)} ${Math.floor(reward / 100) === 1 ? "hoja" : "hojas"}` : `${reward}% de tu próxima hoja`} 🍃
           </div>
         )}
         <div className="relative ml-auto p-5 max-w-[60%]">
@@ -135,7 +135,7 @@ export function HealingTree({ bannerImage }: { bannerImage?: string } = {}) {
 
         {reward !== null && (
           <div className="absolute top-2 right-2 rounded-full bg-success text-white text-xs font-bold px-3 py-1 shadow-glow animate-in fade-in slide-in-from-top-2">
-            +{reward >= 100 ? Math.floor(reward / 100) + " hojas" : "progreso"} 🍃
+            +{reward >= 100 ? `${Math.floor(reward / 100)} ${Math.floor(reward / 100) === 1 ? "hoja" : "hojas"}` : `${reward}% de tu próxima hoja`} 🍃
           </div>
         )}
       </div>
