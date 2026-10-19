@@ -289,13 +289,7 @@ function StageFlow() {
     case 15:
       return gameStep("dardo");
     case 16:
-      return shell(
-        <div className="space-y-3">
-          <MemoryPairs storageKey={`etapa-${id}`} />
-          <ClassifyEmotions />
-          <Cta onClick={next}>Continuar</Cta>
-        </div>,
-      );
+      return shell(<Step16Games id={id} onNext={next} />);
     case 17:
       return shell(<StepBreathe onNext={next} />);
 
@@ -308,6 +302,19 @@ function StageFlow() {
   }
 }
 
+
+function Step16Games({ id, onNext }: { id: number; onNext: () => void }) {
+  const [mem, setMem] = useState(false);
+  const [cls, setCls] = useState(false);
+  const ok = mem && cls;
+  return (
+    <div className="space-y-3">
+      <MemoryPairs storageKey={`etapa-${id}`} onComplete={() => setMem(true)} />
+      <ClassifyEmotions onComplete={() => setCls(true)} />
+      <Cta onClick={onNext} disabled={!ok}>{ok ? "Continuar" : "Completa los dos juegos"}</Cta>
+    </div>
+  );
+}
 
 function insigniaFor(title: string | null, position: number) {
   const map = ["Corazón que sana", "Raíz liberada", "Alma en paz", "Identidad restaurada", "Perdón vivo", "Fe firme", "Propósito claro", "Linaje bendecido"];
@@ -930,6 +937,7 @@ function Step6({ cargas, loading, reward, onNext }: { cargas?: string[]; loading
 /* ───────────────────── 7 · Sopa de letras ───────────────────── */
 
 function Step7({ words, loading, stageId, onNext }: { words: string[]; loading: boolean; stageId: number; onNext: () => void }) {
+  const [solved, setSolved] = useState(false);
   return (
     <div>
       <h1 className="font-display font-extrabold text-[26px] leading-tight text-center">Sopa de letras espiritual 🔍</h1>
@@ -937,14 +945,14 @@ function Step7({ words, loading, stageId, onNext }: { words: string[]; loading: 
       {loading ? (
         <div className="mt-4"><LoadingPack label="Creando tu sopa de letras original…" /></div>
       ) : (
-        <div className="mt-4"><WordSearch words={words} storageKey={`stage-${stageVariant(stageId)}`} /></div>
+        <div className="mt-4"><WordSearch words={words} storageKey={`stage-${stageVariant(stageId)}`} onComplete={() => setSolved(true)} /></div>
       )}
       <div className="relative mt-3 overflow-hidden rounded-[16px] bg-[#3FBE8F]/10 p-4 pr-24">
         <p className="text-[13.5px] font-bold">¡Excelente! Cada palabra que encuentras se graba en tu memoria.</p>
         <p className="mt-1 font-extrabold text-[14px] text-[#2F9A73] inline-flex items-center gap-1">+{ACTION_POINTS.medium}% de tu próxima hoja <Leaf className="w-4 h-4" /></p>
         <img src={tree} alt="" aria-hidden width={512} height={512} loading="lazy" className="pointer-events-none absolute right-0 bottom-0 w-20 object-contain" />
       </div>
-      <Cta onClick={onNext}>Continuar</Cta>
+      <Cta onClick={onNext} disabled={!solved}>{solved ? "Continuar" : "Encuentra todas las palabras"}</Cta>
     </div>
   );
 }

@@ -82,6 +82,7 @@ const [feedback, setFeedback] = useState<"ok" | "fail" | null>(null);
   const [emo, setEmo] = useState<Record<string, "soltar" | "recibir">>({});
   const [bienestar, setBienestar] = useState<Record<number, number>>({});
   const [earned, setEarned] = useState(0);
+  const [wsDone, setWsDone] = useState(false);
 
   const pack = useCaminoPack({
     camino: caminoId,
@@ -438,9 +439,9 @@ const [feedback, setFeedback] = useState<"ok" | "fail" | null>(null);
           <section style={{ animation: "fade-in .4s ease-out both" }}>
             <H title="Sopa de letras del tema" sub="Encuentra las palabras clave de tu etapa." />
             <div className="mt-3">
-              <WordSearch words={p.words} storageKey={caminoVariant(caminoId, dayNum)} gemsReward={40} />
+              <WordSearch words={p.words} storageKey={caminoVariant(caminoId, dayNum)} gemsReward={40} onComplete={() => setWsDone(true)} />
             </div>
-            <Cta onClick={next}>Continuar</Cta>
+            <Cta onClick={next} disabled={!wsDone}>{wsDone ? "Continuar" : "Encuentra todas las palabras"}</Cta>
           </section>
         )}
 

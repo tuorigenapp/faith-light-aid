@@ -30,7 +30,7 @@ export function HealingTree({ bannerImage }: { bannerImage?: string } = {}) {
 
   useEffect(() => {
     if (reward === null) return;
-    const t = setTimeout(() => setReward(null), 2600);
+    const t = setTimeout(() => setReward(null), 5000);
     return () => clearTimeout(t);
   }, [reward]);
 
@@ -55,7 +55,7 @@ export function HealingTree({ bannerImage }: { bannerImage?: string } = {}) {
     return (
       <section className="relative min-h-[170px] rounded-[22px] overflow-hidden shadow-[0_8px_30px_rgba(69,37,142,.12)]">
         <img src={bannerImage} alt="" loading="lazy" className={cn("absolute inset-0 h-full w-full object-cover object-left origin-bottom-left", shaking && "animate-[shake_0.6s_ease-in-out]")} />
-        <div className="absolute inset-0 bg-gradient-to-l from-[#FFFCFF] via-[#FFFCFF]/80 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-l from-background via-background/80 to-transparent" />
         {shaking && (
           <>
             <span className="absolute left-[18%] top-6 text-2xl animate-[fall_1s_ease-in]">🍃</span>
@@ -65,13 +65,13 @@ export function HealingTree({ bannerImage }: { bannerImage?: string } = {}) {
         )}
         {reward !== null && (
           <div className="absolute top-3 left-3 rounded-full bg-success text-white text-xs font-bold px-3 py-1 shadow-glow">
-            +{reward >= 100 ? Math.floor(reward / 100) + " hojas" : "progreso"} 🍃
+            +{reward >= 100 ? `${Math.floor(reward / 100)} ${Math.floor(reward / 100) === 1 ? "hoja" : "hojas"}` : `${reward}% de tu próxima hoja`} 🍃
           </div>
         )}
         <div className="relative ml-auto p-5 max-w-[60%]">
           <span className="text-[11px] font-bold uppercase tracking-wider text-[#25B9A9]">Árbol de Sanación</span>
-          <h3 className="mt-1 font-display font-bold text-[18px] leading-tight text-[#211C32]">{shakenToday ? "Ya recogiste hoy" : "Agita el árbol y gana hojas"}</h3>
-          <p className="mt-1 text-[12.5px] text-[#45405a]">{shakenToday ? "Vuelve mañana para nuevas hojas." : "Cada día una lluvia de hojas para tu camino."}</p>
+          <h3 className="mt-1 font-display font-bold text-[18px] leading-tight text-foreground">{shakenToday ? "Ya recogiste hoy" : "Agita el árbol y gana hojas"}</h3>
+          <p className="mt-1 text-[12.5px] text-foreground/75">{shakenToday ? "Vuelve mañana para nuevas hojas." : "Cada día una lluvia de hojas para tu camino."}</p>
           <button onClick={shake} disabled={!!shakenToday || shaking}
             className={cn("mt-3 inline-flex h-11 items-center gap-2 rounded-full px-5 text-[13px] font-bold transition active:scale-[.97]",
               shakenToday ? "bg-secondary text-muted-foreground" : "bg-gradient-to-r from-[#7950F5] to-[#9d7bff] text-white shadow-[0_4px_14px_rgba(121,80,245,.3)]")}>
@@ -135,7 +135,7 @@ export function HealingTree({ bannerImage }: { bannerImage?: string } = {}) {
 
         {reward !== null && (
           <div className="absolute top-2 right-2 rounded-full bg-success text-white text-xs font-bold px-3 py-1 shadow-glow animate-in fade-in slide-in-from-top-2">
-            +{reward >= 100 ? Math.floor(reward / 100) + " hojas" : "progreso"} 🍃
+            +{reward >= 100 ? `${Math.floor(reward / 100)} ${Math.floor(reward / 100) === 1 ? "hoja" : "hojas"}` : `${reward}% de tu próxima hoja`} 🍃
           </div>
         )}
       </div>

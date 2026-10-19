@@ -63,7 +63,7 @@ function build(words: string[], seed: number) {
 
 
 
-export function WordSearch({ words, storageKey, gemsReward = 40 }: { words: string[]; storageKey: string; gemsReward?: number }) {
+export function WordSearch({ words, storageKey, gemsReward = 40, onComplete }: { words: string[]; storageKey: string; gemsReward?: number; onComplete?: () => void }) {
   const queryClient = useQueryClient();
   const seed = useMemo(() => storageKey.split("").reduce((a, c) => a + c.charCodeAt(0), 0), [storageKey]);
   const { grid, placed } = useMemo(() => build(words, seed), [words, seed]);
@@ -75,6 +75,10 @@ export function WordSearch({ words, storageKey, gemsReward = 40 }: { words: stri
   const [sel, setSel] = useState<string[]>([]);
   const [awarded, setAwarded] = useState(initialFound.length >= placed.length);
   const [feedback, setFeedback] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (placed.length > 0 && found.length >= placed.length) onComplete?.();
+  }, [found.length, placed.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     try { localStorage.setItem(`ws:${storageKey}`, JSON.stringify(found)); } catch {}
