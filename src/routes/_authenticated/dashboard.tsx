@@ -1,13 +1,10 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { wholeHojas } from "@/lib/gems";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { useQuery } from "@tanstack/react-query";
 import { HealingTree } from "@/components/HealingTree";
-import { DailyReflection } from "@/components/DailyReflection";
-import { DailyQuiz } from "@/components/DailyQuiz";
-import { CategoriaSlider } from "@/components/CategoriaSlider";
-import { ManifestacionSlider } from "@/components/ManifestacionSlider";
+import { getTodayExercise } from "@/lib/ejercicios365";
 import { SonidosHome } from "@/components/SonidosHome";
 import { PrimerosPasos } from "@/components/PrimerosPasos";
 import { GuidedTour } from "@/components/GuidedTour";
@@ -17,17 +14,8 @@ import { checkLocalReminder, showLocalNotification } from "@/lib/notifications";
 import { celebrateOnce, milestoneMessage } from "@/lib/celebrate";
 
 
-import { HomeHero, OrigenPillars, DailyExerciseBanner, DigitalLibraryCarousel, DailyMessageBanner, OrigenCommunityBanner, HealingPracticesCarousel, VisualizeAndLiveCarousel, DailyGamesSection } from "@/components/home/HomeSections";
+import { HomeHero, OrigenPillars, DailyExerciseBanner, DigitalLibraryCarousel, DailyMessageBanner, OrigenCommunityBanner, HealingPracticesCarousel, VisualizeAndLiveCarousel, DailyGamesSection, ExploreOrigen, AffiliateBanner, BalanceCard } from "@/components/home/HomeSections";
 import arbolImg from "@/assets/home/arbol.jpg";
-import { format } from "date-fns";
-import { es } from "date-fns/locale";
-import {
-  ArrowRight, Flame,
-  Layers, Lock, Sparkles, Trophy,
-} from "lucide-react";
-import afiliacionBanner from "@/assets/afiliacion-origen-home.png";
-import { FEATURED_EXPLORE } from "@/lib/explore-content";
-import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [
@@ -64,6 +52,17 @@ function Dashboard() {
         activities: activities.data ?? [],
         streakActivities: streak.data ?? [],
       };
+    },
+  });
+
+  const exRef = `ex-${getTodayExercise().day}`;
+  const { data: exerciseDone } = useQuery({
+    queryKey: ["daily_exercise_today", user?.id, exRef],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase.from("daily_activity").select("id").eq("user_id", user!.id)
+        .eq("activity_type", "exercise_completed").eq("activity_date", todayIso()).eq("reference_id", exRef).maybeSingle();
+      return !!data;
     },
   });
 
@@ -115,75 +114,18 @@ function Dashboard() {
           to={hasOnboarding ? "/etapas" : "/onboarding"}
         />
         <OrigenPillars />
-        <DailyExerciseBanner done={streakDates.has(todayIso())} streak={activeCount} />
+        <DailyExerciseBanner done={!!exerciseDone} streak={activeCount} />
         <DigitalLibraryCarousel />
         <DailyMessageBanner name={displayName} />
         <OrigenCommunityBanner />
         <HealingTree bannerImage={arbolImg} />
         <HealingPracticesCarousel />
         <VisualizeAndLiveCarousel />
-        <DailyGamesSection />
-
-        {/* Contenido adicional existente */}
-        <CategoriaSlider />
-        <ManifestacionSlider />
         <SonidosHome />
-        <DailyReflection />
-        <DailyQuiz />
-
-
-
-
-
-
-
-        {/* Explora todo el contenido de ORÍGEN */}
-        <section>
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="font-display font-bold text-[15px]">Explora todo el contenido de ORÍGEN</h3>
-            <Link to="/explorar" className="text-[11px] font-semibold text-primary inline-flex items-center gap-1">
-              Explorar <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-          <div className="hairline-brand mb-3" />
-          <div className="grid grid-cols-2 gap-3">
-            {FEATURED_EXPLORE.map((item) => (
-              <Link key={item.title} to={item.locked ? "/membresia" : item.to} className="overflow-hidden rounded-[16px] bg-card border border-border shadow-soft active:scale-[.99] transition">
-                <div className="relative aspect-[4/3] bg-muted overflow-hidden">
-                  <img src={item.image} alt={item.title} loading="lazy" className={cn("h-full w-full object-cover", item.locked && "opacity-55")} />
-                  <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-[10px] bg-background/85 px-2 py-1 text-[10px] font-black text-primary">
-                    {item.locked ? <Lock className="w-3 h-3" /> : <Sparkles className="w-3 h-3" />} {item.tag}
-                  </span>
-                </div>
-                <div className="p-3">
-                  <h4 className="font-display font-bold text-[14px] leading-tight">{item.title}</h4>
-                  <p className="text-[12px] text-muted-foreground mt-1 leading-snug">{item.description}</p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
-
-        {/* Invita y gana */}
-        <Link
-          to="/invita"
-          aria-label="Afiliación ORIGEN — gana el 70% al compartir"
-          className="block rounded-[24px] overflow-hidden shadow-soft hover:shadow-glow transition-all hover-scale"
-        >
-          <img src={afiliacionBanner} alt="Afiliación ORIGEN — Gana el 70% de ganancias al compartir ORIGEN" loading="lazy" className="w-full h-auto block" />
-        </Link>
-
-        {/* Premios */}
-        <Link to="/comprarmonedas" className="app-card p-4 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-[#F7B955]/20 grid place-items-center text-[#F7B955]">
-            <Trophy className="w-5 h-5" />
-          </div>
-          <div className="flex-1">
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Comprar monedas</p>
-            <p className="font-display font-bold text-base">{wholeHojas(data?.profile?.gems)} 🍃</p>
-          </div>
-          <span className="text-xs font-bold text-primary">Recargar</span>
-        </Link>
+        <DailyGamesSection />
+        <ExploreOrigen />
+        <AffiliateBanner />
+        <BalanceCard hojas={wholeHojas(data?.profile?.gems)} />
       </div>
     </div>
   );
