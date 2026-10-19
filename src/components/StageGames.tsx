@@ -121,11 +121,12 @@ const EMOCIONES: { text: string; group: "mia" | "heredada" }[] = [
   { text: "Alegría por un logro pequeño", group: "mia" },
 ];
 
-export function ClassifyEmotions() {
+export function ClassifyEmotions({ onComplete }: { onComplete?: () => void } = {}) {
   const [answers, setAnswers] = useState<Record<number, "mia" | "heredada">>({});
   const total = EMOCIONES.length;
   const correct = EMOCIONES.filter((e, i) => answers[i] === e.group).length;
   const answered = Object.keys(answers).length;
+  useEffect(() => { if (answered >= total) onComplete?.(); }, [answered, total]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="app-card p-5">
