@@ -1,196 +1,90 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/lib/use-auth";
-import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Copy, Gift, HeartHandshake, MessageCircle, Share2, Sparkles } from "lucide-react";
-import { toast } from "sonner";
+import { ArrowLeft, ArrowRight, BadgeCheck, Infinity as InfinityIcon, Repeat, ShieldCheck, Smartphone, Sparkles } from "lucide-react";
+import afiliacion from "@/assets/home/afiliacion.jpg";
 
 export const Route = createFileRoute("/_authenticated/invita")({
-  head: () => ({ meta: [{ title: "Invita y gana — ORIGEN" }] }),
+  head: () => ({
+    meta: [
+      { title: "Programa de afiliados — ORÍGEN" },
+      { name: "description", content: "Afíliate a ORÍGEN en Hotmart y gana comisiones recomendando el Camino ORÍGEN." },
+      { property: "og:title", content: "Programa de afiliados — ORÍGEN" },
+      { property: "og:description", content: "Comisiones por cada venta y renovación, gestionadas por Hotmart." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   component: InvitaPage,
 });
 
+const HOTMART_URL = "https://affiliate.hotmart.com/affiliate-recruiting/view/4091O107110607";
+
+const BENEFITS = [
+  { Icon: Sparkles, t: "50% de comisión", d: "en la primera venta hecha con tu enlace de Hotmart." },
+  { Icon: Repeat, t: "10% recurrente", d: "en cada renovación mientras la suscripción siga activa." },
+  { Icon: InfinityIcon, t: "Cookie permanente", d: "comisión por último clic, sin fecha de vencimiento." },
+  { Icon: Smartphone, t: "Producto digital", d: "fácil de recomendar en redes, YouTube, TikTok o blogs." },
+];
+
+const RULES = [
+  "Promoción ética y transparente, respetando las políticas de Hotmart.",
+  "Prohibido prometer resultados espirituales, médicos, financieros o personales.",
+  "Nada de spam, mensajes masivos ni publicidad engañosa.",
+  "No uses la marca ORÍGEN en anuncios pagados por nombre sin autorización.",
+  "Los pagos y comisiones los gestiona y paga directamente Hotmart.",
+];
+
 function InvitaPage() {
-  const { user } = useAuth();
-
-  const { data: profile } = useQuery({
-    queryKey: ["profile-invite", user?.id],
-    enabled: !!user,
-    queryFn: async () => {
-      const { data } = await supabase.from("profiles").select("referral_code, display_name, full_name").eq("id", user!.id).maybeSingle();
-      return data;
-    },
-  });
-
-  const { data: myRefs = [] } = useQuery({
-    queryKey: ["referrals", user?.id],
-    enabled: !!user,
-    queryFn: async () => (await supabase.from("referrals").select("*").eq("owner_id", user!.id).order("created_at", { ascending: false })).data ?? [],
-  });
-
-  const code = profile?.referral_code ?? "";
-  const link = typeof window !== "undefined" ? `${window.location.origin}/?ref=${code}` : `/?ref=${code}`;
-  const name = (profile?.display_name || profile?.full_name || "").split(" ")[0];
-  const message = `Hola 💜 Estoy en ORIGEN, una app que me ha ayudado a entender los patrones de mi familia y sanar de raíz. Si estás pasando por algo parecido, creo que te va a servir. Empieza con mi enlace: ${link}`;
-
-  function copy(text: string, label: string) {
-    navigator.clipboard.writeText(text);
-    toast.success(`${label} copiado`);
-  }
-
-  function share() {
-    if (navigator.share) {
-      navigator.share({ title: "ORIGEN", text: message, url: link }).catch(() => {});
-    } else {
-      copy(message, "Mensaje");
-    }
-  }
-
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-aura-top">
-      <div className="max-w-lg mx-auto px-5 pt-6 pb-16">
-        <div className="flex items-center gap-3 mb-6">
-          <Link to="/dashboard" className="w-10 h-10 rounded-full bg-card shadow-soft grid place-items-center">
+      <div className="max-w-lg mx-auto px-4 pt-5 pb-16 space-y-4">
+        <div className="flex items-center gap-3">
+          <Link to="/dashboard" aria-label="Volver" className="w-11 h-11 rounded-full bg-card shadow-soft grid place-items-center">
             <ArrowLeft className="w-4 h-4" />
           </Link>
-          <h1 className="font-display font-bold text-[22px]">Invita y gana</h1>
+          <h1 className="font-display font-bold text-[20px]">Programa de afiliados</h1>
         </div>
 
-        <div className="hero-card text-center">
-          <div className="mx-auto w-16 h-16 rounded-2xl bg-brand-gradient grid place-items-center text-white shadow-glow">
-            <HeartHandshake className="w-8 h-8" />
-          </div>
-          <h2 className="font-display font-extrabold text-[22px] leading-tight mt-4">
-            Alguien que amas <span className="text-gradient-brand">te necesita</span>
-          </h2>
-          <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
-            {name ? `${name}, ` : ""}si conoces a alguien atravesando lo mismo que tú viviste, tu recomendación puede cambiarle la vida. Y por cada persona que empieza su Camino ORIGEN contigo, recibes <b className="text-primary">20% del primer mes</b>.
-          </p>
-        </div>
-
-        <div className="app-card p-5 mt-4">
-          <div className="text-[11px] uppercase tracking-widest font-bold text-primary flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5" /> Tu código único
-          </div>
-          <div className="mt-2 flex items-center gap-2">
-            <div className="flex-1 h-14 rounded-[14px] bg-secondary grid place-items-center font-display font-black text-2xl tracking-widest text-primary">
-              {code || "•••••"}
-            </div>
-            <button onClick={() => copy(code, "Código")} className="h-14 w-14 rounded-[14px] bg-card border border-border grid place-items-center">
-              <Copy className="w-5 h-5" />
-            </button>
-          </div>
-          <div className="mt-3">
-            <div className="text-xs font-semibold text-muted-foreground mb-1">Tu enlace</div>
-            <div className="flex items-center gap-2">
-              <div className="flex-1 h-11 rounded-[12px] bg-secondary/60 px-3 text-xs grid items-center truncate">{link}</div>
-              <button onClick={() => copy(link, "Enlace")} className="h-11 w-11 rounded-[12px] bg-card border border-border grid place-items-center">
-                <Copy className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div className="app-card p-5 mt-4">
-          <div className="text-[11px] uppercase tracking-widest font-bold text-primary">Mensaje sugerido</div>
-          <p className="mt-2 text-sm leading-relaxed text-foreground/90 bg-secondary/50 rounded-[12px] p-3">{message}</p>
-          <div className="grid grid-cols-2 gap-2 mt-3">
-            <a
-              href={`https://wa.me/?text=${encodeURIComponent(message)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="h-12 rounded-[14px] bg-[#25D366] text-white font-semibold text-sm inline-flex items-center justify-center gap-2"
-            >
-              <MessageCircle className="w-4 h-4" /> WhatsApp
-            </a>
-            <button onClick={share} className="h-12 rounded-[14px] btn-primary-gradient inline-flex items-center justify-center gap-2 text-sm">
-              <Share2 className="w-4 h-4" /> Compartir
-            </button>
-          </div>
-        </div>
-
-        <div className="app-card p-5 mt-4">
-          <div className="flex items-center justify-between">
-            <div className="text-[11px] uppercase tracking-widest font-bold text-primary flex items-center gap-1.5">
-              <Gift className="w-3.5 h-3.5" /> Tus invitados
-            </div>
-            <span className="text-xs text-muted-foreground">{myRefs.length}</span>
-          </div>
-          {myRefs.length === 0 ? (
-            <p className="text-sm text-muted-foreground mt-3">Cuando alguien empiece con tu código lo verás aquí. Sin presión: solo comparte con quien de verdad lo necesite.</p>
-          ) : (
-            <ul className="mt-3 space-y-2">
-              {myRefs.map((r: { id: string; invited_email: string | null; status: string; reward_gems: number }) => (
-                <li key={r.id} className="flex items-center justify-between rounded-[12px] bg-secondary/40 px-3 py-2">
-                  <span className="text-sm truncate">{r.invited_email ?? "Nuevo invitado"}</span>
-                  <span className="text-xs font-bold text-primary">{r.status}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-
-        <section className="app-card p-5 mt-4 relative overflow-hidden">
-          <div className="absolute -right-6 -bottom-6 text-6xl opacity-10">💰</div>
-          <div className="relative">
-            <div className="text-[11px] uppercase tracking-widest font-bold text-primary flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5" /> Programa oficial de afiliados
-            </div>
-            <h3 className="font-display font-extrabold text-[20px] mt-2 leading-tight">
-              Cobra hasta <span className="text-primary">40,29 US$</span> por cada venta
-            </h3>
-            <p className="text-[13.5px] text-muted-foreground mt-2 leading-relaxed">
-              Comisionado por último clic, con cookies de duración permanente. Buscamos personas apasionadas por la
-              espiritualidad, el crecimiento interior y el propósito, que quieran recomendar ORÍGEN.
-            </p>
-
-            <div className="mt-4 space-y-2.5">
-              {[
-                { e: "🔥", t: "50% de comisión", d: "en la primera venta generada con tu enlace." },
-                { e: "🔄", t: "10% recurrente", d: "en las renovaciones, mientras la suscripción siga activa." },
-                { e: "🎁", t: "Período de prueba", d: "tus referidos conocen ORÍGEN antes de continuar." },
-                { e: "📱", t: "Producto digital", d: "fácil de promocionar en redes, blogs, YouTube y TikTok." },
-              ].map((b) => (
-                <div key={b.t} className="flex items-start gap-3 rounded-[12px] bg-secondary/50 p-3">
-                  <span className="w-10 h-10 shrink-0 rounded-[10px] bg-primary/10 grid place-items-center text-lg">{b.e}</span>
-                  <div className="min-w-0">
-                    <div className="font-semibold text-[14px]">{b.t}</div>
-                    <p className="text-[13px] text-muted-foreground leading-snug">{b.d}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-4">
-              <div className="text-[11px] uppercase tracking-widest font-bold text-primary">📦 Planes disponibles</div>
-              <ul className="mt-2 space-y-1 text-[13.5px]">
-                <li className="flex justify-between"><span>Explorador</span><b>US$2,99</b></li>
-                <li className="flex justify-between"><span>Camino ORÍGEN Mensual</span><b>US$14,99</b></li>
-                <li className="flex justify-between"><span>Camino ORÍGEN Anual</span><b>US$89,99</b></li>
-              </ul>
-            </div>
-
-            <div className="mt-4">
-              <div className="text-[11px] uppercase tracking-widest font-bold text-primary">🚦 Reglas</div>
-              <p className="text-[13px] text-muted-foreground mt-1.5 leading-relaxed">
-                Promoción ética y transparente, respetando las políticas de Hotmart. No se permiten afirmaciones
-                engañosas sobre resultados espirituales, financieros, médicos o personales, ni spam o publicidad
-                engañosa.
-              </p>
-            </div>
-
-            <a
-              href="https://affiliate.hotmart.com/affiliate-recruiting/view/4091O107110607"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-primary-gradient mt-5 flex h-[52px] items-center justify-center gap-2 rounded-[12px] text-[15px] font-semibold text-white active:scale-[.97] transition"
-            >
-              Registrarme como afiliado <ArrowLeft className="w-4 h-4 rotate-180" />
-            </a>
+        <section className="relative min-h-[240px] rounded-[22px] overflow-hidden shadow-[0_8px_30px_rgba(69,37,142,.15)]">
+          <img src={afiliacion} alt="" width={1536} height={768} className="absolute inset-0 h-full w-full object-cover object-[70%_center]" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#2a1760]/95 via-[#2a1760]/70 to-transparent" />
+          <div className="relative p-5 max-w-[72%] text-white">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-white/85">Oficial en Hotmart</span>
+            <h2 className="mt-1 font-display font-extrabold text-[26px] leading-tight">Recomienda ORÍGEN y gana por cada venta</h2>
+            <p className="mt-2 text-[13px] text-white/85">Hasta 40,29 US$ por venta, pagados por Hotmart.</p>
           </div>
         </section>
 
+        <section className="app-card p-5">
+          <h3 className="font-display font-bold text-[17px]">Lo que recibes</h3>
+          <div className="mt-3 space-y-2.5">
+            {BENEFITS.map(({ Icon, t, d }) => (
+              <div key={t} className="flex items-start gap-3 rounded-[12px] bg-secondary/60 p-3">
+                <span className="w-10 h-10 shrink-0 rounded-[10px] bg-primary/12 text-primary grid place-items-center"><Icon className="w-5 h-5" /></span>
+                <div className="min-w-0">
+                  <div className="font-semibold text-[14px] text-foreground">{t}</div>
+                  <p className="text-[13px] text-muted-foreground leading-snug">{d}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
 
+        <section className="app-card p-5">
+          <h3 className="font-display font-bold text-[17px] inline-flex items-center gap-2"><ShieldCheck className="w-5 h-5 text-primary" /> Reglas del programa</h3>
+          <ul className="mt-3 space-y-2">
+            {RULES.map((r) => (
+              <li key={r} className="flex items-start gap-2.5 text-[13.5px] text-foreground/85 leading-snug">
+                <BadgeCheck className="w-4 h-4 mt-0.5 shrink-0 text-primary" /> {r}
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <a href={HOTMART_URL} target="_blank" rel="noopener noreferrer"
+          className="flex h-[54px] items-center justify-center gap-2 rounded-[12px] bg-gradient-to-r from-[#7950F5] to-[#F4A1D1] text-[16px] font-semibold text-white shadow-[0_4px_14px_rgba(121,80,245,.3)] active:scale-[.97] transition">
+          Suscribirme como afiliado en Hotmart <ArrowRight className="w-4 h-4" />
+        </a>
+        <p className="text-center text-[12px] text-muted-foreground">Se abre la página oficial de Hotmart para registrarte.</p>
       </div>
     </div>
   );
