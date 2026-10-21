@@ -175,3 +175,9 @@
 - [x] Mensaje claro en vez de "No output generated"
 - [x] Créditos de IA y límite de correos con ventana de detalles por periodo (Inicio, Crear con IA, Crear consultas, Marketing)
 - [ ] Rehacer portadas/textos con IA de temas viejos — espera créditos de IA
+
+## Pedido Oct 19 — Embudo de 30 pantallas
+- [x] Evaluación de 9 pantallas con fotos (/empezar)
+- [x] Paywall con antes/después, cupón, planes, mockup y testimonio
+- [x] Rescate: aviso de salida, Raspa y Gana 80%, prueba gratis 7 días
+- [ ] Enlaces de Hotmart para 3 meses, ofertas 80% y prueba gratis — espera a la usuaria
