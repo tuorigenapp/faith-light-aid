@@ -69,6 +69,7 @@ import { Route as ApiCommunityDailyRouteImport } from './routes/api/community/da
 import { Route as ApiCommunityFeedRouteImport } from './routes/api/community/feed'
 import { Route as ApiCommunityMediaRouteImport } from './routes/api/community/media'
 import { Route as ApiCommunityVoteRouteImport } from './routes/api/community/vote'
+import { Route as ApiPublicDemoConsultaRouteImport } from './routes/api/public/demo-consulta'
 import { Route as ApiPublicMarketingDispatchRouteImport } from './routes/api/public/marketing-dispatch'
 import { Route as ApiPublicMinistracionTeaserRouteImport } from './routes/api/public/ministracion-teaser'
 import { Route as ApiPublicPushBroadcastRouteImport } from './routes/api/public/push-broadcast'
@@ -395,6 +396,11 @@ const ApiCommunityVoteRoute = ApiCommunityVoteRouteImport.update({
   path: '/api/community/vote',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicDemoConsultaRoute = ApiPublicDemoConsultaRouteImport.update({
+  id: '/api/public/demo-consulta',
+  path: '/api/public/demo-consulta',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicMarketingDispatchRoute =
   ApiPublicMarketingDispatchRouteImport.update({
     id: '/api/public/marketing-dispatch',
@@ -510,6 +516,7 @@ export interface FileRoutesByFullPath {
   '/api/community/feed': typeof ApiCommunityFeedRoute
   '/api/community/media': typeof ApiCommunityMediaRoute
   '/api/community/vote': typeof ApiCommunityVoteRoute
+  '/api/public/demo-consulta': typeof ApiPublicDemoConsultaRoute
   '/api/public/marketing-dispatch': typeof ApiPublicMarketingDispatchRoute
   '/api/public/ministracion-teaser': typeof ApiPublicMinistracionTeaserRoute
   '/api/public/push-broadcast': typeof ApiPublicPushBroadcastRoute
@@ -580,6 +587,7 @@ export interface FileRoutesByTo {
   '/api/community/feed': typeof ApiCommunityFeedRoute
   '/api/community/media': typeof ApiCommunityMediaRoute
   '/api/community/vote': typeof ApiCommunityVoteRoute
+  '/api/public/demo-consulta': typeof ApiPublicDemoConsultaRoute
   '/api/public/marketing-dispatch': typeof ApiPublicMarketingDispatchRoute
   '/api/public/ministracion-teaser': typeof ApiPublicMinistracionTeaserRoute
   '/api/public/push-broadcast': typeof ApiPublicPushBroadcastRoute
@@ -653,6 +661,7 @@ export interface FileRoutesById {
   '/api/community/feed': typeof ApiCommunityFeedRoute
   '/api/community/media': typeof ApiCommunityMediaRoute
   '/api/community/vote': typeof ApiCommunityVoteRoute
+  '/api/public/demo-consulta': typeof ApiPublicDemoConsultaRoute
   '/api/public/marketing-dispatch': typeof ApiPublicMarketingDispatchRoute
   '/api/public/ministracion-teaser': typeof ApiPublicMinistracionTeaserRoute
   '/api/public/push-broadcast': typeof ApiPublicPushBroadcastRoute
@@ -726,6 +735,7 @@ export interface FileRouteTypes {
     | '/api/community/feed'
     | '/api/community/media'
     | '/api/community/vote'
+    | '/api/public/demo-consulta'
     | '/api/public/marketing-dispatch'
     | '/api/public/ministracion-teaser'
     | '/api/public/push-broadcast'
@@ -796,6 +806,7 @@ export interface FileRouteTypes {
     | '/api/community/feed'
     | '/api/community/media'
     | '/api/community/vote'
+    | '/api/public/demo-consulta'
     | '/api/public/marketing-dispatch'
     | '/api/public/ministracion-teaser'
     | '/api/public/push-broadcast'
@@ -868,6 +879,7 @@ export interface FileRouteTypes {
     | '/api/community/feed'
     | '/api/community/media'
     | '/api/community/vote'
+    | '/api/public/demo-consulta'
     | '/api/public/marketing-dispatch'
     | '/api/public/ministracion-teaser'
     | '/api/public/push-broadcast'
@@ -906,6 +918,7 @@ export interface RootRouteChildren {
   ApiCommunityFeedRoute: typeof ApiCommunityFeedRoute
   ApiCommunityMediaRoute: typeof ApiCommunityMediaRoute
   ApiCommunityVoteRoute: typeof ApiCommunityVoteRoute
+  ApiPublicDemoConsultaRoute: typeof ApiPublicDemoConsultaRoute
   ApiPublicMarketingDispatchRoute: typeof ApiPublicMarketingDispatchRoute
   ApiPublicMinistracionTeaserRoute: typeof ApiPublicMinistracionTeaserRoute
   ApiPublicPushBroadcastRoute: typeof ApiPublicPushBroadcastRoute
@@ -1337,6 +1350,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiCommunityVoteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/demo-consulta': {
+      id: '/api/public/demo-consulta'
+      path: '/api/public/demo-consulta'
+      fullPath: '/api/public/demo-consulta'
+      preLoaderRoute: typeof ApiPublicDemoConsultaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/marketing-dispatch': {
       id: '/api/public/marketing-dispatch'
       path: '/api/public/marketing-dispatch'
@@ -1571,6 +1591,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiCommunityFeedRoute: ApiCommunityFeedRoute,
   ApiCommunityMediaRoute: ApiCommunityMediaRoute,
   ApiCommunityVoteRoute: ApiCommunityVoteRoute,
+  ApiPublicDemoConsultaRoute: ApiPublicDemoConsultaRoute,
   ApiPublicMarketingDispatchRoute: ApiPublicMarketingDispatchRoute,
   ApiPublicMinistracionTeaserRoute: ApiPublicMinistracionTeaserRoute,
   ApiPublicPushBroadcastRoute: ApiPublicPushBroadcastRoute,

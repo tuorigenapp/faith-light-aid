@@ -26,6 +26,10 @@ export function printMinistracion(opts: {
     .emoji { font-size: 22px; }
     .section p { margin:0; font-size: 14px; line-height: 1.6; white-space: pre-line; }
     .footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid #ecebf4; font-size: 11px; color:#8b89a3; text-align:center; }
+    .plans { margin-top: 22px; border: 2px solid #7C5CFF; border-radius: 18px; padding: 18px; page-break-inside: avoid; }
+    .plans h3 { margin: 0 0 12px; font-size: 16px; color:#1B1930; }
+    .plan { margin-bottom: 12px; font-size: 13px; }
+    .pbtn { display:inline-block; margin: 6px 6px 0 0; background:#7C5CFF; color:#fff; font-weight:700; font-size: 12px; padding: 8px 14px; border-radius: 10px; text-decoration:none; }
     @media print { body { padding: 20px; } .section { break-inside: avoid; } }
   `;
   const html = `<!doctype html><html><head><meta charset="utf-8"><title>${opts.title}</title>
@@ -66,6 +70,8 @@ export type ConsultaPDFOptions = {
   plan?: string; // "Explorador" | "Camino Origen"
   date?: string;
   sections: ConsultaPDFSection[];
+  /** Optional subscription buttons shown at the end (kept when printing so they stay clickable in the PDF). */
+  links?: { group: string; items: { label: string; url: string }[] }[];
 };
 
 /**
@@ -105,6 +111,10 @@ export function printConsulta(opts: ConsultaPDFOptions) {
     .footer { margin-top: 32px; padding-top: 18px; border-top: 1px solid #ecebf4; font-size: 11.5px; color:#6B6A85; text-align:center; line-height: 1.7; }
     .footer a { color:#7C5CFF; font-weight: 600; text-decoration: none; }
     .cta { margin-top: 10px; display:inline-block; background: linear-gradient(135deg,#7C5CFF,#F58BCB); color:#fff; font-weight:700; font-size: 12px; padding: 10px 22px; border-radius: 999px; text-decoration:none; }
+    .plans { margin-top: 22px; border: 2px solid #7C5CFF; border-radius: 18px; padding: 18px; page-break-inside: avoid; }
+    .plans h3 { margin: 0 0 12px; font-size: 16px; color:#1B1930; }
+    .plan { margin-bottom: 12px; font-size: 13px; }
+    .pbtn { display:inline-block; margin: 6px 6px 0 0; background:#7C5CFF; color:#fff; font-weight:700; font-size: 12px; padding: 8px 14px; border-radius: 10px; text-decoration:none; }
     @media print { body { padding: 20px; } .section { break-inside: avoid; } .cta { display:none; } }
   `;
   const html = `<!doctype html><html><head><meta charset="utf-8"><title>${escape(opts.title)}</title>
@@ -136,6 +146,8 @@ export function printConsulta(opts: ConsultaPDFOptions) {
       <h2>${s.icon ? `<span class="icon">${s.icon}</span>` : ""} ${escape(s.title)}</h2>
       <p>${escape(s.body)}</p>
     </div>`).join("")}
+
+  ${opts.links?.length ? `<div class="plans"><h3>Continúa tu proceso con el Método ORÍGEN</h3>${opts.links.map(g => `<div class="plan"><b>${escape(g.group)}</b><div>${g.items.map(i => `<a class="pbtn" href="${escape(i.url)}" target="_blank" rel="noopener">${escape(i.label)}</a>`).join("")}</div></div>`).join("")}</div>` : ""}
 
   <div class="footer">
     Documento personal generado en <b>ORIGEN</b>, tu espacio de sanación y propósito.<br/>

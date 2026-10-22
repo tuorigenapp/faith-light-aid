@@ -1,7 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, Check, X, Heart, Sparkles, Brain, Coins, Users, Compass, Headphones, NotebookPen, BookOpen, Lock, ShieldCheck, Star, Map, FileText, Gamepad2, Clock } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ArrowLeft, Check, X, Heart, Sparkles, Brain, Coins, Users, Compass, Headphones, NotebookPen, BookOpen, Lock, ShieldCheck, Map, FileText, Gamepad2, Clock, Gift, Globe2, Download, Sun, TreePine, HeartHandshake, Smartphone, BadgeCheck, CalendarCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ReviewsSlider } from "@/components/ReviewsSlider";
+import { printConsulta } from "@/lib/print-pdf";
+import { detectCurrency, discounted, formatLocal, formatUsd, USD, type LocalCurrency } from "@/lib/currency";
 import logo from "@/assets/logo-origen.png";
 import dSanar from "@/assets/funnel/d-sanar.jpg";
 import dFe from "@/assets/funnel/d-fe.jpg";
@@ -15,9 +18,18 @@ import antes from "@/assets/funnel/antes.jpg";
 import despues from "@/assets/funnel/despues.jpg";
 import gift from "@/assets/funnel/gift.png";
 import mockup from "@/assets/funnel/mockup.png";
+import appCamino from "@/assets/funnel/app-camino.jpg";
+import appVisualiza from "@/assets/funnel/app-visualiza.jpg";
+import appArbol from "@/assets/funnel/app-arbol.jpg";
+import appDiario from "@/assets/funnel/app-diario.jpg";
+import appComunidad from "@/assets/funnel/app-comunidad.jpg";
 import eHeadphones from "@/assets/e3d-headphones.png";
 import ePractice from "@/assets/e3d-practice.png";
 import eBook from "@/assets/e3d-book.png";
+import eCross from "@/assets/e3d-cross.png";
+import eCouple from "@/assets/e3d-couple.png";
+import eHeart from "@/assets/e3d-heartgem.png";
+import eStar from "@/assets/e3d-star.png";
 
 export const Route = createFileRoute("/empezar")({
   head: () => ({
@@ -33,11 +45,37 @@ export const Route = createFileRoute("/empezar")({
   component: Funnel,
 });
 
-const HOTMART = {
-  monthly: "https://pay.hotmart.com/D107250120S?off=2tqo0bnc&checkoutMode=6",
-  annual: "https://pay.hotmart.com/D107250120S?off=0kyotde7&checkoutMode=6",
-};
+// ---------- Plans (Hotmart) ----------
+type Cadence = "weekly" | "monthly" | "annual";
+type Level = { id: string; name: string; claim: string; img: string; usd: Record<Cadence, number>; url: Record<Cadence, string>; off: Record<Cadence, string>; perks: string[] };
+const H = (o: string) => `https://pay.hotmart.com/D107250120S?off=${o}&checkoutMode=6`;
+const LEVELS: Level[] = [
+  { id: "explorador", name: "EXPLORADOR ORÍGEN", claim: "Para dar tu primer paso", img: eStar, usd: { weekly: 2.99, monthly: 14.99, annual: 49.99 },
+    url: { weekly: H("pz5lp6r7"), monthly: H("2tqo0bnc"), annual: H("0kyotde7") }, off: { weekly: H("1n9cgz6n"), monthly: H("9mne3xdg"), annual: H("3si9u63f") },
+    perks: ["Diagnóstico de tu origen", "Etapa 1 del Camino ORÍGEN", "Diario y Palabra del día"] },
+  { id: "caminante", name: "CAMINANTE ORÍGEN", claim: "La experiencia completa", img: eHeart, usd: { weekly: 4.99, monthly: 19.99, annual: 69.99 },
+    url: { weekly: H("m3mf4woy"), monthly: H("m9cvnhi4"), annual: H("ip8loh6o") }, off: { weekly: H("gv5wx433"), monthly: H("7jifsui7"), annual: H("zqn998l2") },
+    perks: ["Camino de 20 etapas completo", "Visualízalo y Vívelo", "Consultas con PDF"] },
+  { id: "proposito", name: "PROPÓSITO ORÍGEN", claim: "Acompañamiento total", img: eCross, usd: { weekly: 7.99, monthly: 29.99, annual: 99.99 },
+    url: { weekly: H("rpp21n33"), monthly: H("z12ipqpy"), annual: H("lf0finnj") }, off: { weekly: H("8yqx728h"), monthly: H("k7ymwjcn"), annual: H("fcbnhwb8") },
+    perks: ["Todo lo de Caminante", "Mentora y consultas sin límite", "Biblioteca y bonos VIP"] },
+];
+const CAD: { id: Cadence; label: string; per: string; days: number }[] = [
+  { id: "weekly", label: "Semanal", per: "semana", days: 7 },
+  { id: "monthly", label: "Mensual", per: "mes", days: 30 },
+  { id: "annual", label: "Anual", per: "año", days: 365 },
+];
+const OFF_PCT: Record<Cadence, number> = { weekly: 65, monthly: 80, annual: 80 };
+type Mode = "normal" | "discount" | "trial";
 
+function priceOf(l: Level, c: Cadence, mode: Mode) {
+  return mode === "discount" ? discounted(l.usd[c], OFF_PCT[c]) : l.usd[c];
+}
+function linkOf(l: Level, c: Cadence, mode: Mode) {
+  return mode === "discount" ? l.off[c] : l.url[c];
+}
+
+// ---------- Quiz data ----------
 const DESEOS = [
   { id: "sanar", img: dSanar, t: "Sanar heridas emocionales", d: "Superar el pasado y dejar de repetir los mismos errores." },
   { id: "fe", img: dFe, t: "Fortalecer mi paz interior y fe", d: "Encontrar dirección y calmar el ruido mental." },
@@ -55,28 +93,24 @@ const DETONANTES = [
   { id: "claridad", img: tClar, t: "No tengo claridad de por dónde empezar a sanar." },
 ];
 const GUIAS = [
-  { id: "audio", img: eHeadphones, icon: Headphones, t: "Con audios, respiración y afirmaciones", d: "Para calmar la ansiedad y conectar rápido." },
-  { id: "practica", img: ePractice, icon: NotebookPen, t: "Con ejercicios prácticos y reflexión", d: "Para escribir y desahogar en tu diario." },
-  { id: "fe", img: eBook, icon: BookOpen, t: "Con enseñanzas de fe y sabiduría interior", d: "Para conectar con principios espirituales." },
+  { id: "audio", img: eHeadphones, t: "Con audios, respiración y afirmaciones", d: "Para calmar la ansiedad y conectar rápido." },
+  { id: "practica", img: ePractice, t: "Con ejercicios prácticos y reflexión", d: "Para escribir y desahogar en tu diario." },
+  { id: "fe", img: eBook, t: "Con enseñanzas de fe y sabiduría interior", d: "Para conectar con principios espirituales." },
+];
+const SCREENS = [
+  { img: appCamino, t: "Camino ORÍGEN", d: "20 etapas, una lección nueva cada día" },
+  { img: appVisualiza, t: "Visualízalo y Vívelo", d: "Programas guiados con audio y seguimiento" },
+  { img: appArbol, t: "Árbol de Sanación", d: "Tus Hojas crecen con cada paso que das" },
+  { img: appDiario, t: "Diario espiritual", d: "Privado, solo tú y Dios" },
+  { img: appComunidad, t: "Comunidad", d: "Personas que viven caminos parecidos" },
 ];
 
-type Plan = { id: string; label: string; old?: string; price: string; perDay: string; badge?: string; url?: string };
-const PLANS_MAIN: Plan[] = [
-  { id: "m1", label: "1 mes", price: "US$14.99", perDay: "0.50", url: HOTMART.monthly },
-  { id: "m3", label: "3 meses", price: "US$18.00", perDay: "0.20", badge: "Más popular" },
-  { id: "y1", label: "Anual", price: "US$49.99", perDay: "0.14", badge: "Mejor valor · Ahorra 72%", url: HOTMART.annual },
-];
-const PLANS_80: Plan[] = [
-  { id: "m1", label: "1 mes", old: "US$14.99", price: "US$8.00", perDay: "0.26" },
-  { id: "m3", label: "3 meses", old: "US$18.00", price: "US$12.00", perDay: "0.13", badge: "Más popular" },
-  { id: "m6", label: "6 meses", old: "US$49.99", price: "US$18.00", perDay: "0.10" },
-];
+type Stage = "quiz" | "paywall" | "offer80";
+type Popup = null | "scratch" | "free";
 
-type Stage = "quiz" | "paywall" | "scratch" | "offer80" | "free";
-
-function useCountdown(seconds: number, active: boolean) {
+function useCountdown(seconds: number) {
   const [left, setLeft] = useState(seconds);
-  useEffect(() => { if (!active) return; setLeft(seconds); const t = setInterval(() => setLeft((s) => Math.max(0, s - 1)), 1000); return () => clearInterval(t); }, [active, seconds]);
+  useEffect(() => { const t = setInterval(() => setLeft((s) => Math.max(0, s - 1)), 1000); return () => clearInterval(t); }, []);
   return `${String(Math.floor(left / 60)).padStart(2, "0")}:${String(left % 60).padStart(2, "0")}`;
 }
 
@@ -84,62 +118,89 @@ function Funnel() {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [stage, setStage] = useState<Stage>("quiz");
+  const [popup, setPopup] = useState<Popup>(null);
+  const shown = useRef<{ scratch: boolean; free: boolean }>({ scratch: false, free: false });
+  const [cur, setCur] = useState<LocalCurrency>(USD);
   const [name, setName] = useState("");
   const [deseo, setDeseo] = useState("");
   const [areas, setAreas] = useState<string[]>([]);
   const [raices, setRaices] = useState("");
   const [deton, setDeton] = useState("");
   const [guia, setGuia] = useState("");
-  const [exitOpen, setExitOpen] = useState(false);
-  const [exitShown, setExitShown] = useState(false);
 
+  useEffect(() => { setCur(detectCurrency()); }, []);
   useEffect(() => {
     try { localStorage.setItem("origen_preonboarding", JSON.stringify({ name, deseo, areas, raices, detonante: deton, guia })); } catch { /* no storage */ }
   }, [name, deseo, areas, raices, deton, guia]);
 
-  // Exit-intent on the paywall: mouse leaving the top of the window or browser back.
+  // Exit intent: 1st attempt on the paywall → scratch card; attempt on the discount page → free trial.
+  const tryExit = useCallback(() => {
+    if (stage === "paywall" && !shown.current.scratch) { shown.current.scratch = true; setPopup("scratch"); return true; }
+    if (stage === "offer80" && !shown.current.free) { shown.current.free = true; setPopup("free"); return true; }
+    return false;
+  }, [stage]);
   useEffect(() => {
-    if (stage !== "paywall" || exitShown) return;
-    const onLeave = (e: MouseEvent) => { if (e.clientY <= 0) { setExitOpen(true); setExitShown(true); } };
-    const onPop = () => { setExitOpen(true); setExitShown(true); history.pushState(null, "", location.href); };
+    if (stage === "quiz") return;
+    const onOut = (e: MouseEvent) => { if (!e.relatedTarget && e.clientY <= 8) tryExit(); };
+    const onPop = () => { if (tryExit()) history.pushState(null, "", location.href); };
+    const onVis = () => { if (document.visibilityState === "hidden") tryExit(); };
+    const onUnload = (e: BeforeUnloadEvent) => { if (tryExit()) { e.preventDefault(); e.returnValue = ""; } };
     history.pushState(null, "", location.href);
-    document.addEventListener("mouseout", onLeave);
+    document.addEventListener("mouseout", onOut);
     window.addEventListener("popstate", onPop);
-    return () => { document.removeEventListener("mouseout", onLeave); window.removeEventListener("popstate", onPop); };
-  }, [stage, exitShown]);
+    document.addEventListener("visibilitychange", onVis);
+    window.addEventListener("beforeunload", onUnload);
+    return () => { document.removeEventListener("mouseout", onOut); window.removeEventListener("popstate", onPop); document.removeEventListener("visibilitychange", onVis); window.removeEventListener("beforeunload", onUnload); };
+  }, [stage, tryExit]);
 
   const progress = [5, 15, 25, 35, 45, 55, 70, 95, 100][step - 1];
   const first = name.trim().split(" ")[0] || "";
   const next = () => setStep((s) => s + 1);
   const autoNext = () => setTimeout(next, 300);
+  const leave = () => { if (!tryExit()) navigate({ to: "/registro" }); };
 
-  if (stage === "paywall") return <Paywall name={first} onClose={() => { setExitOpen(true); setExitShown(true); }} exitOpen={exitOpen} onExitClaim={() => { setExitOpen(false); setStage("scratch"); }} onExitDismiss={() => { setExitOpen(false); setStage("free"); }} />;
-  if (stage === "scratch") return <Scratch onDone={() => setStage("offer80")} />;
-  if (stage === "offer80") return <Offer80 onClose={() => setStage("free")} />;
-  if (stage === "free") return <FreeOffer onBack={() => setStage("offer80")} onSkip={() => navigate({ to: "/registro" })} />;
+  const popups = <>
+    {popup === "scratch" && <ScratchPopup name={first} onClaim={() => { setPopup(null); setStage("offer80"); window.scrollTo(0, 0); }} onClose={() => setPopup(null)} />}
+    {popup === "free" && <FreePopup cur={cur} onClose={() => setPopup(null)} onSkip={() => navigate({ to: "/registro" })} />}
+  </>;
 
+  if (stage === "paywall") return <><Paywall name={first} cur={cur} onClose={leave} />{popups}</>;
+  if (stage === "offer80") return <><Offer80 name={first} cur={cur} onClose={leave} />{popups}</>;
+
+  const welcome = step === 1;
   return (
-    <main className="min-h-dvh bg-gradient-to-b from-primary/5 via-background to-background px-4 pb-8 pt-4">
-      <div className="mx-auto flex min-h-[calc(100dvh-3rem)] max-w-md flex-col">
+    <main className="relative min-h-dvh overflow-hidden bg-background px-4 pb-8 pt-4">
+      {welcome && <>
+        <img src={dFe} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover" />
+        <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-background/30 via-background/70 to-background" />
+      </>}
+      {!welcome && <div aria-hidden className="absolute inset-x-0 top-0 h-80 bg-gradient-to-b from-primary/10 to-transparent" />}
+      <div className="relative mx-auto flex min-h-[calc(100dvh-3rem)] max-w-md flex-col">
         <header className="flex items-center justify-between">
           {step > 1 && step < 8 ? <button aria-label="Atrás" onClick={() => setStep(step - 1)} className="grid h-11 w-11 place-items-center rounded-xl text-foreground"><ArrowLeft className="h-5 w-5" /></button> : <span className="h-11 w-11" />}
           <Link to="/" className="flex items-center gap-2 font-display text-lg font-bold text-foreground"><img src={logo} alt="" className="h-8 w-8 object-contain" />ORÍGEN</Link>
           <span className="h-11 w-11" />
         </header>
-        <div className="mt-3 h-2 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-primary transition-all duration-500" style={{ width: `${progress}%` }} /></div>
+        <div className="mt-3 h-2 overflow-hidden rounded-full bg-muted/70"><div className="h-full rounded-full bg-primary transition-all duration-500" style={{ width: `${progress}%` }} /></div>
 
         <section key={step} className="flex flex-1 flex-col animate-in fade-in slide-in-from-right-4 duration-300">
           {step === 1 && <>
-            <div className="mt-10 grid place-items-center"><img src={logo} alt="ORÍGEN" className="h-28 w-28 object-contain drop-shadow-xl" /></div>
-            <h1 className="mt-8 text-center font-display text-3xl font-bold leading-tight text-foreground">Deja de repetir la historia que no elegiste.</h1>
-            <p className="mt-4 text-center text-base text-muted-foreground">Hoy inicias el camino para identificar y romper los patrones invisibles que vienes cargando. Vamos a descubrir de dónde vienen y cómo transformarlos.</p>
-            <div className="mt-auto pt-8"><Cta onClick={next}>Comenzar mi evaluación</Cta><p className="mt-3 text-center text-xs text-muted-foreground">Toma menos de 2 minutos</p></div>
+            <div className="mt-auto" />
+            <img src={logo} alt="ORÍGEN" className="mx-auto h-24 w-24 object-contain drop-shadow-2xl" />
+            <h1 className="mt-6 text-center font-display text-[34px] font-bold leading-tight text-foreground">Deja de repetir la historia que no elegiste.</h1>
+            <p className="mt-4 text-center text-base text-foreground/80">En 2 minutos descubrimos de dónde vienen tus patrones y cómo empezar a romperlos.</p>
+            <div className="mt-6 flex justify-center gap-4 text-xs font-semibold text-foreground/80">
+              <span className="flex items-center gap-1"><ShieldCheck className="h-4 w-4 text-primary" />Privado</span>
+              <span className="flex items-center gap-1"><Clock className="h-4 w-4 text-primary" />2 minutos</span>
+              <span className="flex items-center gap-1"><Heart className="h-4 w-4 text-primary" />Respeta tu fe</span>
+            </div>
+            <div className="pt-8"><Cta onClick={next}>Comenzar mi evaluación</Cta></div>
           </>}
 
           {step === 2 && <>
             <Bubble>¿Cómo te gustaría que te llamemos?</Bubble>
-            <p className="mt-3 text-center text-sm text-muted-foreground">Personalizaremos tu experiencia, tus reportes y tu mapa de sanación con tu nombre.</p>
-            <input autoFocus value={name} onChange={(e) => setName(e.target.value)} maxLength={40} placeholder="Escribe tu nombre o apodo" className="mt-6 h-13 min-h-[52px] w-full rounded-xl border-[1.5px] border-border bg-card px-4 text-base text-foreground outline-none focus:border-primary focus:ring-4 focus:ring-primary/20" />
+            <p className="mt-3 text-center text-sm text-muted-foreground">Personalizaremos tu experiencia y tu mapa de sanación con tu nombre.</p>
+            <input autoFocus value={name} onChange={(e) => setName(e.target.value)} maxLength={40} placeholder="Escribe tu nombre o apodo" className="mt-6 min-h-[52px] w-full rounded-xl border-[1.5px] border-border bg-card px-4 text-base text-foreground outline-none focus:border-primary focus:ring-4 focus:ring-primary/20" />
             <div className="mt-4"><Cta disabled={!name.trim()} onClick={next}>Continuar</Cta></div>
           </>}
 
@@ -163,7 +224,7 @@ function Funnel() {
           </>}
 
           {step === 5 && <>
-            <Bubble>¿De quién o de dónde sientes que viene este peso?</Bubble>
+            <Bubble>¿De dónde sientes que viene este peso?</Bubble>
             <p className="mt-3 text-sm text-muted-foreground">Escribe una situación o patrón que se repite en tu familia (divorcios, escasez, miedos, silencios…).</p>
             <textarea value={raices} onChange={(e) => setRaices(e.target.value)} maxLength={1000} rows={6} placeholder="Escribe aquí lo que sientes o vives en tu familia…" className="mt-5 w-full rounded-2xl border-[1.5px] border-border bg-card p-4 text-base text-foreground outline-none focus:border-primary focus:ring-4 focus:ring-primary/20" />
             <p className="mt-1 text-right text-xs text-muted-foreground">{raices.length}/1000</p>
@@ -189,23 +250,28 @@ function Funnel() {
           </>}
 
           {step === 8 && <Analysis name={first} onDone={next} />}
-
-          {step === 9 && <Result name={first} areas={areas} onNext={() => setStage("paywall")} />}
+          {step === 9 && <Result name={first} areas={areas} onNext={() => { setStage("paywall"); window.scrollTo(0, 0); }} />}
         </section>
       </div>
     </main>
   );
 }
 
+// ---------- Shared UI ----------
 function Cta({ children, onClick, disabled, className }: { children: React.ReactNode; onClick?: () => void; disabled?: boolean; className?: string }) {
   return <button disabled={disabled} onClick={onClick} className={cn("min-h-[56px] w-full rounded-xl bg-primary px-5 text-base font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition active:scale-[.97] disabled:opacity-40 disabled:shadow-none", className)}>{children}</button>;
 }
-
 function Bubble({ children }: { children: React.ReactNode }) {
   return <div className="mt-8 flex items-center gap-3">
     <img src={logo} alt="" className="h-16 w-16 shrink-0 object-contain drop-shadow-lg" />
     <div className="relative flex-1 rounded-2xl bg-card p-4 shadow-sm"><h1 className="font-display text-xl font-bold leading-snug text-foreground">{children}</h1></div>
   </div>;
+}
+function Tick({ children }: { children: React.ReactNode }) {
+  return <li className="flex items-start gap-2 text-sm text-foreground"><span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-primary/15"><Check className="h-3 w-3 text-primary" /></span>{children}</li>;
+}
+function SectionTitle({ kicker, children }: { kicker?: string; children: React.ReactNode }) {
+  return <div className="mt-12 text-center">{kicker && <p className="text-xs font-bold uppercase tracking-widest text-primary">{kicker}</p>}<h2 className="mt-1 font-display text-2xl font-bold leading-tight text-foreground">{children}</h2></div>;
 }
 
 function Analysis({ name, onDone }: { name: string; onDone: () => void }) {
@@ -231,12 +297,12 @@ function Analysis({ name, onDone }: { name: string; onDone: () => void }) {
 
 function Result({ name, areas, onNext }: { name: string; areas: string[]; onNext: () => void }) {
   const score = 68;
-  const shown = areas.length ? areas.slice(0, 2).join(" y ") : "Emocional y Relaciones";
+  const shownAreas = areas.length ? areas.slice(0, 2).join(" y ") : "Emocional y Relaciones";
   return <div className="flex flex-1 flex-col pt-6">
     <h1 className="text-center font-display text-2xl font-bold text-foreground">El mapa de {name} está listo</h1>
     <img src={despues} alt="" className="mt-5 aspect-[4/3] w-full rounded-2xl object-cover" />
     <div className="mt-4 rounded-2xl bg-card p-5 shadow-sm">
-      <p className="text-sm text-foreground">Detectamos un patrón de repetición fuerte en el área <b>{shown}</b>, ligado a lealtades invisibles de tus raíces.</p>
+      <p className="text-sm text-foreground">Detectamos un patrón de repetición fuerte en el área <b>{shownAreas}</b>, ligado a lealtades invisibles de tus raíces.</p>
       <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Índice de impacto</p>
       <div className="relative mt-3 h-3 rounded-full bg-gradient-to-r from-primary/30 via-primary/60 to-primary">
         <span className="absolute -top-1.5 h-6 w-6 -translate-x-1/2 rounded-full border-4 border-card bg-primary shadow" style={{ left: `${score}%` }} />
@@ -249,167 +315,300 @@ function Result({ name, areas, onNext }: { name: string; areas: string[]; onNext
   </div>;
 }
 
-function PlanPicker({ plans, selected, onSelect }: { plans: Plan[]; selected: string; onSelect: (id: string) => void }) {
-  return <div className="grid gap-3">{plans.map((p) => { const on = p.id === selected; const [i, d] = p.perDay.split("."); return <button key={p.id} onClick={() => onSelect(p.id)} className={cn("overflow-hidden rounded-2xl border-2 bg-card text-left transition active:scale-[.98]", on ? "border-primary" : "border-border")}>
-    {p.badge && <div className={cn("py-1 text-center text-xs font-bold", on ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary")}>{p.badge}</div>}
-    <div className="flex items-center gap-3 p-4">
-      <span className={cn("grid h-6 w-6 shrink-0 place-items-center rounded-full border-2", on ? "border-primary" : "border-border")}>{on && <span className="h-3 w-3 rounded-full bg-primary" />}</span>
-      <span className="flex-1"><span className="block font-display text-lg font-bold text-foreground">{p.label}</span><span className="text-sm text-muted-foreground">{p.old && <s className="mr-2">{p.old}</s>}<span className="font-semibold text-foreground">{p.price}</span></span></span>
-      <span className={cn("flex items-start rounded-xl px-3 py-1.5", on ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary")}><span className="text-xs">$</span><span className="font-display text-3xl font-bold leading-none">{i}</span><span className="ml-0.5 text-xs leading-tight"><b className="block text-sm">{d}</b>al día</span></span>
-    </div>
-  </button>; })}</div>;
+function CurrencyNote({ cur }: { cur: LocalCurrency }) {
+  return <p className="mt-3 flex items-start gap-2 rounded-xl bg-primary/5 p-3 text-xs text-muted-foreground"><Globe2 className="h-4 w-4 shrink-0 text-primary" />
+    {cur.detected && cur.code !== "USD"
+      ? `Precios aproximados en tu moneda (${cur.code}). Hotmart te cobra en tu moneda local con tarjeta de crédito, débito u otros métodos de tu país.`
+      : "Precios en dólares (USD). Podrás pagar en tu moneda local con tarjeta de crédito, débito u otros métodos disponibles en tu país."}
+  </p>;
 }
 
-function PayModal({ plan, onClose, trial }: { plan: Plan; onClose: () => void; trial?: boolean }) {
-  const navigate = useNavigate();
-  const go = () => { if (plan.url) window.open(plan.url, "_blank", "noopener"); else navigate({ to: "/membresia" }); };
-  return <div className="fixed inset-0 z-50 flex items-end justify-center bg-foreground/40 backdrop-blur-sm sm:items-center" onClick={onClose}>
-    <div onClick={(e) => e.stopPropagation()} className="w-full max-w-md rounded-t-3xl bg-card p-6 shadow-2xl animate-in slide-in-from-bottom-8 sm:rounded-3xl">
-      <div className="flex justify-end"><button aria-label="Cerrar" onClick={onClose} className="grid h-11 w-11 place-items-center rounded-xl text-foreground"><X className="h-5 w-5" /></button></div>
-      <h2 className="text-center font-display text-xl font-bold text-foreground">Elige cómo pagar</h2>
-      <div className="mt-5 flex items-center justify-between text-foreground"><span className="font-bold">Total hoy</span><span className="font-display text-xl font-bold">{plan.old && <s className="mr-2 text-base text-muted-foreground">{plan.old}</s>}{trial ? "US$0.00" : plan.price}</span></div>
-      <button onClick={go} className="mt-5 min-h-[56px] w-full rounded-xl bg-foreground text-base font-semibold text-background">Pagar con tarjeta, PayPal o Google Pay</button>
-      <div className="mt-3 flex items-center justify-center gap-2 text-xs text-muted-foreground"><Lock className="h-4 w-4 text-primary" />Pago seguro con cifrado SSL a través de Hotmart</div>
-      <p className="mt-4 text-xs text-muted-foreground">{trial ? "7 días gratis. Luego se renueva a US$14.99 al mes." : `Pagas ${plan.price} por el primer periodo. Se renueva automáticamente.`} Cancela cuando quieras desde tu cuenta o escribiendo a soporte.</p>
+function money(usd: number, cur: LocalCurrency) {
+  return cur.detected && cur.code !== "USD" ? formatLocal(usd, cur) : formatUsd(usd);
+}
+
+/** 3 levels × 3 cadences, each opening its own Hotmart checkout. */
+function PlansBoard({ cur, mode, title }: { cur: LocalCurrency; mode: Mode; title?: string }) {
+  const [cad, setCad] = useState<Cadence>("annual");
+  const [lvl, setLvl] = useState("caminante");
+  const level = LEVELS.find((l) => l.id === lvl)!;
+  const c = CAD.find((x) => x.id === cad)!;
+  const price = priceOf(level, cad, mode);
+  const charge = useMemo(() => { const d = new Date(); d.setDate(d.getDate() + 7); return d.toLocaleDateString("es", { day: "numeric", month: "long", year: "numeric" }); }, []);
+  const go = () => window.open(linkOf(level, cad, mode), "_blank", "noopener");
+  return <section className="mt-5 rounded-3xl bg-card p-4 shadow-sm">
+    {title && <h3 className="mb-3 text-center font-display text-lg font-bold text-foreground">{title}</h3>}
+    <div role="tablist" className="grid grid-cols-3 gap-1 rounded-xl bg-muted p-1">
+      {CAD.map((x) => <button key={x.id} role="tab" aria-selected={cad === x.id} onClick={() => setCad(x.id)} className={cn("min-h-[44px] rounded-lg text-sm font-semibold transition", cad === x.id ? "bg-card text-primary shadow-sm" : "text-muted-foreground")}>{x.label}{mode === "discount" && <span className="block text-[11px] font-bold text-primary">-{OFF_PCT[x.id]}%</span>}</button>)}
+    </div>
+    <div className="mt-4 grid gap-3">
+      {LEVELS.map((l) => { const on = l.id === lvl; const p = priceOf(l, cad, mode); return <button key={l.id} onClick={() => setLvl(l.id)} className={cn("relative overflow-hidden rounded-2xl border-2 bg-card p-4 text-left transition active:scale-[.98]", on ? "border-primary" : "border-border")}>
+        {l.id === "caminante" && <span className="absolute right-3 top-3 rounded-full bg-primary px-2.5 py-0.5 text-[11px] font-bold text-primary-foreground">Más elegido</span>}
+        <div className="flex items-center gap-3">
+          <img src={l.img} alt="" className="h-12 w-12 shrink-0 object-contain" />
+          <div className="min-w-0 flex-1">
+            <p className="font-display text-base font-bold text-foreground">{l.name}</p>
+            <p className="text-xs text-muted-foreground">{l.claim}</p>
+          </div>
+        </div>
+        <div className="mt-3 flex items-end justify-between gap-2">
+          <div>
+            {mode === "trial" && <p className="font-display text-2xl font-bold text-primary">{money(0, cur)} <span className="text-sm font-semibold text-muted-foreground">hoy</span></p>}
+            {mode !== "trial" && <p className="font-display text-2xl font-bold text-foreground">{money(p, cur)}<span className="text-sm font-semibold text-muted-foreground"> / {c.per}</span></p>}
+            {mode === "discount" && <p className="text-xs text-muted-foreground"><s>{money(l.usd[cad], cur)}</s> · ahorras {OFF_PCT[cad]}%</p>}
+            {mode === "trial" && <p className="text-xs text-muted-foreground">Luego {money(l.usd[cad], cur)} / {c.per}</p>}
+            {cur.detected && cur.code !== "USD" && <p className="text-[11px] text-muted-foreground">≈ {formatUsd(mode === "trial" ? l.usd[cad] : p)} USD</p>}
+          </div>
+          <span className={cn("grid h-7 w-7 shrink-0 place-items-center rounded-full border-2", on ? "border-primary bg-primary" : "border-border")}>{on && <Check className="h-4 w-4 text-primary-foreground" />}</span>
+        </div>
+        {on && <ul className="mt-3 grid gap-1.5 border-t border-border pt-3">{l.perks.map((x) => <Tick key={x}>{x}</Tick>)}</ul>}
+      </button>; })}
+    </div>
+    {mode === "trial" && <div className="mt-4 rounded-2xl bg-primary/10 p-4">
+      <p className="font-display text-base font-bold text-foreground">Quiero un período gratis</p>
+      <p className="mt-1 text-sm text-foreground">Tendrás 7 día(s) para probar el producto.</p>
+      <p className="mt-1 text-sm text-muted-foreground">Después de este período se cobrará el importe de <b className="text-foreground">{money(level.usd[cad], cur)} / {c.per}</b> (primer cobro el {charge}).</p>
+      <div className="mt-3 flex items-center justify-between border-t border-primary/20 pt-3 text-foreground"><span className="font-bold">Total a pagar hoy</span><span className="font-display text-xl font-bold">{money(0, cur)}</span></div>
+    </div>}
+    <Cta className="mt-4" onClick={go}>{mode === "trial" ? "Empezar mis 7 días gratis" : mode === "discount" ? `Obtener ${OFF_PCT[cad]}% de descuento` : `Obtener ${level.name.split(" ")[0][0] + level.name.split(" ")[0].slice(1).toLowerCase()} por ${money(price, cur)}`}</Cta>
+    <div className="mt-3 flex items-center justify-center gap-2 text-xs text-muted-foreground"><Lock className="h-4 w-4 text-primary" />Pago seguro con Hotmart · tarjeta, PayPal, Google Pay y más</div>
+    <CurrencyNote cur={cur} />
+    <ul className="mt-3 grid gap-2">
+      {mode === "discount" ? <Tick>Pago inmediato con descuento, sin período de prueba</Tick> : <Tick>Te avisamos antes del cobro</Tick>}
+      <Tick>Cancela cuando quieras</Tick>
+      <Tick>Garantía de 7 días de Hotmart</Tick>
+    </ul>
+  </section>;
+}
+
+function AppScreens() {
+  return <>
+    <SectionTitle kicker="La app por dentro">Así se ve ORÍGEN en tu teléfono</SectionTitle>
+    <div className="-mx-4 mt-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-4 [scrollbar-width:none]">
+      {SCREENS.map((s) => <figure key={s.t} className="w-[62%] shrink-0 snap-center sm:w-56">
+        <div className="overflow-hidden rounded-[28px] border-[6px] border-foreground/85 bg-card shadow-xl"><img src={s.img} alt={`Pantalla ${s.t} de ORÍGEN`} loading="lazy" className="aspect-[390/844] w-full object-cover object-top" /></div>
+        <figcaption className="mt-3 text-center"><p className="text-sm font-bold text-foreground">{s.t}</p><p className="text-xs text-muted-foreground">{s.d}</p></figcaption>
+      </figure>)}
+    </div>
+    <p className="text-center text-xs text-muted-foreground">Desliza para ver más pantallas</p>
+  </>;
+}
+
+function TrustBar() {
+  const items = [{ i: Lock, t: "Pago seguro Hotmart" }, { i: BadgeCheck, t: "Garantía 7 días" }, { i: Globe2, t: "Pagas en tu moneda" }, { i: Smartphone, t: "Celular y computadora" }];
+  return <div className="mt-6 grid grid-cols-2 gap-3">{items.map(({ i: I, t }) => <div key={t} className="flex items-center gap-2 rounded-2xl bg-card p-3 shadow-sm"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/10"><I className="h-5 w-5 text-primary" /></span><span className="text-xs font-bold text-foreground">{t}</span></div>)}</div>;
+}
+
+function BooksGift() {
+  return <section className="relative mt-10 overflow-hidden rounded-3xl bg-primary p-5 text-primary-foreground">
+    <div className="flex items-center gap-4">
+      <img src={eBook} alt="" className="h-24 w-24 shrink-0 object-contain drop-shadow-xl" />
+      <div><p className="text-xs font-bold uppercase tracking-widest opacity-80">Regalo cada semana</p><h3 className="mt-1 font-display text-xl font-bold leading-tight">Un pack de libros digitales gratis cada semana</h3></div>
+    </div>
+    <p className="mt-3 text-sm opacity-90">Desde que entras a ORÍGEN, cada semana se abre un nuevo pack en tu Biblioteca Digital para leer y descargar.</p>
+    <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs font-semibold">{["Sanación", "Fe y propósito", "Abundancia"].map((t) => <span key={t} className="rounded-xl bg-primary-foreground/15 px-2 py-2">{t}</span>)}</div>
+  </section>;
+}
+
+function Includes() {
+  const incl = [{ i: Map, t: "Camino ORÍGEN", d: "20 etapas con una lección nueva cada día" }, { i: FileText, t: "Consultas con PDF", d: "Dios te dice hoy, tu patrón familiar y tu pareja" }, { i: NotebookPen, t: "Diario de sanación", d: "Escribe y desahoga en privado" }, { i: Headphones, t: "Audios guiados", d: "Respiración, afirmaciones y visualización" }, { i: Gamepad2, t: "Juegos del día", d: "Gimnasia emocional de 3 minutos" }, { i: TreePine, t: "Árbol de Sanación", d: "Mira crecer tu avance con cada paso" }];
+  return <>
+    <SectionTitle kicker="Todo en un solo lugar">Lo que incluye tu plan</SectionTitle>
+    <img src={mockup} alt="Pantallas de la app ORÍGEN" loading="lazy" className="mx-auto mt-4 w-full max-w-sm drop-shadow-2xl" />
+    <div className="mt-4 grid gap-3">{incl.map(({ i: I, t, d }) => <div key={t} className="flex items-center gap-3 rounded-2xl bg-card p-4 shadow-sm"><span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-primary/10"><I className="h-6 w-6 text-primary" /></span><span><span className="block font-semibold text-foreground">{t}</span><span className="block text-sm text-muted-foreground">{d}</span></span></div>)}</div>
+  </>;
+}
+
+function BeforeAfter() {
+  return <section className="mt-5 rounded-3xl bg-card p-4 shadow-sm">
+    <div className="grid grid-cols-2 gap-3">
+      {[{ img: antes, tag: "Hoy", tone: "bg-muted text-foreground", lv: [2, 2, 1], lbl: ["Carga", "Inquieta", "Bloqueada"] }, { img: despues, tag: "En 6 meses", tone: "bg-primary text-primary-foreground", lv: [5, 5, 4], lbl: ["Libre", "En paz", "Fluyendo"] }].map((c) => <div key={c.tag}>
+        <span className={cn("block rounded-full py-1.5 text-center text-sm font-bold", c.tone)}>{c.tag}</span>
+        <img src={c.img} alt="" className="mt-3 aspect-[4/5] w-full rounded-2xl object-cover" />
+        {["Paz interior", "Mente", "Relaciones"].map((k, i) => <div key={k} className="mt-3"><p className="text-sm font-bold text-foreground">{k}</p><p className="text-xs text-muted-foreground">{c.lbl[i]}</p><div className="mt-1 flex gap-1">{[0, 1, 2, 3, 4].map((n) => <span key={n} className={cn("h-1.5 flex-1 rounded-full", n < c.lv[i] ? "bg-primary" : "bg-muted")} />)}</div></div>)}
+      </div>)}
+    </div>
+  </section>;
+}
+
+// ---------- Try a consulta ----------
+const DEMOS = [
+  { id: "dios", img: eCross, t: "Dios te dice hoy", ph: "¿Qué te gustaría preguntarle hoy?" },
+  { id: "patron", img: eHeart, t: "Tu patrón familiar", ph: "¿Qué se repite en tu familia?" },
+  { id: "pareja", img: eCouple, t: "¿Es tu pareja de destino?", ph: "¿Qué te inquieta de esta relación?" },
+] as const;
+type DemoResult = { headline: string; sections: { title: string; body: string }[] };
+
+function TryConsulta({ name }: { name: string }) {
+  const [kind, setKind] = useState<(typeof DEMOS)[number]["id"]>("dios");
+  const [who, setWho] = useState(name);
+  const [partner, setPartner] = useState("");
+  const [q, setQ] = useState("");
+  const [state, setState] = useState<"idle" | "loading" | "done" | "error">("idle");
+  const [res, setRes] = useState<DemoResult | null>(null);
+  const demo = DEMOS.find((d) => d.id === kind)!;
+  useEffect(() => { if (name && !who) setWho(name); }, [name, who]);
+  const ask = async () => {
+    setState("loading"); setRes(null);
+    try {
+      const [r] = await Promise.all([
+        fetch("/api/public/demo-consulta", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ kind, name: who, question: q, partner }) }),
+        new Promise((ok) => setTimeout(ok, 2500)),
+      ]);
+      if (!r.ok) throw new Error();
+      setRes(await r.json()); setState("done");
+    } catch { setState("error"); }
+  };
+  const pdf = () => res && printConsulta({
+    kind: demo.t, title: res.headline, subtitle: "Respuesta de prueba del Método ORÍGEN", userName: who, plan: "Prueba",
+    sections: res.sections.map((s) => ({ title: s.title, body: s.body })),
+    links: LEVELS.map((l) => ({ group: l.name, items: CAD.map((c) => ({ label: `${c.label} · ${formatUsd(l.usd[c.id])}`, url: l.url[c.id] })) })),
+  });
+  return <section className="mt-12">
+    <SectionTitle kicker="Pruébalo gratis ahora">¿El Método ORÍGEN es para ti? Compruébalo</SectionTitle>
+    <p className="mt-2 text-center text-sm text-muted-foreground">Elige una consulta, escribe tu pregunta y recibe tu respuesta al instante.</p>
+    <div className="mt-5 grid grid-cols-3 gap-2">
+      {DEMOS.map((d) => <button key={d.id} onClick={() => { setKind(d.id); setState("idle"); setRes(null); }} className={cn("rounded-2xl border-2 bg-card p-2 text-center transition active:scale-[.97]", kind === d.id ? "border-primary" : "border-transparent shadow-sm")}>
+        <img src={d.img} alt="" className="mx-auto h-14 w-14 object-contain" /><span className="mt-1 block text-xs font-bold leading-tight text-foreground">{d.t}</span>
+      </button>)}
+    </div>
+    <div className="mt-4 rounded-3xl bg-card p-4 shadow-sm">
+      {state === "loading" ? <div className="py-10 text-center">
+        <img src={demo.img} alt="" className="mx-auto h-20 w-20 animate-pulse object-contain" />
+        <p className="mt-4 font-display text-lg font-bold text-foreground">Preparando tu respuesta, {who}…</p>
+        <p className="mt-1 text-sm text-muted-foreground">“{q || demo.t}”</p>
+      </div> : state === "done" && res ? <div className="animate-in fade-in">
+        <p className="text-xs font-bold uppercase tracking-widest text-primary">{demo.t}</p>
+        <h3 className="mt-1 font-display text-xl font-bold leading-snug text-foreground">{res.headline}</h3>
+        <div className="mt-4 grid gap-3">{res.sections.map((s) => <div key={s.title} className="rounded-2xl bg-primary/5 p-4"><p className="text-sm font-bold text-primary">{s.title}</p><p className="mt-1 whitespace-pre-line text-sm text-foreground">{s.body}</p></div>)}</div>
+        <button onClick={pdf} className="mt-4 flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl bg-primary/10 text-sm font-semibold text-primary"><Download className="h-4 w-4" />Descargar mi respuesta en PDF</button>
+        <button onClick={() => { setState("idle"); setRes(null); setQ(""); }} className="mt-2 min-h-[44px] w-full text-sm text-muted-foreground">Probar otra consulta</button>
+      </div> : <>
+        <label className="text-sm font-semibold text-foreground">Tu nombre</label>
+        <input value={who} onChange={(e) => setWho(e.target.value)} maxLength={60} placeholder="Tu nombre" className="mt-1 min-h-[48px] w-full rounded-xl border-[1.5px] border-border bg-background px-4 text-base text-foreground outline-none focus:border-primary focus:ring-4 focus:ring-primary/20" />
+        {kind === "pareja" && <><label className="mt-3 block text-sm font-semibold text-foreground">Nombre de esa persona</label>
+          <input value={partner} onChange={(e) => setPartner(e.target.value)} maxLength={60} placeholder="Nombre de tu pareja" className="mt-1 min-h-[48px] w-full rounded-xl border-[1.5px] border-border bg-background px-4 text-base text-foreground outline-none focus:border-primary focus:ring-4 focus:ring-primary/20" /></>}
+        <label className="mt-3 block text-sm font-semibold text-foreground">Tu pregunta</label>
+        <textarea value={q} onChange={(e) => setQ(e.target.value)} maxLength={500} rows={3} placeholder={demo.ph} className="mt-1 w-full rounded-xl border-[1.5px] border-border bg-background p-3 text-base text-foreground outline-none focus:border-primary focus:ring-4 focus:ring-primary/20" />
+        {state === "error" && <p className="mt-2 text-sm text-destructive">No pudimos preparar tu respuesta. Revisa tu conexión e inténtalo otra vez.</p>}
+        <Cta className="mt-3" disabled={!who.trim() || (kind === "pareja" && !partner.trim())} onClick={ask}>Recibir mi respuesta gratis</Cta>
+      </>}
+    </div>
+  </section>;
+}
+
+// ---------- Pages ----------
+function TopBar({ onClose, time, label, cta }: { onClose: () => void; time: string; label: string; cta: () => void }) {
+  return <div className="sticky top-0 z-40 border-b border-border bg-background/95 px-4 py-3 backdrop-blur">
+    <div className="mx-auto flex max-w-md items-center gap-3">
+      <button aria-label="Cerrar" onClick={onClose} className="grid h-11 w-11 shrink-0 place-items-center rounded-xl text-foreground"><X className="h-5 w-5" /></button>
+      <div className="flex-1"><p className="flex items-center gap-1 text-xs font-semibold text-muted-foreground"><img src={gift} alt="" className="h-5 w-5" />{label}</p><p className="font-display text-2xl font-bold text-primary">{time}</p></div>
+      <button onClick={cta} className="min-h-[48px] rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground">Ver planes</button>
     </div>
   </div>;
 }
+const toPlans = () => document.getElementById("planes")?.scrollIntoView({ behavior: "smooth" });
 
-function Paywall({ name, onClose, exitOpen, onExitClaim, onExitDismiss }: { name: string; onClose: () => void; exitOpen: boolean; onExitClaim: () => void; onExitDismiss: () => void }) {
-  const [sel, setSel] = useState("y1");
-  const [pay, setPay] = useState(false);
-  const time = useCountdown(590, true);
-  const plan = PLANS_MAIN.find((p) => p.id === sel)!;
-  const stats = [["5.000+", "personas acompañadas"], ["20", "etapas guiadas"], ["365", "ejercicios diarios"], ["24/7", "acceso desde tu teléfono"]];
-  const incl = [{ i: Map, t: "Camino ORÍGEN: 20 etapas con avance diario" }, { i: FileText, t: "Consultas profundas con reporte en PDF" }, { i: NotebookPen, t: "Diario de sanación y desahogo" }, { i: Headphones, t: "Audios, respiración y afirmaciones guiadas" }, { i: Gamepad2, t: "Gimnasia emocional con juegos diarios" }];
-  return <main className="min-h-dvh bg-background pb-10">
-    <div className="sticky top-0 z-40 border-b border-border bg-background/95 px-4 py-3 backdrop-blur">
-      <div className="mx-auto flex max-w-md items-center gap-3">
-        <button aria-label="Cerrar" onClick={onClose} className="grid h-11 w-11 shrink-0 place-items-center rounded-xl text-foreground"><X className="h-5 w-5" /></button>
-        <div className="flex-1"><p className="flex items-center gap-1 text-xs font-semibold text-muted-foreground"><img src={gift} alt="" className="h-5 w-5" />-70% con código</p><p className="font-display text-2xl font-bold text-primary">{time}</p></div>
-        <button onClick={() => setPay(true)} className="min-h-[48px] rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground">Obtener mi plan</button>
-      </div>
-    </div>
+function Paywall({ name, cur, onClose }: { name: string; cur: LocalCurrency; onClose: () => void }) {
+  const time = useCountdown(590);
+  return <main className="min-h-dvh bg-gradient-to-b from-primary/5 via-background to-background pb-12">
+    <TopBar onClose={onClose} time={time} label="Tu plan está reservado" cta={toPlans} />
     <div className="mx-auto max-w-md px-4">
-      <section className="mt-5 rounded-3xl bg-card p-4 shadow-sm">
-        <div className="grid grid-cols-2 gap-3">
-          {[{ img: antes, tag: "Hoy", tone: "bg-muted text-foreground", lv: [2, 2, 1], lbl: ["Carga", "Inquieta", "Bloqueada"] }, { img: despues, tag: "En 6 meses", tone: "bg-primary text-primary-foreground", lv: [5, 5, 4], lbl: ["Libre", "En paz", "Fluyendo"] }].map((c) => <div key={c.tag}>
-            <span className={cn("block rounded-full py-1.5 text-center text-sm font-bold", c.tone)}>{c.tag}</span>
-            <img src={c.img} alt="" className="mt-3 aspect-[4/5] w-full rounded-2xl object-cover" />
-            {["Paz interior", "Mente", "Relaciones"].map((k, i) => <div key={k} className="mt-3"><p className="text-sm font-bold text-foreground">{k}</p><p className="text-xs text-muted-foreground">{c.lbl[i]}</p><div className="mt-1 flex gap-1">{[0, 1, 2, 3, 4].map((n) => <span key={n} className={cn("h-1.5 flex-1 rounded-full", n < c.lv[i] ? "bg-primary" : "bg-muted")} />)}</div></div>)}
-          </div>)}
-        </div>
-      </section>
-      <h1 className="mt-6 text-center font-display text-2xl font-bold text-foreground">Tu plan para {name ? `${name}, ` : ""}romper el ciclo está listo</h1>
-      <PromoBox time={time} />
-      <section className="mt-4 rounded-3xl bg-card p-4 shadow-sm"><PlanPicker plans={PLANS_MAIN} selected={sel} onSelect={setSel} /><Cta className="mt-4" onClick={() => setPay(true)}>Obtener mi plan ahora</Cta>
-        <ul className="mt-4 grid gap-2 text-sm text-muted-foreground">{["Cancela cuando quieras", "Te avisamos antes del cobro", "Garantía de 7 días de Hotmart"].map((b) => <li key={b} className="flex items-center gap-2"><span className="grid h-5 w-5 place-items-center rounded-full bg-primary/15"><Check className="h-3 w-3 text-primary" /></span>{b}</li>)}</ul>
-      </section>
-      <section className="mt-8 grid grid-cols-2 gap-4 text-center">{stats.map(([n, l]) => <div key={l}><p className="font-display text-3xl font-bold text-primary">{n}</p><p className="text-sm text-muted-foreground">{l}</p></div>)}</section>
-      <h2 className="mt-10 text-center font-display text-xl font-bold text-foreground">Lo que incluye tu plan ORÍGEN</h2>
-      <img src={mockup} alt="Pantallas de la app ORÍGEN" loading="lazy" className="mx-auto mt-4 w-full max-w-sm drop-shadow-2xl" />
-      <div className="mt-4 grid gap-3">{incl.map(({ i: I, t }) => <div key={t} className="flex items-center gap-3 rounded-2xl bg-primary p-4 text-primary-foreground"><span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-primary-foreground/15"><I className="h-6 w-6" /></span><span className="font-semibold">{t}</span></div>)}</div>
-      <section className="-mx-4 mt-10 bg-primary/10 px-4 py-8">
-        <h2 className="text-center font-display text-xl font-bold text-primary">Historias de nuestra comunidad</h2>
-        <div className="mt-5 rounded-2xl bg-card p-5 shadow-sm"><div className="flex gap-1 text-primary">{[0, 1, 2, 3, 4].map((n) => <Star key={n} className="h-4 w-4 fill-current" />)}</div><p className="mt-3 text-sm text-foreground">“Llevaba años cargando culpas familiares y repitiendo relaciones vacías. En 3 semanas con ORÍGEN mi paz mental dio un giro.”</p><p className="mt-3 text-sm font-bold text-foreground">María R., 34 años</p></div>
-      </section>
-      <h2 className="mt-8 text-center font-display text-xl font-bold text-foreground">Empieza tu plan hoy</h2>
-      <section className="mt-4 rounded-3xl bg-card p-4 shadow-sm"><PlanPicker plans={PLANS_MAIN} selected={sel} onSelect={setSel} /><Cta className="mt-4" onClick={() => setPay(true)}>Obtener mi plan ahora</Cta></section>
-      <p className="mt-4 text-xs text-muted-foreground">Pagas {plan.price} por el primer periodo y se renueva automáticamente al mismo precio. Cancela cuando quieras. Lee los <Link to="/" className="underline">términos</Link>.</p>
+      <BeforeAfter />
+      <h1 className="mt-6 text-center font-display text-[28px] font-bold leading-tight text-foreground">Tu plan para {name ? `${name}, ` : ""}romper el ciclo está listo</h1>
+      <div id="planes" className="scroll-mt-24"><PlansBoard cur={cur} mode="normal" /></div>
+      <TrustBar />
+      <AppScreens />
+      <BooksGift />
+      <Includes />
+      <section className="-mx-4 mt-12 bg-primary/5 py-2"><ReviewsSlider /></section>
+      <SectionTitle kicker="Sin riesgo">Garantía de 7 días</SectionTitle>
+      <div className="mt-4 flex items-center gap-4 rounded-3xl bg-card p-5 shadow-sm"><span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-primary/10"><ShieldCheck className="h-7 w-7 text-primary" /></span><p className="text-sm text-foreground">Si en los primeros 7 días sientes que ORÍGEN no es para ti, pides tu reembolso desde Hotmart. Sin preguntas incómodas.</p></div>
+      <PlansBoard cur={cur} mode="normal" title="Empieza tu plan hoy" />
+      <TryConsulta name={name} />
     </div>
-    {pay && <PayModal plan={plan} onClose={() => setPay(false)} />}
-    {exitOpen && <div className="fixed inset-0 z-50 grid place-items-center bg-foreground/40 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-sm rounded-3xl bg-gradient-to-b from-primary/15 to-card bg-card p-6 text-center shadow-2xl animate-in zoom-in-95">
-        <img src={gift} alt="" className="mx-auto h-28 w-28 object-contain" />
-        <h2 className="mt-3 font-display text-2xl font-bold text-foreground">¡Espera{name ? `, ${name}` : ""}! No dejes tu proceso a la mitad</h2>
-        <p className="mt-2 text-sm text-muted-foreground">Activamos un regalo especial de último momento solo para ti.</p>
-        <p className="mt-3 font-display text-xl font-bold text-primary">{time}</p>
-        <Cta className="mt-4" onClick={onExitClaim}>Abrir mi regalo</Cta>
-        <button onClick={onExitDismiss} className="mt-3 min-h-[44px] w-full text-sm text-muted-foreground">No, gracias</button>
-      </div>
-    </div>}
   </main>;
 }
 
-function PromoBox({ time }: { time: string }) {
-  return <div className="mt-4 flex items-center gap-3 rounded-3xl bg-primary p-4 text-primary-foreground">
-    <img src={gift} alt="" className="h-20 w-20 shrink-0 object-contain" />
-    <div className="flex-1"><div className="flex items-center justify-between gap-2"><p className="font-display text-lg font-bold">¡Descuento aplicado!</p><span className="rounded-full bg-foreground/30 px-3 py-1 font-bold">{time}</span></div><p className="mt-2 rounded-full bg-card px-4 py-2 text-sm font-bold text-foreground">ORIGEN_2026</p></div>
-  </div>;
+function Offer80({ name, cur, onClose }: { name: string; cur: LocalCurrency; onClose: () => void }) {
+  const time = useCountdown(600);
+  const bonos = [{ i: Gift, t: "Pack de libros semanal", d: "Un pack nuevo cada semana en tu Biblioteca" }, { i: Sun, t: "Visualízalo y Vívelo completo", d: "Todos los programas con audio" }, { i: HeartHandshake, t: "Consultas con PDF", d: "Descarga e imprime tus respuestas" }, { i: CalendarCheck, t: "Camino de 20 etapas", d: "Una lección nueva cada día" }];
+  return <main className="min-h-dvh bg-gradient-to-b from-primary/10 via-background to-background pb-12">
+    <TopBar onClose={onClose} time={time} label="Descuento activo por" cta={toPlans} />
+    <div className="mx-auto max-w-md px-4">
+      <div className="relative mt-5 overflow-hidden rounded-3xl bg-gradient-to-br from-primary to-primary/80 p-5 text-primary-foreground shadow-lg shadow-primary/25">
+        <img src={gift} alt="" className="absolute -right-4 -top-2 h-32 w-32 object-contain opacity-90" />
+        <p className="text-xs font-bold uppercase tracking-widest opacity-80">Descuento desbloqueado</p>
+        <p className="mt-1 font-display text-5xl font-bold">80% OFF</p>
+        <p className="mt-1 max-w-[70%] text-sm opacity-90">{name ? `${name}, tu` : "Tu"} descuento ya está aplicado en mensual y anual (65% en semanal).</p>
+        <div className="mt-3 inline-flex rounded-full bg-primary-foreground/20 px-3 py-1 text-sm font-bold">Cupón ORIGEN80 · aplicado</div>
+      </div>
+      <div id="planes" className="scroll-mt-24"><PlansBoard cur={cur} mode="discount" /></div>
+      <SectionTitle kicker="Bonos incluidos">Todo esto entra con tu descuento</SectionTitle>
+      <div className="mt-4 grid grid-cols-2 gap-3">{bonos.map(({ i: I, t, d }) => <div key={t} className="rounded-2xl bg-card p-4 shadow-sm"><span className="grid h-11 w-11 place-items-center rounded-xl bg-primary/10"><I className="h-5 w-5 text-primary" /></span><p className="mt-2 text-sm font-bold text-foreground">{t}</p><p className="text-xs text-muted-foreground">{d}</p></div>)}</div>
+      <img src={mockup} alt="Pantallas de la app ORÍGEN" loading="lazy" className="mx-auto mt-8 w-full max-w-sm drop-shadow-2xl" />
+      <AppScreens />
+      <section className="-mx-4 mt-10 bg-primary/5 py-2"><ReviewsSlider /></section>
+      <PlansBoard cur={cur} mode="discount" title="Último paso: elige y ahorra" />
+    </div>
+  </main>;
 }
 
-function Scratch({ onDone }: { onDone: () => void }) {
+// ---------- Popups ----------
+function ScratchPopup({ name, onClaim, onClose }: { name: string; onClaim: () => void; onClose: () => void }) {
   const ref = useRef<HTMLCanvasElement>(null);
   const [done, setDone] = useState(false);
   const drawing = useRef(false);
   useEffect(() => {
-    const c = ref.current; if (!c) return; const ctx = c.getContext("2d")!;
+    const c = ref.current; if (!c) return; const ctx = c.getContext("2d"); if (!ctx) return;
     c.width = c.offsetWidth * 2; c.height = c.offsetHeight * 2;
-    const g = ctx.createLinearGradient(0, 0, c.width, c.height); g.addColorStop(0, "#f2c94c"); g.addColorStop(1, "#c99a1e");
+    const css = getComputedStyle(document.documentElement);
+    const g = ctx.createLinearGradient(0, 0, c.width, c.height);
+    g.addColorStop(0, "hsl(45 85% 62%)"); g.addColorStop(1, "hsl(40 75% 45%)");
     ctx.fillStyle = g; ctx.fillRect(0, 0, c.width, c.height);
-    ctx.fillStyle = "rgba(90,60,0,.75)"; ctx.font = `bold ${c.height / 5}px sans-serif`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("¡Raspa aquí!", c.width / 2, c.height / 2);
+    ctx.fillStyle = "rgba(70,45,0,.8)"; ctx.font = `bold ${c.height / 6}px ${css.getPropertyValue("--font-display") || "sans-serif"}`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("Raspa aquí", c.width / 2, c.height / 2);
   }, []);
   const scratch = (e: React.PointerEvent) => {
-    if (!drawing.current || done) return; const c = ref.current!; const r = c.getBoundingClientRect(); const ctx = c.getContext("2d")!;
-    ctx.globalCompositeOperation = "destination-out"; ctx.beginPath(); ctx.arc((e.clientX - r.left) * 2, (e.clientY - r.top) * 2, 44, 0, Math.PI * 2); ctx.fill();
+    if (!drawing.current || done) return; const c = ref.current; const ctx = c?.getContext("2d"); if (!c || !ctx) return; const r = c.getBoundingClientRect();
+    ctx.globalCompositeOperation = "destination-out"; ctx.beginPath(); ctx.arc((e.clientX - r.left) * 2, (e.clientY - r.top) * 2, 50, 0, Math.PI * 2); ctx.fill();
     const data = ctx.getImageData(0, 0, c.width, c.height).data; let clear = 0; for (let i = 3; i < data.length; i += 64) if (data[i] === 0) clear++;
-    if (clear / (data.length / 64) > 0.45) setDone(true);
+    if (clear / (data.length / 64) > 0.35) setDone(true);
   };
-  return <main className="min-h-dvh bg-background px-4 py-6"><div className="mx-auto flex min-h-[calc(100dvh-3rem)] max-w-md flex-col items-center">
-    <img src={logo} alt="ORÍGEN" className="h-10 w-10 object-contain" />
-    <img src={gift} alt="" className="mt-6 h-40 w-40 object-contain" />
-    <h1 className="mt-4 text-center font-display text-2xl font-bold text-foreground">Tenemos un regalo especial para ti</h1>
-    <p className="mt-2 text-center text-muted-foreground">Desliza tu dedo sobre el recuadro para revelarlo.</p>
-    <div className="mt-6 w-full rounded-3xl border-2 border-dashed border-primary-foreground/40 bg-primary p-5">
-      <p className="text-center font-display text-xl font-bold text-primary-foreground">RASPA Y GANA</p>
-      <div className="relative mt-4 h-32 overflow-hidden rounded-2xl bg-foreground/20">
-        <div className="absolute inset-0 grid place-items-center text-center"><p className="font-display text-4xl font-bold text-primary-foreground">80% OFF<span className="block text-sm font-semibold">extra en tu plan</span></p></div>
-        <canvas ref={ref} className={cn("absolute inset-0 h-full w-full touch-none transition-opacity duration-500", done && "opacity-0")} onPointerDown={(e) => { drawing.current = true; scratch(e); }} onPointerUp={() => (drawing.current = false)} onPointerLeave={() => (drawing.current = false)} onPointerMove={scratch} />
+  return <div className="fixed inset-0 z-50 overflow-y-auto bg-foreground/50 backdrop-blur-sm" role="dialog" aria-modal="true">
+    <div className="mx-auto flex min-h-dvh max-w-md flex-col bg-background px-4 pb-6 pt-3 animate-in zoom-in-95 duration-300 sm:my-6 sm:min-h-0 sm:rounded-3xl">
+      <div className="flex justify-end"><button aria-label="Cerrar" onClick={onClose} className="grid h-11 w-11 place-items-center rounded-xl text-foreground"><X className="h-5 w-5" /></button></div>
+      <img src={gift} alt="" className="mx-auto h-36 w-36 object-contain drop-shadow-xl" />
+      <h2 className="mt-2 text-center font-display text-[28px] font-bold leading-tight text-foreground">¡Espera{name ? `, ${name}` : ""}! Tienes un regalo</h2>
+      <p className="mt-2 text-center text-muted-foreground">Desliza tu dedo sobre la tarjeta para descubrir tu descuento.</p>
+      <div className="mt-5 rounded-3xl border-2 border-dashed border-primary-foreground/40 bg-primary p-5 shadow-lg shadow-primary/25">
+        <p className="text-center font-display text-xl font-bold text-primary-foreground">RASPA Y GANA</p>
+        <div className="relative mt-4 h-44 overflow-hidden rounded-2xl bg-primary-foreground/15" onClick={() => setDone(true)}>
+          <div className="absolute inset-0 grid place-items-center text-center"><p className="font-display text-6xl font-bold text-primary-foreground">80%<span className="block text-base font-semibold">de descuento en tu plan</span></p></div>
+          <canvas ref={ref} className={cn("absolute inset-0 h-full w-full cursor-pointer touch-none transition-opacity duration-500", done && "pointer-events-none opacity-0")} onPointerDown={(e) => { drawing.current = true; scratch(e); }} onPointerUp={() => (drawing.current = false)} onPointerLeave={() => (drawing.current = false)} onPointerMove={scratch} />
+        </div>
       </div>
+      {done && <div className="mt-5 animate-in fade-in slide-in-from-bottom-4">
+        <p className="text-center text-sm font-semibold text-primary">¡Ganaste 80% OFF! Tu descuento se aplica automáticamente.</p>
+        <Cta className="mt-3" onClick={onClaim}>Obtener mi descuento</Cta>
+      </div>}
+      {!done && <p className="mt-5 text-center text-xs text-muted-foreground">También puedes tocar la tarjeta para revelarla.</p>}
     </div>
-    <div className="mt-auto w-full pt-8"><Cta disabled={!done} onClick={onDone}>Aplicar descuento y continuar</Cta></div>
-  </div></main>;
+  </div>;
 }
 
-function Offer80({ onClose }: { onClose: () => void }) {
-  const [sel, setSel] = useState("m3");
-  const [pay, setPay] = useState(false);
-  const time = useCountdown(30, true);
-  const plan = PLANS_80.find((p) => p.id === sel)!;
-  useEffect(() => { if (time === "00:00") onClose(); }, [time, onClose]);
-  return <main className="min-h-dvh bg-background px-4 pb-10 pt-4"><div className="mx-auto max-w-md">
-    <div className="sticky top-2 z-30 flex items-center justify-between rounded-2xl bg-primary p-4 text-primary-foreground shadow-lg"><span className="flex items-center gap-2 font-bold"><Clock className="h-5 w-5" />Oferta disponible por:</span><span className="rounded-full bg-foreground/30 px-4 py-1 font-display text-lg font-bold">{time}</span></div>
-    <h1 className="mt-5 text-center font-display text-2xl font-bold text-foreground">Elige tu plan</h1>
-    <div className="mt-4 overflow-hidden rounded-3xl bg-card shadow-sm">
-      <div className="relative grid h-44 place-items-center bg-gradient-to-br from-primary/80 to-primary"><img src={gift} alt="" className="h-36 w-36 object-contain" /><span className="absolute right-6 top-6 rotate-12 rounded-2xl bg-card px-3 py-1 font-display text-3xl font-bold text-primary shadow">-80%</span></div>
-      <div className="p-4"><PlanPicker plans={PLANS_80} selected={sel} onSelect={setSel} /><Cta className="mt-4" onClick={() => setPay(true)}>Obtener mi plan</Cta></div>
+function FreePopup({ cur, onClose, onSkip }: { cur: LocalCurrency; onClose: () => void; onSkip: () => void }) {
+  const bonos = [{ img: mockup, t: "Plan completo ORÍGEN", items: ["Camino de 20 etapas", "Consultas con PDF", "Audios y juegos diarios"] }, { img: eBook, t: "Pack de libros semanal", items: ["Un pack nuevo cada semana", "Lectura y descarga", "Desde el día 1"] }, { img: ePractice, t: "Diario y ejercicios", items: ["Diario privado", "Ejercicios paso a paso", "Respiración guiada"] }];
+  return <div className="fixed inset-0 z-50 overflow-y-auto bg-foreground/50 backdrop-blur-sm" role="dialog" aria-modal="true">
+    <div className="mx-auto min-h-dvh max-w-md bg-gradient-to-b from-primary/10 to-background bg-background px-4 pb-10 pt-3 animate-in slide-in-from-bottom-8 duration-300">
+      <div className="flex items-center"><button aria-label="Cerrar" onClick={onClose} className="grid h-11 w-11 place-items-center rounded-xl text-foreground"><X className="h-5 w-5" /></button><p className="flex-1 pr-11 text-center text-sm font-bold uppercase tracking-widest text-primary">Última oportunidad</p></div>
+      <h2 className="mt-3 text-center font-display text-3xl font-bold leading-tight text-foreground">Prueba ORÍGEN 7 días por {money(0, cur)}</h2>
+      <p className="mt-2 text-center text-muted-foreground">Hoy no pagas nada. Todo esto queda abierto para ti:</p>
+      <div className="mt-5 grid gap-3">{bonos.map((b) => <div key={b.t} className="overflow-hidden rounded-3xl bg-card shadow-sm">
+        <div className="flex gap-4 p-4"><img src={b.img} alt="" className="h-20 w-20 shrink-0 rounded-2xl bg-primary/10 object-contain p-1" /><div className="flex-1"><p className="font-display text-base font-bold text-primary">{b.t}</p><ul className="mt-1 grid gap-1">{b.items.map((i) => <Tick key={i}>{i}</Tick>)}</ul></div></div>
+        <div className="bg-primary/15 py-2 text-center text-sm font-bold text-foreground">GRATIS por 7 días</div>
+      </div>)}</div>
+      <PlansBoard cur={cur} mode="trial" title="Elige tu plan para la prueba" />
+      <button onClick={onSkip} className="mt-3 min-h-[44px] w-full text-sm text-muted-foreground">Ahora no, seguir con el plan gratis</button>
     </div>
-    <p className="mt-4 text-xs text-muted-foreground">Pagas {plan.price} por el primer periodo; luego se renueva al precio normal. Cancela cuando quieras.</p>
-    <button onClick={onClose} className="mt-3 min-h-[44px] w-full text-sm text-muted-foreground">Ahora no</button>
-    {pay && <PayModal plan={plan} onClose={() => setPay(false)} />}
-  </div></main>;
-}
-
-function FreeOffer({ onBack, onSkip }: { onBack: () => void; onSkip: () => void }) {
-  const [pay, setPay] = useState(false);
-  const charge = useMemo(() => { const d = new Date(); d.setDate(d.getDate() + 7); return d.toLocaleDateString("es", { day: "numeric", month: "long" }); }, []);
-  const bonos = [
-    { img: mockup, t: "Plan completo ORÍGEN", items: ["Camino de 20 etapas", "Consultas profundas", "Audios y juegos diarios"], v: "US$14.99" },
-    { img: ePractice, t: "Hojas de trabajo de sanación", items: ["Guía en PDF imprimible", "Ejercicios paso a paso", "Descarga inmediata"], v: "US$29.99" },
-    { img: eBook, t: "Diario y biblioteca", items: ["Diario de desahogo", "Lecturas y afirmaciones", "Acceso desde el día 1"], v: "US$19.99" },
-  ];
-  return <main className="min-h-dvh bg-gradient-to-b from-primary/10 to-background px-4 pb-10 pt-4"><div className="mx-auto max-w-md">
-    <div className="flex items-center"><button aria-label="Atrás" onClick={onBack} className="grid h-11 w-11 place-items-center rounded-xl text-foreground"><ArrowLeft className="h-5 w-5" /></button><p className="flex-1 pr-11 text-center text-sm font-bold uppercase tracking-widest text-primary">Oferta especial</p></div>
-    <h1 className="mt-4 text-center font-display text-3xl font-bold leading-tight text-foreground">Queremos que pruebes ORÍGEN sin riesgo</h1>
-    <p className="mt-2 text-center text-muted-foreground">Solo hoy, todo esto incluido por US$0.00:</p>
-    <div className="mt-6 grid gap-4">{bonos.map((b) => <div key={b.t} className="overflow-hidden rounded-3xl bg-card shadow-sm">
-      <div className="flex gap-4 p-4"><img src={b.img} alt="" className="h-24 w-24 shrink-0 rounded-2xl bg-primary/10 object-contain p-1" /><div className="flex-1"><div className="flex items-start justify-between gap-2"><p className="font-display text-lg font-bold text-primary">{b.t}</p><span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-primary"><Check className="h-4 w-4 text-primary-foreground" /></span></div><ul className="mt-1 text-sm text-muted-foreground">{b.items.map((i) => <li key={i}>• {i}</li>)}</ul></div></div>
-      <div className="bg-primary/15 py-2 text-center font-bold text-foreground">GRATIS <s className="ml-1 font-normal text-muted-foreground">{b.v}</s></div>
-    </div>)}</div>
-    <p className="mt-5 text-xs text-muted-foreground">7 días gratis. El {charge} se renueva a US$14.99 al mes si no cancelas. Te avisamos antes del cobro.</p>
-    <div className="mt-4 flex items-center justify-center gap-2 text-xs text-muted-foreground"><ShieldCheck className="h-4 w-4 text-primary" />Pago seguro por Hotmart</div>
-    <Cta className="mt-4" onClick={() => setPay(true)}>Reclamar mi oferta gratis</Cta>
-    <button onClick={onSkip} className="mt-3 min-h-[44px] w-full text-sm text-muted-foreground">Ahora no, seguir con el plan gratis</button>
-    {pay && <PayModal trial plan={{ id: "trial", label: "Prueba", old: "US$64.97", price: "US$0.00", perDay: "0.00" }} onClose={() => setPay(false)} />}
-  </div></main>;
+  </div>;
 }
