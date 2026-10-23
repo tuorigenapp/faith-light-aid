@@ -28,4 +28,9 @@ describe("Christian spiritual content policy", () => {
     expect(hasIncompatibleSpiritualLanguage(JSON.stringify(answer))).toBe(false);
     expect(JSON.parse(answer.__titles)).toHaveProperty("body");
   });
+
+  it("does not remove practical advice containing an ordinary change of routine", () => {
+    const advice = "Al cambiar la rutina, pide a Dios sabiduría y busca apoyo.";
+    expect(christianText(advice)).toBe(advice);
+  });
 });

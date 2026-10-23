@@ -37,7 +37,14 @@ import avM2 from "@/assets/av-m2.png";
 import avM3 from "@/assets/av-m3.png";
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
-  head: () => ({ meta: [{ title: "Bienvenido — ORIGEN" }] }),
+  head: () => ({ meta: [
+    { title: "Tu evaluación personal — ORÍGEN" },
+    { name: "description", content: "Comparte tu historia y tus necesidades para orientar tu camino de cuidado emocional y fe cristiana." },
+    { property: "og:title", content: "Tu evaluación personal — ORÍGEN" },
+    { property: "og:description", content: "Una evaluación para acompañar tu proceso personal con respeto y fe." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary_large_image" },
+  ] }),
   validateSearch: (search: Record<string, unknown>): { skipIntro?: boolean } => ({
     ...(search["skipIntro"] === true || search["skipIntro"] === "true" ? { skipIntro: true } : {}),
   }),
@@ -63,7 +70,7 @@ const TOTAL_STEPS = 9;
 const DESEOS = [
   { id: "sanar", label: "Sanar heridas emocionales", img: eHeartPurple },
   { id: "dios", label: "Fortalecer mi relación con Dios", img: eCross },
-  { id: "abundancia", label: "Manifestar abundancia y propósito", img: eStar },
+  { id: "abundancia", label: "Cultivar bienestar y propósito", img: eStar },
   { id: "identidad", label: "Renovar mi identidad", img: eButterfly },
   { id: "todas", label: "Todas las anteriores", img: eClouds },
 ];
