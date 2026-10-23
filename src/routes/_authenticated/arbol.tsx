@@ -108,16 +108,16 @@ function HomeView({ displayName, avatar, gems, onOpenTree, onTransfer }: { displ
             <div className="truncate font-display font-bold text-[15px] text-foreground">Hola, {displayName}</div>
             <div className="text-[11px] font-semibold text-muted-foreground">Tu jardín de sanación</div>
           </div>
-          <Link to="/historial" aria-label="Historial de hojas" className="w-10 h-10 shrink-0 rounded-full bg-card shadow-soft grid place-items-center text-[#7C5CFF] active:scale-95 transition">
+          <Link to="/historial" aria-label="Historial de hojas" className="w-10 h-10 shrink-0 rounded-full bg-card shadow-soft grid place-items-center text-primary active:scale-95 transition">
             <ClockIcon className="w-5 h-5" />
           </Link>
         </div>
 
         {/* Title */}
         <div className="mt-5 text-center">
-          <p className="text-[11px] uppercase tracking-[0.18em] font-bold text-[#7C5CFF]">Tu saldo espiritual</p>
+          <p className="text-[11px] uppercase tracking-[0.18em] font-bold text-primary">Tu saldo espiritual</p>
           <h1 className="mt-1 font-display font-extrabold text-[30px] leading-[1.15] text-foreground">
-            Mis Hojas <span className="text-[#7C5CFF]">de Sanación</span> 🍃
+            Mis Hojas <span className="text-primary">de Sanación</span> 🍃
           </h1>
         </div>
 
@@ -132,14 +132,14 @@ function HomeView({ displayName, avatar, gems, onOpenTree, onTransfer }: { displ
 
         <div className="rounded-[16px] bg-card border border-border p-5 text-center shadow-soft">
           <div className="text-[12px] font-semibold text-muted-foreground">Hojas disponibles</div>
-          <div className="mt-1 font-display font-black text-[40px] leading-none text-[#7C5CFF] tabular-nums">{formatHojas(gems)}</div>
+          <div className="mt-1 font-display font-black text-[40px] leading-none text-primary tabular-nums">{formatHojas(gems)}</div>
           <div className="mt-1 text-[12px] font-semibold text-[#3FBE8F]">🍃 Cada hoja es un paso de sanación</div>
         </div>
 
         {/* CTAs */}
         <div className="mt-4 space-y-3">
           <button onClick={onOpenTree}
-            className="w-full h-14 rounded-[12px] bg-[#7C5CFF]/[0.09] text-[#7C5CFF] font-display font-bold text-[16px] inline-flex items-center justify-center gap-2 active:scale-[.98] transition animate-pulse">
+            className="w-full h-14 rounded-[12px] bg-[#7C5CFF]/[0.09] text-primary font-display font-bold text-[16px] inline-flex items-center justify-center gap-2 active:scale-[.98] transition animate-pulse">
             <TreeDeciduousIcon /> Ver mi árbol genealógico
           </button>
           <Link to="/comprarmonedas"
@@ -148,18 +148,18 @@ function HomeView({ displayName, avatar, gems, onOpenTree, onTransfer }: { displ
             <Sparkles className="w-4 h-4" /> Recargar mis hojas
           </Link>
           <button onClick={onTransfer}
-            className="w-full h-12 rounded-[12px] bg-card border border-border text-[#7C5CFF] font-display font-bold text-[15px] inline-flex items-center justify-center gap-2 active:scale-[.98] transition">
+            className="w-full h-12 rounded-[12px] bg-card border border-border text-primary font-display font-bold text-[15px] inline-flex items-center justify-center gap-2 active:scale-[.98] transition">
             <Send className="w-4 h-4" /> Transferir Balance
           </button>
           <Link to="/historial"
-            className="w-full h-12 rounded-[12px] bg-card border border-border text-[#7C5CFF] font-display font-bold text-[15px] inline-flex items-center justify-center gap-2 active:scale-[.98] transition">
+            className="w-full h-12 rounded-[12px] bg-card border border-border text-primary font-display font-bold text-[15px] inline-flex items-center justify-center gap-2 active:scale-[.98] transition">
             <ClockIcon className="w-4 h-4" /> Ver historial general
           </Link>
         </div>
 
         {/* Usos de las hojas */}
         <div className="mt-6">
-          <h2 className="text-[12px] uppercase tracking-[0.18em] font-black text-[#7C5CFF]">¿En qué usas tus hojas?</h2>
+          <h2 className="text-[12px] uppercase tracking-[0.18em] font-black text-primary">¿En qué usas tus hojas?</h2>
           <div className="mt-3 space-y-3">
             {HOJA_USES.map((u) => (
               <Link key={u.to} to={u.to}
@@ -211,7 +211,7 @@ function TransferView({ gems, onBack }: { gems: number; onBack: () => void }) {
           <button onClick={onBack} aria-label="Volver" className="w-10 h-10 rounded-full bg-card shadow-soft grid place-items-center active:scale-95 transition">
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <div className="min-w-0"><p className="text-[11px] uppercase tracking-[0.18em] font-bold text-[#7C5CFF]">Hojas ORIGEN</p><h1 className="font-display font-black text-[22px] leading-tight">Transferir Balance</h1></div>
+          <div className="min-w-0"><p className="text-[11px] uppercase tracking-[0.18em] font-bold text-primary">Hojas ORIGEN</p><h1 className="font-display font-black text-[22px] leading-tight">Transferir Balance</h1></div>
         </div>
         <TransferSection gems={gems} />
       </div>
@@ -659,7 +659,7 @@ function LeafRulesBlock() {
       <ul className="mt-3 space-y-2">
         {LEAF_RULES_TEXT.map((t, i) => (
           <li key={i} className="text-[12.5px] leading-snug text-muted-foreground flex gap-2">
-            <span className="text-[#7C5CFF] mt-0.5">•</span>
+            <span className="text-primary mt-0.5">•</span>
             <span>{t}</span>
           </li>
         ))}
@@ -740,7 +740,7 @@ function TransferSection({ gems }: { gems: number }) {
 
   return (
     <div className="mt-6">
-      <h2 className="text-[12px] uppercase tracking-[0.18em] font-black text-[#7C5CFF]">Transferir Balance</h2>
+      <h2 className="text-[12px] uppercase tracking-[0.18em] font-black text-primary">Transferir Balance</h2>
       <div className="mt-3 rounded-[16px] bg-card border border-border p-4 shadow-soft space-y-3">
         <div>
           <label className="text-[12px] font-semibold text-foreground">Correo electrónico del destinatario</label>
@@ -765,7 +765,7 @@ function TransferSection({ gems }: { gems: number }) {
           style={{ background: "linear-gradient(180deg,#8F6BFF 0%,#F58BCB 100%)" }}>
           <Send className="w-4 h-4" /> {sending ? "Enviando…" : "Enviar transferencia"}
         </button>
-        <div className="rounded-[12px] bg-[#7C5CFF]/[0.07] border border-[#7C5CFF]/15 px-3 py-2.5 flex items-start gap-2 text-[12px] leading-snug font-semibold text-[#7C5CFF]">
+        <div className="rounded-[12px] bg-[#7C5CFF]/[0.07] border border-[#7C5CFF]/15 px-3 py-2.5 flex items-start gap-2 text-[12px] leading-snug font-semibold text-primary">
           <ClockIcon className="w-4 h-4 mt-0.5 shrink-0" />
           La administración revisa cada transferencia. Suele tardar 24 horas o menos; en días feriados puede tomar hasta 72 horas.
         </div>
@@ -773,7 +773,7 @@ function TransferSection({ gems }: { gems: number }) {
 
       <Link to="/historial" className="mt-4 flex items-center justify-between rounded-[14px] bg-card border border-border px-4 py-3.5 active:scale-[.99] transition">
         <span className="text-[13px] font-bold text-foreground">Historial de transferencias</span>
-        <span className="text-[12px] font-bold text-[#7C5CFF]">Ver todo →</span>
+        <span className="text-[12px] font-bold text-primary">Ver todo →</span>
       </Link>
     </div>
   );
