@@ -105,14 +105,14 @@ function HojasFlow() {
       <div className="mx-auto w-full max-w-[420px] px-4 pt-4 pb-32">
         {/* top bar */}
         <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
-          <button onClick={back} aria-label="Volver" className="w-10 h-10 shrink-0 rounded-full bg-white shadow-[0_1px_3px_rgba(30,25,20,.06)] grid place-items-center text-[#7C5CFF] active:scale-95 transition">
+          <button onClick={back} aria-label="Volver" className="w-10 h-10 shrink-0 rounded-full bg-card shadow-[0_1px_3px_rgba(30,25,20,.06)] grid place-items-center text-primary active:scale-95 transition">
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div className="min-w-0 text-center">
-            <div className="text-[10px] uppercase tracking-[0.18em] font-bold text-[#7C5CFF]">Hojas de Sanación</div>
-            <div className="truncate font-display font-bold text-[15px] text-[#1B1B27]">{hojas} hojas 🍃</div>
+            <div className="text-[10px] uppercase tracking-[0.18em] font-bold text-primary">Hojas de Sanación</div>
+            <div className="truncate font-display font-bold text-[15px] text-foreground">{hojas} hojas 🍃</div>
           </div>
-          <button onClick={() => setStep(6)} aria-label="Historial" className={cn("w-10 h-10 shrink-0 rounded-full grid place-items-center transition active:scale-95", step === 6 ? "bg-[#7C5CFF] text-white" : "bg-white text-[#7C5CFF] shadow-[0_1px_3px_rgba(30,25,20,.06)]")}>
+          <button onClick={() => setStep(6)} aria-label="Historial" className={cn("w-10 h-10 shrink-0 rounded-full grid place-items-center transition active:scale-95", step === 6 ? "bg-[#7C5CFF] text-white" : "bg-card text-primary shadow-[0_1px_3px_rgba(30,25,20,.06)]")}>
             <Clock className="w-5 h-5" />
           </button>
         </div>
@@ -131,7 +131,7 @@ function HojasFlow() {
         {step === 1 && <Rules />}
         <p className="mt-6 text-center text-[13px] leading-snug text-[#64667A]">
           <span className="text-[#F58BCB]">♥</span> Cada hoja te acerca más a tu sanación, tu verdad y tu propósito.
-          <br /><span className="font-semibold text-[#7C5CFF]">Tú puedes. Estamos contigo.</span>
+          <br /><span className="font-semibold text-primary">Tú puedes. Estamos contigo.</span>
         </p>
       </div>
     </div>
@@ -152,7 +152,7 @@ function Dots({ active }: { active: number }) {
 
 function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={cn("rounded-[16px] bg-white border border-[#1B1B27]/[0.08] p-5 shadow-[0_1px_3px_rgba(30,25,20,.06)]", className)}>
+    <div className={cn("rounded-[16px] bg-card border border-border p-5 shadow-[0_1px_3px_rgba(30,25,20,.06)]", className)}>
       {children}
     </div>
   );
@@ -161,8 +161,8 @@ function Card({ children, className = "" }: { children: React.ReactNode; classNa
 function Title({ eyebrow, title, sub }: { eyebrow?: string; title: React.ReactNode; sub?: string }) {
   return (
     <div>
-      {eyebrow && <p className="text-[11px] uppercase tracking-[0.18em] font-bold text-[#7C5CFF]">{eyebrow}</p>}
-      <h1 className="mt-1 font-display font-extrabold text-[28px] leading-[1.15] text-[#1B1B27]">{title}</h1>
+      {eyebrow && <p className="text-[11px] uppercase tracking-[0.18em] font-bold text-primary">{eyebrow}</p>}
+      <h1 className="mt-1 font-display font-extrabold text-[28px] leading-[1.15] text-foreground">{title}</h1>
       {sub && <p className="mt-2 text-[14px] leading-relaxed text-[#64667A]">{sub}</p>}
     </div>
   );
@@ -185,7 +185,7 @@ function StepPacks({ pack, onPick, onConfirm }: { pack: HojaPack | null; onPick:
     <div>
       <div className="flex items-start gap-3">
         <div className="min-w-0">
-          <Title eyebrow="Paso 1 · Paquetes" title={<>Selecciona tu paquete<br /><span className="text-[#7C5CFF]">de Hojas 🍃</span></>} sub="Elige la cantidad que mejor se adapte a ti." />
+          <Title eyebrow="Paso 1 · Paquetes" title={<>Selecciona tu paquete<br /><span className="text-primary">de Hojas 🍃</span></>} sub="Elige la cantidad que mejor se adapte a ti." />
         </div>
         <img src={crystals} alt="" aria-hidden loading="lazy" width={1024} height={1024} className="w-20 h-20 shrink-0 object-contain drop-shadow-[0_10px_22px_rgba(124,92,255,.25)]" />
       </div>
@@ -195,17 +195,17 @@ function StepPacks({ pack, onPick, onConfirm }: { pack: HojaPack | null; onPick:
           const on = pack?.id === p.id;
           return (
             <button key={p.id} onClick={() => onPick(p)}
-              className={cn("relative rounded-[16px] bg-white p-4 text-center transition active:scale-[.97]",
-                on ? "border-2 border-[#F58BCB] shadow-[0_4px_14px_rgba(245,139,203,.28)]" : "border border-[#1B1B27]/[0.08] shadow-[0_1px_3px_rgba(30,25,20,.06)]")}>
+              className={cn("relative rounded-[16px] bg-card p-4 text-center transition active:scale-[.97]",
+                on ? "border-2 border-[#F58BCB] shadow-[0_4px_14px_rgba(245,139,203,.28)]" : "border border-border shadow-[0_1px_3px_rgba(30,25,20,.06)]")}>
               {on && (
                 <span className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-[#F58BCB] text-white grid place-items-center shadow">
                   <Check className="w-3.5 h-3.5" />
                 </span>
               )}
-              <div className="font-display font-extrabold text-[19px] text-[#1B1B27] leading-none">
+              <div className="font-display font-extrabold text-[19px] text-foreground leading-none">
                 {p.hojas.toLocaleString()} <span className="text-[13px] font-semibold text-[#64667A]">hojas</span>
               </div>
-              <div className="mt-1 text-[13px] font-semibold text-[#1B1B27]">{usd(p.usd)}</div>
+              <div className="mt-1 text-[13px] font-semibold text-foreground">{usd(p.usd)}</div>
               {p.tag === "especial" && <div className="mt-1 text-[10px] font-black uppercase tracking-wider text-[#3FBE8F]">Oferta especial</div>}
             </button>
           );
@@ -257,7 +257,7 @@ function StepSummary({ pack, onNext }: { pack: HojaPack; onNext: () => void }) {
           <Row label="Precio" value={usd(pack.usd)} />
           <div className="h-px bg-[#1B1B27]/[0.08]" />
           <div className="flex items-center justify-between">
-            <span className="font-semibold text-[#1B1B27]">Total a pagar</span>
+            <span className="font-semibold text-foreground">Total a pagar</span>
             <span className="font-display font-black text-[#F58BCB] text-[16px]">{usd(pack.usd)}</span>
           </div>
         </div>
@@ -278,7 +278,7 @@ function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between">
       <span className="text-[#64667A]">{label}</span>
-      <span className="font-semibold text-[#1B1B27]">{value}</span>
+      <span className="font-semibold text-foreground">{value}</span>
     </div>
   );
 }
@@ -317,10 +317,10 @@ function StepProcessing({ pack, onDone }: { pack: HojaPack; onDone: () => void }
           <circle cx="75" cy="75" r={R} fill="none" stroke="#F58BCB" strokeWidth="12" strokeLinecap="round"
             strokeDasharray={C} strokeDashoffset={C - (C * pct) / 100} style={{ transition: "stroke-dashoffset .3s ease" }} />
         </svg>
-        <span className="absolute font-display font-black text-[34px] text-[#7C5CFF] tabular-nums">{pct}%</span>
+        <span className="absolute font-display font-black text-[34px] text-primary tabular-nums">{pct}%</span>
       </div>
 
-      <div className="mt-5 rounded-[12px] bg-[#7C5CFF]/[0.07] border border-[#7C5CFF]/15 px-4 py-3 text-[13px] font-semibold text-[#7C5CFF]">
+      <div className="mt-5 rounded-[12px] bg-[#7C5CFF]/[0.07] border border-[#7C5CFF]/15 px-4 py-3 text-[13px] font-semibold text-primary">
         El proceso manual puede tardar entre 24 y 72 horas laborables.
       </div>
 
@@ -340,10 +340,10 @@ function Timeline({ label, done, current }: { label: string; done?: boolean; cur
   return (
     <div className="flex items-center gap-3">
       <span className={cn("w-6 h-6 rounded-full grid place-items-center shrink-0 border-2",
-        done ? "bg-[#3FBE8F] border-[#3FBE8F] text-white" : current ? "border-[#F58BCB] bg-white" : "border-[#D9D5EA] bg-white")}>
+        done ? "bg-[#3FBE8F] border-[#3FBE8F] text-white" : current ? "border-[#F58BCB] bg-card" : "border-[#D9D5EA] bg-card")}>
         {done ? <Check className="w-3.5 h-3.5" /> : current ? <span className="w-2 h-2 rounded-full bg-[#F58BCB]" /> : null}
       </span>
-      <span className={cn("text-[14px]", done ? "font-semibold text-[#1B1B27]" : current ? "font-semibold text-[#F58BCB]" : "text-[#64667A]")}>{label}</span>
+      <span className={cn("text-[14px]", done ? "font-semibold text-foreground" : current ? "font-semibold text-[#F58BCB]" : "text-[#64667A]")}>{label}</span>
       {current && <span className="flex-1 h-[2px] rounded-full bg-gradient-to-r from-[#F58BCB] to-transparent" />}
     </div>
   );
@@ -369,7 +369,7 @@ function StepHistory({ tx }: { tx: Tx[] }) {
     <div>
       <Title title={<>Historial de<br />transacciones <span className="text-[#3FBE8F]">🍃</span></>} sub="Consulta tus compras, transferencias y estados en todo momento." />
 
-      <div className="mt-5 grid grid-cols-3 rounded-[12px] bg-white border border-[#1B1B27]/[0.08] p-1">
+      <div className="mt-5 grid grid-cols-3 rounded-[12px] bg-card border border-border p-1">
         {(["todas", "compras", "transferencias"] as const).map((t) => (
           <button key={t} onClick={() => setTab(t)}
             className={cn("h-9 rounded-[10px] text-[12.5px] font-bold capitalize transition", tab === t ? "bg-[#F58BCB]/12 text-[#F58BCB]" : "text-[#64667A]")}>
@@ -382,17 +382,17 @@ function StepHistory({ tx }: { tx: Tx[] }) {
         {rows.length === 0 && (
           <Card className="text-center">
             <img src={treePng} alt="" aria-hidden loading="lazy" width={1024} height={1024} className="w-28 h-28 mx-auto object-contain" />
-            <div className="font-display font-bold text-[16px] text-[#1B1B27]">Tu historial comienza hoy</div>
+            <div className="font-display font-bold text-[16px] text-foreground">Tu historial comienza hoy</div>
             <p className="mt-1 text-[13px] text-[#64667A]">Cuando recargues o transfieras hojas, verás cada movimiento aquí.</p>
           </Card>
         )}
         {rows.map((r) => (
-          <div key={r.id} className="rounded-[16px] bg-white border border-[#1B1B27]/[0.08] p-4 shadow-[0_1px_3px_rgba(30,25,20,.06)] grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
-            <span className="w-10 h-10 rounded-[10px] bg-[#7C5CFF]/10 grid place-items-center shrink-0 text-[#7C5CFF]">
+          <div key={r.id} className="rounded-[16px] bg-card border border-border p-4 shadow-[0_1px_3px_rgba(30,25,20,.06)] grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
+            <span className="w-10 h-10 rounded-[10px] bg-[#7C5CFF]/10 grid place-items-center shrink-0 text-primary">
               {r.kind === "transferencia" ? <Send className="w-4 h-4" /> : <ShoppingBag className="w-4 h-4" />}
             </span>
             <div className="min-w-0">
-              <div className="font-display font-bold text-[15px] text-[#1B1B27] truncate">
+              <div className="font-display font-bold text-[15px] text-foreground truncate">
                 {r.hojas > 0 ? `${r.hojas.toLocaleString()} hojas` : `${r.hojas.toLocaleString()} hojas`}
               </div>
               <div className="text-[12px] text-[#64667A] truncate">{r.reason}</div>
@@ -407,13 +407,13 @@ function StepHistory({ tx }: { tx: Tx[] }) {
                   : "bg-[#3FBE8F]/15 text-[#2FA574]")}>
                 {r.status === "pendiente" ? "Pendiente" : r.status === "revision" ? "En revisión" : r.status === "rechazada" ? "No aprobada" : "Aprobada"}
               </span>
-              <div className="mt-1 text-[13px] font-semibold text-[#1B1B27]">{r.price !== undefined ? usd(r.price) : "—"}</div>
+              <div className="mt-1 text-[13px] font-semibold text-foreground">{r.price !== undefined ? usd(r.price) : "—"}</div>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="mt-4 rounded-[12px] bg-[#7C5CFF]/[0.07] border border-[#7C5CFF]/15 px-4 py-3 flex items-center gap-3 text-[13px] font-semibold text-[#7C5CFF]">
+      <div className="mt-4 rounded-[12px] bg-[#7C5CFF]/[0.07] border border-[#7C5CFF]/15 px-4 py-3 flex items-center gap-3 text-[13px] font-semibold text-primary">
         <Mail className="w-4 h-4 shrink-0" /> Las hojas pueden transferirse por correo electrónico.
       </div>
     </div>
@@ -434,13 +434,13 @@ function Rules() {
   return (
     <Card className="mt-7">
       <div className="flex items-center justify-center gap-2">
-        <ShieldCheck className="w-4 h-4 text-[#7C5CFF]" />
-        <h2 className="text-[12px] uppercase tracking-[0.18em] font-black text-[#7C5CFF]">Reglas importantes</h2>
+        <ShieldCheck className="w-4 h-4 text-primary" />
+        <h2 className="text-[12px] uppercase tracking-[0.18em] font-black text-primary">Reglas importantes</h2>
       </div>
       <div className="mt-4 space-y-3">
         {RULES.map((r, i) => (
           <div key={i} className="flex items-start gap-3">
-            <span className="w-10 h-10 rounded-[10px] bg-[#7C5CFF]/10 grid place-items-center shrink-0 text-[#7C5CFF]">
+            <span className="w-10 h-10 rounded-[10px] bg-[#7C5CFF]/10 grid place-items-center shrink-0 text-primary">
               <r.icon className="w-4 h-4" />
             </span>
             <p className="text-[13px] leading-snug text-[#64667A]">{r.text}</p>
@@ -514,8 +514,8 @@ function StepReceipt({ pack, paymentRef, onDone }: { pack: HojaPack; paymentRef:
   }
 
   return (
-    <section className="rounded-[16px] bg-white p-5 shadow-[0_1px_3px_rgba(30,25,20,.06)]">
-      <h2 className="font-display text-[22px] font-bold leading-tight text-[#1B1B27]">Confirmar pago</h2>
+    <section className="rounded-[16px] bg-card p-5 shadow-[0_1px_3px_rgba(30,25,20,.06)]">
+      <h2 className="font-display text-[22px] font-bold leading-tight text-foreground">Confirmar pago</h2>
       <p className="mt-1 text-[15px] leading-relaxed text-[#64667A]">
         Adjunta la captura o foto del comprobante de {usd(pack.usd)} por {pack.hojas} hojas. Lo revisamos y te avisamos aquí mismo.
       </p>
@@ -525,10 +525,10 @@ function StepReceipt({ pack, paymentRef, onDone }: { pack: HojaPack; paymentRef:
           <img src={preview} alt="Comprobante elegido" className="max-h-44 rounded-[12px] object-contain" />
         ) : (
           <>
-            <span className="grid h-12 w-12 place-items-center rounded-[12px] bg-[#7C5CFF]/10 text-[#7C5CFF]">
+            <span className="grid h-12 w-12 place-items-center rounded-[12px] bg-[#7C5CFF]/10 text-primary">
               <Camera className="h-5 w-5" />
             </span>
-            <span className="text-[14px] font-bold text-[#1B1B27]">Tocar para elegir la foto</span>
+            <span className="text-[14px] font-bold text-foreground">Tocar para elegir la foto</span>
             <span className="text-[12.5px] text-[#64667A]">Captura de la transferencia o del pago</span>
           </>
         )}
@@ -539,7 +539,7 @@ function StepReceipt({ pack, paymentRef, onDone }: { pack: HojaPack; paymentRef:
         value={message}
         onChange={(e) => setMessage(e.target.value)}
         placeholder="¿Quieres contarnos algo del pago? (opcional)"
-        className="mt-3 min-h-20 w-full rounded-[10px] border-[1.5px] border-[#CEBDD8] bg-white px-3 py-2 text-[15px] text-[#1B1B27] placeholder:text-[#9A9CB0] focus:border-[#7C5CFF] focus:outline-none"
+        className="mt-3 min-h-20 w-full rounded-[10px] border-[1.5px] border-[#CEBDD8] bg-card px-3 py-2 text-[15px] text-foreground placeholder:text-muted-foreground focus:border-[#7C5CFF] focus:outline-none"
       />
 
       {error && <p className="mt-3 text-[13px] font-semibold text-[#C2415A]">{error}</p>}

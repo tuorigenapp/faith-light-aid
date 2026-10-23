@@ -191,7 +191,7 @@ function AuthLayoutInner() {
   return (
     <div className="min-h-screen flex bg-aura-top text-foreground">
       {/* Desktop sidebar */}
-       <aside className="community-reading-hide hidden lg:flex sticky top-0 h-screen w-72 bg-white/70 backdrop-blur border-r border-border flex-col z-30">
+       <aside className="community-reading-hide hidden lg:flex sticky top-0 h-screen w-72 bg-card/70 backdrop-blur border-r border-border flex-col z-30">
         <div className="p-5 border-b border-border">
           <Link to="/dashboard" className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-2xl bg-brand-gradient shadow-glow grid place-items-center text-white font-display font-bold">O</div>
@@ -238,7 +238,7 @@ function AuthLayoutInner() {
       {open && (
         <>
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden" onClick={() => setOpen(false)} />
-          <aside className="fixed top-0 left-0 h-full w-80 max-w-[85vw] bg-white border-r border-border z-50 lg:hidden flex flex-col animate-in slide-in-from-left duration-200">
+          <aside className="fixed top-0 left-0 h-full w-80 max-w-[85vw] bg-card border-r border-border z-50 lg:hidden flex flex-col animate-in slide-in-from-left duration-200">
             <div className="p-5 border-b border-border flex items-center justify-between">
               <Link to="/dashboard" onClick={() => setOpen(false)} className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-xl bg-brand-gradient shadow-glow grid place-items-center text-white font-bold">O</div>
@@ -301,7 +301,7 @@ function AuthLayoutInner() {
                 <button
                   onClick={toggle}
                   aria-label="Cambiar tema"
-                  className="inline-flex items-center justify-center h-11 w-11 rounded-2xl border-2 border-border/70 bg-white/80 text-foreground/80"
+                  className="inline-flex items-center justify-center h-11 w-11 rounded-2xl border-2 border-border/70 bg-card/80 text-foreground/80"
                 >
                   {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
                 </button>
@@ -317,7 +317,7 @@ function AuthLayoutInner() {
                         "inline-flex items-center gap-1.5 h-11 px-3.5 rounded-2xl border-2 text-[13px] font-semibold whitespace-nowrap transition-all",
                         active
                           ? "border-primary bg-primary/10 text-primary shadow-soft"
-                          : "border-border/70 bg-white/80 text-foreground/80 hover:border-primary/40"
+                          : "border-border/70 bg-card/80 text-foreground/80 hover:border-primary/40"
                       )}
                     >
                       <Icon className="w-4 h-4" />
@@ -341,7 +341,7 @@ function AuthLayoutInner() {
               <li className="shrink-0">
                 <button
                   onClick={signOut}
-                  className="inline-flex items-center gap-1.5 h-11 px-3.5 rounded-2xl border-2 border-border/70 bg-white/80 text-foreground/70 text-[13px] font-semibold"
+                  className="inline-flex items-center gap-1.5 h-11 px-3.5 rounded-2xl border-2 border-border/70 bg-card/80 text-foreground/70 text-[13px] font-semibold"
                 >
                   <LogOut className="w-4 h-4" />
                   Salir
@@ -366,7 +366,7 @@ function AuthLayoutInner() {
           aria-label="Navegación principal"
         >
           <div className="relative">
-            <div className="grid grid-cols-5 items-center h-[68px] rounded-[28px] bg-white/95 backdrop-blur-xl border border-border shadow-[0_10px_40px_-10px_rgba(124,92,255,0.35)]">
+            <div className="grid grid-cols-5 items-center h-[68px] rounded-[28px] bg-card/95 backdrop-blur-xl border border-border shadow-[0_10px_40px_-10px_rgba(124,92,255,0.35)]">
               <BottomItem to="/etapas" label="Camino" icon={RouteIcon} isActive={isActive} unread={!!pendings?.camino} />
                 <BottomItem to="/comunidad" label="Comunidad" icon={Users} isActive={isActive} unread={communityUnread} />
               <div aria-hidden />
