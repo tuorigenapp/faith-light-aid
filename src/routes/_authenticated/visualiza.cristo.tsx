@@ -22,7 +22,14 @@ import { StageQuiz } from "@/components/StageQuiz";
 import heroImg from "@/assets/cristo-hero.jpg";
 
 export const Route = createFileRoute("/_authenticated/visualiza/cristo")({
-  head: () => ({ meta: [{ title: "Método de Cristo 3·6·9 — Reconectando" }] }),
+  head: () => ({ meta: [
+    { title: "Método de Cristo 3·6·9 — ORÍGEN" },
+    { name: "description", content: "Prácticas de oración, escritura y reflexión cristiana para cuidar tu vida emocional en ORÍGEN." },
+    { property: "og:title", content: "Método de Cristo 3·6·9 — ORÍGEN" },
+    { property: "og:description", content: "Encuentra prácticas de fe, oración y reflexión en Cristo." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary_large_image" },
+  ] }),
   component: CristoPage,
 });
 
@@ -58,7 +65,7 @@ const PRACTICES: Practice[] = [
     color: "#F5B441",
     bg: "#FFF3D6",
     intention: "Yo soy próspero y abundante en Cristo.",
-    objective: "Alinear tu mente y tu corazón con la frecuencia de la abundancia ilimitada.",
+    objective: "Renovar tu relación con el dinero desde la gratitud a Dios y decisiones responsables.",
     questions: [
       "¿Qué significa la abundancia para mí?",
       "¿Qué creencia sobre el dinero quiero soltar?",
@@ -89,7 +96,7 @@ const PRACTICES: Practice[] = [
       { time: "Tarde", text: "Estoy alineado con la riqueza en todos los niveles." },
       { time: "Tarde", text: "Yo soy digno de todas las bendiciones." },
       { time: "Noche", text: "Agradezco todo lo que ya tengo y lo que está por venir." },
-      { time: "Noche", text: "Confío en el tiempo perfecto de Dios y del Universo." },
+      { time: "Noche", text: "Confío en Dios y pongo mis preocupaciones en sus manos." },
       { time: "Noche", text: "Todo está bien en mi mundo y cada día es mejor." },
     ],
     scripture: { text: "Todo lo puedo en Cristo que me fortalece.", ref: "Filipenses 4:13" },

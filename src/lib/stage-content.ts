@@ -99,13 +99,13 @@ const BY_FOCUS: Record<string, StageContent> = {
         q: "Conectar con lo espiritual empieza por…",
         options: ["Un ritual perfecto", "Un silencio honesto", "Un templo grande"],
         correct: 1,
-        tip: "Dios/Universo/Fuente escucha primero al que se sienta en silencio, no al que grita fuerte.",
+        tip: "Puedes acercarte a Dios con una oración honesta, incluso en silencio.",
       },
       {
         q: "Cuando pides desde el miedo…",
         options: ["Manifiestas más miedo", "Recibes más rápido", "Nada cambia"],
         correct: 0,
-        tip: "Pide desde la gratitud anticipada. El agradecimiento es la frecuencia del cumplimiento.",
+        tip: "Lleva tus preocupaciones a Dios con gratitud, sin convertir la oración en una garantía de resultados.",
       },
       {
         q: "La oración más poderosa suele ser…",

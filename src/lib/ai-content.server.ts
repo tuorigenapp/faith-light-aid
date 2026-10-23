@@ -5,6 +5,7 @@ import { APICallError, Output, streamText } from "ai";
 import { z } from "zod";
 import { createLovableAiGatewayRunIdFetch } from "./ai-run-id.server.ts";
 import { logUsage } from "./usage-log.server.ts";
+import { CHRISTIAN_LANGUAGE_RULE, hasIncompatibleSpiritualLanguage } from "./christian-language";
 
 const GATEWAY = "https://ai.gateway.lovable.dev/v1";
 const TEXT_MODEL = "openai/gpt-6-astra";
@@ -47,7 +48,7 @@ export async function aiJson<T>(prompt: string, system?: string, feature = "crea
   const result = streamText({
     model: provider.responses(TEXT_MODEL),
     maxRetries: 0,
-    system: system ?? "Escribes contenido original de sanación emocional y fe en español LATAM para ORÍGEN. No inventes citas bíblicas, cifras ni promesas médicas.",
+    system: `${system ?? "Escribes contenido original de sanación emocional y fe en español LATAM para ORÍGEN. No inventes citas bíblicas, cifras ni promesas médicas."}\n\n${CHRISTIAN_LANGUAGE_RULE}`,
     prompt: `${prompt}\nDevuelve el objeto JSON solicitado serializado dentro del campo json. Sin markdown.`,
     output: Output.object({ schema: z.object({ json: z.string() }) }),
     providerOptions: { openai: { forceReasoning: true, reasoningEffort: "low", reasoningSummary: "auto", store: false, include: ["reasoning.encrypted_content"] } },
@@ -62,6 +63,7 @@ export async function aiJson<T>(prompt: string, system?: string, feature = "crea
   }
   try {
     const parsed = JSON.parse(output.json) as T;
+    if (hasIncompatibleSpiritualLanguage(output.json)) throw new Error("Contenido espiritual incompatible");
     await logUsage({ kind: "ai", feature, ok: true, status: 200, durationMs: Date.now() - started });
     return parsed;
   } catch {
@@ -82,7 +84,7 @@ export async function aiImage(prompt: string): Promise<Uint8Array> {
     },
     body: JSON.stringify({
       model: IMAGE_MODEL,
-      prompt,
+      prompt: `${prompt}\nChristian spiritual imagery only. No moon, tarot, zodiac, occult symbols or cosmic energy.`,
     }),
   });
   await logUsage({ kind: "ai", feature: "portada", ok: res.ok, status: res.status, durationMs: Date.now() - started });

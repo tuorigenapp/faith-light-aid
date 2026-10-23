@@ -39,14 +39,14 @@ const INCLUDES = [
   { Icon: Heart, label: "Afirmaciones y visualizaciones diarias" },
   { Icon: ClipboardList, label: "Ejercicios de manifestación" },
   { Icon: MessageCircle, label: "Mensajes de fe y motivación" },
-  { Icon: Activity, label: "Elevación de tu frecuencia y enfoque" },
+  { Icon: Activity, label: "Calma interior y enfoque en Dios" },
   { Icon: Sparkles, label: "Transformación interior y resultados" },
 ];
 
 const AREA_ICONS = [DollarSign, Heart, Home, Briefcase, Flower2, HeartHandshake, User, Star];
 
 const AFFIRMATIONS = [
-  { text: "Estoy alineado con la abundancia infinita del Universo.", Icon: Sparkles, color: "#F5B441", bg: "#FFF3D6" },
+  { text: "Confío en la provisión de Dios y actúo con responsabilidad.", Icon: Sparkles, color: "#F5B441", bg: "#FFF3D6" },
   { text: "El dinero llega a mi vida de manera fácil, rápida y constante.", Icon: Heart, color: "#F58BCB", bg: "#FFE1F1" },
   { text: "Merezco vivir en libertad financiera y ayudar a otros con alegría.", Icon: Flower2, color: "#3FBE8F", bg: "#DFF6EA" },
   { text: "Confío en Dios y sé que Él provee todo lo que necesito.", Icon: HandHeart, color: "#A78BFA", bg: "#EDE7FF" },
@@ -68,7 +68,7 @@ const MANIFEST_QUIZ: QuizItem[] = [
     q: "¿Cuál es el primer paso para manifestar con música?",
     options: ["Repetir mecánicamente", "Sentir la emoción como si ya fuera real", "Escuchar sin atención"],
     correct: 1,
-    tip: "Manifestar no es solo pedir: es vibrar en la frecuencia de lo que ya recibiste.",
+    tip: "La música puede acompañar tu oración y tu reflexión; los resultados no dependen de vibraciones ni de repetir palabras.",
   },
   {
     q: "¿Qué acompaña a la fe verdadera?",
@@ -77,7 +77,7 @@ const MANIFEST_QUIZ: QuizItem[] = [
     tip: "Fe sin acción es deseo; fe con acción es creación.",
   },
   {
-    q: "¿Qué actitud eleva tu frecuencia más rápido?",
+    q: "¿Qué actitud te ayuda a cultivar la paz?",
     options: ["La queja", "La gratitud", "La comparación"],
     correct: 1,
     tip: "La gratitud multiplica lo que ya tienes y abre paso a lo que viene.",

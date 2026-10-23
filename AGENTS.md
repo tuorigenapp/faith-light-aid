@@ -17,3 +17,6 @@
 - AI and email calls are recorded in `usage_log` and admin-entered balances in `admin_settings`; the app cannot read the workspace credit balance directly.
 - User-facing consultas (ministración, pareja, patrones, panel consultas) run on the local `origen-engine.server.ts` composer + Cerebro ORÍGEN, logging to `assistant_events`; this keeps them free of AI credits at any user volume.
 - Public sales funnel (/empezar) keeps Hotmart links per level×cadence in one table and shows local currency as an approximation; Hotmart is the source of truth for the charged amount.
+- ORÍGEN-authored spiritual text uses the shared Christian-language policy before display or storage, including study excerpts and consultation outputs; this prevents incompatible source material from bypassing the same rules.
+- Typography-only global selectors never set text color; image-cover titles must inherit their surface foreground in both themes.
+- Membership selections use semantic Button variants with theme-specific surface, border, foreground and shadow tokens; this keeps selected states distinguishable from their parent surface.
