@@ -13,3 +13,9 @@
 
 ## Pendiente
 - [ ] Auditoría fina claro/oscuro en páginas restantes (onboarding, perfil, admin) — seguir revisando capturas
+
+## Ajustes solicitados el 23 de octubre
+- [ ] Reemplazar captura de /dashboard ocultando checklist y ventanas solo durante la captura.
+- [ ] Corregir títulos sobre portadas en modo claro y oscuro.
+- [ ] Hacer visible la selección de membresía en modo oscuro.
+- [ ] Aplicar lenguaje espiritual cristiano sin referencias esotéricas en la aplicación y consultas; verificar con pruebas.
