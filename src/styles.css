@@ -52,6 +52,10 @@ body.community-reading .community-main { padding-bottom: 0; }
   --color-sidebar-ring: var(--sidebar-ring);
   --color-community-cover: var(--community-cover);
   --color-community-cover-foreground: var(--community-cover-foreground);
+  --color-selection: var(--selection);
+  --color-selection-border: var(--selection-border);
+  --color-selection-foreground: var(--selection-foreground);
+  --shadow-selection: var(--selection-shadow);
 
   --shadow-soft: 0 1px 3px rgba(27, 25, 48, 0.06), 0 6px 20px rgba(27, 25, 48, 0.04);
   --shadow-elev: 0 12px 36px rgba(27, 25, 48, 0.10);
@@ -112,6 +116,10 @@ body.community-reading .community-main { padding-bottom: 0; }
   --sidebar-ring: #7C5CFF;
   --community-cover: #1B1930;
   --community-cover-foreground: #F9F7FF;
+  --selection: #EEE7FF;
+  --selection-border: #7050D6;
+  --selection-foreground: #472B96;
+  --selection-shadow: 0 4px 14px rgba(112, 80, 214, 0.18);
   --community-poll: #FFFCF8;
   --community-poll-border: #CEBDD8;
   --community-poll-selected: #F5E9FF;
@@ -165,6 +173,10 @@ body.community-reading .community-main { padding-bottom: 0; }
   --sidebar-accent-foreground: #F4F2FF;
   --sidebar-border: rgba(255, 255, 255, 0.08);
   --sidebar-ring: #A78BFA;
+  --selection: #39304F;
+  --selection-border: #C4AFF7;
+  --selection-foreground: #F5EEFF;
+  --selection-shadow: 0 0 0 1px rgba(196, 175, 247, 0.30), 0 4px 14px rgba(8, 6, 17, 0.45);
   --community-poll: #252033;
   --community-poll-border: #635775;
   --community-poll-selected: #49345F;
@@ -203,6 +215,7 @@ body.community-reading .community-main { padding-bottom: 0; }
 @layer base {
   * { border-color: var(--color-border); -webkit-tap-highlight-color: transparent; }
   html { color-scheme: light; }
+  html.dark { color-scheme: dark; }
   ::selection { background: rgba(128, 128, 128, 0.22); }
   .dark ::selection { background: rgba(200, 200, 200, 0.25); }
   body {
@@ -214,8 +227,7 @@ body.community-reading .community-main { padding-bottom: 0; }
   }
   h1, h2, h3, h4, .font-display {
     font-family: var(--font-display);
-    letter-spacing: -0.015em;
-    color: var(--foreground);
+    letter-spacing: 0;
   }
 }
 

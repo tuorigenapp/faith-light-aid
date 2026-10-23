@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { CancelSurvey } from "@/components/CancelSurvey";
 import { Check, ChevronRight, Crown, Eye, Infinity as InfinityIcon, Leaf, ShieldCheck, Sparkles, Sprout } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_authenticated/membresia")({
   head: () => ({
@@ -164,13 +165,14 @@ function Membresia() {
             const active = l.id === selected;
             const Icon = l.icon;
             return (
-              <button
+              <Button
+                variant="membership"
                 key={l.id}
                 onClick={() => setSelected(l.id)}
                 aria-pressed={active}
+                data-selected={active}
                 className={cn(
-                  "relative w-[86%] shrink-0 snap-center overflow-hidden rounded-[16px] border bg-card p-5 text-left transition active:scale-[.98] md:w-auto",
-                  active ? "border-primary ring-2 ring-primary/20 shadow-glow" : "border-border shadow-soft",
+                  "relative block w-[86%] shrink-0 snap-center overflow-hidden rounded-[16px] p-5 text-left transition active:scale-[.98] md:w-auto",
                 )}
               >
                 {l.popular && (
@@ -202,7 +204,7 @@ function Membresia() {
                 <p className="mt-4 inline-flex items-center gap-1 text-[12.5px] font-bold text-foreground">
                   Ver precios <ChevronRight className="h-3.5 w-3.5" />
                 </p>
-              </button>
+              </Button>
             );
           })}
         </div>
@@ -223,12 +225,13 @@ function Membresia() {
 
             <div className="-mx-5 mt-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-2 md:mx-0 md:grid md:grid-cols-3 md:overflow-visible md:px-0">
               {level.plans.map((p) => (
-                <button
+                <Button
+                  variant="membership"
                   key={p.id}
                   onClick={() => goCheckout(p.url)}
+                  data-selected={Boolean(p.badge)}
                   className={cn(
-                    "relative w-[80%] shrink-0 snap-center rounded-[16px] border bg-card p-5 text-left transition active:scale-[.98] md:w-auto",
-                    p.badge ? "border-primary shadow-glow" : "border-border shadow-soft",
+                    "relative block w-[80%] shrink-0 snap-center rounded-[16px] p-5 text-left transition active:scale-[.98] md:w-auto",
                   )}
                 >
                   {p.badge && (
@@ -241,12 +244,11 @@ function Membresia() {
                   <p className="font-display text-[30px] font-extrabold leading-tight">{p.price}</p>
                   <p className="mt-1 text-[12.5px] text-muted-foreground">pago cada {p.cadence}</p>
                   <span
-                    className="mt-5 flex h-[52px] items-center justify-center gap-2 rounded-[12px] bg-gradient-to-r from-accent-pink to-primary text-[15.5px] font-bold text-white"
-                    style={{ boxShadow: "0 4px 14px rgba(124,92,255,0.3)" }}
+                    className="mt-5 flex h-[52px] items-center justify-center gap-2 rounded-[12px] bg-selection text-[15.5px] font-bold text-selection-foreground ring-2 ring-selection-border shadow-selection"
                   >
                     Empezar ahora <ChevronRight className="h-4 w-4" />
                   </span>
-                </button>
+                </Button>
               ))}
             </div>
 
