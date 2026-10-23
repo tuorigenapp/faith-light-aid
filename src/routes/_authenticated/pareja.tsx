@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { christianContent } from "@/lib/christian-language";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
@@ -49,9 +50,9 @@ type ParejaRow = {
 };
 
 const LOADING_LINES = [
-  "Sintonizando con la información entregada...",
+  "Revisando la información que compartiste...",
   "Observando el patrón de esta unión...",
-  "Escuchando lo que el linaje revela...",
+  "Reflexionando sobre tus vínculos desde la fe...",
   "Preparando la reflexión de Ruth Esther...",
 ];
 
@@ -99,7 +100,7 @@ function ParejaPage() {
       .order("created_at", { ascending: false })
       .limit(10);
     if (error) setHistoryError("No pudimos cargar tu historial de consultas.");
-    setHistory((data as ParejaRow[]) ?? []);
+    setHistory(((data as unknown as ParejaRow[]) ?? []).map((row) => ({ ...row, verdict_title: christianContent(row.verdict_title), summary: christianContent(row.summary), pattern: christianContent(row.pattern), advice: christianContent(row.advice), next_step: christianContent(row.next_step) })));
     setHistoryLoading(false);
   }
 
@@ -135,7 +136,7 @@ function ParejaPage() {
       const j = await r.json();
       if (!r.ok) throw new Error(j.error ?? "Error");
       setProgress(100);
-      setResult(j);
+      setResult(christianContent(j));
       if (user) {
         await supabase.from("pareja_lecturas").insert({
           user_id: user.id,

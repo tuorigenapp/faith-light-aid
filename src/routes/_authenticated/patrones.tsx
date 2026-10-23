@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { christianContent } from "@/lib/christian-language";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
@@ -105,7 +106,7 @@ function PatronesPage() {
       .order("created_at", { ascending: false })
       .limit(10);
     if (error) setHistoryError("No pudimos cargar tu historial de consultas.");
-    setHistory((data as PatronesRow[]) ?? []);
+    setHistory(((data as unknown as PatronesRow[]) ?? []).map((row) => ({ ...row, observation: christianContent(row.observation), patterns: christianContent(row.patterns), reflection: christianContent(row.reflection), recommendations: christianContent(row.recommendations) })));
     setHistoryLoading(false);
   }
 
@@ -158,7 +159,7 @@ function PatronesPage() {
       const j = await r.json();
       if (!r.ok) throw new Error(j.error ?? "Error");
       setProgress(100);
-      setResult(j);
+      setResult(christianContent(j));
       if (user) {
         await supabase.from("patrones_consultas").insert({
           user_id: user.id,

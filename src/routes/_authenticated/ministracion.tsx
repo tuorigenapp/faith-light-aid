@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { christianContent } from "@/lib/christian-language";
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -41,8 +42,8 @@ type Result = {
 const LOADING_LINES = [
   "Recibiendo tu información...",
   "Aplicando el Método ORIGEN...",
-  "Consultando los decretos divinos...",
-  "Abriendo los libros de la Corte Celestial...",
+  "Preparando una reflexión de fe cristiana...",
+  "Organizando pasos para acompañarte...",
   "Preparando tu ministración...",
 ];
 
@@ -97,7 +98,7 @@ function MinistracionPage() {
       .order("created_at", { ascending: false })
       .limit(10);
     if (error) setHistoryError("No pudimos cargar tu historial de consultas.");
-    setHistory((data as unknown as MinistracionRow[]) ?? []);
+    setHistory(((data as unknown as MinistracionRow[]) ?? []).map((row) => ({ ...row, headline: christianContent(row.headline), dictamen: christianContent(row.dictamen), linea_tiempo: christianContent(row.linea_tiempo), senales: christianContent(row.senales), ministracion: christianContent(row.ministracion), versiculo: christianContent(row.versiculo), rompe_ciclo: christianContent(row.rompe_ciclo) })));
     setHistoryLoading(false);
   }
 
@@ -140,7 +141,7 @@ function MinistracionPage() {
       const j = await r.json();
       if (!r.ok) throw new Error(j.error ?? "Error");
       setProgress(100);
-      setResult(j);
+      setResult(christianContent(j));
       setStep(3);
       if (user) {
         await supabase.from("ministracion_lecturas").insert({
