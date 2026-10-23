@@ -233,11 +233,11 @@ function ParejaPage() {
               <div className="mx-auto w-16 h-16 rounded-2xl bg-brand-gradient grid place-items-center text-white shadow-glow">
                 <HeartHandshake className="w-8 h-8" />
               </div>
-              <h1 className="font-display font-extrabold text-[26px] leading-tight mt-4">
-                ¿Tu pareja es <span className="text-gradient-brand">deuda ancestral</span> o <span className="text-gradient-brand">propósito</span>?
+              <h1 className="font-display font-extrabold text-foreground text-[26px] leading-tight mt-4">
+                Comprende tu <span className="text-primary">relación</span> desde el respeto y la <span className="text-primary">fe</span>
               </h1>
               <p className="text-sm text-muted-foreground mt-2">
-                Ruth Esther analiza esta unión desde el método ORIGEN. Descubre qué viene a enseñarte esta persona con una nueva consulta.
+                Reflexiona con el método ORÍGEN sobre tu comunicación, tus necesidades y los límites que deseas cuidar.
               </p>
             </div>
 

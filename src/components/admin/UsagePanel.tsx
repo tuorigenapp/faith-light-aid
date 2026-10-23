@@ -4,6 +4,7 @@ import { Activity, AlertTriangle, CalendarClock, CheckCircle2, Clock, Gauge, Mai
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 type Kind = "ai" | "email";
 type Range = "hoy" | "ayer" | "7" | "15" | "30" | "custom";
@@ -74,11 +75,12 @@ export function UsagePanel({ kind, className }: { kind: Kind; className?: string
 
   return (
     <>
-      <button
+      <Button
+        variant="outline"
         onClick={() => setOpen(true)}
-        className={cn("flex w-full items-center gap-3 rounded-[14px] border p-3 text-left active:scale-[.99] transition", full ? "border-[#E8A23A]/60 bg-[#FFF4E0]" : "border-border bg-card", className)}
+        className={cn("flex h-auto w-full items-center gap-3 whitespace-normal rounded-[14px] border p-3 text-left active:scale-[.99] transition", full ? "border-destructive/50 bg-destructive/10 text-foreground" : "border-border bg-card text-card-foreground", className)}
       >
-        <span className={cn("grid h-11 w-11 shrink-0 place-items-center rounded-[12px]", full ? "bg-[#E8A23A]/20 text-[#9A5B00]" : "bg-[#7C5CFF]/12 text-[#5B3FD9]")}>
+        <span className={cn("grid h-11 w-11 shrink-0 place-items-center rounded-[12px]", full ? "bg-destructive/15 text-destructive" : "bg-primary/12 text-primary")}>
           {kind === "ai" ? <Sparkles className="h-5 w-5" /> : <Mail className="h-5 w-5" />}
         </span>
         <span className="min-w-0 flex-1">
@@ -91,8 +93,8 @@ export function UsagePanel({ kind, className }: { kind: Kind; className?: string
             {todayRows.length} {kind === "ai" ? "peticiones" : "envíos"} hoy · Próxima recarga {fmtDate(kind === "ai" ? nextDailyReset() : bounds("hoy", "", "")[1])}
           </span>
         </span>
-        <span className="shrink-0 rounded-full bg-[#7C5CFF] px-3 py-1.5 text-[12px] font-bold text-white">Ver detalles</span>
-      </button>
+        <span className="shrink-0 rounded-full bg-primary px-3 py-1.5 text-[12px] font-bold text-primary-foreground">Ver detalles</span>
+      </Button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-lg">
           <DialogHeader>

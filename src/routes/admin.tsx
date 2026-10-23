@@ -391,7 +391,7 @@ function Admin() {
       {/* Contenido */}
       <main className="mx-auto w-full max-w-[1100px] px-5 py-6 md:px-8">
         <h1 className="font-display text-[28px] font-extrabold leading-tight">
-          {NAV.find((n) => n.id === section)!.label}
+          {NAV.find((n) => n.id === section)?.label ?? "Administración"}
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Datos reales de tu plataforma. Donde no hay información dice “Sin datos”.
