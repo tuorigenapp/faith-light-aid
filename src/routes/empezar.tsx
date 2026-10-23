@@ -346,7 +346,7 @@ function PlansBoard({ cur, mode, title }: { cur: LocalCurrency; mode: Mode; titl
         {l.id === "caminante" && <span className="absolute right-3 top-3 rounded-full bg-primary px-2.5 py-0.5 text-[11px] font-bold text-primary-foreground">Más elegido</span>}
         <div className="flex items-center gap-3">
           <img src={l.img} alt="" className="h-12 w-12 shrink-0 object-contain" />
-          <div className="min-w-0 flex-1">
+          <div className={cn("min-w-0 flex-1", l.id === "caminante" && "pr-20")}>
             <p className="font-display text-base font-bold text-foreground">{l.name}</p>
             <p className="text-xs text-muted-foreground">{l.claim}</p>
           </div>
