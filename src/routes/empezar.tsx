@@ -18,11 +18,20 @@ import antes from "@/assets/funnel/antes.jpg";
 import despues from "@/assets/funnel/despues.jpg";
 import gift from "@/assets/funnel/gift.png";
 import mockup from "@/assets/funnel/mockup.png";
-import appCamino from "@/assets/funnel/app-camino.jpg";
-import appVisualiza from "@/assets/funnel/app-visualiza.jpg";
-import appArbol from "@/assets/funnel/app-arbol.jpg";
-import appDiario from "@/assets/funnel/app-diario.jpg";
-import appComunidad from "@/assets/funnel/app-comunidad.jpg";
+import shotDashboard from "@/assets/funnel/shots/dashboard.jpg";
+import shotChat from "@/assets/funnel/shots/chat.jpg";
+import shotPareja from "@/assets/funnel/shots/pareja.jpg";
+import shotPatrones from "@/assets/funnel/shots/patrones.jpg";
+import shotMinistracion from "@/assets/funnel/shots/ministracion.jpg";
+import shotEjercicios from "@/assets/funnel/shots/ejercicios.jpg";
+import shotBiblioteca from "@/assets/funnel/shots/biblioteca.jpg";
+import shotCategorias from "@/assets/funnel/shots/categorias.jpg";
+import shotRuleta from "@/assets/funnel/shots/ruleta.jpg";
+import shotJuegos from "@/assets/funnel/shots/juegos.jpg";
+import shotComprar from "@/assets/funnel/shots/comprarmonedas.jpg";
+import shotHistorial from "@/assets/funnel/shots/historial.jpg";
+import shotArbol from "@/assets/funnel/shots/arbol.jpg";
+import shotInvita from "@/assets/funnel/shots/invita.jpg";
 import eHeadphones from "@/assets/e3d-headphones.png";
 import ePractice from "@/assets/e3d-practice.png";
 import eBook from "@/assets/e3d-book.png";
@@ -98,11 +107,20 @@ const GUIAS = [
   { id: "fe", img: eBook, t: "Con enseñanzas de fe y sabiduría interior", d: "Para conectar con principios espirituales." },
 ];
 const SCREENS = [
-  { img: appCamino, t: "Camino ORÍGEN", d: "20 etapas, una lección nueva cada día" },
-  { img: appVisualiza, t: "Visualízalo y Vívelo", d: "Programas guiados con audio y seguimiento" },
-  { img: appArbol, t: "Árbol de Sanación", d: "Tus Hojas crecen con cada paso que das" },
-  { img: appDiario, t: "Diario espiritual", d: "Privado, solo tú y Dios" },
-  { img: appComunidad, t: "Comunidad", d: "Personas que viven caminos parecidos" },
+  { img: shotDashboard, t: "Tu inicio", d: "Tu misión del día, racha y todo tu camino" },
+  { img: shotCategorias, t: "Caminos ORÍGEN", d: "20 etapas, una lección nueva cada día" },
+  { img: shotChat, t: "Mentora ORÍGEN", d: "Te acompaña y te escucha 24/7" },
+  { img: shotMinistracion, t: "Dios te dice hoy", d: "Una palabra personal cada día" },
+  { img: shotPareja, t: "Tu pareja de destino", d: "Entiende lo que hay entre ustedes" },
+  { img: shotPatrones, t: "Patrones generacionales", d: "Descubre lo que se repite en tu familia" },
+  { img: shotEjercicios, t: "Ejercicios diarios", d: "Prácticas cortas que sí se sienten" },
+  { img: shotBiblioteca, t: "Biblioteca digital", d: "Un pack de libros nuevo cada semana" },
+  { img: shotJuegos, t: "Juegos del día", d: "Gimnasia emocional de 3 minutos" },
+  { img: shotRuleta, t: "Ruleta de premios", d: "Un giro cada 24 horas, siempre ganas" },
+  { img: shotArbol, t: "Árbol de Sanación", d: "Mira crecer tu avance con cada paso" },
+  { img: shotComprar, t: "Hojas de Sanación", d: "Tu moneda de avance dentro de la app" },
+  { img: shotHistorial, t: "Tu historial", d: "Todas tus respuestas guardadas en PDF" },
+  { img: shotInvita, t: "Programa de afiliados", d: "Gana compartiendo ORÍGEN" },
 ];
 
 type Stage = "quiz" | "paywall" | "offer80";
