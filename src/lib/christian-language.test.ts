@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { christianStudyText, christianText, hasIncompatibleSpiritualLanguage } from "./christian-language";
+import { christianContent, christianStudyText, christianText, hasIncompatibleSpiritualLanguage } from "./christian-language";
 
 describe("Christian spiritual content policy", () => {
   it("blocks Luna and esoteric references, regardless of case or accents", () => {
@@ -19,5 +19,13 @@ describe("Christian spiritual content policy", () => {
     const result = christianText("Al cambiar la Luna llegará una revelación.");
     expect(result).toContain("Dios");
     expect(hasIncompatibleSpiritualLanguage(result)).toBe(false);
+  });
+
+  it("filters historical nested answers without changing their structure", () => {
+    const answer = christianContent({ verdict: "leccion", body: "La Luna te guía. Confía en Dios.", __titles: '{"body":"Tu horóscopo"}' });
+    expect(answer.verdict).toBe("leccion");
+    expect(answer.body).toBe("Confía en Dios.");
+    expect(hasIncompatibleSpiritualLanguage(JSON.stringify(answer))).toBe(false);
+    expect(JSON.parse(answer.__titles)).toHaveProperty("body");
   });
 });
