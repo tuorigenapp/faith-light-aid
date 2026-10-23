@@ -25,7 +25,14 @@ import { useAuth } from "@/lib/use-auth";
 import { printMinistracion } from "@/lib/print-pdf";
 
 export const Route = createFileRoute("/_authenticated/ministracion")({
-  head: () => ({ meta: [{ title: "Lo que Dios quiere decirte hoy — ORIGEN" }] }),
+  head: () => ({ meta: [
+    { title: "Dios te dice hoy — ORÍGEN" },
+    { name: "description", content: "Reflexión cristiana, oración y pasos para acompañar tu proceso emocional con ORÍGEN." },
+    { property: "og:title", content: "Dios te dice hoy — ORÍGEN" },
+    { property: "og:description", content: "Una reflexión de fe cristiana para cuidar tu paz y tu bienestar." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary_large_image" },
+  ] }),
   component: MinistracionPage,
 });
 

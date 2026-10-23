@@ -20,7 +20,7 @@ export const Route = createFileRoute("/api/public/demo-consulta")({
         if (d.kind === "dios") {
           const r = await eng.engineMinistracion({ scope: "ministracion", name: d.name, question: d.question, title: "Dios te dice hoy" });
           headline = r.headline;
-          sections = [{ title: "Lo que se percibe en ti hoy", body: r.dictamen }, { title: "Lo que viene en los próximos días", body: r.linea_tiempo }, { title: "Tu palabra para hoy", body: `${r.ministracion}\n\n${r.versiculo}` }];
+          sections = [{ title: "Tu inquietud merece atención", body: r.dictamen }, { title: "Tus pasos para los próximos días", body: r.linea_tiempo }, { title: "Tu reflexión y oración", body: `${r.ministracion}\n\n${r.versiculo}` }];
         } else if (d.kind === "patron") {
           const r = await eng.enginePatrones({ scope: "patrones", name: d.name, question: d.question, familyCount: 1 });
           headline = "Lo que se repite en tu familia puede terminar contigo";

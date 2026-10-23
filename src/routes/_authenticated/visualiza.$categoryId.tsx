@@ -19,7 +19,7 @@ import { CustomMusicTopic } from "@/components/visualiza/CustomMusicTopic";
 import { StageQuiz, type QuizItem } from "@/components/StageQuiz";
 
 export const Route = createFileRoute("/_authenticated/visualiza/$categoryId")({
-  head: () => ({ meta: [{ title: "Visualízalo y Vívelo — ORÍGEN" }, { name: "description", content: "Explora las categorías, lecciones y prácticas de Visualízalo y Vívelo." }, { property: "og:title", content: "Visualízalo y Vívelo — ORÍGEN" }, { property: "og:description", content: "Explora categorías y prácticas diarias." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
+  head: () => ({ meta: [{ title: "Oración y reflexión con música — ORÍGEN" }, { name: "description", content: "Lecciones, audios y ejercicios para acompañar tu oración y reflexión cristiana con ORÍGEN." }, { property: "og:title", content: "Oración y reflexión con música — ORÍGEN" }, { property: "og:description", content: "Acompaña tu proceso con música, oración y pasos prácticos." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
   component: CategoryPage,
 });
 
