@@ -179,7 +179,7 @@ function ProfileWizard({ profile, onDone, blockExit }: { profile: any; onDone: (
   const info = stepInfo[step];
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-b from-[#F4F0FF] via-[#FBFAFF] to-[#EEF6FF]">
+    <div className="min-h-[calc(100vh-4rem)] bg-aura-top">
       <div className="mx-auto max-w-md px-4 pt-4 pb-28">
         {/* progreso */}
         <div className="flex items-center gap-3">
@@ -189,7 +189,7 @@ function ProfileWizard({ profile, onDone, blockExit }: { profile: any; onDone: (
             <button
               onClick={() => (step === 1 ? onDone() : setStep(step - 1))}
               aria-label="Volver"
-              className="w-10 h-10 rounded-full bg-white shadow-soft grid place-items-center active:scale-95 transition"
+              className="w-10 h-10 rounded-full bg-card shadow-soft grid place-items-center active:scale-95 transition"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
@@ -213,7 +213,7 @@ function ProfileWizard({ profile, onDone, blockExit }: { profile: any; onDone: (
 
         <div className="mt-5 space-y-4">
           {step === 1 && (
-            <div className="rounded-[24px] bg-white shadow-soft p-6 text-center space-y-4">
+            <div className="rounded-[24px] bg-card shadow-soft p-6 text-center space-y-4">
               <div className="flex justify-center">
                 <PhotoPicker
                   value={currentAvatar}
@@ -239,7 +239,7 @@ function ProfileWizard({ profile, onDone, blockExit }: { profile: any; onDone: (
           )}
 
           {step === 2 && (
-            <div className="rounded-[24px] bg-white shadow-soft p-5 space-y-4">
+            <div className="rounded-[24px] bg-card shadow-soft p-5 space-y-4">
               <div>
                 <Label className="text-[13px] font-semibold">¿Cómo quieres que te llamemos?</Label>
                 <Input value={form.display_name} onChange={(e) => setForm({ ...form, display_name: e.target.value })} placeholder="Tu nombre" className="mt-1.5 h-12 rounded-[12px]" />
@@ -266,7 +266,7 @@ function ProfileWizard({ profile, onDone, blockExit }: { profile: any; onDone: (
           )}
 
           {step === 3 && (
-            <div className="rounded-[24px] bg-white shadow-soft p-5 space-y-4">
+            <div className="rounded-[24px] bg-card shadow-soft p-5 space-y-4">
               <div>
                 <Label className="text-[13px] font-semibold">¿Qué buscas sanar o transformar?</Label>
                 <Textarea
@@ -284,14 +284,14 @@ function ProfileWizard({ profile, onDone, blockExit }: { profile: any; onDone: (
                 </Select>
               </div>
               <div className="rounded-2xl bg-[#F1ECFF] p-4 flex gap-3">
-                <span className="w-10 h-10 rounded-xl bg-white grid place-items-center shrink-0"><Sparkles className="w-5 h-5 text-[#7C5CFF]" /></span>
+                <span className="w-10 h-10 rounded-xl bg-card grid place-items-center shrink-0"><Sparkles className="w-5 h-5 text-[#7C5CFF]" /></span>
                 <p className="text-[13px] text-foreground/80 leading-snug">Tu intención es la brújula que guía tu transformación.</p>
               </div>
             </div>
           )}
 
           {step === 4 && (
-            <div className="rounded-[24px] bg-white shadow-soft p-5 space-y-4">
+            <div className="rounded-[24px] bg-card shadow-soft p-5 space-y-4">
               <Label className="text-[13px] font-semibold">¿Qué temas te interesan más?</Label>
               <div className="space-y-2">
                 {TOPICS.map(({ id, label, icon: Icon, color }) => {
@@ -299,7 +299,7 @@ function ProfileWizard({ profile, onDone, blockExit }: { profile: any; onDone: (
                   return (
                     <button
                       key={id} type="button" onClick={() => toggleTopic(id)}
-                      className={`w-full h-14 px-3 rounded-[14px] border-2 flex items-center gap-3 transition ${on ? "border-[#7C5CFF] bg-[#7C5CFF]/8" : "border-border bg-white"}`}
+                      className={`w-full h-14 px-3 rounded-[14px] border-2 flex items-center gap-3 transition ${on ? "border-[#7C5CFF] bg-[#7C5CFF]/8" : "border-border bg-card"}`}
                     >
                       <span className="w-9 h-9 rounded-xl grid place-items-center shrink-0" style={{ background: `${color}1F` }}>
                         <Icon className="w-4.5 h-4.5" style={{ color }} />
@@ -318,7 +318,7 @@ function ProfileWizard({ profile, onDone, blockExit }: { profile: any; onDone: (
                   {["Notificaciones", "Email", "Ambos"].map((p) => (
                     <button
                       key={p} type="button" onClick={() => setForm({ ...form, content_pref: p })}
-                      className={`h-11 rounded-[12px] text-[13px] font-semibold border-2 transition ${form.content_pref === p ? "bg-[#7C5CFF] text-white border-[#7C5CFF]" : "border-border bg-white text-foreground/70"}`}
+                      className={`h-11 rounded-[12px] text-[13px] font-semibold border-2 transition ${form.content_pref === p ? "bg-[#7C5CFF] text-white border-[#7C5CFF]" : "border-border bg-card text-foreground/70"}`}
                     >{p}</button>
                   ))}
                 </div>
@@ -327,7 +327,7 @@ function ProfileWizard({ profile, onDone, blockExit }: { profile: any; onDone: (
           )}
 
           {step === 5 && (
-            <div className="rounded-[24px] bg-white shadow-soft p-5 space-y-4">
+            <div className="rounded-[24px] bg-card shadow-soft p-5 space-y-4">
               <div>
                 <Label className="text-[13px] font-semibold">Correo electrónico</Label>
                 <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="tucorreo@ejemplo.com" className="mt-1.5 h-12 rounded-[12px]" />
@@ -337,7 +337,7 @@ function ProfileWizard({ profile, onDone, blockExit }: { profile: any; onDone: (
               </div>
               <ChangePassword />
               <div className="rounded-2xl bg-[#EAF3FF] p-4 flex gap-3">
-                <span className="w-10 h-10 rounded-xl bg-white grid place-items-center shrink-0"><Shield className="w-5 h-5 text-[#61A8FF]" /></span>
+                <span className="w-10 h-10 rounded-xl bg-card grid place-items-center shrink-0"><Shield className="w-5 h-5 text-[#61A8FF]" /></span>
                 <p className="text-[13px] text-foreground/80 leading-snug">Tu información está segura con nosotros y tu proceso es 100% confidencial.</p>
               </div>
             </div>
@@ -345,7 +345,7 @@ function ProfileWizard({ profile, onDone, blockExit }: { profile: any; onDone: (
 
           {step === 6 && (
             <div className="space-y-4">
-              <div className="rounded-[24px] bg-white shadow-soft p-5">
+              <div className="rounded-[24px] bg-card shadow-soft p-5">
                 <div className="flex items-center justify-between mb-3">
                   <div className="font-display font-bold text-[15px]">Resumen de tu perfil</div>
                   <button onClick={() => setStep(2)} className="text-[12px] font-bold text-[#7C5CFF]">Editar</button>
@@ -359,7 +359,7 @@ function ProfileWizard({ profile, onDone, blockExit }: { profile: any; onDone: (
                 </div>
               </div>
               <div className="rounded-[20px] bg-[#FDEFF7] p-4 flex gap-3">
-                <span className="w-10 h-10 rounded-xl bg-white grid place-items-center shrink-0"><Heart className="w-5 h-5 text-[#F58BCB]" /></span>
+                <span className="w-10 h-10 rounded-xl bg-card grid place-items-center shrink-0"><Heart className="w-5 h-5 text-[#F58BCB]" /></span>
                 <p className="text-[13px] text-[#7C5CFF] leading-snug font-medium">Gracias por confiar en ORIGEN, {form.display_name.split(" ")[0] || "amig@"}. Este es el inicio de tu transformación.</p>
               </div>
             </div>
@@ -384,7 +384,7 @@ function ProfileWizard({ profile, onDone, blockExit }: { profile: any; onDone: (
           )}
         </div>
 
-        <div className="mt-6 rounded-[20px] bg-white/70 border border-border p-4 grid gap-3">
+        <div className="mt-6 rounded-[20px] bg-card/70 border border-border p-4 grid gap-3">
           <PrivacyNote icon={<Shield className="w-4 h-4 text-[#7C5CFF]" />} title="Tu privacidad es importante" text="Cuidamos tu información y tu proceso es 100% confidencial." />
           <PrivacyNote icon={<Lock className="w-4 h-4 text-[#61A8FF]" />} title="Información protegida" text="Tus datos están encriptados y seguros." />
           <PrivacyNote icon={<UserIcon className="w-4 h-4 text-[#9B7CFF]" />} title="Tú tienes el control" text="Puedes editar tu información cuando quieras." />
@@ -445,16 +445,16 @@ function EditProfileLimited({ profile, onDone }: { profile: any; onDone: () => v
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-b from-[#F4F0FF] via-[#FBFAFF] to-[#EEF6FF]">
+    <div className="min-h-[calc(100vh-4rem)] bg-aura-top">
       <div className="mx-auto max-w-md px-4 pt-4 pb-28">
         <div className="flex items-center gap-3">
-          <button onClick={onDone} aria-label="Volver" className="w-10 h-10 rounded-full bg-white shadow-soft grid place-items-center active:scale-95 transition">
+          <button onClick={onDone} aria-label="Volver" className="w-10 h-10 rounded-full bg-card shadow-soft grid place-items-center active:scale-95 transition">
             <ArrowLeft className="w-5 h-5" />
           </button>
           <h1 className="flex-1 text-center font-display font-black text-[18px] pr-10">Editar perfil</h1>
         </div>
 
-        <div className="mt-5 rounded-[24px] bg-white shadow-soft p-6 text-center space-y-4">
+        <div className="mt-5 rounded-[24px] bg-card shadow-soft p-6 text-center space-y-4">
           <div className="flex justify-center">
             <PhotoPicker
               value={currentAvatar}
@@ -475,7 +475,7 @@ function EditProfileLimited({ profile, onDone }: { profile: any; onDone: () => v
           <p className="text-[13px] text-muted-foreground">Foto de perfil</p>
         </div>
 
-        <div className="mt-4 rounded-[24px] bg-white shadow-soft p-5 space-y-4">
+        <div className="mt-4 rounded-[24px] bg-card shadow-soft p-5 space-y-4">
           <div>
             <Label className="text-[13px] font-semibold">Correo electrónico</Label>
             <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tucorreo@ejemplo.com" className="mt-1.5 h-12 rounded-[12px]" />
@@ -486,7 +486,7 @@ function EditProfileLimited({ profile, onDone }: { profile: any; onDone: () => v
           <ChangePassword />
         </div>
 
-        <div className="mt-4 rounded-[24px] bg-white shadow-soft p-5 space-y-3">
+        <div className="mt-4 rounded-[24px] bg-card shadow-soft p-5 space-y-3">
           <div className="flex items-center gap-2 mb-1">
             <Lock className="w-4 h-4 text-muted-foreground" />
             <div className="font-display font-bold text-[14px]">Datos que no se pueden cambiar</div>
@@ -570,7 +570,7 @@ function SummaryRow({ icon, label, value }: { icon: React.ReactNode; label: stri
 function PrivacyNote({ icon, title, text }: { icon: React.ReactNode; title: string; text: string }) {
   return (
     <div className="flex gap-3">
-      <span className="w-9 h-9 rounded-xl bg-white shadow-soft grid place-items-center shrink-0">{icon}</span>
+      <span className="w-9 h-9 rounded-xl bg-card shadow-soft grid place-items-center shrink-0">{icon}</span>
       <div>
         <div className="text-[13px] font-bold text-[#7C5CFF]">{title}</div>
         <p className="text-[12px] text-muted-foreground leading-snug">{text}</p>
@@ -898,7 +898,7 @@ function ProfilePanel({ profile, onEdit }: { profile: any; onEdit: () => void })
         {/* NOTIFICACIONES */}
         <NotificationsBlock />
 
-        <div className="rounded-[20px] border border-border bg-white/70 p-4 flex items-center gap-3">
+        <div className="rounded-[20px] border border-border bg-card/70 p-4 flex items-center gap-3">
           <span className="w-10 h-10 rounded-xl bg-[#F1ECFF] grid place-items-center shrink-0"><Bell className="w-5 h-5 text-[#7C5CFF]" /></span>
           <div className="min-w-0 flex-1">
             <div className="text-[13px] font-bold">Prefieres recibir contenido por: {profile.content_pref ?? "Notificaciones"}</div>
@@ -1004,7 +1004,7 @@ function MiniStat({ icon, label, value }: { icon: React.ReactNode; label: string
 
 function QuickStat({ color, icon, value, label }: { color: string; icon: React.ReactNode; value: React.ReactNode; label: string }) {
   return (
-    <div className="rounded-2xl bg-white border border-border shadow-soft p-4 text-center">
+    <div className="rounded-2xl bg-card border border-border shadow-soft p-4 text-center">
       <div className="w-10 h-10 rounded-xl mx-auto grid place-items-center" style={{ background: `${color}1F`, color }}>{icon}</div>
       <div className="text-xl font-black font-display mt-2">{value}</div>
       <div className="text-[11px] text-muted-foreground">{label}</div>
@@ -1014,7 +1014,7 @@ function QuickStat({ color, icon, value, label }: { color: string; icon: React.R
 
 function MetricCard({ color, icon, label, value, to }: { color: string; icon: React.ReactNode; label: string; value: React.ReactNode; to: string }) {
   return (
-    <Link to={to} className="rounded-2xl p-4 bg-white shadow-soft border border-border hover:shadow-md transition-all active:scale-[.98]">
+    <Link to={to} className="rounded-2xl p-4 bg-card shadow-soft border border-border hover:shadow-md transition-all active:scale-[.98]">
       <div className="flex items-center justify-between">
         <div className="w-9 h-9 rounded-xl grid place-items-center text-white" style={{ background: color }}>{icon}</div>
         <ChevronRight className="w-4 h-4 text-muted-foreground" />

@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { christianContent } from "@/lib/christian-language";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
@@ -19,7 +20,14 @@ import e3dStar from "@/assets/e3d-star.png";
 import e3dHeartgem from "@/assets/e3d-heartgem.png";
 
 export const Route = createFileRoute("/_authenticated/pareja")({
-  head: () => ({ meta: [{ title: "¿Deuda ancestral o propósito? — ORIGEN" }] }),
+  head: () => ({ meta: [
+    { title: "Comprende tu relación — ORÍGEN" },
+    { name: "description", content: "Reflexiona sobre tu relación, tus límites y tus necesidades con acompañamiento cristiano de ORÍGEN." },
+    { property: "og:title", content: "Comprende tu relación — ORÍGEN" },
+    { property: "og:description", content: "Una reflexión sobre respeto, comunicación y cuidado en tu relación." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary_large_image" },
+  ] }),
   component: ParejaPage,
 });
 
@@ -49,9 +57,9 @@ type ParejaRow = {
 };
 
 const LOADING_LINES = [
-  "Sintonizando con la información entregada...",
+  "Revisando la información que compartiste...",
   "Observando el patrón de esta unión...",
-  "Escuchando lo que el linaje revela...",
+  "Reflexionando sobre tus vínculos desde la fe...",
   "Preparando la reflexión de Ruth Esther...",
 ];
 
@@ -99,7 +107,7 @@ function ParejaPage() {
       .order("created_at", { ascending: false })
       .limit(10);
     if (error) setHistoryError("No pudimos cargar tu historial de consultas.");
-    setHistory((data as ParejaRow[]) ?? []);
+    setHistory(((data as unknown as ParejaRow[]) ?? []).map((row) => ({ ...row, verdict_title: christianContent(row.verdict_title), summary: christianContent(row.summary), pattern: christianContent(row.pattern), advice: christianContent(row.advice), next_step: christianContent(row.next_step) })));
     setHistoryLoading(false);
   }
 
@@ -135,7 +143,7 @@ function ParejaPage() {
       const j = await r.json();
       if (!r.ok) throw new Error(j.error ?? "Error");
       setProgress(100);
-      setResult(j);
+      setResult(christianContent(j));
       if (user) {
         await supabase.from("pareja_lecturas").insert({
           user_id: user.id,
@@ -225,11 +233,11 @@ function ParejaPage() {
               <div className="mx-auto w-16 h-16 rounded-2xl bg-brand-gradient grid place-items-center text-white shadow-glow">
                 <HeartHandshake className="w-8 h-8" />
               </div>
-              <h1 className="font-display font-extrabold text-[26px] leading-tight mt-4">
-                ¿Tu pareja es <span className="text-gradient-brand">deuda ancestral</span> o <span className="text-gradient-brand">propósito</span>?
+              <h1 className="font-display font-extrabold text-foreground text-[26px] leading-tight mt-4">
+                Comprende tu <span className="text-primary">relación</span> desde el respeto y la <span className="text-primary">fe</span>
               </h1>
               <p className="text-sm text-muted-foreground mt-2">
-                Ruth Esther analiza esta unión desde el método ORIGEN. Descubre qué viene a enseñarte esta persona con una nueva consulta.
+                Reflexiona con el método ORÍGEN sobre tu comunicación, tus necesidades y los límites que deseas cuidar.
               </p>
             </div>
 

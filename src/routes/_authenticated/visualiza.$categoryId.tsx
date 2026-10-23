@@ -19,7 +19,7 @@ import { CustomMusicTopic } from "@/components/visualiza/CustomMusicTopic";
 import { StageQuiz, type QuizItem } from "@/components/StageQuiz";
 
 export const Route = createFileRoute("/_authenticated/visualiza/$categoryId")({
-  head: () => ({ meta: [{ title: "Visualízalo y Vívelo — ORÍGEN" }, { name: "description", content: "Explora las categorías, lecciones y prácticas de Visualízalo y Vívelo." }, { property: "og:title", content: "Visualízalo y Vívelo — ORÍGEN" }, { property: "og:description", content: "Explora categorías y prácticas diarias." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
+  head: () => ({ meta: [{ title: "Oración y reflexión con música — ORÍGEN" }, { name: "description", content: "Lecciones, audios y ejercicios para acompañar tu oración y reflexión cristiana con ORÍGEN." }, { property: "og:title", content: "Oración y reflexión con música — ORÍGEN" }, { property: "og:description", content: "Acompaña tu proceso con música, oración y pasos prácticos." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
   component: CategoryPage,
 });
 
@@ -37,16 +37,16 @@ const DAY_DURATION = ["11:42","10:58","12:15","11:33","10:47","11:29","10:31","1
 const INCLUDES = [
   { Icon: Headphones, label: "21 días de playlists guiadas" },
   { Icon: Heart, label: "Afirmaciones y visualizaciones diarias" },
-  { Icon: ClipboardList, label: "Ejercicios de manifestación" },
+  { Icon: ClipboardList, label: "Ejercicios de reflexión cristiana" },
   { Icon: MessageCircle, label: "Mensajes de fe y motivación" },
-  { Icon: Activity, label: "Elevación de tu frecuencia y enfoque" },
+  { Icon: Activity, label: "Calma interior y enfoque en Dios" },
   { Icon: Sparkles, label: "Transformación interior y resultados" },
 ];
 
 const AREA_ICONS = [DollarSign, Heart, Home, Briefcase, Flower2, HeartHandshake, User, Star];
 
 const AFFIRMATIONS = [
-  { text: "Estoy alineado con la abundancia infinita del Universo.", Icon: Sparkles, color: "#F5B441", bg: "#FFF3D6" },
+  { text: "Confío en la provisión de Dios y actúo con responsabilidad.", Icon: Sparkles, color: "#F5B441", bg: "#FFF3D6" },
   { text: "El dinero llega a mi vida de manera fácil, rápida y constante.", Icon: Heart, color: "#F58BCB", bg: "#FFE1F1" },
   { text: "Merezco vivir en libertad financiera y ayudar a otros con alegría.", Icon: Flower2, color: "#3FBE8F", bg: "#DFF6EA" },
   { text: "Confío en Dios y sé que Él provee todo lo que necesito.", Icon: HandHeart, color: "#A78BFA", bg: "#EDE7FF" },
@@ -65,10 +65,10 @@ const MANIFEST_WORDS = ["FE", "GRATITUD", "ABUNDANCIA", "MILAGRO", "CREO", "LUZ"
 
 const MANIFEST_QUIZ: QuizItem[] = [
   {
-    q: "¿Cuál es el primer paso para manifestar con música?",
+    q: "¿Cuál es el primer paso para reflexionar con música?",
     options: ["Repetir mecánicamente", "Sentir la emoción como si ya fuera real", "Escuchar sin atención"],
     correct: 1,
-    tip: "Manifestar no es solo pedir: es vibrar en la frecuencia de lo que ya recibiste.",
+    tip: "La música puede acompañar tu oración y tu reflexión; los resultados no dependen de vibraciones ni de repetir palabras.",
   },
   {
     q: "¿Qué acompaña a la fe verdadera?",
@@ -77,7 +77,7 @@ const MANIFEST_QUIZ: QuizItem[] = [
     tip: "Fe sin acción es deseo; fe con acción es creación.",
   },
   {
-    q: "¿Qué actitud eleva tu frecuencia más rápido?",
+    q: "¿Qué actitud te ayuda a cultivar la paz?",
     options: ["La queja", "La gratitud", "La comparación"],
     correct: 1,
     tip: "La gratitud multiplica lo que ya tienes y abre paso a lo que viene.",
@@ -130,7 +130,7 @@ function CategoryInner() {
   const toTrack = (a: any) => ({
     id: a.id as string,
     title: (c as any)?.is_custom ? `#${String(a.day_index).padStart(2, "0")} — ${a.title}` : `Día ${a.day_index} — ${DAY_TITLES[a.day_index - 1] ?? a.title}`,
-    subtitle: c?.title ?? "Manifestación guiada",
+    subtitle: c?.title ?? "Reflexión guiada",
     url: (a.audio_url as string) ?? "",
     cover: (a.cover_url as string | null) ?? null,
   });
@@ -204,7 +204,7 @@ function CategoryInner() {
               Manifestar con Música <span className="inline-block">🎵</span>
             </h1>
             <p className="text-sm text-foreground/70 mt-3 max-w-md mx-auto leading-relaxed">
-              La música tiene el poder de reprogramar tu mente, elevar tu vibración y alinearte con la vida que deseas.
+              La música puede acompañar tu oración, ayudarte a encontrar calma y dar espacio a la reflexión cristiana.
             </p>
 
             <div className="mt-auto pt-56 sm:pt-72" />
@@ -251,7 +251,7 @@ function CategoryInner() {
         </button>
         <div className="text-center mt-3">
           <div className="text-xs uppercase tracking-widest text-primary font-bold">Paso 2 de 3 · Elige un área</div>
-          <h2 className="font-display font-extrabold text-2xl mt-2">¿Qué deseas manifestar? <span>✨</span></h2>
+          <h2 className="font-display font-extrabold text-2xl mt-2">¿Qué deseas llevar a la oración? <span>✨</span></h2>
           <p className="text-sm text-muted-foreground mt-2 max-w-md mx-auto">
             Elige el área de tu vida en la que quieres enfocarte durante estos 21 días.
           </p>
@@ -406,7 +406,7 @@ function CategoryInner() {
       <section className="px-4 mt-10 max-w-3xl mx-auto">
         <div className="text-center mb-4">
           <h2 className="font-display font-extrabold text-xl">Sopa de letras de la lección <span>🔎</span></h2>
-          <p className="text-sm text-muted-foreground mt-2">Encuentra las palabras que activan tu manifestación.</p>
+          <p className="text-sm text-muted-foreground mt-2">Encuentra palabras para acompañar tu reflexión y oración.</p>
         </div>
         <WordSearch words={MANIFEST_WORDS} storageKey={`manifest-${categoryId}`} gemsReward={40} />
       </section>
@@ -424,10 +424,10 @@ function CategoryInner() {
       <section className="px-4 mt-10 max-w-3xl mx-auto">
         <Card className="rounded-[1.5rem] p-5 shadow-soft border border-border/60">
           <div className="text-center">
-            <h2 className="font-display font-extrabold text-xl">Ejercicio de Manifestación <span>✍️</span></h2>
+            <h2 className="font-display font-extrabold text-xl">Ejercicio de Reflexión Cristiana <span>✍️</span></h2>
             <p className="text-sm text-muted-foreground mt-2">Reflexiona y escribe con intención.</p>
           </div>
-          <label className="block text-sm font-semibold mt-5 mb-2">¿Qué deseas manifestar en tu vida y por qué es importante para ti?</label>
+          <label className="block text-sm font-semibold mt-5 mb-2">¿Qué deseas llevar a la oración y qué paso puedes dar en tu vida?</label>
           <div className="relative">
             <Textarea
               value={exercise}

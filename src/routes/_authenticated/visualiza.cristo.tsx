@@ -22,7 +22,14 @@ import { StageQuiz } from "@/components/StageQuiz";
 import heroImg from "@/assets/cristo-hero.jpg";
 
 export const Route = createFileRoute("/_authenticated/visualiza/cristo")({
-  head: () => ({ meta: [{ title: "Método de Cristo 3·6·9 — Reconectando" }] }),
+  head: () => ({ meta: [
+    { title: "Método de Cristo 3·6·9 — ORÍGEN" },
+    { name: "description", content: "Prácticas de oración, escritura y reflexión cristiana para cuidar tu vida emocional en ORÍGEN." },
+    { property: "og:title", content: "Método de Cristo 3·6·9 — ORÍGEN" },
+    { property: "og:description", content: "Encuentra prácticas de fe, oración y reflexión en Cristo." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary_large_image" },
+  ] }),
   component: CristoPage,
 });
 
@@ -58,7 +65,7 @@ const PRACTICES: Practice[] = [
     color: "#F5B441",
     bg: "#FFF3D6",
     intention: "Yo soy próspero y abundante en Cristo.",
-    objective: "Alinear tu mente y tu corazón con la frecuencia de la abundancia ilimitada.",
+    objective: "Renovar tu relación con el dinero desde la gratitud a Dios y decisiones responsables.",
     questions: [
       "¿Qué significa la abundancia para mí?",
       "¿Qué creencia sobre el dinero quiero soltar?",
@@ -89,7 +96,7 @@ const PRACTICES: Practice[] = [
       { time: "Tarde", text: "Estoy alineado con la riqueza en todos los niveles." },
       { time: "Tarde", text: "Yo soy digno de todas las bendiciones." },
       { time: "Noche", text: "Agradezco todo lo que ya tengo y lo que está por venir." },
-      { time: "Noche", text: "Confío en el tiempo perfecto de Dios y del Universo." },
+      { time: "Noche", text: "Confío en Dios y pongo mis preocupaciones en sus manos." },
       { time: "Noche", text: "Todo está bien en mi mundo y cada día es mejor." },
     ],
     scripture: { text: "Todo lo puedo en Cristo que me fortalece.", ref: "Filipenses 4:13" },
@@ -157,7 +164,7 @@ const PRACTICES: Practice[] = [
       { time: "Mañana", text: "Yo soy salud pura." },
       { time: "Mañana", text: "Mi cuerpo se renueva cada día." },
       { time: "Mañana", text: "Camino con energía y fe." },
-      { time: "Tarde", text: "Cada célula vibra en salud." },
+      { time: "Tarde", text: "Cuido mi salud y busco apoyo cuando lo necesito." },
       { time: "Tarde", text: "Elijo alimentos que me nutren." },
       { time: "Tarde", text: "Respiro paz y vitalidad." },
       { time: "Noche", text: "Descanso en el amor de Cristo." },
@@ -312,7 +319,7 @@ const PRACTICES: Practice[] = [
     color: "#A78BFA",
     bg: "#EDE7FF",
     intention: "Yo soy gratitud viva, mi vida está llena de bendiciones.",
-    objective: "Cambiar tu frecuencia con la práctica poderosa de la gratitud diaria.",
+    objective: "Cultivar gratitud a Dios y reconocer el apoyo que recibes cada día.",
     questions: ["¿Qué agradezco hoy?", "¿Quién me bendice esta semana?"],
     actionPlan: ["Escribir 3 gratitudes al despertar.", "Bendecir tus alimentos.", "Cerrar el día con 3 gracias."],
     info: ["Sencillo y transformador.", "Ideal para cualquier momento.", "Duración: 15 minutos."],
@@ -375,7 +382,7 @@ const PRACTICES: Practice[] = [
 const HOME_BULLETS = [
   { label: "Alineación espiritual", Icon: Leaf, color: "#7C5CFF", bg: "#EDE7FF" },
   { label: "Claridad mental", Icon: Compass, color: "#5AA9FF", bg: "#DCEBFF" },
-  { label: "Manifestación consciente", Icon: Sparkles, color: "#F58BCB", bg: "#FFE1F1" },
+  { label: "Oración consciente", Icon: Sparkles, color: "#F58BCB", bg: "#FFE1F1" },
   { label: "Paz interior", Icon: Heart, color: "#E63980", bg: "#FFE1F1" },
   { label: "Fe y confianza", Icon: ShieldCheck, color: "#5AA9FF", bg: "#DCEBFF" },
   { label: "Propósito y dirección", Icon: Target, color: "#F5B441", bg: "#FFF3D6" },
@@ -393,11 +400,11 @@ const CHECKLIST = [
 
 const QUIZ_ITEMS = [
   { q: "El método 3·6·9 consiste en…", options: ["Repetir la intención 3, 6 y 9 veces al día", "Meditar solo 3 minutos", "Orar una vez a la semana"], correct: 0, tip: "3 veces mañana, 6 tarde y 9 noche durante 21 días." },
-  { q: "El mejor complemento del 3·6·9 es…", options: ["La duda", "La fe y la acción", "La comparación"], correct: 1, tip: "Sin fe no hay manifestación; sin acción, no hay milagro." },
+  { q: "El mejor complemento del 3·6·9 es…", options: ["La duda", "La fe y la acción", "La comparación"], correct: 1, tip: "La oración puede acompañar tus acciones; no garantiza resultados ni exige una fe perfecta." },
   { q: "¿Por qué 21 días?", options: ["Es un número al azar", "Instala el hábito y consolida el cambio", "Solo por tradición"], correct: 1, tip: "21 días construyen el hábito espiritual y renuevan tu mente." },
 ];
 
-const WORDS = ["FE", "CRISTO", "ORACION", "PROPOSITO", "MILAGRO", "FRECUENCIA"];
+const WORDS = ["FE", "CRISTO", "ORACION", "PROPOSITO", "MILAGRO", "GRACIA"];
 
 const CATEGORIES: Category[] = ["Todas", "Abundancia", "Salud", "Relaciones", "Propósito"];
 
@@ -472,10 +479,10 @@ function CristoPage() {
 
             <Card className="mt-8 rounded-[1.75rem] p-6 text-center bg-white/95 dark:bg-card/95 backdrop-blur-xl border border-white/60 shadow-soft">
               <div className="inline-flex items-center gap-1.5 text-xs text-primary font-bold">
-                <Sparkles className="w-3.5 h-3.5" /> Programa de Manifestación Consciente
+                <Sparkles className="w-3.5 h-3.5" /> Programa de Oración y Escritura
               </div>
               <p className="text-sm text-foreground/75 mt-3 leading-relaxed max-w-md mx-auto">
-                El método 369 es una herramienta poderosa de enfoque, fe y alineación. A través de la repetición consciente, la música vibracional y la conexión espiritual, entrenas tu mente para manifestar desde la verdad de tu alma.
+                Esta práctica de escritura organiza tu oración en momentos de mañana, tarde y noche. La música acompaña tu reflexión cristiana; los números no tienen poder espiritual ni garantizan resultados.
               </p>
 
               <div className="mt-6 grid grid-cols-3 gap-3">
@@ -569,7 +576,7 @@ function CristoPage() {
             <Sparkles className="w-4 h-4" /> Práctica recomendada para hoy
           </div>
           <div className="mt-2 font-display font-extrabold text-lg">369 Abundancia Financiera</div>
-          <p className="text-xs text-muted-foreground mt-1 leading-relaxed">Alinea tu mente y tu corazón con la frecuencia de la abundancia ilimitada.</p>
+          <p className="text-xs text-muted-foreground mt-1 leading-relaxed">Ora por sabiduría y cultiva decisiones responsables desde la gratitud a Dios.</p>
           <Button
             onClick={() => { setPracticeId("abundancia"); setStep(3); }}
             className="mt-3 w-full h-11 rounded-full bg-gradient-to-r from-[#7C5CFF] to-[#F58BCB] text-white font-bold"
@@ -846,7 +853,7 @@ function CristoPage() {
         <Card className="rounded-[1.3rem] p-5 shadow-soft">
           <div className="text-xs font-bold text-primary uppercase tracking-widest">¿Por qué funciona el método 369?</div>
           <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
-            La repetición consciente alinea tu mente, tu espíritu y tus emociones con tu deseo. La música eleva tu vibración y te ayuda a mantenerte enfocado en tu intención.
+            Escribir puede ayudarte a ordenar tus pensamientos. La música puede acompañar tu oración y tu atención; los números no determinan tu destino ni aseguran un resultado.
           </p>
           <div className="mt-4 grid grid-cols-3 gap-2">
             {[

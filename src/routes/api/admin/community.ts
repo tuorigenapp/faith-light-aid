@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
+import { CHRISTIAN_LANGUAGE_RULE, christianText } from "@/lib/christian-language";
 
 const TOPIC_KEYS = ["general", "familia", "pareja", "ansiedad", "fe", "logros"];
 const TOPIC_NAMES: Record<string, string> = { general: "Para ti", familia: "Familia", pareja: "Relaciones", ansiedad: "Bienestar", fe: "Fe", logros: "Avances" };
@@ -26,13 +27,13 @@ async function suspensionMessage(note: string, reason: string, kind: string, unt
   if (!key) return fallback;
   try {
     const r = await fetch("https://ai.gateway.lovable.dev/v1/responses", { method: "POST", headers: { "Content-Type": "application/json", "Lovable-API-Key": key, "X-Lovable-AIG-SDK": "fetch" }, body: JSON.stringify({ model: "openai/gpt-6-astra", input: [
-      { role: "system", content: [{ type: "input_text", text: "Eres la administración de ORÍGEN. Redacta en español, 3-5 frases, un aviso de suspensión para la persona indicada. Sé firme, respetuoso y sin humillar. Explica el motivo con claridad, nombra el tono o conducta que debe cambiar, recuerda que ORÍGEN cuida la salud mental de sus usuarios y cierra con una advertencia de que reincidir puede llevar a una suspensión definitiva. No inventes datos ni menciones notas internas." }] },
+      { role: "system", content: [{ type: "input_text", text: CHRISTIAN_LANGUAGE_RULE + " Eres la administración de ORÍGEN. Redacta en español, 3-5 frases, un aviso de suspensión para la persona indicada. Sé firme, respetuoso y sin humillar. Explica el motivo con claridad, nombra el tono o conducta que debe cambiar, recuerda que ORÍGEN cuida la salud mental de sus usuarios y cierra con una advertencia de que reincidir puede llevar a una suspensión definitiva. No inventes datos ni menciones notas internas." }] },
       { role: "user", content: [{ type: "input_text", text: `Persona: ${name}. Tipo de suspensión: ${plazo}. Motivo: ${reason.slice(0, 500)}. Observación del equipo para orientar el mensaje: ${note.slice(0, 700) || "sin observaciones"}.` }] },
     ], stream: false, store: false }) });
     if (!r.ok) return fallback;
     const data = await r.json() as { output?: { content?: { text?: string }[] }[]; output_text?: string };
     const text = data.output_text ?? data.output?.flatMap(o => o.content ?? []).map(c => c.text ?? "").join(" ");
-    return text && text.trim().length > 40 ? `${text.trim().slice(0, 1200)}` : fallback;
+    return text && text.trim().length > 40 ? christianText(text.trim().slice(0, 1200), fallback) : fallback;
   } catch { return fallback; }
 }
 

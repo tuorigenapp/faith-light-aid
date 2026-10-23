@@ -61,7 +61,7 @@ function SlideLink({ s }: { s: Slide }) {
 export function ManifestacionSlider() {
   return (
     <section>
-      <h3 className="font-display font-bold text-[19px] leading-tight">Manifiesta escuchando, no leyendo</h3>
+      <h3 className="font-display font-bold text-[19px] leading-tight">Escucha, ora y encuentra calma</h3>
       <p className="text-[13px] text-muted-foreground mt-1">
         Ponte los audífonos: mentor, música y un ejercicio corto guiado. Diez minutos y sigues con tu día.
       </p>
@@ -73,7 +73,7 @@ export function ManifestacionSlider() {
         to="/visualiza"
         className="mt-3 btn-primary-gradient w-full h-[54px] rounded-[14px] flex items-center justify-center gap-2 text-[15px]"
       >
-        Ver todas las categorías de manifestación <ArrowRight className="w-4 h-4" />
+        Ver todas las prácticas de fe <ArrowRight className="w-4 h-4" />
       </Link>
     </section>
   );

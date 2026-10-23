@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { christianContent } from "@/lib/christian-language";
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -24,7 +25,14 @@ import { useAuth } from "@/lib/use-auth";
 import { printMinistracion } from "@/lib/print-pdf";
 
 export const Route = createFileRoute("/_authenticated/ministracion")({
-  head: () => ({ meta: [{ title: "Lo que Dios quiere decirte hoy — ORIGEN" }] }),
+  head: () => ({ meta: [
+    { title: "Dios te dice hoy — ORÍGEN" },
+    { name: "description", content: "Reflexión cristiana, oración y pasos para acompañar tu proceso emocional con ORÍGEN." },
+    { property: "og:title", content: "Dios te dice hoy — ORÍGEN" },
+    { property: "og:description", content: "Una reflexión de fe cristiana para cuidar tu paz y tu bienestar." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary_large_image" },
+  ] }),
   component: MinistracionPage,
 });
 
@@ -41,8 +49,8 @@ type Result = {
 const LOADING_LINES = [
   "Recibiendo tu información...",
   "Aplicando el Método ORIGEN...",
-  "Consultando los decretos divinos...",
-  "Abriendo los libros de la Corte Celestial...",
+  "Preparando una reflexión de fe cristiana...",
+  "Organizando pasos para acompañarte...",
   "Preparando tu ministración...",
 ];
 
@@ -97,7 +105,7 @@ function MinistracionPage() {
       .order("created_at", { ascending: false })
       .limit(10);
     if (error) setHistoryError("No pudimos cargar tu historial de consultas.");
-    setHistory((data as unknown as MinistracionRow[]) ?? []);
+    setHistory(((data as unknown as MinistracionRow[]) ?? []).map((row) => ({ ...row, headline: christianContent(row.headline), dictamen: christianContent(row.dictamen), linea_tiempo: christianContent(row.linea_tiempo), senales: christianContent(row.senales), ministracion: christianContent(row.ministracion), versiculo: christianContent(row.versiculo), rompe_ciclo: christianContent(row.rompe_ciclo) })));
     setHistoryLoading(false);
   }
 
@@ -140,7 +148,7 @@ function MinistracionPage() {
       const j = await r.json();
       if (!r.ok) throw new Error(j.error ?? "Error");
       setProgress(100);
-      setResult(j);
+      setResult(christianContent(j));
       setStep(3);
       if (user) {
         await supabase.from("ministracion_lecturas").insert({

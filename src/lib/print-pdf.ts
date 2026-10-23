@@ -1,3 +1,5 @@
+import { christianText } from "./christian-language";
+
 // Opens a printable view in a new window with app-branded styles so the user
 // can "Save as PDF" from the native browser dialog. Zero external deps.
 
@@ -41,8 +43,8 @@ export function printMinistracion(opts: {
   ${opts.meta ? `<div class="meta">${escape(opts.meta)}</div>` : ""}
   ${opts.sections.map(s => `
     <div class="section">
-      <h2><span class="emoji">${s.emoji}</span> ${escape(s.title)}</h2>
-      <p>${escape(s.body)}</p>
+      <h2><span class="emoji">${s.emoji}</span> ${escape(christianText(s.title))}</h2>
+      <p>${escape(christianText(s.body))}</p>
     </div>`).join("")}
   <div class="footer">Documento personal generado en ORIGEN · Método Ruth Esther</div>
   </div>
@@ -143,8 +145,8 @@ export function printConsulta(opts: ConsultaPDFOptions) {
 
   ${opts.sections.map(s => `
     <div class="section">
-      <h2>${s.icon ? `<span class="icon">${s.icon}</span>` : ""} ${escape(s.title)}</h2>
-      <p>${escape(s.body)}</p>
+      <h2>${s.icon ? `<span class="icon">${s.icon}</span>` : ""} ${escape(christianText(s.title))}</h2>
+      <p>${escape(christianText(s.body))}</p>
     </div>`).join("")}
 
   ${opts.links?.length ? `<div class="plans"><h3>Continúa tu proceso con el Método ORÍGEN</h3>${opts.links.map(g => `<div class="plan"><b>${escape(g.group)}</b><div>${g.items.map(i => `<a class="pbtn" href="${escape(i.url)}" target="_blank" rel="noopener">${escape(i.label)}</a>`).join("")}</div></div>`).join("")}</div>` : ""}

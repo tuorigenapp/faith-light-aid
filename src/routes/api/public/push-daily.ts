@@ -5,7 +5,7 @@ import { sendPush, type PushSubscriptionRow } from "@/lib/webpush.server";
 const MENSAJES = [
   { title: "Tu Palabra de hoy ya está lista 🕊️", body: "Dos minutos hoy sostienen tu paz y tu racha.", url: "/palabra" },
   { title: "Tu camino te espera", body: "Un paso pequeño hoy cambia la historia de tu linaje.", url: "/etapas" },
-  { title: "Respira 5 minutos con nosotros", body: "Pon un audio de manifestación y suelta el peso del día.", url: "/visualiza" },
+  { title: "Respira 5 minutos con nosotros", body: "Pon un audio de reflexión cristiana y encuentra un momento de calma.", url: "/visualiza" },
 ];
 
 /**

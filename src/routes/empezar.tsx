@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, Check, X, Heart, Sparkles, Brain, Coins, Users, Compass, Headphones, NotebookPen, BookOpen, Lock, ShieldCheck, Map, FileText, Gamepad2, Clock, Gift, Globe2, Download, Sun, TreePine, HeartHandshake, Smartphone, BadgeCheck, CalendarCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { ReviewsSlider } from "@/components/ReviewsSlider";
 import { printConsulta } from "@/lib/print-pdf";
 import { detectCurrency, discounted, formatLocal, formatUsd, USD, type LocalCurrency } from "@/lib/currency";
@@ -18,7 +19,8 @@ import antes from "@/assets/funnel/antes.jpg";
 import despues from "@/assets/funnel/despues.jpg";
 import gift from "@/assets/funnel/gift.png";
 import mockup from "@/assets/funnel/mockup.png";
-import shotDashboard from "@/assets/funnel/shots/dashboard.jpg";
+import dashboardAsset from "@/assets/funnel/shots/dashboard.png.asset.json";
+const shotDashboard = dashboardAsset.url;
 import shotChat from "@/assets/funnel/shots/chat.jpg";
 import shotPareja from "@/assets/funnel/shots/pareja.jpg";
 import shotPatrones from "@/assets/funnel/shots/patrones.jpg";
@@ -349,18 +351,19 @@ function money(usd: number, cur: LocalCurrency) {
 function PlansBoard({ cur, mode, title }: { cur: LocalCurrency; mode: Mode; title?: string }) {
   const [cad, setCad] = useState<Cadence>("annual");
   const [lvl, setLvl] = useState("caminante");
-  const level = LEVELS.find((l) => l.id === lvl)!;
-  const c = CAD.find((x) => x.id === cad)!;
-  const price = priceOf(level, cad, mode);
   const charge = useMemo(() => { const d = new Date(); d.setDate(d.getDate() + 7); return d.toLocaleDateString("es", { day: "numeric", month: "long", year: "numeric" }); }, []);
+  const level = LEVELS.find((l) => l.id === lvl) ?? LEVELS[1];
+  const c = CAD.find((x) => x.id === cad) ?? CAD[2];
+  if (!level || !c) return null;
+  const price = priceOf(level, cad, mode);
   const go = () => window.open(linkOf(level, cad, mode), "_blank", "noopener");
   return <section className="mt-5 rounded-3xl bg-card p-4 shadow-sm">
     {title && <h3 className="mb-3 text-center font-display text-lg font-bold text-foreground">{title}</h3>}
     <div role="tablist" className="grid grid-cols-3 gap-1 rounded-xl bg-muted p-1">
-      {CAD.map((x) => <button key={x.id} role="tab" aria-selected={cad === x.id} onClick={() => setCad(x.id)} className={cn("min-h-[44px] rounded-lg text-sm font-semibold transition", cad === x.id ? "bg-card text-primary shadow-sm" : "text-muted-foreground")}>{x.label}{mode === "discount" && <span className="block text-[11px] font-bold text-primary">-{OFF_PCT[x.id]}%</span>}</button>)}
+      {CAD.map((x) => <Button variant="membershipPeriod" key={x.id} role="tab" aria-selected={cad === x.id} data-selected={cad === x.id} onClick={() => setCad(x.id)} className="h-auto min-h-[44px] flex-col gap-0 rounded-lg px-1 text-sm font-semibold">{x.label}{mode === "discount" && <span className="block text-[11px] font-bold">-{OFF_PCT[x.id]}%</span>}</Button>)}
     </div>
     <div className="mt-4 grid gap-3">
-      {LEVELS.map((l) => { const on = l.id === lvl; const p = priceOf(l, cad, mode); return <button key={l.id} onClick={() => setLvl(l.id)} className={cn("relative overflow-hidden rounded-2xl border-2 bg-card p-4 text-left transition active:scale-[.98]", on ? "border-primary" : "border-border")}>
+      {LEVELS.map((l) => { const on = l.id === lvl; const p = priceOf(l, cad, mode); return <Button variant="membership" key={l.id} aria-pressed={on} data-selected={on} onClick={() => setLvl(l.id)} className="relative block h-auto w-full overflow-hidden rounded-2xl p-4 text-left transition active:scale-[.98]">
         {l.id === "caminante" && <span className="absolute right-3 top-3 rounded-full bg-primary px-2.5 py-0.5 text-[11px] font-bold text-primary-foreground">Más elegido</span>}
         <div className="flex items-center gap-3">
           <img src={l.img} alt="" className="h-12 w-12 shrink-0 object-contain" />
@@ -380,7 +383,7 @@ function PlansBoard({ cur, mode, title }: { cur: LocalCurrency; mode: Mode; titl
           <span className={cn("grid h-7 w-7 shrink-0 place-items-center rounded-full border-2", on ? "border-primary bg-primary" : "border-border")}>{on && <Check className="h-4 w-4 text-primary-foreground" />}</span>
         </div>
         {on && <ul className="mt-3 grid gap-1.5 border-t border-border pt-3">{l.perks.map((x) => <Tick key={x}>{x}</Tick>)}</ul>}
-      </button>; })}
+      </Button>; })}
     </div>
     {mode === "trial" && <div className="mt-4 rounded-2xl bg-primary/10 p-4">
       <p className="font-display text-base font-bold text-foreground">Quiero un período gratis</p>

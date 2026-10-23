@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { CHRISTIAN_LANGUAGE_RULE, christianContent } from "@/lib/christian-language";
 
 type Body = {
   name?: string;
@@ -14,7 +15,7 @@ export const Route = createFileRoute("/api/intake-closure")({
         if (!key) return new Response(JSON.stringify({ error: "Servicio no disponible" }), { status: 500 });
         const body = (await request.json()) as Body;
 
-        const sys = `Eres un guía de bienestar emocional y crecimiento personal (NO religioso). Analizas respuestas del usuario sobre patrones familiares y recuerdos de infancia para identificar UN patrón emocional principal y ofrecer un cierre reflexivo (comprender, soltar, avanzar). Nunca inventes ni supongas: si las respuestas son insuficientes o ambiguas, indícalo en "needs_more". Responde SIEMPRE en JSON estricto con este shape exacto:
+        const sys = `Eres un guía de bienestar emocional y crecimiento personal desde la fe cristiana, sin imponer creencias. Analizas respuestas del usuario sobre patrones familiares y recuerdos de infancia para identificar UN patrón emocional principal y ofrecer un cierre reflexivo (comprender, soltar, avanzar). Nunca inventes ni supongas: si las respuestas son insuficientes o ambiguas, indícalo en "needs_more". Responde SIEMPRE en JSON estricto con este shape exacto:
 {
   "pattern_name": "string corto (2-4 palabras). Ejemplos: 'Herida de abandono', 'Miedo a fallar', 'Necesidad de aprobación', 'Autoexigencia crónica', 'Miedo a la escasez'",
   "pattern_summary": "string — 1 frase (máx 25 palabras) que resume qué aprendió el usuario a hacer por causa del patrón. Ejemplo: 'Has aprendido a protegerte porque durante mucho tiempo sentiste que debías hacerlo solo.'",
@@ -30,7 +31,7 @@ export const Route = createFileRoute("/api/intake-closure")({
   },
   "primary_focus": "relaciones" | "prosperidad" | "emociones" | "identidad" | "propósito",
   "recommended_categories": ["array de 2-4 categorías breves"],
-  "closure_reflection": "string — reflexión de cierre suave, 3-4 líneas, tono cálido y humano (no religioso), incluye comprender, soltar y avanzar",
+  "closure_reflection": "string — reflexión de cierre suave, 3-4 líneas, tono cálido y humano desde la fe cristiana, incluye comprender, soltar y avanzar",
   "welcome_message": "string — 1-2 frases dando la bienvenida al programa personalizado",
   "needs_more": false
 }`;
@@ -49,7 +50,7 @@ ${Object.entries(body.childhood).map(([k, v]) => `- ${k}: ${v}`).join("\n")}`;
             headers: { "Content-Type": "application/json", "Authorization": `Bearer ${key}` },
             body: JSON.stringify({
               model: "google/gemini-2.5-flash",
-              messages: [{ role: "system", content: sys }, { role: "user", content: userMsg }],
+              messages: [{ role: "system", content: `${sys}\n${CHRISTIAN_LANGUAGE_RULE}` }, { role: "user", content: userMsg }],
               response_format: { type: "json_object" },
             }),
           });
@@ -65,7 +66,7 @@ ${Object.entries(body.childhood).map(([k, v]) => `- ${k}: ${v}`).join("\n")}`;
           }
           const j = await r.json();
           const content = j.choices?.[0]?.message?.content ?? "{}";
-          const parsed = JSON.parse(content);
+          const parsed = christianContent(JSON.parse(content));
           return new Response(JSON.stringify(parsed), { headers: { "Content-Type": "application/json" } });
         } catch (e) {
           return new Response(JSON.stringify({ error: (e as Error).message }), { status: 500 });

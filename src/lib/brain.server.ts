@@ -1,4 +1,5 @@
 /** Cerebro ORÍGEN: material de estudio que amplía a la IA. La fuente es confidencial. */
+import { CHRISTIAN_LANGUAGE_RULE, christianStudyText } from "./christian-language";
 
 const MAX_CHARS = 20000;
 
@@ -31,10 +32,10 @@ export async function brainContext(scope = "origen", scopeRef?: string | null): 
     let body = "";
     for (const r of rows as { content: string }[]) {
       if (body.length >= MAX_CHARS) break;
-      body += `\n${(r.content || "").slice(0, Math.max(0, MAX_CHARS - body.length))}\n`;
+      body += `\n${christianStudyText(r.content || "").slice(0, Math.max(0, MAX_CHARS - body.length))}\n`;
     }
     if (!body.trim()) return "";
-    return `${BRAIN_RULE}\n\nMATERIAL INTERNO (confidencial, nunca citar la fuente):\n${body.trim()}`;
+    return `${BRAIN_RULE}\n${CHRISTIAN_LANGUAGE_RULE}\n\nMATERIAL INTERNO (confidencial, nunca citar la fuente):\n${body.trim()}`;
   } catch {
     return "";
   }

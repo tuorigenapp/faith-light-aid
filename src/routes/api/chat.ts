@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { convertToModelMessages, streamText, type UIMessage } from "ai";
+import { convertToModelMessages, streamText, type UIMessage, type TextStreamPart, type ToolSet } from "ai";
 import {
   createLovableAiGatewayProvider,
   getLovableAiGatewayResponseHeaders,
@@ -7,14 +7,15 @@ import {
   withLovableAiGatewayRunIdHeader,
 } from "@/lib/ai-gateway.server";
 import { SYSTEM_PROMPT } from "@/lib/book-context";
+import { CHRISTIAN_LANGUAGE_RULE, christianText } from "@/lib/christian-language";
 
-const ORIGEN_SYSTEM = `Eres RUTH ESTHER PAREDES SUFRÁN, mentora y autora del libro "Reconectando el Espíritu con Dios" y creadora del método ORIGEN.
+const ORIGEN_SYSTEM = `Eres la mentora virtual de ORÍGEN, basada en el método de Ruth Esther Paredes Sufrán y su libro "Reconectando el Espíritu con Dios".
 
 Reglas absolutas de identidad:
-- Nunca digas que eres inteligencia artificial, IA, modelo, algoritmo, ChatGPT, Gemini, asistente virtual, chatbot ni ningún término tecnológico. Eres Ruth Esther, una mentora humana con años de experiencia acompañando procesos de sanación.
-- Si alguien te pregunta si eres IA o cómo funcionas, responde con calidez: "Soy Ruth Esther, tu mentora en este camino. Todo lo que compartimos aquí nace del método ORIGEN y del libro que escribí."
+- Eres la mentora virtual de ORÍGEN, basada en el método de Ruth Esther. No te presentes como la autora ni como una persona humana.
+- Si alguien te pregunta si eres IA o cómo funcionas, responde con honestidad: "Soy la mentora virtual de ORÍGEN y te acompaño con el método de Ruth Esther."
 - Fuentes de tu sabiduría: el libro "Reconectando el Espíritu con Dios", tu experiencia acompañando a mujeres y hombres en procesos de sanación de patrones familiares, tu formación espiritual y bíblica.
-- Nunca menciones tarot, cartas, astrología, karma, magia, cristales, guías cósmicos, akáshico, esoterismo. Usa lenguaje universal, cristiano cuando sea natural, cálido y profesional.
+- Usa siempre lenguaje espiritual cristiano, cálido y profesional, sin referencias esotéricas.
 
 Reglas de conversación:
 - Habla con voz de mentora amorosa: cálida, honesta, sin juicios, sin condenar.
@@ -24,6 +25,25 @@ Reglas de conversación:
 - Termina siempre con una pregunta o invitación suave que abra al usuario a compartir más.
 
 ${SYSTEM_PROMPT}`;
+
+/** Buffer authored text until its end so forbidden prose never appears as a streamed fragment. */
+function christianResponseTransform() {
+  const pending = new Map<string, string>();
+  return new TransformStream<TextStreamPart<ToolSet>, TextStreamPart<ToolSet>>({
+    transform(chunk, controller) {
+      if (chunk.type === "text-delta") {
+        pending.set(chunk.id, (pending.get(chunk.id) ?? "") + chunk.text);
+        return;
+      }
+      if (chunk.type === "text-end") {
+        const text = pending.get(chunk.id);
+        if (text) controller.enqueue({ type: "text-delta", id: chunk.id, text: christianText(text) });
+        pending.delete(chunk.id);
+      }
+      controller.enqueue(chunk);
+    },
+  });
+}
 
 export const Route = createFileRoute("/api/chat")({
   server: {
@@ -38,10 +58,11 @@ export const Route = createFileRoute("/api/chat")({
         const gateway = createLovableAiGatewayProvider(key, initialRunId);
         const result = streamText({
           model: gateway("google/gemini-2.5-pro"),
+          experimental_transform: christianResponseTransform,
           system: await (async () => {
             const { brainContext } = await import("@/lib/brain.server");
             const brain = await brainContext("mentora");
-            return brain ? `${brain}\n\n${ORIGEN_SYSTEM}` : ORIGEN_SYSTEM;
+            return `${brain}\n\n${ORIGEN_SYSTEM}\n\n${CHRISTIAN_LANGUAGE_RULE}`;
           })(),
           messages: await convertToModelMessages(messages),
         });
