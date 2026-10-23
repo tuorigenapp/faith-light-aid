@@ -241,7 +241,7 @@ function TreeDetailView({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#F1ECFF] via-[#FBFAFF] to-[#E8F4FF]">
+    <div className="min-h-screen bg-aura-top">
       <div className="max-w-md mx-auto px-4 pt-4 pb-32">
         {/* Top bar */}
         <div className="flex items-center justify-between gap-3">
@@ -498,7 +498,7 @@ function AddFamilyView({ onBack, initial }: { onBack: () => void; initial?: Memb
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#F1ECFF] via-[#FBFAFF] to-[#E8F4FF]">
+    <div className="min-h-screen bg-aura-top">
       <div className="max-w-md mx-auto px-4 pt-4 pb-40">
         <div className="flex items-center gap-3">
           <button onClick={onBack} aria-label="Volver" className="w-10 h-10 rounded-full bg-card shadow-soft grid place-items-center active:scale-95 transition">
