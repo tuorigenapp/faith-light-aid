@@ -283,7 +283,7 @@ function AuthLayoutInner() {
               <li className="shrink-0">
                 <Link
                   to="/perfil"
-                  className="inline-flex items-center gap-2 h-11 pl-1.5 pr-3 rounded-2xl bg-white border-2 border-primary/30 shadow-soft leading-none"
+                  className="inline-flex items-center gap-2 h-11 pl-1.5 pr-3 rounded-2xl bg-card border-2 border-primary/30 shadow-soft leading-none"
                 >
                   <span className="w-8 h-8 rounded-xl bg-brand-gradient text-white inline-flex items-center justify-center overflow-hidden font-display font-bold text-sm shrink-0 leading-none">
                     {avatarUrl ? <img src={avatarUrl} alt="" className="w-full h-full object-cover" /> : displayName.slice(0, 1).toUpperCase()}
