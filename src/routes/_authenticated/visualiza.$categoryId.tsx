@@ -204,7 +204,7 @@ function CategoryInner() {
               Manifestar con Música <span className="inline-block">🎵</span>
             </h1>
             <p className="text-sm text-foreground/70 mt-3 max-w-md mx-auto leading-relaxed">
-              La música tiene el poder de reprogramar tu mente, elevar tu vibración y alinearte con la vida que deseas.
+              La música puede acompañar tu oración, ayudarte a encontrar calma y dar espacio a la reflexión cristiana.
             </p>
 
             <div className="mt-auto pt-56 sm:pt-72" />

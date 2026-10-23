@@ -172,7 +172,7 @@ function Membresia() {
                 aria-pressed={active}
                 data-selected={active}
                 className={cn(
-                  "relative block w-[86%] shrink-0 snap-center overflow-hidden rounded-[16px] p-5 text-left transition active:scale-[.98] md:w-auto",
+                  "relative block h-auto w-[86%] shrink-0 snap-center overflow-hidden rounded-[16px] p-5 text-left transition active:scale-[.98] md:w-auto",
                 )}
               >
                 {l.popular && (
@@ -231,7 +231,7 @@ function Membresia() {
                   onClick={() => goCheckout(p.url)}
                   data-selected={Boolean(p.badge)}
                   className={cn(
-                    "relative block w-[80%] shrink-0 snap-center rounded-[16px] p-5 text-left transition active:scale-[.98] md:w-auto",
+                    "relative block h-auto w-[80%] shrink-0 snap-center rounded-[16px] p-5 text-left transition active:scale-[.98] md:w-auto",
                   )}
                 >
                   {p.badge && (

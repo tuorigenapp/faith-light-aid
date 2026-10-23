@@ -22,3 +22,17 @@ export function christianText(text: string, fallback = CHRISTIAN_FALLBACK): stri
 export function christianStudyText(text: string): string {
   return christianText(text, "");
 }
+/** Preserve nested response shapes, including historical answers and generated titles. */
+export function christianContent<T>(value: T): T {
+  if (typeof value === "string") {
+    if (value.startsWith("{")) {
+      try { return JSON.stringify(christianContent(JSON.parse(value))) as T; } catch { /* ordinary prose */ }
+    }
+    return christianText(value) as T;
+  }
+  if (Array.isArray(value)) return value.map((item) => christianContent(item)) as T;
+  if (value && typeof value === "object") {
+    return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, christianContent(item)])) as T;
+  }
+  return value;
+}

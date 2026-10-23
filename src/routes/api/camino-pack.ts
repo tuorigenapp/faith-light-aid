@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { CHRISTIAN_LANGUAGE_RULE, hasIncompatibleSpiritualLanguage } from "@/lib/christian-language";
 
 type Body = {
   camino?: string;
@@ -99,13 +100,14 @@ Variante única: ${body.variant ?? new Date().toISOString().slice(0, 10)}`;
             headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
             body: JSON.stringify({
               model: "google/gemini-2.5-flash",
-              messages: [{ role: "system", content: sys }, { role: "user", content: userMsg }],
+              messages: [{ role: "system", content: `${sys}\n${CHRISTIAN_LANGUAGE_RULE}` }, { role: "user", content: userMsg }],
               response_format: { type: "json_object" },
             }),
           });
           if (!r.ok) return Response.json(FALLBACK);
           const j = await r.json();
           const p = JSON.parse(j.choices?.[0]?.message?.content ?? "{}");
+          if (hasIncompatibleSpiritualLanguage(JSON.stringify(p))) return Response.json(FALLBACK);
           const words = (Array.isArray(p.words) ? p.words : [])
             .map((w: string) => String(w).toUpperCase().normalize("NFD").replace(/[^A-Z]/g, ""))
             .filter((w: string) => w.length >= 3 && w.length <= 9);

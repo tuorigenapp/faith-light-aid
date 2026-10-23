@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
+import { CHRISTIAN_LANGUAGE_RULE, christianContent } from "@/lib/christian-language";
 
 const Input = z.object({
   name: z.string().trim().min(1).max(80),
@@ -26,8 +27,8 @@ Devuelve SOLO JSON estricto:
   "headline": "máx 10 palabras, lo más impactante y específico del día para esta persona",
   "visible": "2 o 3 frases (máx 45 palabras) con lo MÁS importante y concreto: qué se está atendiendo hoy en su historia. Debe dejar hambre de saber más, nunca resolver todo",
   "locked": [
-    { "title": "De qué lado viene el patrón", "body": "5 a 7 líneas nombrando línea paterna o materna y el patrón exacto que se repite" },
-    { "title": "Qué pasará en los próximos días", "body": "4 a 6 líneas con plazos humanos y concretos" },
+    { "title": "De qué lado viene el patrón", "body": "5 a 7 líneas explorando solo lo que la persona comparte, sin inventar secretos familiares ni atribuirlo a una línea materna o paterna sin evidencia" },
+    { "title": "Tus pasos para los próximos días", "body": "4 a 6 líneas con acciones prácticas, sin predicciones ni fechas de sucesos" },
     { "title": "Qué debes soltar hoy", "body": "4 a 6 líneas con la instrucción exacta para romper el ciclo" }
   ],
   "versiculo": "cita bíblica exacta (Libro capítulo:versículo) + texto corto"
@@ -66,7 +67,7 @@ Entrega el JSON pedido.`;
             body: JSON.stringify({
               model: "openai/gpt-6-astra",
               input: [
-                { role: "system", content: [{ type: "input_text", text: SYS }] },
+                { role: "system", content: [{ type: "input_text", text: `${SYS}\n${CHRISTIAN_LANGUAGE_RULE}` }] },
                 { role: "user", content: [{ type: "input_text", text: userMsg }] },
               ],
               stream: true,
@@ -93,7 +94,7 @@ Entrega el JSON pedido.`;
           const text = await readOutputText(r.body);
           const parsed = safeParse(text);
           if (!parsed) return json({ error: "No pudimos leer la respuesta. Intenta otra vez." }, 502);
-          return json(parsed, 200);
+          return json(christianContent(parsed), 200);
         } catch (e) {
           return json({ error: (e as Error).message }, 500);
         }

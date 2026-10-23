@@ -9,6 +9,7 @@ import { printConsulta } from "@/lib/print-pdf";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { cn } from "@/lib/utils";
+import { christianContent } from "@/lib/christian-language";
 import { useEffect } from "react";
 import i1 from "@/assets/e3d-star.png";
 import i2 from "@/assets/e3d-heartgem.png";
@@ -126,7 +127,7 @@ function ConsultaPage() {
         .order("created_at", { ascending: false })
         .limit(20);
       if (error) throw error;
-      return (data ?? []) as unknown as ResultRow[];
+      return ((data ?? []) as unknown as ResultRow[]).map((row) => ({ ...row, answer: christianContent(row.answer) }));
     },
   });
 
@@ -178,11 +179,11 @@ function ConsultaPage() {
           full_name: name.trim(),
           birthdate,
           question: question.trim(),
-          answer: json,
+          answer: christianContent(json),
         });
         refetchHistory();
       }
-      setAnswer(json);
+      setAnswer(christianContent(json));
       setAnswerName(name.trim());
       setStep(3);
       window.scrollTo({ top: 0 });

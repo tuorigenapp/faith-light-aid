@@ -359,10 +359,10 @@ function PlansBoard({ cur, mode, title }: { cur: LocalCurrency; mode: Mode; titl
   return <section className="mt-5 rounded-3xl bg-card p-4 shadow-sm">
     {title && <h3 className="mb-3 text-center font-display text-lg font-bold text-foreground">{title}</h3>}
     <div role="tablist" className="grid grid-cols-3 gap-1 rounded-xl bg-muted p-1">
-      {CAD.map((x) => <Button variant="membershipPeriod" key={x.id} role="tab" aria-selected={cad === x.id} data-selected={cad === x.id} onClick={() => setCad(x.id)} className="min-h-[44px] flex-col gap-0 rounded-lg px-1 text-sm font-semibold">{x.label}{mode === "discount" && <span className="block text-[11px] font-bold">-{OFF_PCT[x.id]}%</span>}</Button>)}
+      {CAD.map((x) => <Button variant="membershipPeriod" key={x.id} role="tab" aria-selected={cad === x.id} data-selected={cad === x.id} onClick={() => setCad(x.id)} className="h-auto min-h-[44px] flex-col gap-0 rounded-lg px-1 text-sm font-semibold">{x.label}{mode === "discount" && <span className="block text-[11px] font-bold">-{OFF_PCT[x.id]}%</span>}</Button>)}
     </div>
     <div className="mt-4 grid gap-3">
-      {LEVELS.map((l) => { const on = l.id === lvl; const p = priceOf(l, cad, mode); return <Button variant="membership" key={l.id} aria-pressed={on} data-selected={on} onClick={() => setLvl(l.id)} className="relative block w-full overflow-hidden rounded-2xl p-4 text-left transition active:scale-[.98]">
+      {LEVELS.map((l) => { const on = l.id === lvl; const p = priceOf(l, cad, mode); return <Button variant="membership" key={l.id} aria-pressed={on} data-selected={on} onClick={() => setLvl(l.id)} className="relative block h-auto w-full overflow-hidden rounded-2xl p-4 text-left transition active:scale-[.98]">
         {l.id === "caminante" && <span className="absolute right-3 top-3 rounded-full bg-primary px-2.5 py-0.5 text-[11px] font-bold text-primary-foreground">Más elegido</span>}
         <div className="flex items-center gap-3">
           <img src={l.img} alt="" className="h-12 w-12 shrink-0 object-contain" />

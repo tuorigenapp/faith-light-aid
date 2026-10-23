@@ -164,7 +164,7 @@ const PRACTICES: Practice[] = [
       { time: "Mañana", text: "Yo soy salud pura." },
       { time: "Mañana", text: "Mi cuerpo se renueva cada día." },
       { time: "Mañana", text: "Camino con energía y fe." },
-      { time: "Tarde", text: "Cada célula vibra en salud." },
+      { time: "Tarde", text: "Cuido mi salud y busco apoyo cuando lo necesito." },
       { time: "Tarde", text: "Elijo alimentos que me nutren." },
       { time: "Tarde", text: "Respiro paz y vitalidad." },
       { time: "Noche", text: "Descanso en el amor de Cristo." },
@@ -319,7 +319,7 @@ const PRACTICES: Practice[] = [
     color: "#A78BFA",
     bg: "#EDE7FF",
     intention: "Yo soy gratitud viva, mi vida está llena de bendiciones.",
-    objective: "Cambiar tu frecuencia con la práctica poderosa de la gratitud diaria.",
+    objective: "Cultivar gratitud a Dios y reconocer el apoyo que recibes cada día.",
     questions: ["¿Qué agradezco hoy?", "¿Quién me bendice esta semana?"],
     actionPlan: ["Escribir 3 gratitudes al despertar.", "Bendecir tus alimentos.", "Cerrar el día con 3 gracias."],
     info: ["Sencillo y transformador.", "Ideal para cualquier momento.", "Duración: 15 minutos."],
@@ -404,7 +404,7 @@ const QUIZ_ITEMS = [
   { q: "¿Por qué 21 días?", options: ["Es un número al azar", "Instala el hábito y consolida el cambio", "Solo por tradición"], correct: 1, tip: "21 días construyen el hábito espiritual y renuevan tu mente." },
 ];
 
-const WORDS = ["FE", "CRISTO", "ORACION", "PROPOSITO", "MILAGRO", "FRECUENCIA"];
+const WORDS = ["FE", "CRISTO", "ORACION", "PROPOSITO", "MILAGRO", "GRACIA"];
 
 const CATEGORIES: Category[] = ["Todas", "Abundancia", "Salud", "Relaciones", "Propósito"];
 
@@ -482,7 +482,7 @@ function CristoPage() {
                 <Sparkles className="w-3.5 h-3.5" /> Programa de Manifestación Consciente
               </div>
               <p className="text-sm text-foreground/75 mt-3 leading-relaxed max-w-md mx-auto">
-                El método 369 es una herramienta poderosa de enfoque, fe y alineación. A través de la repetición consciente, la música vibracional y la conexión espiritual, entrenas tu mente para manifestar desde la verdad de tu alma.
+                Esta práctica de escritura organiza tu oración en momentos de mañana, tarde y noche. La música acompaña tu reflexión cristiana; los números no tienen poder espiritual ni garantizan resultados.
               </p>
 
               <div className="mt-6 grid grid-cols-3 gap-3">
@@ -576,7 +576,7 @@ function CristoPage() {
             <Sparkles className="w-4 h-4" /> Práctica recomendada para hoy
           </div>
           <div className="mt-2 font-display font-extrabold text-lg">369 Abundancia Financiera</div>
-          <p className="text-xs text-muted-foreground mt-1 leading-relaxed">Alinea tu mente y tu corazón con la frecuencia de la abundancia ilimitada.</p>
+          <p className="text-xs text-muted-foreground mt-1 leading-relaxed">Ora por sabiduría y cultiva decisiones responsables desde la gratitud a Dios.</p>
           <Button
             onClick={() => { setPracticeId("abundancia"); setStep(3); }}
             className="mt-3 w-full h-11 rounded-full bg-gradient-to-r from-[#7C5CFF] to-[#F58BCB] text-white font-bold"
@@ -853,7 +853,7 @@ function CristoPage() {
         <Card className="rounded-[1.3rem] p-5 shadow-soft">
           <div className="text-xs font-bold text-primary uppercase tracking-widest">¿Por qué funciona el método 369?</div>
           <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
-            La repetición consciente alinea tu mente, tu espíritu y tus emociones con tu deseo. La música eleva tu vibración y te ayuda a mantenerte enfocado en tu intención.
+            Escribir puede ayudarte a ordenar tus pensamientos. La música puede acompañar tu oración y tu atención; los números no determinan tu destino ni aseguran un resultado.
           </p>
           <div className="mt-4 grid grid-cols-3 gap-2">
             {[
