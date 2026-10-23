@@ -93,7 +93,7 @@ function TreePage() {
 
 function HomeView({ displayName, avatar, gems, onOpenTree, onTransfer }: { displayName: string; avatar: string | null; gems: number; onOpenTree: () => void; onTransfer: () => void }) {
   return (
-    <div className="min-h-dvh" style={{ background: "radial-gradient(120% 90% at 50% 0%, #F3ECFF 0%, #FBFAFF 55%, #FDEEF7 100%)" }}>
+    <div className="min-h-dvh bg-aura-top">
       <div className="mx-auto w-full max-w-[420px] px-4 pt-4 pb-32">
         {/* Top bar */}
         <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
@@ -205,7 +205,7 @@ function TreeDeciduousIcon() {
 
 function TransferView({ gems, onBack }: { gems: number; onBack: () => void }) {
   return (
-    <div className="min-h-dvh" style={{ background: "radial-gradient(120% 90% at 50% 0%, #F3ECFF 0%, #FBFAFF 55%, #FDEEF7 100%)" }}>
+    <div className="min-h-dvh bg-aura-top">
       <div className="mx-auto w-full max-w-[420px] px-4 pt-4 pb-32">
         <div className="flex items-center gap-3">
           <button onClick={onBack} aria-label="Volver" className="w-10 h-10 rounded-full bg-card shadow-soft grid place-items-center active:scale-95 transition">
