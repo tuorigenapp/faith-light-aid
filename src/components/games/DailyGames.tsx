@@ -902,6 +902,17 @@ function GameFooter({ hint }: { hint?: string }) {
   );
 }
 
+import imgSopa from "@/assets/games/game-sopa.png.asset.json";
+import imgMemoria from "@/assets/games/game-memoria.png.asset.json";
+import imgEscribe from "@/assets/games/game-escribe.png.asset.json";
+import imgHojas from "@/assets/games/game-hojas.png.asset.json";
+import imgBloques from "@/assets/games/game-bloques.png.asset.json";
+import imgAros from "@/assets/games/game-aros.png.asset.json";
+import imgGlobo from "@/assets/games/game-globo.png.asset.json";
+import imgPez from "@/assets/games/game-pez.png.asset.json";
+import imgArdilla from "@/assets/games/game-ardilla.png.asset.json";
+import imgRespira from "@/assets/games/game-respira.png.asset.json";
+
 export type GameDef = {
   id: string;
   title: string;
@@ -909,6 +920,7 @@ export type GameDef = {
   gems: number;
   icon: React.ReactNode;
   tint: string;
+  img: string;
   render: (p: GameProps) => React.ReactNode;
 };
 
@@ -919,6 +931,7 @@ export const GAMES: GameDef[] = [
     desc: "Sopa de letras de tu tema de hoy",
     gems: 60,
     tint: "from-[#7C4DFF] to-[#B18CFF]",
+    img: imgSopa.url,
     icon: <Search className="w-6 h-6" />,
     render: (p) => <WordFind {...p} />,
   },
@@ -928,6 +941,7 @@ export const GAMES: GameDef[] = [
     desc: "Empareja las palabras que te sostienen",
     gems: 60,
     tint: "from-[#F58BCB] to-[#FFB3DC]",
+    img: imgMemoria.url,
     icon: <Brain className="w-6 h-6" />,
     render: (p) => <Memory {...p} />,
   },
@@ -937,6 +951,7 @@ export const GAMES: GameDef[] = [
     desc: "Escribe tu declaración completa",
     gems: 50,
     tint: "from-[#3FBE8F] to-[#7FE0BC]",
+    img: imgEscribe.url,
     icon: <PenLine className="w-6 h-6" />,
     render: (p) => <TypeIt {...p} />,
   },
@@ -946,6 +961,7 @@ export const GAMES: GameDef[] = [
     desc: "Recoge todas las hojas sin que te atrape la culpa",
     gems: 70,
     tint: "from-[#F7B955] to-[#FFD79A]",
+    img: imgHojas.url,
     icon: <Ghost className="w-6 h-6" />,
     render: (p) => <LeafEater3DLazy {...p} />,
   },
@@ -955,6 +971,7 @@ export const GAMES: GameDef[] = [
     desc: "Encaja los bloques 3D y la grúa se lleva cada línea",
     gems: 70,
     tint: "from-[#4C86C6] to-[#9BC6F0]",
+    img: imgBloques.url,
     icon: <Blocks className="w-6 h-6" />,
     render: (p) => <Ciudad3DGame {...p} />,
   },
@@ -964,6 +981,7 @@ export const GAMES: GameDef[] = [
     desc: "Apunta, carga la fuerza y encesta los aros",
     gems: 60,
     tint: "from-[#7C4DFF] to-[#F58BCB]",
+    img: imgAros.url,
     icon: <Circle className="w-6 h-6" />,
     render: (p) => <Aros3DGame {...p} />,
   },
@@ -973,6 +991,7 @@ export const GAMES: GameDef[] = [
     desc: "Revienta globos y recibe tu afirmación del día",
     gems: 50,
     tint: "from-[#F58BCB] to-[#F7B955]",
+    img: imgGlobo.url,
     icon: <Wind className="w-6 h-6" />,
     render: (p) => <Globos3DGame {...p} />,
   },
@@ -982,6 +1001,7 @@ export const GAMES: GameDef[] = [
     desc: "Navega y atrapa solo lo que te hace bien",
     gems: 60,
     tint: "from-[#4C86C6] to-[#3FBE8F]",
+    img: imgPez.url,
     icon: <Fish className="w-6 h-6" />,
     render: (p) => <HealingFish {...p} />,
   },
@@ -991,6 +1011,7 @@ export const GAMES: GameDef[] = [
     desc: "El conejo corre, junta zanahorias y esquiva a quien lo quiere atrapar",
     gems: 70,
     tint: "from-[#C9743A] to-[#F7B955]",
+    img: imgArdilla.url,
     icon: <Rabbit className="w-6 h-6" />,
     render: (p) => <SquirrelRun {...p} />,
   },
@@ -1000,6 +1021,7 @@ export const GAMES: GameDef[] = [
     desc: "Cuatro rondas para bajar el cuerpo a la calma",
     gems: 40,
     tint: "from-[#7FE0BC] to-[#BFE7FF]",
+    img: imgRespira.url,
     icon: <HeartPulse className="w-6 h-6" />,
     render: (p) => <Breathe {...p} />,
   },
@@ -1055,15 +1077,18 @@ export function GameCard({ game, index = 0 }: { game: GameDef; index?: number })
       className="block w-full overflow-hidden rounded-[16px] border border-border/60 bg-card shadow-soft text-left active:scale-[.98] transition-transform"
       style={{ animation: `fade-in .35s ease-out ${index * 45}ms both` }}
     >
-      {ov?.cover_url ? (
-        <img src={ov.cover_url} alt="" loading="lazy" className="h-24 w-full object-cover" />
-      ) : (
-        <span className={cn("grid h-24 place-items-center bg-gradient-to-br text-white", game.tint)}>
-          <span className="grid h-12 w-12 place-items-center rounded-[14px] bg-white/20">
-            {game.icon}
-          </span>
+      <span className="relative block h-28 w-full overflow-hidden">
+        <img
+          src={ov?.cover_url || game.img}
+          alt=""
+          loading="lazy"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+        <span className={cn("absolute inset-0 bg-gradient-to-t opacity-60", game.tint)} />
+        <span className="absolute bottom-2 left-2 grid h-9 w-9 place-items-center rounded-[12px] bg-white/25 text-white backdrop-blur border border-white/40">
+          {game.icon}
         </span>
-      )}
+      </span>
       <span className="block px-3 py-2.5">
         <span className="block font-display font-bold text-[13.5px] leading-tight truncate">
           {ov?.title || game.title}
