@@ -199,7 +199,7 @@ function compose(kind: Kind, b: Awaited<ReturnType<typeof base>>, used: Set<stri
     case "origen": return clean(`${t(ORIGEN_LINES)} ${t(ORIGEN_LINES)} ${t(VOICE.reflexion)}${brain()}`);
     case "tiempo": return clean(`${t(VOICE.tiempo)} ${t(VOICE.tiempo)} ${t(VOICE.tiempo)} Ninguna fecha garantiza un resultado.`);
     case "senales": return clean(`${t(VOICE.senal)} ${t(VOICE.senal)} ${t(VOICE.senal)}`);
-    case "mensaje": return clean(`${t(VOICE.palabra)} ${take(r, BANK.mandato[b.topic], used)} ${t(VOICE.cierre)}${brain()}`);
+    case "mensaje": return clean(`${t(VOICE.palabra)} ${take(r, BANK.mandato[b.topic], used)} ${t(VOICE.cierre)}${brain()} Puedes llevar este paso a Dios en una oración sincera.`);
     case "consejo": return clean(`${take(r, BANK.mandato[b.topic], used)} ${take(r, BANK.mandato.general, used)} ${take(r, BANK.manana, used)}`);
     case "verso": { const v = take(r, VERSES, used); return `Lectura bíblica sugerida: ${v}. Lee el pasaje completo en su contexto${question ? " y reflexiona sobre lo que preguntaste" : ""}. No es una predicción; puede acompañar tu oración y tus decisiones.`; }
   }
