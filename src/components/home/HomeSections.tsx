@@ -184,7 +184,7 @@ export function DailyMessageBanner({ name }: { name: string }) {
   return (
     <section className={`relative min-h-[180px] ${card}`}>
       <img src={mensaje} alt="" loading="lazy" width={1536} height={640} className="absolute inset-0 h-full w-full object-cover object-[80%_center]" />
-      <div className="absolute inset-0 bg-gradient-to-r from-[#fbf6ee] via-[#fbf6ee]/85 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-transparent" />
       <div className="relative p-5 max-w-[72%] sm:max-w-[55%]">
         <span className="text-[11px] font-bold uppercase tracking-wider text-primary">Mensaje de hoy</span>
         <h3 className="mt-1 font-serif text-[21px] leading-tight text-foreground">{name}, vuelve hoy a tu memoria sana</h3>

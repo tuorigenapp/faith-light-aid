@@ -350,11 +350,11 @@ function money(usd: number, cur: LocalCurrency) {
 function PlansBoard({ cur, mode, title }: { cur: LocalCurrency; mode: Mode; title?: string }) {
   const [cad, setCad] = useState<Cadence>("annual");
   const [lvl, setLvl] = useState("caminante");
+  const charge = useMemo(() => { const d = new Date(); d.setDate(d.getDate() + 7); return d.toLocaleDateString("es", { day: "numeric", month: "long", year: "numeric" }); }, []);
   const level = LEVELS.find((l) => l.id === lvl) ?? LEVELS[1];
   const c = CAD.find((x) => x.id === cad) ?? CAD[2];
   if (!level || !c) return null;
   const price = priceOf(level, cad, mode);
-  const charge = useMemo(() => { const d = new Date(); d.setDate(d.getDate() + 7); return d.toLocaleDateString("es", { day: "numeric", month: "long", year: "numeric" }); }, []);
   const go = () => window.open(linkOf(level, cad, mode), "_blank", "noopener");
   return <section className="mt-5 rounded-3xl bg-card p-4 shadow-sm">
     {title && <h3 className="mb-3 text-center font-display text-lg font-bold text-foreground">{title}</h3>}
