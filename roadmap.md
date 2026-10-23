@@ -11,11 +11,12 @@
 - [x] Modo oscuro: menú inferior, header, Hojas, Árbol, tarjetas hero/app adaptadas
 - [x] Vitrina de /empezar: 14 capturas reales de la app
 
-## Pendiente
-- [ ] Auditoría fina claro/oscuro en páginas restantes (onboarding, perfil, admin) — seguir revisando capturas
+## Verificaciones adicionales
+- [x] Perfil, administración y consultas revisados a 375 px en claro/oscuro, sin desbordamiento ni errores de pantalla.
+- [x] Evaluación de /empezar recorrida hasta planes y consultas; la evaluación interna redirige a Inicio para esta cuenta porque ya está completada.
 
 ## Ajustes solicitados el 23 de octubre
-- [ ] Reemplazar captura de /dashboard ocultando checklist y ventanas solo durante la captura.
-- [ ] Corregir títulos sobre portadas en modo claro y oscuro.
-- [ ] Hacer visible la selección de membresía en modo oscuro.
-- [ ] Aplicar lenguaje espiritual cristiano sin referencias esotéricas en la aplicación y consultas; verificar con pruebas.
+- [x] Reemplazar captura de /dashboard ocultando checklist y ventanas solo durante la captura.
+- [x] Corregir títulos sobre portadas en modo claro y oscuro.
+- [x] Hacer visible la selección de membresía en modo oscuro.
+- [x] Aplicar lenguaje espiritual cristiano en el motor compartido, generación, mentor, prácticas y respuestas guardadas; pruebas y tres consultas públicas con PDF verificadas.
