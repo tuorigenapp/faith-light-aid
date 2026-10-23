@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, Check, X, Heart, Sparkles, Brain, Coins, Users, Compass, Headphones, NotebookPen, BookOpen, Lock, ShieldCheck, Map, FileText, Gamepad2, Clock, Gift, Globe2, Download, Sun, TreePine, HeartHandshake, Smartphone, BadgeCheck, CalendarCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -18,11 +18,20 @@ import antes from "@/assets/funnel/antes.jpg";
 import despues from "@/assets/funnel/despues.jpg";
 import gift from "@/assets/funnel/gift.png";
 import mockup from "@/assets/funnel/mockup.png";
-import appCamino from "@/assets/funnel/app-camino.jpg";
-import appVisualiza from "@/assets/funnel/app-visualiza.jpg";
-import appArbol from "@/assets/funnel/app-arbol.jpg";
-import appDiario from "@/assets/funnel/app-diario.jpg";
-import appComunidad from "@/assets/funnel/app-comunidad.jpg";
+import shotDashboard from "@/assets/funnel/shots/dashboard.jpg";
+import shotChat from "@/assets/funnel/shots/chat.jpg";
+import shotPareja from "@/assets/funnel/shots/pareja.jpg";
+import shotPatrones from "@/assets/funnel/shots/patrones.jpg";
+import shotMinistracion from "@/assets/funnel/shots/ministracion.jpg";
+import shotEjercicios from "@/assets/funnel/shots/ejercicios.jpg";
+import shotBiblioteca from "@/assets/funnel/shots/biblioteca.jpg";
+import shotCategorias from "@/assets/funnel/shots/categorias.jpg";
+import shotRuleta from "@/assets/funnel/shots/ruleta.jpg";
+import shotJuegos from "@/assets/funnel/shots/juegos.jpg";
+import shotComprar from "@/assets/funnel/shots/comprarmonedas.jpg";
+import shotHistorial from "@/assets/funnel/shots/historial.jpg";
+import shotArbol from "@/assets/funnel/shots/arbol.jpg";
+import shotInvita from "@/assets/funnel/shots/invita.jpg";
 import eHeadphones from "@/assets/e3d-headphones.png";
 import ePractice from "@/assets/e3d-practice.png";
 import eBook from "@/assets/e3d-book.png";
@@ -98,11 +107,20 @@ const GUIAS = [
   { id: "fe", img: eBook, t: "Con enseñanzas de fe y sabiduría interior", d: "Para conectar con principios espirituales." },
 ];
 const SCREENS = [
-  { img: appCamino, t: "Camino ORÍGEN", d: "20 etapas, una lección nueva cada día" },
-  { img: appVisualiza, t: "Visualízalo y Vívelo", d: "Programas guiados con audio y seguimiento" },
-  { img: appArbol, t: "Árbol de Sanación", d: "Tus Hojas crecen con cada paso que das" },
-  { img: appDiario, t: "Diario espiritual", d: "Privado, solo tú y Dios" },
-  { img: appComunidad, t: "Comunidad", d: "Personas que viven caminos parecidos" },
+  { img: shotDashboard, t: "Tu inicio", d: "Tu misión del día, racha y todo tu camino" },
+  { img: shotCategorias, t: "Caminos ORÍGEN", d: "20 etapas, una lección nueva cada día" },
+  { img: shotChat, t: "Mentora ORÍGEN", d: "Te acompaña y te escucha 24/7" },
+  { img: shotMinistracion, t: "Dios te dice hoy", d: "Una palabra personal cada día" },
+  { img: shotPareja, t: "Tu pareja de destino", d: "Entiende lo que hay entre ustedes" },
+  { img: shotPatrones, t: "Patrones generacionales", d: "Descubre lo que se repite en tu familia" },
+  { img: shotEjercicios, t: "Ejercicios diarios", d: "Prácticas cortas que sí se sienten" },
+  { img: shotBiblioteca, t: "Biblioteca digital", d: "Un pack de libros nuevo cada semana" },
+  { img: shotJuegos, t: "Juegos del día", d: "Gimnasia emocional de 3 minutos" },
+  { img: shotRuleta, t: "Ruleta de premios", d: "Un giro cada 24 horas, siempre ganas" },
+  { img: shotArbol, t: "Árbol de Sanación", d: "Mira crecer tu avance con cada paso" },
+  { img: shotComprar, t: "Hojas de Sanación", d: "Tu moneda de avance dentro de la app" },
+  { img: shotHistorial, t: "Tu historial", d: "Todas tus respuestas guardadas en PDF" },
+  { img: shotInvita, t: "Programa de afiliados", d: "Gana compartiendo ORÍGEN" },
 ];
 
 type Stage = "quiz" | "paywall" | "offer80";
@@ -115,7 +133,6 @@ function useCountdown(seconds: number) {
 }
 
 function Funnel() {
-  const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [stage, setStage] = useState<Stage>("quiz");
   const [popup, setPopup] = useState<Popup>(null);
@@ -157,11 +174,12 @@ function Funnel() {
   const first = name.trim().split(" ")[0] || "";
   const next = () => setStep((s) => s + 1);
   const autoNext = () => setTimeout(next, 300);
-  const leave = () => { if (!tryExit()) navigate({ to: "/registro" }); };
+  // Sin suscripción no hay acceso: salir siempre devuelve a la oferta con descuento.
+  const leave = () => { if (!tryExit()) { setStage("offer80"); window.scrollTo(0, 0); } };
 
   const popups = <>
     {popup === "scratch" && <ScratchPopup name={first} onClaim={() => { setPopup(null); setStage("offer80"); window.scrollTo(0, 0); }} onClose={() => setPopup(null)} />}
-    {popup === "free" && <FreePopup cur={cur} onClose={() => setPopup(null)} onSkip={() => navigate({ to: "/registro" })} />}
+    {popup === "free" && <FreePopup cur={cur} onClose={() => setPopup(null)} onSkip={() => { setPopup(null); setStage("offer80"); setTimeout(toPlans, 60); }} />}
   </>;
 
   if (stage === "paywall") return <><Paywall name={first} cur={cur} onClose={leave} />{popups}</>;
@@ -370,11 +388,16 @@ function PlansBoard({ cur, mode, title }: { cur: LocalCurrency; mode: Mode; titl
       <p className="mt-1 text-sm text-muted-foreground">Después de este período se cobrará el importe de <b className="text-foreground">{money(level.usd[cad], cur)} / {c.per}</b> (primer cobro el {charge}).</p>
       <div className="mt-3 flex items-center justify-between border-t border-primary/20 pt-3 text-foreground"><span className="font-bold">Total a pagar hoy</span><span className="font-display text-xl font-bold">{money(0, cur)}</span></div>
     </div>}
+    {mode !== "trial" && <div className="mt-4 rounded-2xl bg-primary/10 p-4">
+      <p className="font-display text-base font-bold text-foreground">Incluye 7 días gratis</p>
+      <p className="mt-1 text-sm text-muted-foreground">Hoy pagas <b className="text-foreground">{money(0, cur)}</b>. Después de los 7 días se cobrará el importe de <b className="text-foreground">{money(price, cur)} / {c.per}</b> (primer cobro el {charge}). Puedes cancelar antes sin que se te cobre nada.</p>
+      <div className="mt-3 flex items-center justify-between border-t border-primary/20 pt-3 text-foreground"><span className="font-bold">Total a pagar hoy</span><span className="font-display text-xl font-bold">{money(0, cur)}</span></div>
+    </div>}
     <Cta className="mt-4" onClick={go}>{mode === "trial" ? "Empezar mis 7 días gratis" : mode === "discount" ? `Obtener ${OFF_PCT[cad]}% de descuento` : `Obtener ${level.name.split(" ")[0][0] + level.name.split(" ")[0].slice(1).toLowerCase()} por ${money(price, cur)}`}</Cta>
     <div className="mt-3 flex items-center justify-center gap-2 text-xs text-muted-foreground"><Lock className="h-4 w-4 text-primary" />Pago seguro con Hotmart · tarjeta, PayPal, Google Pay y más</div>
     <CurrencyNote cur={cur} />
     <ul className="mt-3 grid gap-2">
-      {mode === "discount" ? <Tick>Pago inmediato con descuento, sin período de prueba</Tick> : <Tick>Te avisamos antes del cobro</Tick>}
+      <Tick>7 días gratis: te avisamos antes del primer cobro</Tick>
       <Tick>Cancela cuando quieras</Tick>
       <Tick>Garantía de 7 días de Hotmart</Tick>
     </ul>
@@ -446,9 +469,14 @@ function TryConsulta({ name }: { name: string }) {
   const [q, setQ] = useState("");
   const [state, setState] = useState<"idle" | "loading" | "done" | "error">("idle");
   const [res, setRes] = useState<DemoResult | null>(null);
+  // Una sola consulta de prueba por sección: se recuerda cuáles ya se usaron.
+  const [used, setUsed] = useState<string[]>(() => {
+    try { return JSON.parse(localStorage.getItem("origen-demo-used") || "[]"); } catch { return []; }
+  });
   const demo = DEMOS.find((d) => d.id === kind)!;
   useEffect(() => { if (name && !who) setWho(name); }, [name, who]);
   const ask = async () => {
+    if (used.includes(kind)) return;
     setState("loading"); setRes(null);
     try {
       const [r] = await Promise.all([
@@ -457,6 +485,9 @@ function TryConsulta({ name }: { name: string }) {
       ]);
       if (!r.ok) throw new Error();
       setRes(await r.json()); setState("done");
+      const nextUsed = [...used, kind];
+      setUsed(nextUsed);
+      try { localStorage.setItem("origen-demo-used", JSON.stringify(nextUsed)); } catch { /* no storage */ }
     } catch { setState("error"); }
   };
   const pdf = () => res && printConsulta({
@@ -468,10 +499,12 @@ function TryConsulta({ name }: { name: string }) {
     <SectionTitle kicker="Pruébalo gratis ahora">¿El Método ORÍGEN es para ti? Compruébalo</SectionTitle>
     <p className="mt-2 text-center text-sm text-muted-foreground">Elige una consulta, escribe tu pregunta y recibe tu respuesta al instante.</p>
     <div className="mt-5 grid grid-cols-3 gap-2">
-      {DEMOS.map((d) => <button key={d.id} onClick={() => { setKind(d.id); setState("idle"); setRes(null); }} className={cn("rounded-2xl border-2 bg-card p-2 text-center transition active:scale-[.97]", kind === d.id ? "border-primary" : "border-transparent shadow-sm")}>
+      {DEMOS.map((d) => { const done = used.includes(d.id); return <button key={d.id} onClick={() => { setKind(d.id); setState("idle"); setRes(null); }} className={cn("relative rounded-2xl border-2 bg-card p-2 text-center transition active:scale-[.97]", kind === d.id ? "border-primary" : "border-transparent shadow-sm", done && "opacity-60")}>
         <img src={d.img} alt="" className="mx-auto h-14 w-14 object-contain" /><span className="mt-1 block text-xs font-bold leading-tight text-foreground">{d.t}</span>
-      </button>)}
+        {done && <span className="absolute right-1.5 top-1.5 grid h-5 w-5 place-items-center rounded-full bg-primary text-primary-foreground"><Check className="h-3 w-3" /></span>}
+      </button>; })}
     </div>
+    <p className="mt-2 text-center text-xs text-muted-foreground">Una consulta de prueba por sección. Dentro de la app son ilimitadas según tu plan.</p>
     <div className="mt-4 rounded-3xl bg-card p-4 shadow-sm">
       {state === "loading" ? <div className="py-10 text-center">
         <img src={demo.img} alt="" className="mx-auto h-20 w-20 animate-pulse object-contain" />
@@ -482,7 +515,7 @@ function TryConsulta({ name }: { name: string }) {
         <h3 className="mt-1 font-display text-xl font-bold leading-snug text-foreground">{res.headline}</h3>
         <div className="mt-4 grid gap-3">{res.sections.map((s) => <div key={s.title} className="rounded-2xl bg-primary/5 p-4"><p className="text-sm font-bold text-primary">{s.title}</p><p className="mt-1 whitespace-pre-line text-sm text-foreground">{s.body}</p></div>)}</div>
         <button onClick={pdf} className="mt-4 flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl bg-primary/10 text-sm font-semibold text-primary"><Download className="h-4 w-4" />Descargar mi respuesta en PDF</button>
-        <button onClick={() => { setState("idle"); setRes(null); setQ(""); }} className="mt-2 min-h-[44px] w-full text-sm text-muted-foreground">Probar otra consulta</button>
+        {DEMOS.some((d) => !used.includes(d.id)) && <button onClick={() => { const nxt = DEMOS.find((d) => !used.includes(d.id)); if (nxt) setKind(nxt.id); setState("idle"); setRes(null); setQ(""); }} className="mt-2 min-h-[44px] w-full text-sm text-muted-foreground">Probar otra consulta</button>}
       </div> : <>
         <label className="text-sm font-semibold text-foreground">Tu nombre</label>
         <input value={who} onChange={(e) => setWho(e.target.value)} maxLength={60} placeholder="Tu nombre" className="mt-1 min-h-[48px] w-full rounded-xl border-[1.5px] border-border bg-background px-4 text-base text-foreground outline-none focus:border-primary focus:ring-4 focus:ring-primary/20" />
@@ -491,7 +524,7 @@ function TryConsulta({ name }: { name: string }) {
         <label className="mt-3 block text-sm font-semibold text-foreground">Tu pregunta</label>
         <textarea value={q} onChange={(e) => setQ(e.target.value)} maxLength={500} rows={3} placeholder={demo.ph} className="mt-1 w-full rounded-xl border-[1.5px] border-border bg-background p-3 text-base text-foreground outline-none focus:border-primary focus:ring-4 focus:ring-primary/20" />
         {state === "error" && <p className="mt-2 text-sm text-destructive">No pudimos preparar tu respuesta. Revisa tu conexión e inténtalo otra vez.</p>}
-        <Cta className="mt-3" disabled={!who.trim() || (kind === "pareja" && !partner.trim())} onClick={ask}>Recibir mi respuesta gratis</Cta>
+        {used.includes(kind) ? <p className="mt-3 rounded-xl bg-primary/5 p-3 text-center text-sm text-muted-foreground">Ya usaste tu consulta de prueba de esta sección. Con tu plan tienes consultas ilimitadas.</p> : <Cta className="mt-3" disabled={!who.trim() || (kind === "pareja" && !partner.trim())} onClick={ask}>Recibir mi respuesta gratis</Cta>}
       </>}
     </div>
   </section>;
@@ -524,8 +557,8 @@ function Paywall({ name, cur, onClose }: { name: string; cur: LocalCurrency; onC
       <section className="-mx-4 mt-12 bg-primary/5 py-2"><ReviewsSlider /></section>
       <SectionTitle kicker="Sin riesgo">Garantía de 7 días</SectionTitle>
       <div className="mt-4 flex items-center gap-4 rounded-3xl bg-card p-5 shadow-sm"><span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-primary/10"><ShieldCheck className="h-7 w-7 text-primary" /></span><p className="text-sm text-foreground">Si en los primeros 7 días sientes que ORÍGEN no es para ti, pides tu reembolso desde Hotmart. Sin preguntas incómodas.</p></div>
-      <PlansBoard cur={cur} mode="normal" title="Empieza tu plan hoy" />
       <TryConsulta name={name} />
+      <PlansBoard cur={cur} mode="normal" title="Empieza tu plan hoy" />
     </div>
   </main>;
 }
@@ -608,7 +641,7 @@ function FreePopup({ cur, onClose, onSkip }: { cur: LocalCurrency; onClose: () =
         <div className="bg-primary/15 py-2 text-center text-sm font-bold text-foreground">GRATIS por 7 días</div>
       </div>)}</div>
       <PlansBoard cur={cur} mode="trial" title="Elige tu plan para la prueba" />
-      <button onClick={onSkip} className="mt-3 min-h-[44px] w-full text-sm text-muted-foreground">Ahora no, seguir con el plan gratis</button>
+      <button onClick={onSkip} className="mt-3 min-h-[44px] w-full text-sm font-semibold text-primary">Prefiero mi descuento del 80%</button>
     </div>
   </div>;
 }

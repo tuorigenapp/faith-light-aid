@@ -36,6 +36,10 @@ import prNino from "@/assets/home/pr-nino.jpg";
 import prGlowM from "@/assets/home/pr-glowm.jpg";
 import prGlowH from "@/assets/home/pr-glowh.jpg";
 import prMag from "@/assets/home/pr-magnetico.jpg";
+import prPermiso from "@/assets/home/pr-permiso.jpg";
+import prDepresion from "@/assets/home/pr-depresion.jpg";
+import prNarcisista from "@/assets/home/pr-narcisista.jpg";
+import prPerdida from "@/assets/home/pr-perdida.jpg";
 import vvVis from "@/assets/home/vv-visualizacion.jpg";
 import vvMed from "@/assets/home/vv-meditacion.jpg";
 import vvMan from "@/assets/home/vv-manifestacion.jpg";
@@ -221,6 +225,10 @@ const PRACTICES = [
   { id: "glowup-mujer", img: prGlowM, title: "Glow Up Mujer", desc: "Conviértete en tu mejor versión.", Icon: Gem, from: "from-[#b04fc9]" },
   { id: "glowup-hombre", img: prGlowH, title: "Glow Up Hombre", desc: "Disciplina, propósito y equilibrio.", Icon: Shield, from: "from-[#2468c9]" },
   { id: "magnetico", img: prMag, title: "Vuélvete Magnético/a", desc: "Atrae lo que mereces.", Icon: Magnet, from: "from-[#5b2fc9]" },
+  { id: "permiso", img: prPermiso, title: "Deja de pedir permiso para existir", desc: "Tu valor no necesita aprobación.", Icon: Sparkles, from: "from-[#c07a2f]" },
+  { id: "depresion-ansiedad", img: prDepresion, title: "Salir de la depresión y la ansiedad", desc: "Un paso pequeño cada día.", Icon: Heart, from: "from-[#1a7e9e]" },
+  { id: "salir-narcisista", img: prNarcisista, title: "Salir de una relación narcisista", desc: "Recupera tu voz y tu paz.", Icon: Shield, from: "from-[#7a3fb0]" },
+  { id: "sanar-el-dolor-de-una-perdida-desde-el-origen", img: prPerdida, title: "Sanar el dolor de una pérdida desde el ORIGEN", desc: "Honra, suelta y vuelve a vivir.", Icon: Leaf, from: "from-[#2f8a5b]" },
 ];
 export function HealingPracticesCarousel() {
   return (
@@ -228,7 +236,7 @@ export function HealingPracticesCarousel() {
       <SectionHead title="Elige el dolor que quieres sanar" sub="Cada día abre una práctica corta: entiendes algo, lo trabajas y lo cierras." to="/categorias" cta="Ver todas" />
       <div className={scroller}>
         {PRACTICES.map((p) => (
-          <Link key={p.id} to="/programas/$programaId" params={{ programaId: p.id }} className={`relative snap-start shrink-0 w-[46%] sm:w-[23.5%] aspect-[4/5] ${card}`}>
+          <Link key={p.id} to="/caminos/$caminoId" params={{ caminoId: p.id }} className={`relative snap-start shrink-0 w-[46%] sm:w-[23.5%] aspect-[4/5] ${card}`}>
             <img src={p.img} alt="" loading="lazy" width={768} height={1024} className="absolute inset-0 h-full w-full object-cover" />
             <div className={`absolute inset-0 bg-gradient-to-t ${p.from} via-transparent to-transparent`} />
             <div className="absolute inset-x-0 bottom-0 p-3 text-white">
