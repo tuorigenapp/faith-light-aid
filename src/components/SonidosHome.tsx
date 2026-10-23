@@ -59,7 +59,7 @@ export function SonidosHome() {
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
         <div className="min-w-0">
           <div className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-primary">
-            <Headphones className="h-3.5 w-3.5" /> Sonidos de manifestación
+            <Headphones className="h-3.5 w-3.5" /> Sonidos para orar y reflexionar
           </div>
           <h3 className="mt-1 font-display text-[17px] font-bold leading-tight">Busca tu audio y escúchalo ahora</h3>
         </div>
@@ -120,7 +120,7 @@ export function SonidosHome() {
                   <span className="min-w-0">
                     <span className="block truncate text-[14px] font-bold leading-tight">{r.title}</span>
                     <span className="block truncate text-[12px] text-muted-foreground">
-                      {data?.names.get(r.category_id) ?? "Manifestación"} · Día {r.day_index}
+                      {data?.names.get(r.category_id) ?? "Reflexión cristiana"} · Día {r.day_index}
                     </span>
                   </span>
                   <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground">

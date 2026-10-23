@@ -256,7 +256,7 @@ export function HealingPracticesCarousel() {
 
 /* 9 · VISUALÍZALO — categorías principales reales de /visualiza */
 const VV_METHODS = [
-  { key: "musica", title: "Manifestación con Música", desc: "Playlists guiadas de 21 días.", img: vivMusic, from: "from-[#4b2fb0]", to: "/visualiza/$categoryId", params: { categoryId: "manifestando-con-musica" } },
+  { key: "musica", title: "Oración y Reflexión con Música", desc: "Playlists guiadas de 21 días.", img: vivMusic, from: "from-[#4b2fb0]", to: "/visualiza/$categoryId", params: { categoryId: "manifestando-con-musica" } },
   { key: "limpieza", title: "Limpieza Espiritual", desc: "Oración, gratitud y renovación.", img: vivClean, from: "from-[#11786d]", to: "/visualiza/limpieza" },
   { key: "identidad", title: "Salto de Identidad", desc: "Hábitos para tu mejor versión.", img: vivIdentity, from: "from-[#b06a12]", to: "/visualiza/identidad" },
   { key: "cristo", title: "Método de Cristo 3·6·9", desc: "Fe, escritura y afirmación.", img: vivCristo, from: "from-[#2b3a9e]", to: "/visualiza/cristo" },

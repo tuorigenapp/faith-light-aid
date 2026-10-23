@@ -295,7 +295,7 @@ function LessonStep({ cat, page, accent, subs, sel, entries, isPaid, onBack, onP
           <section className="mx-auto mt-10 max-w-3xl px-4">
             <div className="mb-4 text-center">
               <h2 className="font-display text-xl font-extrabold">Sopa de letras de la lección <span>🔎</span></h2>
-              <p className="mt-2 text-sm text-muted-foreground">Encuentra las palabras que activan tu manifestación.</p>
+              <p className="mt-2 text-sm text-muted-foreground">Encuentra palabras para acompañar tu reflexión y oración.</p>
             </div>
             <WordSearch words={words} storageKey={`custom-${cat.id}-${sel.day_index}`} gemsReward={40} />
           </section>
@@ -313,10 +313,10 @@ function LessonStep({ cat, page, accent, subs, sel, entries, isPaid, onBack, onP
           <section className="mx-auto mt-10 max-w-3xl px-4">
             <Card className="rounded-[16px] border border-border/60 p-5 shadow-soft">
               <div className="text-center">
-                <h2 className="font-display text-xl font-extrabold">Ejercicio de Manifestación <span>✍️</span></h2>
+                <h2 className="font-display text-xl font-extrabold">Ejercicio de Reflexión Cristiana <span>✍️</span></h2>
                 <p className="mt-2 text-sm text-muted-foreground">Reflexiona y escribe con intención.</p>
               </div>
-              <label htmlFor="ex-text" className="mb-2 mt-5 block text-sm font-semibold">{sel.exercise || `¿Qué deseas manifestar con «${sel.title}» y por qué es importante para ti?`}</label>
+              <label htmlFor="ex-text" className="mb-2 mt-5 block text-sm font-semibold">{sel.exercise || `¿Qué deseas llevar a la oración con «${sel.title}» y por qué es importante para ti?`}</label>
               <div className="relative">
                 <Textarea id="ex-text" value={exercise} onChange={(e) => setExercise(e.target.value.slice(0, 1000))} placeholder="Escribe aquí con libertad..." className="min-h-32 resize-none rounded-[12px] pr-16" />
                 <span className="absolute bottom-2 right-3 text-[11px] tabular-nums text-muted-foreground">{exercise.length}/1000</span>

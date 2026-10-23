@@ -25,7 +25,7 @@ export const Route = createFileRoute("/_authenticated/visualiza")({
 const METHODS_META = [
   {
     key: "musica",
-    title: "Manifestación con Música",
+    title: "Oración y Reflexión con Música",
     desc: "Playlists guiadas durante 21 días con música, visualización y afirmaciones diarias.",
     image: musicImg,
     Icon: Headphones,

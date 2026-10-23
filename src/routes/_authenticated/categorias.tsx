@@ -74,7 +74,7 @@ function CategoriasPage() {
                 <Sparkles className="w-5 h-5" />
               </span>
               <h2 className="font-display font-bold text-[17px] mt-3">Visualízalo y Vívelo</h2>
-              <p className="text-[13px] text-muted-foreground mt-1">Manifestación con música, limpieza espiritual, identidad y Método de Cristo 3·6·9.</p>
+              <p className="text-[13px] text-muted-foreground mt-1">Oración con música, renovación espiritual, identidad en Cristo y escritura de fe.</p>
             </div>
             <span className="mt-4 h-12 rounded-[12px] bg-primary/10 text-primary text-[14px] font-semibold inline-flex items-center justify-center gap-2">
               Entrar <ArrowRight className="w-4 h-4" />

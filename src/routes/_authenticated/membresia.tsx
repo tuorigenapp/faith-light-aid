@@ -114,7 +114,7 @@ const LEVELS: Level[] = [
     ],
     locked: [],
     perks: [
-      { icon: Crown, title: "Todo abierto", body: "Cada camino, ritual y consulta disponible desde el primer día." },
+      { icon: Crown, title: "Todo abierto", body: "Cada camino, práctica y consulta disponible desde el primer día." },
       { icon: Sparkles, title: "Bonos de propósito", body: "Contenido y premios exclusivos por tu constancia." },
       { icon: ShieldCheck, title: "Garantía real", body: "Cancelas cuando quieras y te avisamos antes del cobro." },
     ],
@@ -149,7 +149,7 @@ function Membresia() {
       <div className="mx-auto max-w-[1120px] px-5 pt-7 pb-28">
         <header className="mx-auto max-w-[620px] text-center">
           <h1 className="font-display text-[32px] font-extrabold leading-[1.12]">
-            Empieza tu ritual personal para volver a tu origen
+            Empieza tu camino personal para volver a tu origen
           </h1>
           <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground">
             Elige tu plan para que cada día del Camino cuente

@@ -39,7 +39,7 @@ const INCLUDE = [
   "Caminos de 365 días: niño interior, identidad, magnetismo, propósito",
   "Consultas con PDF: Pareja, Patrones familiares y «Dios te dice hoy»",
   "Palabra de hoy con enseñanza, quiz e imagen para compartir",
-  "Biblioteca con 82 libros y playlists de manifestación guiada",
+  "Biblioteca con 82 libros y playlists de reflexión guiada",
 ];
 
 const FAQ = [

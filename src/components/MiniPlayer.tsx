@@ -111,7 +111,7 @@ export function MiniPlayer() {
           <button onClick={() => setFull(true)} className="min-w-0 text-left">
             <p className="truncate text-[13.5px] font-bold leading-tight">{current.title}</p>
             <p className="truncate text-[11.5px] text-muted-foreground">
-              {current.subtitle ?? "Manifestación guiada"} · {fmtTime(position)}
+              {current.subtitle ?? "Reflexión guiada"} · {fmtTime(position)}
             </p>
           </button>
           <div className="flex shrink-0 items-center gap-1">

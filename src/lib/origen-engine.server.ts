@@ -102,7 +102,7 @@ async function base(inp: EngineInput) {
   const topic = topicOf(words, inp.scope);
   const first = (inp.name || "").trim().split(/\s+/)[0] || "";
   const brain = await brainLines(inp.scope, inp.scopeRef, words, r);
-  return { words, r, topic, first: clean(first), brain };
+  return { words, r, topic, first, brain };
 }
 
 /** Toma un elemento que no se haya usado antes en esta misma respuesta. */
@@ -221,8 +221,8 @@ export async function engineReading(inp: EngineInput) {
 }
 
 const TITLE_BY_KIND: Record<Kind, string[]> = {
-  energia: ["Lo que se percibe en ti hoy", "Tu estado interior en este momento", "Cómo cuidar tu bienestar hoy"],
-  vision: ["Lo que se revela de tu situación", "Lo que se ve con claridad", "Lo que hay detrás de tu pregunta"],
+  energia: ["Tu inquietud merece atención", "Una reflexión sobre tu bienestar", "Cómo cuidar tu bienestar hoy"],
+  vision: ["Mirar tu situación con prudencia", "Distinguir los hechos de los temores", "Reflexionar sobre tu pregunta"],
   origen: ["De dónde viene lo que vives", "La raíz de lo que se repite", "Lo que tu historia te muestra"],
   sentir: ["Lo que tu corazón está cargando", "Lo que sientes y no has dicho", "Lo que tu cuerpo te avisa"],
   tiempo: ["Tus pasos para los próximos días", "Avanza a tu ritmo", "Cómo acompañar tu proceso"],
@@ -232,13 +232,13 @@ const TITLE_BY_KIND: Record<Kind, string[]> = {
   verso: ["Una palabra para sostenerte", "Tu versículo de hoy", "Escritura para tu camino"],
 };
 const HEADLINE: Record<Topic, string[]> = {
-  pareja: ["El amor que buscas empieza por cómo te tratas a ti", "Lo que está entre ustedes ya se está revelando", "Tu corazón merece una respuesta clara"],
+  pareja: ["Tu dignidad también importa en el amor", "Comprender tu relación desde el respeto", "Puedes buscar claridad sin decidir por miedo"],
   familia: ["Lo que se repite en tu familia puede terminar contigo", "Tu historia no te condena, te prepara", "Hoy puedes soltar lo que heredaste sin elegir"],
-  dinero: ["Tu abundancia se desbloquea cuando dejas de dudar", "La puerta que esperas ya se está moviendo", "Mereces crecer sin pedir permiso"],
+  dinero: ["Tu situación económica merece apoyo, no culpa", "Pide sabiduría y organiza tu próximo paso", "Tu dignidad no depende de tus ingresos"],
   salud: ["Tu paz vuelve cuando te escuchas de verdad", "Lo que sientes tiene un origen y tiene salida", "Tu interior te está pidiendo una pausa sagrada"],
   decision: ["La respuesta ya vive dentro de ti", "Es tiempo de elegir sin miedo", "Tu siguiente paso está más claro de lo que crees"],
-  perdida: ["El amor que perdiste sigue vivo de otra forma", "Tu dolor también es un camino de regreso a ti", "Lo que partió te dejó una misión"],
-  fe: ["Dios no se ha ido: te está hablando distinto", "Tu propósito está despertando", "Una reflexión de fe para acompañarte"],
+  perdida: ["Puedes recordar con amor y atravesar el duelo acompañado", "Tu dolor merece cuidado y compañía", "Dios puede acompañarte en tu tristeza"],
+  fe: ["Puedes acercarte a Dios con tus preguntas", "Camina con fe y pide sabiduría", "Una reflexión de fe para acompañarte"],
   general: ["Lo que necesitas saber hoy ya está aquí", "Tu camino se aclara un paso a la vez", "Hoy tu historia te habla con claridad"],
 };
 

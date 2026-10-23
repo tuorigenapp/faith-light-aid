@@ -382,7 +382,7 @@ const PRACTICES: Practice[] = [
 const HOME_BULLETS = [
   { label: "Alineación espiritual", Icon: Leaf, color: "#7C5CFF", bg: "#EDE7FF" },
   { label: "Claridad mental", Icon: Compass, color: "#5AA9FF", bg: "#DCEBFF" },
-  { label: "Manifestación consciente", Icon: Sparkles, color: "#F58BCB", bg: "#FFE1F1" },
+  { label: "Oración consciente", Icon: Sparkles, color: "#F58BCB", bg: "#FFE1F1" },
   { label: "Paz interior", Icon: Heart, color: "#E63980", bg: "#FFE1F1" },
   { label: "Fe y confianza", Icon: ShieldCheck, color: "#5AA9FF", bg: "#DCEBFF" },
   { label: "Propósito y dirección", Icon: Target, color: "#F5B441", bg: "#FFF3D6" },
@@ -400,7 +400,7 @@ const CHECKLIST = [
 
 const QUIZ_ITEMS = [
   { q: "El método 3·6·9 consiste en…", options: ["Repetir la intención 3, 6 y 9 veces al día", "Meditar solo 3 minutos", "Orar una vez a la semana"], correct: 0, tip: "3 veces mañana, 6 tarde y 9 noche durante 21 días." },
-  { q: "El mejor complemento del 3·6·9 es…", options: ["La duda", "La fe y la acción", "La comparación"], correct: 1, tip: "Sin fe no hay manifestación; sin acción, no hay milagro." },
+  { q: "El mejor complemento del 3·6·9 es…", options: ["La duda", "La fe y la acción", "La comparación"], correct: 1, tip: "La oración puede acompañar tus acciones; no garantiza resultados ni exige una fe perfecta." },
   { q: "¿Por qué 21 días?", options: ["Es un número al azar", "Instala el hábito y consolida el cambio", "Solo por tradición"], correct: 1, tip: "21 días construyen el hábito espiritual y renuevan tu mente." },
 ];
 
@@ -479,7 +479,7 @@ function CristoPage() {
 
             <Card className="mt-8 rounded-[1.75rem] p-6 text-center bg-white/95 dark:bg-card/95 backdrop-blur-xl border border-white/60 shadow-soft">
               <div className="inline-flex items-center gap-1.5 text-xs text-primary font-bold">
-                <Sparkles className="w-3.5 h-3.5" /> Programa de Manifestación Consciente
+                <Sparkles className="w-3.5 h-3.5" /> Programa de Oración y Escritura
               </div>
               <p className="text-sm text-foreground/75 mt-3 leading-relaxed max-w-md mx-auto">
                 Esta práctica de escritura organiza tu oración en momentos de mañana, tarde y noche. La música acompaña tu reflexión cristiana; los números no tienen poder espiritual ni garantizan resultados.
