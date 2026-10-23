@@ -297,7 +297,7 @@ export async function enginePatrones(inp: EngineInput & { familyCount: number })
     observation: x.energia,
     patterns: ["Callar para evitar conflictos", "Cargar responsabilidades ajenas", "Miedo a recibir", "Relaciones que se repiten", "Autoexigencia heredada"].sort(() => 0.5 - Math.random()).slice(0, 4),
     reflection: `${x.mensaje} ${x.tiempo}`,
-    recommendations: ["Escribe tres frases que escuchabas de niña en casa y cuál ya no quieres repetir.", "Completa tu árbol familiar en la app para ver qué se repite por cada lado.", "Practica la respiración guiada 4-4-6 antes de una conversación difícil.", "Haz una oración de perdón por tu línea familiar esta noche."],
+    recommendations: ["Escribe tres frases que escuchabas en casa y cuál ya no quieres repetir.", "Pide a Dios sabiduría en oración y explora tu historia familiar con ejemplos concretos, sin atribuir culpas.", "Practica la respiración guiada 4-4-6 antes de una conversación difícil.", "Haz una oración por tu familia y busca apoyo para cuidar tus límites."],
     needs_more: inp.familyCount === 0,
   };
 }
