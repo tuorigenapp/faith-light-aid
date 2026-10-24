@@ -27,4 +27,8 @@
 - Generated human portraits used in public stories must be explicitly illustrative, never verified customer identities; this avoids attributing invented endorsements to real people.
 - Mensajes ORÍGEN are generated from a pure daily schedule (one message per assistant per day) and check-ins persist in `daily_activity` (`mensaje_checkin`); this keeps them free of AI credits and testable.
 - Every downloadable PDF uses the shared `pdf-brand` header and closing promo (book + subscription or affiliate CTA by plan); this keeps branding identical across documents.
-- Journey screens (/etapas, caminos, /ejercicios) use the shared seasonal background picker chosen in the browser by season and time of day; this avoids hydration mismatches and keeps one look.
+- Journey screens use the browser-hydrated seasonal picker with separate exercise and journey image pools; this avoids hydration mismatches and cross-section background collisions.
+- Layout and profile queries sharing the profile cache key always select the complete profile row; this prevents missing completion state from reopening registration.
+- Audio upload and audio publication are separate operations, with explicit completion/error reporting and awaited writes; AI content enrichment never blocks saving a valid audio.
+- Browser push activation is confirmed only after the subscription and preference persist; internal popups cannot enable external push delivery.
+- Exploration cards share one asset catalog between Home and Explore; this prevents stale covers in one entry point.
