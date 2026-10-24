@@ -17,6 +17,16 @@ body.community-reading .community-main { padding-bottom: 0; }
   --radius-xl: calc(var(--radius) + 6px);
   --radius-2xl: calc(var(--radius) + 14px);
 
+  --color-install-bg: #07060D;
+  --color-install-fg: #F6F4FF;
+  --color-install-muted: #A9A3C4;
+  --color-install-bubble: #FAF9FC;
+  --color-install-bubble-fg: #121018;
+  --color-install-phone-top: #2A2160;
+  --color-install-phone-bottom: #0B0A16;
+  --color-install-frame: #1C1A28;
+  --color-install-tile: #FFFFFF14;
+  --color-install-bar: #1A1824;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
