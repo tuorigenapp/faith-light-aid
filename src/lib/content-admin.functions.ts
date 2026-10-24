@@ -172,7 +172,6 @@ export const adminCreateVisualizaSubtopic = createServerFn({ method: "POST" })
         categoryId: z.string().min(1),
         title: z.string().trim().min(3).max(140),
         notes: z.string().trim().max(1200).default(""),
-        withCover: z.boolean().default(true),
         audioOnly: z.boolean().optional(),
       })
       .parse(input),
@@ -466,7 +465,7 @@ export const adminDeleteSubtopic = createServerFn({ method: "POST" })
 export const adminRegenerateSubtopic = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i) =>
-    z.object({ id: z.string().uuid(), notes: z.string().trim().max(1200).default(""), cover: z.boolean().default(false) }).parse(i),
+    z.object({ id: z.string().uuid(), notes: z.string().trim().max(1200).default("") }).parse(i),
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
@@ -482,7 +481,7 @@ export const adminRegenerateSubtopic = createServerFn({ method: "POST" })
       affirmation: g.affirmation,
       lesson: g.lesson,
       exercise: `${g.exercise}\n\nPasos:\n${(g.recipe_steps ?? []).map((s, i) => `${i + 1}. ${s}`).join("\n")}`,
-      quiz: { tasks: g.tasks ?? [], questions: g.quiz ?? [] },
+      quiz: { tasks: g.tasks ?? [], questions: g.quiz ?? [], recipe_steps: g.recipe_steps, materials: g.materials ?? [] },
       word_game: { words: g.search_words ?? [] },
     };
     patch["cover_url"] = null;

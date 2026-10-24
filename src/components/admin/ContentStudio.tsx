@@ -380,7 +380,7 @@ function Subtopics({ onNote }: { onNote: Notify }) {
     setBusy(true);
     onNote(null);
     try {
-      const result = await create({ data: { categoryId: selected, title: title.trim(), notes, withCover: false, audioOnly } });
+      const result = await create({ data: { categoryId: selected, title: title.trim(), notes, audioOnly } });
       onNote({
         text: `Subtema creado como día ${result.dayIndex}, con lección, ejercicio, pasos, tareas, sopa de letras y preguntas. Sube el audio cuando quieras.`,
       });
@@ -391,10 +391,6 @@ function Subtopics({ onNote }: { onNote: Notify }) {
       onNote({ text: e instanceof Error ? e.message : "No pudimos crear el subtema.", error: true });
     }
     setBusy(false);
-  }
-
-  async function regenSilently(id: string) {
-    try { await regen({ data: { id, notes: "", cover: false } }); } catch { /* el audio ya quedó guardado */ }
   }
 
   async function saveAudio(id: string, audioUrl: string) {
@@ -483,7 +479,7 @@ function Subtopics({ onNote }: { onNote: Notify }) {
                   <span className="grid h-11 w-11 place-items-center"><Loader2 className="h-4 w-4 animate-spin" /></span>
                 ) : (
                   <>
-                    <IconAction label="Rehacer todo con IA" onClick={() => act(s.id, () => regen({ data: { id: s.id, notes: "", cover: false } }), "La IA reescribió el contenido propio de este subtema, sin generar imágenes.")}>
+                    <IconAction label="Rehacer todo con IA" onClick={() => act(s.id, () => regen({ data: { id: s.id, notes: "" } }), "La IA reescribió el contenido propio de este subtema, sin generar imágenes.")}>
                       <Wand2 className="h-4 w-4" />
                     </IconAction>
                     <IconAction danger label="Eliminar" onClick={() => ask(`¿Eliminar "${s.title}"?`) && act(s.id, () => removeSub({ data: { id: s.id } }), "Subtema eliminado.")}>
@@ -514,7 +510,7 @@ function Limpieza({ onNote }: { onNote: Notify }) {
   const updateL = useServerFn(adminUpdateLimpieza);
   const removeL = useServerFn(adminDeleteLimpieza);
   const [working, setWorking] = useState<string | null>(null);
-  const [editing, setEditing] = useState<{ id: string; title: string; cover: string; notes: string } | null>(null);
+  const [editing, setEditing] = useState<{ id: string; title: string; notes: string } | null>(null);
   async function act(id: string, fn: () => Promise<unknown>, ok: string) {
     setWorking(id);
     try {
@@ -529,7 +525,6 @@ function Limpieza({ onNote }: { onNote: Notify }) {
   const [title, setTitle] = useState("");
   const [level, setLevel] = useState(1);
   const [notes, setNotes] = useState("");
-  const [audioOnly, setAudioOnly] = useState(false);
   const [busy, setBusy] = useState(false);
 
   const { data: practices = [] } = useQuery({
@@ -610,7 +605,7 @@ function Limpieza({ onNote }: { onNote: Notify }) {
                 <span className="grid h-11 w-11 place-items-center"><Loader2 className="h-4 w-4 animate-spin" /></span>
               ) : (
                 <>
-                  <IconAction label="Editar" onClick={() => setEditing({ id: p.id, title: p.title, cover: p.cover_url ?? "", notes: "" })}><Pencil className="h-4 w-4" /></IconAction>
+                  <IconAction label="Editar" onClick={() => setEditing({ id: p.id, title: p.title, notes: "" })}><Pencil className="h-4 w-4" /></IconAction>
                   <IconAction danger label="Eliminar" onClick={() => ask(`¿Eliminar "${p.title}"?`) && act(p.id, () => removeL({ data: { id: p.id } }), "Práctica eliminada.")}><Trash2 className="h-4 w-4" /></IconAction>
                 </>
               )}
