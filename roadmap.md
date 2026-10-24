@@ -1,5 +1,12 @@
 # Roadmap ORÍGEN
 
+## Enlaces y organización del 24 de octubre, 04:16 UTC
+- [ ] Importar y reproducir el audio público de Google Drive desde ambos formularios de administración.
+- [ ] Organizar portadas, consultas, juegos, logos e isotipos por sección, editables sin IA y sin fondos.
+- [ ] Reemplazar imágenes de subcategorías por emojis temáticos y evitar generación de imágenes futuras.
+- [ ] Corregir contenido repetido de subtemas y asegurar generación específica de lecciones, juegos, palabras, afirmaciones y tareas.
+- [ ] Verificar guardado, reproducción y ajustes con sesión real y pruebas.
+
 ## Correcciones y renovación del 24 de octubre, 03:08 UTC
 - [x] PDF con texto recibido y guardado en Cerebro; MP3 original guardado por archivo/enlace y reproducido en Vamos a corroborar, día 3.
 - [x] Configuración de avisos externos, preferencias persistidas y envío programado verificados; errores de registro visibles.
