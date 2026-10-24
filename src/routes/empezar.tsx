@@ -336,7 +336,7 @@ function Result({ name, areas, variant, onNext }: { name: string; areas: string[
     <div className="mt-4 rounded-2xl bg-card p-5 shadow-sm">
       <p className="text-sm text-foreground">Tus respuestas señalan que deseas trabajar en el área <b>{shownAreas}</b>. Tu mapa es un punto de partida para explorar tus raíces y dar pasos hacia el cambio.</p>
       <p id="impact-label" className="mt-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Índice de impacto</p>
-      <div role="meter" aria-labelledby="impact-label" aria-describedby="impact-note" aria-valuemin={0} aria-valuemax={100} aria-valuenow={score ?? undefined} aria-valuetext={score === null ? "Preparando indicador ilustrativo" : `${score}% · impulso positivo, ilustrativo`} className="relative mt-3 h-3 rounded-full bg-gradient-to-r from-impact-low to-impact-high">
+      <div role="meter" aria-labelledby="impact-label" aria-describedby="impact-note" aria-valuemin={0} aria-valuemax={100} aria-valuenow={score ?? undefined} aria-valuetext={score === null ? "Preparando indicador ilustrativo" : `${score}% · impulso positivo, ilustrativo`} className="relative mt-3 h-3 rounded-full bg-gradient-to-r from-impact-low via-impact-mid to-impact-high shadow-[0_0_12px_color-mix(in_oklab,var(--impact-high)_35%,transparent)]">
         {score !== null && <span className="absolute -top-1.5 h-6 w-6 -translate-x-1/2 rounded-full border-4 border-card bg-impact-high shadow-soft motion-safe:transition-[left] motion-safe:duration-300" style={{ left: `${score}%` }} />}
       </div>
       <div className="mt-2 flex justify-between text-xs text-muted-foreground"><span className="text-impact-low">Menor</span><span>Intermedio</span><span className="text-impact-high">Positivo</span></div>
