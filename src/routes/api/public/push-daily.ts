@@ -27,16 +27,8 @@ export const Route = createFileRoute("/api/public/push-daily")({
         const ids = (prefs.data ?? []).map((p) => p.user_id);
         if (ids.length === 0) return Response.json({ sent: 0 });
 
-        // Quién ya entró hoy: a esas personas no se les recuerda nada.
-        const today = new Date().toISOString().slice(0, 10);
-        const active = await supabaseAdmin
-          .from("daily_activity")
-          .select("user_id")
-          .eq("activity_date", today)
-          .in("user_id", ids);
-        const activeIds = new Set((active.data ?? []).map((a) => a.user_id));
-        const targets = ids.filter((id) => !activeIds.has(id));
-        if (targets.length === 0) return Response.json({ sent: 0 });
+        // Siempre recomendamos algo nuevo, aunque la persona ya haya entrado hoy.
+        const targets = ids;
 
         const subs = await supabaseAdmin
           .from("push_subscriptions")

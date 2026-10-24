@@ -243,7 +243,7 @@ function StepSummary({ pack, onNext }: { pack: HojaPack; onNext: () => void }) {
     <div>
       <Title eyebrow="Paso 2 · Resumen" title="Resumen de tu compra" sub="Revisa los detalles antes de continuar." />
       <div className="mt-4 grid place-items-center">
-        <img src={crystals} alt="Cristales de sanación" loading="lazy" width={1024} height={1024}
+        <img src={crystals} alt="Hojas de Sanación ORÍGEN" loading="lazy" width={1024} height={1024}
           className="w-40 h-40 object-contain drop-shadow-[0_14px_30px_rgba(124,92,255,.28)] animate-[floaty_6s_ease-in-out_infinite]" />
       </div>
 

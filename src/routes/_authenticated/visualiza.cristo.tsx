@@ -1,3 +1,4 @@
+import { useSessionState } from "@/hooks/use-session-step";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useAuth } from "@/lib/use-auth";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -411,7 +412,7 @@ const CATEGORIES: Category[] = ["Todas", "Abundancia", "Salud", "Relaciones", "P
 function CristoPage() {
   const { user } = useAuth();
   const qc = useQueryClient();
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useSessionState<1 | 2 | 3>("viz-cristo", 1);
   const [practiceId, setPracticeId] = useState<string>(PRACTICES[0].id);
   const [category, setCategory] = useState<Category>("Todas");
   const [answers, setAnswers] = useState<Record<string, string>>({});

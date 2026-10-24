@@ -34,6 +34,7 @@ import { Route as AuthenticatedExplorarRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedHistorialRouteImport } from './routes/_authenticated/historial'
 import { Route as AuthenticatedInvitaRouteImport } from './routes/_authenticated/invita'
 import { Route as AuthenticatedMembresiaRouteImport } from './routes/_authenticated/membresia'
+import { Route as AuthenticatedMensajesRouteImport } from './routes/_authenticated/mensajes'
 import { Route as AuthenticatedMinistracionRouteImport } from './routes/_authenticated/ministracion'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedPalabraRouteImport } from './routes/_authenticated/palabra'
@@ -205,6 +206,11 @@ const AuthenticatedInvitaRoute = AuthenticatedInvitaRouteImport.update({
 const AuthenticatedMembresiaRoute = AuthenticatedMembresiaRouteImport.update({
   id: '/membresia',
   path: '/membresia',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedMensajesRoute = AuthenticatedMensajesRouteImport.update({
+  id: '/mensajes',
+  path: '/mensajes',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedMinistracionRoute =
@@ -482,6 +488,7 @@ export interface FileRoutesByFullPath {
   '/historial': typeof AuthenticatedHistorialRoute
   '/invita': typeof AuthenticatedInvitaRoute
   '/membresia': typeof AuthenticatedMembresiaRoute
+  '/mensajes': typeof AuthenticatedMensajesRoute
   '/ministracion': typeof AuthenticatedMinistracionRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/palabra': typeof AuthenticatedPalabraRoute
@@ -554,6 +561,7 @@ export interface FileRoutesByTo {
   '/historial': typeof AuthenticatedHistorialRoute
   '/invita': typeof AuthenticatedInvitaRoute
   '/membresia': typeof AuthenticatedMembresiaRoute
+  '/mensajes': typeof AuthenticatedMensajesRoute
   '/ministracion': typeof AuthenticatedMinistracionRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/palabra': typeof AuthenticatedPalabraRoute
@@ -627,6 +635,7 @@ export interface FileRoutesById {
   '/_authenticated/historial': typeof AuthenticatedHistorialRoute
   '/_authenticated/invita': typeof AuthenticatedInvitaRoute
   '/_authenticated/membresia': typeof AuthenticatedMembresiaRoute
+  '/_authenticated/mensajes': typeof AuthenticatedMensajesRoute
   '/_authenticated/ministracion': typeof AuthenticatedMinistracionRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/palabra': typeof AuthenticatedPalabraRoute
@@ -701,6 +710,7 @@ export interface FileRouteTypes {
     | '/historial'
     | '/invita'
     | '/membresia'
+    | '/mensajes'
     | '/ministracion'
     | '/onboarding'
     | '/palabra'
@@ -773,6 +783,7 @@ export interface FileRouteTypes {
     | '/historial'
     | '/invita'
     | '/membresia'
+    | '/mensajes'
     | '/ministracion'
     | '/onboarding'
     | '/palabra'
@@ -845,6 +856,7 @@ export interface FileRouteTypes {
     | '/_authenticated/historial'
     | '/_authenticated/invita'
     | '/_authenticated/membresia'
+    | '/_authenticated/mensajes'
     | '/_authenticated/ministracion'
     | '/_authenticated/onboarding'
     | '/_authenticated/palabra'
@@ -1103,6 +1115,13 @@ declare module '@tanstack/react-router' {
       path: '/membresia'
       fullPath: '/membresia'
       preLoaderRoute: typeof AuthenticatedMembresiaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/mensajes': {
+      id: '/_authenticated/mensajes'
+      path: '/mensajes'
+      fullPath: '/mensajes'
+      preLoaderRoute: typeof AuthenticatedMensajesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/ministracion': {
@@ -1511,6 +1530,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedHistorialRoute: typeof AuthenticatedHistorialRoute
   AuthenticatedInvitaRoute: typeof AuthenticatedInvitaRoute
   AuthenticatedMembresiaRoute: typeof AuthenticatedMembresiaRoute
+  AuthenticatedMensajesRoute: typeof AuthenticatedMensajesRoute
   AuthenticatedMinistracionRoute: typeof AuthenticatedMinistracionRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedPalabraRoute: typeof AuthenticatedPalabraRoute
@@ -1545,6 +1565,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedHistorialRoute: AuthenticatedHistorialRoute,
   AuthenticatedInvitaRoute: AuthenticatedInvitaRoute,
   AuthenticatedMembresiaRoute: AuthenticatedMembresiaRoute,
+  AuthenticatedMensajesRoute: AuthenticatedMensajesRoute,
   AuthenticatedMinistracionRoute: AuthenticatedMinistracionRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedPalabraRoute: AuthenticatedPalabraRoute,

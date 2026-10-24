@@ -1,3 +1,4 @@
+import { useSessionState } from "@/hooks/use-session-step";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useAuth } from "@/lib/use-auth";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -296,7 +297,7 @@ const CHECKLIST = [
 function LimpiezaPage() {
   const { user } = useAuth();
   const qc = useQueryClient();
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useSessionState<1 | 2 | 3>("viz-limpieza", 1);
   const [practiceId, setPracticeId] = useState<string>(PRACTICES[0].id);
   const { data: extra = [] } = useQuery({
     queryKey: ["limpieza-practices"],

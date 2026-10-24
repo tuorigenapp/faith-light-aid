@@ -32,6 +32,7 @@ function ChatPage() {
   const { user } = useAuth();
   const qc = useQueryClient();
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [showHistory, setShowHistory] = useState(false);
 
   const { data: conversations } = useQuery({
     queryKey: ["conversations", user?.id],
@@ -86,17 +87,7 @@ function ChatPage() {
           </button>
         </div>
         <div className="flex-1 overflow-y-auto p-2">
-          {(conversations ?? []).map((c) => (
-            <div key={c.id} className={cn("group flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer mb-1",
-              activeId === c.id ? "bg-secondary" : "hover:bg-secondary/50")}
-              onClick={() => setActiveId(c.id)}>
-              <MessageCircle className="w-4 h-4 text-muted-foreground shrink-0" />
-              <span className="flex-1 text-sm truncate">{c.title}</span>
-              <button onClick={(e) => { e.stopPropagation(); deleteConversation(c.id); }} className="opacity-0 group-hover:opacity-100">
-                <Trash2 className="w-3.5 h-3.5 text-muted-foreground" />
-              </button>
-            </div>
-          ))}
+          <ConversationList items={conversations ?? []} activeId={activeId} onPick={setActiveId} onDelete={deleteConversation} />
         </div>
       </aside>
 
@@ -114,8 +105,11 @@ function ChatPage() {
             <span className="inline-flex items-center gap-1 text-xs font-bold text-primary bg-brand-soft px-2.5 py-1 rounded-full">
               <Leaf className="w-3.5 h-3.5" />{formatHojas(profile?.gems)}
             </span>
-            <button onClick={newConversation} className="lg:hidden text-xs font-bold text-primary">
-              + Nueva
+            <button onClick={() => setShowHistory(true)} className="lg:hidden inline-flex min-h-11 items-center gap-1 rounded-[12px] bg-secondary px-3 text-xs font-bold">
+              <MessageCircle className="w-4 h-4" />Historial{conversations?.length ? ` (${conversations.length})` : ""}
+            </button>
+            <button onClick={newConversation} className="lg:hidden inline-flex min-h-11 items-center gap-1 rounded-[12px] bg-primary/10 px-3 text-xs font-bold text-primary">
+              <Plus className="w-4 h-4" />Nueva
             </button>
           </div>
         </div>
@@ -147,6 +141,42 @@ function ChatPage() {
           </div>
         )}
       </main>
+      {showHistory && (
+        <div className="fixed inset-0 z-[60] bg-foreground/40 lg:hidden" onClick={() => setShowHistory(false)}>
+          <div className="absolute inset-x-0 bottom-0 max-h-[80dvh] overflow-y-auto rounded-t-[20px] bg-card p-4 pb-[calc(env(safe-area-inset-bottom)+16px)]" onClick={(e) => e.stopPropagation()}>
+            <div className="mx-auto mb-3 h-1.5 w-10 rounded-full bg-border" />
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="font-display text-[18px] font-bold">Tus conversaciones</h2>
+              <button onClick={() => { setShowHistory(false); newConversation(); }} className="inline-flex min-h-11 items-center gap-1 rounded-[12px] bg-primary px-3 text-[13px] font-semibold text-primary-foreground"><Plus className="w-4 h-4" />Nueva</button>
+            </div>
+            <ConversationList items={conversations ?? []} activeId={activeId} onPick={(id) => { setActiveId(id); setShowHistory(false); }} onDelete={deleteConversation} />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ConversationList({ items, activeId, onPick, onDelete }: { items: { id: string; title: string; updated_at: string }[]; activeId: string | null; onPick: (id: string) => void; onDelete: (id: string) => void }) {
+  if (items.length === 0) return <p className="px-3 py-6 text-center text-sm text-muted-foreground">Tus conversaciones guardadas aparecerán aquí.</p>;
+  return (
+    <div>
+      {items.map((c) => {
+        let draft = "";
+        try { draft = typeof window !== "undefined" ? localStorage.getItem(`chat-draft-${c.id}`) ?? "" : ""; } catch { /* ignore */ }
+        return (
+          <div key={c.id} className={cn("group mb-1 flex min-h-14 cursor-pointer items-center gap-3 rounded-[12px] px-3 py-2", activeId === c.id ? "bg-secondary" : "hover:bg-secondary/50")} onClick={() => onPick(c.id)}>
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary/10 text-primary"><MessageCircle className="h-4 w-4" /></span>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-semibold">{c.title}</p>
+              <p className="truncate text-[12px] text-muted-foreground">{draft ? <span className="font-semibold text-destructive">Borrador: </span> : null}{draft || new Date(c.updated_at).toLocaleString("es", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</p>
+            </div>
+            <button aria-label="Borrar conversación" onClick={(e) => { e.stopPropagation(); if (confirm("¿Borrar esta conversación?")) onDelete(c.id); }} className="grid h-11 w-11 place-items-center rounded-full lg:opacity-0 lg:group-hover:opacity-100">
+              <Trash2 className="h-4 w-4 text-muted-foreground" />
+            </button>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -233,12 +263,15 @@ function ChatWindow({
 
   useEffect(() => { if (initialMessages) setMessages(initialMessages); }, [conversationId, initialMessages, setMessages]);
   useEffect(() => { inputRef.current?.focus(); }, [conversationId, status]);
+  useEffect(() => { try { setInput(localStorage.getItem(`chat-draft-${conversationId}`) ?? ""); } catch { /* ignore */ } }, [conversationId]);
+  useEffect(() => { try { if (input) localStorage.setItem(`chat-draft-${conversationId}`, input); } catch { /* ignore */ } }, [input, conversationId]);
   useEffect(() => { scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" }); }, [messages]);
 
   async function handleSend() {
     if (!input.trim() || !user || locked) return;
     const text = input.trim();
     setInput("");
+    try { localStorage.removeItem(`chat-draft-${conversationId}`); } catch { /* ignore */ }
     await supabase.from("messages").insert({
       conversation_id: conversationId, user_id: user.id,
       role: "user", content: [{ type: "text", text }] as never,

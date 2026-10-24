@@ -1,3 +1,5 @@
+import { PlayChoice, PLAYLIST_SLOTS } from "./PlayChoice";
+import { useSessionState } from "@/hooks/use-session-step";
 import { useState, type ReactNode } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
@@ -26,8 +28,8 @@ export function CustomMusicTopic({ cat, audios, entries, isPaid }: { cat: any; a
   const page = (cat.page ?? {}) as Record<string, any>;
   const accent: string = page.accent || cat.color || "#7C5CFF";
   const subs = audios.filter((a) => a.is_published !== false).sort((a, b) => a.day_index - b.day_index);
-  const [step, setStep] = useState<1 | 2 | 3>(1);
-  const [selId, setSelId] = useState<string | null>(null);
+  const [step, setStep] = useSessionState<1 | 2 | 3>(`viz-music-${cat.id}`, 1);
+  const [selId, setSelId] = useSessionState<string | null>(`viz-music-sel-${cat.id}`, null);
   const sel = subs.find((s) => s.id === selId) ?? subs[0];
   const includes: string[] = page.includes?.length ? page.includes : [cat.subtitle, cat.affirmation_ya_tengo, cat.identity_yo_soy].filter(Boolean);
 
@@ -185,13 +187,20 @@ function LessonStep({ cat, page, accent, subs, sel, entries, isPaid, onBack, onP
   const quiz = lessonQuiz(sel, cat);
   const doneCount = subs.filter((s) => entries.get(s.id)?.completed).length;
 
+  const [choice, setChoice] = useState<Sub | null>(null);
+  const lessonOf = (a: Sub) => navigate({ to: "/visualiza/$categoryId/$day", params: { categoryId: cat.id, day: String(a.day_index) } });
   function open(a: Sub) {
     if (!isPaid && a.day_index > FREE_AUDIOS) return navigate({ to: "/membresia" });
     onPick(a.id);
-    if (!a.audio_url) return navigate({ to: "/visualiza/$categoryId/$day", params: { categoryId: cat.id, day: String(a.day_index) } });
+    if (!a.audio_url) return lessonOf(a);
     if (playingId === a.id) return player.toggle();
+    setChoice(a);
+  }
+  function listen(a: Sub) {
+    setChoice(null);
     player.play(toTrack(a), subs.filter((x) => x.audio_url && (isPaid || x.day_index <= FREE_AUDIOS)).map(toTrack));
   }
+  const fillers = Array.from({ length: Math.max(0, PLAYLIST_SLOTS - subs.length) }, (_, i) => subs.length + i + 1);
 
   async function finish() {
     if (!user) return;
@@ -247,8 +256,16 @@ function LessonStep({ cat, page, accent, subs, sel, entries, isPaid, onBack, onP
               </button>
             );
           })}
+          {fillers.map((n) => (
+            <div key={`f${n}`} aria-hidden="true" className="flex w-full items-center gap-3 border-b border-border/40 px-4 py-3 last:border-b-0">
+              <div className="w-12 shrink-0 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">#{String(n).padStart(2, "0")}</div>
+              <div className="min-w-0 flex-1 select-none blur-[3px]"><div className="truncate text-sm font-semibold">Práctica guiada de sanación</div></div>
+              <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-muted text-muted-foreground"><Lock className="h-4 w-4" /></div>
+            </div>
+          ))}
         </div>
-        {!isPaid && subs.length > FREE_AUDIOS && (
+        {choice && <PlayChoice title={choice.title} onClose={() => setChoice(null)} onLesson={() => { setChoice(null); lessonOf(choice); }} onListen={() => listen(choice)} />}
+        {!isPaid && (
           <Card className="mt-3 rounded-[16px] border p-4" style={{ borderColor: `${accent}50`, background: `${accent}10` }}>
             <div className="flex items-start gap-3">
               <Lock className="mt-0.5 h-5 w-5 shrink-0" style={{ color: accent }} />

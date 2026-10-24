@@ -84,7 +84,7 @@ export async function aiImage(prompt: string): Promise<Uint8Array> {
     },
     body: JSON.stringify({
       model: IMAGE_MODEL,
-      prompt: `${prompt}\nChristian spiritual imagery only. No moon, tarot, zodiac, occult symbols or cosmic energy.`,
+      prompt: `${prompt}\nChristian spiritual imagery only. Hyperrealistic professional photography. Any people must be decorously dressed Christians: long sleeves, covered shoulders and chest, modest skirts or trousers, no cleavage, no tank tops, no jewelry, no necklaces, no crucifix pendants. No moon, tarot, zodiac, occult symbols or cosmic energy.`,
     }),
   });
   await logUsage({ kind: "ai", feature: "portada", ok: res.ok, status: res.status, durationMs: Date.now() - started });

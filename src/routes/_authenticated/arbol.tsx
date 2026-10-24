@@ -125,7 +125,7 @@ function HomeView({ displayName, avatar, gems, onOpenTree, onTransfer }: { displ
         <button onClick={onOpenTree} aria-label="Ver mi árbol genealógico" className="mt-3 block w-full active:scale-[.98] transition">
           <div className="relative">
             <div className="absolute inset-x-8 bottom-10 h-24 bg-[#7C5CFF]/20 blur-3xl rounded-full" />
-            <img src={hojasTree} alt="Árbol de sanación con hojas moradas" width={1024} height={1024}
+            <img src={hojasTree} alt="Árbol de sanación con una familia unida" width={1024} height={1024}
               className="relative mx-auto w-[280px] h-[280px] object-contain animate-[floatTree_6s_ease-in-out_infinite]" />
           </div>
         </button>

@@ -3,8 +3,8 @@ import bGlowHombre from "@/assets/banner-glow-hombre.png";
 import bGlowMujer from "@/assets/banner-glow-mujer.png";
 import bPermiso from "@/assets/banner-permiso.png";
 import bMagnetico from "@/assets/banner-magnetico.png";
-import bDepresion from "@/assets/banner-depresion.png";
-import bNarcisista from "@/assets/banner-narcisista.png";
+import bDepresion from "@/assets/banner-depresion-v2.jpg";
+import bNarcisista from "@/assets/banner-narcisista-v2.jpg";
 
 export const CAMINO_TOTAL_DAYS = 8;
 /** Costo en hojas para abrir la semana completa (los 7 días restantes). */

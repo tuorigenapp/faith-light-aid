@@ -1,3 +1,4 @@
+import { useSessionState } from "@/hooks/use-session-step";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useAuth } from "@/lib/use-auth";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -314,7 +315,7 @@ const WORDS = ["IDENTIDAD", "HABITO", "ACCION", "VISION", "FE", "PROPOSITO"];
 function IdentidadPage() {
   const { user } = useAuth();
   const qc = useQueryClient();
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useSessionState<1 | 2 | 3>("viz-identidad", 1);
   const [practiceId, setPracticeId] = useState<string>(PRACTICES[2].id);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [dailyAction, setDailyAction] = useState("");

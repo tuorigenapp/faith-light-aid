@@ -24,7 +24,9 @@ import {
   User as UserIcon,
   Users,
   X,
+  MessageSquareHeart,
 } from "lucide-react";
+import { useMensajesUnread } from "@/hooks/use-mensajes";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
@@ -35,12 +37,14 @@ type Item = {
   label: string;
   icon: typeof Home;
   flag?: keyof Pendings;
+  mensajes?: boolean;
   search?: Record<string, string>;
 };
 
 const ITEMS_TOP: Item[] = [
   { to: "/dashboard", label: "Inicio", icon: Home },
   { to: "/avisos", label: "Avisos de ORÍGEN", icon: Bell, flag: "notices" },
+  { to: "/mensajes", label: "Mensajes ORÍGEN", icon: MessageSquareHeart, mensajes: true },
   { to: "/etapas", label: "Mi Camino", icon: RouteIcon, flag: "camino" },
   { to: "/ejercicios", label: "Ejercicios del día", icon: Dumbbell, flag: "ejercicios" },
   { to: "/palabra", label: "Palabra del día", icon: Sparkles, flag: "palabra" },
@@ -147,7 +151,8 @@ export function FloatingOrigenMenu() {
     location.pathname.startsWith("/ruleta");
   if (hide) return null;
 
-  const anyPending = [...ITEMS_TOP, ...ITEMS_BOTTOM].some((i) => isPending(pendings, i.flag));
+  const mensajesUnread = useMensajesUnread();
+  const anyPending = mensajesUnread > 0 || [...ITEMS_TOP, ...ITEMS_BOTTOM].some((i) => isPending(pendings, i.flag));
   const rowCls = "flex min-h-12 items-center gap-3 rounded-[12px] px-3 text-sm font-semibold text-foreground/85 hover:bg-secondary/60";
 
   const renderItem = (item: Item) => (
@@ -155,7 +160,7 @@ export function FloatingOrigenMenu() {
       <Link to={item.to} search={(item.search ?? {}) as never} onClick={() => setOpen(false)} className={rowCls}>
         <item.icon className="h-4 w-4 shrink-0 text-primary" />
         <span className="min-w-0 flex-1 truncate">{item.label}</span>
-        {isPending(pendings, item.flag) && <Dot />}
+        {(isPending(pendings, item.flag) || (item.mensajes && mensajesUnread > 0)) && <Dot />}
       </Link>
     </li>
   );

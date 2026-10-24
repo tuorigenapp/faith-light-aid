@@ -255,8 +255,8 @@ export const adminUpdateSubtopic = createServerFn({ method: "POST" })
     z
       .object({
         id: z.string().uuid(),
-        audioUrl: z.string().trim().max(600).optional(),
-        pdfUrl: z.string().trim().max(600).optional(),
+        audioUrl: z.string().trim().max(2000).optional(),
+        pdfUrl: z.string().trim().max(2000).optional(),
         lesson: z.string().trim().max(6000).optional(),
         exercise: z.string().trim().max(6000).optional(),
         affirmation: z.string().trim().max(400).optional(),
