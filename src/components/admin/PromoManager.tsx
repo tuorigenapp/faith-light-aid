@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ImagePlus, Trash2, Eye, EyeOff, Megaphone, Home, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { confirmDeletion } from "@/lib/deletion-confirmation";
 
 type Placement = "inicio" | "comunidad";
 type Promo = {
@@ -82,8 +83,9 @@ export function PromoManager() {
     qc.invalidateQueries({ queryKey: ["admin-promos"] });
   }
   async function remove(p: Promo) {
-    if (!confirm("¿Eliminar esta campaña?")) return;
-    await supabase.from("promo_campaigns").delete().eq("id", p.id);
+    if (!await confirmDeletion("Esta campaña se eliminará.")) return;
+    const { error } = await supabase.from("promo_campaigns").delete().eq("id", p.id);
+    if (error) return setNote({ text: "No pudimos eliminar la campaña. Intenta de nuevo.", error: true });
     qc.invalidateQueries({ queryKey: ["admin-promos"] });
   }
 

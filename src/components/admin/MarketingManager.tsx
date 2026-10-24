@@ -21,6 +21,7 @@ import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { getAudienceCount, sendCampaignNow, scheduleCampaign, pauseCampaign, getAiPush, setAiPush } from "@/lib/marketing.functions";
+import { confirmDeletion } from "@/lib/deletion-confirmation";
 
 type Channel = "email" | "push";
 
@@ -392,8 +393,8 @@ export function MarketingManager() {
                   </p>
                 </div>
                 <button
-                  onClick={() => {
-                    if (confirm(`¿Eliminar la lista "${l.name}"?`)) removeList.mutate(l.id);
+                  onClick={async () => {
+                    if (await confirmDeletion("Esta lista se eliminará.")) removeList.mutate(l.id);
                   }}
                   aria-label={`Eliminar ${l.name}`}
                   className="grid h-9 w-9 place-items-center rounded-[10px] bg-destructive/10 text-destructive"

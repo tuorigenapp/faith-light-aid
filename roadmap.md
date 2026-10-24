@@ -1,5 +1,12 @@
 # Roadmap ORÍGEN
 
+## Correcciones del 24 de octubre, 06:44 UTC
+- [x] Sincronizar en Inicio las portadas de Libérate del Narcisista y Sana Tu Árbol Familiar que ya aparecen en Visualízalo; iguales en ambas vistas, completas y con enlaces comprobados a 375/1280 px.
+- [x] Reparar portada de la consulta Sana tu árbol familiar y comprobarla con sesión: portada firmada visible en listado y detalle, con respaldo local.
+- [x] Corregir regreso de Patrones Familiares al inicio: navegación a /dashboard comprobada.
+- [x] Unificar todas las eliminaciones en un popup ORÍGEN con cancelar, eliminar y casilla No volver a mostrar, guardada por persona; diario, mentora, consultas, fotos, árbol, comunidad y panel migrados sin confirmaciones nativas.
+- [x] Probar cancelación, confirmación y eliminaciones siguientes sin recordatorio; diario con restauración y borrado permanente, mensaje y conversación de mentora comprobados con datos temporales y sesión real. Ocho pruebas aprobadas, sin errores de pantalla, build OK.
+
 ## Portadas de Visualízate del 24 de octubre, 06:11 UTC
 - [x] Portadas 1:1 con texto (etiqueta, título grande, subtítulo, sin botón) para las 4 categorías principales: Música, Limpieza, Identidad y Cristo 3·6·9.
 - [x] Portadas registradas en el catálogo del cPanel para edición manual.

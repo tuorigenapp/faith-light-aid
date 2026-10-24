@@ -22,6 +22,7 @@ import { createHojaTransfer } from "@/lib/rewards.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { printFamilyTree } from "@/lib/print-pdf";
 import origenIcon from "@/assets/origen-o-icon.png";
+import { confirmDeletion } from "@/lib/deletion-confirmation";
 
 
 export const Route = createFileRoute("/_authenticated/arbol")({
@@ -233,7 +234,7 @@ function TreeDetailView({
   const qc = useQueryClient();
 
   async function removeMember(member: Member) {
-    if (!confirm(`¿Eliminar a ${member.full_name} del árbol?`)) return;
+    if (!await confirmDeletion("Este familiar se eliminará de tu árbol.")) return;
     const { error } = await supabase.from("family_members").delete().eq("id", member.id);
     if (error) return toast.error("No pudimos eliminar este familiar");
     qc.invalidateQueries({ queryKey: ["family_members"] });

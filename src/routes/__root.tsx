@@ -17,6 +17,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { ThemeProvider } from "@/lib/theme";
 import { VoiceProvider } from "@/lib/voice";
+import { DeletionConfirmation } from "@/components/DeletionConfirmation";
 
 function NotFoundComponent() {
   return (
@@ -130,6 +131,7 @@ function RootComponent() {
       <ThemeProvider>
         <VoiceProvider>
           <Outlet />
+          <DeletionConfirmation />
           <AppToaster />
           <Analytics />
         </VoiceProvider>

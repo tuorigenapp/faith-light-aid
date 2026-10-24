@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Search, ShieldCheck, Sparkles, Users, Megaphone, Flag, Ban, BadgeCheck } from "lucide-react";
+import { confirmDeletion } from "@/lib/deletion-confirmation";
 
 const TOPICS = [
   { key: "general", label: "Para ti" },
@@ -74,9 +75,9 @@ export function CommunityModerator() {
     refresh();
   }
   async function act(payload: Record<string, unknown>, confirmText?: string) {
-    if (confirmText && !window.confirm(confirmText)) return;
+    if (confirmText && !await confirmDeletion("Este contenido se eliminará de la comunidad. No podrás recuperarlo.")) return;
     try { await send(payload); toast.success("Moderación actualizada"); }
-    catch (e) { toast.error((e as Error).message); }
+    catch (e) { toast.error(confirmText ? "No pudimos eliminar el contenido. Intenta de nuevo." : (e as Error).message); }
   }
   async function publish() {
     setPublishing(true);

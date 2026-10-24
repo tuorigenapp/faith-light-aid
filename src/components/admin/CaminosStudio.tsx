@@ -16,6 +16,7 @@ import { CAMINOS } from "@/lib/caminos";
 import { GAMES } from "@/components/games/DailyGames";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { confirmDeletion } from "@/lib/deletion-confirmation";
 
 type Notify = (n: { text: string; error?: boolean } | null) => void;
 
@@ -47,7 +48,7 @@ export function CaminosStudio({ onNote }: { onNote: Notify }) {
       qc.invalidateQueries({ queryKey: ["content-overrides"] });
       qc.invalidateQueries({ queryKey: ["custom-caminos"] });
     } catch (e) {
-      onNote({ text: e instanceof Error ? e.message : "No pudimos guardar.", error: true });
+      onNote({ text: ok === "Camino eliminado." ? "No pudimos eliminar el camino. Intenta de nuevo." : e instanceof Error ? e.message : "No pudimos guardar.", error: true });
     }
     setBusy(null);
   }
@@ -117,7 +118,7 @@ export function CaminosStudio({ onNote }: { onNote: Notify }) {
               coverValue={c.cover_url ?? ""}
               onToggle={() => run(c.id, () => update({ data: { id: c.id, isPublished: !c.is_published } }), "Visibilidad actualizada.")}
               onSaveCover={(url) => run(c.id, () => update({ data: { id: c.id, coverUrl: url } }), "Portada guardada.")}
-              onDelete={() => window.confirm(`¿Eliminar "${c.title}"?`) && run(c.id, () => update({ data: { id: c.id, remove: true } }), "Camino eliminado.")}
+              onDelete={async () => { if (await confirmDeletion("Este camino se eliminará. No podrás recuperarlo.")) await run(c.id, () => update({ data: { id: c.id, remove: true } }), "Camino eliminado."); }}
             />
           </div>)}
         </div>

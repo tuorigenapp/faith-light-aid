@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { MessageCircleHeart, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useContentOverrides } from "@/hooks/use-content-overrides";
+import { ConsultaCover } from "@/components/ConsultaCover";
 import consultaMentora from "@/assets/consultas/consulta-mentora.jpg";
 import consultaPareja from "@/assets/consultas/consulta-pareja.jpg";
 import consultaPatrones from "@/assets/consultas/consulta-patrones.jpg";
@@ -40,13 +40,7 @@ const BUILTIN: ConsultaCard[] = [
   { key: "ministracion", title: "Dios te dice hoy", subtitle: "Una palabra de fe preparada para tu corazón.", image: consultaMinistracion, to: "/ministracion", coverKey: "imagen:consulta:banner-ministracion" },
 ];
 
-/** Portadas locales con texto para consultas conocidas (respaldo si la portada guardada caduca). */
-const LOCAL_COVERS: Record<string, string> = {
-  "sana-tu-arbol-familiar-encuentra-el-origen-8en3p": consultaArbol,
-};
-
 function ConsultasPage() {
-  const ov = useContentOverrides();
   const { data: custom, isLoading } = useQuery({
     queryKey: ["todas-las-consultas"],
     queryFn: async () => {
@@ -62,7 +56,7 @@ function ConsultasPage() {
     key: c.id,
     title: c.title,
     subtitle: c.subtitle || "Tu respuesta personalizada te espera.",
-    image: LOCAL_COVERS[c.slug] || c.cover_url || consultaPatrones,
+    image: c.cover_url || (c.slug.startsWith("sana-tu-arbol-familiar") ? consultaArbol : consultaPatrones),
     to: "/consulta/$slug",
     slug: c.slug,
   }));
@@ -96,7 +90,7 @@ function ConsultasPage() {
         ) : (
           <section className="mt-5 grid gap-3 sm:grid-cols-2">
             {cards.map((c, i) => (
-              <ConsultaCardView key={c.key} card={{ ...c, image: (c.coverKey && ov.get(c.coverKey)?.cover_url) || c.image }} index={i} />
+              <ConsultaCardView key={c.key} card={c} index={i} />
             ))}
           </section>
         )}
@@ -117,7 +111,9 @@ function ConsultasPage() {
 function ConsultaCardView({ card, index }: { card: ConsultaCard; index: number }) {
   const inner = (
     <div className="relative aspect-[21/9] overflow-hidden bg-muted">
-      <img
+      <ConsultaCover
+        slug={card.slug}
+        imageKey={card.coverKey}
         src={card.image}
         alt={`Portada de ${card.title}`}
         loading="lazy"

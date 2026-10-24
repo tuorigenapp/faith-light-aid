@@ -44,6 +44,7 @@ import reactionLove from "@/assets/community-reactions/love.png";
 import star3d from "@/assets/e3d-star.png";
 import { celebrateStep } from "@/lib/celebrate-step";
 import { useCommunityNotifications, useMarkCommunityRead } from "@/hooks/use-community-notifications";
+import { confirmDeletion } from "@/lib/deletion-confirmation";
 
 export const Route = createFileRoute("/_authenticated/comunidad")({
   head: () => ({ meta: [{ title: "Comunidad ORÍGEN — un lugar para acompañarnos" }, { name: "description", content: "Comparte preguntas y conversa con respeto. Comunidad abierta a todas las membresías." }, { property: "og:title", content: "Comunidad ORÍGEN" }, { property: "og:description", content: "Preguntas y conversaciones para acompañarnos." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
@@ -414,7 +415,7 @@ function Comunidad() {
      setBlockTopic(null); setTopic("todos"); setTab("feed"); refresh(); toast.success("Tema oculto de Descubrir. Sigue visible en Temas.");
    }
   async function share(id: string) { const url = `${window.location.origin}/comunidad?post=${id}`; try { if (navigator.share) await navigator.share({ title: "Comunidad ORÍGEN", url }); else { await navigator.clipboard.writeText(url); toast.success("Enlace copiado"); } } catch { /* cancelled */ } }
-   async function remove(id: string) { if (!confirm("¿Borrar tu pregunta y sus respuestas?")) return; const { error } = await supabase.from("community_posts").delete().eq("id", id); if (error) toast.error(error.message); else { setOpenPost(null); refresh(); } }
+   async function remove(id: string) { if (!await confirmDeletion("Tu pregunta y sus respuestas se eliminarán. No podrás recuperarlas.")) return; const { error } = await supabase.from("community_posts").delete().eq("id", id); if (error) toast.error("No pudimos eliminar la pregunta. Intenta de nuevo."); else { setOpenPost(null); refresh(); } }
    async function report(type: "post" | "reply", id: string) {
      const reason = window.prompt("¿Por qué debemos revisar este contenido?");
      if (!reason) return;

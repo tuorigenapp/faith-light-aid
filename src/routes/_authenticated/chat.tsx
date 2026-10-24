@@ -13,6 +13,8 @@ import { getUserPlan, getDailyUsage, PLAN_LIMITS } from "@/lib/plan";
 import { formatHojas, spendDailyAccess } from "@/lib/gems";
 import { Link } from "@tanstack/react-router";
 import { msUntilAppDayReset, formatCountdown } from "@/lib/app-day";
+import { confirmDeletion } from "@/lib/deletion-confirmation";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_authenticated/chat")({
   head: () => ({ meta: [
@@ -77,9 +79,14 @@ function ChatPage() {
   }
 
   async function deleteConversation(id: string) {
-    await supabase.from("conversations").delete().eq("id", id);
+    if (!await confirmDeletion("Esta conversación y sus mensajes se eliminarán. No podrás recuperarlos.")) return;
+    const { error } = await supabase.from("conversations").delete().eq("id", id);
+    if (error) return toast.error("No pudimos eliminar la conversación. Intenta de nuevo.");
+    try { localStorage.removeItem(`chat-draft-${id}`); } catch { /* ignore */ }
     if (activeId === id) setActiveId(null);
     qc.invalidateQueries({ queryKey: ["conversations"] });
+    qc.invalidateQueries({ queryKey: ["messages", id] });
+    qc.invalidateQueries({ queryKey: ["historial-general"] });
   }
 
   const locked = !!gate && gate.remaining === 0;
@@ -178,9 +185,9 @@ function ConversationList({ items, activeId, onPick, onDelete }: { items: { id: 
               <p className="truncate text-sm font-semibold">{c.title}</p>
               <p className="truncate text-[12px] text-muted-foreground">{draft ? <span className="font-semibold text-destructive">Borrador: </span> : null}{draft || new Date(c.updated_at).toLocaleString("es", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</p>
             </div>
-            <button aria-label="Borrar conversación" onClick={(e) => { e.stopPropagation(); if (confirm("¿Borrar esta conversación?")) onDelete(c.id); }} className="grid h-11 w-11 place-items-center rounded-full lg:opacity-0 lg:group-hover:opacity-100">
+            <Button variant="ghost" size="icon" aria-label="Borrar conversación" onClick={(e) => { e.stopPropagation(); onDelete(c.id); }} className="h-11 w-11 rounded-full lg:opacity-0 lg:group-hover:opacity-100">
               <Trash2 className="h-4 w-4 text-muted-foreground" />
-            </button>
+            </Button>
           </div>
         );
       })}
@@ -302,6 +309,16 @@ function ChatWindow({
 
   const loading = status === "submitted" || status === "streaming";
 
+  async function deleteMessage(id: string) {
+    if (loading || !user) return;
+    if (!await confirmDeletion("Este mensaje se eliminará de la conversación. No podrás recuperarlo.")) return;
+    const { error } = await supabase.from("messages").delete().eq("id", id).eq("user_id", user.id).eq("conversation_id", conversationId);
+    if (error) return toast.error("No pudimos eliminar el mensaje. Intenta de nuevo.");
+    setMessages(current => current.filter(message => message.id !== id));
+    await qc.invalidateQueries({ queryKey: ["messages", conversationId] });
+    qc.invalidateQueries({ queryKey: ["historial-general"] });
+  }
+
   return (
     <>
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-5">
@@ -336,6 +353,9 @@ function ChatWindow({
                   : "bg-card border border-border rounded-tl-md shadow-soft"
               )}>
                 {m.parts.map((p, i) => p.type === "text" ? <span key={i} className="whitespace-pre-wrap">{p.text}</span> : null)}
+                <div className="flex justify-end">
+                  <Button variant="ghost" size="icon" className="h-11 w-11 text-current" aria-label="Eliminar mensaje" title="Eliminar mensaje" disabled={loading} onClick={() => deleteMessage(m.id)}><Trash2 /></Button>
+                </div>
                 {m.role === "assistant" && (
                   <p className="mt-1.5 text-[10px] text-muted-foreground/70 flex items-center gap-1">
                     <Leaf className="w-3 h-3" />1 hoja de sanación

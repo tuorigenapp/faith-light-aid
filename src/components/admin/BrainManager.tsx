@@ -6,6 +6,7 @@ import { extractPdfText } from "@/lib/pdf-text";
 import { cn } from "@/lib/utils";
 import { CAMINOS } from "@/lib/caminos";
 import { mediaError } from "@/lib/media-input";
+import { confirmDeletion } from "@/lib/deletion-confirmation";
 
 type Doc = {
   id: string;
@@ -94,9 +95,9 @@ export function BrainManager() {
     qc.invalidateQueries({ queryKey: ["admin-brain"] });
   }
   async function remove(d: Doc) {
-    if (!confirm(`¿Eliminar "${d.title}" del Cerebro ORÍGEN?`)) return;
+    if (!await confirmDeletion("Este material se eliminará del Cerebro ORÍGEN.")) return;
     const { error } = await supabase.from("brain_documents").delete().eq("id", d.id);
-    if (error) { setNote({ text: mediaError(error, "No pudimos eliminar el material."), error: true }); return; }
+    if (error) { setNote({ text: "No pudimos eliminar el material. Intenta de nuevo.", error: true }); return; }
     qc.invalidateQueries({ queryKey: ["admin-brain"] });
   }
 

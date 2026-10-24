@@ -6,6 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { adminCreateConsulta, adminToggleConsulta, adminDeleteConsulta } from "@/lib/consultas.functions";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { confirmDeletion } from "@/lib/deletion-confirmation";
+import { ConsultaCover } from "@/components/ConsultaCover";
 
 type Row = {
   id: string;
@@ -97,7 +99,7 @@ export function ConsultasStudio() {
         {!isLoading && rows.length === 0 && <p className="text-[14px] text-muted-foreground">Todavía no creaste ninguna. La primera aparecerá aquí.</p>}
         {rows.map((r) => (
           <article key={r.id} className="overflow-hidden rounded-[16px] border border-border bg-card">
-            {r.cover_url && <img src={r.cover_url} alt="" className={cn("aspect-[16/9] w-full object-cover", !r.is_published && "opacity-50")} />}
+            <ConsultaCover slug={r.slug} src={r.cover_url ?? undefined} alt={`Portada de ${r.title}`} className={cn("aspect-[21/9] w-full object-cover", !r.is_published && "opacity-50")} />
             <div className="p-3">
               <p className="truncate font-bold">{r.title}</p>
               <p className="truncate text-[12px] text-muted-foreground">{r.subtitle || "Sin subtítulo"}</p>
@@ -113,7 +115,7 @@ export function ConsultasStudio() {
                   {r.is_published ? <><EyeOff className="h-4 w-4" /> Ocultar</> : <><Eye className="h-4 w-4" /> Mostrar</>}
                 </button>
                 <button
-                  onClick={async () => { if (!confirm(`¿Eliminar "${r.title}"?`)) return; await del({ data: { id: r.id } }); qc.invalidateQueries({ queryKey: ["admin-consultas"] }); }}
+                  onClick={async () => { if (!await confirmDeletion("Esta consulta se eliminará. No podrás recuperarla.")) return; try { await del({ data: { id: r.id } }); qc.invalidateQueries({ queryKey: ["admin-consultas"] }); } catch { setNote({ text: "No pudimos eliminar la consulta. Intenta de nuevo.", error: true }); } }}
                   aria-label="Eliminar"
                   className="grid min-h-11 w-11 place-items-center rounded-[10px] bg-destructive/10 text-destructive"
                 ><Trash2 className="h-4 w-4" /></button>

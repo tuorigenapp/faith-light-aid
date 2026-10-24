@@ -18,6 +18,7 @@ import i4 from "@/assets/e3d-butterfly.png";
 import i5 from "@/assets/e3d-cross.png";
 import i6 from "@/assets/e3d-heart-purple.png";
 import i7 from "@/assets/e3d-book.png";
+import { ConsultaCover } from "@/components/ConsultaCover";
 
 const ICONS3D = [i1, i2, i3, i4, i5, i6, i7];
 
@@ -253,7 +254,7 @@ function ConsultaPage() {
       {step === 1 && (
         <>
           <header className="overflow-hidden rounded-[16px] border border-border bg-card">
-            {consulta.cover_url && <img src={consulta.cover_url} alt="" className="aspect-[16/9] w-full object-cover" />}
+            <ConsultaCover slug={consulta.slug} src={consulta.cover_url ?? undefined} alt={`Portada de ${consulta.title}`} className="aspect-[21/9] w-full object-cover" />
             <div className="p-4">
               <h1 className="font-display text-[26px] font-bold leading-[1.15]">{consulta.title}</h1>
               {consulta.subtitle && <p className="mt-1 text-[15px] text-muted-foreground">{consulta.subtitle}</p>}

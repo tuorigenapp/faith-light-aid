@@ -255,7 +255,7 @@ function PatronesPage() {
       <div className="relative z-10 mx-auto max-w-lg px-5 pt-6 pb-16">
         {/* Progress header */}
         <div className="flex items-center justify-between mb-6">
-          <Link to="/arbol" className="w-10 h-10 rounded-full bg-white shadow-soft grid place-items-center">
+          <Link to="/dashboard" aria-label="Volver al inicio" className="w-11 h-11 rounded-full bg-white shadow-soft grid place-items-center">
             <ArrowLeft className="w-4 h-4 text-[#1B1B27]" />
           </Link>
           <div className="text-[13px] font-medium text-[#64667A]">Paso {step} de 3</div>
