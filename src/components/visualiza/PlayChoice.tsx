@@ -30,4 +30,4 @@ export function PlayChoice({ title, onLesson, onListen, onClose, canListen = tru
 }
 
 /** Total rows every playlist shows; missing days render as blurred "Próximamente" rows. */
-export const PLAYLIST_SLOTS = 21;
+export { PLAYLIST_SLOTS } from "@/lib/playlist-slots";

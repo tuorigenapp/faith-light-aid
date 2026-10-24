@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { PlayChoice, PLAYLIST_SLOTS } from "./PlayChoice";
+import { PlayChoice } from "./PlayChoice";
+import { missingPlaylistDays } from "@/lib/playlist-slots";
 import { usePlayer } from "@/lib/player";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, Check, Headphones, Lock, Sparkles, BookOpen } from "lucide-react";
@@ -54,8 +55,8 @@ export function CustomTopic({
     <div className="pb-32">
       <section className="relative overflow-hidden rounded-b-[28px]">
         <img src={page.cover_home || page.cover_step1 || cat.cover_url || heroFallback} alt="" className="absolute inset-0 h-full w-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-b from-foreground/30 via-foreground/55 to-foreground/85" />
-        <div className="relative mx-auto max-w-3xl px-5 pt-6 pb-8 text-background">
+        <div className="absolute inset-0 music-scrim" />
+        <div className="relative mx-auto max-w-3xl px-5 pt-6 pb-8 text-sanctuary-foreground">
           <Link to="/visualiza" className="inline-flex min-h-11 items-center gap-1 text-[13px] font-bold">
             <ArrowLeft className="h-4 w-4" /> Visualízalo y Vívelo
           </Link>
@@ -63,8 +64,8 @@ export function CustomTopic({
           <h1 className="mt-1 font-display text-[32px] font-extrabold leading-[1.1]">{page.hero_title || cat.title}</h1>
           {(page.hero_text || cat.subtitle) && <p className="mt-2 text-[15px] opacity-90">{page.hero_text || cat.subtitle}</p>}
           <div className="mt-5 flex items-center gap-3">
-            <div className="h-2 flex-1 overflow-hidden rounded-full bg-background/25">
-              <div className="h-full rounded-full bg-background transition-[width] duration-500" style={{ width: `${pct}%` }} />
+            <div className="h-2 flex-1 overflow-hidden rounded-full bg-sanctuary-foreground/25">
+              <div className="h-full rounded-full bg-sanctuary-foreground transition-[width] duration-500" style={{ width: `${pct}%` }} />
             </div>
             <span className="text-[13px] font-bold tabular-nums">{done}/{subs.length}</span>
           </div>
@@ -139,7 +140,7 @@ export function CustomTopic({
           )}
 
           <div className="mt-3 overflow-hidden rounded-[16px] border border-border bg-card">
-            {Array.from({ length: Math.max(0, PLAYLIST_SLOTS - subs.length) }, (_, i) => subs.length + i + 1).map(n => <div key={n} aria-hidden="true" className="flex min-h-16 items-center gap-3 border-b border-border px-4 py-3 last:border-b-0"><span className="text-[12px] text-muted-foreground">#{String(n).padStart(2, "0")}</span><span className="flex-1 select-none blur-[3px] text-sm">Práctica guiada de sanación</span><Lock className="h-4 w-4 text-muted-foreground" /></div>)}
+            {missingPlaylistDays(subs).map(n => <div key={n} aria-hidden="true" className="flex min-h-16 items-center gap-3 border-b border-border px-4 py-3 last:border-b-0"><span className="text-[12px] text-muted-foreground">#{String(n).padStart(2, "0")}</span><span className="flex-1 select-none blur-[3px] text-sm">Práctica guiada de sanación</span><Lock className="h-4 w-4 text-muted-foreground" /></div>)}
           </div>
           {choice && <PlayChoice title={choice.title} canListen={Boolean(choice.audio_url)} onClose={() => setChoice(null)} onListen={() => listen(choice)} onLesson={() => { const day = choice.day_index; setChoice(null); navigate({ to: "/visualiza/$categoryId/$day", params: { categoryId: cat.id, day: String(day) } }); }} />}
           {!isPaid && (

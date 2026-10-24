@@ -33,3 +33,5 @@
 - Browser push activation is confirmed only after the subscription and preference persist; internal popups cannot enable external push delivery.
 - Web Push delivery validates browser push-service hosts on the client and again before server fetch, with redirects forbidden; this prevents stored endpoints from targeting private services.
 - Exploration cards share one asset catalog between Home and Explore; this prevents stale covers in one entry point.
+- Playlist placeholders come from unassigned day indices in the shared slot helper without truncating real tracks; this prevents repeated day labels when uploads have gaps.
+- Updating a music category cover synchronizes its page cover variants while preserving its lesson text; this prevents older art from persisting inside a refreshed category.

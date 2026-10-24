@@ -1,4 +1,5 @@
-import { PlayChoice, PLAYLIST_SLOTS } from "@/components/visualiza/PlayChoice";
+import { PlayChoice } from "@/components/visualiza/PlayChoice";
+import { missingPlaylistDays } from "@/lib/playlist-slots";
 import { useSessionState } from "@/hooks/use-session-step";
 import { createFileRoute, Link, Outlet, useParams, useNavigate, useRouterState } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
@@ -368,7 +369,7 @@ function CategoryInner() {
               </button>
             );
           })}
-          {Array.from({ length: Math.max(0, PLAYLIST_SLOTS - (data?.audios.length ?? 0)) }, (_, i) => (data?.audios.length ?? 0) + i + 1).map((n) => (
+          {missingPlaylistDays(data?.audios ?? []).map((n) => (
             <div key={`f${n}`} aria-hidden="true" className="flex w-full items-center gap-3 px-4 py-3 border-b border-border/40 last:border-b-0">
               <div className="w-12 shrink-0 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Día {n}</div>
               <div className="flex-1 min-w-0 blur-[3px] select-none"><div className="font-semibold text-sm truncate">{DAY_TITLES[n - 1] ?? "Práctica guiada"}</div></div>
