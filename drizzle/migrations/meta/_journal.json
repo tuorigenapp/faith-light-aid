@@ -15,6 +15,13 @@
       "when": 1791856042410,
       "tag": "0001_assistant_events",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792826106613,
+      "tag": "0002_mentor_conversation_trash_30_days",
+      "breakpoints": true
     }
   ]
 }
