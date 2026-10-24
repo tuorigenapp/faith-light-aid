@@ -46,21 +46,17 @@ const FLAGS = [
   { t: "Ya probaste terapia, libros y apps.", d: "Te ayudaron un rato. El patrón volvió." },
 ];
 
-const PHASES = [
-  { img: eBrain, t: "Fase 1 · Lo nombras", d: "Un diagnóstico de 2 minutos te muestra qué se repite y de qué lado de tu familia viene." },
-  { img: eHeartPurple, t: "Fase 2 · Lo entiendes", d: "Consultas personalizadas sobre tus patrones familiares, tu pareja y lo que Dios te dice hoy." },
-  { img: eCross, t: "Fase 3 · Lo entregas", d: "La Palabra del día, oración y perdón guiado para soltar lo que no te corresponde cargar." },
-  { img: ePractice, t: "Fase 4 · Lo trabajas", d: "Un ejercicio de 5 minutos al día y tu Camino ORÍGEN de 20 etapas, a tu ritmo." },
-  { img: eHeadphones, t: "Fase 5 · Lo vives", d: "Visualízalo y Vívelo: audios, afirmaciones y programas para renovar tu mente." },
-  { img: eButterfly, t: "Fase 6 · Lo sostienes", d: "Diario, mentora, racha y Árbol de Sanación para que el cambio no se apague." },
+const VS: [string, string][] = [
+  ["Consejos generales", "Parte de tu historia"],
+  ["Trata el síntoma", "Sana la raíz"],
+  ["Horas de lectura", "5 minutos al día"],
+  ["Lo haces sola(o)", "Con Dios y tu mentora"],
 ];
 
-const FOR_WHO = [
-  "Siente que carga heridas que no son solo suyas.",
-  "Quiere paz real, no frases bonitas.",
-  "Tiene poco tiempo y necesita pasos cortos y claros.",
-  "Busca a Dios sin que le impongan una religión.",
-  "Quiere que sus hijos no hereden lo mismo.",
+const STEPS = [
+  { img: eBrain, t: "Lo nombras" },
+  { img: eCross, t: "Lo entregas" },
+  { img: eButterfly, t: "Lo vives" },
 ];
 
 const FAILED = ["“Ten paciencia.”", "“Piensa positivo.”", "“Ya pasará.”", "“Lee otro libro.”"];
@@ -173,44 +169,41 @@ function Landing() {
           </Reveal>
         </section>
 
-        {/* 3. TE PRESENTO EL MÉTODO */}
+        {/* 3. TE PRESENTO EL MÉTODO — comparación VS */}
         <section className="relative -mx-4 mt-14 overflow-hidden px-4 py-10" style={{ background: "linear-gradient(180deg, color-mix(in oklab, var(--primary) 7%, var(--background)), var(--background))" }}>
           <Reveal>
             <p className="text-center text-[14px] font-semibold text-muted-foreground">Te presento:</p>
             <h2 className="mt-1 text-center font-display text-[30px] font-extrabold leading-tight text-primary sm:text-[38px]">El Método ORÍGEN</h2>
-            <p className="mx-auto mt-3 max-w-xl text-center text-[16px] leading-relaxed text-muted-foreground">
-              Un camino de <strong className="text-foreground">6 fases</strong> para sanar la raíz de lo que se repite en tu vida, con la Palabra de Dios, tu historia familiar y pasos diarios de 5 minutos.
-            </p>
+            <p className="mx-auto mt-2 max-w-md text-center text-[15px] text-muted-foreground">Sanar la raíz, no solo el síntoma.</p>
           </Reveal>
           <Reveal>
-            <div className="mx-auto mt-6 max-w-xl rounded-[16px] border border-primary/20 bg-card p-5 text-center">
-              <p className="text-[16px] font-bold">Esto no es otro libro de autoayuda.</p>
-              <p className="mt-1 text-[14px] text-muted-foreground">No te va a decir “piensa positivo”. Eso ya lo sabes y no alcanzó. Esto trabaja desde tu origen: lo que aprendiste en casa y lo que Dios dice de ti.</p>
+            <div className="relative mx-auto mt-6 grid max-w-2xl grid-cols-2 gap-3">
+              <div className="rounded-[16px] bg-card p-4 shadow-[0_1px_3px_rgba(30,25,20,.06)]">
+                <p className="text-[12px] font-bold uppercase tracking-widest text-muted-foreground">Lo de siempre</p>
+                <ul className="mt-3 grid gap-2.5">
+                  {VS.map(([a]) => <li key={a} className="flex items-start gap-2 text-[14px] text-muted-foreground"><CircleX className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />{a}</li>)}
+                </ul>
+              </div>
+              <div className="rounded-[16px] border-2 border-primary bg-card p-4 shadow-[0_4px_14px_color-mix(in_oklab,var(--primary)_25%,transparent)]">
+                <p className="text-[12px] font-bold uppercase tracking-widest text-primary">ORÍGEN</p>
+                <ul className="mt-3 grid gap-2.5">
+                  {VS.map(([, b]) => <li key={b} className="flex items-start gap-2 text-[14px] font-semibold"><CheckDot />{b}</li>)}
+                </ul>
+              </div>
+              <span aria-hidden className="absolute left-1/2 top-1/2 grid h-11 w-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full text-[14px] font-extrabold text-primary-foreground shadow-glow" style={{ background: "var(--gradient-primary)" }}>VS</span>
             </div>
           </Reveal>
-          <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {PHASES.map((p, i) => (
+          <div className="mx-auto mt-6 grid max-w-2xl grid-cols-3 gap-2">
+            {STEPS.map((p, i) => (
               <Reveal key={p.t} delay={i * 60}>
-                <div className="relative h-full rounded-[16px] bg-card p-5 shadow-[0_1px_3px_rgba(30,25,20,.06)]">
-                  {i === 0 && <span aria-hidden className="absolute inset-x-6 top-0 h-[2px] rounded-full" style={{ background: "var(--gradient-primary)" }} />}
-                  <img src={p.img} alt="" loading="lazy" className="h-14 w-14 object-contain" />
-                  <p className="mt-3 font-display text-[18px] font-bold">{p.t}</p>
-                  <p className="mt-1 text-[14px] leading-relaxed text-muted-foreground">{p.d}</p>
+                <div className="flex h-full flex-col items-center rounded-[16px] bg-card p-3 text-center shadow-[0_1px_3px_rgba(30,25,20,.06)]">
+                  <img src={p.img} alt="" loading="lazy" className="h-12 w-12 object-contain" />
+                  <p className="mt-2 text-[12px] font-bold text-primary">Paso {i + 1}</p>
+                  <p className="text-[15px] font-bold leading-tight">{p.t}</p>
                 </div>
               </Reveal>
             ))}
           </div>
-        </section>
-
-        {/* 4. PARA QUIÉN */}
-        <section className="mt-12 grid items-center gap-6 md:grid-cols-2">
-          <Reveal><img src={eStar} alt="" loading="lazy" className="mx-auto h-40 w-40 object-contain drop-shadow-xl md:h-56 md:w-56" /></Reveal>
-          <Reveal>
-            <p className="text-[12px] font-bold uppercase tracking-widest text-primary">¿Para quién es?</p>
-            <H2 left>Para la persona que…</H2>
-            <ul className="mt-4 grid gap-3">{FOR_WHO.map((t) => <li key={t} className="flex items-start gap-2.5 text-[15px] font-medium"><CheckDot />{t}</li>)}</ul>
-            <p className="mt-4 text-[15px] text-muted-foreground">Si te viste aquí, esto fue hecho para ti — y para la persona en la que te estás convirtiendo.</p>
-          </Reveal>
         </section>
 
         {/* 5. ANTES Y DESPUÉS */}
@@ -247,7 +240,10 @@ function Landing() {
         {/* 10. PRUEBA UNA CONSULTA */}
         <section className="mx-auto max-w-2xl"><TryConsulta name="" /></section>
 
-        <Reveal><div id="dios-te-dice-hoy" className="mt-12 scroll-mt-20"><DiosTeDiceHoy /></div></Reveal>
+        <section className="mx-auto mt-12 max-w-md">
+          <Kicker>iPhone y Android</Kicker><H2>Tenla en tu celular</H2>
+          <InstallAppButton className="mt-4" label="Ver cómo agregar ORÍGEN al inicio" />
+        </section>
 
         {/* 11. GARANTÍA */}
         <section className="relative mx-auto mt-12 max-w-2xl overflow-hidden rounded-[24px] bg-card p-6 text-center shadow-[0_1px_3px_rgba(30,25,20,.06)]">
