@@ -65,7 +65,7 @@ type JsPdfLike = {
   setFillColor(...c: number[]): unknown; roundedRect(x: number, y: number, w: number, h: number, rx: number, ry: number, s?: string): unknown;
   text(t: string | string[], x: number, y: number, o?: { align?: string }): unknown;
   splitTextToSize(t: string, w: number): string[];
-  textWithLink(t: string, x: number, y: number, o: { url: string }): unknown;
+  link(x: number, y: number, w: number, h: number, o: { url: string }): unknown;
 };
 
 /** Draws the ORÍGEN logo at the top of the current jsPDF page. */
@@ -95,7 +95,8 @@ export async function jsPdfPromoPage(doc: JsPdfLike, premium = isPremiumPlan()) 
     const btn = (label: string, url: string, yy: number) => {
       doc.setFillColor(124, 92, 255); doc.roundedRect(w / 2 - 50, yy - 6, 100, 11, 4, 4, "F");
       doc.setTextColor(255, 255, 255); doc.setFont("helvetica", "bold"); doc.setFontSize(11);
-      doc.textWithLink(label, w / 2 - doc.splitTextToSize(label, 200)[0]!.length * 1.0, yy + 1, { url });
+      doc.text(label, w / 2, yy + 1, { align: "center" });
+      doc.link(w / 2 - 50, yy - 6, 100, 11, { url });
     };
     btn("Comprar el libro en Amazon", BOOK_AMAZON_URL, y); y += 22;
     doc.setTextColor(30, 25, 20); doc.setFont("times", "bold"); doc.setFontSize(13);
