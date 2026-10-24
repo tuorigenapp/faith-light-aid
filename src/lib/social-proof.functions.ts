@@ -27,11 +27,11 @@ export const getLiveActivity = createServerFn({ method: "GET" })
     const raw: { icon: string; text: string; count: number }[] = [
       { icon: "sparkles", text: `${nuevos.count ?? 0} personas empezaron su camino hoy`, count: nuevos.count ?? 0 },
       { icon: "users", text: `${activos} personas avanzaron hoy en ORÍGEN`, count: activos },
-      { icon: "dove", text: `${consultas.count ?? 0} consultas «Dios te dice hoy» en las últimas 24 h`, count: consultas.count ?? 0 },
-      { icon: "heart", text: `${parejas.count ?? 0} lecturas de pareja realizadas hoy`, count: parejas.count ?? 0 },
+      { icon: "clouds", text: `${consultas.count ?? 0} consultas «Dios te dice hoy» en las últimas 24 h`, count: consultas.count ?? 0 },
+      { icon: "heart", text: `${parejas.count ?? 0} consultas de pareja realizadas hoy`, count: parejas.count ?? 0 },
       { icon: "gift", text: `${giros.count ?? 0} personas giraron la ruleta hoy`, count: giros.count ?? 0 },
       { icon: "book", text: `${diario.count ?? 0} entradas de diario escritas hoy`, count: diario.count ?? 0 },
-      { icon: "flag", text: `${etapas.count ?? 0} etapas completadas en las últimas 24 h`, count: etapas.count ?? 0 },
+      { icon: "star", text: `${etapas.count ?? 0} etapas completadas en las últimas 24 h`, count: etapas.count ?? 0 },
     ];
 
     // Umbral: por debajo de 3 no se muestra nada (mejor nada que un número bajo).
