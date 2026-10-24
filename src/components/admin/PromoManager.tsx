@@ -84,7 +84,8 @@ export function PromoManager() {
   }
   async function remove(p: Promo) {
     if (!await confirmDeletion("Esta campaña se eliminará.")) return;
-    await supabase.from("promo_campaigns").delete().eq("id", p.id);
+    const { error } = await supabase.from("promo_campaigns").delete().eq("id", p.id);
+    if (error) return setNote({ text: "No pudimos eliminar la campaña. Intenta de nuevo.", error: true });
     qc.invalidateQueries({ queryKey: ["admin-promos"] });
   }
 

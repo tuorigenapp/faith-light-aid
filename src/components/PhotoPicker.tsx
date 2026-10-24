@@ -90,7 +90,7 @@ export function PhotoPicker({ value, onCropped, onRemove, size = 96, shape = "ci
         <div className="flex-1 text-[12px] text-muted-foreground leading-snug">
           {label ?? `Toca para elegir una foto. Podrás recortarla. Máx. ${MAX_PHOTO_MB} MB.`}
           {value && onRemove && (
-            <Button variant="ghost" type="button" onClick={async () => { if (await confirmDeletion("Esta foto se eliminará.")) onRemove(); }} className="mt-1 min-h-11 gap-1 text-destructive font-bold text-[14px]">
+            <Button variant="ghost" type="button" onClick={async () => { if (await confirmDeletion("Esta foto se eliminará.")) await onRemove(); }} className="mt-1 min-h-11 gap-1 text-destructive font-bold text-[14px]">
               <Trash2 className="w-3.5 h-3.5" /> Eliminar foto
             </Button>
           )}

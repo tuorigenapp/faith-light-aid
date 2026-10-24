@@ -97,7 +97,7 @@ export function BrainManager() {
   async function remove(d: Doc) {
     if (!await confirmDeletion("Este material se eliminará del Cerebro ORÍGEN.")) return;
     const { error } = await supabase.from("brain_documents").delete().eq("id", d.id);
-    if (error) { setNote({ text: mediaError(error, "No pudimos eliminar el material."), error: true }); return; }
+    if (error) { setNote({ text: "No pudimos eliminar el material. Intenta de nuevo.", error: true }); return; }
     qc.invalidateQueries({ queryKey: ["admin-brain"] });
   }
 

@@ -115,7 +115,7 @@ export function UsersManager() {
       toast.success("Cuenta eliminada.");
       qc.invalidateQueries({ queryKey: ["admin-users"] });
     },
-    onError: (e: Error) => toast.error(e.message || "No se pudo eliminar la cuenta."),
+    onError: () => toast.error("No pudimos eliminar la cuenta. Intenta de nuevo."),
   });
 
   function submit(e: FormEvent) {
