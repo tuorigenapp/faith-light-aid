@@ -264,13 +264,14 @@ function ChatWindow({
   useEffect(() => { if (initialMessages) setMessages(initialMessages); }, [conversationId, initialMessages, setMessages]);
   useEffect(() => { inputRef.current?.focus(); }, [conversationId, status]);
   useEffect(() => { try { setInput(localStorage.getItem(`chat-draft-${conversationId}`) ?? ""); } catch { /* ignore */ } }, [conversationId]);
-  useEffect(() => { try { if (input) localStorage.setItem(`chat-draft-${conversationId}`, input); else localStorage.removeItem(`chat-draft-${conversationId}`); } catch { /* ignore */ } }, [input, conversationId]);
+  useEffect(() => { try { if (input) localStorage.setItem(`chat-draft-${conversationId}`, input); } catch { /* ignore */ } }, [input, conversationId]);
   useEffect(() => { scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" }); }, [messages]);
 
   async function handleSend() {
     if (!input.trim() || !user || locked) return;
     const text = input.trim();
     setInput("");
+    try { localStorage.removeItem(`chat-draft-${conversationId}`); } catch { /* ignore */ }
     await supabase.from("messages").insert({
       conversation_id: conversationId, user_id: user.id,
       role: "user", content: [{ type: "text", text }] as never,
