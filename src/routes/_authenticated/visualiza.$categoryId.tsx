@@ -1,6 +1,6 @@
 import { ManagedImage } from "@/components/ManagedImage";
 import { SubtopicIcon } from "@/components/visualiza/SubtopicIcon";
-import { resolvePractice, thematicPractice } from "@/lib/visualiza-content";
+import { resolvePractice, thematicPractice, dailyAffirmations } from "@/lib/visualiza-content";
 import { PlayChoice } from "@/components/visualiza/PlayChoice";
 import { missingPlaylistDays } from "@/lib/playlist-slots";
 import { useSessionState } from "@/hooks/use-session-step";
@@ -189,7 +189,8 @@ function CategoryInner() {
   const selectedArea = areas.find((a) => a.id === categoryId);
   const firstPractice = data.audios[0];
   const practice = firstPractice ? resolvePractice(c.title, firstPractice, data.audios) : thematicPractice(c.title, c.title);
-  const areaAffirmations = [{ text: practice.affirmation, Icon: Heart, color: "var(--primary)", bg: "var(--secondary)" }];
+  const todayIndex = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
+  const areaAffirmations = dailyAffirmations(c.title, firstPractice?.title ?? c.title, todayIndex, practice.affirmation).map(text => ({ text, Icon: Heart, color: "var(--primary)", bg: "var(--secondary)" }));
   const areaQuiz: QuizItem[] = practice.quiz.map(q => ({ q: q.question, options: q.options, correct: q.correctIndex, tip: q.explanation }));
 
   const StepDots = (
