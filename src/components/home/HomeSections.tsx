@@ -2,22 +2,18 @@ import { Link } from "@tanstack/react-router";
 import { useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useGamePlays, MIN_PLAYS } from "@/lib/game-plays";
 import vivMusic from "@/assets/viv-music.jpg";
 import vivClean from "@/assets/viv-clean.jpg";
 import vivIdentity from "@/assets/viv-identity.jpg";
 import vivCristo from "@/assets/viv-cristo.jpg";
-import gSopa from "@/assets/home/g-sopa.jpg";
-import gMemoria from "@/assets/home/g-memoria.jpg";
-import gHojas from "@/assets/home/g-hojas.jpg";
-import gEscribe from "@/assets/home/g-escribe.jpg";
+import { GAMES, GameCard } from "@/components/games/DailyGames";
 import exEjercicios from "@/assets/home/ex-ejercicios.jpg";
 import exPremios from "@/assets/home/ex-premios.jpg";
 import afiliacion from "@/assets/home/afiliacion.jpg";
 import balanceImg from "@/assets/home/balance.jpg";
 import {
   ArrowRight, BookOpen, Check, ChevronLeft, ChevronRight, Flame, Heart, Library,
-  Mic, Network, Sparkles, Baby, Gem, Shield, Magnet, Headphones, Gamepad2, Leaf, HeartHandshake, LayoutGrid,
+  Mic, Network, Sparkles, Baby, Gem, Shield, Magnet, Headphones, Leaf, HeartHandshake, LayoutGrid,
 } from "lucide-react";
 import { EBOOKS } from "@/lib/biblioteca";
 import coverFallback from "@/assets/e3d-book.png";
@@ -29,9 +25,7 @@ import pDios from "@/assets/home/pilar-dios.jpg";
 import ejercicio from "@/assets/home/ejercicio.jpg";
 import mensaje from "@/assets/home/mensaje.jpg";
 import comunidad from "@/assets/home/comunidad.jpg";
-import avatar1 from "@/assets/community-avatar-01.png";
-import avatar5 from "@/assets/community-avatar-05.png";
-import avatar12 from "@/assets/community-avatar-12.png";
+import { COMMUNITY_PORTRAITS } from "@/lib/funnel-visuals";
 import prNino from "@/assets/home/pr-nino.jpg";
 import prGlowM from "@/assets/home/pr-glowm.jpg";
 import prGlowH from "@/assets/home/pr-glowh.jpg";
@@ -203,8 +197,8 @@ export function OrigenCommunityBanner() {
       <div className="absolute inset-0 bg-gradient-to-r from-[#2a1760]/90 via-[#45258E]/60 to-[#45258E]/20" />
       <div className="relative p-5 text-white">
         <div className="flex -space-x-3 mb-3">
-          {[avatar1, avatar5, avatar12].map((a, i) => (
-            <img key={i} src={a} alt="" loading="lazy" className="w-11 h-11 rounded-full border-2 border-white/80 bg-white/20 object-cover" />
+          {COMMUNITY_PORTRAITS.slice(0, 3).map((a, i) => (
+            <img key={i} src={a} alt="Retrato humano ilustrativo de la comunidad" loading="lazy" width={88} height={88} className="w-11 h-11 rounded-full border-2 border-community-cover-foreground/80 bg-community-cover-foreground/20 object-cover" />
           ))}
         </div>
         <p className="text-[10.5px] font-bold uppercase tracking-wider text-white/80">Comunidad ORÍGEN · Abierta para todos</p>
@@ -304,38 +298,16 @@ export function VisualizeAndLiveCarousel() {
 }
 
 /* 10 · JUEGOS */
-const HOME_GAMES = [
-  { id: "sopa", title: "Encuentra la palabra", desc: "Busca las palabras que sanan", img: gSopa, from: "from-[#4b2fb0]" },
-  { id: "memoria", title: "Memoria del alma", desc: "Empareja lo que te sostiene", img: gMemoria, from: "from-[#b83b7f]" },
-  { id: "hojas", title: "Come-hojas", desc: "Recoge hojas sin que te atrape la culpa", img: gHojas, from: "from-[#11786d]" },
-  { id: "escribe", title: "Escríbelo y créelo", desc: "Escribe tu declaración del día", img: gEscribe, from: "from-[#8a5a12]" },
-];
-function GameTile({ g }: { g: (typeof HOME_GAMES)[number] }) {
-  const plays = useGamePlays(g.id);
-  return (
-    <Link to="/juegos/$gameId" params={{ gameId: g.id }} className={`relative snap-start shrink-0 w-[46%] sm:w-auto aspect-[4/5] ${card}`}>
-      <img src={g.img} alt="" loading="lazy" width={816} height={816} className="absolute inset-0 h-full w-full object-cover" />
-      <div className={`absolute inset-0 bg-gradient-to-t ${g.from} via-black/15 to-transparent`} />
-      <span className="absolute left-2.5 top-2.5 inline-flex items-center gap-1 rounded-full bg-black/40 backdrop-blur px-2.5 h-7 text-[11px] font-bold text-white">
-        {plays.unlocked ? <><Check className="w-3.5 h-3.5" /> Hoja liberada</> : <><Leaf className="w-3.5 h-3.5" /> {plays.plays}/{MIN_PLAYS} hoy</>}
-      </span>
-      <div className="absolute inset-x-0 bottom-0 p-3 text-white">
-        <span className="grid place-items-center w-8 h-8 rounded-full bg-white/25 backdrop-blur border border-white/40"><Gamepad2 className="w-4 h-4" /></span>
-        <h4 className="mt-1.5 font-display font-bold text-[14px] leading-tight">{g.title}</h4>
-        <div className="flex items-end justify-between gap-1">
-          <p className="text-[11px] leading-snug opacity-90 line-clamp-2">{g.desc}</p>
-          <ArrowRight className="w-4 h-4 shrink-0" />
-        </div>
-      </div>
-    </Link>
-  );
-}
+const HOME_GAMES = ["sopa", "memoria", "hojas", "escribe"].flatMap((id) => {
+  const game = GAMES.find((item) => item.id === id);
+  return game ? [game] : [];
+});
 export function DailyGamesSection() {
   return (
     <section>
       <SectionHead title="Juegos del día" sub="Juegos mentales que trabajan justo lo que estás sanando." to="/juegos" cta="Ver los 10" />
       <div className={scroller + " sm:grid sm:grid-cols-4 sm:overflow-visible sm:mx-0 sm:px-0"}>
-        {HOME_GAMES.map((g) => <GameTile key={g.id} g={g} />)}
+        {HOME_GAMES.map((game) => <div key={game.id} className="w-[46%] shrink-0 snap-start sm:w-auto"><GameCard game={game} /></div>)}
       </div>
     </section>
   );
