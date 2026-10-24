@@ -38,10 +38,11 @@ import caminoPeace from "@/assets/screens-current/camino-5-actual.png.asset.json
 import caminoBoundaries from "@/assets/screens-current/camino-6-actual.png.asset.json";
 import caminoLoss from "@/assets/screens-current/camino-7-actual.png.asset.json";
 import type { FUNNEL_INTERACTIONS } from "@/lib/funnel-interactions";
+import { diversifyScreens } from "@/lib/app-screen-order";
 
 export type AppScreen = { img: string; t: string; d: string; group?: "camino" | "visualiza"; icon?: keyof typeof FUNNEL_INTERACTIONS };
 
-export const APP_SCREENS: AppScreen[] = [
+export const APP_SCREENS: AppScreen[] = diversifyScreens<AppScreen>([
   { img: dashboard, t: "Tu inicio", d: "Tu misión del día, racha y todo tu camino" },
   { img: etapas.url, t: "Mi camino ORÍGEN · Etapas", d: "Tu mapa, progreso y lecciones diarias", group: "camino", icon: "path" },
   { img: categoriesShot.url, t: "Categorías de Camino ORÍGEN", d: "Elige el tema que deseas trabajar", group: "camino", icon: "categories" },
@@ -80,4 +81,4 @@ export const APP_SCREENS: AppScreen[] = [
   { img: hojas, t: "Hojas de Sanación", d: "Tu moneda de avance dentro de la app" },
   { img: historial, t: "Tu historial", d: "Todos tus movimientos y respuestas guardadas" },
   { img: invita, t: "Programa de afiliados", d: "Gana compartiendo ORÍGEN" },
-];
+]);
