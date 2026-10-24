@@ -27,6 +27,7 @@ body.community-reading .community-main { padding-bottom: 0; }
   --color-install-frame: #1C1A28;
   --color-install-tile: #FFFFFF14;
   --color-install-bar: #1A1824;
+  --color-install-accent: #0A84FF;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);

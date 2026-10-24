@@ -1,5 +1,6 @@
 import { ManagedImage } from "@/components/ManagedImage";
 import { NotificacionesCard } from "@/components/NotificacionesCard";
+import { InstallAppButton } from "@/components/InstallAppGuide";
 import { VoiceToggle } from "@/components/VoiceControls";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
@@ -981,6 +982,7 @@ function NotificationsBlock() {
             </div>
             <Switch checked={prefs?.email_enabled ?? true} onCheckedChange={(v) => update({ email_enabled: v })} />
           </div>
+          <InstallAppButton />
           <NotificacionesCard />
           <div className="rounded-2xl border border-border p-3">
             <div className="text-[13px] font-semibold">Escuchar las instrucciones</div>
