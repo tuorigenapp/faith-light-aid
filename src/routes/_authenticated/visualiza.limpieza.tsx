@@ -16,8 +16,8 @@ import { toast } from "sonner";
 import { getUserPlan } from "@/lib/plan";
 import { awardGems } from "@/lib/gems";
 import { cn } from "@/lib/utils";
-import heroImg from "@/assets/limpieza-hero.jpg";
-import bathImg from "@/assets/limpieza-bath.jpg";
+import heroImg from "@/assets/explore/clean.jpg";
+import bathImg from "@/assets/explore/word.jpg";
 
 export const Route = createFileRoute("/_authenticated/visualiza/limpieza")({
   head: () => ({ meta: [{ title: "Limpieza Espiritual — Reconectando" }] }),

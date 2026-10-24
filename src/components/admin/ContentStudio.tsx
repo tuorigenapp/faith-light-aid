@@ -22,6 +22,8 @@ import { Copy, Eye, EyeOff, ImageIcon, Loader2, Pencil, Plus, RefreshCw, Search,
 import { CaminosStudio, CoversStudio } from "@/components/admin/CaminosStudio";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import { directAudioUrl, mediaError, validAudioAddress } from "@/lib/media-input";
+export { directAudioUrl } from "@/lib/media-input";
 
 type Tab = "temas" | "subtemas" | "limpieza" | "caminos" | "portadas";
 
@@ -396,12 +398,15 @@ function Subtopics({ onNote }: { onNote: Notify }) {
 
   async function saveAudio(id: string, audioUrl: string) {
     try {
+      if (!validAudioAddress(audioUrl)) throw new Error("Pega un enlace completo que empiece con https://");
       await update({ data: { id, audioUrl, isPublished: audioUrl ? true : undefined } });
-      if (audioUrl) await regenSilently(id);
-      onNote({ text: "Audio guardado. La IA completó el contenido y el subtema ya está visible." });
+      onNote({ text: "Audio guardado. El subtema ya está visible." });
       qc.invalidateQueries({ queryKey: ["studio-subtopics"] });
-    } catch {
-      onNote({ text: "No pudimos guardar el audio.", error: true });
+      qc.invalidateQueries({ queryKey: ["cat-full"] });
+      qc.invalidateQueries({ queryKey: ["day-audio"] });
+    } catch (error) {
+      onNote({ text: mediaError(error, "No pudimos guardar el audio."), error: true });
+      throw error;
     }
   }
 
@@ -642,15 +647,7 @@ function Limpieza({ onNote }: { onNote: Notify }) {
 }
 
 /** Convierte enlaces de Google Drive o Dropbox en enlaces que se reproducen directo. */
-export function directAudioUrl(raw: string) {
-  const url = raw.trim();
-  const drive = url.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:export=\w+&)?id=)([\w-]{10,})/);
-  if (drive) return `https://drive.google.com/uc?export=download&id=${drive[1]}`;
-  if (/dropbox\.com/.test(url)) return url.replace(/[?&]dl=0/, "").replace("www.dropbox.com", "dl.dropboxusercontent.com");
-  return url;
-}
-
-function AudioInput({ current, onSave, onNote }: { current: string | null; onSave: (url: string) => void; onNote: Notify }) {
+function AudioInput({ current, onSave, onNote }: { current: string | null; onSave: (url: string) => Promise<void>; onNote: Notify }) {
   const [busy, setBusy] = useState(false);
   async function upload(file: File) {
     if (file.size > 50 * 1024 * 1024) return onNote({ text: "El audio supera 50 MB.", error: true });
@@ -662,12 +659,12 @@ function AudioInput({ current, onSave, onNote }: { current: string | null; onSav
       if (up.error) throw up.error;
       const signed = await supabase.storage.from("manifest-audios").createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
       if (signed.error || !signed.data) throw signed.error;
-      onSave(signed.data.signedUrl);
-      onNote({ text: "Audio subido y guardado." });
+      await onSave(signed.data.signedUrl);
     } catch (e) {
-      onNote({ text: `No pudimos subir el audio: ${e instanceof Error ? e.message : "intenta otra vez"}.`, error: true });
+      onNote({ text: mediaError(e, "No pudimos subir o guardar el audio. Intenta de nuevo."), error: true });
+    } finally {
+      setBusy(false);
     }
-    setBusy(false);
   }
   return (
     <div className="mt-2 space-y-2">
@@ -677,14 +674,14 @@ function AudioInput({ current, onSave, onNote }: { current: string | null; onSav
           onBlur={(e) => {
             const v = directAudioUrl(e.target.value);
             if (v !== e.target.value) e.target.value = v;
-            if (v !== (current ?? "")) onSave(v);
+            if (v !== (current ?? "")) void onSave(v).catch(() => undefined);
           }}
           placeholder="Pega el enlace del audio (mp3, Google Drive o Dropbox)"
           className={inputClass}
         />
         <label className="inline-flex min-h-11 shrink-0 cursor-pointer items-center gap-1.5 rounded-[12px] bg-[#7C5CFF]/10 px-3 text-[13px] font-bold text-[#5B3FD6]">
           {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />} Subir mp3
-          <input type="file" accept="audio/*,.mp3" className="hidden" onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])} />
+          <input type="file" accept="audio/*,.mp3" className="hidden" disabled={busy} onChange={(e) => { const file = e.target.files?.[0]; if (file) void upload(file); e.target.value = ""; }} />
         </label>
       </div>
       <p className="text-[11.5px] text-foreground/55">En Google Drive comparte el archivo como "Cualquier persona con el enlace" y pega el enlace aquí: se convierte solo para que suene dentro de la app.</p>

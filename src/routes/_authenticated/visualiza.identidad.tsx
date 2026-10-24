@@ -19,7 +19,7 @@ import { awardGems } from "@/lib/gems";
 import { cn } from "@/lib/utils";
 import { WordSearch } from "@/components/WordSearch";
 import { StageQuiz } from "@/components/StageQuiz";
-import heroImg from "@/assets/identidad-hero.jpg";
+import heroImg from "@/assets/explore/identity.jpg";
 
 export const Route = createFileRoute("/_authenticated/visualiza/identidad")({
   head: () => ({ meta: [{ title: "Salto de Identidad — Reconectando" }] }),
