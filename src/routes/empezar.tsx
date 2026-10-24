@@ -475,7 +475,7 @@ function Includes() {
         <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-[12px] font-bold text-primary"><Gift className="h-3.5 w-3.5" /> Regalo incluido</span>
         <p className="mt-1.5 font-display text-[17px] font-bold leading-tight text-foreground">Ebook «Reconectando el Espíritu con Dios» gratis</p>
         <p className="mt-1 text-sm text-muted-foreground">El libro de Ruth Esther Paredes Sufran, autora y fundadora de ORÍGEN, donde nace este método.</p>
-        <a href={BOOK_AMAZON_URL} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex min-h-11 items-center text-sm font-bold text-primary">Comprar la edición física en Amazon <ArrowRight className="ml-1 h-4 w-4" /></a>
+        <a href={BOOK_AMAZON_URL} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex min-h-11 items-center text-sm font-bold text-primary">Comprar la edición física en Amazon</a>
       </div>
     </div>
   </>;

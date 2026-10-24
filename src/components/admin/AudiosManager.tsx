@@ -814,7 +814,7 @@ export function AudiosManager() {
                     onBlur={(e) => setForm({ ...form, audio_url: directAudioUrl(e.target.value) })}
                     placeholder="https://… o sube el archivo"
                     className={inputCls}
-                    maxLength={800}
+                    maxLength={8000}
                   />
                   <label className="mt-2 inline-flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-[10px] bg-primary/10 text-[13px] font-semibold text-primary">
                     {uploading === "audio" ? (

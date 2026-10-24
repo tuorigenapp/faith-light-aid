@@ -20,7 +20,7 @@ import heroImg from "@/assets/explore/clean.jpg";
 import bathImg from "@/assets/explore/word.jpg";
 
 export const Route = createFileRoute("/_authenticated/visualiza/limpieza")({
-  head: () => ({ meta: [{ title: "Limpieza Espiritual — Reconectando" }] }),
+  head: () => ({ meta: [{ title: "Limpieza Espiritual — ORÍGEN" }, { name: "description", content: "Prácticas cristianas de oración, gratitud y renovación interior en ORÍGEN." }, { property: "og:title", content: "Limpieza Espiritual — ORÍGEN" }, { property: "og:description", content: "Encuentra un momento de oración y renovación con Dios." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
   component: LimpiezaPage,
 });
 
