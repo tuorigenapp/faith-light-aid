@@ -104,7 +104,7 @@ export async function sendPush(sub: PushSubscriptionRow, message: PushMessage): 
   if (!isTrustedPushEndpoint(sub.endpoint)) return 400;
   const publicKey = process.env["VAPID_PUBLIC_KEY"];
   const privateKey = process.env["VAPID_PRIVATE_KEY"];
-  const subject = process.env["VAPID_SUBJECT"] ?? "mailto:soporte@tuorigen.app";
+  const subject = process.env["VAPID_SUBJECT"] ?? "mailto:supportorigenapp@gmail.com";
   if (!publicKey || !privateKey) throw new Error("VAPID keys missing");
   if (!sub.p256dh || !sub.auth) return 400;
 

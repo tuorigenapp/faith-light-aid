@@ -2,7 +2,7 @@ import logoUrl from "@/assets/logo-origen.png";
 import bookUrl from "@/assets/libro-oficial-mockup.png";
 
 /** Brand + promo blocks shared by every downloadable PDF (HTML print and jsPDF). */
-export const APP_URL = "https://faith-light-aid.lovable.app";
+export const APP_URL = "https://tuorigen.app";
 export const BOOK_TITLE = "Reconectando el Espíritu con Dios";
 export const BOOK_AUTHOR = "Ruth Esther Paredes Sufran";
 /** Official product link supplied by the author. */

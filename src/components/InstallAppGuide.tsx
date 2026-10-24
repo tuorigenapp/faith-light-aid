@@ -110,10 +110,22 @@ export function InstallAppGuide({ open, onClose }: { open: boolean; onClose: () 
         {/* Barra del navegador móvil */}
         <div className="mx-auto mt-3 flex w-full max-w-[340px] items-center gap-2 rounded-[18px] bg-install-bar px-3 py-2.5 text-install-muted">
           <ChevronLeft className="h-5 w-5" aria-hidden />
-          <div className="flex-1 truncate rounded-[10px] bg-install-tile px-3 py-1.5 text-center text-[13px]">faith-light-aid.lovable.app</div>
+          <div className="flex-1 truncate rounded-[10px] bg-install-tile px-3 py-1.5 text-center text-[13px]">tuorigen.app</div>
           {platform === "ios" ? <ShareIcon className="h-5 w-5 text-install-accent" /> : <EllipsisVertical className="h-5 w-5 text-install-fg" aria-hidden />}
           <RotateCw className="h-4 w-4" aria-hidden />
         </div>
+
+        <ol className="mx-auto mt-4 grid w-full max-w-[340px] gap-2 text-[15px]">
+          {(platform === "ios"
+            ? ["Abre tuorigen.app en Safari.", "Toca el botón Compartir (cuadrado con flecha).", "Elige «Añadir a pantalla de inicio» y toca «Añadir»."]
+            : ["Abre tuorigen.app en Chrome.", "Toca el menú ⋮ arriba a la derecha.", "Elige «Instalar app» o «Agregar a pantalla principal»."]
+          ).map((s, i) => (
+            <li key={s} className="flex items-start gap-3 rounded-[14px] bg-install-tile px-3 py-2.5">
+              <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-install-fg text-[13px] font-bold text-install-bg">{i + 1}</span>
+              <span>{s}</span>
+            </li>
+          ))}
+        </ol>
 
         <div className="mt-5 flex justify-center gap-2" role="tablist" aria-label="Tipo de teléfono">
           {(["ios", "android"] as const).map((p) => (
