@@ -373,12 +373,12 @@ function ExerciseModal({
   const [gameOpen, setGameOpen] = useState(false);
   const [doneSteps, setDoneSteps] = useState<Set<number>>(new Set());
   const allStepsDone = doneSteps.size >= exercise.steps.length;
-  const quizCorrect = quizPick !== null && quizPick === quiz[quizIdx]?.correctIndex;
 
   const keywords = useMemo(() => getExerciseKeywords(exercise), [exercise]);
   const quiz = useMemo(() => getExerciseQuiz(exercise), [exercise]);
   const gameKind = getGameKindForDay(exercise.day);
   const currentQuiz = quiz[quizIdx];
+  const quizCorrect = quizPick !== null && quizPick === currentQuiz?.correctIndex;
   const quizDone = quizIdx >= quiz.length - 1 && quizPick !== null;
 
   function nextQuiz() {
