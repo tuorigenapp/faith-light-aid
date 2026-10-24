@@ -1,3 +1,4 @@
+import { useSeasonalBackground } from "@/lib/seasonal-bg";
 import { wholeHojas } from "@/lib/gems";
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
@@ -89,9 +90,8 @@ function Etapas() {
   return (
     <div className="relative min-h-dvh">
       {/* Fondo místico animado */}
-      <img src={paisaje} alt="" aria-hidden width={1024} height={1024} className="fixed inset-0 h-full w-full object-cover" />
-      <img src={mapaCamino} alt="" aria-hidden width={1024} height={1024} className="fixed inset-0 h-full w-full object-cover opacity-30 mix-blend-screen" />
-      <div aria-hidden className="fixed inset-0 bg-gradient-to-b from-[#2A1B45]/72 via-[#241539]/78 to-[#150C24]/92" />
+      <img src={seasonBg} alt="" aria-hidden width={720} height={1280} className="fixed inset-0 h-full w-full object-cover motion-safe:transition-opacity motion-safe:duration-500" />
+      <div aria-hidden className="fixed inset-0 bg-gradient-to-b from-[#1E1712]/35 via-[#1E1712]/50 to-[#120D09]/85" />
       <div aria-hidden className="fixed inset-0 pointer-events-none">
         {[12, 34, 58, 76, 90].map((l, i) => (
           <span
