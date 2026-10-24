@@ -6,8 +6,11 @@
 import type { Palabra } from "@/lib/palabra365";
 import type { PalabraBlock } from "@/lib/palabra-extras";
 
-const WIDTH = 1080;
-const HEIGHT = 1920;
+import logoUrl from "@/assets/logo-origen.png";
+
+export type PalabraFormat = "horizontal" | "vertical";
+/** Horizontal = square 1:1 post; vertical = 3:4 portrait. */
+export const FORMAT_SIZE: Record<PalabraFormat, { w: number; h: number }> = { horizontal: { w: 1080, h: 1080 }, vertical: { w: 1080, h: 1440 } };
 const SEAL = "tuorigen.app";
 
 type Section = { kind: "title"; text: string } | { kind: "ref"; text: string } | { kind: "body"; heading?: string; text: string };
@@ -85,31 +88,33 @@ export async function generatePalabraWallpaper(
   palabra: Palabra,
   blocks: PalabraBlock[],
   bgSrc: string,
+  format: PalabraFormat = "vertical",
 ): Promise<Blob> {
+  const { w: W, h: H } = FORMAT_SIZE[format];
   const canvas = document.createElement("canvas");
-  canvas.width = WIDTH;
-  canvas.height = HEIGHT;
+  canvas.width = W;
+  canvas.height = H;
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("no canvas context");
 
   const img = await loadImage(bgSrc);
-  const cover = Math.max(WIDTH / img.width, HEIGHT / img.height);
+  const cover = Math.max(W / img.width, H / img.height);
   const w = img.width * cover;
   const h = img.height * cover;
-  ctx.drawImage(img, (WIDTH - w) / 2, (HEIGHT - h) / 2, w, h);
+  ctx.drawImage(img, (W - w) / 2, (H - h) / 2, w, h);
 
-  const veil = ctx.createLinearGradient(0, 0, 0, HEIGHT);
+  const veil = ctx.createLinearGradient(0, 0, 0, H);
   veil.addColorStop(0, "rgba(15,12,26,0.74)");
   veil.addColorStop(0.4, "rgba(15,12,26,0.58)");
   veil.addColorStop(1, "rgba(15,12,26,0.84)");
   ctx.fillStyle = veil;
-  ctx.fillRect(0, 0, WIDTH, HEIGHT);
+  ctx.fillRect(0, 0, W, H);
 
   const marginX = 96;
-  const maxWidth = WIDTH - marginX * 2;
-  const topMargin = 130;
-  const footerHeight = 190;
-  const availableHeight = HEIGHT - topMargin - footerHeight;
+  const maxWidth = W - marginX * 2;
+  const topMargin = 150;
+  const footerHeight = 170;
+  const availableHeight = H - topMargin - footerHeight;
 
   const sections = buildSections(palabra, blocks);
 
@@ -123,7 +128,12 @@ export async function generatePalabraWallpaper(
   let y = topMargin;
   ctx.font = `700 ${Math.round(32 * scale)}px 'Trebuchet MS', sans-serif`;
   ctx.fillStyle = "rgba(255,255,255,0.85)";
-  ctx.fillText("🕊️  ORÍGEN · PALABRA DEL DÍA", WIDTH / 2, y);
+  try {
+    const logo = await loadImage(logoUrl);
+    const ls = 64;
+    ctx.drawImage(logo, W / 2 - ls / 2, 30, ls, ls);
+  } catch { /* logo optional */ }
+  ctx.fillText("ORÍGEN · PALABRA DEL DÍA", W / 2, y);
   y += Math.round(64 * scale);
 
   for (const s of sections) {
@@ -132,20 +142,20 @@ export async function generatePalabraWallpaper(
       ctx.fillStyle = "#ffffff";
       const lines = wrapText(ctx, s.text, maxWidth);
       for (const line of lines) {
-        ctx.fillText(line, WIDTH / 2, y);
+        ctx.fillText(line, W / 2, y);
         y += Math.round(66 * scale);
       }
       y += Math.round(30 * scale);
     } else if (s.kind === "ref") {
       ctx.font = `italic 600 ${Math.round(34 * scale)}px Georgia, serif`;
       ctx.fillStyle = "#F5C77E";
-      ctx.fillText(s.text, WIDTH / 2, y);
+      ctx.fillText(s.text, W / 2, y);
       y += Math.round(58 * scale);
     } else {
       if (s.heading) {
         ctx.font = `700 ${Math.round(30 * scale)}px 'Trebuchet MS', sans-serif`;
         ctx.fillStyle = "#F5C77E";
-        ctx.fillText(s.heading, WIDTH / 2, y);
+        ctx.fillText(s.heading, W / 2, y);
         y += Math.round(46 * scale) + Math.round(14 * scale);
       }
       ctx.font = `500 ${Math.round(32 * scale)}px Georgia, serif`;
@@ -156,7 +166,7 @@ export async function generatePalabraWallpaper(
           y += Math.round(18 * scale);
           continue;
         }
-        ctx.fillText(line, WIDTH / 2, y);
+        ctx.fillText(line, W / 2, y);
         y += Math.round(42 * scale);
       }
       y += Math.round(34 * scale);
@@ -165,22 +175,22 @@ export async function generatePalabraWallpaper(
 
   ctx.font = "700 34px Georgia, serif";
   ctx.fillStyle = "#F5C77E";
-  ctx.fillText("ORÍGEN", WIDTH / 2, HEIGHT - 150);
+  ctx.fillText("ORÍGEN", W / 2, H - 120);
   ctx.font = "400 26px 'Trebuchet MS', sans-serif";
   ctx.fillStyle = "rgba(255,255,255,0.85)";
-  ctx.fillText(SEAL, WIDTH / 2, HEIGHT - 106);
+  ctx.fillText(SEAL, W / 2, H - 78);
 
   const blob: Blob | null = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
   if (!blob) throw new Error("no blob");
   return blob;
 }
 
-export async function downloadPalabraWallpaper(palabra: Palabra, blocks: PalabraBlock[], bgSrc: string) {
-  const blob = await generatePalabraWallpaper(palabra, blocks, bgSrc);
+export async function downloadPalabraWallpaper(palabra: Palabra, blocks: PalabraBlock[], bgSrc: string, format: PalabraFormat = "vertical") {
+  const blob = await generatePalabraWallpaper(palabra, blocks, bgSrc, format);
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `origen-palabra-dia-${palabra.day}.png`;
+  a.download = `origen-palabra-dia-${palabra.day}-${format}.png`;
   document.body.appendChild(a);
   a.click();
   a.remove();

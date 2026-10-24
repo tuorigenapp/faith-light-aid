@@ -26,7 +26,7 @@ import {
   palabraQuiz,
   shareTargets,
 } from "@/lib/palabra-extras";
-import { blobToShareFile, downloadPalabraWallpaper, generatePalabraWallpaper } from "@/components/palabra/wallpaperCanvas";
+import { blobToShareFile, downloadPalabraWallpaper, generatePalabraWallpaper, type PalabraFormat } from "@/components/palabra/wallpaperCanvas";
 import { awardLeaf } from "@/lib/gems";
 import { appDayKey } from "@/lib/app-day";
 import { useAuth } from "@/lib/use-auth";
@@ -70,6 +70,7 @@ function PalabraPage() {
   const [palabra, setPalabra] = useState<Palabra | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [downloading, setDownloading] = useState(false);
+  const [format, setFormat] = useState<PalabraFormat>("vertical");
   const [shareOpen, setShareOpen] = useState(false);
   const [bgIndex, setBgIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<number, number>>({});
@@ -168,7 +169,7 @@ function PalabraPage() {
     if (!palabra) return;
     setDownloading(true);
     try {
-      await downloadPalabraWallpaper(palabra, blocks, PALABRA_BACKGROUNDS[bgIndex]!);
+      await downloadPalabraWallpaper(palabra, blocks, PALABRA_BACKGROUNDS[bgIndex]!, format);
       toast.success("Imagen descargada", { description: "Ya puedes ponerla de fondo o compartirla." });
     } catch (e) {
       console.error(e);
@@ -328,6 +329,13 @@ function PalabraPage() {
             ))}
           </div>
 
+          <div role="radiogroup" aria-label="Formato de la imagen" className="mt-3 grid grid-cols-2 gap-2">
+            {([["horizontal", "Horizontal", "aspect-square"], ["vertical", "Vertical", "aspect-[3/4]"]] as const).map(([v, label, ratio]) => (
+              <button key={v} role="radio" aria-checked={format === v} onClick={() => setFormat(v)} className={`flex min-h-12 items-center justify-center gap-2 rounded-[12px] border-[1.5px] text-[14px] font-semibold active:scale-[.97] transition ${format === v ? "border-primary bg-primary/10 text-primary" : "border-border text-foreground/80"}`}>
+                <span className={`w-4 rounded-[3px] border-2 border-current ${ratio}`} /> {label}
+              </button>
+            ))}
+          </div>
           <button
             onClick={handleDownload}
             disabled={downloading}
