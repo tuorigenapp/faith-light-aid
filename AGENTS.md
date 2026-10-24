@@ -43,3 +43,5 @@
 - Consultation list, detail and administration share ConsultaCover to resolve private cover objects and managed overrides with bundled fallbacks; this prevents inaccessible or expired storage URLs from breaking a consultation cover.
 - Home, Visualiza and the cover catalog resolve custom category covers through visualizaCategoryCover with override-first precedence; this prevents stale covers in one entry point and preserves manual replacements.
 - Home and Visualiza use the same method-cover catalog, PROGRAMAS and custom-cover resolver; Home retains one gradient-overlay carousel with complete square artwork for every entry, preventing stale covers and missing programs without changing Visualiza's layout.
+- Funnel blocks (app screens, includes, books, before/after, demo consulta) live in `src/components/funnel/FunnelShared.tsx` and screens in `src/lib/app-screens.ts`; this keeps `/` and `/empezar` showing identical, current content.
+- In-app reminders become system notifications whenever notification permission is granted; the in-app card is only the fallback without permission.

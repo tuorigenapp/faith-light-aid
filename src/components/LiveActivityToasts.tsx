@@ -1,20 +1,29 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { BookHeart, Flag, Gift, HeartHandshake, Sparkles, Users, X } from "lucide-react";
+import { X } from "lucide-react";
 import { getLiveActivity } from "@/lib/social-proof.functions";
 import { useAuth } from "@/lib/use-auth";
+import e3dbook from "@/assets/e3d-book.png";
+import e3dbrain from "@/assets/e3d-brain.png";
+import e3dbutterfly from "@/assets/e3d-butterfly.png";
+import e3dclouds from "@/assets/e3d-clouds.png";
+import e3dcoin from "@/assets/e3d-coin.png";
+import e3dcouple from "@/assets/e3d-couple.png";
+import e3dcross from "@/assets/e3d-cross.png";
+import e3dheadphones from "@/assets/e3d-headphones.png";
+import e3dheartpurple from "@/assets/e3d-heart-purple.png";
+import e3dheartgem from "@/assets/e3d-heartgem.png";
+import e3dpractice from "@/assets/e3d-practice.png";
+import e3dstar from "@/assets/e3d-star.png";
 import { appDayKey } from "@/lib/app-day";
 import { buildSocialProofMessages, type SocialProofMessage } from "@/components/social/social-proof-content";
 
-const ICONS: Record<string, typeof Sparkles> = {
-  sparkles: Sparkles,
-  users: Users,
-  dove: Sparkles,
-  heart: HeartHandshake,
-  gift: Gift,
-  book: BookHeart,
-  flag: Flag,
+/** Elementos 3D propios de ORÍGEN (sin emojis del sistema). */
+const ART: Record<string, string> = {
+  book: e3dbook, brain: e3dbrain, butterfly: e3dbutterfly, clouds: e3dclouds, coin: e3dcoin, couple: e3dcouple,
+  cross: e3dcross, headphones: e3dheadphones, "heart-purple": e3dheartpurple, heartgem: e3dheartgem, practice: e3dpractice, star: e3dstar,
+  sparkles: e3dstar, users: e3dcouple, sun: e3dcross, gift: e3dcoin, compass: e3dstar, heart: e3dheartgem, eye: e3dheadphones,
 };
 
 const VISIBLE_MS = 5500;
@@ -82,7 +91,7 @@ export function LiveActivityToasts({ variant = "app" }: { variant?: "landing" | 
   }, [messages, variant]);
 
   if (!current) return null;
-  const Icon = ICONS[current.icon] ?? Sparkles;
+  const art = ART[current.icon] ?? e3dstar;
 
   return (
     <div
@@ -93,10 +102,10 @@ export function LiveActivityToasts({ variant = "app" }: { variant?: "landing" | 
       }
     >
       <div className="pointer-events-auto flex items-start gap-2.5 rounded-[14px] border border-border/60 bg-card/95 p-3 shadow-elevated backdrop-blur animate-in fade-in slide-in-from-left-4 duration-500">
-        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-[10px] bg-primary/10 text-primary">
-          <Icon className="h-4 w-4" />
+        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[12px] bg-primary/10">
+          <img src={art} alt="" aria-hidden className="h-8 w-8 object-contain drop-shadow-sm motion-safe:animate-[bounce_1.2s_ease-out_1]" />
         </span>
-        <p className="pt-0.5 text-[12.5px] font-medium leading-snug text-foreground/90">{current.text}</p>
+        <p className="pt-1 text-[13px] font-medium leading-snug text-foreground/90">{current.text}</p>
         <button
           onClick={() => setCurrent(null)}
           aria-label="Descartar aviso"

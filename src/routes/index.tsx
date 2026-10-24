@@ -1,43 +1,35 @@
 import { ManagedImage } from "@/components/ManagedImage";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { ArrowRight, ChevronDown, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowRight, Check, ChevronDown, CircleAlert, CircleX, ShieldCheck } from "lucide-react";
 import logo from "@/assets/logo-origen.png";
-import mockup from "@/assets/origen-mockup.png.asset.json";
+import heroImg from "@/assets/landing/hero-oracion.jpg";
+import triedImg from "@/assets/landing/probaste-todo.jpg";
+import familyImg from "@/assets/landing/familia-libre.jpg";
 import eHeartPurple from "@/assets/e3d-heart-purple.png";
+import eHeartGem from "@/assets/e3d-heartgem.png";
 import eCross from "@/assets/e3d-cross.png";
 import eStar from "@/assets/e3d-star.png";
 import ePractice from "@/assets/e3d-practice.png";
 import eHeadphones from "@/assets/e3d-headphones.png";
 import eBrain from "@/assets/e3d-brain.png";
+import eButterfly from "@/assets/e3d-butterfly.png";
 import { ReviewsSlider } from "@/components/ReviewsSlider";
 import { LiveActivityToasts } from "@/components/LiveActivityToasts";
 import { DiosTeDiceHoy } from "@/components/DiosTeDiceHoy";
-import screenExercises from "@/assets/screens-current/ejercicios.png.asset.json";
-import screenVisualiza from "@/assets/screens-current/visualiza.png.asset.json";
-import screenCommunity from "@/assets/screens-current/comunidad.png.asset.json";
-import screenRewards from "@/assets/screens-current/premiosorigen.png.asset.json";
-import screenProfile from "@/assets/screens-current/perfil.png.asset.json";
+import { AppScreens, BeforeAfter, BooksGift, Includes, TryConsulta } from "@/components/funnel/FunnelShared";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "ORÍGEN — sana el patrón familiar que se repite en tu vida" },
+      { title: "ORÍGEN — rompe con Dios el patrón que se repite en tu familia" },
       {
         name: "description",
         content:
-          "Repites los mismos errores, sientes un vacío que no sabes explicar y empiezas cosas que abandonas. ORÍGEN te muestra de qué lado de tu familia viene ese patrón y qué hacer hoy. Empieza gratis.",
+          "Repites los mismos errores, sientes un vacío que no sabes explicar y empiezas cosas que abandonas. El Método ORÍGEN te muestra de dónde viene y qué hacer hoy, con Dios en el centro. Pruébalo gratis.",
       },
-      {
-        name: "keywords",
-        content:
-          "sanar patrones familiares, heridas de la infancia, niño interior, ansiedad y depresión, relación narcisista, límites sin culpa, sanación espiritual cristiana, Dios te dice hoy",
-      },
-      { property: "og:title", content: "ORÍGEN — rompe el patrón que se repite" },
-      {
-        property: "og:description",
-        content: "Descubre hoy qué se repite en tu historia y da el primer paso para cerrarlo.",
-      },
+      { property: "og:title", content: "ORÍGEN — lo que no se sana, se hereda" },
+      { property: "og:description", content: "El Método ORÍGEN: sana la raíz del patrón que se repite en tu vida, un paso al día con Dios." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -45,51 +37,49 @@ export const Route = createFileRoute("/")({
   component: Landing,
 });
 
-const PAINS = [
-  { img: eHeartPurple, text: "“Repito los mismos errores.”" },
-  { img: eCross, text: "“Siento un vacío que no sé explicar.”" },
-  { img: eStar, text: "“Empiezo con todo y lo abandono.”" },
+const FLAGS = [
+  { t: "Te prometes que esta vez será distinto.", d: "Y vuelves a terminar en el mismo lugar, con otra persona, otro trabajo, otra excusa." },
+  { t: "Das todo y te quedas vacía(o).", d: "Cuidas a todos, pero nadie te pregunta cómo estás de verdad." },
+  { t: "Empiezas con fuerza y abandonas.", d: "La dieta, la oración diaria, el proyecto. Siempre a la segunda semana." },
+  { t: "Ves en ti a tu mamá o a tu papá.", d: "Esa reacción, ese miedo, esa forma de amar que juraste no repetir." },
+  { t: "Oras, pero sientes el cielo cerrado.", d: "Crees en Dios, pero hay algo pesado que no se va." },
+  { t: "Ya probaste terapia, libros y apps.", d: "Te ayudaron un rato. El patrón volvió." },
 ];
 
-const STEPS = [
-  { img: eBrain, title: "Lo nombras", body: "Sabes qué se repite y de qué lado de tu familia viene." },
-  { img: ePractice, title: "Lo trabajas", body: "Un paso al día. Cinco minutos, no una biblioteca." },
-  { img: eHeadphones, title: "Lo vives", body: "Audios, mentora y tu progreso siempre contigo." },
+const PHASES = [
+  { img: eBrain, t: "Fase 1 · Lo nombras", d: "Un diagnóstico de 2 minutos te muestra qué se repite y de qué lado de tu familia viene." },
+  { img: eHeartPurple, t: "Fase 2 · Lo entiendes", d: "Consultas personalizadas sobre tus patrones familiares, tu pareja y lo que Dios te dice hoy." },
+  { img: eCross, t: "Fase 3 · Lo entregas", d: "La Palabra del día, oración y perdón guiado para soltar lo que no te corresponde cargar." },
+  { img: ePractice, t: "Fase 4 · Lo trabajas", d: "Un ejercicio de 5 minutos al día y tu Camino ORÍGEN de 20 etapas, a tu ritmo." },
+  { img: eHeadphones, t: "Fase 5 · Lo vives", d: "Visualízalo y Vívelo: audios, afirmaciones y programas para renovar tu mente." },
+  { img: eButterfly, t: "Fase 6 · Lo sostienes", d: "Diario, mentora, racha y Árbol de Sanación para que el cambio no se apague." },
 ];
+
+const FOR_WHO = [
+  "Siente que carga heridas que no son solo suyas.",
+  "Quiere paz real, no frases bonitas.",
+  "Tiene poco tiempo y necesita pasos cortos y claros.",
+  "Busca a Dios sin que le impongan una religión.",
+  "Quiere que sus hijos no hereden lo mismo.",
+];
+
+const FAILED = ["“Ten paciencia.”", "“Piensa positivo.”", "“Ya pasará.”", "“Lee otro libro.”"];
 
 const FAQ = [
-  {
-    q: "Ya probé terapia, libros y otras apps.",
-    a: "Aquí no empezamos por contenido general: empezamos por tu historia y tu línea familiar. Lo que recibes responde a tu caso.",
-  },
-  {
-    q: "No tengo tiempo.",
-    a: "Cinco minutos al día. Un solo paso, a propósito: el cambio necesita asentarse, no acumularse.",
-  },
-  {
-    q: "No quiero que me impongan una religión.",
-    a: "Partimos de la fe cristiana con respeto absoluto. Te invitamos, nunca te presionamos.",
-  },
-  {
-    q: "¿Y si no es para mí?",
-    a: "Tienes 7 días completos para probarlo. Si no sientes que algo se movió, sales cuando quieras.",
-  },
+  { q: "Ya probé terapia, libros y otras apps.", a: "ORÍGEN no empieza por contenido general: empieza por tu historia y tu línea familiar. Lo que recibes responde a tu caso, cada día." },
+  { q: "No tengo tiempo.", a: "Cinco minutos al día. Un solo paso, a propósito: el cambio necesita asentarse, no acumularse." },
+  { q: "No quiero que me impongan una religión.", a: "Partimos de la fe cristiana con respeto absoluto. Te invitamos, nunca te presionamos." },
+  { q: "¿Cuánto cuesta?", a: "Puedes probarlo gratis ahora mismo. Si decides seguir, eliges tu plan después, con 7 días gratis y cancelación cuando quieras." },
+  { q: "¿Funciona si no tengo pareja o mi familia no participa?", a: "Sí. El trabajo es contigo y con Dios. Tu cambio ya transforma la forma en que te relacionas." },
+  { q: "¿Sustituye a un médico o psicólogo?", a: "No. ORÍGEN es acompañamiento espiritual y emocional; si lo necesitas, complementa la atención profesional." },
 ];
 
 function Landing() {
-  const [faq, setFaq] = useState<number | null>(null);
+  const [faq, setFaq] = useState<number | null>(0);
   const [sticky, setSticky] = useState(false);
-  const [screen, setScreen] = useState(0);
-  const screens = [
-    { image: screenExercises.url, title: "Tu camino, un día a la vez", caption: "Ejercicios diarios y progreso visible." },
-    { image: screenVisualiza.url, title: "Visualízalo y Vívelo", caption: "Programas guiados de fe, identidad y bienestar." },
-    { image: screenRewards.url, title: "Tu constancia tiene raíces", caption: "Tu árbol, tus logros y tus Hojas de Sanación." },
-    { image: screenProfile.url, title: "Tu historia importa", caption: "Tu perfil y el avance de tu camino." },
-    { image: screenCommunity.url, title: "Personas que te escuchan", caption: "Preguntas, respuestas y acompañamiento en comunidad." },
-  ];
 
   useEffect(() => {
-    const onScroll = () => setSticky(window.scrollY > 520);
+    const onScroll = () => setSticky(window.scrollY > 620);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
@@ -122,184 +112,179 @@ function Landing() {
       </header>
 
       <div className="mx-auto max-w-[1100px] px-4">
-        {/* HERO — poco texto, mucho aire */}
-        <section
-          className="relative -mx-4 overflow-hidden px-4 pb-10 pt-10"
-          style={{
-            background: "radial-gradient(120% 90% at 50% 0%, #EFE7FF 0%, var(--background) 62%)",
-          }}
-        >
-          <Reveal>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-[12px] font-bold text-primary">
-              <Sparkles className="h-3.5 w-3.5" /> 7 días gratis · sin tarjeta
-            </span>
-          </Reveal>
-          <Reveal delay={80}>
-            <h1 className="mt-5 max-w-2xl font-display text-[34px] font-extrabold leading-[1.08] sm:text-[46px]">
-              Lo que no se sana, se hereda.
-            </h1>
-          </Reveal>
-          <Reveal delay={160}>
-            <p className="mt-4 max-w-md text-[16px] leading-relaxed text-muted-foreground">
-              Descubre hoy qué se repite en tu historia — y da el primer paso para cerrarlo.
-            </p>
-          </Reveal>
-          <Reveal delay={240}>
-            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <Link
-                to="/empezar"
-                className="grid h-14 place-items-center rounded-[12px] px-7 text-[16.5px] font-bold text-primary-foreground shadow-glow transition active:scale-[.98]"
-                style={{ background: "var(--gradient-primary)" }}
-              >
-                Empezar gratis
-              </Link>
-              <a
-                href="#dios-te-dice-hoy"
-                className="grid h-14 place-items-center rounded-[12px] bg-primary/10 px-7 text-[15.5px] font-bold text-primary"
-              >
-                Ver qué dice Dios hoy
-              </a>
+        {/* 1. HERO */}
+        <section className="relative -mx-4 overflow-hidden px-4 pb-10 pt-8" style={{ background: "radial-gradient(120% 80% at 50% 0%, color-mix(in oklab, var(--primary) 14%, var(--background)) 0%, var(--background) 65%)" }}>
+          <div className="grid items-center gap-8 md:grid-cols-[1.1fr_1fr]">
+            <div>
+              <Reveal><p className="text-[13px] font-semibold italic text-primary">Lo que no se sana, se hereda.</p></Reveal>
+              <Reveal delay={60}>
+                <h1 className="mt-3 font-display text-[32px] font-extrabold leading-[1.1] sm:text-[44px]">
+                  No naciste repitiendo. <span className="text-primary">Lo aprendiste.</span> Y con Dios se puede desaprender.
+                </h1>
+              </Reveal>
+              <Reveal delay={120}>
+                <p className="mt-4 max-w-md text-[16px] leading-relaxed text-muted-foreground">
+                  Descubre con el <strong className="text-foreground">Método ORÍGEN</strong> de qué lado de tu familia viene el patrón que se repite en tu vida, y rómpelo en pasos de 5 minutos al día.
+                </p>
+              </Reveal>
+              <Reveal delay={180}>
+                <ul className="mt-5 grid gap-2.5">
+                  {["Entiende por qué repites lo que juraste no repetir.", "Recupera la paz sin dejar de ser tú.", "Rompe el ciclo para ti y para los tuyos."].map((t) => (
+                    <li key={t} className="flex items-start gap-2.5 text-[15px] font-medium"><CheckDot />{t}</li>
+                  ))}
+                </ul>
+              </Reveal>
+              <Reveal delay={240}>
+                <Link to="/empezar" className="mt-6 grid h-14 w-full place-items-center rounded-[12px] text-[16.5px] font-bold text-primary-foreground shadow-glow transition active:scale-[.97] sm:w-auto sm:px-10" style={{ background: "var(--gradient-primary)" }}>
+                  Probar gratis ahora
+                </Link>
+                <p className="mt-2 text-center text-[13px] text-muted-foreground sm:text-left">Diagnóstico gratis · 2 minutos · sin tarjeta</p>
+              </Reveal>
             </div>
-          </Reveal>
-          <Reveal delay={320}>
-            <img
-              src={mockup.url}
-              alt="La app ORÍGEN en el celular: diagnóstico, audios guiados y ejercicios diarios"
-              width={1400}
-              height={1000}
-              className="mt-8 w-full"
-            />
-          </Reveal>
-        </section>
-
-        <section className="mt-12 border-y border-border bg-secondary/30 py-8" aria-label="Conoce ORÍGEN desde adentro">
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            <div><p className="text-xs font-bold uppercase tracking-widest text-primary">La app por dentro</p><h2 className="mt-1 font-display text-2xl font-extrabold sm:text-3xl">Un lugar para volver a ti.</h2><p className="mt-2 text-sm text-muted-foreground">Explora las pantallas reales antes de empezar.</p></div>
-            <div className="flex gap-2"><button type="button" onClick={() => setScreen((screen + screens.length - 1) % screens.length)} aria-label="Pantalla anterior" className="grid h-11 w-11 place-items-center rounded-full border border-primary/20 bg-card text-primary">←</button><button type="button" onClick={() => setScreen((screen + 1) % screens.length)} aria-label="Siguiente pantalla" className="grid h-11 w-11 place-items-center rounded-full border border-primary/20 bg-card text-primary">→</button></div>
-          </div>
-          <div className="mt-6 grid gap-5 sm:grid-cols-[minmax(0,1fr)_220px] sm:items-center">
-            <div className="mx-auto w-full max-w-[300px] overflow-hidden rounded-[24px] border border-border bg-card shadow-soft"><img key={screen} src={screens[screen].image} alt={`Captura real de ORÍGEN: ${screens[screen].title}`} className="h-auto w-full" loading="lazy" /></div>
-            <div><span className="text-xs font-bold text-primary">0{screen + 1} / 0{screens.length}</span><h3 className="mt-2 font-display text-xl font-bold">{screens[screen].title}</h3><p className="mt-2 text-sm leading-relaxed text-muted-foreground">{screens[screen].caption}</p><div className="mt-5 flex gap-2">{screens.map((s, i) => <button key={s.title} type="button" onClick={() => setScreen(i)} aria-label={`Ver ${s.title}`} className={`h-2 rounded-full transition-all ${screen === i ? "w-8 bg-primary" : "w-2 bg-primary/25"}`} />)}</div></div>
+            <Reveal delay={200}>
+              <div className="relative mx-auto max-w-[420px]">
+                <img src={heroImg} alt="Mujer orando en paz frente a su Biblia al amanecer" width={1200} height={1408} className="h-auto w-full rounded-[28px] object-cover shadow-[0_8px_30px_rgba(30,25,20,.12)]" />
+                <div className="absolute -bottom-4 left-4 right-4 flex items-center gap-3 rounded-[16px] bg-card/95 p-3 shadow-[0_8px_30px_rgba(30,25,20,.12)] backdrop-blur">
+                  <img src={eHeartGem} alt="" className="h-11 w-11 object-contain" />
+                  <p className="text-[13px] font-semibold leading-snug">“Por fin entendí de dónde venía lo que sentía.”</p>
+                </div>
+              </div>
+            </Reveal>
           </div>
         </section>
 
-        <section className="mt-8 rounded-[24px] bg-[#45317e] p-6 text-white sm:p-9"><p className="text-xs font-bold uppercase tracking-widest text-pink-200">Comunidad ORÍGEN</p><h2 className="mt-2 font-display text-2xl font-bold">Tu historia merece ser escuchada.</h2><p className="mt-2 max-w-xl text-sm text-white/80">Comparte preguntas, encuentra respuestas y conversa con personas en un camino parecido al tuyo. Abierta a todas las membresías.</p><Link to="/empezar" className="mt-5 inline-flex min-h-11 items-center rounded-xl bg-white px-5 text-sm font-bold text-primary">Conocer la comunidad <ArrowRight className="ml-2 h-4 w-4" /></Link></section>
-
-        {/* DIOS TE DICE HOY */}
-        <Reveal>
-          <div className="mt-10">
-            <DiosTeDiceHoy />
-          </div>
-        </Reveal>
-
-        {/* DOLORES */}
+        {/* 2. RECONOCE ESTO */}
         <section className="mt-14">
-          <Reveal>
-            <h2 className="font-display text-[26px] font-extrabold leading-tight">
-              ¿Te suena?
-            </h2>
-          </Reveal>
-          <div className="mt-5 grid gap-3 sm:grid-cols-3">
-            {PAINS.map((p, i) => (
-              <Reveal key={p.text} delay={i * 90}>
-                <div className="flex h-full items-center gap-3 rounded-[16px] border border-border bg-card p-4">
-                  <img src={p.img} alt="" width={48} height={48} loading="lazy" className="h-12 w-12 shrink-0 object-contain" />
-                  <p className="min-w-0 text-[14.5px] font-semibold leading-snug">{p.text}</p>
+          <Reveal><Kicker>La verdad que nadie te dice</Kicker><H2>Reconoce esto y deja de culparte…</H2></Reveal>
+          <div className="mt-6 grid gap-3 sm:grid-cols-2">
+            {FLAGS.map((f, i) => (
+              <Reveal key={f.t} delay={i * 60}>
+                <div className="flex h-full gap-3 rounded-[16px] bg-card p-4 shadow-[0_1px_3px_rgba(30,25,20,.06)]">
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[12px] bg-destructive/10 text-destructive"><CircleAlert className="h-5 w-5" /></span>
+                  <div><p className="text-[16px] font-bold leading-snug">{f.t}</p><p className="mt-1 text-[14px] text-muted-foreground">{f.d}</p></div>
                 </div>
               </Reveal>
             ))}
           </div>
-          <Reveal delay={280}>
-            <p className="mt-4 max-w-lg text-[14.5px] leading-relaxed text-muted-foreground">
-              No es falta de voluntad. Es un patrón que aprendiste antes de poder elegirlo.
+          <Reveal>
+            <p className="mx-auto mt-6 max-w-xl rounded-[16px] bg-primary/5 p-5 text-center text-[16px] font-medium italic leading-relaxed">
+              Eso no es mala suerte ni falta de fe. <strong className="not-italic text-primary">Es un patrón.</strong> Y los patrones se rompen cuando entiendes su raíz, no cuando esperas que se vayan solos.
             </p>
           </Reveal>
         </section>
 
-        {/* MÉTODO */}
-        <section className="mt-14">
+        {/* 3. TE PRESENTO EL MÉTODO */}
+        <section className="relative -mx-4 mt-14 overflow-hidden px-4 py-10" style={{ background: "linear-gradient(180deg, color-mix(in oklab, var(--primary) 7%, var(--background)), var(--background))" }}>
           <Reveal>
-            <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
-              El método ORÍGEN
+            <p className="text-center text-[14px] font-semibold text-muted-foreground">Te presento:</p>
+            <h2 className="mt-1 text-center font-display text-[30px] font-extrabold leading-tight text-primary sm:text-[38px]">El Método ORÍGEN</h2>
+            <p className="mx-auto mt-3 max-w-xl text-center text-[16px] leading-relaxed text-muted-foreground">
+              Un camino de <strong className="text-foreground">6 fases</strong> para sanar la raíz de lo que se repite en tu vida, con la Palabra de Dios, tu historia familiar y pasos diarios de 5 minutos.
             </p>
-            <h2 className="mt-1 font-display text-[26px] font-extrabold leading-tight">
-              Tres pasos. Cinco minutos al día.
-            </h2>
-            <div className="hairline-brand mt-3" />
           </Reveal>
-          <div className="mt-5 grid gap-3 sm:grid-cols-3">
-            {STEPS.map((s, i) => (
-              <Reveal key={s.title} delay={i * 90}>
-                <div className="h-full rounded-[16px] border border-border bg-card p-5 shadow-soft">
-                  <img src={s.img} alt="" width={56} height={56} loading="lazy" className="h-14 w-14 object-contain" />
-                  <h3 className="mt-3 font-display text-[18px] font-bold leading-tight">{s.title}</h3>
-                  <p className="mt-1.5 text-[13.5px] leading-relaxed text-muted-foreground">{s.body}</p>
+          <Reveal>
+            <div className="mx-auto mt-6 max-w-xl rounded-[16px] border border-primary/20 bg-card p-5 text-center">
+              <p className="text-[16px] font-bold">Esto no es otro libro de autoayuda.</p>
+              <p className="mt-1 text-[14px] text-muted-foreground">No te va a decir “piensa positivo”. Eso ya lo sabes y no alcanzó. Esto trabaja desde tu origen: lo que aprendiste en casa y lo que Dios dice de ti.</p>
+            </div>
+          </Reveal>
+          <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {PHASES.map((p, i) => (
+              <Reveal key={p.t} delay={i * 60}>
+                <div className="relative h-full rounded-[16px] bg-card p-5 shadow-[0_1px_3px_rgba(30,25,20,.06)]">
+                  {i === 0 && <span aria-hidden className="absolute inset-x-6 top-0 h-[2px] rounded-full" style={{ background: "var(--gradient-primary)" }} />}
+                  <img src={p.img} alt="" loading="lazy" className="h-14 w-14 object-contain" />
+                  <p className="mt-3 font-display text-[18px] font-bold">{p.t}</p>
+                  <p className="mt-1 text-[14px] leading-relaxed text-muted-foreground">{p.d}</p>
                 </div>
               </Reveal>
             ))}
           </div>
         </section>
 
-        {/* GARANTÍA */}
-        <Reveal>
-          <section className="mt-14 flex items-start gap-3 rounded-[16px] border border-border bg-card p-5">
-            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-[12px] bg-primary/10 text-primary">
-              <ShieldCheck className="h-6 w-6" />
-            </span>
-            <div className="min-w-0">
-              <h3 className="font-display text-[17px] font-bold">Pruébalo 7 días completos</h3>
-              <p className="mt-1 text-[13.5px] leading-relaxed text-muted-foreground">
-                Entra, haz tu diagnóstico y vive tus primeros días. Decides después, con calma.
-              </p>
-            </div>
-          </section>
-        </Reveal>
-
-        <ReviewsSlider />
-
-        {/* FAQ */}
-        <section className="mt-14">
+        {/* 4. PARA QUIÉN */}
+        <section className="mt-12 grid items-center gap-6 md:grid-cols-2">
+          <Reveal><img src={eStar} alt="" loading="lazy" className="mx-auto h-40 w-40 object-contain drop-shadow-xl md:h-56 md:w-56" /></Reveal>
           <Reveal>
-            <h2 className="font-display text-[26px] font-extrabold leading-tight">
-              Antes de empezar
-            </h2>
+            <p className="text-[12px] font-bold uppercase tracking-widest text-primary">¿Para quién es?</p>
+            <H2 left>Para la persona que…</H2>
+            <ul className="mt-4 grid gap-3">{FOR_WHO.map((t) => <li key={t} className="flex items-start gap-2.5 text-[15px] font-medium"><CheckDot />{t}</li>)}</ul>
+            <p className="mt-4 text-[15px] text-muted-foreground">Si te viste aquí, esto fue hecho para ti — y para la persona en la que te estás convirtiendo.</p>
           </Reveal>
-          <div className="mt-4 space-y-2">
+        </section>
+
+        {/* 5. ANTES Y DESPUÉS */}
+        <section className="mt-14">
+          <Reveal><Kicker>Lo que puede cambiar</Kicker><H2>De cargar el patrón a vivir en paz</H2></Reveal>
+          <div className="mx-auto max-w-xl"><BeforeAfter variant={0} /></div>
+          <div className="mt-5 text-center"><Link to="/empezar" className="inline-grid h-14 w-full place-items-center rounded-[12px] px-8 text-[16px] font-bold text-primary-foreground shadow-glow active:scale-[.97] sm:w-auto" style={{ background: "var(--gradient-primary)" }}>Quiero empezar mi cambio</Link></div>
+        </section>
+
+        {/* 6. LA APP POR DENTRO */}
+        <section className="mx-auto mt-4 max-w-3xl"><AppScreens /></section>
+
+        {/* 7. POR QUÉ FALLÓ LO ANTERIOR */}
+        <section className="mt-14 overflow-hidden rounded-[24px] bg-card shadow-[0_1px_3px_rgba(30,25,20,.06)]">
+          <img src={triedImg} alt="Pareja cansada después de intentar de todo" loading="lazy" width={1200} height={610} className="h-48 w-full object-cover grayscale sm:h-64" />
+          <div className="p-5 sm:p-8">
+            <H2 left>Por qué todo lo que probaste antes no alcanzó</H2>
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              {FAILED.map((f) => <p key={f} className="flex items-center gap-2 rounded-[10px] bg-muted px-3 py-2.5 text-[14px] font-semibold"><CircleX className="h-4 w-4 shrink-0 text-destructive" />{f} <span className="text-muted-foreground">No alcanzó.</span></p>)}
+            </div>
+            <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground">No fue tu culpa. Esos consejos tratan el síntoma, no la raíz. <strong className="text-foreground">Lo que no se mira en su origen, vuelve.</strong> ORÍGEN te ayuda a mirarlo con Dios, paso a paso, sin juicio.</p>
+          </div>
+        </section>
+
+        {/* 8. TODO LO QUE INCLUYE + LIBROS */}
+        <section className="mx-auto max-w-3xl">
+          <Includes />
+          <BooksGift />
+        </section>
+
+        {/* 9. TESTIMONIOS */}
+        <section className="-mx-4 mt-14 bg-primary/5 py-4"><ReviewsSlider /></section>
+
+        {/* 10. PRUEBA UNA CONSULTA */}
+        <section className="mx-auto max-w-2xl"><TryConsulta name="" /></section>
+
+        <Reveal><div id="dios-te-dice-hoy" className="mt-12 scroll-mt-20"><DiosTeDiceHoy /></div></Reveal>
+
+        {/* 11. GARANTÍA */}
+        <section className="relative mx-auto mt-12 max-w-2xl overflow-hidden rounded-[24px] bg-card p-6 text-center shadow-[0_1px_3px_rgba(30,25,20,.06)]">
+          <span aria-hidden className="absolute inset-x-10 top-0 h-[2px] rounded-full" style={{ background: "var(--gradient-primary)" }} />
+          <span className="mx-auto grid h-14 w-14 place-items-center rounded-[16px] bg-primary/10 text-primary"><ShieldCheck className="h-7 w-7" /></span>
+          <H2>Pruébalo sin riesgo</H2>
+          <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">Empiezas gratis. Si después eliges un plan, tienes 7 días gratis, te avisamos antes del cobro y cancelas cuando quieras. Sin preguntas incómodas.</p>
+        </section>
+
+        {/* 12. FAQ */}
+        <section className="mx-auto mt-14 max-w-2xl">
+          <Kicker>¿Tienes dudas?</Kicker><H2>Te respondemos</H2>
+          <div className="mt-5 grid gap-2">
             {FAQ.map((f, i) => (
-              <div key={f.q} className="overflow-hidden rounded-[16px] border border-border bg-card">
-                <button
-                  onClick={() => setFaq(faq === i ? null : i)}
-                  className="grid min-h-[52px] w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 text-left"
-                >
-                  <span className="min-w-0 text-[14.5px] font-semibold leading-snug">{f.q}</span>
-                  <ChevronDown
-                    className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform ${faq === i ? "rotate-180" : ""}`}
-                  />
+              <div key={f.q} className="rounded-[16px] bg-card shadow-[0_1px_3px_rgba(30,25,20,.06)]">
+                <button type="button" aria-expanded={faq === i} onClick={() => setFaq(faq === i ? null : i)} className="flex min-h-14 w-full items-center justify-between gap-3 px-4 text-left text-[15px] font-semibold">
+                  {f.q}<ChevronDown className={`h-5 w-5 shrink-0 text-primary transition-transform ${faq === i ? "rotate-180" : ""}`} />
                 </button>
-                {faq === i && (
-                  <p className="px-4 pb-4 text-[13.5px] leading-relaxed text-muted-foreground">{f.a}</p>
-                )}
+                {faq === i && <p className="px-4 pb-4 text-[14px] leading-relaxed text-muted-foreground">{f.a}</p>}
               </div>
             ))}
           </div>
         </section>
 
-        {/* CTA FINAL */}
+        {/* 13. CTA FINAL */}
         <Reveal>
-          <section
-            className="mt-14 rounded-[16px] p-7 text-center"
-            style={{ background: "var(--gradient-brand-soft)" }}
-          >
-            <h2 className="font-display text-[26px] font-extrabold leading-tight">
-              Hoy puedes cortar la cadena.
-            </h2>
-            <Link
-              to="/empezar"
-              className="mt-5 grid h-14 w-full place-items-center rounded-[12px] text-[16.5px] font-bold text-primary-foreground shadow-glow active:scale-[.98]"
-              style={{ background: "var(--gradient-primary)" }}
-            >
-              Empezar gratis <ArrowRight className="ml-2 inline h-4 w-4" />
-            </Link>
+          <section className="mt-14 overflow-hidden rounded-[24px] bg-card shadow-[0_8px_30px_rgba(30,25,20,.12)]">
+            <img src={familyImg} alt="Tres generaciones de una familia caminando juntas en paz" loading="lazy" width={1408} height={912} className="h-56 w-full object-cover sm:h-80" />
+            <div className="p-6 text-center sm:p-10">
+              <img src={logo} alt="" className="mx-auto -mt-16 h-20 w-20 object-contain drop-shadow-xl sm:-mt-20" />
+              <h2 className="mt-3 font-display text-[28px] font-extrabold leading-tight">Hoy puedes cortar la cadena.</h2>
+              <p className="mx-auto mt-2 max-w-md text-[15px] text-muted-foreground">Lo que sanes hoy ya no lo heredarán los tuyos. El primer paso dura 2 minutos.</p>
+              <Link to="/empezar" className="mt-5 grid h-14 w-full place-items-center rounded-[12px] text-[16.5px] font-bold text-primary-foreground shadow-glow active:scale-[.97]" style={{ background: "var(--gradient-primary)" }}>
+                Probar gratis ahora <ArrowRight className="ml-2 inline h-4 w-4" />
+              </Link>
+              <p className="mt-4 text-[13px] italic text-muted-foreground"><strong>PD:</strong> No tienes que tenerlo todo resuelto para empezar. Solo tienes que dejar de cargarlo sola(o).</p>
+            </div>
           </section>
         </Reveal>
 
@@ -311,26 +296,29 @@ function Landing() {
             <a href="/disclaimer-ia" className="underline-offset-2 hover:underline">Uso de IA</a>
           </div>
           <p className="mt-3">Soporte: infodenegociorm@gmail.com</p>
-          <p className="mt-1">
-            © {new Date().getFullYear()} ORÍGEN. Acompañamiento espiritual, no sustituye atención
-            médica o psicológica.
-          </p>
+          <p className="mt-1">© {new Date().getFullYear()} ORÍGEN. Acompañamiento espiritual, no sustituye atención médica o psicológica.</p>
         </footer>
       </div>
 
       {sticky && (
-        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 px-4 pb-[max(12px,env(safe-area-inset-bottom))] pt-3 backdrop-blur-xl">
-          <Link
-            to="/empezar"
-            className="grid h-14 w-full place-items-center rounded-[12px] text-[16px] font-bold text-primary-foreground shadow-glow active:scale-[.98]"
-            style={{ background: "var(--gradient-primary)" }}
-          >
-            Empezar gratis
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 px-4 pb-[max(12px,env(safe-area-inset-bottom))] pt-3 backdrop-blur-xl motion-safe:animate-in motion-safe:slide-in-from-bottom-4">
+          <Link to="/empezar" className="mx-auto grid h-14 w-full max-w-md place-items-center rounded-[12px] text-[16px] font-bold text-primary-foreground shadow-glow active:scale-[.97]" style={{ background: "var(--gradient-primary)" }}>
+            Probar gratis ahora
           </Link>
         </div>
       )}
     </main>
   );
+}
+
+function Kicker({ children }: { children: React.ReactNode }) {
+  return <p className="text-center text-[12px] font-bold uppercase tracking-widest text-primary">{children}</p>;
+}
+function H2({ children, left }: { children: React.ReactNode; left?: boolean }) {
+  return <h2 className={`mt-1 font-display text-[26px] font-extrabold leading-tight sm:text-[32px] ${left ? "" : "text-center"}`}>{children}</h2>;
+}
+function CheckDot() {
+  return <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-primary/12 text-primary"><Check className="h-3.5 w-3.5" strokeWidth={3} /></span>;
 }
 
 /** Entrada suave al hacer scroll; respeta “reducir movimiento”. */
