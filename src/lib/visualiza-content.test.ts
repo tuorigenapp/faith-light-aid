@@ -38,4 +38,21 @@ describe("subcategory-specific content", () => {
     expect(resolvePractice("Oración con música", first, [first, second]).exercise).toContain("Organizar mi dinero");
     expect(resolvePractice("Oración con música", first, [first, second]).lesson).toBe("Una lección original de presupuesto");
   });
+  it("differentiates baths, guided visualization, future planning, writing and journaling", () => {
+    const pairs = [["Baño con Sal", "Baño con Hierbas"], ["Future Self (Visualización)", "Visualización Guiada"], ["Scripting (Escritura)", "Diario de Transformación"]];
+    for (const [first, second] of pairs) {
+      const a = thematicPractice("Visualízalo", first);
+      const b = thematicPractice("Visualízalo", second);
+      expect(a.tasks[1]).not.toEqual(b.tasks[1]);
+      expect(a.search_words).not.toEqual(b.search_words);
+    }
+    expect(thematicPractice("Limpieza", "Baño con Hierbas").tasks[1]).toContain("sin ingerir plantas");
+  });
+  it("handles legacy rows without ids and word games repeated in reverse order", () => {
+    const first = { title: "Mi dinero", day_index: 1, exercise: "Tarea repetida", word_game: { words: ["AMOR", "CALMA"] } };
+    const second = { title: "Mi pareja", day_index: 2, exercise: first.exercise, word_game: { words: ["CALMA", "AMOR"] } };
+    const result = resolvePractice("Música", first, [first, second]);
+    expect(result.exercise).not.toBe(first.exercise);
+    expect(result.search_words).toContain("AHORRO");
+  });
 });
