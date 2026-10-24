@@ -132,12 +132,7 @@ export function CustomMusicTopic({ cat, audios, entries, isPaid }: { cat: any; a
   return <LessonStep cat={cat} page={page} accent={accent} subs={subs} sel={sel} entries={entries} isPaid={isPaid} onBack={() => setStep(2)} onPick={setSelId} dots={Dots} />;
 }
 
-const AFF_STYLE = [
-  { Icon: Sparkles, color: "#C98A12", bg: "#FFF3D6" },
-  { Icon: Heart, color: "#D9468F", bg: "#FFE1F1" },
-  { Icon: Flower2, color: "#1F8A63", bg: "#DFF6EA" },
-  { Icon: HandHeart, color: "#6D4FE0", bg: "#EDE7FF" },
-];
+const AFF_STYLE = AFFIRMATION_STYLES;
 const EX_HINTS = [
   { label: "Visualiza", sub: "Tu vida ideal", Icon: Eye },
   { label: "Siente", sub: "La emoción", Icon: Waves },
