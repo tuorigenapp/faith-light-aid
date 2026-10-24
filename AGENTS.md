@@ -25,3 +25,6 @@
 - Home and game listings reuse GameCard with natural image sizing and no overlays; this keeps every game cover complete and consistent.
 - Funnel library previews derive their count from EBOOKS and use managed cover pointers without download links; this keeps the public preview synchronized without granting access to paid files.
 - Generated human portraits used in public stories must be explicitly illustrative, never verified customer identities; this avoids attributing invented endorsements to real people.
+- Mensajes ORÍGEN are generated from a pure daily schedule (one message per assistant per day) and check-ins persist in `daily_activity` (`mensaje_checkin`); this keeps them free of AI credits and testable.
+- Every downloadable PDF uses the shared `pdf-brand` header and closing promo (book + subscription or affiliate CTA by plan); this keeps branding identical across documents.
+- Journey screens (/etapas, caminos, /ejercicios) use the shared seasonal background picker chosen in the browser by season and time of day; this avoids hydration mismatches and keeps one look.

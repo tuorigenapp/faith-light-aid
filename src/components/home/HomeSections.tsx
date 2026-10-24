@@ -1,3 +1,5 @@
+import { getPalabraHoy, dayOfYear } from "@/lib/palabra365";
+import { useProfile } from "@/hooks/use-profile";
 import { Link } from "@tanstack/react-router";
 import { useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -175,15 +177,22 @@ export function DigitalLibraryCarousel() {
 
 /* 5 · MENSAJE */
 export function DailyMessageBanner({ name }: { name: string }) {
+  const p = getPalabraHoy();
+  const { data: profile } = useProfile();
+  const focus = (profile?.intention as string | null) ?? "";
+  // Two variations: the day's word itself, or the word applied to the person's current situation.
+  const personal = !!focus && dayOfYear() % 2 === 0;
+  const title = personal ? `${name}, «${p.title}» para ${focus.toLowerCase()}` : `${name}, hoy Dios te habla de «${p.title}»`;
+  const body = personal ? `${p.advice} ${p.passage.reference}.` : `${p.intro} ${p.passage.reference}.`;
   return (
     <section className={`relative min-h-[180px] ${card}`}>
       <img src={mensaje} alt="" loading="lazy" width={1536} height={640} className="absolute inset-0 h-full w-full object-cover object-[80%_center]" />
       <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-transparent" />
       <div className="relative p-5 max-w-[72%] sm:max-w-[55%]">
-        <span className="text-[11px] font-bold uppercase tracking-wider text-primary">Mensaje de hoy</span>
-        <h3 className="mt-1 font-serif text-[21px] leading-tight text-foreground">{name}, vuelve hoy a tu memoria sana</h3>
-        <p className="mt-1 text-[12.5px] leading-snug text-foreground/75 line-clamp-3">A veces la mente corre más rápido que el corazón, y ahí es donde volver al centro se vuelve necesario. No se trata de negar lo que sientes, sino de darte espacio para comprenderlo.</p>
-        <Link to="/palabra" className="mt-3 inline-flex h-10 items-center gap-2 rounded-full bg-[#45258E] px-4 text-[13px] font-bold text-white">Ver completo <ArrowRight className="w-4 h-4" /></Link>
+        <span className="text-[11px] font-bold uppercase tracking-wider text-primary">Palabra del día</span>
+        <h3 className="mt-1 font-serif text-[21px] leading-tight text-foreground">{title}</h3>
+        <p className="mt-1 text-[13px] leading-snug text-foreground/75 line-clamp-3">{body}</p>
+        <Link to="/palabra" className="mt-3 inline-flex h-11 items-center gap-2 rounded-full bg-primary px-4 text-[13px] font-bold text-primary-foreground">Ver completo <ArrowRight className="w-4 h-4" /></Link>
       </div>
     </section>
   );

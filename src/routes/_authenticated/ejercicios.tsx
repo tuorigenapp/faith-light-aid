@@ -1,3 +1,4 @@
+import { useSeasonalBackground } from "@/lib/seasonal-bg";
 import { createFileRoute } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
@@ -71,6 +72,7 @@ function refIdFor(day: number) {
 }
 
 function Ejercicios() {
+  const seasonBg = useSeasonalBackground();
   const { user } = useAuth();
   const { data: profile } = useProfile();
   const qc = useQueryClient();
@@ -181,14 +183,10 @@ function Ejercicios() {
   const progressPct = Math.round((completedCount / TOTAL_DAYS) * 100);
 
   return (
-    <div
-      className="min-h-dvh"
-      style={{
-        background:
-          "radial-gradient(80% 40% at 12% 0%, rgba(124,92,255,.32), transparent 62%), radial-gradient(70% 35% at 95% 6%, rgba(245,139,203,.22), transparent 62%), linear-gradient(180deg, #241348 0%, #1A0F31 45%, #140C24 100%)",
-      }}
-    >
-      <div className="mx-auto w-full max-w-[1100px] px-4 py-6 md:px-6 md:py-10 mobile-safe-bottom lg:pb-10">
+    <div className="relative min-h-dvh">
+      <img src={seasonBg} alt="" aria-hidden width={720} height={1280} className="fixed inset-0 h-full w-full object-cover" />
+      <div aria-hidden className="fixed inset-0 bg-gradient-to-b from-[#1E1712]/30 via-[#1E1712]/50 to-[#120D09]/85" />
+      <div className="relative mx-auto w-full max-w-[1100px] px-4 py-6 md:px-6 md:py-10 mobile-safe-bottom lg:pb-10">
         <JourneyHeader
           name={profile?.display_name || profile?.full_name || "Tu camino"}
           streak={profile?.consecutive_days ?? 0}
@@ -373,11 +371,14 @@ function ExerciseModal({
   const [mentalDone, setMentalDone] = useState(false);
   const [gameDone, setGameDone] = useState(false);
   const [gameOpen, setGameOpen] = useState(false);
+  const [doneSteps, setDoneSteps] = useState<Set<number>>(new Set());
+  const allStepsDone = doneSteps.size >= exercise.steps.length;
 
   const keywords = useMemo(() => getExerciseKeywords(exercise), [exercise]);
   const quiz = useMemo(() => getExerciseQuiz(exercise), [exercise]);
   const gameKind = getGameKindForDay(exercise.day);
   const currentQuiz = quiz[quizIdx];
+  const quizCorrect = quizPick !== null && quizPick === currentQuiz?.correctIndex;
   const quizDone = quizIdx >= quiz.length - 1 && quizPick !== null;
 
   function nextQuiz() {
@@ -392,7 +393,7 @@ function ExerciseModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-[#1B1930]/70 backdrop-blur-sm grid place-items-end sm:place-items-center p-0 sm:p-4"
+      className="fixed inset-0 z-50 bg-[#1E1712]/60 backdrop-blur-sm grid place-items-end sm:place-items-center p-0 sm:p-4"
       onClick={onClose}
     >
       <div
@@ -434,16 +435,19 @@ function ExerciseModal({
             {exercise.scripture && <p className="scripture mt-3 text-sm">“{exercise.scripture}”</p>}
             <ol className="mt-5 space-y-2.5 text-sm">
               {exercise.steps.map((s, i) => (
-                <li key={i} className="flex gap-3 rounded-[16px] border border-border p-3 bg-card">
-                  <span className="shrink-0 w-7 h-7 rounded-full bg-primary/10 text-primary grid place-items-center text-xs font-bold">
-                    {i + 1}
-                  </span>
-                  <span className="leading-relaxed">{s}</span>
+                <li key={i}>
+                  <button type="button" onClick={() => setDoneSteps((prev) => { const n = new Set(prev); if (n.has(i)) n.delete(i); else n.add(i); return n; })} aria-pressed={doneSteps.has(i)} className={cn("flex w-full gap-3 rounded-[16px] border p-3 text-left active:scale-[.98] transition", doneSteps.has(i) ? "border-primary bg-primary/8" : "border-border bg-card")}>
+                    <span className={cn("shrink-0 w-7 h-7 rounded-full grid place-items-center text-xs font-bold", doneSteps.has(i) ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary")}>
+                      {doneSteps.has(i) ? <Check className="w-4 h-4" /> : i + 1}
+                    </span>
+                    <span className="leading-relaxed">{s}</span>
+                  </button>
                 </li>
               ))}
             </ol>
             <AffirmationSlider className="mt-4" focus={exercise.title} words={keywords} />
-            <StepButton onClick={() => setStep(2)}>Hacer el quiz</StepButton>
+            {!allStepsDone && <p className="mt-4 text-center text-[13px] font-semibold text-muted-foreground">Marca cada paso cuando lo hayas hecho para continuar.</p>}
+            <StepButton disabled={!allStepsDone} onClick={() => setStep(2)}>Hacer el quiz</StepButton>
           </section>
         )}
 
@@ -481,9 +485,13 @@ function ExerciseModal({
                 {currentQuiz.explanation}
               </p>
             )}
-            <StepButton disabled={quizPick === null} onClick={nextQuiz}>
-              {quizDone ? "Ir al juego de verdades" : "Siguiente pregunta"}
-            </StepButton>
+            {quizPick !== null && !quizCorrect ? (
+              <StepButton onClick={() => setQuizPick(null)}>Intentar de nuevo</StepButton>
+            ) : (
+              <StepButton disabled={!quizCorrect} onClick={nextQuiz}>
+                {quizDone ? "Ir al juego de verdades" : "Siguiente pregunta"}
+              </StepButton>
+            )}
           </section>
         )}
 

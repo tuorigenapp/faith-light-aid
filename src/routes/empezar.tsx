@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import bookImg from "@/assets/libro-reconectando.png";
 import { ArrowLeft, Check, X, Heart, Sparkles, Brain, Coins, Users, Compass, Headphones, NotebookPen, BookOpen, Lock, ShieldCheck, Map, FileText, Gamepad2, Clock, Gift, Globe2, Download, Sun, TreePine, HeartHandshake, Smartphone, BadgeCheck, CalendarCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -467,6 +468,14 @@ function Includes() {
     <SectionTitle kicker="Todo en un solo lugar">Lo que incluye tu plan</SectionTitle>
     <img src={mockup} alt="Pantallas de la app ORÍGEN" loading="lazy" className="mx-auto mt-4 w-full max-w-sm drop-shadow-2xl" />
     <div className="mt-4 grid gap-3">{incl.map(({ i: I, t, d }) => <div key={t} className="flex items-center gap-3 rounded-2xl bg-card p-4 shadow-sm"><span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-primary/10"><I className="h-6 w-6 text-primary" /></span><span><span className="block font-semibold text-foreground">{t}</span><span className="block text-sm text-muted-foreground">{d}</span></span></div>)}</div>
+    <div className="relative mt-4 grid grid-cols-[96px_1fr] items-center gap-4 overflow-hidden rounded-2xl border-2 border-primary bg-card p-4 shadow-sm">
+      <img src={bookImg} alt="Libro Reconectando el Espíritu con Dios" width={96} height={128} loading="lazy" className="h-auto w-24" />
+      <div>
+        <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-[12px] font-bold text-primary"><Gift className="h-3.5 w-3.5" /> Regalo incluido</span>
+        <p className="mt-1.5 font-display text-[17px] font-bold leading-tight text-foreground">Ebook «Reconectando el Espíritu con Dios» gratis</p>
+        <p className="mt-1 text-sm text-muted-foreground">El libro de Ruth Esther Paredes Sufran, autora y fundadora de ORÍGEN, donde nace este método.</p>
+      </div>
+    </div>
   </>;
 }
 

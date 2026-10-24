@@ -32,6 +32,8 @@ import { useSignedUrls } from "@/hooks/use-signed-urls";
 import { useCommunityNotifications } from "@/hooks/use-community-notifications";
 import origenIcon from "@/assets/logo-origen.png";
 import { useMensajesUnread } from "@/hooks/use-mensajes";
+import { getUserPlan } from "@/lib/plan";
+import { rememberPlan } from "@/lib/pdf-brand";
 import { Bell as BellIcon, MessageSquareHeart } from "lucide-react";
 
 
@@ -108,6 +110,7 @@ function AuthLayoutInner() {
   const communityUnread = (communityNotifications?.length ?? 0) > 0;
   const { data: pendings } = useOrigenPendings(user?.id);
   const mensajesUnread = useMensajesUnread();
+  useEffect(() => { if (user?.id) void getUserPlan(user.id).then(rememberPlan).catch(() => {}); }, [user?.id]);
   useSectionSeen(user?.id, location.pathname, location.searchStr ?? "");
   const ensureNotice = useServerFn(ensureDailyNotice);
   useEffect(() => {

@@ -1,3 +1,4 @@
+import { useSeasonalBackground } from "@/lib/seasonal-bg";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,8 +11,6 @@ import { cn } from "@/lib/utils";
 import { DuolingoPath } from "@/components/DuolingoPath";
 import { toast } from "sonner";
 import { ArrowLeft, Award, Check, Flame, Leaf, Lock, Sparkles } from "lucide-react";
-import paisaje from "@/assets/fondo-mistico.png";
-import mapaCamino from "@/assets/mapa-camino.png";
 import arbolIsla from "@/assets/hojas-tree.png";
 import heartGem from "@/assets/e3d-heartgem.png";
 import portal from "@/assets/onb-portal.png";
@@ -33,6 +32,7 @@ export const Route = createFileRoute("/_authenticated/caminos/$caminoId/")({
 function todayIso() { return new Date().toISOString().slice(0, 10); }
 
 function CaminoMapa() {
+  const seasonBg = useSeasonalBackground();
   const { caminoId } = Route.useParams();
   const { user } = useAuth();
   const qc = useQueryClient();
@@ -106,9 +106,8 @@ function CaminoMapa() {
 
   return (
     <div className="relative min-h-dvh">
-      <img src={paisaje} alt="" aria-hidden width={1024} height={1024} className="fixed inset-0 h-full w-full object-cover" />
-      <img src={mapaCamino} alt="" aria-hidden width={1024} height={1024} className="fixed inset-0 h-full w-full object-cover opacity-30 mix-blend-screen" />
-      <div aria-hidden className="fixed inset-0 bg-gradient-to-b from-[#2A1B45]/72 via-[#241539]/78 to-[#150C24]/92" />
+      <img src={seasonBg} alt="" aria-hidden width={720} height={1280} className="fixed inset-0 h-full w-full object-cover motion-safe:transition-opacity motion-safe:duration-500" />
+      <div aria-hidden className="fixed inset-0 bg-gradient-to-b from-[#1E1712]/35 via-[#1E1712]/50 to-[#120D09]/85" />
 
       <div className="relative z-10 px-4 py-5 max-w-[520px] mx-auto mobile-safe-bottom lg:pb-10">
         <Link to="/categorias" className="inline-flex items-center gap-2 text-[13.5px] font-semibold text-white/85">

@@ -59,7 +59,7 @@ export const Route = createFileRoute("/api/public/push-daily")({
         }
         if (dead.length) await supabaseAdmin.from("push_subscriptions").delete().in("endpoint", dead);
 
-        return Response.json({ sent, skipped: activeIds.size });
+        return Response.json({ sent, skipped: 0 });
       },
     },
   },

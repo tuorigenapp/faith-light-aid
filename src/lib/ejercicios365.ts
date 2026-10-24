@@ -758,11 +758,11 @@ export function getExerciseQuiz(ex: DailyExercise): QuizQuestion[] {
   const q1Options = [ex.purpose, ...distractorThemes.slice(0, 3).map((t) => OTHER_THEME_HINTS[t])];
   const q1Order = [0, 1, 2, 3].sort((a, b) => seeded(ex.day + a, 97) - seeded(ex.day + b, 97));
 
-  const stepsLen = ex.steps.length;
-  const q2Options = [stepsLen - 1, stepsLen, stepsLen + 1, stepsLen + 2].filter((n) => n > 0);
-  while (q2Options.length < 4) q2Options.push(stepsLen + q2Options.length);
-
-  const q3Options = [ex.theme, ...distractorThemes.slice(0, 3)];
+  const others = [ex.day + 37, ex.day + 101, ex.day + 173].map((d) => getExerciseForDay(((d - 1) % 365) + 1));
+  const realStep = ex.steps[seeded(ex.day, 13) % ex.steps.length]!;
+  const q2Options = [realStep, ...others.map((o) => o.steps[0]!).filter((x) => x !== realStep)].slice(0, 4);
+  const truth = ex.scripture || ex.purpose;
+  const q3Options = [truth, ...others.map((o) => o.scripture || o.purpose).filter((x) => x !== truth)].slice(0, 4);
 
   function shuffledWithCorrect<T>(options: T[], correctValue: T, seedBase: number) {
     const idx = options.findIndex((o) => o === correctValue);
@@ -772,12 +772,8 @@ export function getExerciseQuiz(ex: DailyExercise): QuizQuestion[] {
   }
 
   const s1 = shuffledWithCorrect(q1Options, ex.purpose, ex.day);
-  const s2 = shuffledWithCorrect(
-    q2Options.map(String),
-    String(stepsLen),
-    ex.day + 1,
-  );
-  const s3 = shuffledWithCorrect(q3Options, ex.theme, ex.day + 2);
+  const s2 = shuffledWithCorrect(q2Options, realStep, ex.day + 1);
+  const s3 = shuffledWithCorrect(q3Options, truth, ex.day + 2);
 
   return [
     {
@@ -787,16 +783,16 @@ export function getExerciseQuiz(ex: DailyExercise): QuizQuestion[] {
       explanation: ex.purpose,
     },
     {
-      question: "¿Cuántos pasos tiene el ejercicio de hoy?",
+      question: "¿Cuál de estas acciones forma parte de tu práctica de hoy?",
       options: s2.options,
       correctIndex: s2.correctIndex,
-      explanation: `El ejercicio de hoy tiene ${stepsLen} pasos concretos.`,
+      explanation: `Hoy te toca: ${realStep}`,
     },
     {
-      question: "¿A qué tema pertenece la práctica de hoy?",
+      question: ex.scripture ? "¿Qué Palabra acompaña tu práctica de hoy?" : "¿Qué busca sanar en ti el ejercicio de hoy?",
       options: s3.options,
       correctIndex: s3.correctIndex,
-      explanation: `Hoy trabajas: ${ex.theme}.`,
+      explanation: ex.scripture ? `Hoy te acompaña: «${ex.scripture}».` : ex.purpose,
     },
   ];
 }
