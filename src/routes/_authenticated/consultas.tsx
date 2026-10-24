@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, HeartHandshake, MessageCircleHeart, Network, BookOpen, Sparkles } from "lucide-react";
+import { MessageCircleHeart, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useContentOverrides } from "@/hooks/use-content-overrides";
 import consultaMentora from "@/assets/consultas/consulta-mentora.jpg";
 import consultaPareja from "@/assets/consultas/consulta-pareja.jpg";
 import consultaPatrones from "@/assets/consultas/consulta-patrones.jpg";
@@ -26,17 +27,17 @@ type ConsultaCard = {
   key: string;
   title: string;
   subtitle: string;
-  tag: string;
   image: string;
   to: string;
   slug?: string;
+  coverKey?: string;
 };
 
 const BUILTIN: ConsultaCard[] = [
-  { key: "mentora", title: "Conversa con Ruth Esther", subtitle: "Tu mentora espiritual te escucha.", tag: "Mentora", image: consultaMentora, to: "/chat" },
-  { key: "pareja", title: "¿Deuda o propósito?", subtitle: "Consulta profunda de pareja.", tag: "Pareja", image: consultaPareja, to: "/pareja" },
-  { key: "patrones", title: "Patrones familiares", subtitle: "Mira qué se repite en tu historia.", tag: "Consulta", image: consultaPatrones, to: "/patrones" },
-  { key: "ministracion", title: "Dios te dice hoy", subtitle: "Una palabra para tu corazón.", tag: "Palabra", image: consultaMinistracion, to: "/ministracion" },
+  { key: "mentora", title: "Conversa con Ruth Esther", subtitle: "Tu mentora espiritual te escucha y te guía con fe.", image: consultaMentora, to: "/chat", coverKey: "imagen:consulta:banner-mentora" },
+  { key: "pareja", title: "¿Deuda o propósito?", subtitle: "Descubre lo que Dios muestra sobre tu relación.", image: consultaPareja, to: "/pareja", coverKey: "imagen:consulta:banner-pareja" },
+  { key: "patrones", title: "Patrones familiares", subtitle: "Mira qué se repite en tu historia y rómpelo con fe.", image: consultaPatrones, to: "/patrones", coverKey: "imagen:consulta:banner-patrones" },
+  { key: "ministracion", title: "Dios te dice hoy", subtitle: "Una palabra de fe preparada para tu corazón.", image: consultaMinistracion, to: "/ministracion", coverKey: "imagen:consulta:banner-ministracion" },
 ];
 
 /** Portadas locales con texto para consultas conocidas (respaldo si la portada guardada caduca). */
@@ -45,6 +46,7 @@ const LOCAL_COVERS: Record<string, string> = {
 };
 
 function ConsultasPage() {
+  const ov = useContentOverrides();
   const { data: custom, isLoading } = useQuery({
     queryKey: ["todas-las-consultas"],
     queryFn: async () => {
@@ -60,7 +62,6 @@ function ConsultasPage() {
     key: c.id,
     title: c.title,
     subtitle: c.subtitle || "Tu respuesta personalizada te espera.",
-    tag: "Consulta",
     image: LOCAL_COVERS[c.slug] || c.cover_url || consultaPatrones,
     to: "/consulta/$slug",
     slug: c.slug,
@@ -87,15 +88,15 @@ function ConsultasPage() {
         </section>
 
         {isLoading ? (
-          <section className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="aspect-[4/5] rounded-[16px] bg-muted animate-pulse" />
+          <section className="mt-5 grid gap-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="aspect-[21/9] rounded-[16px] bg-muted animate-pulse" />
             ))}
           </section>
         ) : (
-          <section className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          <section className="mt-5 grid gap-3 sm:grid-cols-2">
             {cards.map((c, i) => (
-              <ConsultaCardView key={c.key} card={c} index={i} />
+              <ConsultaCardView key={c.key} card={{ ...c, image: (c.coverKey && ov.get(c.coverKey)?.cover_url) || c.image }} index={i} />
             ))}
           </section>
         )}
@@ -115,42 +116,30 @@ function ConsultasPage() {
 
 function ConsultaCardView({ card, index }: { card: ConsultaCard; index: number }) {
   const inner = (
-    <>
-      <div className="relative aspect-[4/5] overflow-hidden bg-muted">
-        <img
-          src={card.image}
-          alt={`Portada de ${card.title}`}
-          loading="lazy"
-          width={1024}
-          height={1280}
-          className="h-full w-full object-cover transition group-hover:scale-[1.03]"
-        />
-        <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-[10px] bg-background/85 backdrop-blur px-2.5 py-1 text-[10.5px] font-black text-primary">
-          {card.tag === "Mentora" ? <MessageCircleHeart className="w-3 h-3" /> : card.tag === "Pareja" ? <HeartHandshake className="w-3 h-3" /> : card.tag === "Palabra" ? <BookOpen className="w-3 h-3" /> : <Network className="w-3 h-3" />}
-          {card.tag}
-        </span>
-      </div>
-      <div className="p-4">
-        <h2 className="font-display font-bold text-[16px] leading-tight">{card.title}</h2>
-        <p className="mt-1 text-[13px] leading-snug text-muted-foreground line-clamp-2">{card.subtitle}</p>
-        <span className="mt-3 inline-flex items-center gap-1 text-[12px] font-bold text-primary">
-          Abrir consulta <ArrowRight className="w-3.5 h-3.5" />
-        </span>
-      </div>
-    </>
+    <div className="relative aspect-[21/9] overflow-hidden bg-muted">
+      <img
+        src={card.image}
+        alt={`Portada de ${card.title}`}
+        loading="lazy"
+        width={1536}
+        height={640}
+        className="h-full w-full object-cover transition group-hover:scale-[1.02]"
+      />
+      <span className="sr-only">{card.title}. {card.subtitle}</span>
+    </div>
   );
 
   const cls = "group overflow-hidden rounded-[16px] bg-card border border-border shadow-soft active:scale-[.99] transition block";
 
   if (card.slug) {
     return (
-      <Link to="/consulta/$slug" params={{ slug: card.slug }} className={cls} style={{ animation: `fade-in .4s ease-out ${index * 60}ms both` }}>
+      <Link to="/consulta/$slug" params={{ slug: card.slug }} aria-label={`Abrir consulta ${card.title}`} className={cls} style={{ animation: `fade-in .4s ease-out ${index * 60}ms both` }}>
         {inner}
       </Link>
     );
   }
   return (
-    <Link to={card.to} className={cls} style={{ animation: `fade-in .4s ease-out ${index * 60}ms both` }}>
+    <Link to={card.to} aria-label={`Abrir consulta ${card.title}`} className={cls} style={{ animation: `fade-in .4s ease-out ${index * 60}ms both` }}>
       {inner}
     </Link>
   );
