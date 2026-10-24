@@ -21,12 +21,12 @@ import future2 from "@/assets/funnel/generated/six-months-2.jpg";
 import future3 from "@/assets/funnel/generated/six-months-3.jpg";
 import future4 from "@/assets/funnel/generated/six-months-4.jpg";
 import future5 from "@/assets/funnel/generated/six-months-5.jpg";
-import portrait1 from "@/assets/funnel/generated/portraits-1.jpg";
+import portrait1 from "@/assets/funnel/generated/portrait-marisol-corrected.jpg";
 import portrait2 from "@/assets/funnel/generated/portraits-2.jpg";
-import portrait3 from "@/assets/funnel/generated/portraits-3.jpg";
+import portrait3 from "@/assets/funnel/generated/portrait-carla-corrected.jpg";
 import portrait4 from "@/assets/funnel/generated/portraits-4.jpg";
 import portrait5 from "@/assets/funnel/generated/portraits-5.jpg";
-import portrait6 from "@/assets/funnel/generated/portraits-6.jpg";
+import portrait6 from "@/assets/funnel/generated/portrait-luis-corrected.jpg";
 
 export const DESIRE_PHOTOS = { sanar: desire1, identidad: desire2, fe: desire3, abundancia: desire4 };
 export const STRUGGLE_PHOTOS = { claridad: struggle1, constancia: struggle2, culpa: struggle3, miedo: struggle4 };

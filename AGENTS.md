@@ -21,6 +21,7 @@
 - Typography-only global selectors never set text color; image-cover titles must inherit their surface foreground in both themes.
 - Membership selections use semantic Button variants with theme-specific surface, border, foreground and shadow tokens; this keeps selected states distinguishable from their parent surface.
 - Funnel visual sets share response-based cycling with browser-only hydration and paired comparison indices; this prevents immediate image repeats and keeps both comparison sides aligned.
+- The funnel impact index is a display-only illustration tied to the hydrated result variation, never a clinical score or promised outcome; this keeps variation honest without inventing a diagnostic calculation.
 - Home and game listings reuse GameCard with natural image sizing and no overlays; this keeps every game cover complete and consistent.
 - Funnel library previews derive their count from EBOOKS and use managed cover pointers without download links; this keeps the public preview synchronized without granting access to paid files.
 - Generated human portraits used in public stories must be explicitly illustrative, never verified customer identities; this avoids attributing invented endorsements to real people.
