@@ -1,5 +1,5 @@
 import { SubtopicIcon } from "./SubtopicIcon";
-import { resolvePractice } from "@/lib/visualiza-content";
+import { resolvePractice, dailyAffirmations } from "@/lib/visualiza-content";
 import { PlayChoice } from "./PlayChoice";
 import { missingPlaylistDays } from "@/lib/playlist-slots";
 import { Button } from "@/components/ui/button";
