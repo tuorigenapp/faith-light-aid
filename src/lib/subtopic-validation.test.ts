@@ -10,6 +10,9 @@ describe("original subcategory generation", () => {
   it("rejects reused sibling tasks", () => {
     expect(() => assertOriginalSubtopic(content, [{ quiz: { tasks: [content.tasks[0]] } }])).toThrow("tareas");
   });
+  it("rejects a reused word game regardless of word order", () => {
+    expect(() => assertOriginalSubtopic(content, [{ word_game: { words: [...content.search_words].reverse() } }])).toThrow("juego");
+  });
   it("requires six to eight distinct words with four to nine letters for the game", () => {
     expect(subtopicSchema.safeParse(content).success).toBe(true);
     expect(subtopicSchema.safeParse({ ...content, search_words: ["PRESUPUESTO", "DIALOGO", "ESCUCHA", "RESPETO", "VINCULO", "EMPATIA"] }).success).toBe(false);

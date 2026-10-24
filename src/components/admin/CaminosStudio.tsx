@@ -1,5 +1,5 @@
 import { APP_COVERS } from "@/lib/app-cover-catalog";
-import { adminListCategories, adminUpdateCategory, adminListLimpieza, adminUpdateLimpieza } from "@/lib/content-admin.functions";
+import { adminListCategories, adminUpdateCategory } from "@/lib/content-admin.functions";
 import { useContentOverrides } from "@/hooks/use-content-overrides";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -134,12 +134,9 @@ export function CoversStudio({ onNote }: { onNote: Notify }) {
   const updateCategory = useServerFn(adminUpdateCategory);
   const listCaminos = useServerFn(adminListCaminos);
   const updateCamino = useServerFn(adminUpdateCamino);
-  const listLimpieza = useServerFn(adminListLimpieza);
-  const updateLimpieza = useServerFn(adminUpdateLimpieza);
   const { data: ov } = useOverrides();
   const { data: categories = [] } = useQuery({ queryKey: ["studio-categories"], queryFn: () => listCategories() });
   const { data: caminos = [] } = useQuery({ queryKey: ["studio-caminos"], queryFn: () => listCaminos() });
-  const { data: practices = [] } = useQuery({ queryKey: ["studio-limpieza"], queryFn: () => listLimpieza() });
   const { data: consultas = [] } = useQuery({ queryKey: ["studio-consulta-covers"], queryFn: async () => { const { data, error } = await supabase.from("custom_consultas").select("id,title,slug,cover_url").order("created_at"); if (error) throw error; return data ?? []; } });
   const [busy, setBusy] = useState<string | null>(null);
   const [q, setQ] = useState("");

@@ -16,7 +16,9 @@ export function assertOriginalSubtopic(content: z.infer<typeof subtopicSchema>, 
     for (const key of ["affirmation", "lesson", "exercise"] as const) {
       if (p[key] && normalized(p[key]) === normalized(content[key])) throw new Error("La IA repitió contenido de otra práctica. No se guardó; agrega notas específicas del subtema y vuelve a intentar.");
     }
-    const quiz = p.quiz && typeof p.quiz === "object" ? p.quiz as { tasks?: string[]; questions?: { question: string }[] } : {};
+    const quiz = p.quiz && typeof p.quiz === "object" && !Array.isArray(p.quiz) ? p.quiz as { tasks?: string[]; questions?: { question: string }[] } : {};
     if (quiz.tasks?.some(t => content.tasks.some(v => normalized(t) === normalized(v))) || quiz.questions?.some(q => content.quiz.some(v => normalized(q.question) === normalized(v.question)))) throw new Error("La IA repitió tareas o preguntas de otra práctica. No se guardó; agrega notas específicas del subtema y vuelve a intentar.");
+    const game = p.word_game && typeof p.word_game === "object" ? p.word_game as { words?: string[] } : {};
+    if (game.words?.length === content.search_words.length && [...game.words].map(normalized).sort().join("|") === [...content.search_words].map(normalized).sort().join("|")) throw new Error("La IA repitió el juego de palabras de otra práctica. No se guardó; agrega notas específicas del subtema y vuelve a intentar.");
   }
 }
