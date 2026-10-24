@@ -38,3 +38,4 @@
 - Exploration cards share one asset catalog between Home and Explore; this prevents stale covers in one entry point.
 - Playlist placeholders come from unassigned day indices in the shared slot helper without truncating real tracks; this prevents repeated day labels when uploads have gaps.
 - Updating a music category cover synchronizes its page cover variants, while named page-cover slots can be edited individually without changing lesson text; this keeps manual image changes complete and precise.
+- Every user-triggered content deletion awaits the shared root-mounted confirmation queue, with preferences scoped by account; this prevents native dialogs, premature deletion, and confirmation collisions.
