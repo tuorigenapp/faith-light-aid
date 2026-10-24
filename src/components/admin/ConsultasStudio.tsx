@@ -7,6 +7,7 @@ import { adminCreateConsulta, adminToggleConsulta, adminDeleteConsulta } from "@
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { confirmDeletion } from "@/lib/deletion-confirmation";
+import { ConsultaCover } from "@/components/ConsultaCover";
 
 type Row = {
   id: string;
@@ -98,7 +99,7 @@ export function ConsultasStudio() {
         {!isLoading && rows.length === 0 && <p className="text-[14px] text-muted-foreground">Todavía no creaste ninguna. La primera aparecerá aquí.</p>}
         {rows.map((r) => (
           <article key={r.id} className="overflow-hidden rounded-[16px] border border-border bg-card">
-            {r.cover_url && <img src={r.cover_url} alt="" className={cn("aspect-[16/9] w-full object-cover", !r.is_published && "opacity-50")} />}
+            <ConsultaCover slug={r.slug} src={r.cover_url ?? undefined} alt={`Portada de ${r.title}`} className={cn("aspect-[21/9] w-full object-cover", !r.is_published && "opacity-50")} />
             <div className="p-3">
               <p className="truncate font-bold">{r.title}</p>
               <p className="truncate text-[12px] text-muted-foreground">{r.subtitle || "Sin subtítulo"}</p>
