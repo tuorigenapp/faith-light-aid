@@ -68,7 +68,8 @@ Devuelve JSON con: hero_title (máx 50 caracteres), hero_text (máx 200), includ
   );
   const prompts = (page.cover_prompts ?? []).slice(0, 3);
   const covers: (string | null)[] = [];
-  for (const [i, cp] of prompts.entries()) covers.push(await uploadCover(`${cp}. ${COVER_STYLE}`, `${slug}-paso-${i + 1}`));
+  for (const [i, cp] of prompts.entries())
+    covers.push(await uploadCover(i === 0 ? `${cp}. ${CATEGORY_COVER_STYLE(title)}` : `${cp}. ${COVER_STYLE}`, `${slug}-paso-${i + 1}`));
   const { cover_prompts: _c, ...rest } = page;
   return design === "audio"
     ? { ...rest, cover_home: covers[0] ?? null, cover_playlist: covers[1] ?? null, cover_step3: covers[2] ?? null }
@@ -131,7 +132,7 @@ Devuelve JSON con: subtitle (máx 70 caracteres), description (2 a 3 frases, má
     const id = await uniqueSlug(supabaseAdmin, "manifest_categories", "id", slug);
 
     const cover = data.withCover
-      ? await uploadCover(`${generated.cover_prompt}. ${COVER_STYLE}`, slug)
+      ? await uploadCover(`${generated.cover_prompt}. ${CATEGORY_COVER_STYLE(data.title)}`, slug)
       : null;
 
     const { data: last } = await supabaseAdmin
