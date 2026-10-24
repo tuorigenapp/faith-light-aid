@@ -309,16 +309,6 @@ function ChatWindow({
 
   const loading = status === "submitted" || status === "streaming";
 
-  async function deleteMessage(id: string) {
-    if (loading || !user) return;
-    if (!await confirmDeletion("Este mensaje se eliminará de la conversación. No podrás recuperarlo.")) return;
-    const { error } = await supabase.from("messages").delete().eq("id", id).eq("user_id", user.id).eq("conversation_id", conversationId);
-    if (error) return toast.error("No pudimos eliminar el mensaje. Intenta de nuevo.");
-    setMessages(current => current.filter(message => message.id !== id));
-    await qc.invalidateQueries({ queryKey: ["messages", conversationId] });
-    qc.invalidateQueries({ queryKey: ["historial-general"] });
-  }
-
   return (
     <>
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-5">
@@ -353,9 +343,6 @@ function ChatWindow({
                   : "bg-card border border-border rounded-tl-md shadow-soft"
               )}>
                 {m.parts.map((p, i) => p.type === "text" ? <span key={i} className="whitespace-pre-wrap">{p.text}</span> : null)}
-                <div className="flex justify-end">
-                  <Button variant="ghost" size="icon" className="h-11 w-11 text-current" aria-label="Eliminar mensaje" title="Eliminar mensaje" disabled={loading} onClick={() => deleteMessage(m.id)}><Trash2 /></Button>
-                </div>
                 {m.role === "assistant" && (
                   <p className="mt-1.5 text-[10px] text-muted-foreground/70 flex items-center gap-1">
                     <Leaf className="w-3 h-3" />1 hoja de sanación

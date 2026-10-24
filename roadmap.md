@@ -2,6 +2,7 @@
 
 ## Ajuste del 24 de octubre, 07:01 UTC
 - [x] Recuperar en Inicio el degradado, proporción y título sobre la imagen de las categorías del panel, conservando sus portadas nuevas completas; verificado a 375/1280 px con sesión.
+- [ ] Quitar la eliminación de mensajes individuales del chat con la mentora; mantener el borrado de conversaciones guardadas en el historial con confirmación ORÍGEN.
 
 ## Correcciones del 24 de octubre, 06:44 UTC
 - [x] Sincronizar en Inicio las portadas de Libérate del Narcisista y Sana Tu Árbol Familiar que ya aparecen en Visualízalo; iguales en ambas vistas, completas y con enlaces comprobados a 375/1280 px.
