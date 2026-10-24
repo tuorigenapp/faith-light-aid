@@ -4,6 +4,7 @@ import { Brain, FileText, Trash2, Eye, EyeOff, Upload, RefreshCw, Pencil, Folder
 import { supabase } from "@/integrations/supabase/client";
 import { extractPdfText } from "@/lib/pdf-text";
 import { cn } from "@/lib/utils";
+import { CAMINOS } from "@/lib/caminos";
 
 type Doc = {
   id: string;
@@ -36,7 +37,14 @@ export function BrainManager() {
   const [note, setNote] = useState<{ text: string; error?: boolean } | null>(null);
   const { data: targets = [] } = useQuery({ queryKey: ["brain-targets"], queryFn: async () => {
     const [consultas, caminos, temas] = await Promise.all([supabase.from("custom_consultas").select("slug,title"), supabase.from("custom_caminos").select("slug,title"), supabase.from("manifest_categories").select("id,title")]);
-    return [...(consultas.data ?? []).map(x => ({ scope: "consulta", ref: x.slug, title: x.title })), ...(caminos.data ?? []).map(x => ({ scope: "camino", ref: x.slug, title: x.title })), ...(temas.data ?? []).map(x => ({ scope: "visualiza", ref: x.id, title: x.title }))];
+    const fixed = [
+      { scope: "ministracion", ref: "", title: "Dios te dice hoy" },
+      { scope: "pareja", ref: "", title: "¿Mi pareja es de destino?" },
+      { scope: "patrones", ref: "", title: "Patrones generacionales" },
+      { scope: "mentora", ref: "", title: "Hablar con la Mentora" },
+    ];
+    const staticCaminos = [{ scope: "camino", ref: "origen", title: "CAMINO ORÍGEN (20 etapas)" }, ...CAMINOS.map(c => ({ scope: "camino", ref: c.id, title: c.title }))];
+    return [...fixed, ...staticCaminos, ...(consultas.data ?? []).map(x => ({ scope: "consulta", ref: x.slug, title: x.title })), ...(caminos.data ?? []).map(x => ({ scope: "camino", ref: x.slug, title: x.title })), ...(temas.data ?? []).map(x => ({ scope: "visualiza", ref: x.id, title: x.title }))];
   }, refetchInterval: 20000 });
 
   const { data: docs = [], isLoading } = useQuery({
@@ -51,7 +59,7 @@ export function BrainManager() {
     },
   });
 
-  async function addFiles(files: FileList | null) {
+  async function addFiles(files: FileList | null, sc = scope, ref = scopeRef) {
     if (!files || files.length === 0) return;
     setNote(null);
     for (const file of Array.from(files)) {
@@ -60,8 +68,8 @@ export function BrainManager() {
         const text = await extractPdfText(file, (page, total) => setBusy(`${file.name} — página ${page} de ${total}`));
         if (text.trim().length < 40) throw new Error(`${file.name}: no pudimos leer texto (parece escaneado como imagen).`);
         const { error } = await supabase.from("brain_documents").insert({
-          scope,
-          scope_ref: scopeRef.trim() || null,
+          scope: sc,
+          scope_ref: ref.trim() || null,
           title: file.name.replace(/\.pdf$/i, ""),
           content: text,
           chars: text.length,
@@ -69,12 +77,13 @@ export function BrainManager() {
         });
         if (error) throw error;
         qc.invalidateQueries({ queryKey: ["admin-brain"] });
+        setNote({ text: `"${file.name}" recibido: ${text.length.toLocaleString("es")} letras leídas y guardadas.` });
       } catch (e) {
         setNote({ text: e instanceof Error ? e.message : `No pudimos leer ${file.name}.`, error: true });
       }
     }
     setBusy(null);
-    setNote((n) => n?.error ? n : { text: "Material agregado. La IA ya lo usa como conocimiento propio." });
+
   }
 
   async function toggle(d: Doc) {
@@ -142,6 +151,31 @@ export function BrainManager() {
         </div>
       </div>
 
+
+      <div className="rounded-[16px] border border-border bg-card p-5">
+        <h3 className="font-display text-[16px] font-bold">Todas las secciones</h3>
+        <p className="text-[13px] text-muted-foreground">Toca “Subir PDF” en la sección exacta. Las consultas y caminos nuevos aparecen aquí solos.</p>
+        {([["Consultas fijas", ["ministracion", "pareja", "patrones", "mentora"]], ["Consultas creadas", ["consulta"]], ["Caminos ORÍGEN y categorías", ["camino"]], ["Visualízalo y Vívelo", ["visualiza"]]] as const).map(([g, scs]) => {
+          const list = targets.filter(t => (scs as readonly string[]).includes(t.scope));
+          return (
+            <details key={g} open={g !== "Visualízalo y Vívelo"} className="mt-3 rounded-[12px] border border-border p-3">
+              <summary className="cursor-pointer text-[14px] font-bold">{g} <span className="text-muted-foreground">({list.length})</span></summary>
+              {list.length === 0 && <p className="mt-2 text-[13px] text-muted-foreground">Aún no hay secciones creadas en este grupo.</p>}
+              <div className="mt-2 grid gap-2">
+                {list.map(t => {
+                  const n = docs.filter(d => d.scope === t.scope && (d.scope_ref ?? "") === t.ref).length;
+                  return (
+                    <div key={t.scope + t.ref} className="flex items-center gap-3 rounded-[10px] bg-muted/40 p-2">
+                      <div className="min-w-0 flex-1"><p className="truncate text-[14px] font-semibold">{t.title}</p><p className="text-[12px] text-muted-foreground">{n} PDF{n === 1 ? "" : "s"}</p></div>
+                      <label className={cn("flex min-h-11 cursor-pointer items-center gap-1 rounded-[10px] bg-primary px-3 text-[13px] font-semibold text-primary-foreground", busy && "pointer-events-none opacity-50")}><Upload className="h-4 w-4" />Subir PDF<input type="file" accept="application/pdf" multiple className="hidden" onChange={(e) => { addFiles(e.target.files, t.scope, t.ref); e.target.value = ""; }} /></label>
+                    </div>
+                  );
+                })}
+              </div>
+            </details>
+          );
+        })}
+      </div>
       <div className="grid gap-2">
         {isLoading && <div className="h-16 animate-pulse rounded-[16px] bg-muted" />}
         {!isLoading && docs.length === 0 && <p className="text-[14px] text-muted-foreground">Todavía no hay material. El primer PDF que subas aparecerá aquí.</p>}
