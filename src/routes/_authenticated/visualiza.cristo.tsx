@@ -1,4 +1,5 @@
 import { thematicPractice } from "@/lib/visualiza-content";
+import { affirmationStyle } from "@/lib/affirmation-palette";
 import { SubtopicIcon } from "@/components/visualiza/SubtopicIcon";
 import { ManagedImage } from "@/components/ManagedImage";
 import { useSessionState } from "@/hooks/use-session-step";
@@ -850,7 +851,7 @@ function CristoPage() {
                   <button className="w-9 h-9 rounded-full bg-primary/10 text-primary grid place-items-center shrink-0">
                     <Play className="w-4 h-4 ml-0.5" />
                   </button>
-                  <p className="text-sm font-semibold flex-1 leading-snug">{a.text}</p>
+                  <p className="text-sm font-semibold flex-1 leading-snug text-[#2A2238]">{a.text}</p>
                   <button
                     onClick={() => setAffRead((prev) => { const s = new Set(prev); s.has(idx) ? s.delete(idx) : s.add(idx); return s; })}
                     className={cn("w-9 h-9 rounded-full grid place-items-center shrink-0 transition", active ? "bg-pink-500 text-white" : "bg-pink-50 text-pink-500")}
