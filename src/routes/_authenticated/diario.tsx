@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { EmptyState } from "@/components/EmptyState";
+import { confirmDeletion } from "@/lib/deletion-confirmation";
 
 export const Route = createFileRoute("/_authenticated/diario")({
   head: () => ({
@@ -65,7 +66,9 @@ function Diario() {
   }
 
   async function moveToTrash(id: string) {
-    await supabase.from("journal_entries").update({ deleted_at: new Date().toISOString() }).eq("id", id);
+    if (!await confirmDeletion("Esta nota irá a la papelera. Puedes restaurarla durante 30 días.")) return;
+    const { error } = await supabase.from("journal_entries").update({ deleted_at: new Date().toISOString() }).eq("id", id);
+    if (error) return toast.error("No pudimos mover la nota a la papelera. Intenta de nuevo.");
     qc.invalidateQueries({ queryKey: ["journal"] });
     toast("Movida a la papelera", { description: "Puedes restaurarla durante 30 días." });
   }
@@ -77,7 +80,9 @@ function Diario() {
   }
 
   async function destroy(id: string) {
-    await supabase.from("journal_entries").delete().eq("id", id);
+    if (!await confirmDeletion("Esta nota se eliminará para siempre. No podrás recuperarla.")) return;
+    const { error } = await supabase.from("journal_entries").delete().eq("id", id);
+    if (error) return toast.error("No pudimos eliminar la nota. Intenta de nuevo.");
     qc.invalidateQueries({ queryKey: ["journal"] });
     toast("Eliminada para siempre");
   }

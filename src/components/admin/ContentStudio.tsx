@@ -25,6 +25,7 @@ import { CaminosStudio, CoversStudio } from "@/components/admin/CaminosStudio";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { directAudioUrl, mediaError, validAudioAddress } from "@/lib/media-input";
+import { confirmDeletion } from "@/lib/deletion-confirmation";
 export { directAudioUrl } from "@/lib/media-input";
 
 type Tab = "temas" | "subtemas" | "limpieza" | "caminos" | "portadas";
@@ -109,10 +110,6 @@ function useCategories() {
     queryFn: () => list(),
     refetchInterval: 20_000,
   });
-}
-
-export function ask(msg: string) {
-  return typeof window !== "undefined" && window.confirm(msg);
 }
 
 export function IconAction({ label, onClick, children, danger }: { label: string; onClick: () => void; children: React.ReactNode; danger?: boolean }) {
@@ -285,7 +282,7 @@ function TopicList({ categories, loading, onNote }: { categories: Cat[]; loading
                     {c.is_custom && <IconAction label="Nueva portada con IA" onClick={() => run(c.id, () => update({ data: { id: c.id, regenerateCover: true } }), "Portada nueva generada.")}>
                       <RefreshCw className="h-4 w-4" />
                     </IconAction>}
-                    <IconAction danger label="Eliminar" onClick={() => ask(`¿Eliminar "${c.title}" y sus ${c.subtopics} subtemas? No se puede deshacer.`) && run(c.id, () => remove({ data: { id: c.id } }), "Tema eliminado.")}>
+                    <IconAction danger label="Eliminar" onClick={async () => { if (await confirmDeletion("Este tema y sus subtemas se eliminarán. No podrás recuperarlos.")) await run(c.id, () => remove({ data: { id: c.id } }), "Tema eliminado."); }}>
                       <Trash2 className="h-4 w-4" />
                     </IconAction>
                   </>
@@ -482,7 +479,7 @@ function Subtopics({ onNote }: { onNote: Notify }) {
                     <IconAction label="Rehacer todo con IA" onClick={() => act(s.id, () => regen({ data: { id: s.id, notes: "" } }), "La IA reescribió el contenido propio de este subtema, sin generar imágenes.")}>
                       <Wand2 className="h-4 w-4" />
                     </IconAction>
-                    <IconAction danger label="Eliminar" onClick={() => ask(`¿Eliminar "${s.title}"?`) && act(s.id, () => removeSub({ data: { id: s.id } }), "Subtema eliminado.")}>
+                    <IconAction danger label="Eliminar" onClick={async () => { if (await confirmDeletion("Este subtema se eliminará. No podrás recuperarlo.")) await act(s.id, () => removeSub({ data: { id: s.id } }), "Subtema eliminado."); }}>
                       <Trash2 className="h-4 w-4" />
                     </IconAction>
                   </>
@@ -606,7 +603,7 @@ function Limpieza({ onNote }: { onNote: Notify }) {
               ) : (
                 <>
                   <IconAction label="Editar" onClick={() => setEditing({ id: p.id, title: p.title, notes: "" })}><Pencil className="h-4 w-4" /></IconAction>
-                  <IconAction danger label="Eliminar" onClick={() => ask(`¿Eliminar "${p.title}"?`) && act(p.id, () => removeL({ data: { id: p.id } }), "Práctica eliminada.")}><Trash2 className="h-4 w-4" /></IconAction>
+                  <IconAction danger label="Eliminar" onClick={async () => { if (await confirmDeletion("Esta práctica se eliminará. No podrás recuperarla.")) await act(p.id, () => removeL({ data: { id: p.id } }), "Práctica eliminada."); }}><Trash2 className="h-4 w-4" /></IconAction>
                 </>
               )}
             </li>

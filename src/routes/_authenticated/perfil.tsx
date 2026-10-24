@@ -27,6 +27,7 @@ import { wholeHojas } from "@/lib/gems";
 import origenCompanion from "@/assets/origen-companion.png";
 import origenDove from "@/assets/origen-dove.png";
 import origenLogo from "@/assets/logo-origen.png";
+import { confirmDeletion } from "@/lib/deletion-confirmation";
 
 export const Route = createFileRoute("/_authenticated/perfil")({
   head: () => ({
@@ -865,8 +866,9 @@ function ProfilePanel({ profile, onEdit }: { profile: any; onEdit: () => void })
                   <div className="flex gap-2 mt-2">
                     <button onClick={() => downloadMinistracion(m)} className="text-xs px-3 py-1.5 rounded-full bg-primary text-primary-foreground font-semibold">Descargar PDF</button>
                     <button onClick={async () => {
-                      if (!confirm("¿Eliminar esta ministración?")) return;
-                      await supabase.from("ministracion_lecturas").delete().eq("id", m.id);
+                      if (!await confirmDeletion("Esta consulta se eliminará de tu historial. No podrás recuperarla.")) return;
+                      const { error } = await supabase.from("ministracion_lecturas").delete().eq("id", m.id);
+                      if (error) return toast.error("No pudimos eliminar la consulta. Intenta de nuevo.");
                       qc.invalidateQueries({ queryKey: ["ministracion-hist"] });
                     }} className="text-xs px-3 py-1.5 rounded-full border border-border">Eliminar</button>
                   </div>

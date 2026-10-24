@@ -11,6 +11,7 @@ import {
   adminSetPlan,
 } from "@/lib/admin.functions";
 import { adminAdjustHojas, adminDeleteUsers } from "@/lib/content-admin.functions";
+import { confirmDeletion } from "@/lib/deletion-confirmation";
 
 const EXCLUDED_KEY = "origen_admin_excluded_users";
 const PLAN_LABEL: Record<string, string> = {
@@ -55,7 +56,7 @@ export function UsersManager() {
     if (selected.length === 0) return;
     const n = Math.abs(parseInt(amount.replace(/\D/g, ""), 10) || 0);
     if (kind !== "delete" && n === 0) return toast.error("Escribe cuántas hojas.");
-    if (kind === "delete" && !confirm(`¿Eliminar ${selected.length} cuentas? No se puede deshacer.`)) return;
+    if (kind === "delete" && !await confirmDeletion("Las cuentas seleccionadas se eliminarán. No podrás recuperarlas.")) return;
     setBulkBusy(true);
     try {
       if (kind === "delete") {
@@ -329,10 +330,10 @@ export function UsersManager() {
                       </td>
                       <td className="py-3">
                         <button
-                          onClick={() => {
+                          onClick={async () => {
                             if (
-                              confirm(
-                                `¿Eliminar la cuenta de ${u.email ?? u.name}? No se puede deshacer.`,
+                              await confirmDeletion(
+                                "Esta cuenta se eliminará. No podrás recuperarla.",
                               )
                             )
                               remove.mutate(u.id);

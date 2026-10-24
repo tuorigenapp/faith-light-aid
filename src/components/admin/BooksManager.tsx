@@ -4,6 +4,7 @@ import { Library, Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
+import { confirmDeletion } from "@/lib/deletion-confirmation";
 
 type Item = {
   id: string;
@@ -199,8 +200,8 @@ export function BooksManager() {
                 <Pencil className="h-4 w-4" />
               </button>
               <button
-                onClick={() => {
-                  if (confirm(`¿Eliminar "${it.title}" de la biblioteca?`)) remove.mutate(it.id);
+                onClick={async () => {
+                  if (await confirmDeletion("Este libro se eliminará de la biblioteca.")) remove.mutate(it.id);
                 }}
                 aria-label={`Eliminar ${it.title}`}
                 className="grid h-11 w-11 place-items-center rounded-[10px] bg-destructive/10 text-destructive"

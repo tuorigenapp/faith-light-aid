@@ -23,6 +23,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { confirmDeletion } from "@/lib/deletion-confirmation";
 
 type Audio = {
   id: string;
@@ -616,8 +617,8 @@ export function AudiosManager() {
                     <Pencil className="h-4 w-4" />
                   </button>
                   <button
-                    onClick={() => {
-                      if (confirm(`¿Eliminar la subcategoría "${activeCat.title}" y todos sus audios?`))
+                    onClick={async () => {
+                      if (await confirmDeletion("Esta subcategoría y todos sus audios se eliminarán. No podrás recuperarlos."))
                         removeCat.mutate(activeCat.id);
                     }}
                     aria-label="Eliminar subcategoría"
@@ -934,8 +935,8 @@ export function AudiosManager() {
                       <Pencil className="h-4 w-4" />
                     </button>
                     <button
-                      onClick={() => {
-                        if (confirm(`¿Eliminar "${a.title}"?`)) remove.mutate(a.id);
+                      onClick={async () => {
+                        if (await confirmDeletion("Este audio se eliminará. No podrás recuperarlo.")) remove.mutate(a.id);
                       }}
                       aria-label={`Eliminar ${a.title}`}
                       className="grid h-11 w-11 place-items-center rounded-[10px] bg-destructive/10 text-destructive"

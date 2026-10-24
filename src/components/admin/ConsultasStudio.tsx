@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { adminCreateConsulta, adminToggleConsulta, adminDeleteConsulta } from "@/lib/consultas.functions";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { confirmDeletion } from "@/lib/deletion-confirmation";
 
 type Row = {
   id: string;
@@ -113,7 +114,7 @@ export function ConsultasStudio() {
                   {r.is_published ? <><EyeOff className="h-4 w-4" /> Ocultar</> : <><Eye className="h-4 w-4" /> Mostrar</>}
                 </button>
                 <button
-                  onClick={async () => { if (!confirm(`¿Eliminar "${r.title}"?`)) return; await del({ data: { id: r.id } }); qc.invalidateQueries({ queryKey: ["admin-consultas"] }); }}
+                  onClick={async () => { if (!await confirmDeletion("Esta consulta se eliminará. No podrás recuperarla.")) return; try { await del({ data: { id: r.id } }); qc.invalidateQueries({ queryKey: ["admin-consultas"] }); } catch { setNote({ text: "No pudimos eliminar la consulta. Intenta de nuevo.", error: true }); } }}
                   aria-label="Eliminar"
                   className="grid min-h-11 w-11 place-items-center rounded-[10px] bg-destructive/10 text-destructive"
                 ><Trash2 className="h-4 w-4" /></button>

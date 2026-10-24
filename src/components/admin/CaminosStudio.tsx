@@ -16,6 +16,7 @@ import { CAMINOS } from "@/lib/caminos";
 import { GAMES } from "@/components/games/DailyGames";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { confirmDeletion } from "@/lib/deletion-confirmation";
 
 type Notify = (n: { text: string; error?: boolean } | null) => void;
 
@@ -117,7 +118,7 @@ export function CaminosStudio({ onNote }: { onNote: Notify }) {
               coverValue={c.cover_url ?? ""}
               onToggle={() => run(c.id, () => update({ data: { id: c.id, isPublished: !c.is_published } }), "Visibilidad actualizada.")}
               onSaveCover={(url) => run(c.id, () => update({ data: { id: c.id, coverUrl: url } }), "Portada guardada.")}
-              onDelete={() => window.confirm(`¿Eliminar "${c.title}"?`) && run(c.id, () => update({ data: { id: c.id, remove: true } }), "Camino eliminado.")}
+              onDelete={async () => { if (await confirmDeletion("Este camino se eliminará. No podrás recuperarlo.")) await run(c.id, () => update({ data: { id: c.id, remove: true } }), "Camino eliminado."); }}
             />
           </div>)}
         </div>
