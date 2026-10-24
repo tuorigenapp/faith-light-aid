@@ -1,3 +1,5 @@
+import { thematicPractice } from "@/lib/visualiza-content";
+import { useContentOverrides } from "@/hooks/use-content-overrides";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -37,7 +39,9 @@ function ProgramaPage() {
   const { user } = useAuth();
   const qc = useQueryClient();
   const { data: profile } = useProfile();
-  const prog = getPrograma(programaId);
+  const { get: getOverride } = useContentOverrides();
+  const baseProgram = getPrograma(programaId);
+  const prog = baseProgram ? { ...baseProgram, cover: getOverride(`imagen:programa:${programaId}`)?.cover_url || baseProgram.cover } : null;
 
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [day, setDay] = useState(1);
@@ -221,8 +225,9 @@ function ProgramaPage() {
   }
 
   /* ---------------- PASO 3 · Día ---------------- */
-  const affirmation = prog.affirmations[(day - 1) % prog.affirmations.length];
-  const exercise = prog.exercises[(day - 1) % prog.exercises.length];
+  const content = thematicPractice(prog.title, prog.days[day - 1] ?? prog.title, day);
+  const affirmation = content.affirmation;
+  const exercise = content.exercise;
   const complete = done.has(day);
 
   return (

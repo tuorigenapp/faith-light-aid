@@ -1,3 +1,5 @@
+import { useContentOverrides } from "@/hooks/use-content-overrides";
+import { exploreKey } from "@/lib/explore-content";
 import { getPalabraHoy, dayOfYear } from "@/lib/palabra365";
 import { useProfile } from "@/hooks/use-profile";
 import { Link } from "@tanstack/react-router";
@@ -101,13 +103,14 @@ const PILLARS = [
   { to: "/ministracion", img: pDios, tag: "Dios te dice hoy", title: "Dios te dice hoy", Icon: BookOpen, from: "from-[#2b3a9e]", via: "via-[#62B8F5]/50" },
 ];
 export function OrigenPillars() {
+  const { get } = useContentOverrides();
   return (
     <section>
       <SectionHead title="Los 4 pilares más TOP del Método ORÍGEN 🔥" />
       <div className={scroller + " sm:grid sm:grid-cols-5 sm:overflow-visible sm:mx-0 sm:px-0"}>
         {PILLARS.map((p, i) => (
           <Link key={p.to} to={p.to} className={`relative snap-start shrink-0 w-[44%] sm:w-auto aspect-[3/4] ${card}`} style={{ animation: `fade-in .4s ease-out ${i * 60}ms both` }}>
-            <img src={p.img} alt="" loading="lazy" width={768} height={1024} className="absolute inset-0 h-full w-full object-cover" />
+            <img src={get(exploreKey(FEATURED_EXPLORE.find(e => e.to === p.to)?.title ?? (p.to === "/pareja" ? "¿Deuda o propósito?" : "Dios te dice hoy")))?.cover_url || p.img} alt="" loading="lazy" width={768} height={1024} className="absolute inset-0 h-full w-full object-cover" />
             <div className={`absolute inset-0 bg-gradient-to-t ${p.from} ${p.via} to-transparent`} />
             <div className="absolute inset-x-0 bottom-0 p-3 text-white">
               <span className="grid place-items-center w-9 h-9 rounded-full bg-white/25 backdrop-blur border border-white/40"><p.Icon className="w-4 h-4" /></span>
@@ -235,13 +238,14 @@ const PRACTICES = [
   { id: "sanar-el-dolor-de-una-perdida-desde-el-origen", img: prPerdida, title: "Sanar el dolor de una pérdida desde el ORIGEN", desc: "Honra, suelta y vuelve a vivir.", Icon: Leaf, from: "from-[#2f8a5b]" },
 ];
 export function HealingPracticesCarousel() {
+  const { get } = useContentOverrides();
   return (
     <section>
       <SectionHead title="Elige el dolor que quieres sanar" sub="Cada día abre una práctica corta: entiendes algo, lo trabajas y lo cierras." to="/categorias" cta="Ver todas" />
       <div className={scroller}>
         {PRACTICES.map((p) => (
           <Link key={p.id} to="/caminos/$caminoId" params={{ caminoId: p.id }} className={`relative snap-start shrink-0 w-[46%] sm:w-[23.5%] aspect-[4/5] ${card}`}>
-            <img src={p.img} alt="" loading="lazy" width={768} height={1024} className="absolute inset-0 h-full w-full object-cover" />
+            <img src={get(`camino:${p.id}`)?.cover_url || p.img} alt="" loading="lazy" width={768} height={1024} className="absolute inset-0 h-full w-full object-cover" />
             <div className={`absolute inset-0 bg-gradient-to-t ${p.from} via-transparent to-transparent`} />
             <div className="absolute inset-x-0 bottom-0 p-3 text-white">
               <span className="grid place-items-center w-8 h-8 rounded-full bg-white/25 backdrop-blur border border-white/40"><p.Icon className="w-4 h-4" /></span>
@@ -268,6 +272,7 @@ const VV_METHODS = [
 const VV_FALLBACK = [vvVis, vvMed, vvMan, vvAbu, vvBien];
 const VV_TINTS = ["from-[#5b2fc9]", "from-[#c0397f]", "from-[#1a7e9e]", "from-[#7a3fb0]", "from-[#2f8a5b]"];
 export function VisualizeAndLiveCarousel() {
+  const { get } = useContentOverrides();
   const { data } = useQuery({
     queryKey: ["home-vv-cats"],
     staleTime: 1000 * 60 * 10,
@@ -277,7 +282,7 @@ export function VisualizeAndLiveCarousel() {
     },
   });
   const items = [
-    ...VV_METHODS.map((m) => ({ ...m })),
+    ...VV_METHODS.map((m) => ({ ...m, img: get(`imagen:visualiza:${m.key}`)?.cover_url || m.img })),
     ...(data ?? []).map((c, i) => ({
       key: c.id, title: c.title, desc: (c.subtitle || c.description || "Tema guiado con audios y práctica.").slice(0, 60),
       img: c.cover_url || VV_FALLBACK[i % VV_FALLBACK.length], from: VV_TINTS[i % VV_TINTS.length],
@@ -326,13 +331,14 @@ export function DailyGamesSection() {
 /* 11 · EXPLORA */
 const EXPLORE = FEATURED_EXPLORE.map(item => ({ ...item, img: item.image, desc: item.description }));
 export function ExploreOrigen() {
+  const { get } = useContentOverrides();
   return (
     <section>
       <SectionHead title="Explora todo el contenido de ORÍGEN" sub="Todo lo que tienes para sanar, en un solo lugar." to="/explorar" cta="Explorar" />
       <div className="grid grid-cols-2 gap-3">
         {EXPLORE.map((e) => (
           <Link key={e.title} to={e.to} className="overflow-hidden rounded-[16px] border border-border bg-card shadow-soft transition-transform active:scale-[.98]">
-            <img src={e.img} alt={e.title} loading="lazy" className="aspect-[4/3] w-full object-cover" />
+            <img src={get(exploreKey(e.title))?.cover_url || e.img} alt={e.title} loading="lazy" className="aspect-[4/3] w-full object-cover" />
             <div className="p-3 text-card-foreground">
               <span className="text-[12px] font-semibold text-primary">{e.tag}</span>
               <h4 className="font-display font-bold text-[15px] leading-tight">{e.title}</h4>

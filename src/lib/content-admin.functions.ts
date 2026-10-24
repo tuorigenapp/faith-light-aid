@@ -179,46 +179,18 @@ export const adminCreateVisualizaSubtopic = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const { aiJson, uploadCover } = await import("@/lib/ai-content.server");
+    const { generateSubtopicContent } = await import("./subtopic-generation.server");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-
-    const { data: category } = await supabaseAdmin
-      .from("manifest_categories")
-      .select("id, title, description, audio_only, design")
-      .eq("id", data.categoryId)
-      .maybeSingle();
+    const { data: category } = await supabaseAdmin.from("manifest_categories").select("id, title, description, audio_only, design").eq("id", data.categoryId).maybeSingle();
     if (!category) throw new Error("Ese tema principal ya no existe.");
-
-    const { data: days } = await supabaseAdmin
-      .from("manifest_audios")
-      .select("day_index")
-      .eq("category_id", data.categoryId)
-      .order("day_index", { ascending: false })
-      .limit(1);
-    const dayIndex = (days?.[0]?.day_index ?? 0) + 1;
-
+    const { data: siblings, error: readError } = await supabaseAdmin.from("manifest_audios").select("day_index, title, affirmation, lesson, exercise, quiz").eq("category_id", data.categoryId).order("day_index");
+    if (readError) throw new Error(readError.message);
+    const usedDays = new Set((siblings ?? []).map(s => s.day_index));
+    let dayIndex = 1;
+    while (usedDays.has(dayIndex)) dayIndex += 1;
     const isRecipe = (category as { design?: string }).design === "limpieza";
-    const generated = await aiJson<{
-      materials?: string[];
-      affirmation: string;
-      lesson: string;
-      exercise: string;
-      recipe_steps: string[];
-      tasks: string[];
-      search_words: string[];
-      quiz: { question: string; options: string[]; correctIndex: number; explanation: string }[];
-      cover_prompt: string;
-    }>(
-      `Tema principal: "${category.title}" (${category.description ?? "sin descripción"}). Crea el subtema número ${dayIndex} titulado "${data.title}". Notas del editor: ${data.notes || "sin notas"}.
-Devuelve JSON con: affirmation (una frase poderosa en presente, máx 160 caracteres), lesson (lección práctica de 110 a 170 palabras), exercise (práctica concreta de 80 a 130 palabras), recipe_steps (array de 5 a 8 pasos cortos y seguros), tasks (array de 3 tareas del día, cada una máx 90 caracteres), search_words (array de 8 palabras en MAYÚSCULAS de 4 a 9 letras sin tildes ni espacios, relacionadas con el tema), quiz (array de 3 objetos con question, options de 3 opciones, correctIndex 0-2 y explanation breve) y cover_prompt (descripción visual en inglés, sin texto).${isRecipe ? " Es una receta o práctica con instrucciones: agrega también materials (array de 4 a 8 materiales o ingredientes sencillos y seguros) y haz que recipe_steps sean instrucciones claras en orden." : ""}`,
-    );
-
-    const cover = data.withCover
-      ? await uploadCover(
-          `${generated.cover_prompt}. ${COVER_STYLE}`,
-          `${slugify(data.title) || "subtema"}-${dayIndex}`,
-        )
-      : null;
+    const generated = await generateSubtopicContent({ category: category.title, description: category.description ?? "", title: data.title, day: dayIndex, notes: data.notes, recipe: isRecipe, previous: siblings ?? [] });
+    const cover = null;
 
     const { data: inserted, error } = await supabaseAdmin
       .from("manifest_audios")
@@ -268,7 +240,10 @@ export const adminUpdateSubtopic = createServerFn({ method: "POST" })
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const patch: Record<string, unknown> = {};
-    if (data.audioUrl !== undefined) patch["audio_url"] = data.audioUrl || null;
+    if (data.audioUrl !== undefined) {
+      const { importAudioAddress } = await import("./audio-import.server");
+      patch["audio_url"] = data.audioUrl ? await importAudioAddress(data.audioUrl) : null;
+    }
     if (data.pdfUrl !== undefined) patch["pdf_url"] = data.pdfUrl || null;
     if (data.lesson !== undefined) patch["lesson"] = data.lesson;
     if (data.exercise !== undefined) patch["exercise"] = data.exercise;
@@ -308,7 +283,7 @@ export const adminCreateLimpieza = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const { aiJson, uploadCover } = await import("@/lib/ai-content.server");
+    const { aiJson } = await import("@/lib/ai-content.server");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const generated = await aiJson<{
@@ -319,17 +294,14 @@ export const adminCreateLimpieza = createServerFn({ method: "POST" })
       steps: string[];
       scripture: string;
       scripture_ref: string;
-      cover_prompt: string;
     }>(
       `Crea una práctica de limpieza espiritual cristiana llamada "${data.title}", nivel ${data.level} de 3. Notas del editor: ${data.notes || "sin notas"}.
-Devuelve JSON con: duration (por ejemplo "20 min"), objective (1 o 2 frases), info (array de 4 avisos útiles y seguros), materials (array de 4 a 7 materiales sencillos y sin riesgo, usa vela LED en vez de fuego), steps (array de 6 a 8 pasos claros en orden), scripture (un versículo bíblico real y textual), scripture_ref (su referencia exacta) y cover_prompt (descripción visual en inglés, sin texto ni personas reconocibles).
-No incluyas rituales peligrosos, sustancias, ni promesas de curación física.`,
+Devuelve JSON con: duration (por ejemplo "20 min"), objective (1 o 2 frases), info (array de 4 avisos útiles y seguros), materials (array de materiales sencillos como Biblia y cuaderno), steps (array de 6 a 8 pasos claros en orden), scripture (un versículo bíblico real y textual), scripture_ref (su referencia exacta).
+Usa contenido propio de este subtema, oración y acciones cotidianas; no generes imágenes ni cover_prompt. No incluyas rituales, sustancias, ni promesas de curación física.`,
     );
 
     const slug = await uniqueSlug(supabaseAdmin, "limpieza_practices", "slug", slugify(data.title) || "practica");
-    const cover = data.withCover
-      ? await uploadCover(`${generated.cover_prompt}. ${COVER_STYLE}`, slug)
-      : null;
+    const cover = null;
 
     const { data: last } = await supabaseAdmin
       .from("limpieza_practices")
@@ -385,7 +357,7 @@ export const adminListCategories = createServerFn({ method: "GET" })
     const [cats, subs] = await Promise.all([
       supabaseAdmin
         .from("manifest_categories")
-        .select("id, title, subtitle, group_key, required_plan, cover_url, is_published, sort_order")
+        .select("id, title, subtitle, group_key, required_plan, cover_url, is_published, is_custom, sort_order")
         .order("sort_order"),
       supabaseAdmin.from("manifest_audios").select("category_id"),
     ]);
@@ -492,21 +464,13 @@ export const adminRegenerateSubtopic = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const { aiJson, uploadCover } = await import("@/lib/ai-content.server");
+    const { generateSubtopicContent } = await import("./subtopic-generation.server");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: sub } = await supabaseAdmin
-      .from("manifest_audios").select("id, title, category_id, day_index").eq("id", data.id).maybeSingle();
+    const { data: sub } = await supabaseAdmin.from("manifest_audios").select("id, title, category_id, day_index").eq("id", data.id).maybeSingle();
     if (!sub) throw new Error("Ese subtema ya no existe.");
-    const { data: cat } = await supabaseAdmin
-      .from("manifest_categories").select("title, description").eq("id", sub.category_id).maybeSingle();
-    const g = await aiJson<{
-      affirmation: string; lesson: string; exercise: string; recipe_steps: string[]; tasks: string[];
-      search_words: string[]; quiz: { question: string; options: string[]; correctIndex: number; explanation: string }[];
-      cover_prompt: string;
-    }>(
-      `Tema principal: "${cat?.title ?? ""}" (${cat?.description ?? ""}). Reescribe completo el subtema "${sub.title}". Notas del editor: ${data.notes || "sin notas"}.
-Devuelve JSON con: affirmation (máx 160 caracteres), lesson (110-170 palabras), exercise (80-130 palabras), recipe_steps (5-8 pasos), tasks (3 tareas máx 90 caracteres), search_words (8 palabras MAYÚSCULAS 4-9 letras sin tildes), quiz (3 objetos question, options de 3, correctIndex 0-2, explanation) y cover_prompt (inglés, sin texto).`,
-    );
+    const { data: cat } = await supabaseAdmin.from("manifest_categories").select("title, description, design").eq("id", sub.category_id).maybeSingle();
+    const { data: siblings } = await supabaseAdmin.from("manifest_audios").select("title, affirmation, lesson, exercise, quiz").eq("category_id", sub.category_id).neq("id", data.id);
+    const g = await generateSubtopicContent({ category: cat?.title ?? "", description: cat?.description ?? "", title: sub.title, day: sub.day_index, notes: data.notes, recipe: cat?.design === "limpieza", previous: siblings ?? [] });
     const patch: Record<string, unknown> = {
       affirmation: g.affirmation,
       lesson: g.lesson,
@@ -514,10 +478,7 @@ Devuelve JSON con: affirmation (máx 160 caracteres), lesson (110-170 palabras),
       quiz: { tasks: g.tasks ?? [], questions: g.quiz ?? [] },
       word_game: { words: g.search_words ?? [] },
     };
-    if (data.cover) {
-      const url = await uploadCover(`${g.cover_prompt}. ${COVER_STYLE}`, `${slugify(sub.title)}-${sub.day_index}`);
-      if (url) patch["cover_url"] = url;
-    }
+    patch["cover_url"] = null;
     const { error } = await supabaseAdmin.from("manifest_audios").update(patch as never).eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
@@ -585,7 +546,7 @@ export const adminSetOverride = createServerFn({ method: "POST" })
   .inputValidator((i) =>
     z.object({
       key: z.string().min(1).max(120),
-      scope: z.enum(["camino", "categoria", "juego", "explorar"]),
+      scope: z.enum(["camino", "categoria", "juego", "explorar", "imagen"]),
       title: z.string().trim().max(120).optional(),
       coverUrl: z.string().trim().max(1000).optional(),
       isHidden: z.boolean().optional(),

@@ -1,3 +1,5 @@
+import { thematicPractice } from "@/lib/visualiza-content";
+import { ManagedImage } from "@/components/ManagedImage";
 import { useSessionState } from "@/hooks/use-session-step";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useAuth } from "@/lib/use-auth";
@@ -304,7 +306,7 @@ function LimpiezaPage() {
     queryFn: async (): Promise<Practice[]> => {
       const { data } = await supabase
         .from("limpieza_practices")
-        .select("slug, title, duration, level, objective, info, materials, steps, scripture, scripture_ref, cover_url")
+        .select("slug, title, duration, level, objective, info, materials, steps, scripture, scripture_ref")
         .eq("is_published", true)
         .order("sort_order");
       return (data ?? []).map((row) => ({
@@ -315,7 +317,6 @@ function LimpiezaPage() {
         Icon: Droplet,
         color: "#7C5CFF",
         bg: "#EDE7FF",
-        bgImage: row.cover_url ?? undefined,
         objective: row.objective ?? "",
         info: (row.info as string[] | null) ?? [],
         materials: ((row.materials as string[] | null) ?? []).map((label) => ({ label, Icon: Leaf })),
@@ -337,6 +338,7 @@ function LimpiezaPage() {
   const isPaid = plan === "camino";
 
   const practice = allPractices.find((p) => p.id === practiceId) ?? PRACTICES[0];
+  const practiceContent = thematicPractice("Limpieza Espiritual", practice.title);
 
   async function completePractice() {
     if (!user) return;
@@ -369,7 +371,7 @@ function LimpiezaPage() {
     return (
       <div className="pb-24">
         <section className="relative overflow-hidden rounded-b-[2.5rem] min-h-[92vh]">
-          <img src={heroImg} alt="" className="absolute inset-0 h-full w-full object-cover" />
+          <ManagedImage imageKey="imagen:visualiza:limpieza" src={heroImg} alt="" className="absolute inset-0 h-full w-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-b from-white/25 via-white/70 to-white dark:from-black/40 dark:via-black/70 dark:to-background" />
           <div className="relative px-5 pt-6 pb-8 max-w-2xl mx-auto text-center flex flex-col">
             <Link to="/visualiza" className="inline-flex items-center gap-1 text-xs text-primary font-bold self-start">
@@ -503,7 +505,7 @@ function LimpiezaPage() {
     <div className="pb-32 max-w-3xl mx-auto">
       {/* Hero image */}
       <section className="relative h-64 sm:h-80 overflow-hidden rounded-b-[2rem]">
-        <img src={practice.bgImage ?? bathImg} alt={practice.title} className="absolute inset-0 h-full w-full object-cover" />
+        <ManagedImage imageKey="imagen:visualiza:limpieza" src={heroImg} alt="" className="absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-white/60 dark:to-background/60" />
         <button onClick={() => setStep(2)} className="absolute top-4 left-4 w-10 h-10 rounded-full bg-white/90 grid place-items-center shadow-soft">
           <ArrowLeft className="w-4 h-4 text-foreground" />
@@ -598,13 +600,13 @@ function LimpiezaPage() {
             <div className="flex items-center gap-1.5 text-[11px] font-bold text-primary uppercase tracking-widest">
               <Sparkles className="w-3.5 h-3.5" /> Desafío del día
             </div>
-            <p className="text-xs mt-2 text-foreground/85 leading-relaxed">Hoy intenta practicar 10 minutos sin distracciones para conectar con Dios.</p>
+            <p className="text-xs mt-2 text-foreground/85 leading-relaxed">{practiceContent.tasks[1]}</p>
           </Card>
           <Card className="rounded-[1.3rem] p-4 shadow-soft">
             <div className="flex items-center gap-1.5 text-[11px] font-bold text-primary uppercase tracking-widest">
               <PenLine className="w-3.5 h-3.5" /> Ejercicio del día
             </div>
-            <p className="text-xs mt-2 text-foreground/85 leading-relaxed">¿Qué deseo entregar hoy a Dios?</p>
+            <p className="text-xs mt-2 text-foreground/85 leading-relaxed">{`¿Qué deseas entregar a Dios sobre ${practice.title}?`}</p>
           </Card>
         </div>
 
@@ -615,7 +617,7 @@ function LimpiezaPage() {
             <p className="text-xs text-muted-foreground mt-1">Declara con fe cada verdad sobre tu vida.</p>
           </div>
           <div className="mt-4 grid grid-cols-2 gap-3">
-            {AFFIRMATIONS.map((a, i) => {
+            {[practiceContent.affirmation].map((a, i) => {
               const active = affirmationsRead.has(i);
               return (
                 <div key={i} className="app-card p-3 rounded-2xl">
@@ -664,7 +666,7 @@ function LimpiezaPage() {
             <Card className="rounded-[1.3rem] p-4 shadow-soft">
               <div className="text-xs font-bold text-primary uppercase tracking-widest">Revisa lo que has completado hoy</div>
               <div className="mt-3 space-y-2.5">
-                {CHECKLIST.map((line, i) => {
+                {practiceContent.tasks.map((line, i) => {
                   const on = checked.has(i);
                   return (
                     <button

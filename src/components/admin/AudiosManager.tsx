@@ -1,3 +1,8 @@
+import { useServerFn } from "@tanstack/react-start";
+import { adminImportAudio } from "@/lib/audio-import.functions";
+import { googleDriveFileId } from "@/lib/media-input";
+import { SubtopicIcon } from "@/components/visualiza/SubtopicIcon";
+import { Button } from "@/components/ui/button";
 import { directAudioUrl, mediaError, validAudioAddress } from "@/lib/media-input";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -31,6 +36,8 @@ type Audio = {
   lesson: string | null;
   exercise: string | null;
   pdf_url: string | null;
+  quiz: unknown;
+  word_game: unknown;
 };
 
 type Cat = {
@@ -103,6 +110,8 @@ const emptyForm = {
   lesson: "",
   exercise: "",
   pdf_url: "",
+  quiz: {} as { tasks?: string[]; recipe_steps?: string[]; materials?: string[]; questions?: { question: string; options: string[]; correctIndex: number; explanation: string }[] },
+  word_game: {} as { words?: string[] },
 };
 
 const catSchema = z.object({
@@ -143,6 +152,7 @@ function slugify(v: string) {
 /** Alta, edición y baja de audios y prácticas de Visualízalo y Vívelo, organizadas por categoría y subcategoría. */
 export function AudiosManager() {
   const qc = useQueryClient();
+  const importAudio = useServerFn(adminImportAudio);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<string | null>(null);
   const [uploading, setUploading] = useState<"audio" | "cover" | null>(null);
@@ -207,7 +217,7 @@ export function AudiosManager() {
       let q = supabase
         .from("manifest_audios")
         .select(
-          "id, category_id, day_index, title, affirmation, audio_url, cover_url, duration_seconds, lesson, exercise, pdf_url",
+          "id, category_id, day_index, title, affirmation, audio_url, cover_url, duration_seconds, lesson, exercise, pdf_url, quiz, word_game",
         )
         .order("day_index")
         .limit(400);
@@ -273,10 +283,10 @@ export function AudiosManager() {
 
   async function generateContent(current: typeof emptyForm) {
     const { data: session } = await supabase.auth.getSession();
-    const res = await fetch("/api/admin/generate-manifest", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.session?.access_token ?? ""}` }, body: JSON.stringify({ title: current.title, category: cats?.find(c => c.id === current.category_id)?.title ?? current.category_id, day: current.day_index, context: [current.affirmation, current.lesson, current.exercise].filter(Boolean).join("\n").slice(0, 2000) }) });
+    const res = await fetch("/api/admin/generate-manifest", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.session?.access_token ?? ""}` }, body: JSON.stringify({ title: current.title, category: cats?.find(c => c.id === current.category_id)?.title ?? current.category_id, categoryId: current.category_id, audioId: editing, day: current.day_index, context: [current.affirmation, current.lesson, current.exercise].filter(Boolean).join("\n").slice(0, 2000) }) });
     const result = await res.json();
     if (!res.ok) throw new Error(result.error ?? "No pudimos generar el contenido");
-    return result as { affirmation: string; lesson: string; exercise: string };
+    return result as Pick<typeof emptyForm, "affirmation" | "lesson" | "exercise" | "quiz" | "word_game">;
   }
 
   const save = useMutation({
@@ -293,16 +303,19 @@ export function AudiosManager() {
       const parsed = schema.safeParse(current);
       if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? "Revisa la práctica.");
       const d = parsed.data;
+      const audioUrl = googleDriveFileId(d.audio_url) ? (await importAudio({ data: { url: d.audio_url } })).url : d.audio_url;
       const row = {
         category_id: d.category_id,
         day_index: d.day_index,
         title: d.title,
         affirmation: d.affirmation,
-        audio_url: d.audio_url || null,
-        cover_url: d.cover_url || null,
+        audio_url: audioUrl || null,
+        cover_url: null,
         lesson: d.lesson || null,
         exercise: d.exercise || null,
         pdf_url: d.pdf_url || null,
+        quiz: current.quiz,
+        word_game: current.word_game,
       };
       const res = editing
         ? await supabase.from("manifest_audios").update(row).eq("id", editing)
@@ -350,7 +363,7 @@ export function AudiosManager() {
             title: d.title,
             subtitle: d.subtitle || null,
             description: d.description || null,
-            cover_url: d.cover_url || null,
+            cover_url: null,
             required_plan: d.required_plan,
             sort_order: d.sort_order,
           })
@@ -363,7 +376,7 @@ export function AudiosManager() {
           title: d.title,
           subtitle: d.subtitle || null,
           description: d.description || null,
-          cover_url: d.cover_url || null,
+          cover_url: null,
           required_plan: d.required_plan,
           sort_order: d.sort_order,
           group_key: selectedRoot,
@@ -415,6 +428,8 @@ export function AudiosManager() {
       lesson: a.lesson ?? "",
       exercise: a.exercise ?? "",
       pdf_url: a.pdf_url ?? "",
+      quiz: (a.quiz as typeof emptyForm.quiz) ?? {},
+      word_game: (a.word_game as typeof emptyForm.word_game) ?? {},
     });
     setOpen(true);
   }
@@ -584,17 +599,7 @@ export function AudiosManager() {
             {activeCat && (
               <div className="mb-3 flex items-center justify-between gap-3 rounded-[12px] border border-border/60 bg-background p-3">
                 <div className="flex min-w-0 items-center gap-3">
-                  {activeCat.cover_url ? (
-                    <img
-                      src={activeCat.cover_url}
-                      alt=""
-                      className="h-11 w-11 shrink-0 rounded-[10px] object-cover"
-                    />
-                  ) : (
-                    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[10px] bg-primary/10 text-primary">
-                      <ImageIcon className="h-4 w-4" />
-                    </span>
-                  )}
+                  <SubtopicIcon title={activeCat.title} category={GROUP_LABELS[activeCat.group_key]} className="h-11 w-11 text-2xl" />
                   <div className="min-w-0">
                     <p className="truncate text-[13.5px] font-bold leading-tight">{activeCat.title}</p>
                     <p className="truncate text-[11.5px] text-muted-foreground">
@@ -706,29 +711,10 @@ export function AudiosManager() {
                     className="w-full rounded-[10px] border-[1.5px] border-border bg-card p-3 text-[14px] outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/20"
                   />
                 </Field>
-                <Field label="Portada">
-                  <input
-                    value={catForm.cover_url}
-                    onChange={(e) => setCatForm({ ...catForm, cover_url: e.target.value })}
-                    placeholder="https://… o sube la imagen"
-                    className={inputCls}
-                    maxLength={8000}
-                  />
-                  <label className="mt-2 inline-flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-[10px] bg-primary/10 text-[13px] font-semibold text-primary">
-                    {catUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-                    Subir portada
-                    <input
-                      type="file"
-                      accept="image/png,image/jpeg,image/webp"
-                      className="sr-only"
-                      onChange={(e) => {
-                        const f = e.target.files?.[0];
-                        if (f) void uploadCatCover(f);
-                        e.target.value = "";
-                      }}
-                    />
-                  </label>
-                </Field>
+                <div className="flex items-center gap-3">
+                  <SubtopicIcon title={catForm.title} category={GROUP_LABELS[selectedRoot]} />
+                  <p className="text-sm text-muted-foreground">{catForm.title || "Subcategoría"}</p>
+                </div>
 
                 <div className="flex gap-2 sm:col-span-2">
                   <button
@@ -811,7 +797,7 @@ export function AudiosManager() {
                   <input
                     value={form.audio_url}
                     onChange={(e) => setForm({ ...form, audio_url: e.target.value })}
-                    onBlur={(e) => setForm({ ...form, audio_url: directAudioUrl(e.target.value) })}
+                    onBlur={(e) => { if (!googleDriveFileId(e.target.value)) setForm(f => ({ ...f, audio_url: directAudioUrl(e.target.value) })); }}
                     placeholder="https://… o sube el archivo"
                     className={inputCls}
                     maxLength={8000}
@@ -837,39 +823,14 @@ export function AudiosManager() {
                 </Field>
 
                 <div className="sm:col-span-2 rounded-xl bg-primary/5 border border-primary/20 p-4 text-sm">
-                  {form.audio_url && <audio aria-label="Probar audio antes de guardar" controls preload="metadata" src={directAudioUrl(form.audio_url)} className="mb-3 h-11 w-full" onError={() => toast.error("Este enlace no se puede reproducir. Usa un MP3 directo o sube el archivo.")} />}
+                  {googleDriveFileId(form.audio_url) && <Button type="button" disabled={uploading === "audio"} className="mb-3 w-full" onClick={async () => { setUploading("audio"); try { const result = await importAudio({ data: { url: form.audio_url } }); setForm(f => ({ ...f, audio_url: result.url })); toast.success("Audio de Drive copiado. Puedes escucharlo y publicarlo."); } catch (e) { toast.error(mediaError(e, "No pudimos importar el audio de Drive.")); } finally { setUploading(null); } }}>{uploading === "audio" ? "Importando audio de Drive…" : "Importar y probar enlace de Drive"}</Button>}
+                  {form.audio_url && !googleDriveFileId(form.audio_url) && <audio aria-label="Probar audio antes de guardar" controls preload="metadata" src={directAudioUrl(form.audio_url)} className="mb-3 h-11 w-full" onError={() => toast.error("Este enlace no se puede reproducir. Usa un MP3 directo o sube el archivo.")} />}
                   <label className="flex items-center gap-2 font-semibold"><input type="checkbox" checked={autoGenerate} onChange={e => setAutoGenerate(e.target.checked)} /> Completar con IA los campos vacíos al guardar</label>
                   <p className="mt-1 text-muted-foreground">Puedes publicar sin audio. La IA usa el título, categoría, día y texto que escribas; revisa el contenido antes de publicarlo.</p>
                   <button type="button" disabled={generating || !form.title.trim()} className="mt-3 rounded-xl bg-primary px-4 py-2 text-white disabled:opacity-50" onClick={async () => { setGenerating(true); try { const content = await generateContent(form); setForm(f => ({ ...f, ...content })); toast.success("Contenido listo para revisar"); } catch (e) { toast.error((e as Error).message); } finally { setGenerating(false); } }}>{generating ? "Generando…" : "Generar contenido ahora"}</button>
                 </div>
 
-                <Field label="Portada (enlace o archivo)">
-                  <input
-                    value={form.cover_url}
-                    onChange={(e) => setForm({ ...form, cover_url: e.target.value })}
-                    placeholder="https://… o sube la imagen"
-                    className={inputCls}
-                    maxLength={800}
-                  />
-                  <label className="mt-2 inline-flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-[10px] bg-primary/10 text-[13px] font-semibold text-primary">
-                    {uploading === "cover" ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Upload className="h-4 w-4" />
-                    )}
-                    Subir portada
-                    <input
-                      type="file"
-                      accept="image/png,image/jpeg,image/webp"
-                      className="sr-only"
-                      onChange={(e) => {
-                        const f = e.target.files?.[0];
-                        if (f) void upload("cover", f);
-                        e.target.value = "";
-                      }}
-                    />
-                  </label>
-                </Field>
+                <div className="flex items-center gap-3"><SubtopicIcon title={form.title} category={cats?.find(c => c.id === form.category_id)?.title} /><span className="text-sm text-muted-foreground">{form.title || "Práctica del día"}</span></div>
 
                 <Field label="Lección / contenido del día">
                   <textarea

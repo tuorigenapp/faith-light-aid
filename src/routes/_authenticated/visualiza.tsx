@@ -1,3 +1,5 @@
+import { useContentOverrides } from "@/hooks/use-content-overrides";
+import { ManagedImage } from "@/components/ManagedImage";
 import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
@@ -92,6 +94,7 @@ function groupLabel(key: string) {
 
 
 function Visualiza() {
+  const { get: getOverride } = useContentOverrides();
   const { user } = useAuth();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const isCategoryRoute = /^\/visualiza\/[^/]+(?:\/[^/]+)?$/.test(pathname);
@@ -154,7 +157,7 @@ function Visualiza() {
         key: m.key,
         title: m.title,
         desc: m.desc,
-        image: m.image,
+        image: getOverride(`imagen:visualiza:${m.key}`)?.cover_url || m.image,
         Icon: m.Icon,
         iconTint: m.iconTint,
         chipBg: m.chipBg,
@@ -172,7 +175,7 @@ function Visualiza() {
       key: p.id,
       title: p.title,
       desc: p.claim,
-      image: p.cover,
+      image: getOverride(`imagen:programa:${p.id}`)?.cover_url || p.cover,
       Icon: Sparkles,
       iconTint: p.tint,
       chipBg: "bg-primary/12",
@@ -214,7 +217,7 @@ function Visualiza() {
       }));
 
     return [...methods, ...fromDb, ...programas];
-  }, [data]);
+  }, [data, getOverride]);
 
   const tags = ["Todos", ...Array.from(new Set(unified.map((u) => u.tag)))];
   const filtered = filter === "Todos" ? unified : unified.filter((u) => u.tag === filter);
@@ -226,7 +229,7 @@ function Visualiza() {
       {/* PORTADA */}
       <section className="relative overflow-hidden rounded-[1.75rem] md:rounded-[2rem] shadow-glow">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/85 via-primary/60 to-accent-pink/70" />
-        <img
+        <ManagedImage imageKey="imagen:visualiza:principal"
           src={heroImg}
           alt=""
           width={1024}

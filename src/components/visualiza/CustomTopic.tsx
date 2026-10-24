@@ -1,3 +1,4 @@
+import { SubtopicIcon } from "./SubtopicIcon";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { PlayChoice } from "./PlayChoice";
@@ -116,7 +117,7 @@ export function CustomTopic({
                 const inner = (
                   <div className={cn("app-card flex items-center gap-3 p-3 transition active:scale-[.98]", locked && "opacity-70")}>
                     <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-[12px] bg-muted">
-                      <img src={s.cover_url || cat.cover_url || heroFallback} alt="" className="h-full w-full object-cover" loading="lazy" />
+                      <SubtopicIcon title={s.title} category={cat.title} className="h-full w-full" />
                     </div>
                     <div className={cn("min-w-0 flex-1", locked && "blur-[3px] select-none")}>
                       <p className="text-[11px] font-bold uppercase tracking-wide text-primary">

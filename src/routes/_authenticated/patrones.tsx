@@ -1,3 +1,4 @@
+import { ManagedImage } from "@/components/ManagedImage";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { christianContent } from "@/lib/christian-language";
 import { useEffect, useState } from "react";
@@ -324,7 +325,7 @@ function Step1({
     <div>
       {/* Hero illustration */}
       <div className="relative rounded-[2rem] overflow-hidden bg-gradient-to-b from-[#F5F0FF] to-white shadow-soft">
-        <img src={step1Asset} alt="Consulta de patrones familiares — ORIGEN" className="w-full h-auto object-cover" />
+        <ManagedImage imageKey="imagen:consulta:patrones" src={step1Asset} alt="Consulta de patrones familiares — ORIGEN" className="w-full h-auto object-cover" />
       </div>
 
       <h1 className="text-center font-display font-extrabold text-[28px] leading-tight mt-6 text-[#1B1B27]">
@@ -400,7 +401,7 @@ function Step2({ line, progress }: { line: string; progress: number }) {
   return (
     <div className="text-center pt-2">
       <div className="relative mx-auto w-full max-w-[280px]">
-        <img src={step2Asset} alt="Corazón y árbol" className="w-full h-auto animate-breathe" />
+        <ManagedImage imageKey="imagen:consulta:patrones-preparacion" src={step2Asset} alt="Corazón y árbol" className="w-full h-auto animate-breathe" />
         <div aria-hidden className="absolute inset-0 rounded-full blur-3xl -z-10"
           style={{ background: "radial-gradient(circle at 50% 60%, rgba(245,139,203,0.35), transparent 65%)" }} />
       </div>

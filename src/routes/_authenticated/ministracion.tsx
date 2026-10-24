@@ -1,3 +1,4 @@
+import { ManagedImage } from "@/components/ManagedImage";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { christianContent } from "@/lib/christian-language";
 import { useEffect, useState } from "react";
@@ -249,7 +250,7 @@ function MinistracionPage() {
           <div className="animate-in fade-in slide-in-from-right-6 duration-300">
             <div className="hero-card p-0 overflow-hidden relative shadow-elev ring-1 ring-border">
               <div className="relative">
-                <img src={ministracionHero} alt="Manos abiertas recibiendo una palabra del cielo" width={1280} height={896} loading="lazy" className="w-full h-auto rounded-[16px] block border-2 border-gold/40 shadow-soft" />
+                <ManagedImage imageKey="imagen:consulta:ministracion" src={ministracionHero} alt="Manos abiertas recibiendo una palabra del cielo" width={1280} height={896} loading="lazy" className="w-full h-auto rounded-[16px] block border-2 border-gold/40 shadow-soft" />
                 <div className="absolute inset-0 pointer-events-none" style={{ boxShadow: "inset 0 0 40px rgba(255,255,255,0.12)" }} />
               </div>
               <div className="p-5 text-center">

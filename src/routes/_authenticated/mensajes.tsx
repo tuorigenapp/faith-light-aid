@@ -8,6 +8,7 @@ import { useProfile } from "@/hooks/use-profile";
 import { appDayKey } from "@/lib/app-day";
 import { buildMensajes, healingIndex, SEEN_KEY, type Mensaje } from "@/lib/mensajes-origen";
 import { cn } from "@/lib/utils";
+import { ManagedImage } from "@/components/ManagedImage";
 
 export const Route = createFileRoute("/_authenticated/mensajes")({
   head: () => ({
@@ -92,7 +93,7 @@ function MensajesPage() {
         {[...unlocked].reverse().map((m, i) => (
           <li key={m.id} className="rounded-[16px] bg-card p-4 shadow-[0_1px_3px_rgba(30,25,20,.06)] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2" style={{ animationDelay: `${i * 60}ms` }}>
             <div className="flex items-center gap-3">
-              <img src={m.avatar} alt="" width={56} height={56} loading="lazy" className="h-14 w-14 shrink-0 rounded-full bg-primary/10 object-contain motion-safe:animate-[bounce_2.4s_ease-in-out_1]" />
+              <ManagedImage imageKey={`imagen:mensaje:${m.id.slice(11)}`} src={m.avatar} alt="" width={56} height={56} loading="lazy" className="h-14 w-14 shrink-0 rounded-full bg-primary/10 object-contain motion-safe:animate-[bounce_2.4s_ease-in-out_1]" />
               <div className="min-w-0">
                 <p className="text-[15px] font-bold leading-tight">{m.assistant}</p>
                 <p className="text-[12px] font-medium text-muted-foreground">{m.role} · {String(m.hour).padStart(2, "0")}:00</p>
@@ -124,7 +125,7 @@ function MensajesPage() {
 
       {next && (
         <div className="mt-3 flex items-center gap-3 rounded-[16px] border border-dashed border-border p-4">
-          <img src={next.avatar} alt="" width={40} height={40} className="h-10 w-10 rounded-full object-contain opacity-70" />
+          <ManagedImage imageKey={`imagen:mensaje:${next.id.slice(11)}`} src={next.avatar} alt="" width={40} height={40} className="h-10 w-10 rounded-full object-contain opacity-70" />
           <p className="flex-1 text-[14px] text-muted-foreground"><span className="font-semibold text-foreground">{next.assistant}</span> te escribe a las {String(next.hour).padStart(2, "0")}:00</p>
           <Lock className="h-4 w-4 text-muted-foreground" />
         </div>

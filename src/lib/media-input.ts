@@ -1,8 +1,17 @@
 /** Accept only a usable web audio address; storage links remain private and signed. */
+export function googleDriveFileId(raw: string): string | null {
+  try {
+    const url = new URL(raw.trim());
+    if (url.protocol !== "https:" || url.hostname !== "drive.google.com") return null;
+    const id = url.pathname.match(/^\/file\/d\/([\w-]+)(?:\/|$)/)?.[1] ?? url.searchParams.get("id");
+    return id && /^[\w-]{10,}$/.test(id) ? id : null;
+  } catch { return null; }
+}
+
 export function directAudioUrl(raw: string) {
   const url = raw.trim();
-  const drive = url.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:export=\w+&)?id=)([\w-]{10,})/);
-  if (drive) return `https://drive.google.com/uc?export=download&id=${drive[1]}`;
+  const drive = googleDriveFileId(url);
+  if (drive) return `https://drive.google.com/uc?export=download&id=${drive}`;
   if (/dropbox\.com/.test(url)) return url.replace(/[?&]dl=0/, "").replace("www.dropbox.com", "dl.dropboxusercontent.com");
   return url;
 }

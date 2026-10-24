@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { Fragment, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -32,7 +33,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "subtemas", label: "Subtemas" },
   { id: "limpieza", label: "Limpieza espiritual" },
   { id: "caminos", label: "Caminos ORÍGEN" },
-  { id: "portadas", label: "Portadas de categorías y juegos" },
+  { id: "portadas", label: "Imágenes por sección" },
 ];
 
 function Field({
@@ -344,7 +345,6 @@ function Subtopics({ onNote }: { onNote: Notify }) {
   const [categoryId, setCategoryId] = useState("");
   const [title, setTitle] = useState("");
   const [notes, setNotes] = useState("");
-  const [withCover, setWithCover] = useState(true);
   const [audioOnly, setAudioOnly] = useState(false);
   const [busy, setBusy] = useState(false);
   const selected = categoryId || categories[0]?.id || "";
@@ -379,7 +379,7 @@ function Subtopics({ onNote }: { onNote: Notify }) {
     setBusy(true);
     onNote(null);
     try {
-      const result = await create({ data: { categoryId: selected, title: title.trim(), notes, withCover, audioOnly } });
+      const result = await create({ data: { categoryId: selected, title: title.trim(), notes, withCover: false, audioOnly } });
       onNote({
         text: `Subtema creado como día ${result.dayIndex}, con lección, ejercicio, pasos, tareas, sopa de letras y preguntas. Sube el audio cuando quieras.`,
       });
@@ -441,10 +441,7 @@ function Subtopics({ onNote }: { onNote: Notify }) {
         <Field label="Notas para la IA (opcional)">
           <textarea className={cn(inputClass, "min-h-24 py-2")} value={notes} onChange={(e) => setNotes(e.target.value)} />
         </Field>
-        <label className="flex min-h-11 items-center gap-2 text-[13px] font-semibold text-foreground/80">
-          <input type="checkbox" checked={withCover} onChange={(e) => setWithCover(e.target.checked)} className="h-5 w-5" />
-          Generar la portada con IA
-        </label>
+        <p className="text-sm text-muted-foreground">Ícono temático · sin generación de imágenes</p>
         <label className="flex min-h-11 items-start gap-2 text-[13px] font-semibold text-foreground/80">
           <input type="checkbox" checked={audioOnly} onChange={(e) => setAudioOnly(e.target.checked)} className="mt-0.5 h-5 w-5" />
           <span>Solo audio (como "Sanar tu niño interior"). Si no la marcas, la IA lo arma como subcategoría completa: lección, pasos, tareas, sopa de letras y preguntas.</span>
@@ -485,7 +482,7 @@ function Subtopics({ onNote }: { onNote: Notify }) {
                   <span className="grid h-11 w-11 place-items-center"><Loader2 className="h-4 w-4 animate-spin" /></span>
                 ) : (
                   <>
-                    <IconAction label="Rehacer todo con IA" onClick={() => act(s.id, () => regen({ data: { id: s.id, notes: "", cover: true } }), "La IA reescribió lección, juegos, afirmación y portada.")}>
+                    <IconAction label="Rehacer todo con IA" onClick={() => act(s.id, () => regen({ data: { id: s.id, notes: "", cover: false } }), "La IA reescribió el contenido propio de este subtema, sin generar imágenes.")}>
                       <Wand2 className="h-4 w-4" />
                     </IconAction>
                     <IconAction danger label="Eliminar" onClick={() => ask(`¿Eliminar "${s.title}"?`) && act(s.id, () => removeSub({ data: { id: s.id } }), "Subtema eliminado.")}>
@@ -531,7 +528,6 @@ function Limpieza({ onNote }: { onNote: Notify }) {
   const [title, setTitle] = useState("");
   const [level, setLevel] = useState(1);
   const [notes, setNotes] = useState("");
-  const [withCover, setWithCover] = useState(true);
   const [audioOnly, setAudioOnly] = useState(false);
   const [busy, setBusy] = useState(false);
 
@@ -545,8 +541,8 @@ function Limpieza({ onNote }: { onNote: Notify }) {
     setBusy(true);
     onNote(null);
     try {
-      await create({ data: { title: title.trim(), level, notes, withCover } });
-      onNote({ text: "Práctica creada con portada, materiales y pasos. Ya se ve en la app." });
+      await create({ data: { title: title.trim(), level, notes, withCover: false } });
+      onNote({ text: "Práctica creada con ícono, materiales y pasos propios del tema." });
       setTitle("");
       setNotes("");
       qc.invalidateQueries({ queryKey: ["studio-limpieza"] });
@@ -573,10 +569,7 @@ function Limpieza({ onNote }: { onNote: Notify }) {
         <Field label="Notas para la IA (opcional)">
           <textarea className={cn(inputClass, "min-h-24 py-2")} value={notes} onChange={(e) => setNotes(e.target.value)} />
         </Field>
-        <label className="flex min-h-11 items-center gap-2 text-[13px] font-semibold text-foreground/80">
-          <input type="checkbox" checked={withCover} onChange={(e) => setWithCover(e.target.checked)} className="h-5 w-5" />
-          Generar la portada con IA
-        </label>
+        <SubtopicIcon title={title || "Limpieza Espiritual"} />
         <button
           onClick={submit}
           disabled={busy}
@@ -593,7 +586,7 @@ function Limpieza({ onNote }: { onNote: Notify }) {
           {practices.map((p) => (
             <Fragment key={p.id}>
             <li className="flex items-center gap-3 rounded-[12px] border border-border bg-muted/40 p-3">
-              {p.cover_url && <img src={p.cover_url} alt="" className="h-12 w-12 shrink-0 rounded-[10px] object-cover" />}
+              <SubtopicIcon title={p.title} category="Limpieza Espiritual" className="h-12 w-12 text-2xl" />
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-[14px] font-bold text-foreground">{p.title}</span>
                 <span className="block text-[11.5px] text-foreground/55">
@@ -624,11 +617,9 @@ function Limpieza({ onNote }: { onNote: Notify }) {
             {editing?.id === p.id && (
               <li className="space-y-2 rounded-[12px] border border-border bg-card p-3">
                 <Field label="Título"><input className={inputClass} value={editing.title} onChange={(e) => setEditing({ ...editing, title: e.target.value })} /></Field>
-                <Field label="Portada (enlace de imagen)"><input className={inputClass} value={editing.cover} onChange={(e) => setEditing({ ...editing, cover: e.target.value })} placeholder="https://…" /></Field>
                 <Field label="Nota para la IA"><textarea className={cn(inputClass, "min-h-20 py-2")} value={editing.notes} onChange={(e) => setEditing({ ...editing, notes: e.target.value })} /></Field>
-                <div className="grid gap-2 sm:grid-cols-3">
-                  <button className="min-h-11 rounded-[12px] border border-border text-[13px] font-semibold" onClick={() => { const e = editing; setEditing(null); act(p.id, () => updateL({ data: { id: p.id, title: e.title.trim() !== p.title ? e.title.trim() : undefined, coverUrl: e.cover !== (p.cover_url ?? "") ? e.cover.trim() : undefined, notes: e.notes } }), "Práctica guardada."); }}>Guardar cambios</button>
-                  <button className="min-h-11 rounded-[12px] border border-border text-[13px] font-semibold" onClick={() => { const e = editing; setEditing(null); act(p.id, () => updateL({ data: { id: p.id, regenerateCover: true, notes: e.notes } }), "Portada nueva generada."); }}><RefreshCw className="mr-1 inline h-4 w-4" />Portada con IA</button>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <button className="min-h-11 rounded-[12px] border border-border text-[13px] font-semibold" onClick={() => { const e = editing; setEditing(null); act(p.id, () => updateL({ data: { id: p.id, title: e.title.trim() !== p.title ? e.title.trim() : undefined,  notes: e.notes } }), "Práctica guardada."); }}>Guardar cambios</button>
                   <button className="min-h-11 rounded-[12px] bg-[#7C5CFF] text-[13px] font-bold text-white" onClick={() => { const e = editing; setEditing(null); act(p.id, () => updateL({ data: { id: p.id, improve: true, notes: e.notes } }), "La IA mejoró la receta y los pasos."); }}><Wand2 className="mr-1 inline h-4 w-4" />Mejorar con IA</button>
                 </div>
               </li>
@@ -646,47 +637,35 @@ function Limpieza({ onNote }: { onNote: Notify }) {
   );
 }
 
-/** Convierte enlaces de Google Drive o Dropbox en enlaces que se reproducen directo. */
+/** Upload and link import both require an explicit save and await persistence. */
 function AudioInput({ current, onSave, onNote }: { current: string | null; onSave: (url: string) => Promise<void>; onNote: Notify }) {
   const [busy, setBusy] = useState(false);
+  const [url, setUrl] = useState(current ?? "");
+  async function saveLink() {
+    setBusy(true);
+    try { await onSave(url.trim()); } catch { /* onSave reports the error */ }
+    finally { setBusy(false); }
+  }
   async function upload(file: File) {
     if (file.size > 50 * 1024 * 1024) return onNote({ text: "El audio supera 50 MB.", error: true });
     if (!/audio|mpeg|mp3|m4a|wav/i.test(file.type + file.name)) return onNote({ text: "Elige un archivo de audio (mp3, m4a o wav).", error: true });
     setBusy(true);
     try {
-      const path = `subtemas/${Date.now()}-${file.name.replace(/[^\w.-]/g, "_")}`;
-      const up = await supabase.storage.from("manifest-audios").upload(path, file, { contentType: file.type || "audio/mpeg", upsert: true });
+      const path = `subtemas/${crypto.randomUUID()}-${file.name.replace(/[^\w.-]/g, "_")}`;
+      const up = await supabase.storage.from("manifest-audios").upload(path, file, { contentType: file.type || "audio/mpeg" });
       if (up.error) throw up.error;
       const signed = await supabase.storage.from("manifest-audios").createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
-      if (signed.error || !signed.data) throw signed.error;
-      await onSave(signed.data.signedUrl);
-    } catch (e) {
-      onNote({ text: mediaError(e, "No pudimos subir o guardar el audio. Intenta de nuevo."), error: true });
-    } finally {
-      setBusy(false);
-    }
+      if (signed.error || !signed.data) throw new Error("No pudimos crear el enlace de reproducción.");
+      await onSave(signed.data.signedUrl); setUrl(signed.data.signedUrl);
+    } catch (e) { onNote({ text: mediaError(e, "No pudimos subir o guardar el audio. Intenta de nuevo."), error: true }); }
+    finally { setBusy(false); }
   }
-  return (
-    <div className="mt-2 space-y-2">
-      <div className="flex gap-2">
-        <input key={current ?? "without-audio"}
-          defaultValue={current ?? ""}
-          onBlur={(e) => {
-            const v = directAudioUrl(e.target.value);
-            if (v !== e.target.value) e.target.value = v;
-            if (v !== (current ?? "")) void onSave(v).catch(() => undefined);
-          }}
-          placeholder="Pega el enlace del audio (mp3, Google Drive o Dropbox)"
-          maxLength={8000}
-          className={inputClass}
-        />
-        <label className="inline-flex min-h-11 shrink-0 cursor-pointer items-center gap-1.5 rounded-[12px] bg-[#7C5CFF]/10 px-3 text-[13px] font-bold text-[#5B3FD6]">
-          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />} Subir mp3
-          <input type="file" accept="audio/*,.mp3" className="hidden" disabled={busy} onChange={(e) => { const file = e.target.files?.[0]; if (file) void upload(file); e.target.value = ""; }} />
-        </label>
-      </div>
-      <p className="text-[11.5px] text-foreground/55">En Google Drive comparte el archivo como "Cualquier persona con el enlace" y pega el enlace aquí: se convierte solo para que suene dentro de la app.</p>
-      {current && <audio src={current} controls preload="none" className="h-10 w-full" />}
+  return <div className="mt-2 space-y-2">
+    <input aria-label="Enlace del audio" value={url} onChange={e => setUrl(e.target.value)} placeholder="MP3 directo o enlace compartido de Google Drive" maxLength={8000} className={inputClass} disabled={busy} />
+    <div className="flex flex-wrap gap-2">
+      <Button onClick={() => void saveLink()} disabled={busy || url.trim() === (current ?? "")}><Upload className="h-4 w-4" />{busy ? "Guardando audio…" : "Guardar enlace"}</Button>
+      <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-[12px] bg-primary/10 px-3 text-sm font-semibold text-primary"><Upload className="h-4 w-4" />Subir MP3<input type="file" accept="audio/*,.mp3" className="hidden" disabled={busy} onChange={e => { const file = e.target.files?.[0]; if (file) void upload(file); e.target.value = ""; }} /></label>
     </div>
-  );
+    {current && <audio aria-label="Audio guardado" src={current} controls preload="metadata" className="h-11 w-full" />}
+  </div>;
 }

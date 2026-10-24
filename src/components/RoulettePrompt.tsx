@@ -5,6 +5,7 @@ import { X, Sparkles } from "lucide-react";
 import { getWheelState } from "@/lib/ruleta.functions";
 import { appDayKey } from "@/lib/app-day";
 import origenIcon from "@/assets/logo-origen.png";
+import { ManagedImage } from "@/components/ManagedImage";
 
 const MAX_PER_DAY = 3;
 const GAP_MS = 2 * 60 * 60 * 1000; // entre apariciones, al menos 2 horas
@@ -41,7 +42,7 @@ export function RoulettePrompt({ userId }: { userId?: string }) {
         <button onClick={() => setOpen(false)} aria-label="Cerrar" className="absolute right-2 top-2 grid h-11 w-11 place-items-center rounded-full text-muted-foreground">
           <X className="h-5 w-5" />
         </button>
-        <img src={origenIcon} alt="ORÍGEN" width={72} height={72} className="mx-auto h-[72px] w-[72px] rounded-full animate-breathe" />
+        <ManagedImage imageKey="imagen:logo" src={origenIcon} alt="ORÍGEN" width={72} height={72} className="mx-auto h-[72px] w-[72px] rounded-full animate-breathe" />
         <h2 className="mt-3 font-display text-[22px] font-extrabold">Tu giro de hoy te espera</h2>
         <p className="mt-1 text-[14.5px] text-muted-foreground">Siempre ganas algo. Solo toma unos segundos.</p>
         <Link to="/ruleta" onClick={() => setOpen(false)} className="btn-primary-gradient mt-5 inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-[12px] text-[16px] font-bold text-primary-foreground">

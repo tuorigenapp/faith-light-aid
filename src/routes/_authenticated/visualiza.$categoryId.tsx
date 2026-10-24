@@ -1,3 +1,6 @@
+import { ManagedImage } from "@/components/ManagedImage";
+import { SubtopicIcon } from "@/components/visualiza/SubtopicIcon";
+import { resolvePractice, thematicPractice } from "@/lib/visualiza-content";
 import { PlayChoice } from "@/components/visualiza/PlayChoice";
 import { missingPlaylistDays } from "@/lib/playlist-slots";
 import { useSessionState } from "@/hooks/use-session-step";
@@ -184,6 +187,10 @@ function CategoryInner() {
 
   const doneCount = data?.audios.filter((a: any) => data.entries.get(a.id)?.completed).length ?? 0;
   const selectedArea = areas.find((a) => a.id === categoryId);
+  const firstPractice = data.audios[0];
+  const practice = firstPractice ? resolvePractice(c.title, firstPractice, data.audios) : thematicPractice(c.title, c.title);
+  const areaAffirmations = [{ text: practice.affirmation, Icon: Heart, color: "var(--primary)", bg: "var(--secondary)" }];
+  const areaQuiz: QuizItem[] = practice.quiz.map(q => ({ q: q.question, options: q.options, correct: q.correctIndex, tip: q.explanation }));
 
   const StepDots = (
     <div className="flex items-center justify-center gap-2 pt-4">
@@ -198,7 +205,7 @@ function CategoryInner() {
     return (
       <div className="pb-24">
         <section className="relative overflow-hidden rounded-b-[2.5rem] min-h-[92vh] flex flex-col">
-          <img src={heroAsset} alt="" className="absolute inset-0 h-full w-full object-cover" />
+          <ManagedImage imageKey="imagen:visualiza:musica" src={heroAsset} alt="" className="absolute inset-0 h-full w-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-b from-white/30 via-white/70 to-white dark:from-black/40 dark:via-black/70 dark:to-background" />
           <div className="relative px-5 pt-6 pb-8 max-w-2xl mx-auto text-center flex-1 flex flex-col">
             <Link to="/visualiza" className="inline-flex items-center gap-1 text-xs text-primary font-bold mb-3 self-start">
@@ -286,7 +293,7 @@ function CategoryInner() {
                 )}
               >
                  <div className="aspect-[4/3] w-full overflow-hidden rounded-[12px] mx-auto mb-2 bg-primary/10 text-primary">
-                   <img src={a.cover_url || AREA_COVERS[a.id] || heroAsset} alt={a.title} loading="lazy" className="h-full w-full object-cover" />
+                   <SubtopicIcon title={a.title} className="h-full w-full text-5xl" />
                  </div>
                  <div className="font-bold text-[13px] leading-tight">{a.title}</div>
                  <div className="text-[10px] text-muted-foreground mt-1.5 leading-snug">{a.description}</div>
@@ -400,7 +407,7 @@ function CategoryInner() {
           <p className="text-sm text-muted-foreground mt-2 max-w-md mx-auto">Repite estas afirmaciones con fe y convicción.</p>
         </div>
         <div className="mt-5 flex gap-3 overflow-x-auto snap-x snap-mandatory -mx-4 px-4 pb-2 no-scrollbar">
-          {AFFIRMATIONS.map((af, i) => (
+          {areaAffirmations.map((af, i) => (
             <Card key={i} className="snap-center shrink-0 w-[62%] sm:w-[45%] max-w-[220px] rounded-2xl p-4 text-center shadow-soft border border-border/60" style={{ background: af.bg }}>
               <div className="w-10 h-10 rounded-2xl bg-white/70 grid place-items-center mx-auto" style={{ color: af.color }}>
                 <af.Icon className="w-5 h-5" fill={af.Icon === Heart ? "currentColor" : "none"} />
@@ -421,7 +428,7 @@ function CategoryInner() {
           <h2 className="font-display font-extrabold text-xl">Sopa de letras de la lección <span>🔎</span></h2>
           <p className="text-sm text-muted-foreground mt-2">Encuentra palabras para acompañar tu reflexión y oración.</p>
         </div>
-        <WordSearch words={MANIFEST_WORDS} storageKey={`manifest-${categoryId}`} gemsReward={40} />
+        <WordSearch words={practice.search_words} storageKey={`manifest-${categoryId}`} gemsReward={40} />
       </section>
 
       {/* Preguntas / Quiz */}
@@ -430,7 +437,7 @@ function CategoryInner() {
           <h2 className="font-display font-extrabold text-xl">Preguntas de la lección <span>🧠</span></h2>
           <p className="text-sm text-muted-foreground mt-2">Responde desde el corazón. Cada acierto suma hojas.</p>
         </div>
-        <StageQuiz items={MANIFEST_QUIZ} storageKey={`manifest-${categoryId}`} gemsPerCorrect={15} />
+        <StageQuiz items={areaQuiz} storageKey={`manifest-${categoryId}`} gemsPerCorrect={15} />
       </section>
 
       {/* Ejercicio + finalizar */}
@@ -440,7 +447,7 @@ function CategoryInner() {
             <h2 className="font-display font-extrabold text-xl">Ejercicio de Reflexión Cristiana <span>✍️</span></h2>
             <p className="text-sm text-muted-foreground mt-2">Reflexiona y escribe con intención.</p>
           </div>
-          <label className="block text-sm font-semibold mt-5 mb-2">¿Qué deseas llevar a la oración y qué paso puedes dar en tu vida?</label>
+          <label className="block text-sm font-semibold mt-5 mb-2">{practice.exercise}</label>
           <div className="relative">
             <Textarea
               value={exercise}
@@ -450,15 +457,7 @@ function CategoryInner() {
             />
             <span className="absolute bottom-2 right-3 text-[10px] text-muted-foreground tabular-nums">{exercise.length}/1000</span>
           </div>
-          <div className="mt-4 grid grid-cols-4 gap-2">
-            {EX_HINTS.map((h, i) => (
-              <div key={i} className="rounded-2xl border border-border/60 py-3 text-center bg-muted/30">
-                <h.Icon className="w-4 h-4 mx-auto text-primary" />
-                <div className="text-[11px] font-bold mt-1">{h.label}</div>
-                <div className="text-[9px] text-muted-foreground">{h.sub}</div>
-              </div>
-            ))}
-          </div>
+          <ul className="mt-4 space-y-3">{practice.tasks.map(task => <li key={task} className="flex gap-2 text-sm"><Check className="mt-1 h-4 w-4 shrink-0 text-primary" />{task}</li>)}</ul>
           <Button
             onClick={completeExercise}
             className="mt-5 w-full h-14 rounded-full font-bold text-base bg-gradient-to-r from-[#7C5CFF] via-[#B49BFF] to-[#F58BCB] text-white shadow-glow"

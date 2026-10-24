@@ -1,3 +1,4 @@
+import { ManagedImage } from "@/components/ManagedImage";
 import { useServerFn } from "@tanstack/react-start";
 import { ensureDailyNotice } from "@/lib/notices.functions";
 import { useOrigenPendings } from "@/hooks/use-origen-pendings";
@@ -397,7 +398,7 @@ function AuthLayoutInner() {
               aria-label="Inicio"
               className="absolute left-1/2 -translate-x-1/2 -top-8 w-20 h-20 grid place-items-center active:scale-95 transition-transform"
             >
-              <img
+              <ManagedImage imageKey="imagen:logo"
                 src={origenIcon}
                 alt=""
                 className="w-full h-full object-contain drop-shadow-[0_12px_20px_rgba(124,92,255,0.55)]"
@@ -439,5 +440,5 @@ function BottomItem({
 
 
 function OrigenLogoIcon({ className }: { className?: string }) {
-  return <img src={origenIcon} alt="" aria-hidden className={cn(className, "object-contain")} />;
+  return <ManagedImage imageKey="imagen:logo" src={origenIcon} alt="" aria-hidden className={cn(className, "object-contain")} />;
 }

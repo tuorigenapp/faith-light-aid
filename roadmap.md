@@ -2,6 +2,7 @@
 
 ## Enlaces y organización del 24 de octubre, 04:16 UTC
 - [ ] Importar y reproducir el audio público de Google Drive desde ambos formularios de administración.
+- [ ] Probar también el segundo enlace público de Drive recibido a las 04:33 UTC y dejarlo en Vamos a corroborar.
 - [ ] Organizar portadas, consultas, juegos, logos e isotipos por sección, editables sin IA y sin fondos.
 - [ ] Reemplazar imágenes de subcategorías por emojis temáticos y evitar generación de imágenes futuras.
 - [ ] Corregir contenido repetido de subtemas y asegurar generación específica de lecciones, juegos, palabras, afirmaciones y tareas.
