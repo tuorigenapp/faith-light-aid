@@ -1,3 +1,5 @@
+import { SubtopicIcon } from "@/components/visualiza/SubtopicIcon";
+import { resolvePractice } from "@/lib/visualiza-content";
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
@@ -46,6 +48,7 @@ function DayPlayer() {
       ]);
       const entry = audio.data && user ? await supabase.from("manifest_entries").select("*").eq("user_id", user.id).eq("audio_id", audio.data.id).maybeSingle() : { data: null };
       const plan = user ? await getUserPlan(user.id) : "explorador";
+      const { data: siblings } = await supabase.from("manifest_audios").select("id, title, day_index, affirmation, lesson, exercise, quiz, word_game").eq("category_id", categoryId).order("day_index");
       let position = Number(day);
       if ((cat.data as any)?.is_custom && audio.data) {
         const { data: list } = await supabase.from("manifest_audios").select("day_index").eq("category_id", categoryId).order("day_index");
@@ -55,7 +58,7 @@ function DayPlayer() {
       const credits = (unlocks ?? []).filter((u) => !u.audio_id).length;
       const unlocked = !!audio.data && (unlocks ?? []).some((u) => u.audio_id === audio.data!.id);
       const hiddenByPlan = !audio.data && plan !== "camino" && Number(day) > FREE_AUDIOS;
-      return { cat: cat.data, audio: audio.data, entry: entry.data, credits, locked: hiddenByPlan || (plan !== "camino" && position > FREE_AUDIOS && !unlocked) };
+      return { cat: cat.data, audio: audio.data, siblings: siblings ?? [], entry: entry.data, credits, locked: hiddenByPlan || (plan !== "camino" && position > FREE_AUDIOS && !unlocked) };
     },
   });
 
@@ -174,35 +177,36 @@ function DayPlayer() {
       </div>
     );
   const audioOnly = Boolean((a as any).audio_only);
-  const game = a.word_game as { words?: string[] } | null;
-  const questions = (a.quiz as { questions?: { question: string; options: string[]; correctIndex: number; explanation?: string }[] } | null)?.questions ?? [];
-  const tasks: string[] = Array.isArray((a as any).quiz?.tasks) ? (a as any).quiz.tasks : [];
+  const content = resolvePractice(c.title, a, data.siblings);
+  const game = { words: content.search_words };
+  const questions = content.quiz;
+  const tasks = content.tasks;
   const materials: string[] = Array.isArray((a as any).quiz?.materials) ? (a as any).quiz.materials : [];
   const steps: string[] = Array.isArray((a as any).quiz?.steps) ? (a as any).quiz.steps : [];
 
   return (
     <div className="pb-32">
       <div className="relative overflow-hidden bg-sanctuary text-sanctuary-foreground">
-        <img src={a.cover_url || c.cover_url || lessonCover} alt="" className="absolute inset-0 h-full w-full object-cover" />
+        <img src={c.cover_url || lessonCover} alt="" className="absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-sanctuary/80" />
         <div className="relative max-w-3xl mx-auto px-4 md:px-8 pt-6 pb-10">
           <Link to="/visualiza/$categoryId" params={{ categoryId }} className="inline-flex min-h-11 items-center gap-2 text-sanctuary-foreground text-sm"><ArrowLeft className="w-4 h-4" /> {c.title}</Link>
           <div className="text-center mt-6">
             <div className="text-[12px] uppercase text-sanctuary-foreground/80 font-bold">{(c as any).is_custom ? `#${String(a.day_index).padStart(2, "0")} · ${c.title}` : `Día ${a.day_index} de 21`}</div>
             <div className="mx-auto mt-4 h-32 w-32 grid place-items-center rounded-[16px] border border-sanctuary-border bg-sanctuary-panel">
-              <Headphones className="w-16 h-16 text-sanctuary-foreground" />
+              <SubtopicIcon title={a.title} category={c.title} className="h-full w-full text-6xl" />
             </div>
           </div>
           <div className="mt-6 text-center">
             <div className="text-[12px] uppercase text-sanctuary-foreground/80 font-bold">{a.affirmation ? "Afirmación del día" : "Tu práctica de hoy"}</div>
-            <p className="font-display font-extrabold text-2xl mt-2 text-sanctuary-foreground leading-tight">{a.affirmation || a.title}</p>
+            <p className="font-display font-extrabold text-2xl mt-2 text-sanctuary-foreground leading-tight">{content.affirmation}</p>
             <p className="text-sm text-sanctuary-foreground/80 mt-3">Repite: Mañana <b>3 veces</b> · Tarde <b>6 veces</b> · Noche <b>9 veces</b> — durante 21 días.</p>
           </div>
         </div>
       </div>
 
       <div className="max-w-3xl mx-auto px-4 md:px-8 space-y-5">
-        {a.cover_url && <img src={a.cover_url} alt={a.title} className="aspect-video w-full rounded-xl object-cover" />}
+        
         {!audioOnly && (game?.words?.length ?? 0) >= 3 && <WordSearch words={game?.words ?? []} storageKey={`practice-words-${a.id}`} gemsReward={5} />}
         {!audioOnly && questions.length > 0 && <StageQuiz storageKey={`practice-quiz-${a.id}`} gemsPerCorrect={2} items={questions.map(q => ({ q: q.question, options: q.options, correct: q.correctIndex, tip: q.explanation ?? "" }))} />}
         <Card className="rounded-[1.7rem] p-5 shadow-soft">
@@ -241,18 +245,18 @@ function DayPlayer() {
          {materials.length > 0 && <Card className="rounded-[1.7rem] p-5 shadow-soft"><h2 className="font-display font-bold text-lg">Materiales</h2><ul className="mt-3 grid gap-2 sm:grid-cols-2">{materials.map((m) => <li key={m} className="flex gap-2 text-sm"><span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-primary/12 text-primary"><Check className="h-3 w-3" /></span>{m}</li>)}</ul></Card>}
          {steps.length > 0 && <Card className="rounded-[1.7rem] p-5 shadow-soft"><h2 className="font-display font-bold text-lg">Paso a paso</h2><ol className="mt-3 space-y-3">{steps.map((st, i) => <li key={st} className="flex gap-3 text-sm"><span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-primary text-[12px] font-bold text-primary-foreground">{i + 1}</span><span className="pt-1">{st}</span></li>)}</ol></Card>}
          {!audioOnly && tasks.length > 0 && <Card className="rounded-[1.7rem] p-5 shadow-soft"><h2 className="font-display font-bold text-lg">Tareas de hoy</h2><ul className="mt-3 space-y-2">{tasks.map((t) => <li key={t} className="flex gap-2 text-sm"><span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-primary/12 text-primary"><Check className="h-3 w-3" /></span>{t}</li>)}</ul></Card>}
-         {!audioOnly && (a.lesson || a.exercise || a.pdf_url) && <Card className="rounded-[1.7rem] p-5 md:p-6 shadow-soft space-y-3">
-           {a.lesson && <div><h2 className="font-display font-bold text-lg">Lección del día</h2><p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed">{a.lesson}</p></div>}
-           {a.exercise && <div><h2 className="font-display font-bold text-lg">Ejercicio o receta</h2><p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed">{a.exercise}</p></div>}
+         {!audioOnly && (content.lesson || content.exercise || a.pdf_url) && <Card className="rounded-[1.7rem] p-5 md:p-6 shadow-soft space-y-3">
+           {content.lesson && <div><h2 className="font-display font-bold text-lg">Lección del día</h2><p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed">{content.lesson}</p></div>}
+           {content.exercise && <div><h2 className="font-display font-bold text-lg">Ejercicio o receta</h2><p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed">{content.exercise}</p></div>}
            {a.pdf_url && <a href={a.pdf_url} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center gap-2 text-primary underline"><Download className="h-4 w-4" /> Abrir PDF de apoyo</a>}
          </Card>}
          {!audioOnly && <Card className="rounded-[1.7rem] p-5 md:p-6 shadow-soft">
           <div className="text-[11px] uppercase tracking-widest text-primary font-bold">Tu ejercicio Método de Cristo</div>
           <div className="mt-4 space-y-5">
-            <Field label="Escribe 3 veces aquello que ya ves realizado en tu vida por fe en tiempo presente (YA TENGO)" value={yaTengo} set={setYaTengo} placeholder={c.affirmation_ya_tengo} rows={3} />
-            <Field label="Escribe 6 veces la identidad que estás desarrollando para caminar en esa promesa (YO SOY)" value={yoSoy} set={setYoSoy} placeholder={c.identity_yo_soy} rows={5} />
-            <Field label="Escribe 9 veces una declaración de gratitud conforme a la voluntad de Dios (GRATITUD)" value={gratitud} set={setGratitud} placeholder={c.gratitude_gracias} rows={7} />
-            <Field label="Finaliza con una petición sencilla y directa al Espíritu Santo" value={peticion} set={setPeticion} placeholder={c.petition} rows={2} />
+            <Field label="Escribe 3 veces aquello que ya ves realizado en tu vida por fe en tiempo presente (YA TENGO)" value={yaTengo} set={setYaTengo} placeholder={content.affirmation} rows={3} />
+            <Field label="Escribe 6 veces la identidad que estás desarrollando para caminar en esa promesa (YO SOY)" value={yoSoy} set={setYoSoy} placeholder={`En «${a.title}», ¿qué actitud responsable deseas practicar?`} rows={5} />
+            <Field label="Escribe 9 veces una declaración de gratitud conforme a la voluntad de Dios (GRATITUD)" value={gratitud} set={setGratitud} placeholder={`¿Qué agradeces al trabajar «${a.title}»?`} rows={7} />
+            <Field label="Finaliza con una petición sencilla y directa al Espíritu Santo" value={peticion} set={setPeticion} placeholder={`¿Qué ayuda pides a Dios para «${a.title}»?`} rows={2} />
           </div>
           <div className="mt-6 flex flex-col sm:flex-row gap-3">
             <Button onClick={saveAndComplete} className="flex-1 rounded-full h-12 bg-primary"><Check className="w-4 h-4 mr-2" /> Guardar y marcar completado</Button>

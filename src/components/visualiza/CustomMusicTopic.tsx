@@ -1,3 +1,5 @@
+import { SubtopicIcon } from "./SubtopicIcon";
+import { resolvePractice } from "@/lib/visualiza-content";
 import { PlayChoice } from "./PlayChoice";
 import { missingPlaylistDays } from "@/lib/playlist-slots";
 import { Button } from "@/components/ui/button";
@@ -106,7 +108,7 @@ export function CustomMusicTopic({ cat, audios, entries, isPaid }: { cat: any; a
               return (
                 <button key={s.id} onClick={() => { setSelId(s.id); setStep(3); }} className="rounded-[16px] border border-border/60 bg-card p-3 text-center shadow-soft transition active:scale-[.97]">
                   <div className="relative mx-auto mb-2 h-16 w-full overflow-hidden rounded-[12px]" style={{ background: `${accent}1A` }}>
-                    {s.cover_url ? <img src={s.cover_url} alt="" className="h-full w-full object-cover" /> : <Headphones className="m-auto mt-5 h-6 w-6" style={{ color: accent }} />}
+                    <SubtopicIcon title={s.title} category={cat.title} className="h-full w-full" />
                     {(locked || done) && <span className="absolute right-1 top-1 grid h-6 w-6 place-items-center rounded-full bg-card">{done ? <Check className="h-3.5 w-3.5 text-[#2F9C74]" /> : <Lock className="h-3.5 w-3.5 text-muted-foreground" />}</span>}
                   </div>
                   <div className="text-[13px] font-bold leading-tight">{s.title}</div>
@@ -128,33 +130,6 @@ export function CustomMusicTopic({ cat, audios, entries, isPaid }: { cat: any; a
 
   if (!sel) return null;
   return <LessonStep cat={cat} page={page} accent={accent} subs={subs} sel={sel} entries={entries} isPaid={isPaid} onBack={() => setStep(2)} onPick={setSelId} dots={Dots} />;
-}
-
-const STOP = new Set(["PARA", "COMO", "CADA", "ESTA", "ESTE", "ESTOY", "TODO", "TODA", "TODOS", "DESDE", "SOBRE", "ENTRE", "HACIA", "PORQUE", "TENGO", "SOLO", "MUCHO", "AHORA", "DONDE", "CUANDO", "QUIEN", "TAMBIEN", "HASTA", "TUYO", "MISMO", "MISMA", "SIENTO", "PUEDO", "QUE", "LOS", "LAS", "DEL", "CON", "UNA", "UNO", "MIS", "TUS", "SUS", "POR", "SIN", "YA", "MAS", "SER", "HOY", "MUY", "ESA", "ESE", "ELLA", "ELLO", "NADA"]);
-const BASE_WORDS = ["FE", "PAZ", "LUZ", "AMOR", "SANAR", "GRACIAS", "CREO", "VIDA"];
-
-/** Palabras de la sopa: las del subtema o, si faltan, las sacadas de sus propios textos. */
-export function lessonWords(own: string[] | undefined, texts: (string | null | undefined)[]) {
-  const norm = (w: string) => w.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().replace(/[^A-Z]/g, "");
-  const out: string[] = [];
-  for (const w of [...(own ?? []), ...texts.filter(Boolean).join(" ").split(/\s+/)]) {
-    const n = norm(w);
-    if (n.length >= 3 && n.length <= 9 && !STOP.has(n) && !out.includes(n)) out.push(n);
-    if (out.length >= 8) break;
-  }
-  for (const b of BASE_WORDS) if (out.length < 6 && !out.includes(b)) out.push(b);
-  return out.slice(0, 8);
-}
-
-function lessonQuiz(sel: Sub, cat: any): QuizItem[] {
-  const own = (sel.quiz?.questions ?? []).filter((q) => q?.question && q.options?.length >= 2);
-  if (own.length) return own.map((q) => ({ q: q.question, options: q.options, correct: q.correctIndex, tip: q.explanation ?? "" }));
-  const aff = sel.affirmation || cat.affirmation_ya_tengo || "Hoy elijo creer que lo nuevo ya empezó en mí.";
-  return [
-    { q: "¿Cuál de estas frases es la afirmación de tu lección?", options: ["Nada va a cambiar en mi vida", aff, "Mi pasado decide quién soy"], correct: 1, tip: "Repítela en voz alta tres veces, despacio y sintiéndola." },
-    { q: `¿Qué te ayuda a vivir «${sel.title}»?`, options: ["Esperar sin hacer nada", "Sentirlo como real y dar un paso hoy", "Compararte con otras personas"], correct: 1, tip: "La fe se vuelve real cuando das un paso pequeño hoy." },
-    { q: "¿Con qué cierras tu práctica de hoy?", options: ["Con culpa por lo que falta", "Con gratitud por lo que ya empezó", "Con prisa por terminar"], correct: 1, tip: "Agradecer antes de ver el resultado abre espacio para recibirlo." },
-  ];
 }
 
 const AFF_STYLE = [
@@ -184,9 +159,10 @@ function LessonStep({ cat, page, accent, subs, sel, entries, isPaid, onBack, onP
   const locked = !isPaid && sel.day_index > FREE_AUDIOS;
   const playingId = player.current?.id ?? null;
   const toTrack = (a: Sub) => ({ id: a.id, title: `#${String(a.day_index).padStart(2, "0")} — ${a.title}`, subtitle: cat.title, url: a.audio_url ?? "", cover: a.cover_url ?? null });
-  const affirmations = Array.from(new Set([sel.affirmation, ...(page.affirmations ?? []), cat.affirmation_ya_tengo, cat.identity_yo_soy, cat.gratitude_gracias].filter(Boolean) as string[])).slice(0, 4);
-  const words = lessonWords(sel.word_game?.words, [sel.title, sel.affirmation, cat.title, ...affirmations, sel.lesson]);
-  const quiz = lessonQuiz(sel, cat);
+  const content = resolvePractice(cat.title, sel, subs);
+  const affirmations = [content.affirmation];
+  const words = content.search_words;
+  const quiz: QuizItem[] = content.quiz.map(q => ({ q: q.question, options: q.options, correct: q.correctIndex, tip: q.explanation }));
   const doneCount = subs.filter((s) => entries.get(s.id)?.completed).length;
 
   const [choice, setChoice] = useState<Sub | null>(null);
@@ -221,7 +197,7 @@ function LessonStep({ cat, page, accent, subs, sel, entries, isPaid, onBack, onP
     <div className="pb-32">
       <div className="mx-auto max-w-3xl px-4 pt-6">
         <button onClick={onBack} className="inline-flex min-h-11 items-center gap-1 text-xs font-bold" style={{ color: accent }}><ArrowLeft className="h-3.5 w-3.5" /> Cambiar área</button>
-        {(sel.cover_url || page.cover_step3) && <img src={sel.cover_url || page.cover_step3} alt="" className="mt-2 h-44 w-full rounded-[16px] object-cover" />}
+        <SubtopicIcon title={sel.title} category={cat.title} className="mx-auto mt-4 h-24 w-24 text-5xl" />
         <div className="mt-3 text-center">
           <div className="text-xs font-bold uppercase tracking-widest" style={{ color: accent }}>Paso 3 de 3 · Tu lección</div>
           <h2 className="mt-2 font-display text-2xl font-extrabold leading-tight">{sel.title} <span>💗</span></h2>
@@ -241,7 +217,7 @@ function LessonStep({ cat, page, accent, subs, sel, entries, isPaid, onBack, onP
               <p className="mt-0.5 text-xs text-muted-foreground">{cat.title} · {page.playlist_text || "Escucha y practica a tu ritmo."}</p>
             </div>
           </div>
-          {sel.lesson && !locked && <p className="mt-3 whitespace-pre-line text-[14px] leading-relaxed text-foreground/80">{sel.lesson}</p>}
+          {!locked && <p className="mt-3 whitespace-pre-line text-[14px] leading-relaxed text-foreground/80">{content.lesson}</p>}
         </Card>
         <div className="mt-3 overflow-hidden rounded-[16px] border border-border/60 bg-card">
           {subs.map((a) => {
@@ -335,20 +311,12 @@ function LessonStep({ cat, page, accent, subs, sel, entries, isPaid, onBack, onP
                 <h2 className="font-display text-xl font-extrabold">Ejercicio de Reflexión Cristiana <span>✍️</span></h2>
                 <p className="mt-2 text-sm text-muted-foreground">Reflexiona y escribe con intención.</p>
               </div>
-              <label htmlFor="ex-text" className="mb-2 mt-5 block text-sm font-semibold">{sel.exercise || `¿Qué deseas llevar a la oración con «${sel.title}» y por qué es importante para ti?`}</label>
+              <label htmlFor="ex-text" className="mb-2 mt-5 block text-sm font-semibold">{content.exercise}</label>
               <div className="relative">
                 <Textarea id="ex-text" value={exercise} onChange={(e) => setExercise(e.target.value.slice(0, 1000))} placeholder="Escribe aquí con libertad..." className="min-h-32 resize-none rounded-[12px] pr-16" />
                 <span className="absolute bottom-2 right-3 text-[11px] tabular-nums text-muted-foreground">{exercise.length}/1000</span>
               </div>
-              <div className="mt-4 grid grid-cols-4 gap-2">
-                {EX_HINTS.map((h) => (
-                  <div key={h.label} className="rounded-[12px] border border-border/60 bg-muted/30 py-3 text-center">
-                    <h.Icon className="mx-auto h-4 w-4" style={{ color: accent }} />
-                    <div className="mt-1 text-[11px] font-bold">{h.label}</div>
-                    <div className="text-[10px] text-muted-foreground">{h.sub}</div>
-                  </div>
-                ))}
-              </div>
+              <ul className="mt-4 space-y-3">{content.tasks.map(task => <li key={task} className="flex gap-2 text-sm"><Check className="mt-1 h-4 w-4 shrink-0 text-primary" />{task}</li>)}</ul>
               <button onClick={() => void finish()} disabled={saving} className="mt-5 inline-flex h-14 w-full items-center justify-center gap-2 rounded-[12px] text-base font-bold text-primary-foreground active:scale-[.97] disabled:opacity-60" style={{ background: `linear-gradient(180deg, ${accent}, ${accent}DD)` }}>
                 <Check className="h-5 w-5" /> {saving ? "Guardando…" : "Finalizar tarea del día"}
               </button>
