@@ -185,11 +185,10 @@ function DayPlayer() {
       <div className="relative overflow-hidden bg-sanctuary text-sanctuary-foreground">
         <img src={a.cover_url || c.cover_url || lessonCover} alt="" className="absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-sanctuary/80" />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/20 to-background" />
         <div className="relative max-w-3xl mx-auto px-4 md:px-8 pt-6 pb-10">
-          <Link to="/visualiza/$categoryId" params={{ categoryId }} className="inline-flex items-center gap-2 text-white/95 text-sm"><ArrowLeft className="w-4 h-4" /> {c.title}</Link>
+          <Link to="/visualiza/$categoryId" params={{ categoryId }} className="inline-flex min-h-11 items-center gap-2 text-sanctuary-foreground text-sm"><ArrowLeft className="w-4 h-4" /> {c.title}</Link>
           <div className="text-center mt-6">
-            <div className="text-[11px] uppercase tracking-widest text-white/80 font-bold">{(c as any).is_custom ? `#${String(a.day_index).padStart(2, "0")} · ${c.title}` : `Día ${a.day_index} de 21`}</div>
+            <div className="text-[12px] uppercase text-sanctuary-foreground/80 font-bold">{(c as any).is_custom ? `#${String(a.day_index).padStart(2, "0")} · ${c.title}` : `Día ${a.day_index} de 21`}</div>
             <div className="mx-auto mt-4 h-32 w-32 grid place-items-center rounded-[16px] border border-sanctuary-border bg-sanctuary-panel">
               <Headphones className="w-16 h-16 text-sanctuary-foreground" />
             </div>

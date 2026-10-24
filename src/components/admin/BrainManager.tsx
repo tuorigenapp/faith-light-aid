@@ -89,12 +89,14 @@ export function BrainManager() {
   }
 
   async function toggle(d: Doc) {
-    await supabase.from("brain_documents").update({ is_active: !d.is_active }).eq("id", d.id);
+    const { error } = await supabase.from("brain_documents").update({ is_active: !d.is_active }).eq("id", d.id);
+    if (error) { setNote({ text: mediaError(error, "No pudimos cambiar el material."), error: true }); return; }
     qc.invalidateQueries({ queryKey: ["admin-brain"] });
   }
   async function remove(d: Doc) {
     if (!confirm(`¿Eliminar "${d.title}" del Cerebro ORÍGEN?`)) return;
-    await supabase.from("brain_documents").delete().eq("id", d.id);
+    const { error } = await supabase.from("brain_documents").delete().eq("id", d.id);
+    if (error) { setNote({ text: mediaError(error, "No pudimos eliminar el material."), error: true }); return; }
     qc.invalidateQueries({ queryKey: ["admin-brain"] });
   }
 
@@ -114,7 +116,8 @@ export function BrainManager() {
   async function rename(d: Doc) {
     const t = prompt("Nuevo nombre del material", d.title)?.trim();
     if (!t) return;
-    await supabase.from("brain_documents").update({ title: t }).eq("id", d.id);
+    const { error } = await supabase.from("brain_documents").update({ title: t }).eq("id", d.id);
+    if (error) { setNote({ text: mediaError(error, "No pudimos cambiar el nombre."), error: true }); return; }
     qc.invalidateQueries({ queryKey: ["admin-brain"] });
   }
   const where = (d: Doc) => `${label(d.scope)}${d.scope_ref ? ` · ${targets.find(x => x.ref === d.scope_ref)?.title ?? d.scope_ref}` : ""}`;
