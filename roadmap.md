@@ -1,5 +1,16 @@
 # Roadmap ORÍGEN
 
+## Correcciones y renovación del 24 de octubre, 03:08 UTC
+- [ ] Diagnosticar y verificar PDF en Cerebro y MP3 por archivo/enlace con guardado y reproducción.
+- [ ] Corregir entrega externa de avisos y comprobar configuración programada.
+- [ ] Renovar Ejercicios con fondos propios distintos de Etapas.
+- [ ] Renovar portadas compartidas de Explorar e Inicio y música cristiana.
+- [ ] Mantener dos opciones por pista incluso sin audio, escuchar desactivado si falta.
+- [ ] Sustituir icono de popup ruleta por logo original.
+- [ ] Corregir regreso del perfil guardado y renovar Perfil/Premios manteniendo el árbol.
+- [ ] Crear mockup con portada real, enlace Amazon oficial y actualizar PDF/oferta.
+- [ ] Renovar capturas de la app por dentro y verificar recorridos reales.
+
 ## Ajustes visuales del índice y retratos
 - [x] Índice de impacto rojo a verde, con cinco valores positivos variados e identificados como ilustrativos; pruebas aprobadas.
 - [x] Comparativa: cinco fotos de Hoy en gris; seis meses en color, comprobado en los cinco resultados.
