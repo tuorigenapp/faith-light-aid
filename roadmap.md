@@ -1,5 +1,9 @@
 # Roadmap ORÍGEN
 
+## Registro directo del 24 de octubre, 09:24 UTC
+- [x] Quitar logos e íconos; destacar «Desbloquea tu descuento especial» antes de «Probar gratis ahora», con pulso suave y un solo recorrido a la evaluación y oferta existente.
+- [x] Verificado a 375/432/1280 px, claro/oscuro, sin desbordamiento; pulso desactivado con movimiento reducido, evaluación completa hasta descuento, dos pruebas aprobadas y build OK.
+
 ## Registro inferior del 24 de octubre, 09:18 UTC
 - [x] Renovar el registro inferior con isotipo ORÍGEN, superficie tonal, botón de registro destacado y acceso separado al descuento; sin reloj/fecha ni vencimiento inventado.
 - [x] Comprobar presentación a 375/432/1280 px en claro y oscuro, sin desbordamiento; registro abre evaluación y oferta completa la evaluación hasta los planes con descuento. Sin errores de pantalla, cuatro pruebas aprobadas y build OK.
