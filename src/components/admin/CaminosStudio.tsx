@@ -1,8 +1,11 @@
+import { APP_COVERS } from "@/lib/app-cover-catalog";
+import { adminListCategories, adminUpdateCategory, adminListLimpieza, adminUpdateLimpieza } from "@/lib/content-admin.functions";
+import { useContentOverrides } from "@/hooks/use-content-overrides";
 import { EXPLORE_ITEMS, exploreKey } from "@/lib/explore-content";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Eye, EyeOff, Loader2, Plus, Save, Search, Trash2 } from "lucide-react";
+import { Eye, EyeOff, Loader2, Plus, Save, Search, Trash2, Upload, ChevronDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   adminCreateCamino,
@@ -20,15 +23,7 @@ type Notify = (n: { text: string; error?: boolean } | null) => void;
 const input =
   "w-full min-h-12 rounded-[10px] border-2 border-border bg-card px-3 text-[14px] text-foreground placeholder:text-muted-foreground focus:border-[#7C5CFF] focus:outline-none";
 
-function useOverrides() {
-  return useQuery({
-    queryKey: ["content-overrides"],
-    queryFn: async () => {
-      const { data } = await supabase.from("content_overrides").select("key, title, cover_url, is_hidden");
-      return new Map((data ?? []).map((o) => [o.key, o]));
-    },
-  });
-}
+function useOverrides() { const { map, isLoading } = useContentOverrides(); return { data: map, isLoading }; }
 
 /** Caminos ORÍGEN: los existentes (ocultar/portada) y nuevos creados por la IA. */
 export function CaminosStudio({ onNote }: { onNote: Notify }) {
@@ -132,90 +127,93 @@ export function CaminosStudio({ onNote }: { onNote: Notify }) {
   );
 }
 
-/** Portadas por enlace de /categorias y de los 10 juegos. */
+/** Named image library; covers only, never background pools. */
 export function CoversStudio({ onNote }: { onNote: Notify }) {
   const qc = useQueryClient();
   const setOv = useServerFn(adminSetOverride);
+  const listCategories = useServerFn(adminListCategories);
+  const updateCategory = useServerFn(adminUpdateCategory);
+  const listCaminos = useServerFn(adminListCaminos);
+  const updateCamino = useServerFn(adminUpdateCamino);
+  const listLimpieza = useServerFn(adminListLimpieza);
+  const updateLimpieza = useServerFn(adminUpdateLimpieza);
   const { data: ov } = useOverrides();
+  const { data: categories = [] } = useQuery({ queryKey: ["studio-categories"], queryFn: () => listCategories() });
+  const { data: caminos = [] } = useQuery({ queryKey: ["studio-caminos"], queryFn: () => listCaminos() });
+  const { data: practices = [] } = useQuery({ queryKey: ["studio-limpieza"], queryFn: () => listLimpieza() });
+  const { data: consultas = [] } = useQuery({ queryKey: ["studio-consulta-covers"], queryFn: async () => { const { data, error } = await supabase.from("custom_consultas").select("id,title,slug,cover_url").order("created_at"); if (error) throw error; return data ?? []; } });
   const [busy, setBusy] = useState<string | null>(null);
   const [q, setQ] = useState("");
-
-  async function save(key: string, scope: "camino" | "juego" | "explorar", patch: { coverUrl?: string; isHidden?: boolean }) {
+  async function run(key: string, action: () => Promise<unknown>) {
     setBusy(key);
-    try {
-      await setOv({ data: { key, scope, ...patch } });
-      onNote({ text: "Guardado. Ya se ve en la app." });
-      qc.invalidateQueries({ queryKey: ["content-overrides"] });
-    } catch (e) {
-      onNote({ text: e instanceof Error ? e.message : "No pudimos guardar.", error: true });
-    }
-    setBusy(null);
+    try { await action(); onNote({ text: "Imagen guardada en su sección." }); await qc.invalidateQueries(); }
+    catch (e) { onNote({ text: e instanceof Error ? e.message : "No pudimos guardar la imagen.", error: true }); }
+    finally { setBusy(null); }
   }
-
-  const items = [
-    ...CAMINOS.map((c) => ({ key: `camino:${c.id}`, scope: "camino" as const, title: `Categoría · ${c.title}`, image: c.banner as string | null })),
-    ...GAMES.map((g) => ({ key: `juego:${g.id}`, scope: "juego" as const, title: `Juego · ${g.title}`, image: null as string | null })),
-    ...EXPLORE_ITEMS.map((e) => ({ key: exploreKey(e.title), scope: "explorar" as const, title: `Explorar · ${e.title}`, image: e.image as string | null })),
-  ].filter((i) => i.title.toLowerCase().includes(q.trim().toLowerCase()));
-
-  return (
-    <div className="rounded-[16px] border border-border bg-card p-5">
-      <div className="flex items-center gap-2 rounded-[10px] border border-border bg-background px-3">
-        <Search className="h-4 w-4 text-muted-foreground" />
-        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar por nombre" className="min-h-11 w-full bg-transparent text-[14px] outline-none" />
-      </div>
-      <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {items.map((i) => {
-          const o = ov?.get(i.key);
-          return (
-            <CoverCard
-              key={i.key}
-              title={i.title}
-              image={o?.cover_url || i.image}
-              visible={!o?.is_hidden}
-              busy={busy === i.key}
-              coverValue={o?.cover_url ?? ""}
-              onToggle={() => save(i.key, i.scope, { isHidden: !o?.is_hidden })}
-              onSaveCover={(url) => save(i.key, i.scope, { coverUrl: url })}
-            />
-          );
-        })}
-      </div>
-    </div>
-  );
+  type Item = { key: string; section: string; title: string; image: string | null; save: (url: string) => Promise<unknown>; toggle?: () => Promise<unknown>; visible?: boolean };
+  const items: Item[] = [
+    ...APP_COVERS.map(i => ({ ...i, image: ov?.get(i.key)?.cover_url || i.image, save: (url: string) => setOv({ data: { key: i.key, scope: i.scope, coverUrl: url } }) })),
+    ...CAMINOS.map(c => ({ key: `camino:${c.id}`, section: "Caminos y categorías", title: c.title, image: ov?.get(`camino:${c.id}`)?.cover_url || c.banner, save: (url: string) => setOv({ data: { key: `camino:${c.id}`, scope: "camino", coverUrl: url } }) })),
+    ...caminos.map(c => ({ key: `custom-camino:${c.id}`, section: "Caminos creados", title: c.title, image: c.cover_url, save: (url: string) => updateCamino({ data: { id: c.id, coverUrl: url } }) })),
+    ...categories.filter(c => c.subtopics > 0 || c.group_key === "visualiza").map(c => ({ key: `category:${c.id}`, section: "Visualízalo · temas creados", title: c.title, image: c.cover_url, save: (url: string) => updateCategory({ data: { id: c.id, coverUrl: url } }) })),
+    ...practices.map(p => ({ key: `practice:${p.id}`, section: "Limpieza · prácticas creadas", title: p.title, image: p.cover_url, save: (url: string) => updateLimpieza({ data: { id: p.id, coverUrl: url } }) })),
+    ...consultas.map(c => ({ key: `consulta:${c.id}`, section: "Consultas creadas", title: c.title, image: c.cover_url, save: async (url: string) => { const { error } = await supabase.from("custom_consultas").update({ cover_url: url || null }).eq("id", c.id); if (error) throw error; } })),
+    ...GAMES.map(g => ({ key: `juego:${g.id}`, section: "Juegos", title: g.title, image: ov?.get(`juego:${g.id}`)?.cover_url || g.img, save: (url: string) => setOv({ data: { key: `juego:${g.id}`, scope: "juego", coverUrl: url } }) })),
+  ];
+  const sections = [...new Set(items.map(i => i.section))];
+  return <section className="space-y-4">
+    <div className="flex items-center gap-2 rounded-[10px] border border-border bg-background px-3"><Search className="h-4 w-4 text-muted-foreground" /><input aria-label="Buscar imagen por sección o nombre" value={q} onChange={e => setQ(e.target.value)} placeholder="Buscar sección o imagen" className="min-h-12 w-full bg-transparent text-sm outline-none" /></div>
+    {sections.map(section => { const shown = items.filter(i => i.section === section && `${i.title} ${section}`.toLowerCase().includes(q.toLowerCase())); if (!shown.length) return null; return <details key={section} open={!!q} className="border-b border-border pb-4"><summary className="flex min-h-12 cursor-pointer items-center gap-3 font-display text-base font-semibold"><ChevronDown className="h-4 w-4 text-primary" />{section}<span className="ml-auto text-sm text-muted-foreground">{shown.length}</span></summary><div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{shown.map(i => <CoverCard key={`${i.key}:${i.image}`} title={i.title} image={i.image} busy={busy === i.key} visible={true} coverValue={i.image ?? ""} onSaveCover={url => run(i.key, () => i.save(url))} />)}</div></details>; })}
+    {q && !items.some(i => `${i.title} ${i.section}`.toLowerCase().includes(q.toLowerCase())) && <p className="py-8 text-center text-sm text-muted-foreground">No encontramos una imagen con ese nombre.</p>}
+  </section>;
 }
 
 function CoverCard({ title, image, visible, busy, coverValue, onToggle, onSaveCover, onDelete }: {
   title: string; image: string | null; visible: boolean; busy: boolean; coverValue: string;
-  onToggle: () => void; onSaveCover: (url: string) => void; onDelete?: () => void;
+  onToggle?: () => void; onSaveCover: (url: string) => void; onDelete?: () => void;
 }) {
   const [url, setUrl] = useState(coverValue);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+  async function upload(file: File) {
+    if (!file.type.startsWith("image/") || file.size > 5 * 1024 * 1024) { setUploadError("Elige una imagen PNG, JPG o WEBP de hasta 5 MB."); return; }
+    setUploading(true); setUploadError("");
+    try {
+      const path = `manual/${crypto.randomUUID()}.${file.name.split(".").pop()?.replace(/[^a-z0-9]/gi, "") || "png"}`;
+      const { error } = await supabase.storage.from("content-covers").upload(path, file, { contentType: file.type });
+      if (error) throw error;
+      const signed = await supabase.storage.from("content-covers").createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+      if (signed.error || !signed.data) throw new Error("No pudimos preparar la imagen.");
+      setUrl(signed.data.signedUrl); await onSaveCover(signed.data.signedUrl);
+    } catch (error) { setUploadError(error instanceof Error ? error.message : "No pudimos subir la imagen."); }
+    finally { setUploading(false); }
+  }
   return (
     <article className="overflow-hidden rounded-[14px] border border-border bg-muted/30">
       {image ? (
-        <img src={image} alt={title} className="aspect-[16/9] w-full object-cover" />
+        <img src={image} alt={title} className="aspect-[4/3] w-full bg-muted/30 object-contain" />
       ) : (
         <div className="grid aspect-[16/9] place-items-center bg-muted text-[12px] text-foreground/50">Sin portada</div>
       )}
       <div className="space-y-2 p-3">
         <div className="flex items-start justify-between gap-2">
           <p className="text-[13.5px] font-bold leading-tight">{title}</p>
-          <span className={cn("shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold", visible ? "bg-[#3FBE8F]/20 text-[#1B6B4F]" : "bg-muted text-foreground/60")}>
-            {visible ? "Visible" : "Oculto"}
-          </span>
+          {onToggle && <span className="shrink-0 text-xs text-muted-foreground">{visible ? "Visible" : "Oculto"}</span>}
         </div>
         <input className={input} value={url} onChange={(e) => setUrl(e.target.value)} placeholder="Enlace de la portada https://…" />
+        <label className="flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-[10px] bg-primary/10 text-sm font-semibold text-primary"><Upload className="h-4 w-4" />{uploading ? "Subiendo…" : "Reemplazar con archivo"}<input type="file" accept="image/png,image/jpeg,image/webp" className="hidden" disabled={busy || uploading} onChange={e => { const file = e.target.files?.[0]; if (file) void upload(file); e.target.value = ""; }} /></label>
+        {uploadError && <p role="alert" className="text-sm text-destructive">{uploadError}</p>}
         <div className="flex gap-2">
-          {busy ? (
+          {busy || uploading ? (
             <Loader2 className="m-3 h-4 w-4 animate-spin" />
           ) : (
             <>
-              <button onClick={() => onSaveCover(url.trim())} className="inline-flex min-h-11 flex-1 items-center justify-center gap-1 rounded-[10px] bg-[#7C5CFF] text-[13px] font-bold text-white">
-                <Save className="h-4 w-4" /> Guardar portada
-              </button>
-              <button aria-label={visible ? "Ocultar" : "Hacer visible"} onClick={onToggle} className="grid h-11 w-11 place-items-center rounded-[10px] border border-border bg-card">
+              <Button onClick={() => onSaveCover(url.trim())} className="min-h-11 flex-1 gap-1 rounded-[10px] text-sm">
+                <Save className="h-4 w-4" /> Guardar imagen
+              </Button>
+              {onToggle && <Button variant="outline" size="icon" aria-label={visible ? "Ocultar" : "Hacer visible"} onClick={onToggle} className="grid h-11 w-11 place-items-center rounded-[10px] border border-border bg-card">
                 {visible ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-              </button>
+              </Button>}
               {onDelete && (
                 <button aria-label="Eliminar" onClick={onDelete} className="grid h-11 w-11 place-items-center rounded-[10px] border border-border bg-card text-destructive">
                   <Trash2 className="h-4 w-4" />
