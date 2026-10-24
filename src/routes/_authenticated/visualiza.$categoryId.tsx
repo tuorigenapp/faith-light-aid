@@ -1,3 +1,5 @@
+import { PlayChoice, PLAYLIST_SLOTS } from "@/components/visualiza/PlayChoice";
+import { useSessionState } from "@/hooks/use-session-step";
 import { createFileRoute, Link, Outlet, useParams, useNavigate, useRouterState } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { usePlayer } from "@/lib/player";
@@ -100,7 +102,7 @@ function CategoryInner() {
   const qc = useQueryClient();
   const player = usePlayer();
   const [exercise, setExercise] = useState("");
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useSessionState<1 | 2 | 3>(`viz-${rawId}`, 1);
 
   const { data } = useQuery({
     queryKey: ["cat-full", categoryId, user?.id],
@@ -148,6 +150,11 @@ function CategoryInner() {
       player.toggle();
       return;
     }
+    setChoice(a);
+  }
+  const [choice, setChoice] = useState<any | null>(null);
+  function listen(a: any) {
+    setChoice(null);
     const available = (data?.audios ?? []).filter((x: any) => x.audio_url && (isPaid || x.day_index <= FREE_AUDIOS));
     player.play(toTrack(a), available.map(toTrack));
   }
@@ -364,7 +371,15 @@ function CategoryInner() {
               </button>
             );
           })}
+          {Array.from({ length: Math.max(0, PLAYLIST_SLOTS - (data?.audios.length ?? 0)) }, (_, i) => (data?.audios.length ?? 0) + i + 1).map((n) => (
+            <div key={`f${n}`} aria-hidden="true" className="flex w-full items-center gap-3 px-4 py-3 border-b border-border/40 last:border-b-0">
+              <div className="w-12 shrink-0 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Día {n}</div>
+              <div className="flex-1 min-w-0 blur-[3px] select-none"><div className="font-semibold text-sm truncate">{DAY_TITLES[n - 1] ?? "Práctica guiada"}</div></div>
+              <div className="w-9 h-9 rounded-full grid place-items-center shrink-0 bg-muted text-muted-foreground"><Lock className="w-4 h-4" /></div>
+            </div>
+          ))}
         </div>
+        {choice && <PlayChoice title={choice.title || DAY_TITLES[choice.day_index - 1] || c.title} onClose={() => setChoice(null)} onLesson={() => { const d = choice.day_index; setChoice(null); navigate({ to: "/visualiza/$categoryId/$day", params: { categoryId, day: String(d) } }); }} onListen={() => listen(choice)} />}
 
         {!isPaid && (
           <Card className="mt-3 rounded-2xl p-4 bg-gradient-to-br from-primary/10 to-pink-100/50 dark:to-pink-500/10 border border-primary/30">
