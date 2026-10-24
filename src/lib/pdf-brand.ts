@@ -1,12 +1,12 @@
 import logoUrl from "@/assets/logo-origen.png";
-import bookUrl from "@/assets/libro-reconectando.png";
+import bookUrl from "@/assets/libro-oficial-mockup.png";
 
 /** Brand + promo blocks shared by every downloadable PDF (HTML print and jsPDF). */
 export const APP_URL = "https://faith-light-aid.lovable.app";
 export const BOOK_TITLE = "Reconectando el Espíritu con Dios";
 export const BOOK_AUTHOR = "Ruth Esther Paredes Sufran";
-/** Amazon search for the author's book (replace with the exact product link when available). */
-export const BOOK_AMAZON_URL = "https://www.amazon.com/s?k=Reconectando+el+Esp%C3%ADritu+con+Dios+Ruth+Esther+Paredes";
+/** Official product link supplied by the author. */
+export const BOOK_AMAZON_URL = "https://a.co/d/07RJbIzg";
 export const METHOD_TITLE = "MÉTODO ORÍGEN basado en el Método de Cristo";
 
 const PLAN_KEY = "origen-plan";
@@ -53,7 +53,9 @@ async function toDataUrl(src: string): Promise<{ data: string; w: number; h: num
   await img.decode();
   const c = document.createElement("canvas");
   c.width = img.naturalWidth; c.height = img.naturalHeight;
-  c.getContext("2d")!.drawImage(img, 0, 0);
+  const context = c.getContext("2d");
+  if (!context) throw new Error("No pudimos preparar la imagen del libro.");
+  context.drawImage(img, 0, 0);
   return { data: c.toDataURL("image/png"), w: img.naturalWidth, h: img.naturalHeight };
 }
 

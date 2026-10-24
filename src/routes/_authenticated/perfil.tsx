@@ -23,6 +23,9 @@ import { uploadPhoto, removePhoto } from "@/lib/photo";
 import { useSignedUrls } from "@/hooks/use-signed-urls";
 import { Switch } from "@/components/ui/switch";
 import { wholeHojas } from "@/lib/gems";
+import origenCompanion from "@/assets/origen-companion.png";
+import origenDove from "@/assets/origen-dove.png";
+import origenLogo from "@/assets/logo-origen.png";
 
 export const Route = createFileRoute("/_authenticated/perfil")({
   head: () => ({
@@ -65,7 +68,12 @@ function PerfilPage() {
   const { data: profile, isLoading } = useQuery({
     queryKey: ["profile", user?.id],
     enabled: !!user,
-    queryFn: async () => (await supabase.from("profiles").select("*").eq("id", user!.id).maybeSingle()).data,
+    queryFn: async () => {
+      if (!user) return null;
+      const { data, error } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle();
+      if (error) throw error;
+      return data;
+    },
   });
 
   if (isLoading || !profile) {
@@ -179,7 +187,7 @@ function ProfileWizard({ profile, onDone, blockExit }: { profile: any; onDone: (
   const info = stepInfo[step];
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-aura-top">
+    <div className="personal-space min-h-[calc(100vh-4rem)]">
       <div className="mx-auto max-w-md px-4 pt-4 pb-28">
         {/* progreso */}
         <div className="flex items-center gap-3">
@@ -445,7 +453,7 @@ function EditProfileLimited({ profile, onDone }: { profile: any; onDone: () => v
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-aura-top">
+    <div className="personal-space min-h-[calc(100vh-4rem)]">
       <div className="mx-auto max-w-md px-4 pt-4 pb-28">
         <div className="flex items-center gap-3">
           <button onClick={onDone} aria-label="Volver" className="w-10 h-10 rounded-full bg-card shadow-soft grid place-items-center active:scale-95 transition">
@@ -680,38 +688,36 @@ function ProfilePanel({ profile, onEdit }: { profile: any; onEdit: () => void })
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-aura-top">
+    <div className="personal-space min-h-[calc(100vh-4rem)]">
       <div className="mx-auto max-w-2xl lg:max-w-5xl px-4 pt-5 pb-24 space-y-4">
         {/* HERO */}
-        <div className="rounded-[24px] p-5 bg-brand-gradient text-white shadow-[0_20px_50px_-20px_rgba(124,92,255,0.6)]">
+        <section className="personal-banner relative overflow-hidden rounded-[16px] p-5 text-foreground">
+          <div className="mb-4 flex items-center justify-between gap-4"><div className="flex items-center gap-2"><img src={origenLogo} alt="ORÍGEN" className="h-10 w-10 object-contain" /><p className="text-[12px] font-bold uppercase text-primary">Mi espacio ORÍGEN</p></div><span className="text-[12px] text-muted-foreground">{new Date().toLocaleDateString("es-MX", { day: "numeric", month: "long" })}</span></div>
           <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4">
             <div className="flex min-w-0 items-center gap-3">
-              <div className="w-16 h-16 rounded-full bg-white/25 backdrop-blur grid place-items-center overflow-hidden text-2xl font-bold ring-2 ring-white/40 shrink-0">
+              <div className="w-16 h-16 rounded-full bg-primary/10 grid place-items-center overflow-hidden text-2xl font-bold ring-2 ring-primary/30 shrink-0">
                 {avatar ? <img src={avatar} alt={name} className="w-full h-full object-cover" /> : initials}
               </div>
               <div className="min-w-0">
-                <div className="text-xl font-display font-black truncate">¡Hola, {name}! 👋</div>
-                <div className="text-[12px] opacity-90">Bienvenid@ a tu espacio sagrado</div>
-                <div className="mt-1.5 inline-flex items-center gap-1 text-[11px] font-bold bg-white/20 rounded-full px-2.5 py-1">
-                  Nivel: {profile.spiritual_level ?? "inicial"} 🌱
+                <h1 className="text-[22px] font-display font-bold break-words">{name}, tu historia importa</h1>
+                <div className="text-[13px] text-muted-foreground">Tu fe, tu avance y lo que viene.</div>
+                <div className="mt-1.5 inline-flex items-center gap-1 text-[12px] font-bold bg-primary/10 text-primary rounded-[10px] px-2.5 py-1">
+                  <Leaf className="h-3.5 w-3.5" /> {profile.spiritual_level ?? "inicial"}
                 </div>
               </div>
             </div>
-            <div className="text-center shrink-0">
-              <div className="text-lg font-black leading-none">{currentStage} / {totalStages}</div>
-              <div className="text-[10px] uppercase tracking-wider opacity-85 mt-1">Etapa actual</div>
-              <div className="text-2xl font-black mt-1">{pct}%</div>
+            <div className="hidden text-center shrink-0 sm:block">
+              <img src={origenCompanion} alt="Compañero ORÍGEN" loading="eager" className="mascot-motion h-36 w-28 object-contain" />
             </div>
           </div>
+          <div className="mt-4 flex items-center gap-4 sm:hidden"><img src={origenCompanion} alt="Compañero ORÍGEN" className="mascot-motion h-28 w-24 object-contain" /><div><p className="font-display text-[22px] font-bold text-primary">{pct}%</p><p className="text-sm text-muted-foreground">Etapa {currentStage} de {totalStages}</p><p className="mt-1 text-sm">Un paso a la vez, con Dios.</p></div></div>
           <div className="mt-4 grid grid-cols-3 gap-2">
             <MiniStat icon={<Calendar className="w-3.5 h-3.5" />} label="Días activos" value={stats?.activeDays ?? 0} />
             <MiniStat icon={<Flame className="w-3.5 h-3.5" />} label="Racha" value={`${profile.consecutive_days ?? 0}d`} />
             <MiniStat icon={<Leaf className="w-3.5 h-3.5" />} label="Hojas" value={wholeHojas(profile.gems)} />
           </div>
-          <button onClick={onEdit} className="mt-4 w-full h-11 rounded-[14px] bg-white/20 backdrop-blur text-white font-bold text-[14px] active:scale-[.98] transition">
-            Editar mi perfil
-          </button>
-        </div>
+          <Button onClick={onEdit} variant="outline" className="mt-4 w-full h-12 rounded-[12px] bg-card font-bold text-[15px]"><PenLine className="mr-2 h-4 w-4" />Editar mi perfil</Button>
+        </section>
 
         {/* XP E INSIGNIAS */}
         <Card className="rounded-[20px] p-4">
@@ -819,10 +825,11 @@ function ProfilePanel({ profile, onEdit }: { profile: any; onEdit: () => void })
         </Card>
 
         {/* MENSAJE PARA TI HOY */}
-        <div className="rounded-[24px] p-6 text-center bg-gradient-to-br from-[#F1ECFF] to-[#FDEFF7] border border-border">
+        <div className="personal-banner rounded-[16px] p-5 text-center border border-border">
+          <img src={origenDove} alt="Paloma ORÍGEN" loading="lazy" className="mascot-motion mx-auto h-24 w-24 object-contain" />
           <div className="text-[13px] font-bold text-primary">Mensaje para ti hoy</div>
           <p className="font-display text-[15px] leading-snug mt-2">"{message}"</p>
-          <Heart className="w-6 h-6 text-[#F58BCB] mx-auto mt-3" />
+          <Heart className="w-6 h-6 text-accent-pink mx-auto mt-3" />
         </div>
 
         {/* ACCESOS RÁPIDOS */}
@@ -919,13 +926,13 @@ function NotificationsBlock() {
     enabled: !!user,
     queryFn: async () => {
       const { data } = await supabase.from("notification_prefs").select("email_enabled, push_enabled").eq("user_id", user!.id).maybeSingle();
-      return data ?? { email_enabled: true, push_enabled: true };
+      return data ?? { email_enabled: true, push_enabled: false };
     },
   });
 
   async function update(patch: Partial<{ email_enabled: boolean; push_enabled: boolean }>) {
     if (!user) return;
-    const next = { email_enabled: prefs?.email_enabled ?? true, push_enabled: prefs?.push_enabled ?? true, ...patch };
+    const next = { email_enabled: prefs?.email_enabled ?? true, push_enabled: prefs?.push_enabled ?? false, ...patch };
     qc.setQueryData(["notification_prefs", user.id], next);
     const { error } = await supabase.from("notification_prefs").upsert({ user_id: user.id, ...next });
     if (error) toast.error("No pudimos guardar tu preferencia");
@@ -971,13 +978,6 @@ function NotificationsBlock() {
             </div>
             <Switch checked={prefs?.email_enabled ?? true} onCheckedChange={(v) => update({ email_enabled: v })} />
           </div>
-          <div className="flex items-center justify-between rounded-2xl border border-border p-3">
-            <div>
-              <div className="text-[13px] font-semibold">Avisos dentro de la app</div>
-              <div className="text-[11.5px] text-muted-foreground">Muestra avisos emergentes cuando algo nuevo se desbloquea.</div>
-            </div>
-            <Switch checked={prefs?.push_enabled ?? true} onCheckedChange={(v) => update({ push_enabled: v })} />
-          </div>
           <NotificacionesCard />
           <div className="rounded-2xl border border-border p-3">
             <div className="text-[13px] font-semibold">Escuchar las instrucciones</div>
@@ -995,7 +995,7 @@ function NotificationsBlock() {
 
 function MiniStat({ icon, label, value }: { icon: React.ReactNode; label: string; value: React.ReactNode }) {
   return (
-    <div className="rounded-2xl bg-white/20 backdrop-blur px-3 py-2.5 text-center ring-1 ring-white/30">
+    <div className="rounded-[12px] bg-card px-3 py-3 text-center border border-border">
       <div className="flex items-center justify-center gap-1 text-[10px] uppercase tracking-wider opacity-90">{icon} {label}</div>
       <div className="text-lg font-bold mt-0.5 leading-none">{value}</div>
     </div>

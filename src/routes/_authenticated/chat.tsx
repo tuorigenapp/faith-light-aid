@@ -15,7 +15,14 @@ import { Link } from "@tanstack/react-router";
 import { msUntilAppDayReset, formatCountdown } from "@/lib/app-day";
 
 export const Route = createFileRoute("/_authenticated/chat")({
-  head: () => ({ meta: [{ title: "Conversa con Ruth Esther — ORIGEN" }] }),
+  head: () => ({ meta: [
+    { title: "Conversa con Ruth Esther — ORÍGEN" },
+    { name: "description", content: "Conversa con tu mentora espiritual de ORÍGEN y vuelve a tus conversaciones guardadas." },
+    { property: "og:title", content: "Conversa con Ruth Esther — ORÍGEN" },
+    { property: "og:description", content: "Un espacio privado de acompañamiento espiritual cristiano." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary_large_image" },
+  ] }),
   component: ChatPage,
 });
 

@@ -11,11 +11,11 @@ import { IncludesModal } from "@/components/visualiza/IncludesModal";
 import { ProgramCard, type UnifiedProgram } from "@/components/visualiza/ProgramCard";
 import { ProgramCardSkeleton } from "@/components/visualiza/SeguimientoSkeleton";
 
-import heroImg from "@/assets/visualiza-hero.jpg";
-import musicImg from "@/assets/viv-music.jpg";
-import cleanImg from "@/assets/viv-clean.jpg";
-import identityImg from "@/assets/viv-identity.jpg";
-import cristoImg from "@/assets/viv-cristo.jpg";
+import heroImg from "@/assets/explore/listen.jpg";
+import musicImg from "@/assets/explore/music.jpg";
+import cleanImg from "@/assets/explore/clean.jpg";
+import identityImg from "@/assets/explore/identity.jpg";
+import cristoImg from "@/assets/explore/christ.jpg";
 
 export const Route = createFileRoute("/_authenticated/visualiza")({
   head: () => ({ meta: [{ title: "Visualízalo y Vívelo — ORÍGEN" }, { name: "description", content: "Programas, audios y prácticas de Visualízalo y Vívelo." }, { property: "og:title", content: "Visualízalo y Vívelo — ORÍGEN" }, { property: "og:description", content: "Programas, audios y prácticas para acompañar tu camino." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),

@@ -72,7 +72,7 @@ function refIdFor(day: number) {
 }
 
 function Ejercicios() {
-  const seasonBg = useSeasonalBackground();
+  const seasonBg = useSeasonalBackground("exercises");
   const { user } = useAuth();
   const { data: profile } = useProfile();
   const qc = useQueryClient();
@@ -183,9 +183,9 @@ function Ejercicios() {
   const progressPct = Math.round((completedCount / TOTAL_DAYS) * 100);
 
   return (
-    <div className="relative min-h-dvh">
+    <div className="exercise-space relative min-h-dvh bg-sanctuary">
       <img src={seasonBg} alt="" aria-hidden width={720} height={1280} className="fixed inset-0 h-full w-full object-cover" />
-      <div aria-hidden className="fixed inset-0 bg-gradient-to-b from-[#1E1712]/30 via-[#1E1712]/50 to-[#120D09]/85" />
+      <div aria-hidden className="exercise-scrim fixed inset-0" />
       <div className="relative mx-auto w-full max-w-[1100px] px-4 py-6 md:px-6 md:py-10 mobile-safe-bottom lg:pb-10">
         <JourneyHeader
           name={profile?.display_name || profile?.full_name || "Tu camino"}

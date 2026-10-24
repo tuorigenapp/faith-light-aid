@@ -3,6 +3,8 @@
  * Sin dependencias de Node: funciona en el runtime de la app.
  */
 
+import { isTrustedPushEndpoint } from "./push-endpoint";
+
 const enc = new TextEncoder();
 
 function b64urlToBytes(s: string): Uint8Array {
@@ -99,6 +101,7 @@ export type PushMessage = { title: string; body: string; url?: string; tag?: str
 
 /** Envía una notificación. Devuelve el status HTTP del servicio de push. */
 export async function sendPush(sub: PushSubscriptionRow, message: PushMessage): Promise<number> {
+  if (!isTrustedPushEndpoint(sub.endpoint)) return 400;
   const publicKey = process.env["VAPID_PUBLIC_KEY"];
   const privateKey = process.env["VAPID_PRIVATE_KEY"];
   const subject = process.env["VAPID_SUBJECT"] ?? "mailto:soporte@tuorigen.app";
@@ -121,6 +124,7 @@ export async function sendPush(sub: PushSubscriptionRow, message: PushMessage): 
   const payload = await encryptPayload(sub.p256dh, sub.auth, JSON.stringify(fullPayload));
   const res = await fetch(sub.endpoint, {
     method: "POST",
+    redirect: "error",
     headers: {
       Authorization: await vapidHeader(sub.endpoint, publicKey, privateKey, subject),
       "Content-Encoding": "aes128gcm",

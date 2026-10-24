@@ -96,8 +96,8 @@ export function JourneyHeader({
               <span className="block text-[12.5px] font-medium text-primary-foreground/70">
                 Racha actual
               </span>
-              <span className="block font-display text-[26px] font-extrabold leading-tight text-primary-foreground">
-                {streak} {streak === 1 ? "día" : "días"}
+              <span className="block whitespace-nowrap font-display text-[22px] font-extrabold leading-tight text-primary-foreground">
+                {streak}<span className="ml-1 text-[15px]">{streak === 1 ? "día" : "días"}</span>
               </span>
             </span>
           </div>
@@ -130,7 +130,7 @@ export function JourneyHeader({
           <span
             className="pointer-events-none absolute inset-x-0 bottom-0 top-6"
             style={{
-              background: "linear-gradient(0deg, rgba(124,92,255,.22), transparent 78%)",
+              background: "linear-gradient(0deg, var(--sanctuary-border), transparent 78%)",
               clipPath: "polygon(48% 100%, 6% 0%, 94% 0%)",
             }}
           />
@@ -154,7 +154,7 @@ export function JourneyHeader({
                       reached
                         ? "border-gold bg-gold/20 text-gold"
                         : isNext
-                          ? "border-primary bg-primary/20 text-primary-foreground shadow-[0_0_18px_rgba(124,92,255,.55)]"
+                          ? "border-gold bg-gold/20 text-primary-foreground"
                           : "border-primary-foreground/18 bg-primary-foreground/[.06] text-primary-foreground/45",
                     )}
                   >

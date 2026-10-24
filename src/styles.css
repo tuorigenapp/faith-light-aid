@@ -59,6 +59,10 @@ body.community-reading .community-main { padding-bottom: 0; }
   --color-selection-border: var(--selection-border);
   --color-selection-foreground: var(--selection-foreground);
   --shadow-selection: var(--selection-shadow);
+  --color-sanctuary: var(--sanctuary);
+  --color-sanctuary-foreground: var(--sanctuary-foreground);
+  --color-sanctuary-panel: var(--sanctuary-panel);
+  --color-sanctuary-border: var(--sanctuary-border);
 
   --shadow-soft: 0 1px 3px rgba(27, 25, 48, 0.06), 0 6px 20px rgba(27, 25, 48, 0.04);
   --shadow-elev: 0 12px 36px rgba(27, 25, 48, 0.10);
@@ -75,6 +79,10 @@ body.community-reading .community-main { padding-bottom: 0; }
 }
 
 :root {
+  --sanctuary: oklch(0.23 0.032 166);
+  --sanctuary-foreground: oklch(0.98 0.007 153);
+  --sanctuary-panel: oklch(0.29 0.028 166 / 0.92);
+  --sanctuary-border: oklch(0.85 0.02 166 / 0.22);
   --radius: 1.25rem;
 
   --background: #FBFAFF;
@@ -443,3 +451,13 @@ body.community-reading .community-main { padding-bottom: 0; }
   60% { transform: scale(1.12) rotate(3deg); opacity: 1; }
   100% { transform: scale(1) rotate(0deg); opacity: 1; }
 }
+
+.exercise-scrim { background: linear-gradient(180deg, color-mix(in oklab, var(--sanctuary) 72%, transparent), color-mix(in oklab, var(--sanctuary) 84%, transparent)); }
+.music-scrim { background: linear-gradient(180deg, color-mix(in oklab, var(--sanctuary) 78%, transparent), color-mix(in oklab, var(--sanctuary) 50%, transparent) 40%, var(--sanctuary)); }
+.exercise-space { --primary-foreground: var(--sanctuary-foreground); --gold: oklch(0.86 0.13 155); }
+.exercise-space section > div.rounded-\[16px\], .exercise-space section.rounded-\[16px\] { background: var(--sanctuary-panel); border-color: var(--sanctuary-border); }
+.personal-space { background: linear-gradient(165deg, var(--secondary), var(--background) 35%, color-mix(in oklab, var(--accent) 8%, var(--background))); }
+.personal-banner { background: linear-gradient(120deg, color-mix(in oklab, var(--accent) 14%, var(--card)), var(--card), color-mix(in oklab, var(--gold) 14%, var(--card))); border-bottom: 1px solid var(--border); }
+.mascot-motion { animation: companion-wave 4s ease-in-out infinite; transform-origin: bottom center; }
+@keyframes companion-wave { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-7px) rotate(2deg); } }
+@media (prefers-reduced-motion: reduce) { .mascot-motion { animation: none; } }

@@ -34,7 +34,7 @@ async function uniqueSlug(db: any, table: string, column: string, base: string) 
 }
 
 const COVER_STYLE =
-  "Ilustración espiritual cálida y luminosa, estilo pintura digital suave, tonos lavanda, durazno y dorado, sin texto, sin letras, sin marcas de agua, composición centrada, atmósfera de paz y esperanza.";
+  "Fotografía hiperrealista editorial profesional para ORÍGEN, aplicación cristiana. Personas con anatomía natural, vestimenta modesta, brazos y hombros cubiertos; sin joyas, collares ni crucifijos. Escena clara de oración, reflexión bíblica o familia según el tema, color vivo, composición profesional. Nunca simbolismo esotérico, chakras, cristales, rituales, sensualidad, auras ni fantasía espiritual. Sin texto, letras ni marcas de agua; el título se muestra en la interfaz.";
 
 
 /* ───────── Diseño propio de cada tema (inspirado en la estructura, nunca copiado) ───────── */
@@ -255,7 +255,7 @@ export const adminUpdateSubtopic = createServerFn({ method: "POST" })
     z
       .object({
         id: z.string().uuid(),
-        audioUrl: z.string().trim().max(2000).optional(),
+        audioUrl: z.string().trim().max(8000).optional(),
         pdfUrl: z.string().trim().max(2000).optional(),
         lesson: z.string().trim().max(6000).optional(),
         exercise: z.string().trim().max(6000).optional(),
@@ -429,11 +429,17 @@ export const adminUpdateCategory = createServerFn({ method: "POST" })
       const { data: cur } = await supabaseAdmin
         .from("manifest_categories").select("title").eq("id", data.id).maybeSingle();
       const url = await uploadCover(
-        `Spiritual illustration for "${data.title ?? cur?.title ?? ""}". ${data.notes ?? ""}. ${COVER_STYLE}`,
+        `Professional Christian editorial photograph for "${data.title ?? cur?.title ?? ""}". ${data.notes ?? ""}. ${COVER_STYLE}`,
         slugify(data.title ?? cur?.title ?? "tema"),
       );
       if (!url) throw new Error("No pudimos generar la portada. Intenta de nuevo.");
       patch["cover_url"] = url;
+    }
+    if (typeof patch["cover_url"] === "string" && patch["cover_url"]) {
+      const { data: current, error: pageError } = await supabaseAdmin.from("manifest_categories").select("page").eq("id", data.id).maybeSingle();
+      if (pageError) throw new Error("No pudimos leer el diseño de la categoría. La portada no se cambió.");
+      const page = current?.page && typeof current.page === "object" && !Array.isArray(current.page) ? current.page : {};
+      patch["page"] = { ...page, cover_home: patch["cover_url"], cover_step1: patch["cover_url"], cover_step2: patch["cover_url"], cover_step3: patch["cover_url"], cover_playlist: patch["cover_url"] };
     }
     if (Object.keys(patch).length === 0) return { ok: true };
     const { error } = await supabaseAdmin.from("manifest_categories").update(patch as never).eq("id", data.id);

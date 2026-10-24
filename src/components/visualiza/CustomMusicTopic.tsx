@@ -1,4 +1,6 @@
-import { PlayChoice, PLAYLIST_SLOTS } from "./PlayChoice";
+import { PlayChoice } from "./PlayChoice";
+import { missingPlaylistDays } from "@/lib/playlist-slots";
+import { Button } from "@/components/ui/button";
 import { useSessionState } from "@/hooks/use-session-step";
 import { useState, type ReactNode } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
@@ -13,7 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { WordSearch } from "@/components/WordSearch";
 import { cn } from "@/lib/utils";
-import heroFallback from "@/assets/visualiza-hero.jpg";
+import heroFallback from "@/assets/explore/music.jpg";
 import { FREE_AUDIOS } from "@/components/visualiza/CustomTopic";
 import { StageQuiz, type QuizItem } from "@/components/StageQuiz";
 
@@ -42,22 +44,22 @@ export function CustomMusicTopic({ cat, audios, entries, isPaid }: { cat: any; a
   if (step === 1)
     return (
       <div className="pb-24">
-        <section className="relative flex min-h-[92vh] flex-col overflow-hidden rounded-b-[2.5rem]">
+        <section className="relative flex min-h-[720px] flex-col overflow-hidden rounded-b-[28px] bg-sanctuary text-sanctuary-foreground sm:min-h-[800px]">
           <img src={page.cover_step1 || cat.cover_url || heroFallback} alt="" className="absolute inset-0 h-full w-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-background/70 to-background" />
+          <div className="absolute inset-0 music-scrim" />
           <div className="relative mx-auto flex max-w-2xl flex-1 flex-col px-5 pb-8 pt-6 text-center">
-            <Link to="/visualiza" className="mb-3 inline-flex min-h-11 items-center gap-1 self-start text-xs font-bold" style={{ color: accent }}><ArrowLeft className="h-3.5 w-3.5" /> Volver</Link>
-            <div className="text-xs font-bold uppercase tracking-widest" style={{ color: accent }}>Paso 1 de 3 · Bienvenida</div>
-            <h1 className="mt-2 font-display text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl">{page.hero_title || cat.title}</h1>
-            <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-foreground/75">{page.hero_text || cat.description}</p>
-            <div className="mt-auto pt-48 sm:pt-64" />
+            <Link to="/visualiza" className="mb-3 inline-flex min-h-11 items-center gap-1 self-start text-[13px] font-bold"><ArrowLeft className="h-4 w-4" /> Volver</Link>
+            <div className="text-[12px] font-bold uppercase">Paso 1 de 3 · Bienvenida</div>
+            <h1 className="mt-2 font-display text-3xl font-extrabold leading-tight sm:text-4xl">{page.hero_title || cat.title}</h1>
+            <p className="mx-auto mt-3 max-w-md text-[15px] leading-relaxed text-sanctuary-foreground/90">{page.hero_text || cat.description}</p>
+            <div className="mt-auto pt-24 sm:pt-32" />
             {includes.length > 0 && (
-              <Card className="rounded-[16px] bg-card/95 p-5 text-left shadow-soft backdrop-blur-xl">
+              <Card className="rounded-[16px] bg-card p-5 text-left text-card-foreground shadow-soft">
                 <div className="mb-3 font-display text-base font-bold">Este programa incluye:</div>
                 <ul className="space-y-2.5">
                   {includes.map((t, i) => (
                     <li key={i} className="flex items-center gap-3 text-sm">
-                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-[10px]" style={{ background: `${accent}1F`, color: accent }}><Check className="h-4 w-4" /></span>
+                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-[10px] bg-primary/10 text-primary"><Check className="h-4 w-4" /></span>
                       <span className="text-foreground/85">{t}</span>
                     </li>
                   ))}
@@ -65,15 +67,15 @@ export function CustomMusicTopic({ cat, audios, entries, isPaid }: { cat: any; a
               </Card>
             )}
             {page.verse && (
-              <div className="mt-4 rounded-[16px] border p-4" style={{ background: `${accent}12`, borderColor: `${accent}40` }}>
-                <Heart className="mx-auto h-5 w-5" style={{ color: accent }} fill="currentColor" />
-                <p className="scripture mt-2 text-sm text-foreground/80">"{page.verse}"</p>
-                {page.verse_ref && <p className="mt-1 text-xs font-bold text-foreground/70">{page.verse_ref}</p>}
+              <div className="mt-4 rounded-[16px] border border-sanctuary-border bg-sanctuary-panel p-4">
+                <Heart className="mx-auto h-5 w-5" />
+                <p className="scripture mt-2 text-[15px] text-sanctuary-foreground">"{page.verse}"</p>
+                {page.verse_ref && <p className="mt-1 text-[13px] font-bold text-sanctuary-foreground/90">{page.verse_ref}</p>}
               </div>
             )}
-            <button onClick={() => setStep(2)} className="mt-6 inline-flex h-14 w-full items-center justify-center gap-2 rounded-[12px] text-base font-bold text-primary-foreground active:scale-[.97]" style={{ background: `linear-gradient(180deg, ${accent}, ${accent}DD)` }}>
+            <Button onClick={() => setStep(2)} className="mt-6 h-14 w-full gap-2 rounded-[12px] text-base font-bold active:scale-[.97]">
               <Sparkles className="h-5 w-5" /> {page.cta || "Empezar"}
-            </button>
+            </Button>
             {Dots}
           </div>
         </section>
@@ -190,17 +192,17 @@ function LessonStep({ cat, page, accent, subs, sel, entries, isPaid, onBack, onP
   const [choice, setChoice] = useState<Sub | null>(null);
   const lessonOf = (a: Sub) => navigate({ to: "/visualiza/$categoryId/$day", params: { categoryId: cat.id, day: String(a.day_index) } });
   function open(a: Sub) {
-    if (!isPaid && a.day_index > FREE_AUDIOS) return navigate({ to: "/membresia" });
     onPick(a.id);
-    if (!a.audio_url) return lessonOf(a);
-    if (playingId === a.id) return player.toggle();
     setChoice(a);
   }
   function listen(a: Sub) {
     setChoice(null);
+    if (!a.audio_url) return;
+    if (!isPaid && a.day_index > FREE_AUDIOS) { navigate({ to: "/membresia" }); return; }
+    if (playingId === a.id) { player.toggle(); return; }
     player.play(toTrack(a), subs.filter((x) => x.audio_url && (isPaid || x.day_index <= FREE_AUDIOS)).map(toTrack));
   }
-  const fillers = Array.from({ length: Math.max(0, PLAYLIST_SLOTS - subs.length) }, (_, i) => subs.length + i + 1);
+  const fillers = missingPlaylistDays(subs);
 
   async function finish() {
     if (!user) return;
@@ -264,7 +266,7 @@ function LessonStep({ cat, page, accent, subs, sel, entries, isPaid, onBack, onP
             </div>
           ))}
         </div>
-        {choice && <PlayChoice title={choice.title} onClose={() => setChoice(null)} onLesson={() => { setChoice(null); lessonOf(choice); }} onListen={() => listen(choice)} />}
+        {choice && <PlayChoice title={choice.title} canListen={Boolean(choice.audio_url)} onClose={() => setChoice(null)} onLesson={() => { setChoice(null); lessonOf(choice); }} onListen={() => listen(choice)} />}
         {!isPaid && (
           <Card className="mt-3 rounded-[16px] border p-4" style={{ borderColor: `${accent}50`, background: `${accent}10` }}>
             <div className="flex items-start gap-3">

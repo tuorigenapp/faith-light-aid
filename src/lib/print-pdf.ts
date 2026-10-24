@@ -35,7 +35,7 @@ export function printMinistracion(opts: {
     .pbtn { display:inline-block; margin: 6px 6px 0 0; background:#7C5CFF; color:#fff; font-weight:700; font-size: 12px; padding: 8px 14px; border-radius: 10px; text-decoration:none; }
     @media print { body { padding: 20px; } .section { break-inside: avoid; } }
   `;
-  const html = `<!doctype html><html><head><meta charset="utf-8"><title>${opts.title}</title>
+  const html = `<!doctype html><html><head><meta charset="utf-8"><title>${escape(opts.title)}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>${style}${brandCss}</style></head><body><div class="wrap">
   ${brandHeaderHtml()}

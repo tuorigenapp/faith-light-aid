@@ -141,7 +141,8 @@ function AuthLayoutInner() {
     queryKey: ["profile", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const { data } = await supabase.from("profiles").select("display_name, full_name, gems, avatar_url").eq("id", user!.id).maybeSingle();
+      if (!user) return null;
+      const { data } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle();
       return data;
     },
     refetchInterval: 30000,

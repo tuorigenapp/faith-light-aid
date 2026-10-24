@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { X, Sparkles } from "lucide-react";
 import { getWheelState } from "@/lib/ruleta.functions";
 import { appDayKey } from "@/lib/app-day";
-import origenIcon from "@/assets/origen-o-icon.png";
+import origenIcon from "@/assets/logo-origen.png";
 
 const MAX_PER_DAY = 3;
 const GAP_MS = 2 * 60 * 60 * 1000; // entre apariciones, al menos 2 horas

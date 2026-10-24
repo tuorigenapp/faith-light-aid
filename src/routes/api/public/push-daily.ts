@@ -24,6 +24,7 @@ export const Route = createFileRoute("/api/public/push-daily")({
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
         const prefs = await supabaseAdmin.from("notification_prefs").select("user_id").eq("push_enabled", true);
+        if (prefs.error) return Response.json({ error: "No pudimos leer las preferencias de avisos." }, { status: 500 });
         const ids = (prefs.data ?? []).map((p) => p.user_id);
         if (ids.length === 0) return Response.json({ sent: 0 });
 
@@ -34,6 +35,7 @@ export const Route = createFileRoute("/api/public/push-daily")({
           .from("push_subscriptions")
           .select("endpoint, p256dh, auth, user_id")
           .in("user_id", targets);
+        if (subs.error) return Response.json({ error: "No pudimos leer los dispositivos registrados." }, { status: 500 });
 
         const setting = await supabaseAdmin.from("community_settings").select("value").eq("key", "ai_push").maybeSingle();
         const smart = setting.data?.value !== false;
@@ -43,23 +45,27 @@ export const Route = createFileRoute("/api/public/push-daily")({
           : { data: [] };
         const byUser = new Map((profs.data ?? []).map((p) => [p.id, p]));
         let sent = 0;
+        let failed = 0;
         const dead: string[] = [];
         for (const sub of (subs.data ?? []) as (PushSubscriptionRow & { user_id: string })[]) {
           try {
             const p = byUser.get(sub.user_id);
             const message = smart && catalog.length
-              ? pickFor(catalog, (p?.interests as string[] | null) ?? [], (p?.display_name || p?.full_name || "").split(" ")[0] ?? "")
-              : MENSAJES[new Date().getDate() % MENSAJES.length]!;
+              ? pickFor(catalog, (p?.interests as string[] | null) ?? [], "")
+              : MENSAJES[new Date().getDate() % MENSAJES.length] ?? MENSAJES[0];
+            if (!message) continue;
             const status = await sendPush(sub, message);
             if (status === 404 || status === 410) dead.push(sub.endpoint);
             else if (status >= 200 && status < 300) sent += 1;
+            else { failed += 1; console.warn("push delivery rejected", { status }); }
           } catch {
-            /* seguimos con el resto */
+            failed += 1;
+            console.warn("push delivery failed");
           }
         }
         if (dead.length) await supabaseAdmin.from("push_subscriptions").delete().in("endpoint", dead);
 
-        return Response.json({ sent, skipped: 0 });
+        return Response.json({ sent, failed, expired: dead.length, unregistered: targets.filter(id => !(subs.data ?? []).some(s => s.user_id === id)).length });
       },
     },
   },
@@ -76,7 +82,7 @@ async function buildCatalog(admin: any): Promise<Msg[]> {
   const out: Msg[] = [
     ...MENSAJES.map((m) => ({ ...m, tags: m.title.toLowerCase() })),
     { title: "Tu mentora te escucha", body: "Cuéntale lo que hoy te pesa y recibe una guía para ti.", url: "/chat", tags: "mentora relaciones familia" },
-    { title: "¿Tu pareja es de destino?", body: "Mira lo que dicen tu fecha y la suya.", url: "/pareja", tags: "pareja amor relaciones" },
+    { title: "Reflexiona sobre tu relación", body: "Reconoce hábitos, límites y pasos para una relación sana.", url: "/pareja", tags: "pareja amor relaciones" },
     { title: "Patrones de tu familia", body: "Descubre qué se repite en tu linaje y cómo cortarlo.", url: "/patrones", tags: "familia patrones linaje" },
     { title: "Gira la ruleta de hoy", body: "Hay un premio esperándote en ORÍGEN.", url: "/ruleta", tags: "premios" },
     { title: "Lo nuevo en la comunidad", body: "Otras almas compartieron su avance hoy.", url: "/comunidad", tags: "comunidad" },
@@ -88,9 +94,9 @@ async function buildCatalog(admin: any): Promise<Msg[]> {
 
 /** Elige al azar, dando más peso a lo que coincide con los intereses de la persona. */
 function pickFor(catalog: Msg[], interests: string[], name: string) {
-  const keys = interests.map((i) => i.toLowerCase());
+  const keys = interests.filter((i) => typeof i === "string").map((i) => i.toLowerCase());
   const liked = catalog.filter((m) => keys.some((k) => k && m.tags.includes(k)));
   const pool = liked.length && Math.random() < 0.75 ? liked : catalog;
-  const m = pool[Math.floor(Math.random() * pool.length)]!;
+  const m = pool[Math.floor(Math.random() * pool.length)] ?? { title: "Tu camino te espera", body: "Un paso a la vez, con fe y calma.", url: "/etapas" };
   return { title: name ? `${name}, ${m.title.charAt(0).toLowerCase()}${m.title.slice(1)}` : m.title, body: m.body, url: m.url };
 }

@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { extractPdfText } from "@/lib/pdf-text";
 import { cn } from "@/lib/utils";
 import { CAMINOS } from "@/lib/caminos";
+import { mediaError } from "@/lib/media-input";
 
 type Doc = {
   id: string;
@@ -35,8 +36,9 @@ export function BrainManager() {
   const [scopeRef, setScopeRef] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
   const [note, setNote] = useState<{ text: string; error?: boolean } | null>(null);
-  const { data: targets = [] } = useQuery({ queryKey: ["brain-targets"], queryFn: async () => {
+  const { data: targets = [], isError: targetsError } = useQuery({ queryKey: ["brain-targets"], queryFn: async () => {
     const [consultas, caminos, temas] = await Promise.all([supabase.from("custom_consultas").select("slug,title"), supabase.from("custom_caminos").select("slug,title"), supabase.from("manifest_categories").select("id,title")]);
+    for (const result of [consultas, caminos, temas]) if (result.error) throw result.error;
     const fixed = [
       { scope: "ministracion", ref: "", title: "Dios te dice hoy" },
       { scope: "pareja", ref: "", title: "¿Mi pareja es de destino?" },
@@ -47,7 +49,7 @@ export function BrainManager() {
     return [...fixed, ...staticCaminos, ...(consultas.data ?? []).map(x => ({ scope: "consulta", ref: x.slug, title: x.title })), ...(caminos.data ?? []).map(x => ({ scope: "camino", ref: x.slug, title: x.title })), ...(temas.data ?? []).map(x => ({ scope: "visualiza", ref: x.id, title: x.title }))];
   }, refetchInterval: 20000 });
 
-  const { data: docs = [], isLoading } = useQuery({
+  const { data: docs = [], isLoading, isError: docsError, refetch } = useQuery({
     queryKey: ["admin-brain"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -79,7 +81,7 @@ export function BrainManager() {
         qc.invalidateQueries({ queryKey: ["admin-brain"] });
         setNote({ text: `"${file.name}" recibido: ${text.length.toLocaleString("es")} letras leídas y guardadas.` });
       } catch (e) {
-        setNote({ text: e instanceof Error ? e.message : `No pudimos leer ${file.name}.`, error: true });
+        setNote({ text: mediaError(e, `No pudimos leer ${file.name}. Intenta de nuevo.`), error: true });
       }
     }
     setBusy(null);
@@ -87,12 +89,14 @@ export function BrainManager() {
   }
 
   async function toggle(d: Doc) {
-    await supabase.from("brain_documents").update({ is_active: !d.is_active }).eq("id", d.id);
+    const { error } = await supabase.from("brain_documents").update({ is_active: !d.is_active }).eq("id", d.id);
+    if (error) { setNote({ text: mediaError(error, "No pudimos cambiar el material."), error: true }); return; }
     qc.invalidateQueries({ queryKey: ["admin-brain"] });
   }
   async function remove(d: Doc) {
     if (!confirm(`¿Eliminar "${d.title}" del Cerebro ORÍGEN?`)) return;
-    await supabase.from("brain_documents").delete().eq("id", d.id);
+    const { error } = await supabase.from("brain_documents").delete().eq("id", d.id);
+    if (error) { setNote({ text: mediaError(error, "No pudimos eliminar el material."), error: true }); return; }
     qc.invalidateQueries({ queryKey: ["admin-brain"] });
   }
 
@@ -112,7 +116,8 @@ export function BrainManager() {
   async function rename(d: Doc) {
     const t = prompt("Nuevo nombre del material", d.title)?.trim();
     if (!t) return;
-    await supabase.from("brain_documents").update({ title: t }).eq("id", d.id);
+    const { error } = await supabase.from("brain_documents").update({ title: t }).eq("id", d.id);
+    if (error) { setNote({ text: mediaError(error, "No pudimos cambiar el nombre."), error: true }); return; }
     qc.invalidateQueries({ queryKey: ["admin-brain"] });
   }
   const where = (d: Doc) => `${label(d.scope)}${d.scope_ref ? ` · ${targets.find(x => x.ref === d.scope_ref)?.title ?? d.scope_ref}` : ""}`;
@@ -145,7 +150,7 @@ export function BrainManager() {
           )}
           <label className="flex min-h-24 cursor-pointer flex-col items-center justify-center gap-2 rounded-[12px] border-2 border-dashed border-border bg-muted/30 p-4 text-center text-[13px] font-semibold text-muted-foreground">
             {busy ? <><span className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />{busy}</> : <><Upload className="h-6 w-6" /> Elegir PDF (puedes elegir varios)</>}
-            <input type="file" accept="application/pdf" multiple className="hidden" disabled={!!busy} onChange={(e) => addFiles(e.target.files)} />
+            <input type="file" accept="application/pdf,.pdf" multiple className="hidden" disabled={!!busy} onChange={(e) => { void addFiles(e.target.files); e.target.value = ""; }} />
           </label>
           {note && <p className={cn("text-[13px] font-semibold", note.error ? "text-destructive" : "text-accent-green")}>{note.text}</p>}
         </div>
@@ -177,6 +182,7 @@ export function BrainManager() {
         })}
       </div>
       <div className="grid gap-2">
+        {(docsError || targetsError) && <div role="alert" className="rounded-[12px] bg-destructive/10 p-4 text-sm text-destructive">No pudimos cargar el material o las secciones. <button onClick={() => { void refetch(); void qc.invalidateQueries({ queryKey: ["brain-targets"] }); }} className="min-h-11 font-bold underline">Volver a intentar</button></div>}
         {isLoading && <div className="h-16 animate-pulse rounded-[16px] bg-muted" />}
         {!isLoading && docs.length === 0 && <p className="text-[14px] text-muted-foreground">Todavía no hay material. El primer PDF que subas aparecerá aquí.</p>}
         {groups.map(({ g, items }) => (

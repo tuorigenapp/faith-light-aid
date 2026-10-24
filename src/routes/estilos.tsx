@@ -5,6 +5,11 @@ export const Route = createFileRoute("/estilos")({
   head: () => ({
     meta: [
       { title: "Vista previa de estilo — ORIGEN" },
+      { name: "description", content: "Vista previa del estilo visual de ORÍGEN, con misión diaria y progreso espiritual." },
+      { property: "og:title", content: "Vista previa de estilo — ORÍGEN" },
+      { property: "og:description", content: "Una vista del inicio y la identidad visual de ORÍGEN." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { name: "robots", content: "noindex" },
     ],
   }),

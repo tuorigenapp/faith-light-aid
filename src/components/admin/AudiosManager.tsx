@@ -1,4 +1,4 @@
-import { directAudioUrl } from "./ContentStudio";
+import { directAudioUrl, mediaError, validAudioAddress } from "@/lib/media-input";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -85,8 +85,8 @@ const schema = z.object({
   category_id: z.string().trim().min(1, "Elige una práctica o playlist"),
   day_index: z.number().int().min(1, "El día empieza en 1").max(365),
   title: z.string().trim().min(3, "El título necesita al menos 3 letras").max(140),
-  affirmation: z.string().trim().min(3, "Escribe la afirmación del audio").max(600),
-  audio_url: z.string().trim().max(2000).transform((v) => directAudioUrl(v)),
+  affirmation: z.string().trim().max(600),
+  audio_url: z.string().trim().max(8000).transform((v) => directAudioUrl(v)).refine(validAudioAddress, "Pega un enlace completo que empiece con https://"),
   cover_url: z.string().trim().max(800).optional().or(z.literal("")),
   lesson: z.string().trim().max(4000).optional().or(z.literal("")),
   exercise: z.string().trim().max(2000).optional().or(z.literal("")),
@@ -148,7 +148,7 @@ export function AudiosManager() {
   const [uploading, setUploading] = useState<"audio" | "cover" | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [generating, setGenerating] = useState(false);
-  const [autoGenerate, setAutoGenerate] = useState(true);
+  const [autoGenerate, setAutoGenerate] = useState(false);
   const [openGroups, setOpenGroups] = useState<Set<string>>(new Set(["abundancia"]));
   const [filter, setFilter] = useState<string>("");
   const [selectedRoot, setSelectedRoot] = useState<string>("");
@@ -251,20 +251,24 @@ export function AudiosManager() {
 
   async function upload(kind: "audio" | "cover", file: File) {
     setUploading(kind);
-    const url = await uploadFile(kind, file);
-    setUploading(null);
-    if (!url) return;
-    setForm((f) => ({ ...f, [kind === "audio" ? "audio_url" : "cover_url"]: url }));
-    toast.success(kind === "audio" ? "MP3 subido" : "Portada subida");
+    try {
+      const url = await uploadFile(kind, file);
+      if (!url) return;
+      setForm((f) => ({ ...f, [kind === "audio" ? "audio_url" : "cover_url"]: url }));
+      toast.success(kind === "audio" ? "MP3 cargado. Pulsa Publicar o Guardar cambios para añadirlo a la playlist." : "Portada cargada. Guarda los cambios para publicarla.");
+    } catch (error) { toast.error(mediaError(error, "No pudimos cargar el archivo. Intenta de nuevo.")); }
+    finally { setUploading(null); }
   }
 
   async function uploadCatCover(file: File) {
     setCatUploading(true);
-    const url = await uploadFile("cover", file);
-    setCatUploading(false);
-    if (!url) return;
-    setCatForm((f) => ({ ...f, cover_url: url }));
-    toast.success("Portada subida");
+    try {
+      const url = await uploadFile("cover", file);
+      if (!url) return;
+      setCatForm((f) => ({ ...f, cover_url: url }));
+      toast.success("Portada cargada. Guarda los cambios.");
+    } catch (error) { toast.error(mediaError(error, "No pudimos cargar la portada.")); }
+    finally { setCatUploading(false); }
   }
 
   async function generateContent(current: typeof emptyForm) {
@@ -278,13 +282,16 @@ export function AudiosManager() {
   const save = useMutation({
     mutationFn: async () => {
       let current = form;
+      const initial = schema.safeParse(current);
+      if (!initial.success) throw new Error(initial.error.issues[0]?.message ?? "Revisa los datos de la práctica.");
       if (autoGenerate && (!form.affirmation || !form.lesson || !form.exercise)) {
         setGenerating(true);
         try { current = { ...form, ...await generateContent(form) }; setForm(current); }
+        catch (error) { toast.warning(`El audio se guardará sin completar la lección: ${mediaError(error, "No pudimos generar el contenido.")}`); }
         finally { setGenerating(false); }
       }
       const parsed = schema.safeParse(current);
-      if (!parsed.success) throw new Error(parsed.error.issues[0]!.message);
+      if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? "Revisa la práctica.");
       const d = parsed.data;
       const row = {
         category_id: d.category_id,
@@ -310,6 +317,9 @@ export function AudiosManager() {
       void qc.invalidateQueries({ queryKey: ["admin-manifest-audios"] });
       void qc.invalidateQueries({ queryKey: ["admin-manifest-counts"] });
       void qc.invalidateQueries({ queryKey: ["sonidos_home"] });
+      void qc.invalidateQueries({ queryKey: ["cat-full"] });
+      void qc.invalidateQueries({ queryKey: ["day-audio"] });
+      void qc.invalidateQueries({ queryKey: ["studio-subtopics"] });
     },
     onError: (e: Error) => toast.error(e.message || "No pudimos guardar la práctica"),
   });
@@ -702,7 +712,7 @@ export function AudiosManager() {
                     onChange={(e) => setCatForm({ ...catForm, cover_url: e.target.value })}
                     placeholder="https://… o sube la imagen"
                     className={inputCls}
-                    maxLength={800}
+                    maxLength={8000}
                   />
                   <label className="mt-2 inline-flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-[10px] bg-primary/10 text-[13px] font-semibold text-primary">
                     {catUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
@@ -804,7 +814,7 @@ export function AudiosManager() {
                     onBlur={(e) => setForm({ ...form, audio_url: directAudioUrl(e.target.value) })}
                     placeholder="https://… o sube el archivo"
                     className={inputCls}
-                    maxLength={800}
+                    maxLength={8000}
                   />
                   <label className="mt-2 inline-flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-[10px] bg-primary/10 text-[13px] font-semibold text-primary">
                     {uploading === "audio" ? (
@@ -827,6 +837,7 @@ export function AudiosManager() {
                 </Field>
 
                 <div className="sm:col-span-2 rounded-xl bg-primary/5 border border-primary/20 p-4 text-sm">
+                  {form.audio_url && <audio aria-label="Probar audio antes de guardar" controls preload="metadata" src={directAudioUrl(form.audio_url)} className="mb-3 h-11 w-full" onError={() => toast.error("Este enlace no se puede reproducir. Usa un MP3 directo o sube el archivo.")} />}
                   <label className="flex items-center gap-2 font-semibold"><input type="checkbox" checked={autoGenerate} onChange={e => setAutoGenerate(e.target.checked)} /> Completar con IA los campos vacíos al guardar</label>
                   <p className="mt-1 text-muted-foreground">Puedes publicar sin audio. La IA usa el título, categoría, día y texto que escribas; revisa el contenido antes de publicarlo.</p>
                   <button type="button" disabled={generating || !form.title.trim()} className="mt-3 rounded-xl bg-primary px-4 py-2 text-white disabled:opacity-50" onClick={async () => { setGenerating(true); try { const content = await generateContent(form); setForm(f => ({ ...f, ...content })); toast.success("Contenido listo para revisar"); } catch (e) { toast.error((e as Error).message); } finally { setGenerating(false); } }}>{generating ? "Generando…" : "Generar contenido ahora"}</button>

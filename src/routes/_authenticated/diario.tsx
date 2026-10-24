@@ -22,6 +22,7 @@ export const Route = createFileRoute("/_authenticated/diario")({
       { property: "og:title", content: "Diario espiritual — ORÍGEN" },
       { property: "og:description", content: "Escribe lo que solo tú y Dios necesitan leer." },
       { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Diario,

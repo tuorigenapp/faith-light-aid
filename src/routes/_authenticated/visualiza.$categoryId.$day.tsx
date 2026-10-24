@@ -16,6 +16,7 @@ import { awardLeaf } from "@/lib/gems";
 import { CELEBRATIONS } from "@/lib/celebrate-step";
 import { WordSearch } from "@/components/WordSearch";
 import { StageQuiz } from "@/components/StageQuiz";
+import lessonCover from "@/assets/explore/listen.jpg";
 
 export const Route = createFileRoute("/_authenticated/visualiza/$categoryId/$day")({
   head: () => ({ meta: [{ title: "Práctica de Visualízalo y Vívelo — ORÍGEN" }, { name: "description", content: "Audio, afirmación y práctica guiada del día." }, { property: "og:title", content: "Práctica de Visualízalo y Vívelo — ORÍGEN" }, { property: "og:description", content: "Audio, afirmación y práctica guiada del día." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
@@ -181,20 +182,21 @@ function DayPlayer() {
 
   return (
     <div className="pb-32">
-      <div className="relative overflow-hidden" style={{ background: `linear-gradient(180deg, ${c.color ?? "#7C6AED"}, ${(c.color ?? "#7C6AED")}77 40%, transparent)` }}>
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/20 to-background" />
+      <div className="relative overflow-hidden bg-sanctuary text-sanctuary-foreground">
+        <img src={a.cover_url || c.cover_url || lessonCover} alt="" className="absolute inset-0 h-full w-full object-cover" />
+        <div className="absolute inset-0 bg-sanctuary/80" />
         <div className="relative max-w-3xl mx-auto px-4 md:px-8 pt-6 pb-10">
-          <Link to="/visualiza/$categoryId" params={{ categoryId }} className="inline-flex items-center gap-2 text-white/95 text-sm"><ArrowLeft className="w-4 h-4" /> {c.title}</Link>
+          <Link to="/visualiza/$categoryId" params={{ categoryId }} className="inline-flex min-h-11 items-center gap-2 text-sanctuary-foreground text-sm"><ArrowLeft className="w-4 h-4" /> {c.title}</Link>
           <div className="text-center mt-6">
-            <div className="text-[11px] uppercase tracking-widest text-white/80 font-bold">{(c as any).is_custom ? `#${String(a.day_index).padStart(2, "0")} · ${c.title}` : `Día ${a.day_index} de 21`}</div>
-            <div className="mx-auto mt-4 w-56 h-56 md:w-64 md:h-64 rounded-3xl grid place-items-center shadow-glow" style={{ background: c.color ?? "#7C6AED" }}>
-              <Headphones className="w-24 h-24 text-white/95 drop-shadow" />
+            <div className="text-[12px] uppercase text-sanctuary-foreground/80 font-bold">{(c as any).is_custom ? `#${String(a.day_index).padStart(2, "0")} · ${c.title}` : `Día ${a.day_index} de 21`}</div>
+            <div className="mx-auto mt-4 h-32 w-32 grid place-items-center rounded-[16px] border border-sanctuary-border bg-sanctuary-panel">
+              <Headphones className="w-16 h-16 text-sanctuary-foreground" />
             </div>
           </div>
           <div className="mt-6 text-center">
-            <div className="text-[11px] uppercase tracking-widest text-primary font-bold">Afirmación del día</div>
-            <p className="font-display font-extrabold text-2xl md:text-3xl mt-2 text-foreground leading-tight">"{a.affirmation}"</p>
-            <p className="text-sm text-muted-foreground mt-3">Repite: Mañana <b>3 veces</b> · Tarde <b>6 veces</b> · Noche <b>9 veces</b> — durante 21 días.</p>
+            <div className="text-[12px] uppercase text-sanctuary-foreground/80 font-bold">{a.affirmation ? "Afirmación del día" : "Tu práctica de hoy"}</div>
+            <p className="font-display font-extrabold text-2xl mt-2 text-sanctuary-foreground leading-tight">{a.affirmation || a.title}</p>
+            <p className="text-sm text-sanctuary-foreground/80 mt-3">Repite: Mañana <b>3 veces</b> · Tarde <b>6 veces</b> · Noche <b>9 veces</b> — durante 21 días.</p>
           </div>
         </div>
       </div>

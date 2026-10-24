@@ -31,9 +31,8 @@ export function ProgramCard({ program, delayMs }: { program: UnifiedProgram; del
       <div className="app-card overflow-hidden h-full flex flex-col shadow-soft hover:shadow-glow active:scale-[.98] transition-all">
         <div className="relative aspect-square w-full">
           <img src={image} alt={title} width={640} height={640} loading="lazy" className="h-full w-full object-cover" />
-          <div className="absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-black/50 to-transparent" />
-          <div className={cn("absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-full bg-white/85 backdrop-blur px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-widest", tint)}>
-            <Icon className="w-3.5 h-3.5" /> {days} días {emoji}
+          <div className={cn("absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-[10px] bg-card/95 px-2.5 py-1 text-[12px] font-semibold", tint)}>
+            <Icon className="w-3.5 h-3.5" /> {days} días
           </div>
           {done > 0 && (
             <div className="absolute top-3 right-3 grid place-items-center">
@@ -62,8 +61,7 @@ export function ProgramCard({ program, delayMs }: { program: UnifiedProgram; del
           <p className="text-[12.5px] text-muted-foreground mt-1.5 leading-relaxed line-clamp-3">{desc}</p>
           <div
             className={cn(
-              "mt-3 h-11 rounded-[12px] grid place-items-center text-[14px] font-bold text-white bg-gradient-to-r shadow-soft",
-              gradient,
+              "mt-3 h-11 rounded-[12px] grid place-items-center text-[14px] font-bold text-primary-foreground bg-primary shadow-soft",
             )}
           >
             <span className="inline-flex items-center gap-2">

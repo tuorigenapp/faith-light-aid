@@ -4,10 +4,11 @@ import { Link } from "@tanstack/react-router";
 import { useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import vivMusic from "@/assets/viv-music.jpg";
-import vivClean from "@/assets/viv-clean.jpg";
-import vivIdentity from "@/assets/viv-identity.jpg";
-import vivCristo from "@/assets/viv-cristo.jpg";
+import vivMusic from "@/assets/explore/music.jpg";
+import vivClean from "@/assets/explore/clean.jpg";
+import vivIdentity from "@/assets/explore/identity.jpg";
+import vivCristo from "@/assets/explore/christ.jpg";
+import { FEATURED_EXPLORE } from "@/lib/explore-content";
 import { GAMES, GameCard } from "@/components/games/DailyGames";
 import exEjercicios from "@/assets/home/ex-ejercicios.jpg";
 import exPremios from "@/assets/home/ex-premios.jpg";
@@ -323,26 +324,20 @@ export function DailyGamesSection() {
 }
 
 /* 11 · EXPLORA */
-const EXPLORE = [
-  { title: "Ruth Esther", desc: "Habla con tu mentora espiritual.", img: pMentora, to: "/chat", tag: "Mentora" },
-  { title: "Patrones familiares", desc: "Mira qué se repite en tu historia.", img: pPatron, to: "/patrones", tag: "Consulta" },
-  { title: "Ejercicios diarios", desc: "Un ejercicio nuevo cada día.", img: exEjercicios, to: "/ejercicios", tag: "Diario" },
-  { title: "Premios ORÍGEN", desc: "Racha, logros y bonificaciones.", img: exPremios, to: "/premiosorigen", tag: "Premios" },
-];
+const EXPLORE = FEATURED_EXPLORE.map(item => ({ ...item, img: item.image, desc: item.description }));
 export function ExploreOrigen() {
   return (
     <section>
       <SectionHead title="Explora todo el contenido de ORÍGEN" sub="Todo lo que tienes para sanar, en un solo lugar." to="/explorar" cta="Explorar" />
       <div className="grid grid-cols-2 gap-3">
         {EXPLORE.map((e) => (
-          <Link key={e.title} to={e.to} className={`relative aspect-[4/5] ${card}`}>
-            <img src={e.img} alt="" loading="lazy" width={816} height={816} className="absolute inset-0 h-full w-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-            <span className="absolute left-2.5 top-2.5 rounded-full bg-white/90 px-2.5 h-6 inline-flex items-center text-[10.5px] font-bold text-[#45258E]">{e.tag}</span>
-            <div className="absolute inset-x-0 bottom-0 p-3 text-white">
+          <Link key={e.title} to={e.to} className="overflow-hidden rounded-[16px] border border-border bg-card shadow-soft transition-transform active:scale-[.98]">
+            <img src={e.img} alt={e.title} loading="lazy" className="aspect-[4/3] w-full object-cover" />
+            <div className="p-3 text-card-foreground">
+              <span className="text-[12px] font-semibold text-primary">{e.tag}</span>
               <h4 className="font-display font-bold text-[15px] leading-tight">{e.title}</h4>
               <div className="flex items-end justify-between gap-1 mt-0.5">
-                <p className="text-[11.5px] leading-snug opacity-90">{e.desc}</p>
+                <p className="text-[13px] leading-snug text-muted-foreground">{e.desc}</p>
                 <ArrowRight className="w-4 h-4 shrink-0" />
               </div>
             </div>

@@ -1,8 +1,8 @@
-import ninoCover from "@/assets/prog-nino-interior.png";
-import glowMujerCover from "@/assets/prog-glowup-mujer.png";
-import magneticoCover from "@/assets/prog-magnetico.png";
-import permisoCover from "@/assets/prog-permiso.png";
-import glowHombreCover from "@/assets/prog-glowup-hombre.jpg";
+import ninoCover from "@/assets/explore/child.jpg";
+import glowMujerCover from "@/assets/explore/woman.jpg";
+import magneticoCover from "@/assets/explore/identity.jpg";
+import permisoCover from "@/assets/explore/freedom.jpg";
+import glowHombreCover from "@/assets/explore/man.jpg";
 
 export type Programa = {
   id: string;
