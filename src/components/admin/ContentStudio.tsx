@@ -537,7 +537,7 @@ function Limpieza({ onNote }: { onNote: Notify }) {
     setBusy(true);
     onNote(null);
     try {
-      await create({ data: { title: title.trim(), level, notes, withCover: false } });
+      await create({ data: { title: title.trim(), level, notes } });
       onNote({ text: "Práctica creada con ícono, materiales y pasos propios del tema." });
       setTitle("");
       setNotes("");

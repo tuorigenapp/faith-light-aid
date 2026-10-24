@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { assertOriginalRenewal, renewalPracticeSchema } from "./subtopic-validation";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function assertAdmin(context: { supabase: any; userId: string }) {
@@ -276,7 +277,6 @@ export const adminCreateLimpieza = createServerFn({ method: "POST" })
         title: z.string().trim().min(3).max(120),
         level: z.number().int().min(1).max(3).default(1),
         notes: z.string().trim().max(1200).default(""),
-        withCover: z.boolean().default(true),
       })
       .parse(input),
   )
@@ -284,20 +284,14 @@ export const adminCreateLimpieza = createServerFn({ method: "POST" })
     await assertAdmin(context);
     const { aiJson } = await import("@/lib/ai-content.server");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-
-    const generated = await aiJson<{
-      duration: string;
-      objective: string;
-      info: string[];
-      materials: string[];
-      steps: string[];
-      scripture: string;
-      scripture_ref: string;
-    }>(
+    const { data: previous, error: previousError } = await supabaseAdmin.from("limpieza_practices").select("title, objective, steps");
+    if (previousError) throw new Error("No pudimos revisar las otras prácticas. Intenta de nuevo.");
+    const generated = renewalPracticeSchema.parse(await aiJson<unknown>(
       `Crea una práctica de limpieza espiritual cristiana llamada "${data.title}", nivel ${data.level} de 3. Notas del editor: ${data.notes || "sin notas"}.
 Devuelve JSON con: duration (por ejemplo "20 min"), objective (1 o 2 frases), info (array de 4 avisos útiles y seguros), materials (array de materiales sencillos como Biblia y cuaderno), steps (array de 6 a 8 pasos claros en orden), scripture (un versículo bíblico real y textual), scripture_ref (su referencia exacta).
-Usa contenido propio de este subtema, oración y acciones cotidianas; no generes imágenes ni cover_prompt. No incluyas rituales, sustancias, ni promesas de curación física.`,
-    );
+Usa contenido propio de este subtema, oración y acciones cotidianas; no generes imágenes ni cover_prompt. No incluyas rituales, sustancias, ni promesas de curación física. No copies objetivos ni pasos existentes: ${JSON.stringify(previous ?? []).slice(0, 14000)}.`,
+    ));
+    assertOriginalRenewal(generated, previous ?? []);
 
     const slug = await uniqueSlug(supabaseAdmin, "limpieza_practices", "slug", slugify(data.title) || "practica");
     const cover = null;
@@ -496,8 +490,6 @@ export const adminUpdateLimpieza = createServerFn({ method: "POST" })
     z.object({
       id: z.string().uuid(),
       title: z.string().trim().min(3).max(120).optional(),
-      coverUrl: z.string().trim().max(1000).optional(),
-      regenerateCover: z.boolean().optional(),
       improve: z.boolean().optional(),
       notes: z.string().trim().max(1200).default(""),
     }).parse(i),
@@ -510,14 +502,16 @@ export const adminUpdateLimpieza = createServerFn({ method: "POST" })
       .from("limpieza_practices").select("title, level, slug").eq("id", data.id).maybeSingle();
     if (!cur) throw new Error("Esa práctica ya no existe.");
     const title = data.title ?? cur.title;
-    const patch: Record<string, unknown> = {};
+    const patch: Record<string, unknown> = { cover_url: null };
     if (data.title) patch["title"] = data.title;
-    if (data.coverUrl !== undefined || data.regenerateCover) patch["cover_url"] = null;
     if (data.improve) {
-      const g = await aiJson<{ duration: string; objective: string; info: string[]; materials: string[]; steps: string[]; scripture: string; scripture_ref: string }>(
+      const { data: previous, error: previousError } = await supabaseAdmin.from("limpieza_practices").select("title, objective, steps").neq("id", data.id);
+      if (previousError) throw new Error("No pudimos revisar las otras prácticas. Intenta de nuevo.");
+      const g = renewalPracticeSchema.parse(await aiJson<unknown>(
         `Mejora y reescribe la práctica de limpieza espiritual cristiana "${title}", nivel ${cur.level}. Notas: ${data.notes || "sin notas"}.
-JSON: duration, objective, info (4 avisos), materials (4-7 seguros, vela LED), steps (6-8), scripture (versículo real textual), scripture_ref. Sin rituales peligrosos ni promesas médicas.`,
-      );
+JSON: duration, objective, info (4 avisos), materials (4-7 seguros, vela LED), steps (6-8), scripture (versículo real textual), scripture_ref. Sin rituales peligrosos ni promesas médicas. Solo contenido propio de este título; no generes fotos ni cover_prompt. No copies objetivos ni pasos existentes: ${JSON.stringify(previous ?? []).slice(0, 14000)}.`,
+      ));
+      assertOriginalRenewal(g, previous ?? []);
       Object.assign(patch, {
         duration: g.duration, objective: g.objective, info: g.info, materials: g.materials,
         steps: g.steps, scripture: g.scripture, scripture_ref: g.scripture_ref,
