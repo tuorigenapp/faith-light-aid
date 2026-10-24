@@ -13,7 +13,7 @@ export async function importAudioAddress(address: string): Promise<string> {
   if (!apiKey || !connectionKey) throw new Error("Conecta Google Drive a ORÍGEN para importar este audio.");
   const headers = { Authorization: `Bearer ${apiKey}`, "X-Connection-Api-Key": connectionKey };
   const providerRead = async (path: string) => {
-    const response = await fetch(`${GATEWAY_URL}${path}`, { headers, redirect: "error", signal: AbortSignal.timeout(60_000) });
+    const response = await fetch(`${GATEWAY_URL}${path}`, { headers, redirect: "follow", signal: AbortSignal.timeout(60_000) });
     if (!response.ok) {
       const body = await response.text();
       console.error(`Google Drive import failed [${response.status}]: ${body}`);

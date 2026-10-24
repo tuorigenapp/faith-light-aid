@@ -77,3 +77,36 @@ export function resolvePractice(category: string, row: LegacyRow, siblings: Lega
 }
 
 export const SUBTOPIC_CONTENT_RULE = "Cada campo debe tratar exclusivamente el tema principal y el título de ESTE subtema. Prohibido reutilizar lecciones, tareas, afirmaciones, palabras o preguntas de otros subtemas. Usa situaciones, acciones y vocabulario propios del subtema, progresivos para su día. No generes imágenes, cover_prompt, fotos ni fondos para subcategorías: usan emojis temáticos. No prometas curación ni resultados automáticos; oración y fe cristiana con acciones responsables.";
+const AFF_TEMPLATES = [
+  (t: string) => `Con la ayuda de Dios, trabajo «${t}» con verdad y pasos responsables.`,
+  (t: string) => `Hoy entrego «${t}» en oración y elijo un paso concreto.`,
+  (_t: string, w: string) => `Elijo cultivar ${w} en mi día con paciencia.`,
+  (t: string) => `No tengo que resolver «${t}» de una vez; avanzo poco a poco.`,
+  (_t: string, w: string) => `Dios me acompaña mientras practico ${w}.`,
+  (t: string) => `Mi valor no depende de cómo vaya «${t}» hoy.`,
+  (_t: string, w: string) => `Pido sabiduría para vivir ${w} con equilibrio.`,
+  (t: string) => `Puedo pedir apoyo para «${t}» sin sentir vergüenza.`,
+  (_t: string, w: string) => `Cada pequeño acto de ${w} cuenta delante de Dios.`,
+  (t: string) => `Reconozco con honestidad dónde estoy en «${t}».`,
+  (_t: string, w: string) => `Agradezco a Dios por la ${w} que ya está creciendo en mí.`,
+  (t: string) => `Hoy respondo a «${t}» con calma, no con prisa.`,
+  (_t: string, w: string) => `Elijo la ${w} aunque todavía me cueste.`,
+  (t: string) => `Si fallo en «${t}», vuelvo a empezar sin culpa.`,
+  (_t: string, w: string) => `Mis decisiones de hoy reflejan ${w} y respeto.`,
+  (t: string) => `Pongo «${t}» en manos de Dios y hago mi parte.`,
+  (_t: string, w: string) => `La ${w} se construye con constancia, no con perfección.`,
+  (t: string) => `Cierro este día dando gracias por lo aprendido en «${t}».`,
+];
+
+/** 14 offline daily affirmations per subtopic; rotate with the day and the theme, no network or AI. */
+export function dailyAffirmations(category: string, title: string, day = 1, base?: string | null): string[] {
+  const theme = subtopicVisual(title, category);
+  const topic = title.trim() || category;
+  const words = theme.words.map(w => w.toLowerCase());
+  const start = (Math.max(1, day) - 1) * 5;
+  const list = Array.from({ length: 14 }, (_, i) => {
+    const k = start + i;
+    return AFF_TEMPLATES[k % AFF_TEMPLATES.length]!(topic, words[(k + day) % words.length]!);
+  });
+  return [...new Set([...(base ? [base] : []), ...list])].slice(0, 14);
+}
