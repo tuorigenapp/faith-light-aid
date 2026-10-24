@@ -89,3 +89,11 @@
 - [x] Corregir títulos sobre portadas en modo claro y oscuro.
 - [x] Hacer visible la selección de membresía en modo oscuro.
 - [x] Aplicar lenguaje espiritual cristiano en el motor compartido, generación, mentor, prácticas y respuestas guardadas; pruebas y tres consultas públicas con PDF verificadas.
+
+## Ajustes solicitados el 24 de octubre (ronda 2)
+- [x] Capturas actuales (22 secciones, antiguas y nuevas) compartidas por /empezar y la página de inicio.
+- [x] Actividad en vivo con ilustraciones 3D de ORÍGEN, todas las secciones y cifras moderadas.
+- [x] Recordatorios salen como notificación real del teléfono/navegador cuando hay permiso; botón «Recibir en mi teléfono».
+- [x] Tutorial oscuro «Añadir a pantalla de inicio» (iPhone/Android) en Perfil e Inicio.
+- [x] Ícono de la app a sangre completa (sin borde blanco) + versión adaptable para Android.
+- [x] Página de inicio rediseñada con la estructura de la página de referencia, sin pagos y con prueba gratis.
