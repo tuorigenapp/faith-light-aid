@@ -1,5 +1,6 @@
 /** Notificaciones del navegador + recordatorios de inactividad. */
 import { supabase } from "@/integrations/supabase/client";
+import { isTrustedPushEndpoint } from "./push-endpoint";
 
 let vapidCache: string | null | undefined;
 
@@ -48,6 +49,7 @@ export async function enablePush(userId: string): Promise<{ ok: boolean; message
       });
       const json = sub.toJSON() as { endpoint?: string; keys?: { p256dh?: string; auth?: string } };
       if (!json.endpoint || !json.keys?.p256dh || !json.keys.auth) return { ok: false, message: "No pudimos registrar este dispositivo. Vuelve a activar los avisos." };
+      if (!isTrustedPushEndpoint(json.endpoint)) return { ok: false, message: "El servicio de avisos de este navegador no está disponible. Usa Chrome, Firefox o Safari actualizado." };
       const { error: subscriptionError } = await supabase.from("push_subscriptions").upsert(
         {
           user_id: userId,
