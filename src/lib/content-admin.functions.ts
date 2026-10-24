@@ -400,7 +400,7 @@ export const adminUpdateCategory = createServerFn({ method: "POST" })
       const { data: cur } = await supabaseAdmin
         .from("manifest_categories").select("title").eq("id", data.id).maybeSingle();
       const url = await uploadCover(
-        `Professional Christian editorial photograph for "${data.title ?? cur?.title ?? ""}". ${data.notes ?? ""}. ${COVER_STYLE}`,
+        `Escena para la portada principal de "${data.title ?? cur?.title ?? ""}". ${data.notes ?? ""}. ${CATEGORY_COVER_STYLE(data.title ?? cur?.title ?? "")}`,
         slugify(data.title ?? cur?.title ?? "tema"),
       );
       if (!url) throw new Error("No pudimos generar la portada. Intenta de nuevo.");

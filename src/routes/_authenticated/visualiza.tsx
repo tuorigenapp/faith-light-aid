@@ -18,6 +18,14 @@ import musicImg from "@/assets/visualiza/cat-musica.jpg";
 import cleanImg from "@/assets/visualiza/cat-limpieza.jpg";
 import identityImg from "@/assets/visualiza/cat-identidad.jpg";
 import cristoImg from "@/assets/visualiza/cat-cristo.jpg";
+import narcisistaImg from "@/assets/visualiza/cat-narcisista.jpg";
+import arbolFamiliarImg from "@/assets/visualiza/cat-arbol-familiar.jpg";
+
+/** Portadas locales para categorías del panel cuya imagen firmada no abre. */
+const LOCAL_CAT_COVERS: Record<string, string> = {
+  "liberate-del-narcisista": narcisistaImg,
+  "sana-tu-arbol-familiar": arbolFamiliarImg,
+};
 
 export const Route = createFileRoute("/_authenticated/visualiza")({
   head: () => ({ meta: [{ title: "Visualízalo y Vívelo — ORÍGEN" }, { name: "description", content: "Programas, audios y prácticas de Visualízalo y Vívelo." }, { property: "og:title", content: "Visualízalo y Vívelo — ORÍGEN" }, { property: "og:description", content: "Programas, audios y prácticas para acompañar tu camino." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
@@ -202,7 +210,11 @@ function Visualiza() {
           (c.subtitle as string) ||
           (c.description as string) ||
           "Tema guiado con audios, práctica y evaluación.",
-        image: (c.cover_url as string) || GROUP_FALLBACK[i % GROUP_FALLBACK.length],
+        image:
+          getOverride(`imagen:visualiza:cat-${c.id}`)?.cover_url ||
+          LOCAL_CAT_COVERS[c.id as string] ||
+          (c.cover_url as string) ||
+          GROUP_FALLBACK[i % GROUP_FALLBACK.length],
         Icon: Headphones,
         iconTint: "text-primary",
         chipBg: "bg-primary/12",

@@ -1,8 +1,9 @@
-import ninoCover from "@/assets/explore/child.jpg";
-import glowMujerCover from "@/assets/explore/woman.jpg";
-import magneticoCover from "@/assets/explore/identity.jpg";
-import permisoCover from "@/assets/explore/freedom.jpg";
-import glowHombreCover from "@/assets/explore/man.jpg";
+import ninoCover from "@/assets/programas/prog-nino.jpg";
+import glowMujerCover from "@/assets/programas/prog-glowup-mujer.jpg";
+import magneticoCover from "@/assets/programas/prog-magnetico.jpg";
+import permisoMujerCover from "@/assets/programas/prog-permiso-mujer.jpg";
+import permisoHombreCover from "@/assets/programas/prog-permiso-hombre.jpg";
+import glowHombreCover from "@/assets/programas/prog-glowup-hombre.jpg";
 
 export type Programa = {
   id: string;
@@ -146,7 +147,7 @@ export const PROGRAMAS: Programa[] = [
     title: "Deja de pedir permiso para existir (Mujer)",
     subtitle: "Tu voz, tu espacio, tu decisión",
     claim: "No naciste para pedir permiso: naciste para ocupar tu lugar.",
-    cover: permisoCover,
+    cover: permisoMujerCover,
     emoji: "🕊️",
     gradient: "from-accent-pink via-gold to-primary",
     tint: "text-accent-pink",
@@ -170,7 +171,7 @@ export const PROGRAMAS: Programa[] = [
     title: "Deja de pedir permiso para existir (Hombre)",
     subtitle: "Deja de fingir fuerza y empieza a tener paz",
     claim: "Ser hombre no es callar: es hablar con verdad.",
-    cover: permisoCover,
+    cover: permisoHombreCover,
     emoji: "🛡️",
     gradient: "from-accent-blue via-primary to-gold",
     tint: "text-accent-blue",
