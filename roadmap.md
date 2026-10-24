@@ -1,10 +1,10 @@
 # Roadmap ORÍGEN
 
 ## Papelera de la mentora, 24 de octubre, 07:12 UTC
-- [ ] Guardar conversaciones eliminadas y sus mensajes en papelera recuperable por 30 días, con privacidad por cuenta y plazo controlado en el servidor.
-- [ ] Agregar acceso a papelera y restauración en el historial del chat sin permitir borrar burbujas individuales.
-- [ ] Verificar borrar, recargar, restaurar y recuperar mensajes/borrador con sesión real; probar el límite de 30 días.
-- [ ] Sincronizar todas las portadas de Visualízalo y Vívelo en Inicio con las de /visualiza, manteniendo el degradado y sin recortar sus títulos.
+- [x] Guardar conversaciones eliminadas y sus mensajes en papelera recuperable por 30 días, con privacidad por cuenta, plazo controlado en el servidor y limpieza de vencidas al consultar el historial.
+- [x] Agregar acceso a papelera y restauración en el historial del chat sin permitir borrar burbujas individuales.
+- [x] Verificar borrar, cancelar, recargar, restaurar ambos mensajes y borrador con sesión real a 375/1280 px; borrado definitivo y limpieza comprobados. Prueba del límite exacto de 30 días y 10 pruebas aprobadas, build OK.
+- [x] Sincronizar las 12 portadas de Visualízalo y Vívelo en Inicio con /visualiza: métodos, categorías del panel y programas, mismo archivo y opción de edición; degradado, títulos completos y navegación comprobados a 375/1280 px.
 
 ## Ajuste del 24 de octubre, 07:01 UTC
 - [x] Recuperar en Inicio el degradado, proporción y título sobre la imagen de las categorías del panel, conservando sus portadas nuevas completas; verificado a 375/1280 px con sesión.
