@@ -283,10 +283,11 @@ export function VisualizeAndLiveCarousel() {
     },
   });
   const items = [
-    ...VV_METHODS.map((m) => ({ ...m, img: get(`imagen:visualiza:${m.key}`)?.cover_url || m.img })),
+    ...VV_METHODS.map((m) => ({ ...m, img: get(`imagen:visualiza:${m.key}`)?.cover_url || m.img, imageFit: "object-cover" })),
     ...(data ?? []).map((c, i) => ({
       key: c.id, title: c.title, desc: (c.subtitle || c.description || "Tema guiado con audios y práctica.").slice(0, 60),
       img: visualizaCategoryCover(c.id, get(`imagen:visualiza:cat-${c.id}`)?.cover_url, c.cover_url, VV_FALLBACK[i % VV_FALLBACK.length]), from: VV_TINTS[i % VV_TINTS.length],
+      imageFit: "object-contain object-top bg-community-cover",
       to: "/visualiza/$categoryId" as const, params: { categoryId: c.id },
     })),
   ];
@@ -296,7 +297,7 @@ export function VisualizeAndLiveCarousel() {
       <div className={scroller}>
         {items.map((p) => (
           <Link key={p.key} to={p.to as "/visualiza"} params={("params" in p ? p.params : undefined) as never} aria-label={`Abrir ${p.title}`} className={`relative snap-start shrink-0 w-[46%] sm:w-[23.5%] aspect-[4/5] ${card}`}>
-            <img src={p.img} alt={`Portada de ${p.title}`} loading="lazy" width={768} height={1024} className="absolute inset-0 h-full w-full object-cover" />
+            <img src={p.img} alt={`Portada de ${p.title}`} loading="lazy" width={768} height={1024} className={`absolute inset-0 h-full w-full ${p.imageFit}`} />
             <div className={`absolute inset-0 bg-gradient-to-t ${p.from} via-community-cover/10 to-transparent`} />
             <div className="absolute inset-x-0 bottom-0 p-3 text-community-cover-foreground">
               <span className="grid place-items-center w-8 h-8 rounded-full bg-community-cover-foreground/25 backdrop-blur border border-community-cover-foreground/40"><Headphones className="w-4 h-4" /></span>
