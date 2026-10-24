@@ -10,7 +10,7 @@ export type Reminder = { title: string; body: string; url: string };
 export const REMINDERS: Reminder[] = [
   { title: "¿Qué dice el cielo hoy sobre tu vida?", body: "Tu Palabra de hoy ya está lista. Dos minutos y cambia tu día.", url: "/palabra" },
   { title: "¿Por qué se repiten las mismas cosas?", body: "Descubre el patrón familiar que se está repitiendo en tu línea paterna o materna.", url: "/patrones" },
-  { title: "¿Tu relación es deuda ancestral o propósito?", body: "La lectura de pareja te lo dice con nombre y apellido.", url: "/pareja" },
+  { title: "¿Tu relación es deuda ancestral o propósito?", body: "La consulta de pareja te ayuda a verlo con claridad.", url: "/pareja" },
   { title: "Dios te dice hoy", body: "Pregunta lo que te arde. Recibe dictamen, señales y tu paso concreto.", url: "/ministracion" },
   { title: "Tu etapa del día te espera", body: "En «Mi camino ORÍGEN» te toca una sola etapa hoy. Ni más, ni menos.", url: "/etapas" },
   { title: "Tus categorías siguen abiertas", body: "Sanar al niño interior, Glow Up, Vuélvete magnético… avanza un día.", url: "/categorias" },
@@ -51,7 +51,7 @@ export function pickReminder(interests: string, currentPath: string): Reminder {
 export async function pushReminder(r: Reminder) {
   if (permissionState() !== "granted") return;
   try {
-    const reg = await navigator.serviceWorker.getRegistration("/sw.js");
+    const reg = (await navigator.serviceWorker.getRegistration("/sw.js")) ?? (await navigator.serviceWorker.register("/sw.js").then(() => navigator.serviceWorker.ready));
     if (reg) {
       const options: NotificationOptions = {
         body: r.body,
