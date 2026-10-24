@@ -39,6 +39,8 @@ body.community-reading .community-main { padding-bottom: 0; }
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-success: var(--success);
+  --color-impact-low: var(--impact-low);
+  --color-impact-high: var(--impact-high);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -101,6 +103,8 @@ body.community-reading .community-main { padding-bottom: 0; }
   --destructive-foreground: #FFFFFF;
   --success: #3FBE8F;
   --warning: #F7B955;
+  --impact-low: #C83448;
+  --impact-high: #137547;
 
   --border: #EEE9F7;
   --input: #EEE9F7;
@@ -163,6 +167,8 @@ body.community-reading .community-main { padding-bottom: 0; }
   --destructive-foreground: #FFFFFF;
   --success: #3FBE8F;
   --border: rgba(255, 255, 255, 0.08);
+  --impact-low: #FF8798;
+  --impact-high: #62D4A4;
   --input: rgba(255, 255, 255, 0.10);
   --ring: #A78BFA;
   --sidebar: #0E0B1A;

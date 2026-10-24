@@ -9,6 +9,7 @@ import { detectCurrency, discounted, formatLocal, formatUsd, USD, type LocalCurr
 import logo from "@/assets/logo-origen.png";
 import { DESIRE_PHOTOS, STRUGGLE_PHOTOS, RESULT_PHOTOS, TODAY_PHOTOS, FUTURE_PHOTOS } from "@/lib/funnel-visuals";
 import { nextFunnelVariation } from "@/lib/funnel-visual-rotation";
+import { illustrativeImpactScore } from "@/lib/funnel-impact";
 import { FUNNEL_BOOKS } from "@/lib/funnel-books";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import gift from "@/assets/funnel/gift.png";
@@ -327,19 +328,20 @@ function Analysis({ name, onDone }: { name: string; onDone: () => void }) {
 }
 
 function Result({ name, areas, variant, onNext }: { name: string; areas: string[]; variant: number | null; onNext: () => void }) {
-  const score = 68;
+  const score = variant === null ? null : illustrativeImpactScore(variant);
   const shownAreas = areas.length ? areas.slice(0, 2).join(" y ") : "Emocional y Relaciones";
   return <div className="flex flex-1 flex-col pt-6">
     <h1 className="text-center font-display text-2xl font-bold text-foreground">El mapa de {name} está listo</h1>
     {variant === null ? <div className="mt-5 aspect-[10/9] w-full animate-pulse rounded-2xl bg-muted" /> : <img src={RESULT_PHOTOS[variant]} alt="Escena ilustrativa de acompañamiento cristiano y paz interior" width={640} height={576} className="mt-5 h-auto w-full rounded-2xl" />}
     <div className="mt-4 rounded-2xl bg-card p-5 shadow-sm">
-      <p className="text-sm text-foreground">Detectamos un patrón de repetición fuerte en el área <b>{shownAreas}</b>, ligado a lealtades invisibles de tus raíces.</p>
-      <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Índice de impacto</p>
-      <div className="relative mt-3 h-3 rounded-full bg-gradient-to-r from-primary/30 via-primary/60 to-primary">
-        <span className="absolute -top-1.5 h-6 w-6 -translate-x-1/2 rounded-full border-4 border-card bg-primary shadow" style={{ left: `${score}%` }} />
+      <p className="text-sm text-foreground">Tus respuestas señalan que deseas trabajar en el área <b>{shownAreas}</b>. Tu mapa es un punto de partida para explorar tus raíces y dar pasos hacia el cambio.</p>
+      <p id="impact-label" className="mt-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Índice de impacto</p>
+      <div role="meter" aria-labelledby="impact-label" aria-describedby="impact-note" aria-valuemin={0} aria-valuemax={100} aria-valuenow={score ?? undefined} aria-valuetext={score === null ? "Preparando indicador ilustrativo" : `${score}% · impulso positivo, ilustrativo`} className="relative mt-3 h-3 rounded-full bg-gradient-to-r from-impact-low to-impact-high">
+        {score !== null && <span className="absolute -top-1.5 h-6 w-6 -translate-x-1/2 rounded-full border-4 border-card bg-impact-high shadow-soft motion-safe:transition-[left] motion-safe:duration-300" style={{ left: `${score}%` }} />}
       </div>
-      <div className="mt-2 flex justify-between text-xs text-muted-foreground"><span>Leve</span><span>Moderado</span><span>Alto</span></div>
-      <p className="mt-3 font-display text-lg font-bold text-primary">{score}% · moderado-alto</p>
+      <div className="mt-2 flex justify-between text-xs text-muted-foreground"><span className="text-impact-low">Menor</span><span>Intermedio</span><span className="text-impact-high">Positivo</span></div>
+      {score === null ? <div className="mt-3 h-7 w-48 animate-pulse rounded-lg bg-muted" /> : <p className="mt-3 font-display text-lg font-bold text-impact-high">{score}% · impulso positivo</p>}
+      <p id="impact-note" className="mt-2 text-xs text-muted-foreground">Indicador ilustrativo, no una medición clínica ni una garantía de resultados.</p>
       <p className="mt-1 text-sm text-muted-foreground">Estás a tiempo de cortar el ciclo. ORÍGEN te guía paso a paso, 5 a 10 minutos al día.</p>
     </div>
     <div className="mt-auto pt-6"><Cta onClick={onNext}>Ver mi plan personalizado</Cta></div>
@@ -471,9 +473,9 @@ function Includes() {
 function BeforeAfter({ variant }: { variant: number }) {
   return <section className="mt-5 rounded-3xl bg-card p-4 shadow-sm">
     <div className="grid grid-cols-2 gap-3">
-      {[{ img: TODAY_PHOTOS[variant], tag: "Hoy", tone: "bg-muted text-foreground", lv: [2, 2, 1], lbl: ["Carga", "Inquietud", "Bloqueo"] }, { img: FUTURE_PHOTOS[variant], tag: "En 6 meses", tone: "bg-primary text-primary-foreground", lv: [5, 5, 4], lbl: ["Libertad", "En paz", "Conexión"] }].map((c) => <div key={c.tag}>
+      {[{ img: TODAY_PHOTOS[variant], tag: "Hoy", grayscale: true, tone: "bg-muted text-foreground", lv: [2, 2, 1], lbl: ["Carga", "Inquietud", "Bloqueo"] }, { img: FUTURE_PHOTOS[variant], tag: "En 6 meses", grayscale: false, tone: "bg-primary text-primary-foreground", lv: [5, 5, 4], lbl: ["Libertad", "En paz", "Conexión"] }].map((c) => <div key={c.tag}>
         <span className={cn("block rounded-full py-1.5 text-center text-sm font-bold", c.tone)}>{c.tag}</span>
-        <img src={c.img} alt={`Escena ilustrativa: ${c.tag}`} width={640} height={576} className="mt-3 h-auto w-full rounded-2xl" />
+        <img src={c.img} alt={`Escena ilustrativa: ${c.tag}`} width={640} height={576} className={cn("mt-3 h-auto w-full rounded-2xl", c.grayscale && "grayscale")} />
         {["Paz interior", "Mente", "Relaciones"].map((k, i) => <div key={k} className="mt-3"><p className="text-sm font-bold text-foreground">{k}</p><p className="text-xs text-muted-foreground">{c.lbl[i]}</p><div className="mt-1 flex gap-1">{[0, 1, 2, 3, 4].map((n) => <span key={n} className={cn("h-1.5 flex-1 rounded-full", n < c.lv[i] ? "bg-primary" : "bg-muted")} />)}</div></div>)}
       </div>)}
     </div>
