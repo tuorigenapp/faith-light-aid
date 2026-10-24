@@ -1,15 +1,16 @@
 # Roadmap ORÍGEN
 
 ## Correcciones y renovación del 24 de octubre, 03:08 UTC
-- [ ] Diagnosticar y verificar PDF en Cerebro y MP3 por archivo/enlace con guardado y reproducción.
-- [ ] Corregir entrega externa de avisos y comprobar configuración programada.
-- [ ] Renovar Ejercicios con fondos propios distintos de Etapas.
-- [ ] Renovar portadas compartidas de Explorar e Inicio y música cristiana.
-- [ ] Mantener dos opciones por pista incluso sin audio, escuchar desactivado si falta.
-- [ ] Sustituir icono de popup ruleta por logo original.
-- [ ] Corregir regreso del perfil guardado y renovar Perfil/Premios manteniendo el árbol.
-- [ ] Crear mockup con portada real, enlace Amazon oficial y actualizar PDF/oferta.
-- [ ] Renovar capturas de la app por dentro y verificar recorridos reales.
+- [x] PDF con texto recibido y guardado en Cerebro; MP3 original guardado por archivo/enlace y reproducido en Vamos a corroborar, día 3.
+- [x] Configuración de avisos externos, preferencias persistidas y envío programado verificados; errores de registro visibles.
+- [x] Renovar Ejercicios con fondos propios distintos de Etapas; separación comprobada para todos los horarios y meses.
+- [x] Renovar portadas compartidas de Explorar e Inicio y música cristiana; portadas nuevas sincronizadas también en pasos interiores de categorías.
+- [x] Mantener dos opciones por pista incluso sin audio, escuchar desactivado si falta; 21 espacios sin repetir días y sin limitar audios adicionales.
+- [x] Sustituir icono de popup ruleta por logo original.
+- [x] Corregir regreso del perfil guardado y renovar Perfil/Premios manteniendo el árbol; navegación comprobada con sesión.
+- [x] Crear mockup con portada real, enlace Amazon oficial y actualizar PDF/oferta; PDF de dos páginas revisado sin cortes ni superposiciones.
+- [x] Renovar capturas de la app por dentro; categorías, audio y navegación comprobados en móvil/computadora, 32 pruebas aprobadas.
+- [ ] Confirmar recepción externa en el teléfono de Ruth: requiere activar Avisos fuera de ORÍGEN en ese dispositivo; actualmente no hay dispositivos registrados.
 
 ## Ajustes visuales del índice y retratos
 - [x] Índice de impacto rojo a verde, con cinco valores positivos variados e identificados como ilustrativos; pruebas aprobadas.
