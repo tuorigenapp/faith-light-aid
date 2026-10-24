@@ -2,6 +2,10 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Sparkles, ArrowRight } from "lucide-react";
 import { CAMINOS } from "@/lib/caminos";
 import fondo from "@/assets/fondo-mistico.png";
+import bPerdida from "@/assets/banner-perdida.jpg";
+
+/** Large text+photo banners for panel-created caminos that already have a designed cover. */
+const CUSTOM_BANNERS: Record<string, string> = { "sanar-el-dolor-de-una-perdida-desde-el-origen": bPerdida, "sanar-el-dolor-de-una-perdida": bPerdida };
 import { useContentOverrides, useCustomCaminos } from "@/hooks/use-content-overrides";
 
 export const Route = createFileRoute("/_authenticated/categorias")({
@@ -57,7 +61,9 @@ function CategoriasPage() {
               aria-label={c.title}
               className="block rounded-[16px] overflow-hidden shadow-soft active:scale-[.98] transition-transform"
             >
-              {c.cover_url ? (
+              {CUSTOM_BANNERS[c.slug] ? (
+                <img src={CUSTOM_BANNERS[c.slug]} alt={c.title} loading="lazy" className="w-full h-auto block" />
+              ) : c.cover_url ? (
                 <img src={c.cover_url} alt={c.title} loading="lazy" className="w-full aspect-[16/9] object-cover block" />
               ) : (
                 <div className="w-full aspect-[16/9] bg-gradient-to-br from-primary/30 to-accent-pink/30" />
