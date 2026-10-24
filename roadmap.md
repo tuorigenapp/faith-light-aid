@@ -1,10 +1,10 @@
 # Roadmap ORÍGEN
 
 ## Ajustes visuales del índice y retratos
-- [ ] Índice de impacto rojo a verde, con valores positivos variados e identificados como ilustrativos.
-- [ ] Comparativa: cinco fotos de Hoy en gris; seis meses en color.
-- [ ] Corregir retratos de Marisol, Carla y Luis Fernando en todas sus apariciones compartidas.
-- [ ] Verificar el recorrido y los cambios en claro/oscuro.
+- [x] Índice de impacto rojo a verde, con cinco valores positivos variados e identificados como ilustrativos; pruebas aprobadas.
+- [x] Comparativa: cinco fotos de Hoy en gris; seis meses en color, comprobado en los cinco resultados.
+- [x] Corregir retratos de Marisol, Carla y Luis Fernando en el catálogo compartido por reviews y Comunidad de Inicio; fotos nuevas verificadas en pantalla.
+- [x] Recorrido completo verificado a 375 px en claro/oscuro, sin errores de pantalla; computadora sin desbordamiento.
 
 ## Ajustes solicitados el 24 de octubre
 - [x] Agregar capturas autenticadas de /palabra y /arbol?vista=mi-arbol a /empezar.
