@@ -195,9 +195,9 @@ function DayPlayer() {
             </div>
           </div>
           <div className="mt-6 text-center">
-            <div className="text-[11px] uppercase tracking-widest text-primary font-bold">Afirmación del día</div>
-            <p className="font-display font-extrabold text-2xl md:text-3xl mt-2 text-foreground leading-tight">"{a.affirmation}"</p>
-            <p className="text-sm text-muted-foreground mt-3">Repite: Mañana <b>3 veces</b> · Tarde <b>6 veces</b> · Noche <b>9 veces</b> — durante 21 días.</p>
+            <div className="text-[12px] uppercase text-sanctuary-foreground/80 font-bold">{a.affirmation ? "Afirmación del día" : "Tu práctica de hoy"}</div>
+            <p className="font-display font-extrabold text-2xl mt-2 text-sanctuary-foreground leading-tight">{a.affirmation || a.title}</p>
+            <p className="text-sm text-sanctuary-foreground/80 mt-3">Repite: Mañana <b>3 veces</b> · Tarde <b>6 veces</b> · Noche <b>9 veces</b> — durante 21 días.</p>
           </div>
         </div>
       </div>

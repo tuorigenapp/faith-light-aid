@@ -926,13 +926,13 @@ function NotificationsBlock() {
     enabled: !!user,
     queryFn: async () => {
       const { data } = await supabase.from("notification_prefs").select("email_enabled, push_enabled").eq("user_id", user!.id).maybeSingle();
-      return data ?? { email_enabled: true, push_enabled: true };
+      return data ?? { email_enabled: true, push_enabled: false };
     },
   });
 
   async function update(patch: Partial<{ email_enabled: boolean; push_enabled: boolean }>) {
     if (!user) return;
-    const next = { email_enabled: prefs?.email_enabled ?? true, push_enabled: prefs?.push_enabled ?? true, ...patch };
+    const next = { email_enabled: prefs?.email_enabled ?? true, push_enabled: prefs?.push_enabled ?? false, ...patch };
     qc.setQueryData(["notification_prefs", user.id], next);
     const { error } = await supabase.from("notification_prefs").upsert({ user_id: user.id, ...next });
     if (error) toast.error("No pudimos guardar tu preferencia");
