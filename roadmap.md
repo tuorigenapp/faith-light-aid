@@ -1,6 +1,7 @@
 # Roadmap ORÍGEN
 
 ## Capturas e íconos del 24 de octubre, 08:50 UTC
+- [ ] Alternar las capturas de «Todas» entre herramientas, Camino ORÍGEN y Visualízalo para mostrar variedad desde el inicio, conservando el orden de los filtros individuales.
 - [x] Agregar capturas reales de Categorías, Etapas y los ocho caminos, categorías de Visualízalo y una subcategoría con afirmaciones, práctica y lección en Inicio y ambos bloques de pago; 38 capturas compartidas.
 - [x] Crear 19 PNG nuevos y específicos para las interacciones mostradas, pasos del método, consultas y oferta; sin reutilizar los emojis anteriores.
 - [x] Verificar con navegador Inicio a 375/1280 px y el recorrido de evaluación a pago y descuento: 10 capturas de Camino y 8 de Visualízalo, imágenes cargadas, filtros y flechas funcionales, sin desbordamiento ni errores; 32 pruebas aprobadas.
