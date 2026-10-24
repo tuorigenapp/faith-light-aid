@@ -14,6 +14,7 @@ import { checkLocalReminder, showLocalNotification } from "@/lib/notifications";
 import { celebrateOnce, milestoneMessage } from "@/lib/celebrate";
 
 
+import { InstallAppButton } from "@/components/InstallAppGuide";
 import { HomeHero, OrigenPillars, DailyExerciseBanner, DigitalLibraryCarousel, DailyMessageBanner, OrigenCommunityBanner, HealingPracticesCarousel, VisualizeAndLiveCarousel, DailyGamesSection, ExploreOrigen, AffiliateBanner, BalanceCard } from "@/components/home/HomeSections";
 import arbolImg from "@/assets/home/arbol.jpg";
 
@@ -125,6 +126,7 @@ function Dashboard() {
         <DailyGamesSection />
         <ExploreOrigen />
         <AffiliateBanner />
+        <InstallAppButton label="Instalar ORÍGEN en mi celular" />
         <BalanceCard hojas={wholeHojas(data?.profile?.gems)} />
       </div>
     </div>
