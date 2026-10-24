@@ -6,11 +6,8 @@ import { Link } from "@tanstack/react-router";
 import { useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { visualizaCategoryCover } from "@/lib/visualiza-covers";
-import vivMusic from "@/assets/explore/music.jpg";
-import vivClean from "@/assets/explore/clean.jpg";
-import vivIdentity from "@/assets/explore/identity.jpg";
-import vivCristo from "@/assets/explore/christ.jpg";
+import { visualizaCategoryCover, VISUALIZA_METHOD_COVERS } from "@/lib/visualiza-covers";
+import { PROGRAMAS } from "@/lib/programas";
 import { FEATURED_EXPLORE } from "@/lib/explore-content";
 import { GAMES, GameCard } from "@/components/games/DailyGames";
 import exEjercicios from "@/assets/home/ex-ejercicios.jpg";
@@ -40,11 +37,6 @@ import prPermiso from "@/assets/home/pr-permiso.jpg";
 import prDepresion from "@/assets/home/pr-depresion.jpg";
 import prNarcisista from "@/assets/home/pr-narcisista.jpg";
 import prPerdida from "@/assets/home/pr-perdida.jpg";
-import vvVis from "@/assets/home/vv-visualizacion.jpg";
-import vvMed from "@/assets/home/vv-meditacion.jpg";
-import vvMan from "@/assets/home/vv-manifestacion.jpg";
-import vvAbu from "@/assets/home/vv-abundancia.jpg";
-import vvBien from "@/assets/home/vv-bienestar.jpg";
 
 const card = "rounded-[22px] overflow-hidden shadow-[0_8px_30px_rgba(69,37,142,.12)] active:scale-[.98] transition-transform";
 const scroller = "-mx-4 px-4 flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden";
@@ -265,12 +257,12 @@ export function HealingPracticesCarousel() {
 
 /* 9 · VISUALÍZALO — categorías principales reales de /visualiza */
 const VV_METHODS = [
-  { key: "musica", title: "Oración y Reflexión con Música", desc: "Playlists guiadas de 21 días.", img: vivMusic, from: "from-[#4b2fb0]", to: "/visualiza/$categoryId", params: { categoryId: "manifestando-con-musica" } },
-  { key: "limpieza", title: "Limpieza Espiritual", desc: "Oración, gratitud y renovación.", img: vivClean, from: "from-[#11786d]", to: "/visualiza/limpieza" },
-  { key: "identidad", title: "Salto de Identidad", desc: "Hábitos para tu mejor versión.", img: vivIdentity, from: "from-[#b06a12]", to: "/visualiza/identidad" },
-  { key: "cristo", title: "Método de Cristo 3·6·9", desc: "Fe, escritura y afirmación.", img: vivCristo, from: "from-[#2b3a9e]", to: "/visualiza/cristo" },
+  { key: "musica", title: "Oración y Reflexión con Música", desc: "Playlists guiadas de 21 días.", img: VISUALIZA_METHOD_COVERS.musica, from: "from-home-cover-violet", to: "/visualiza/$categoryId", params: { categoryId: "manifestando-con-musica" } },
+  { key: "limpieza", title: "Limpieza Espiritual", desc: "Oración, gratitud y renovación.", img: VISUALIZA_METHOD_COVERS.limpieza, from: "from-home-cover-teal", to: "/visualiza/limpieza" },
+  { key: "identidad", title: "Salto de Identidad", desc: "Hábitos para tu mejor versión.", img: VISUALIZA_METHOD_COVERS.identidad, from: "from-home-cover-rose", to: "/visualiza/identidad" },
+  { key: "cristo", title: "Método de Cristo 3·6·9", desc: "Fe, escritura y afirmación.", img: VISUALIZA_METHOD_COVERS.cristo, from: "from-home-cover-plum", to: "/visualiza/cristo" },
 ] as const;
-const VV_FALLBACK = [vvVis, vvMed, vvMan, vvAbu, vvBien];
+const VV_FALLBACK = Object.values(VISUALIZA_METHOD_COVERS);
 const VV_TINTS = ["from-home-cover-violet", "from-home-cover-rose", "from-home-cover-teal", "from-home-cover-plum", "from-home-cover-green"];
 export function VisualizeAndLiveCarousel() {
   const { get } = useContentOverrides();
@@ -283,12 +275,17 @@ export function VisualizeAndLiveCarousel() {
     },
   });
   const items = [
-    ...VV_METHODS.map((m) => ({ ...m, img: get(`imagen:visualiza:${m.key}`)?.cover_url || m.img, imageFit: "object-cover" })),
+    ...VV_METHODS.map((m) => ({ ...m, img: get(`imagen:visualiza:${m.key}`)?.cover_url || m.img })),
     ...(data ?? []).map((c, i) => ({
       key: c.id, title: c.title, desc: (c.subtitle || c.description || "Tema guiado con audios y práctica.").slice(0, 60),
       img: visualizaCategoryCover(c.id, get(`imagen:visualiza:cat-${c.id}`)?.cover_url, c.cover_url, VV_FALLBACK[i % VV_FALLBACK.length]), from: VV_TINTS[i % VV_TINTS.length],
-      imageFit: "object-contain object-top bg-community-cover",
       to: "/visualiza/$categoryId" as const, params: { categoryId: c.id },
+    })),
+    ...PROGRAMAS.map((p, i) => ({
+      key: `programa-${p.id}`, title: p.title, desc: p.claim,
+      img: get(`imagen:programa:${p.id}`)?.cover_url || p.cover,
+      from: VV_TINTS[i % VV_TINTS.length],
+      to: "/programas/$programaId" as const, params: { programaId: p.id },
     })),
   ];
   return (
@@ -297,7 +294,7 @@ export function VisualizeAndLiveCarousel() {
       <div className={scroller}>
         {items.map((p) => (
           <Link key={p.key} to={p.to as "/visualiza"} params={("params" in p ? p.params : undefined) as never} aria-label={`Abrir ${p.title}`} className={`relative snap-start shrink-0 w-[46%] sm:w-[23.5%] aspect-[4/5] ${card}`}>
-            <img src={p.img} alt={`Portada de ${p.title}`} loading="lazy" width={768} height={1024} className={`absolute inset-0 h-full w-full ${p.imageFit}`} />
+            <img src={p.img} alt={`Portada de ${p.title}`} loading="lazy" width={1024} height={1024} className="absolute inset-0 h-full w-full object-contain object-top bg-community-cover" />
             <div className={`absolute inset-0 bg-gradient-to-t ${p.from} via-community-cover/10 to-transparent`} />
             <div className="absolute inset-x-0 bottom-0 p-3 text-community-cover-foreground">
               <span className="grid place-items-center w-8 h-8 rounded-full bg-community-cover-foreground/25 backdrop-blur border border-community-cover-foreground/40"><Headphones className="w-4 h-4" /></span>
