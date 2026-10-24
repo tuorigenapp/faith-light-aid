@@ -3,7 +3,7 @@ import { diversifyScreens } from "./app-screen-order";
 
 describe("capture variety", () => {
   it("interleaves tools, caminos and Visualiza while preserving each group", () => {
-    const tools = Array.from({ length: 20 }, (_, id) => ({ id: `t${id}`, group: undefined }));
+    const tools: { id: string; group?: "camino" | "visualiza" }[] = Array.from({ length: 20 }, (_, id) => ({ id: `t${id}` }));
     const caminos = Array.from({ length: 10 }, (_, id) => ({ id: `c${id}`, group: "camino" as const }));
     const visualiza = Array.from({ length: 8 }, (_, id) => ({ id: `v${id}`, group: "visualiza" as const }));
     const screens = [...tools, ...caminos, ...visualiza];

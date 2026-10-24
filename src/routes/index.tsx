@@ -76,7 +76,7 @@ function Landing() {
   }, []);
 
   return (
-    <main className="min-h-dvh bg-background pb-48">
+    <main className="min-h-dvh bg-background pb-64 md:pb-48">
       <LiveActivityToasts variant="landing" />
 
       <header className="sticky top-0 z-40 border-b border-border/70 bg-background/85 backdrop-blur-xl">
