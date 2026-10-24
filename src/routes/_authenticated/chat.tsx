@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Send, Trash2, MessageCircle, HeartHandshake, Lock, Clock, Leaf } from "lucide-react";
+import { Plus, Send, MessageCircle, HeartHandshake, Lock, Clock, Leaf, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -15,13 +15,17 @@ import { Link } from "@tanstack/react-router";
 import { msUntilAppDayReset, formatCountdown } from "@/lib/app-day";
 import { confirmDeletion } from "@/lib/deletion-confirmation";
 import { Button } from "@/components/ui/button";
+import { useServerFn } from "@tanstack/react-start";
+import { MentorConversationHistory, type MentorHistoryTab } from "@/components/MentorConversationHistory";
+import { listMentorConversations, trashMentorConversation, restoreMentorConversation, deleteMentorConversationForever } from "@/lib/mentor-trash.functions";
+import { canRecoverMentorConversation } from "@/lib/mentor-trash";
 
 export const Route = createFileRoute("/_authenticated/chat")({
   head: () => ({ meta: [
     { title: "Conversa con Ruth Esther — ORÍGEN" },
-    { name: "description", content: "Conversa con tu mentora espiritual de ORÍGEN y vuelve a tus conversaciones guardadas." },
+    { name: "description", content: "Conversa con tu mentora espiritual de ORÍGEN, vuelve a tu historial y recupera conversaciones desde la papelera durante 30 días." },
     { property: "og:title", content: "Conversa con Ruth Esther — ORÍGEN" },
-    { property: "og:description", content: "Un espacio privado de acompañamiento espiritual cristiano." },
+    { property: "og:description", content: "Acompañamiento espiritual cristiano con historial privado y papelera recuperable durante 30 días." },
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary_large_image" },
   ] }),
@@ -42,19 +46,39 @@ function ChatPage() {
   const qc = useQueryClient();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [showHistory, setShowHistory] = useState(false);
+  const [historyTab, setHistoryTab] = useState<MentorHistoryTab>("history");
+  const [pending, setPending] = useState(false);
+  const [now, setNow] = useState(Date.now());
+  const listConversations = useServerFn(listMentorConversations);
+  const trashConversation = useServerFn(trashMentorConversation);
+  const restoreConversation = useServerFn(restoreMentorConversation);
+  const destroyConversation = useServerFn(deleteMentorConversationForever);
 
-  const { data: conversations } = useQuery({
+  const conversationQuery = useQuery({
     queryKey: ["conversations", user?.id],
     enabled: !!user,
-    queryFn: async () => (await supabase.from("conversations").select("*").eq("user_id", user!.id).order("updated_at", { ascending: false })).data ?? [],
+    queryFn: () => listConversations(),
+    refetchInterval: 60_000,
   });
+  const allConversations = conversationQuery.data?.conversations ?? [];
+  const serverNow = conversationQuery.data
+    ? conversationQuery.data.serverNow + Math.max(0, now - conversationQuery.dataUpdatedAt)
+    : now;
+  const conversations = allConversations.filter(c => c.deleted_at === null);
+  const trashed = allConversations.filter(c => canRecoverMentorConversation(c.deleted_at, serverNow))
+    .sort((a, b) => Date.parse(b.deleted_at ?? "") - Date.parse(a.deleted_at ?? ""));
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 30_000);
+    return () => clearInterval(timer);
+  }, []);
 
   const { data: gate } = useQuery({
     queryKey: ["chat-gate", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const plan = await getUserPlan(user!.id);
-      const used = await getDailyUsage(user!.id, "chat_message");
+      if (!user) return null;
+      const plan = await getUserPlan(user.id);
+      const used = await getDailyUsage(user.id, "chat_message");
       const limit = PLAN_LIMITS[plan].chat_message_per_day;
       return { plan, used, limit, remaining: limit === Infinity ? Infinity : Math.max(0, limit - used) };
     },
@@ -63,31 +87,83 @@ function ChatPage() {
   const { data: profile } = useQuery({
     queryKey: ["profile-hojas-chat", user?.id],
     enabled: !!user,
-    queryFn: async () => (await supabase.from("profiles").select("gems").eq("id", user!.id).maybeSingle()).data,
+    queryFn: async () => {
+      if (!user) return null;
+      return (await supabase.from("profiles").select("gems").eq("id", user.id).maybeSingle()).data;
+    },
   });
 
   useEffect(() => {
-    if (!activeId && conversations && conversations.length > 0) setActiveId(conversations[0].id);
-  }, [conversations, activeId]);
+    if (conversationQuery.data && (!activeId || !conversations.some(c => c.id === activeId))) {
+      setActiveId(conversations[0]?.id ?? null);
+    }
+  }, [conversationQuery.data, activeId]);
 
   async function newConversation() {
     if (!user) return;
     const { data, error } = await supabase.from("conversations").insert({ user_id: user.id, title: "Nueva conversación" }).select().single();
-    if (error) return toast.error(error.message);
+    if (error) return toast.error("No pudimos crear la conversación. Intenta de nuevo.");
+    await qc.invalidateQueries({ queryKey: ["conversations", user.id] });
     setActiveId(data.id);
-    qc.invalidateQueries({ queryKey: ["conversations"] });
+    setHistoryTab("history");
   }
 
   async function deleteConversation(id: string) {
-    if (!await confirmDeletion("Esta conversación y sus mensajes se eliminarán. No podrás recuperarlos.")) return;
-    const { error } = await supabase.from("conversations").delete().eq("id", id);
-    if (error) return toast.error("No pudimos eliminar la conversación. Intenta de nuevo.");
-    try { localStorage.removeItem(`chat-draft-${id}`); } catch { /* ignore */ }
-    if (activeId === id) setActiveId(null);
-    qc.invalidateQueries({ queryKey: ["conversations"] });
-    qc.invalidateQueries({ queryKey: ["messages", id] });
-    qc.invalidateQueries({ queryKey: ["historial-general"] });
+    if (pending || !await confirmDeletion("Esta conversación irá a la papelera con todos sus mensajes. Puedes restaurarla durante 30 días.")) return;
+    setPending(true);
+    try {
+      const result = await trashConversation({ data: { id } });
+      if (!result.ok) return toast.error("No pudimos mover la conversación a la papelera. Intenta de nuevo.");
+      if (activeId === id) setActiveId(null);
+      await refreshHistory(id);
+      toast.success("Conversación movida a la papelera", { description: "Puedes restaurarla durante 30 días." });
+    } catch { toast.error("No pudimos mover la conversación a la papelera. Revisa tu conexión."); }
+    finally { setPending(false); }
   }
+
+  async function refreshHistory(id: string) {
+    await Promise.all([
+      qc.invalidateQueries({ queryKey: ["conversations", user?.id] }),
+      qc.invalidateQueries({ queryKey: ["messages", id] }),
+      qc.invalidateQueries({ queryKey: ["historial-general"] }),
+    ]);
+  }
+
+  async function restore(id: string) {
+    if (pending) return;
+    setPending(true);
+    try {
+      const result = await restoreConversation({ data: { id } });
+      if (!result.ok) { await refreshHistory(id); return toast.error(result.message); }
+      await refreshHistory(id);
+      setHistoryTab("history");
+      setActiveId(id);
+      setShowHistory(false);
+      toast.success("Conversación restaurada", { description: "Tus mensajes siguen aquí." });
+    } catch { toast.error("No pudimos restaurar la conversación. Revisa tu conexión e intenta de nuevo."); }
+    finally { setPending(false); }
+  }
+
+  async function destroy(id: string) {
+    if (pending || !await confirmDeletion("Esta conversación y todos sus mensajes se eliminarán para siempre. No podrás recuperarlos.")) return;
+    setPending(true);
+    try {
+      const result = await destroyConversation({ data: { id } });
+      if (!result.ok) return toast.error("No pudimos eliminar la conversación. Intenta de nuevo.");
+      try { localStorage.removeItem(`chat-draft-${id}`); } catch { /* optional draft */ }
+      await refreshHistory(id);
+      toast.success("Conversación eliminada para siempre");
+    } catch { toast.error("No pudimos eliminar la conversación. Revisa tu conexión."); }
+    finally { setPending(false); }
+  }
+
+  const history = (mobile: boolean) => <MentorConversationHistory
+    conversations={conversations} trashed={trashed} tab={historyTab} onTab={setHistoryTab}
+    activeId={activeId} onPick={id => { setActiveId(id); if (mobile) setShowHistory(false); }}
+    onTrash={deleteConversation} onRestore={restore} onDestroy={destroy} pending={pending}
+    loading={conversationQuery.isLoading} error={conversationQuery.isError}
+    onRetry={() => { void conversationQuery.refetch(); }} now={serverNow}
+  />;
 
   const locked = !!gate && gate.remaining === 0;
 
@@ -101,7 +177,7 @@ function ChatPage() {
           </button>
         </div>
         <div className="flex-1 overflow-y-auto p-2">
-          <ConversationList items={conversations ?? []} activeId={activeId} onPick={setActiveId} onDelete={deleteConversation} />
+          {history(false)}
         </div>
       </aside>
 
@@ -119,16 +195,16 @@ function ChatPage() {
             <span className="inline-flex items-center gap-1 text-xs font-bold text-primary bg-brand-soft px-2.5 py-1 rounded-full">
               <Leaf className="w-3.5 h-3.5" />{formatHojas(profile?.gems)}
             </span>
-            <button onClick={() => setShowHistory(true)} className="lg:hidden inline-flex min-h-11 items-center gap-1 rounded-[12px] bg-secondary px-3 text-xs font-bold">
+            <Button variant="secondary" onClick={() => setShowHistory(true)} className="lg:hidden inline-flex min-h-11 items-center gap-1 rounded-[12px] px-3 text-xs font-bold">
               <MessageCircle className="w-4 h-4" />Historial{conversations?.length ? ` (${conversations.length})` : ""}
-            </button>
-            <button onClick={newConversation} className="lg:hidden inline-flex min-h-11 items-center gap-1 rounded-[12px] bg-primary/10 px-3 text-xs font-bold text-primary">
-              <Plus className="w-4 h-4" />Nueva
-            </button>
+            </Button>
+            <Button variant="ghost" size="icon" onClick={newConversation} aria-label="Nueva conversación" title="Nueva conversación" className="lg:hidden h-11 w-11 shrink-0 rounded-[12px] text-primary">
+              <Plus className="w-4 h-4" />
+            </Button>
           </div>
         </div>
 
-        {activeId ? (
+        {activeId && conversations.some(c => c.id === activeId) ? (
           <ChatWindow
             key={activeId}
             conversationId={activeId}
@@ -161,36 +237,15 @@ function ChatPage() {
             <div className="mx-auto mb-3 h-1.5 w-10 rounded-full bg-border" />
             <div className="mb-3 flex items-center justify-between">
               <h2 className="font-display text-[18px] font-bold">Tus conversaciones</h2>
-              <button onClick={() => { setShowHistory(false); newConversation(); }} className="inline-flex min-h-11 items-center gap-1 rounded-[12px] bg-primary px-3 text-[13px] font-semibold text-primary-foreground"><Plus className="w-4 h-4" />Nueva</button>
+              <div className="flex gap-2">
+                <Button onClick={() => { setShowHistory(false); newConversation(); }} className="min-h-11 gap-1 rounded-[12px] text-[13px]"><Plus className="w-4 h-4" />Nueva</Button>
+                <Button variant="ghost" size="icon" aria-label="Cerrar historial" onClick={() => setShowHistory(false)} className="h-11 w-11"><X className="h-4 w-4" /></Button>
+              </div>
             </div>
-            <ConversationList items={conversations ?? []} activeId={activeId} onPick={(id) => { setActiveId(id); setShowHistory(false); }} onDelete={deleteConversation} />
+            {history(true)}
           </div>
         </div>
       )}
-    </div>
-  );
-}
-
-function ConversationList({ items, activeId, onPick, onDelete }: { items: { id: string; title: string; updated_at: string }[]; activeId: string | null; onPick: (id: string) => void; onDelete: (id: string) => void }) {
-  if (items.length === 0) return <p className="px-3 py-6 text-center text-sm text-muted-foreground">Tus conversaciones guardadas aparecerán aquí.</p>;
-  return (
-    <div>
-      {items.map((c) => {
-        let draft = "";
-        try { draft = typeof window !== "undefined" ? localStorage.getItem(`chat-draft-${c.id}`) ?? "" : ""; } catch { /* ignore */ }
-        return (
-          <div key={c.id} className={cn("group mb-1 flex min-h-14 cursor-pointer items-center gap-3 rounded-[12px] px-3 py-2", activeId === c.id ? "bg-secondary" : "hover:bg-secondary/50")} onClick={() => onPick(c.id)}>
-            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary/10 text-primary"><MessageCircle className="h-4 w-4" /></span>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold">{c.title}</p>
-              <p className="truncate text-[12px] text-muted-foreground">{draft ? <span className="font-semibold text-destructive">Borrador: </span> : null}{draft || new Date(c.updated_at).toLocaleString("es", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</p>
-            </div>
-            <Button variant="ghost" size="icon" aria-label="Borrar conversación" onClick={(e) => { e.stopPropagation(); onDelete(c.id); }} className="h-11 w-11 rounded-full lg:opacity-0 lg:group-hover:opacity-100">
-              <Trash2 className="h-4 w-4 text-muted-foreground" />
-            </Button>
-          </div>
-        );
-      })}
     </div>
   );
 }
