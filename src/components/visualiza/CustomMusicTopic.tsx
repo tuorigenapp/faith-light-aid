@@ -160,7 +160,7 @@ function LessonStep({ cat, page, accent, subs, sel, entries, isPaid, onBack, onP
   const playingId = player.current?.id ?? null;
   const toTrack = (a: Sub) => ({ id: a.id, title: `#${String(a.day_index).padStart(2, "0")} — ${a.title}`, subtitle: cat.title, url: a.audio_url ?? "", cover: a.cover_url ?? null });
   const content = resolvePractice(cat.title, sel, subs);
-  const affirmations = [content.affirmation];
+  const affirmations = dailyAffirmations(cat.title, sel.title, sel.day_index, sel.affirmation ?? null);
   const words = content.search_words;
   const quiz: QuizItem[] = content.quiz.map(q => ({ q: q.question, options: q.options, correct: q.correctIndex, tip: q.explanation }));
   const doneCount = subs.filter((s) => entries.get(s.id)?.completed).length;

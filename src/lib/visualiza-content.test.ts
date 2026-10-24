@@ -72,3 +72,13 @@ describe("subcategory-specific content", () => {
     expect(practice.search_words.every(value => /^[A-Z]{4,9}$/.test(value))).toBe(true);
   });
 });
+import { dailyAffirmations } from "./visualiza-content";
+describe("dailyAffirmations", () => {
+  it("returns at least 12 distinct affirmations per subtopic", () => {
+    const a = dailyAffirmations("Sanación", "Ansiedad", 1);
+    expect(new Set(a).size).toBeGreaterThanOrEqual(12);
+  });
+  it("changes from one day to the next", () => {
+    expect(dailyAffirmations("Sanación", "Ansiedad", 1)).not.toEqual(dailyAffirmations("Sanación", "Ansiedad", 2));
+  });
+});
