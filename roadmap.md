@@ -1,8 +1,8 @@
 # Roadmap ORÍGEN
 
 ## Capturas e íconos del 24 de octubre, 08:50 UTC
-- [ ] Agregar reloj y fecha diaria junto al botón inferior de registro, con acceso a la oferta existente y sin anunciar un vencimiento ficticio.
-- [ ] Alternar las capturas de «Todas» entre herramientas, Camino ORÍGEN y Visualízalo para mostrar variedad desde el inicio, conservando el orden de los filtros individuales.
+- [x] Agregar reloj local y fecha diaria junto al botón inferior de registro, con enlace a evaluación y oferta existente; sin vencimiento ficticio. Verificado a 375/432/1280 px, reloj en vivo, cambio de fecha a medianoche sin recargar y descuento del 80% tras evaluación.
+- [x] Alternar las 38 capturas de «Todas» entre herramientas, Camino ORÍGEN y Visualízalo para mostrar variedad desde el inicio; filtros de 10 caminos y 8 vistas de Visualízalo intactos, imágenes y flechas comprobadas en Inicio, pago y descuento. Dos pruebas de orden y dos de fecha/enlace; 40 pruebas aprobadas.
 - [x] Agregar capturas reales de Categorías, Etapas y los ocho caminos, categorías de Visualízalo y una subcategoría con afirmaciones, práctica y lección en Inicio y ambos bloques de pago; 38 capturas compartidas.
 - [x] Crear 19 PNG nuevos y específicos para las interacciones mostradas, pasos del método, consultas y oferta; sin reutilizar los emojis anteriores.
 - [x] Verificar con navegador Inicio a 375/1280 px y el recorrido de evaluación a pago y descuento: 10 capturas de Camino y 8 de Visualízalo, imágenes cargadas, filtros y flechas funcionales, sin desbordamiento ni errores; 32 pruebas aprobadas.
