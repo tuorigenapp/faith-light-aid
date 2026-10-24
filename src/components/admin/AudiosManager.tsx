@@ -45,8 +45,8 @@ type Cat = {
   sort_order: number;
 };
 
-const AUDIO_BUCKET = "manifest-audio";
-const COVERS_BUCKET = "manifest-covers";
+const AUDIO_BUCKET = "manifest-audios";
+const COVERS_BUCKET = "content-covers";
 
 /** Nombre visible de cada grupo madre del panel. */
 const GROUP_LABELS: Record<string, string> = {
