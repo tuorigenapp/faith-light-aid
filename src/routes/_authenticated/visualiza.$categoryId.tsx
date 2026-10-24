@@ -1,6 +1,7 @@
 import { ManagedImage } from "@/components/ManagedImage";
 import { SubtopicIcon } from "@/components/visualiza/SubtopicIcon";
 import { resolvePractice, thematicPractice, dailyAffirmations } from "@/lib/visualiza-content";
+import { affirmationStyle } from "@/lib/affirmation-palette";
 import { PlayChoice } from "@/components/visualiza/PlayChoice";
 import { missingPlaylistDays } from "@/lib/playlist-slots";
 import { useSessionState } from "@/hooks/use-session-step";

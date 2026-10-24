@@ -1,4 +1,5 @@
 import { thematicPractice } from "@/lib/visualiza-content";
+import { affirmationStyle } from "@/lib/affirmation-palette";
 import { SubtopicIcon } from "@/components/visualiza/SubtopicIcon";
 import { ManagedImage } from "@/components/ManagedImage";
 import { useSessionState } from "@/hooks/use-session-step";

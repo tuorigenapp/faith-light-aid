@@ -1,5 +1,6 @@
 import { SubtopicIcon } from "./SubtopicIcon";
 import { resolvePractice, dailyAffirmations } from "@/lib/visualiza-content";
+import { AFFIRMATION_STYLES } from "@/lib/affirmation-palette";
 import { PlayChoice } from "./PlayChoice";
 import { missingPlaylistDays } from "@/lib/playlist-slots";
 import { Button } from "@/components/ui/button";
