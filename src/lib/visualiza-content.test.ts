@@ -55,4 +55,20 @@ describe("subcategory-specific content", () => {
     expect(result.exercise).not.toBe(first.exercise);
     expect(result.search_words).toContain("AHORRO");
   });
+  it.each([
+    ["369 Abundancia Financiera", "AHORRO"], ["369 Amor y Relaciones", "DIALOGO"],
+    ["369 Salud y Bienestar", "SALUD"], ["369 Propósito de Vida", "TALENTO"],
+    ["369 Paz Interior", "CALMA"], ["369 Éxito y Prosperidad", "PROVISION"],
+    ["369 Sanación Emocional", "EMOCION"], ["369 Gratitud y Plenitud", "GRATITUD"],
+    ["369 Fe y Confianza", "PACIENCIA"], ["Baño con Sal", "HIGIENE"],
+    ["Baño con Hierbas", "PLANTAS"], ["Meditación Bíblica", "CONTEXTO"],
+    ["Ayuno Espiritual", "PRUDENCIA"], ["Reprogramación de Creencias", "EVIDENCIA"],
+    ["Construcción de Hábitos", "HORARIO"], ["Acción Valiente", "VALENTIA"],
+    ["Mapa de Visión", "RECURSOS"],
+  ])("keeps %s vocabulary relevant and its word game within 4–9 letters", (title, word) => {
+    const practice = thematicPractice("Visualízalo", title);
+    expect(practice.search_words).toContain(word);
+    expect(practice.search_words.length).toBeGreaterThanOrEqual(6);
+    expect(practice.search_words.every(value => /^[A-Z]{4,9}$/.test(value))).toBe(true);
+  });
 });
