@@ -17,6 +17,11 @@ import patterns from "@/assets/patrones-step1.png";
 import patternsSecond from "@/assets/patrones-step2.png";
 import pareja from "@/assets/pareja-hero.jpg";
 import ministracion from "@/assets/ministracion-palabra-cielo.jpg";
+import consultaMentora from "@/assets/consultas/consulta-mentora.jpg";
+import consultaPareja from "@/assets/consultas/consulta-pareja.jpg";
+import consultaPatrones from "@/assets/consultas/consulta-patrones.jpg";
+import consultaMinistracion from "@/assets/consultas/consulta-ministracion.jpg";
+import consultaArbol from "@/assets/consultas/consulta-arbol.jpg";
 import { PROGRAMAS } from "./programas";
 import { EXPLORE_ITEMS, exploreKey } from "./explore-content";
 
@@ -40,6 +45,11 @@ export const APP_COVERS: AppCover[] = [
   { key: "imagen:visualiza:identidad", section: "Visualízalo y Vívelo", title: "Salto de Identidad", image: identity, scope: "imagen" },
   { key: "imagen:visualiza:cristo", section: "Visualízalo y Vívelo", title: "Método de Cristo 3·6·9", image: christ, scope: "imagen" },
   ...PROGRAMAS.map(p => ({ key: `imagen:programa:${p.id}`, section: "Programas de sanación", title: p.title, image: p.cover, scope: "imagen" as const })),
+  { key: "imagen:consulta:banner-mentora", section: "Consultas · portadas con botón", title: "Conversa con Ruth Esther · Banner", image: consultaMentora, scope: "imagen" },
+  { key: "imagen:consulta:banner-pareja", section: "Consultas · portadas con botón", title: "¿Deuda o propósito? · Banner", image: consultaPareja, scope: "imagen" },
+  { key: "imagen:consulta:banner-patrones", section: "Consultas · portadas con botón", title: "Patrones familiares · Banner", image: consultaPatrones, scope: "imagen" },
+  { key: "imagen:consulta:banner-ministracion", section: "Consultas · portadas con botón", title: "Dios te dice hoy · Banner", image: consultaMinistracion, scope: "imagen" },
+  { key: "imagen:consulta:banner-arbol", section: "Consultas · portadas con botón", title: "Sana tu árbol familiar · Banner", image: consultaArbol, scope: "imagen" },
   { key: "imagen:consulta:pareja", section: "Consultas", title: "¿Deuda o propósito? · Portada", image: pareja, scope: "imagen" },
   { key: "imagen:consulta:patrones", section: "Consultas", title: "Patrones familiares · Portada", image: patterns, scope: "imagen" },
   { key: "imagen:consulta:patrones-preparacion", section: "Consultas", title: "Patrones familiares · Preparación", image: patternsSecond, scope: "imagen" },
