@@ -1,3 +1,4 @@
+import { useSeasonalBackground } from "@/lib/seasonal-bg";
 import { createFileRoute } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
@@ -71,6 +72,7 @@ function refIdFor(day: number) {
 }
 
 function Ejercicios() {
+  const seasonBg = useSeasonalBackground();
   const { user } = useAuth();
   const { data: profile } = useProfile();
   const qc = useQueryClient();
@@ -181,14 +183,10 @@ function Ejercicios() {
   const progressPct = Math.round((completedCount / TOTAL_DAYS) * 100);
 
   return (
-    <div
-      className="min-h-dvh"
-      style={{
-        background:
-          "radial-gradient(80% 40% at 12% 0%, rgba(124,92,255,.32), transparent 62%), radial-gradient(70% 35% at 95% 6%, rgba(245,139,203,.22), transparent 62%), linear-gradient(180deg, #241348 0%, #1A0F31 45%, #140C24 100%)",
-      }}
-    >
-      <div className="mx-auto w-full max-w-[1100px] px-4 py-6 md:px-6 md:py-10 mobile-safe-bottom lg:pb-10">
+    <div className="relative min-h-dvh">
+      <img src={seasonBg} alt="" aria-hidden width={720} height={1280} className="fixed inset-0 h-full w-full object-cover" />
+      <div aria-hidden className="fixed inset-0 bg-gradient-to-b from-[#1E1712]/30 via-[#1E1712]/50 to-[#120D09]/85" />
+      <div className="relative mx-auto w-full max-w-[1100px] px-4 py-6 md:px-6 md:py-10 mobile-safe-bottom lg:pb-10">
         <JourneyHeader
           name={profile?.display_name || profile?.full_name || "Tu camino"}
           streak={profile?.consecutive_days ?? 0}
@@ -395,7 +393,7 @@ function ExerciseModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-[#1B1930]/70 backdrop-blur-sm grid place-items-end sm:place-items-center p-0 sm:p-4"
+      className="fixed inset-0 z-50 bg-[#1E1712]/60 backdrop-blur-sm grid place-items-end sm:place-items-center p-0 sm:p-4"
       onClick={onClose}
     >
       <div
