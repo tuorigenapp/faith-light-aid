@@ -7,16 +7,10 @@ import { ReviewsSlider } from "@/components/ReviewsSlider";
 import { printConsulta } from "@/lib/print-pdf";
 import { detectCurrency, discounted, formatLocal, formatUsd, USD, type LocalCurrency } from "@/lib/currency";
 import logo from "@/assets/logo-origen.png";
-import dSanar from "@/assets/funnel/d-sanar.jpg";
-import dFe from "@/assets/funnel/d-fe.jpg";
-import dAbund from "@/assets/funnel/d-abundancia.jpg";
-import dIdent from "@/assets/funnel/d-identidad.jpg";
-import tMiedo from "@/assets/funnel/t-miedo.jpg";
-import tCulpa from "@/assets/funnel/t-culpa.jpg";
-import tConst from "@/assets/funnel/t-constancia.jpg";
-import tClar from "@/assets/funnel/t-claridad.jpg";
-import antes from "@/assets/funnel/antes.jpg";
-import despues from "@/assets/funnel/despues.jpg";
+import { DESIRE_PHOTOS, STRUGGLE_PHOTOS, RESULT_PHOTOS, TODAY_PHOTOS, FUTURE_PHOTOS } from "@/lib/funnel-visuals";
+import { nextFunnelVariation } from "@/lib/funnel-visual-rotation";
+import { FUNNEL_BOOKS } from "@/lib/funnel-books";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import gift from "@/assets/funnel/gift.png";
 import mockup from "@/assets/funnel/mockup.png";
 import dashboardAsset from "@/assets/funnel/shots/dashboard.png.asset.json";
@@ -34,6 +28,8 @@ import shotComprar from "@/assets/funnel/shots/comprarmonedas.jpg";
 import shotHistorial from "@/assets/funnel/shots/historial.jpg";
 import shotArbol from "@/assets/funnel/shots/arbol.jpg";
 import shotInvita from "@/assets/funnel/shots/invita.jpg";
+import palabraAsset from "@/assets/funnel/shots/palabra.png.asset.json";
+import familyTreeAsset from "@/assets/funnel/shots/mi-arbol.png.asset.json";
 import eHeadphones from "@/assets/e3d-headphones.png";
 import ePractice from "@/assets/e3d-practice.png";
 import eBook from "@/assets/e3d-book.png";
@@ -88,20 +84,20 @@ function linkOf(l: Level, c: Cadence, mode: Mode) {
 
 // ---------- Quiz data ----------
 const DESEOS = [
-  { id: "sanar", img: dSanar, t: "Sanar heridas emocionales", d: "Superar el pasado y dejar de repetir los mismos errores." },
-  { id: "fe", img: dFe, t: "Fortalecer mi paz interior y fe", d: "Encontrar dirección y calmar el ruido mental." },
-  { id: "abundancia", img: dAbund, t: "Manifestar abundancia y propósito", d: "Romper la culpa económica y alinearme con mi valor." },
-  { id: "identidad", img: dIdent, t: "Renovar mi identidad y autoestima", d: "Seguridad interna sin buscar aprobación." },
+  { id: "sanar", img: DESIRE_PHOTOS.sanar, t: "Sanar heridas emocionales", d: "Superar el pasado y dejar de repetir los mismos errores." },
+  { id: "fe", img: DESIRE_PHOTOS.fe, t: "Fortalecer mi paz interior y fe", d: "Encontrar dirección y calmar el ruido mental." },
+  { id: "abundancia", img: DESIRE_PHOTOS.abundancia, t: "Encontrar bienestar y propósito", d: "Cuidar mis finanzas sin culpa y reconocer mi valor." },
+  { id: "identidad", img: DESIRE_PHOTOS.identidad, t: "Renovar mi identidad y autoestima", d: "Seguridad interna sin buscar aprobación." },
 ];
 const AREAS = [
   { id: "Emocional", icon: Heart }, { id: "Espiritual", icon: Sparkles }, { id: "Mental", icon: Brain },
   { id: "Financiera", icon: Coins }, { id: "Relaciones", icon: Users }, { id: "Propósito", icon: Compass },
 ];
 const DETONANTES = [
-  { id: "miedo", img: tMiedo, t: "Miedos e inseguridades que paralizan mis decisiones." },
-  { id: "culpa", img: tCulpa, t: "Pensamientos repetitivos, culpa y cargas del pasado." },
-  { id: "constancia", img: tConst, t: "Falta de constancia: empiezo y abandono." },
-  { id: "claridad", img: tClar, t: "No tengo claridad de por dónde empezar a sanar." },
+  { id: "miedo", img: STRUGGLE_PHOTOS.miedo, t: "Miedos e inseguridades que paralizan mis decisiones." },
+  { id: "culpa", img: STRUGGLE_PHOTOS.culpa, t: "Pensamientos repetitivos, culpa y cargas del pasado." },
+  { id: "constancia", img: STRUGGLE_PHOTOS.constancia, t: "Falta de constancia: empiezo y abandono." },
+  { id: "claridad", img: STRUGGLE_PHOTOS.claridad, t: "No tengo claridad de por dónde empezar a sanar." },
 ];
 const GUIAS = [
   { id: "audio", img: eHeadphones, t: "Con audios, respiración y afirmaciones", d: "Para calmar la ansiedad y conectar rápido." },
@@ -120,6 +116,8 @@ const SCREENS = [
   { img: shotJuegos, t: "Juegos del día", d: "Gimnasia emocional de 3 minutos" },
   { img: shotRuleta, t: "Ruleta de premios", d: "Un giro cada 24 horas, siempre ganas" },
   { img: shotArbol, t: "Árbol de Sanación", d: "Mira crecer tu avance con cada paso" },
+  { img: familyTreeAsset.url, t: "Tu árbol generacional", d: "Conoce tus raíces y organiza tu historia familiar" },
+  { img: palabraAsset.url, t: "Palabra del día", d: "Escritura, reflexión y oración para cada día" },
   { img: shotComprar, t: "Hojas de Sanación", d: "Tu moneda de avance dentro de la app" },
   { img: shotHistorial, t: "Tu historial", d: "Todas tus respuestas guardadas en PDF" },
   { img: shotInvita, t: "Programa de afiliados", d: "Gana compartiendo ORÍGEN" },
@@ -146,6 +144,19 @@ function Funnel() {
   const [raices, setRaices] = useState("");
   const [deton, setDeton] = useState("");
   const [guia, setGuia] = useState("");
+  const [visualVariant, setVisualVariant] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (step !== 9 || visualVariant !== null) return;
+    let previous: number | null = null;
+    try {
+      const stored = localStorage.getItem("origen-funnel-last-visual");
+      if (stored !== null) previous = Number(stored);
+    } catch { /* Visuals still work without browser storage. */ }
+    const variant = nextFunnelVariation(`${deseo}|${deton}|${areas.join("|")}`, previous);
+    setVisualVariant(variant);
+    try { localStorage.setItem("origen-funnel-last-visual", String(variant)); } catch { /* no storage */ }
+  }, [step, visualVariant, deseo, deton, areas]);
 
   useEffect(() => { setCur(detectCurrency()); }, []);
   useEffect(() => {
@@ -184,14 +195,14 @@ function Funnel() {
     {popup === "free" && <FreePopup cur={cur} onClose={() => setPopup(null)} onSkip={() => { setPopup(null); setStage("offer80"); setTimeout(toPlans, 60); }} />}
   </>;
 
-  if (stage === "paywall") return <><Paywall name={first} cur={cur} onClose={leave} />{popups}</>;
+  if (stage === "paywall") return <><Paywall name={first} cur={cur} variant={visualVariant ?? 0} onClose={leave} />{popups}</>;
   if (stage === "offer80") return <><Offer80 name={first} cur={cur} onClose={leave} />{popups}</>;
 
   const welcome = step === 1;
   return (
     <main className="relative min-h-dvh overflow-hidden bg-background px-4 pb-8 pt-4">
       {welcome && <>
-        <img src={dFe} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover" />
+        <img src={DESIRE_PHOTOS.fe} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover" />
         <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-background/30 via-background/70 to-background" />
       </>}
       {!welcome && <div aria-hidden className="absolute inset-x-0 top-0 h-80 bg-gradient-to-b from-primary/10 to-transparent" />}
@@ -227,10 +238,10 @@ function Funnel() {
           {step === 3 && <>
             <Bubble>Hola {first}, ¿qué deseas transformar hoy?</Bubble>
             <div className="mt-6 grid grid-cols-2 gap-3">
-              {DESEOS.map((o) => <button key={o.id} onClick={() => { setDeseo(o.id); autoNext(); }} className={cn("overflow-hidden rounded-2xl border-2 bg-card text-left transition active:scale-[.97]", deseo === o.id ? "border-primary" : "border-transparent shadow-sm")}>
-                <img src={o.img} alt="" className="aspect-square w-full object-cover" />
+              {DESEOS.map((o) => <Button variant="outline" key={o.id} onClick={() => { setDeseo(o.id); autoNext(); }} className={cn("block h-auto whitespace-normal overflow-hidden rounded-2xl border-2 bg-card p-0 text-left transition active:scale-[.97]", deseo === o.id ? "border-primary" : "border-transparent shadow-sm")}>
+                <img src={o.img} alt={`Escena ilustrativa: ${o.t}`} width={768} height={768} className="aspect-square w-full object-contain" />
                 <div className="p-3"><p className="text-sm font-bold leading-snug text-foreground">{o.t}</p><p className="mt-1 text-xs text-muted-foreground">{o.d}</p></div>
-              </button>)}
+              </Button>)}
             </div>
           </>}
 
@@ -254,9 +265,9 @@ function Funnel() {
           {step === 6 && <>
             <Bubble>¿Qué te frena más cuando intentas cambiar?</Bubble>
             <div className="mt-6 grid gap-3">
-              {DETONANTES.map((o) => <button key={o.id} onClick={() => { setDeton(o.id); autoNext(); }} className={cn("flex items-center gap-3 overflow-hidden rounded-2xl border-2 bg-card p-2 pr-4 text-left transition active:scale-[.97]", deton === o.id ? "border-primary" : "border-transparent shadow-sm")}>
-                <img src={o.img} alt="" className="h-20 w-20 shrink-0 rounded-xl object-cover" /><span className="text-sm font-semibold text-foreground">{o.t}</span>
-              </button>)}
+              {DETONANTES.map((o) => <Button variant="outline" key={o.id} onClick={() => { setDeton(o.id); autoNext(); }} className={cn("flex h-auto whitespace-normal items-center gap-3 overflow-hidden rounded-2xl border-2 bg-card p-2 pr-4 text-left transition active:scale-[.97]", deton === o.id ? "border-primary" : "border-transparent shadow-sm")}>
+                <img src={o.img} alt="Escena ilustrativa de reflexión personal" width={768} height={768} className="h-24 w-24 shrink-0 rounded-xl object-contain" /><span className="text-sm font-semibold text-foreground">{o.t}</span>
+              </Button>)}
             </div>
           </>}
 
@@ -270,7 +281,7 @@ function Funnel() {
           </>}
 
           {step === 8 && <Analysis name={first} onDone={next} />}
-          {step === 9 && <Result name={first} areas={areas} onNext={() => { setStage("paywall"); window.scrollTo(0, 0); }} />}
+          {step === 9 && <Result name={first} areas={areas} variant={visualVariant} onNext={() => { setStage("paywall"); window.scrollTo(0, 0); }} />}
         </section>
       </div>
     </main>
@@ -315,12 +326,12 @@ function Analysis({ name, onDone }: { name: string; onDone: () => void }) {
   </div>;
 }
 
-function Result({ name, areas, onNext }: { name: string; areas: string[]; onNext: () => void }) {
+function Result({ name, areas, variant, onNext }: { name: string; areas: string[]; variant: number | null; onNext: () => void }) {
   const score = 68;
   const shownAreas = areas.length ? areas.slice(0, 2).join(" y ") : "Emocional y Relaciones";
   return <div className="flex flex-1 flex-col pt-6">
     <h1 className="text-center font-display text-2xl font-bold text-foreground">El mapa de {name} está listo</h1>
-    <img src={despues} alt="" className="mt-5 aspect-[4/3] w-full rounded-2xl object-cover" />
+    {variant === null ? <div className="mt-5 aspect-[10/9] w-full animate-pulse rounded-2xl bg-muted" /> : <img src={RESULT_PHOTOS[variant]} alt="Escena ilustrativa de acompañamiento cristiano y paz interior" width={640} height={576} className="mt-5 h-auto w-full rounded-2xl" />}
     <div className="mt-4 rounded-2xl bg-card p-5 shadow-sm">
       <p className="text-sm text-foreground">Detectamos un patrón de repetición fuerte en el área <b>{shownAreas}</b>, ligado a lealtades invisibles de tus raíces.</p>
       <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Índice de impacto</p>
@@ -426,13 +437,25 @@ function TrustBar() {
 }
 
 function BooksGift() {
-  return <section className="relative mt-10 overflow-hidden rounded-3xl bg-primary p-5 text-primary-foreground">
+  const rail = useRef<HTMLDivElement>(null);
+  const scrollBooks = (direction: number) => rail.current?.scrollBy({ left: direction * 280, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+  return <section aria-labelledby="books-gift-title" className="relative mt-10 overflow-hidden rounded-3xl bg-primary p-5 text-primary-foreground">
     <div className="flex items-center gap-4">
       <img src={eBook} alt="" className="h-24 w-24 shrink-0 object-contain drop-shadow-xl" />
-      <div><p className="text-xs font-bold uppercase tracking-widest opacity-80">Regalo cada semana</p><h3 className="mt-1 font-display text-xl font-bold leading-tight">Un pack de libros digitales gratis cada semana</h3></div>
+      <div><p className="text-xs font-bold uppercase tracking-widest opacity-80">Incluidos en tu suscripción</p><h3 id="books-gift-title" className="mt-1 font-display text-xl font-bold leading-tight">{FUNNEL_BOOKS.length} libros para ti, sin costo adicional</h3></div>
     </div>
-    <p className="mt-3 text-sm opacity-90">Desde que entras a ORÍGEN, cada semana se abre un nuevo pack en tu Biblioteca Digital para leer y descargar.</p>
-    <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs font-semibold">{["Sanación", "Fe y propósito", "Abundancia"].map((t) => <span key={t} className="rounded-xl bg-primary-foreground/15 px-2 py-2">{t}</span>)}</div>
+    <p className="mt-3 text-sm opacity-90">Todo esto está incluido para ti. Cada semana actualizamos la biblioteca y agregamos contenido variado para acompañar tu sanación.</p>
+    <div ref={rail} role="region" aria-label="Portadas de los libros disponibles en ORÍGEN" tabIndex={0} className="mt-5 flex touch-pan-x snap-x snap-mandatory gap-3 overflow-x-auto pb-3 [scrollbar-width:none]">
+      {FUNNEL_BOOKS.map((book) => <figure key={book.id} className="w-28 shrink-0 snap-start">
+        <img src={book.cover} alt={`Portada de ${book.title}`} loading="lazy" width={224} height={336} className="aspect-[2/3] w-full rounded-lg bg-card object-contain shadow-soft" />
+      </figure>)}
+    </div>
+    <div className="mt-2 flex items-center justify-between gap-3">
+      <Button variant="secondary" size="icon" title="Libros anteriores" aria-label="Libros anteriores" onClick={() => scrollBooks(-1)} className="h-11 w-11"><ChevronLeft className="h-5 w-5" /></Button>
+      <span className="text-xs font-semibold">{FUNNEL_BOOKS.length} lecturas · nuevos packs cada semana</span>
+      <Button variant="secondary" size="icon" title="Más libros" aria-label="Más libros" onClick={() => scrollBooks(1)} className="h-11 w-11"><ChevronRight className="h-5 w-5" /></Button>
+    </div>
+    <p className="mt-3 text-xs opacity-90">Lectura y descarga según los cupos de tu plan.</p>
   </section>;
 }
 
@@ -445,15 +468,16 @@ function Includes() {
   </>;
 }
 
-function BeforeAfter() {
+function BeforeAfter({ variant }: { variant: number }) {
   return <section className="mt-5 rounded-3xl bg-card p-4 shadow-sm">
     <div className="grid grid-cols-2 gap-3">
-      {[{ img: antes, tag: "Hoy", tone: "bg-muted text-foreground", lv: [2, 2, 1], lbl: ["Carga", "Inquieta", "Bloqueada"] }, { img: despues, tag: "En 6 meses", tone: "bg-primary text-primary-foreground", lv: [5, 5, 4], lbl: ["Libre", "En paz", "Fluyendo"] }].map((c) => <div key={c.tag}>
+      {[{ img: TODAY_PHOTOS[variant], tag: "Hoy", tone: "bg-muted text-foreground", lv: [2, 2, 1], lbl: ["Carga", "Inquietud", "Bloqueo"] }, { img: FUTURE_PHOTOS[variant], tag: "En 6 meses", tone: "bg-primary text-primary-foreground", lv: [5, 5, 4], lbl: ["Libertad", "En paz", "Conexión"] }].map((c) => <div key={c.tag}>
         <span className={cn("block rounded-full py-1.5 text-center text-sm font-bold", c.tone)}>{c.tag}</span>
-        <img src={c.img} alt="" className="mt-3 aspect-[4/5] w-full rounded-2xl object-cover" />
+        <img src={c.img} alt={`Escena ilustrativa: ${c.tag}`} width={640} height={576} className="mt-3 h-auto w-full rounded-2xl" />
         {["Paz interior", "Mente", "Relaciones"].map((k, i) => <div key={k} className="mt-3"><p className="text-sm font-bold text-foreground">{k}</p><p className="text-xs text-muted-foreground">{c.lbl[i]}</p><div className="mt-1 flex gap-1">{[0, 1, 2, 3, 4].map((n) => <span key={n} className={cn("h-1.5 flex-1 rounded-full", n < c.lv[i] ? "bg-primary" : "bg-muted")} />)}</div></div>)}
       </div>)}
     </div>
+    <p className="mt-3 text-center text-xs text-muted-foreground">Escenas ilustrativas de lo que deseas trabajar; los resultados varían en cada persona.</p>
   </section>;
 }
 
@@ -545,12 +569,12 @@ function TopBar({ onClose, time, label, cta }: { onClose: () => void; time: stri
 }
 const toPlans = () => document.getElementById("planes")?.scrollIntoView({ behavior: "smooth" });
 
-function Paywall({ name, cur, onClose }: { name: string; cur: LocalCurrency; onClose: () => void }) {
+function Paywall({ name, cur, variant, onClose }: { name: string; cur: LocalCurrency; variant: number; onClose: () => void }) {
   const time = useCountdown(590);
   return <main className="min-h-dvh bg-gradient-to-b from-primary/5 via-background to-background pb-12">
     <TopBar onClose={onClose} time={time} label="Tu plan está reservado" cta={toPlans} />
     <div className="mx-auto max-w-md px-4">
-      <BeforeAfter />
+      <BeforeAfter variant={variant} />
       <h1 className="mt-6 text-center font-display text-[28px] font-bold leading-tight text-foreground">Tu plan para {name ? `${name}, ` : ""}romper el ciclo está listo</h1>
       <div id="planes" className="scroll-mt-24"><PlansBoard cur={cur} mode="normal" /></div>
       <TrustBar />
@@ -585,6 +609,7 @@ function Offer80({ name, cur, onClose }: { name: string; cur: LocalCurrency; onC
       <img src={mockup} alt="Pantallas de la app ORÍGEN" loading="lazy" className="mx-auto mt-8 w-full max-w-sm drop-shadow-2xl" />
       <AppScreens />
       <section className="-mx-4 mt-10 bg-primary/5 py-2"><ReviewsSlider /></section>
+      <BooksGift />
       <PlansBoard cur={cur} mode="discount" title="Último paso: elige y ahorra" />
     </div>
   </main>;

@@ -1,11 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { Star, Quote } from "lucide-react";
-import avatar1 from "@/assets/community-avatar-01.png";
-import avatar3 from "@/assets/community-avatar-03.png";
-import avatar5 from "@/assets/community-avatar-05.png";
-import avatar7 from "@/assets/community-avatar-07.png";
-import avatar9 from "@/assets/community-avatar-09.png";
-import avatar12 from "@/assets/community-avatar-12.png";
+import { Quote, ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { COMMUNITY_PORTRAITS } from "@/lib/funnel-visuals";
 
 type Review = { name: string; place: string; text: string; img: string };
 
@@ -14,37 +10,37 @@ const REVIEWS: Review[] = [
     name: "Marisol A.",
     place: "Guadalajara, MX",
     text: "Llevaba años repitiendo la misma historia con mi mamá. El diagnóstico me dijo por dónde venía y por primera vez entendí que no era mi culpa.",
-    img: avatar1,
+    img: COMMUNITY_PORTRAITS[0] ?? "",
   },
   {
     name: "Jonathan R.",
     place: "Bogotá, CO",
     text: "Probé terapia y tres apps. Esta es la única que me dio un paso concreto cada día, de cinco minutos. Llevo 41 días seguidos.",
-    img: avatar5,
+    img: COMMUNITY_PORTRAITS[1] ?? "",
   },
   {
     name: "Carla V.",
     place: "Lima, PE",
     text: "Lloré con el ejercicio del niño interior. No es contenido general, se siente escrito para lo que yo viví.",
-    img: avatar3,
+    img: COMMUNITY_PORTRAITS[2] ?? "",
   },
   {
     name: "Andrés M.",
     place: "Santo Domingo, RD",
     text: "Lo que más me sirvió: aprender a decir no sin sentir culpa. Mi esposa lo notó antes que yo.",
-    img: avatar7,
+    img: COMMUNITY_PORTRAITS[3] ?? "",
   },
   {
     name: "Paola G.",
     place: "Monterrey, MX",
-    text: "Los audios de manifestación guiada los uso en el carro camino al trabajo. Llego distinta.",
-    img: avatar9,
+    text: "Busco un momento de oración y reflexión antes de comenzar mi jornada.",
+    img: COMMUNITY_PORTRAITS[4] ?? "",
   },
   {
     name: "Luis Fernando C.",
     place: "Quito, EC",
     text: "Respeta mi fe, no me impone nada. Oro con mis palabras y aún así siento acompañamiento real.",
-    img: avatar12,
+    img: COMMUNITY_PORTRAITS[5] ?? "",
   },
 ];
 
@@ -66,16 +62,9 @@ export function ReviewsSlider() {
 
   return (
     <section className="mt-12">
-      <div className="flex items-center gap-2 px-4">
-        <div className="flex gap-0.5">
-          {[0, 1, 2, 3, 4].map((i) => (
-            <Star key={i} className="h-4 w-4 fill-[#F5C77E] text-[#F5C77E]" />
-          ))}
-        </div>
-        <p className="text-[13px] font-semibold text-muted-foreground">4,8 de 5 según quienes ya empezaron</p>
-      </div>
+      <p className="px-4 text-[13px] font-semibold text-muted-foreground">Historias y retratos ilustrativos; no son testimonios verificados.</p>
       <h2 className="mt-2 px-4 font-display text-[26px] font-extrabold leading-tight">
-        Lo que cambió para personas como tú
+        Historias con las que puedes identificarte
       </h2>
 
       <div
@@ -85,12 +74,12 @@ export function ReviewsSlider() {
         {REVIEWS.map((r) => (
           <article
             key={r.name}
-            className="min-w-[84%] snap-center rounded-[16px] border border-border bg-card p-5 shadow-soft sm:min-w-[360px]"
+            className="w-[84%] shrink-0 snap-center rounded-[16px] border border-border bg-card p-5 shadow-soft sm:w-[360px]"
           >
             <div className="flex items-center gap-3">
               <img
                 src={r.img}
-                alt={`Foto de ${r.name}`}
+                alt="Retrato humano ilustrativo, generado para ORÍGEN"
                 loading="lazy"
                 width={96}
                 height={96}
@@ -105,22 +94,19 @@ export function ReviewsSlider() {
               </span>
             </div>
             <p className="mt-3 text-[14.5px] leading-relaxed">{r.text}</p>
-            <div className="mt-3 flex gap-0.5">
-              {[0, 1, 2, 3, 4].map((i) => (
-                <Star key={i} className="h-3.5 w-3.5 fill-[#F5C77E] text-[#F5C77E]" />
-              ))}
-            </div>
           </article>
         ))}
       </div>
 
-      <div className="mt-1 flex justify-center gap-1.5">
+      <div className="mt-3 flex items-center justify-center gap-3">
+        <Button variant="outline" size="icon" aria-label="Historias anteriores" title="Historias anteriores" className="h-11 w-11" onClick={() => railRef.current?.scrollBy({ left: -320, behavior: "smooth" })}><ChevronLeft className="h-5 w-5" /></Button>
         {REVIEWS.map((r, i) => (
           <span
             key={r.name}
             className={`h-1.5 rounded-full transition-all ${i === index ? "w-5 bg-primary" : "w-1.5 bg-border"}`}
           />
         ))}
+        <Button variant="outline" size="icon" aria-label="Más historias" title="Más historias" className="h-11 w-11" onClick={() => railRef.current?.scrollBy({ left: 320, behavior: "smooth" })}><ChevronRight className="h-5 w-5" /></Button>
       </div>
     </section>
   );

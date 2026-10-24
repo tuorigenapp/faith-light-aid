@@ -1064,7 +1064,7 @@ export function DailyGames({
   );
 }
 
-/** Tarjeta-enlace con portada local (degradé tonal + ícono). */
+/** Shared full-image presentation for both the game library and home carousel. */
 export function GameCard({ game, index = 0 }: { game: GameDef; index?: number }) {
   const plays = useGamePlays(game.id);
   const ov = useContentOverrides().get(`juego:${game.id}`);
@@ -1077,20 +1077,16 @@ export function GameCard({ game, index = 0 }: { game: GameDef; index?: number })
       className="block w-full overflow-hidden rounded-[16px] border border-border/60 bg-card shadow-soft text-left active:scale-[.98] transition-transform"
       style={{ animation: `fade-in .35s ease-out ${index * 45}ms both` }}
     >
-      <span className="relative block h-28 w-full overflow-hidden">
+      <span className="block w-full bg-card">
         <img
           src={ov?.cover_url || game.img}
-          alt=""
+          alt={`Portada completa de ${game.title}`}
           loading="lazy"
-          className="absolute inset-0 h-full w-full object-cover"
+          className="block h-auto w-full object-contain"
         />
-        <span className={cn("absolute inset-0 bg-gradient-to-t opacity-60", game.tint)} />
-        <span className="absolute bottom-2 left-2 grid h-9 w-9 place-items-center rounded-[12px] bg-white/25 text-white backdrop-blur border border-white/40">
-          {game.icon}
-        </span>
       </span>
       <span className="block px-3 py-2.5">
-        <span className="block font-display font-bold text-[13.5px] leading-tight truncate">
+        <span className="block font-display font-bold text-[14px] leading-tight text-card-foreground">
           {ov?.title || game.title}
         </span>
         <span className="block text-[11.5px] text-muted-foreground leading-snug line-clamp-2">
