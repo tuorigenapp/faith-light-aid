@@ -4,6 +4,7 @@
 - [ ] Guardar conversaciones eliminadas y sus mensajes en papelera recuperable por 30 días, con privacidad por cuenta y plazo controlado en el servidor.
 - [ ] Agregar acceso a papelera y restauración en el historial del chat sin permitir borrar burbujas individuales.
 - [ ] Verificar borrar, recargar, restaurar y recuperar mensajes/borrador con sesión real; probar el límite de 30 días.
+- [ ] Sincronizar todas las portadas de Visualízalo y Vívelo en Inicio con las de /visualiza, manteniendo el degradado y sin recortar sus títulos.
 
 ## Ajuste del 24 de octubre, 07:01 UTC
 - [x] Recuperar en Inicio el degradado, proporción y título sobre la imagen de las categorías del panel, conservando sus portadas nuevas completas; verificado a 375/1280 px con sesión.
