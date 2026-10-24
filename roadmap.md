@@ -1,5 +1,11 @@
 # Roadmap ORÍGEN
 
+## Ajustes visuales del índice y retratos
+- [ ] Índice de impacto rojo a verde, con valores positivos variados e identificados como ilustrativos.
+- [ ] Comparativa: cinco fotos de Hoy en gris; seis meses en color.
+- [ ] Corregir retratos de Marisol, Carla y Luis Fernando en todas sus apariciones compartidas.
+- [ ] Verificar el recorrido y los cambios en claro/oscuro.
+
 ## Ajustes solicitados el 24 de octubre
 - [x] Agregar capturas autenticadas de /palabra y /arbol?vista=mi-arbol a /empezar.
 - [x] Crear fotos cristianas decorosas y claras para deseos y obstáculos; cinco resultados y cinco pares Hoy/6 meses, rotación comprobada con cinco evaluaciones.
