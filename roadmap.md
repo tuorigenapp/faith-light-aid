@@ -1,9 +1,9 @@
 # Roadmap ORÍGEN
 
 ## Capturas e íconos del 24 de octubre, 08:50 UTC
-- [ ] Agregar capturas reales de Categorías, Etapas, camino individual, categorías de Visualízalo y una subcategoría por dentro en Inicio y ambos bloques de pago.
-- [ ] Crear PNG nuevos y específicos para las interacciones mostradas, sin reutilizar los emojis anteriores.
-- [ ] Verificar capturas visibles, navegación del carrusel y ausencia de desbordamiento en teléfono y computadora.
+- [x] Agregar capturas reales de Categorías, Etapas y los ocho caminos, categorías de Visualízalo y una subcategoría con afirmaciones, práctica y lección en Inicio y ambos bloques de pago; 38 capturas compartidas.
+- [x] Crear 19 PNG nuevos y específicos para las interacciones mostradas, pasos del método, consultas y oferta; sin reutilizar los emojis anteriores.
+- [x] Verificar con navegador Inicio a 375/1280 px y el recorrido de evaluación a pago y descuento: 10 capturas de Camino y 8 de Visualízalo, imágenes cargadas, filtros y flechas funcionales, sin desbordamiento ni errores; 32 pruebas aprobadas.
 
 ## Papelera de la mentora, 24 de octubre, 07:12 UTC
 - [x] Guardar conversaciones eliminadas y sus mensajes en papelera recuperable por 30 días, con privacidad por cuenta, plazo controlado en el servidor y limpieza de vencidas al consultar el historial.
