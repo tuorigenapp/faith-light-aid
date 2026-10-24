@@ -1,3 +1,4 @@
+import { thematicPractice } from "@/lib/visualiza-content";
 import { ManagedImage } from "@/components/ManagedImage";
 import { useSessionState } from "@/hooks/use-session-step";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -338,6 +339,7 @@ function LimpiezaPage() {
   const isPaid = plan === "camino";
 
   const practice = allPractices.find((p) => p.id === practiceId) ?? PRACTICES[0];
+  const practiceContent = thematicPractice("Limpieza Espiritual", practice.title);
 
   async function completePractice() {
     if (!user) return;
@@ -599,13 +601,13 @@ function LimpiezaPage() {
             <div className="flex items-center gap-1.5 text-[11px] font-bold text-primary uppercase tracking-widest">
               <Sparkles className="w-3.5 h-3.5" /> Desafío del día
             </div>
-            <p className="text-xs mt-2 text-foreground/85 leading-relaxed">Hoy intenta practicar 10 minutos sin distracciones para conectar con Dios.</p>
+            <p className="text-xs mt-2 text-foreground/85 leading-relaxed">{practiceContent.tasks[1]}</p>
           </Card>
           <Card className="rounded-[1.3rem] p-4 shadow-soft">
             <div className="flex items-center gap-1.5 text-[11px] font-bold text-primary uppercase tracking-widest">
               <PenLine className="w-3.5 h-3.5" /> Ejercicio del día
             </div>
-            <p className="text-xs mt-2 text-foreground/85 leading-relaxed">¿Qué deseo entregar hoy a Dios?</p>
+            <p className="text-xs mt-2 text-foreground/85 leading-relaxed">{`¿Qué deseas entregar a Dios sobre ${practice.title}?`}</p>
           </Card>
         </div>
 
@@ -616,7 +618,7 @@ function LimpiezaPage() {
             <p className="text-xs text-muted-foreground mt-1">Declara con fe cada verdad sobre tu vida.</p>
           </div>
           <div className="mt-4 grid grid-cols-2 gap-3">
-            {AFFIRMATIONS.map((a, i) => {
+            {[practiceContent.affirmation].map((a, i) => {
               const active = affirmationsRead.has(i);
               return (
                 <div key={i} className="app-card p-3 rounded-2xl">
@@ -665,7 +667,7 @@ function LimpiezaPage() {
             <Card className="rounded-[1.3rem] p-4 shadow-soft">
               <div className="text-xs font-bold text-primary uppercase tracking-widest">Revisa lo que has completado hoy</div>
               <div className="mt-3 space-y-2.5">
-                {CHECKLIST.map((line, i) => {
+                {practiceContent.tasks.map((line, i) => {
                   const on = checked.has(i);
                   return (
                     <button

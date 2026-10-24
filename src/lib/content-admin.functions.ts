@@ -185,7 +185,9 @@ export const adminCreateVisualizaSubtopic = createServerFn({ method: "POST" })
     if (!category) throw new Error("Ese tema principal ya no existe.");
     const { data: siblings, error: readError } = await supabaseAdmin.from("manifest_audios").select("day_index, title, affirmation, lesson, exercise, quiz").eq("category_id", data.categoryId).order("day_index");
     if (readError) throw new Error(readError.message);
-    const dayIndex = Math.max(0, ...(siblings ?? []).map(s => s.day_index)) + 1;
+    const usedDays = new Set((siblings ?? []).map(s => s.day_index));
+    let dayIndex = 1;
+    while (usedDays.has(dayIndex)) dayIndex += 1;
     const isRecipe = (category as { design?: string }).design === "limpieza";
     const generated = await generateSubtopicContent({ category: category.title, description: category.description ?? "", title: data.title, day: dayIndex, notes: data.notes, recipe: isRecipe, previous: siblings ?? [] });
     const cover = null;

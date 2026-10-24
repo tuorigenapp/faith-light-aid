@@ -1,3 +1,4 @@
+import { thematicPractice } from "@/lib/visualiza-content";
 import { ManagedImage } from "@/components/ManagedImage";
 import { useSessionState } from "@/hooks/use-session-step";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -331,7 +332,8 @@ function IdentidadPage() {
   });
   const isPaid = plan === "camino";
 
-  const practice = PRACTICES.find((p) => p.id === practiceId)!;
+  const practice = PRACTICES.find((p) => p.id === practiceId) ?? PRACTICES[0];
+  const practiceContent = thematicPractice("Salto de Identidad", practice.title, PRACTICES.indexOf(practice) + 1);
 
   async function completePractice() {
     if (!user) return;
@@ -580,13 +582,13 @@ function IdentidadPage() {
             <div className="flex items-center gap-1.5 text-[11px] font-bold text-primary uppercase tracking-widest">
               <Sparkles className="w-3.5 h-3.5" /> Desafío del día
             </div>
-            <p className="text-xs mt-2 text-foreground/85 leading-relaxed">Haz hoy una acción real que tu "yo futuro" haría.</p>
+            <p className="text-xs mt-2 text-foreground/85 leading-relaxed">{practiceContent.tasks[1]}</p>
           </Card>
           <Card className="rounded-[1.3rem] p-4 shadow-soft">
             <div className="flex items-center gap-1.5 text-[11px] font-bold text-primary uppercase tracking-widest">
               <PenLine className="w-3.5 h-3.5" /> Ejercicio del día
             </div>
-            <p className="text-xs mt-2 text-foreground/85 leading-relaxed">¿Qué acción concreta realizarás antes de terminar el día?</p>
+            <p className="text-xs mt-2 text-foreground/85 leading-relaxed">{`¿Qué paso darás en ${practice.title}?`}</p>
             <Input value={dailyAction} onChange={(e) => setDailyAction(e.target.value)} placeholder="Escribe aquí..." className="mt-2 rounded-xl" />
           </Card>
         </div>
@@ -597,11 +599,11 @@ function IdentidadPage() {
             <h3 className="font-display font-extrabold text-lg">Sopa de letras</h3>
             <p className="text-xs text-muted-foreground">Encuentra las claves de tu nueva identidad.</p>
           </div>
-          <WordSearch words={WORDS} storageKey={`identidad-${practice.id}`} />
+          <WordSearch words={practiceContent.search_words} storageKey={`identidad-${practice.id}`} />
         </div>
 
         {/* Quiz */}
-        <StageQuiz items={QUIZ_ITEMS} storageKey={`identidad-${practice.id}`} />
+        <StageQuiz items={practiceContent.quiz.map(q => ({ q: q.question, options: q.options, correct: q.correctIndex, tip: q.explanation }))} storageKey={`identidad-${practice.id}`} />
 
         {/* AFIRMACIONES */}
         <section className="pt-2">
@@ -651,7 +653,7 @@ function IdentidadPage() {
             <Card className="rounded-[1.3rem] p-4 shadow-soft">
               <div className="text-xs font-bold text-primary uppercase tracking-widest">Revisa tu progreso de hoy</div>
               <div className="mt-3 space-y-2.5">
-                {CHECKLIST.map((line, i) => {
+                {practiceContent.tasks.map((line, i) => {
                   const on = checked.has(i);
                   return (
                     <button

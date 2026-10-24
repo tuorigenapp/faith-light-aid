@@ -1,3 +1,4 @@
+import { thematicPractice } from "@/lib/visualiza-content";
 import { ManagedImage } from "@/components/ManagedImage";
 import { useSessionState } from "@/hooks/use-session-step";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -432,7 +433,8 @@ function CristoPage() {
   });
   const isPaid = plan === "camino";
 
-  const practice = PRACTICES.find((p) => p.id === practiceId)!;
+  const practice = PRACTICES.find((p) => p.id === practiceId) ?? PRACTICES[0];
+  const practiceContent = thematicPractice("Método de Cristo 3·6·9", practice.title, PRACTICES.indexOf(practice) + 1);
   const filtered = category === "Todas" ? PRACTICES : PRACTICES.filter((p) => p.category === category);
 
   async function completePractice() {
@@ -506,7 +508,7 @@ function CristoPage() {
                 Comenzar <ArrowRight className="w-5 h-5 ml-1" />
               </Button>
               <p className="text-[11px] text-muted-foreground mt-3 inline-flex items-center gap-1 justify-center">
-                <ShieldCheck className="w-3 h-3" /> Recuerda: Tú eres cocreador de tu realidad.
+                <ShieldCheck className="w-3 h-3" /> La oración acompaña tus decisiones y acciones responsables.
               </p>
             </Card>
             {StepDots}
@@ -526,7 +528,7 @@ function CristoPage() {
         <div className="text-center mt-3">
           <div className="text-[11px] uppercase tracking-widest text-primary font-bold">Paso 2 de 3 · Elige tu práctica</div>
           <h2 className="font-display font-extrabold text-2xl mt-2">Elige tu práctica guiada 369 <span>✨</span></h2>
-          <p className="text-sm text-muted-foreground mt-2">¿Qué deseas manifestar hoy?</p>
+          <p className="text-sm text-muted-foreground mt-2">¿Qué deseas llevar a la oración?</p>
         </div>
 
         <div className="mt-5 flex gap-2 overflow-x-auto no-scrollbar pb-1">
@@ -793,11 +795,11 @@ function CristoPage() {
             <h3 className="font-display font-extrabold text-lg">Sopa de letras</h3>
             <p className="text-xs text-muted-foreground">Encuentra las palabras clave del método 369.</p>
           </div>
-          <WordSearch words={WORDS} storageKey={`cristo-${practice.id}`} />
+          <WordSearch words={practiceContent.search_words} storageKey={`cristo-${practice.id}`} />
         </div>
 
         {/* Quiz */}
-        <StageQuiz items={QUIZ_ITEMS} storageKey={`cristo-${practice.id}`} />
+        <StageQuiz items={practiceContent.quiz.map(q => ({ q: q.question, options: q.options, correct: q.correctIndex, tip: q.explanation }))} storageKey={`cristo-${practice.id}`} />
 
         {/* AFIRMACIONES 369 con tabs Mañana/Tarde/Noche */}
         <section className="pt-2">
@@ -910,7 +912,7 @@ function CristoPage() {
             <Card className="rounded-[1.3rem] p-4 shadow-soft">
               <div className="text-xs font-bold text-primary uppercase tracking-widest">Resumen de hoy</div>
               <div className="mt-3 space-y-2.5">
-                {CHECKLIST.map((line, i) => {
+                {practiceContent.tasks.map((line, i) => {
                   const on = checked.has(i);
                   return (
                     <button

@@ -1,7 +1,6 @@
 import { APP_COVERS } from "@/lib/app-cover-catalog";
 import { adminListCategories, adminUpdateCategory, adminListLimpieza, adminUpdateLimpieza } from "@/lib/content-admin.functions";
 import { useContentOverrides } from "@/hooks/use-content-overrides";
-import { EXPLORE_ITEMS, exploreKey } from "@/lib/explore-content";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -21,7 +20,7 @@ import { Button } from "@/components/ui/button";
 type Notify = (n: { text: string; error?: boolean } | null) => void;
 
 const input =
-  "w-full min-h-12 rounded-[10px] border-2 border-border bg-card px-3 text-[14px] text-foreground placeholder:text-muted-foreground focus:border-[#7C5CFF] focus:outline-none";
+  "w-full min-h-12 rounded-[10px] border-2 border-border bg-card px-3 text-[14px] text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none";
 
 function useOverrides() { const { map, isLoading } = useContentOverrides(); return { data: map, isLoading }; }
 
@@ -57,11 +56,11 @@ export function CaminosStudio({ onNote }: { onNote: Notify }) {
     <div className="space-y-4">
       <div className="space-y-3 rounded-[16px] border border-border bg-card p-5">
         <h3 className="font-display text-[17px] font-bold">Crear camino nuevo con IA</h3>
-        <div className="rounded-[12px] bg-[#7C5CFF]/8 p-4">
-          <p className="text-[13px] font-bold text-[#5B3FD9]">Sale idéntico a CAMINO ORÍGEN</p>
+        <div className="rounded-[12px] bg-primary/8 p-4">
+          <p className="text-[13px] font-bold text-primary">Sale idéntico a CAMINO ORÍGEN</p>
           <div className="mt-2 grid grid-cols-8 gap-1" aria-hidden>
             {Array.from({ length: 8 }).map((_, i) => (
-              <span key={i} className="grid h-9 place-items-center rounded-full bg-card text-[12px] font-bold text-[#5B3FD9] shadow-soft">{i + 1}</span>
+              <span key={i} className="grid h-9 place-items-center rounded-full bg-card text-[12px] font-bold text-primary shadow-soft">{i + 1}</span>
             ))}
           </div>
           <ul className="mt-3 space-y-1 text-[12.5px] text-foreground/80">
@@ -82,7 +81,7 @@ export function CaminosStudio({ onNote }: { onNote: Notify }) {
               setTitle(""); setNotes(""); setCover("");
             }, "Camino creado con 8 etapas diarias de 20 pasos cada una, igual a CAMINO ORÍGEN. Queda oculto hasta que lo hagas visible.");
           }}
-          className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-[12px] bg-[#7C5CFF] text-[15px] font-bold text-white disabled:opacity-60"
+          className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-[12px] bg-primary text-[15px] font-bold text-primary-foreground disabled:opacity-60"
         >
           {busy === "new" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />} Crear camino con IA
         </button>
@@ -170,7 +169,7 @@ export function CoversStudio({ onNote }: { onNote: Notify }) {
 
 function CoverCard({ title, image, visible, busy, coverValue, onToggle, onSaveCover, onDelete }: {
   title: string; image: string | null; visible: boolean; busy: boolean; coverValue: string;
-  onToggle?: () => void; onSaveCover: (url: string) => void; onDelete?: () => void;
+  onToggle?: () => void; onSaveCover: (url: string) => void | Promise<void>; onDelete?: () => void;
 }) {
   const [url, setUrl] = useState(coverValue);
   const [uploading, setUploading] = useState(false);

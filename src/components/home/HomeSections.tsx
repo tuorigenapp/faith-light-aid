@@ -1,6 +1,5 @@
 import { useContentOverrides } from "@/hooks/use-content-overrides";
 import { exploreKey } from "@/lib/explore-content";
-import { ManagedImage } from "@/components/ManagedImage";
 import { getPalabraHoy, dayOfYear } from "@/lib/palabra365";
 import { useProfile } from "@/hooks/use-profile";
 import { Link } from "@tanstack/react-router";
