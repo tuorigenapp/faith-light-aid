@@ -271,7 +271,7 @@ const VV_METHODS = [
   { key: "cristo", title: "Método de Cristo 3·6·9", desc: "Fe, escritura y afirmación.", img: vivCristo, from: "from-[#2b3a9e]", to: "/visualiza/cristo" },
 ] as const;
 const VV_FALLBACK = [vvVis, vvMed, vvMan, vvAbu, vvBien];
-const VV_TINTS = ["from-[#5b2fc9]", "from-[#c0397f]", "from-[#1a7e9e]", "from-[#7a3fb0]", "from-[#2f8a5b]"];
+const VV_TINTS = ["from-home-cover-violet", "from-home-cover-rose", "from-home-cover-teal", "from-home-cover-plum", "from-home-cover-green"];
 export function VisualizeAndLiveCarousel() {
   const { get } = useContentOverrides();
   const { data } = useQuery({
@@ -283,11 +283,11 @@ export function VisualizeAndLiveCarousel() {
     },
   });
   const items = [
-    ...VV_METHODS.map((m) => ({ ...m, img: get(`imagen:visualiza:${m.key}`)?.cover_url || m.img })),
+    ...VV_METHODS.map((m) => ({ ...m, img: get(`imagen:visualiza:${m.key}`)?.cover_url || m.img, imageFit: "object-cover" })),
     ...(data ?? []).map((c, i) => ({
       key: c.id, title: c.title, desc: (c.subtitle || c.description || "Tema guiado con audios y práctica.").slice(0, 60),
       img: visualizaCategoryCover(c.id, get(`imagen:visualiza:cat-${c.id}`)?.cover_url, c.cover_url, VV_FALLBACK[i % VV_FALLBACK.length]), from: VV_TINTS[i % VV_TINTS.length],
-      customCover: true,
+      imageFit: "object-contain object-top bg-community-cover",
       to: "/visualiza/$categoryId" as const, params: { categoryId: c.id },
     })),
   ];
@@ -296,19 +296,11 @@ export function VisualizeAndLiveCarousel() {
       <SectionHead title="Visualízalo y Vívelo" sub="Crea la vida que deseas con el poder de tu mente y tu fe." to="/visualiza" cta="Ver todos" />
       <div className={scroller}>
         {items.map((p) => (
-          "customCover" in p ? (
-            <Link key={p.key} to="/visualiza/$categoryId" params={{ categoryId: p.key }} aria-label={`Abrir ${p.title}`} className="block snap-start shrink-0 w-[46%] sm:w-[23.5%] overflow-hidden rounded-[16px] border border-border bg-card shadow-soft transition-transform active:scale-[.98]">
-              <img src={p.img} alt={`Portada de ${p.title}`} loading="lazy" width={1024} height={1024} className="aspect-square w-full object-contain" />
-              <div className="p-3 text-card-foreground">
-                <h4 className="font-display text-[14px] font-bold leading-tight">{p.title}</h4>
-                <p className="mt-1 line-clamp-2 text-[12px] text-muted-foreground">{p.desc}</p>
-              </div>
-            </Link>
-          ) : <Link key={p.key} to={p.to as "/visualiza"} params={("params" in p ? p.params : undefined) as never} className={`relative snap-start shrink-0 w-[46%] sm:w-[23.5%] aspect-[4/5] ${card}`}>
-            <img src={p.img} alt={`Portada de ${p.title}`} loading="lazy" width={768} height={1024} className="absolute inset-0 h-full w-full object-cover" />
-            <div className={`absolute inset-0 bg-gradient-to-t ${p.from} via-black/10 to-transparent`} />
-            <div className="absolute inset-x-0 bottom-0 p-3 text-white">
-              <span className="grid place-items-center w-8 h-8 rounded-full bg-white/25 backdrop-blur border border-white/40"><Headphones className="w-4 h-4" /></span>
+          <Link key={p.key} to={p.to as "/visualiza"} params={("params" in p ? p.params : undefined) as never} aria-label={`Abrir ${p.title}`} className={`relative snap-start shrink-0 w-[46%] sm:w-[23.5%] aspect-[4/5] ${card}`}>
+            <img src={p.img} alt={`Portada de ${p.title}`} loading="lazy" width={768} height={1024} className={`absolute inset-0 h-full w-full ${p.imageFit}`} />
+            <div className={`absolute inset-0 bg-gradient-to-t ${p.from} via-community-cover/10 to-transparent`} />
+            <div className="absolute inset-x-0 bottom-0 p-3 text-community-cover-foreground">
+              <span className="grid place-items-center w-8 h-8 rounded-full bg-community-cover-foreground/25 backdrop-blur border border-community-cover-foreground/40"><Headphones className="w-4 h-4" /></span>
               <h4 className="mt-1.5 font-display font-bold text-[14px] leading-tight">{p.title}</h4>
               <div className="flex items-end justify-between gap-1">
                 <p className="text-[11px] leading-snug opacity-90 line-clamp-2">{p.desc}</p>

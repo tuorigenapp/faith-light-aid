@@ -1,5 +1,9 @@
 # Roadmap ORÍGEN
 
+## Ajuste del 24 de octubre, 07:01 UTC
+- [x] Recuperar en Inicio el degradado, proporción y título sobre la imagen de las categorías del panel, conservando sus portadas nuevas completas; verificado a 375/1280 px con sesión.
+- [x] Quitar la eliminación de mensajes individuales del chat con la mentora; mensajes enviados y respuestas sin papelera a 375/1280 px. Historial mantiene el borrado con popup ORÍGEN y cancelación comprobada sin eliminar conversaciones.
+
 ## Correcciones del 24 de octubre, 06:44 UTC
 - [x] Sincronizar en Inicio las portadas de Libérate del Narcisista y Sana Tu Árbol Familiar que ya aparecen en Visualízalo; iguales en ambas vistas, completas y con enlaces comprobados a 375/1280 px.
 - [x] Reparar portada de la consulta Sana tu árbol familiar y comprobarla con sesión: portada firmada visible en listado y detalle, con respaldo local.
