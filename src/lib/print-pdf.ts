@@ -1,4 +1,5 @@
 import { christianText } from "./christian-language";
+import { brandCss, brandHeaderHtml, promoHtml } from "./pdf-brand";
 
 // Opens a printable view in a new window with app-branded styles so the user
 // can "Save as PDF" from the native browser dialog. Zero external deps.
@@ -36,8 +37,8 @@ export function printMinistracion(opts: {
   `;
   const html = `<!doctype html><html><head><meta charset="utf-8"><title>${opts.title}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <style>${style}</style></head><body><div class="wrap">
-  <div class="brand"><div class="brand-dot"></div><div class="brand-name">ORIGEN</div></div>
+  <style>${style}${brandCss}</style></head><body><div class="wrap">
+  ${brandHeaderHtml()}
   <h1>${escape(opts.title)}</h1>
   ${opts.subtitle ? `<div class="subtitle">${escape(opts.subtitle)}</div>` : ""}
   ${opts.meta ? `<div class="meta">${escape(opts.meta)}</div>` : ""}
@@ -46,7 +47,8 @@ export function printMinistracion(opts: {
       <h2><span class="emoji">${s.emoji}</span> ${escape(christianText(s.title))}</h2>
       <p>${escape(christianText(s.body))}</p>
     </div>`).join("")}
-  <div class="footer">Documento personal generado en ORIGEN · Método Ruth Esther</div>
+  ${promoHtml()}
+  <div class="footer">Documento personal generado en ORÍGEN · MÉTODO ORÍGEN basado en el Método de Cristo</div>
   </div>
   <script>window.addEventListener('load', function(){ setTimeout(function(){ window.print(); }, 400); });</script>
   </body></html>`;
@@ -121,15 +123,9 @@ export function printConsulta(opts: ConsultaPDFOptions) {
   `;
   const html = `<!doctype html><html><head><meta charset="utf-8"><title>${escape(opts.title)}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <style>${style}</style></head><body><div class="wrap">
+  <style>${style}${brandCss}</style></head><body><div class="wrap">
   <div class="header">
-    <div class="brand">
-      <div class="brand-dot"></div>
-      <div>
-        <div class="brand-name">ORIGEN</div>
-        <div class="brand-tag">Método Ruth Esther</div>
-      </div>
-    </div>
+    ${brandHeaderHtml().replace('class="ob-head"', 'class="ob-head" style="border:0;padding:0;margin:0"')}
     <div class="kind">${escape(opts.kind)}</div>
   </div>
 
@@ -151,6 +147,7 @@ export function printConsulta(opts: ConsultaPDFOptions) {
 
   ${opts.links?.length ? `<div class="plans"><h3>Continúa tu proceso con el Método ORÍGEN</h3>${opts.links.map(g => `<div class="plan"><b>${escape(g.group)}</b><div>${g.items.map(i => `<a class="pbtn" href="${escape(i.url)}" target="_blank" rel="noopener">${escape(i.label)}</a>`).join("")}</div></div>`).join("")}</div>` : ""}
 
+  ${promoHtml()}
   <div class="footer">
     Documento personal generado en <b>ORIGEN</b>, tu espacio de sanación y propósito.<br/>
     Sigue tu camino de transformación cada día.<br/>
@@ -184,7 +181,7 @@ export function printFamilyTree(opts: {
   const dateStr = new Date().toLocaleDateString("es", { dateStyle: "long" });
   const materno = opts.members.filter((m) => m.lineage === "materno");
   const paterno = opts.members.filter((m) => m.lineage === "paterno");
-  const logo = opts.logoUrl ? `<img class="logo-img" src="${escape(opts.logoUrl)}" alt="ORIGEN"/>` : `<div class="logo-dot">O</div>`;
+  const logo = brandHeaderHtml("Árbol genealógico espiritual").match(/<img[^>]+>/)?.[0]?.replace("<img", '<img class="logo-img"') ?? `<div class="logo-dot">O</div>`;
   const memberHtml = (m: FamilyTreePDFMember) => `
     <div class="member">
       <div class="avatar">${m.photo_url ? `<img src="${escape(m.photo_url)}" alt="${escape(m.full_name)}"/>` : escape(m.full_name.slice(0,1).toUpperCase())}</div>
@@ -196,11 +193,12 @@ export function printFamilyTree(opts: {
     .brand{display:flex;align-items:center;justify-content:space-between;gap:14px;border-bottom:1px solid #ece7f6;padding-bottom:18px;margin-bottom:22px}.brand-left{display:flex;align-items:center;gap:12px}.logo-dot,.logo-img{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg,#7C5CFF,#F58BCB);color:#fff;font-weight:900;object-fit:cover}.brand-name{font-weight:900;letter-spacing:2px}.brand-url{font-size:12px;color:#7C5CFF;font-weight:800}
     h1{font-size:28px;line-height:1.15;margin:0}.meta{margin-top:6px;color:#6B6A85;font-size:13px}.tree{margin:26px 0;text-align:center}.you{display:inline-flex;align-items:center;gap:10px;padding:10px 16px;border-radius:18px;background:#F2ECFF;color:#7C5CFF;font-weight:900}.branch{height:34px;width:2px;background:#7C5CFF;margin:0 auto}.cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}.col{border:2px solid #efe7ff;border-radius:20px;padding:16px}.col h2{font-size:13px;text-transform:uppercase;letter-spacing:1.5px;color:#7C5CFF;margin:0 0 12px}.member{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:center;border:1px solid #f0edf7;border-radius:16px;padding:10px;margin-bottom:10px;break-inside:avoid}.avatar{width:42px;height:42px;border-radius:50%;background:#F2ECFF;color:#7C5CFF;display:grid;place-items:center;font-weight:900;overflow:hidden}.avatar img{width:100%;height:100%;object-fit:cover}.member b{display:block;font-size:13px}.member span{display:block;color:#6B6A85;font-size:11px;margin-top:2px}.empty{color:#8b89a3;font-size:13px}.footer{margin-top:22px;text-align:center;color:#6B6A85;font-size:12px;border-top:1px solid #ece7f6;padding-top:16px}.footer b{color:#7C5CFF}@media print{body{padding:0;background:#fff}.wrap{box-shadow:none;border:0}.member{break-inside:avoid}}
   `;
-  const html = `<!doctype html><html><head><meta charset="utf-8"><title>Árbol genealógico ORIGEN</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap" rel="stylesheet"><style>${style}</style></head><body><div class="wrap">
+  const html = `<!doctype html><html><head><meta charset="utf-8"><title>Árbol genealógico ORIGEN</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap" rel="stylesheet"><style>${style}${brandCss}</style></head><body><div class="wrap">
     <div class="brand"><div class="brand-left">${logo}<div><div class="brand-name">ORIGEN</div><div class="meta">Árbol genealógico espiritual</div></div></div><div class="brand-url">tuorigen.app</div></div>
     <h1>Árbol genealógico de ${escape(opts.userName)}</h1><div class="meta">Generado el ${escape(dateStr)} · ${opts.members.length} familiares registrados</div>
     <div class="tree"><div class="you">Yo · ${escape(opts.userName)}</div><div class="branch"></div></div>
     <div class="cols"><section class="col"><h2>Linaje materno</h2>${materno.length ? materno.map(memberHtml).join("") : `<p class="empty">Aún no hay familiares maternos.</p>`}</section><section class="col"><h2>Linaje paterno</h2>${paterno.length ? paterno.map(memberHtml).join("") : `<p class="empty">Aún no hay familiares paternos.</p>`}</section></div>
+    ${promoHtml()}
     <div class="footer">Documento generado por <b>ORIGEN</b> · tuorigen.app<br/>Tu historia se honra, se ordena y se sana un paso a la vez.</div>
   </div><script>window.addEventListener('load',function(){setTimeout(function(){window.print()},500)})</script></body></html>`;
   w.document.open();

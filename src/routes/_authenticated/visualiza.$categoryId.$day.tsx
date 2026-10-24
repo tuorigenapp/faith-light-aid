@@ -11,6 +11,7 @@ import { Play, Pause, Download, ArrowLeft, Check, Headphones, Lock } from "lucid
 import { getUserPlan } from "@/lib/plan";
 import { FREE_AUDIOS } from "@/components/visualiza/CustomTopic";
 import { jsPDF } from "jspdf";
+import { jsPdfLogo, jsPdfPromoPage, METHOD_TITLE } from "@/lib/pdf-brand";
 import { awardLeaf } from "@/lib/gems";
 import { CELEBRATIONS } from "@/lib/celebrate-step";
 import { WordSearch } from "@/components/WordSearch";
@@ -103,14 +104,15 @@ function DayPlayer() {
     qc.invalidateQueries();
   }
 
-  function downloadPdf() {
+  async function downloadPdf() {
     if (!c || !a) return;
     const doc = new jsPDF({ format: "a4" });
     const w = doc.internal.pageSize.getWidth();
     doc.setFont("times", "italic"); doc.setFontSize(11);
-    doc.text(`CATEGORÍA: ${c.title.toUpperCase()}`, w / 2, 20, { align: "center" });
-    doc.setFont("times", "bold"); doc.setFontSize(24);
-    doc.text("MÉTODO DE CRISTO", w / 2, 32, { align: "center" });
+    await jsPdfLogo(doc as never, 4);
+    doc.text(`CATEGORÍA: ${c.title.toUpperCase()}`, w / 2, 24, { align: "center" });
+    doc.setFont("times", "bold"); doc.setFontSize(18);
+    doc.text(METHOD_TITLE, w / 2, 33, { align: "center" });
     doc.setFont("helvetica", "italic"); doc.setFontSize(10);
     doc.text(`Hoy es: ___/___/____   ·   Día ${a.day_index}`, w / 2, 42, { align: "center" });
 
@@ -128,7 +130,8 @@ function DayPlayer() {
     section("Finaliza cada ejercicio escribiendo una petición sencilla y directa", 18);
     doc.setFont("helvetica", "italic"); doc.setFontSize(9); doc.setTextColor(120);
     doc.text("Tu práctica personal — ORÍGEN", w / 2, 285, { align: "center" });
-    doc.save(`metodo-cristo-${categoryId}-dia${day}.pdf`);
+    await jsPdfPromoPage(doc as never);
+    doc.save(`metodo-origen-${categoryId}-dia${day}.pdf`);
   }
 
   async function applyUnlock() {
