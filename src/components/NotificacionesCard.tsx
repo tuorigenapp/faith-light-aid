@@ -32,6 +32,7 @@ export function NotificacionesCard() {
   async function togglePush() {
     if (!user || busy) return;
     setBusy(true);
+    try {
     if (push) {
       await disablePush(user.id);
       setPush(false);
@@ -41,7 +42,8 @@ export function NotificacionesCard() {
       setPush(res.ok);
       res.ok ? toast.success(res.message) : toast.error(res.message);
     }
-    setBusy(false);
+    } catch { toast.error("No pudimos guardar el cambio de avisos. Intenta de nuevo."); }
+    finally { setBusy(false); }
   }
 
   async function toggleEmail() {

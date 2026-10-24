@@ -82,13 +82,15 @@ export async function disablePush(userId: string) {
     const reg = await navigator.serviceWorker.getRegistration("/sw.js");
     const sub = await reg?.pushManager.getSubscription();
     if (sub) {
-      await supabase.from("push_subscriptions").delete().eq("endpoint", sub.endpoint);
+      const { error } = await supabase.from("push_subscriptions").delete().eq("endpoint", sub.endpoint);
+      if (error) throw error;
       await sub.unsubscribe();
     }
   } catch (e) {
-    console.error(e);
+    throw new Error("No pudimos desactivar este dispositivo. Intenta de nuevo.");
   }
-  await supabase.from("notification_prefs").upsert({ user_id: userId, push_enabled: false });
+  const { error } = await supabase.from("notification_prefs").upsert({ user_id: userId, push_enabled: false });
+  if (error) throw new Error("No pudimos guardar la desactivación de avisos.");
 }
 
 export async function setEmailEnabled(userId: string, enabled: boolean) {

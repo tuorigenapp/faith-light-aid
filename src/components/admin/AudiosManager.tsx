@@ -148,7 +148,7 @@ export function AudiosManager() {
   const [uploading, setUploading] = useState<"audio" | "cover" | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [generating, setGenerating] = useState(false);
-  const [autoGenerate, setAutoGenerate] = useState(true);
+  const [autoGenerate, setAutoGenerate] = useState(false);
   const [openGroups, setOpenGroups] = useState<Set<string>>(new Set(["abundancia"]));
   const [filter, setFilter] = useState<string>("");
   const [selectedRoot, setSelectedRoot] = useState<string>("");
