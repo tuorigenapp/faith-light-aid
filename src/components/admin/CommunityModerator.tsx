@@ -77,7 +77,7 @@ export function CommunityModerator() {
   async function act(payload: Record<string, unknown>, confirmText?: string) {
     if (confirmText && !await confirmDeletion("Este contenido se eliminará de la comunidad. No podrás recuperarlo.")) return;
     try { await send(payload); toast.success("Moderación actualizada"); }
-    catch (e) { toast.error((e as Error).message); }
+    catch (e) { toast.error(confirmText ? "No pudimos eliminar el contenido. Intenta de nuevo." : (e as Error).message); }
   }
   async function publish() {
     setPublishing(true);

@@ -236,7 +236,7 @@ function TopicList({ categories, loading, onNote }: { categories: Cat[]; loading
       onNote({ text: ok });
       refresh();
     } catch (e) {
-      onNote({ text: e instanceof Error ? e.message : "No pudimos guardar el cambio.", error: true });
+      onNote({ text: ok === "Tema eliminado." ? "No pudimos eliminar el tema. Intenta de nuevo." : e instanceof Error ? e.message : "No pudimos guardar el cambio.", error: true });
     }
     setBusyId(null);
   }
@@ -366,7 +366,7 @@ function Subtopics({ onNote }: { onNote: Notify }) {
       qc.invalidateQueries({ queryKey: ["studio-subtopics"] });
       qc.invalidateQueries({ queryKey: ["studio-categories"] });
     } catch (e) {
-      onNote({ text: e instanceof Error ? e.message : "No pudimos guardar.", error: true });
+      onNote({ text: ok === "Subtema eliminado." ? "No pudimos eliminar el subtema. Intenta de nuevo." : e instanceof Error ? e.message : "No pudimos guardar.", error: true });
     }
     setWorking(null);
   }
@@ -515,7 +515,7 @@ function Limpieza({ onNote }: { onNote: Notify }) {
       onNote({ text: ok });
       qc.invalidateQueries({ queryKey: ["studio-limpieza"] });
     } catch (e) {
-      onNote({ text: e instanceof Error ? e.message : "No pudimos guardar.", error: true });
+      onNote({ text: ok === "Práctica eliminada." ? "No pudimos eliminar la práctica. Intenta de nuevo." : e instanceof Error ? e.message : "No pudimos guardar.", error: true });
     }
     setWorking(null);
   }

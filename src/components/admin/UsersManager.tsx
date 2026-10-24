@@ -69,7 +69,7 @@ export function UsersManager() {
       setSelected([]);
       qc.invalidateQueries({ queryKey: ["admin-users"] });
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "No se pudo completar.");
+      toast.error(kind === "delete" ? "No pudimos eliminar las cuentas. Intenta de nuevo." : e instanceof Error ? e.message : "No se pudo completar.");
     }
     setBulkBusy(false);
   }

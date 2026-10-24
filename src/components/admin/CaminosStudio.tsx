@@ -48,7 +48,7 @@ export function CaminosStudio({ onNote }: { onNote: Notify }) {
       qc.invalidateQueries({ queryKey: ["content-overrides"] });
       qc.invalidateQueries({ queryKey: ["custom-caminos"] });
     } catch (e) {
-      onNote({ text: e instanceof Error ? e.message : "No pudimos guardar.", error: true });
+      onNote({ text: ok === "Camino eliminado." ? "No pudimos eliminar el camino. Intenta de nuevo." : e instanceof Error ? e.message : "No pudimos guardar.", error: true });
     }
     setBusy(null);
   }
