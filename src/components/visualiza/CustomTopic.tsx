@@ -1,3 +1,4 @@
+import { affirmationStyle } from "@/lib/affirmation-palette";
 import { SubtopicIcon } from "./SubtopicIcon";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
@@ -83,10 +84,10 @@ export function CustomTopic({
 
         {affirmations.length > 0 && (
           <div className="grid gap-3 sm:grid-cols-3">
-            {affirmations.map((a) => (
-              <div key={a} className="app-card p-4">
-                <Sparkles className="h-4 w-4 text-primary" />
-                <p className="mt-2 text-[14px] font-semibold leading-snug">{a}</p>
+            {affirmations.map((a, ai) => (
+              <div key={a} className="p-4 rounded-2xl border border-black/5" style={{ background: affirmationStyle(ai).bg }}>
+                <Sparkles className="h-4 w-4" style={{ color: affirmationStyle(ai).color }} />
+                <p className="mt-2 text-[14px] font-semibold leading-snug text-[#2A2238]">{a}</p>
               </div>
             ))}
           </div>

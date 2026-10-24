@@ -1,4 +1,5 @@
 import { thematicPractice } from "@/lib/visualiza-content";
+import { affirmationStyle } from "@/lib/affirmation-palette";
 import { SubtopicIcon } from "@/components/visualiza/SubtopicIcon";
 import { WordSearch } from "@/components/WordSearch";
 import { StageQuiz } from "@/components/StageQuiz";
@@ -626,8 +627,8 @@ function LimpiezaPage() {
             {[practiceContent.affirmation].map((a, i) => {
               const active = affirmationsRead.has(i);
               return (
-                <div key={i} className="app-card p-3 rounded-2xl">
-                  <p className="text-xs font-semibold leading-snug min-h-[3rem]">{a}</p>
+                <div key={i} className="p-3 rounded-2xl border border-black/5" style={{ background: affirmationStyle(i).bg }}>
+                  <p className="text-xs font-semibold leading-snug min-h-[3rem] text-[#2A2238]">{a}</p>
                   <div className="flex items-center justify-between mt-2">
                     <button className="w-8 h-8 rounded-full bg-primary/10 text-primary grid place-items-center">
                       <Play className="w-3.5 h-3.5 ml-0.5" />

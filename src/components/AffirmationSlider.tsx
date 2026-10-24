@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { affirmationsFor } from "@/lib/affirmations";
+import { affirmationStyle } from "@/lib/affirmation-palette";
 
 /**
  * Slider de afirmaciones del Paso 1 (reemplaza el video).
@@ -47,8 +48,8 @@ export function AffirmationSlider({
       </div>
 
       <div
-        className="relative mt-3 grid min-h-[168px] place-items-center px-5 text-center"
-        style={{ background: "linear-gradient(180deg,#F6EFFF 0%,#FFF3FA 100%)" }}
+        className="relative mt-3 grid min-h-[168px] place-items-center px-5 text-center transition-colors duration-300"
+        style={{ background: affirmationStyle(i).bg }}
       >
         <div key={i} style={{ animation: "fade-in .35s ease-out both" }}>
           <div className="text-[38px] leading-none">{current.emoji}</div>
