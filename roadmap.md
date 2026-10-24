@@ -1,5 +1,10 @@
 # Roadmap ORÍGEN
 
+## Capturas e íconos del 24 de octubre, 08:50 UTC
+- [ ] Agregar capturas reales de Categorías, Etapas, camino individual, categorías de Visualízalo y una subcategoría por dentro en Inicio y ambos bloques de pago.
+- [ ] Crear PNG nuevos y específicos para las interacciones mostradas, sin reutilizar los emojis anteriores.
+- [ ] Verificar capturas visibles, navegación del carrusel y ausencia de desbordamiento en teléfono y computadora.
+
 ## Papelera de la mentora, 24 de octubre, 07:12 UTC
 - [x] Guardar conversaciones eliminadas y sus mensajes en papelera recuperable por 30 días, con privacidad por cuenta, plazo controlado en el servidor y limpieza de vencidas al consultar el historial.
 - [x] Agregar acceso a papelera y restauración en el historial del chat sin permitir borrar burbujas individuales.
