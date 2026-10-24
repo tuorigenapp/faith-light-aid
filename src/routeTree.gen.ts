@@ -25,6 +25,7 @@ import { Route as AuthenticatedCategoriasRouteImport } from './routes/_authentic
 import { Route as AuthenticatedChatRouteImport } from './routes/_authenticated/chat'
 import { Route as AuthenticatedComprarmonedasRouteImport } from './routes/_authenticated/comprarmonedas'
 import { Route as AuthenticatedComunidadRouteImport } from './routes/_authenticated/comunidad'
+import { Route as AuthenticatedConsultasRouteImport } from './routes/_authenticated/consultas'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedDiagnosticoRouteImport } from './routes/_authenticated/diagnostico'
 import { Route as AuthenticatedDiarioRouteImport } from './routes/_authenticated/diario'
@@ -160,6 +161,11 @@ const AuthenticatedComprarmonedasRoute =
 const AuthenticatedComunidadRoute = AuthenticatedComunidadRouteImport.update({
   id: '/comunidad',
   path: '/comunidad',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedConsultasRoute = AuthenticatedConsultasRouteImport.update({
+  id: '/consultas',
+  path: '/consultas',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
@@ -479,6 +485,7 @@ export interface FileRoutesByFullPath {
   '/chat': typeof AuthenticatedChatRoute
   '/comprarmonedas': typeof AuthenticatedComprarmonedasRoute
   '/comunidad': typeof AuthenticatedComunidadRoute
+  '/consultas': typeof AuthenticatedConsultasRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/diagnostico': typeof AuthenticatedDiagnosticoRoute
   '/diario': typeof AuthenticatedDiarioRoute
@@ -552,6 +559,7 @@ export interface FileRoutesByTo {
   '/chat': typeof AuthenticatedChatRoute
   '/comprarmonedas': typeof AuthenticatedComprarmonedasRoute
   '/comunidad': typeof AuthenticatedComunidadRoute
+  '/consultas': typeof AuthenticatedConsultasRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/diagnostico': typeof AuthenticatedDiagnosticoRoute
   '/diario': typeof AuthenticatedDiarioRoute
@@ -626,6 +634,7 @@ export interface FileRoutesById {
   '/_authenticated/chat': typeof AuthenticatedChatRoute
   '/_authenticated/comprarmonedas': typeof AuthenticatedComprarmonedasRoute
   '/_authenticated/comunidad': typeof AuthenticatedComunidadRoute
+  '/_authenticated/consultas': typeof AuthenticatedConsultasRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/diagnostico': typeof AuthenticatedDiagnosticoRoute
   '/_authenticated/diario': typeof AuthenticatedDiarioRoute
@@ -701,6 +710,7 @@ export interface FileRouteTypes {
     | '/chat'
     | '/comprarmonedas'
     | '/comunidad'
+    | '/consultas'
     | '/dashboard'
     | '/diagnostico'
     | '/diario'
@@ -774,6 +784,7 @@ export interface FileRouteTypes {
     | '/chat'
     | '/comprarmonedas'
     | '/comunidad'
+    | '/consultas'
     | '/dashboard'
     | '/diagnostico'
     | '/diario'
@@ -847,6 +858,7 @@ export interface FileRouteTypes {
     | '/_authenticated/chat'
     | '/_authenticated/comprarmonedas'
     | '/_authenticated/comunidad'
+    | '/_authenticated/consultas'
     | '/_authenticated/dashboard'
     | '/_authenticated/diagnostico'
     | '/_authenticated/diario'
@@ -1052,6 +1064,13 @@ declare module '@tanstack/react-router' {
       path: '/comunidad'
       fullPath: '/comunidad'
       preLoaderRoute: typeof AuthenticatedComunidadRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/consultas': {
+      id: '/_authenticated/consultas'
+      path: '/consultas'
+      fullPath: '/consultas'
+      preLoaderRoute: typeof AuthenticatedConsultasRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard': {
@@ -1521,6 +1540,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedChatRoute: typeof AuthenticatedChatRoute
   AuthenticatedComprarmonedasRoute: typeof AuthenticatedComprarmonedasRoute
   AuthenticatedComunidadRoute: typeof AuthenticatedComunidadRoute
+  AuthenticatedConsultasRoute: typeof AuthenticatedConsultasRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedDiagnosticoRoute: typeof AuthenticatedDiagnosticoRoute
   AuthenticatedDiarioRoute: typeof AuthenticatedDiarioRoute
@@ -1556,6 +1576,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedChatRoute: AuthenticatedChatRoute,
   AuthenticatedComprarmonedasRoute: AuthenticatedComprarmonedasRoute,
   AuthenticatedComunidadRoute: AuthenticatedComunidadRoute,
+  AuthenticatedConsultasRoute: AuthenticatedConsultasRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedDiagnosticoRoute: AuthenticatedDiagnosticoRoute,
   AuthenticatedDiarioRoute: AuthenticatedDiarioRoute,

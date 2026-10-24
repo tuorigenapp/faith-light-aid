@@ -33,7 +33,7 @@ export const FEATURED_EXPLORE: ExploreItem[] = [
 
 export const EXPLORE_ITEMS: ExploreItem[] = [
   ...FEATURED_EXPLORE,
-  { title: "¿Deuda o propósito?", description: "Lectura profunda de pareja.", image: pilarPareja, to: "/pareja", tag: "Pareja" },
+  { title: "¿Deuda o propósito?", description: "Consulta profunda de pareja.", image: pilarPareja, to: "/pareja", tag: "Pareja" },
   { title: "Dios te dice hoy", description: "Ministración desde la Corte Celestial.", image: pilarMinistracion, to: "/ministracion", tag: "Palabra" },
   { title: "Visualízalo y Vívelo", description: "Audios, ejercicios y visualización guiada.", image: visualizaBanner, to: "/visualiza", tag: "Audio" },
   { title: "Mi árbol", description: "Agrega familiares y mira tu linaje.", image: treeCover, to: "/arbol", tag: "Familia" },
