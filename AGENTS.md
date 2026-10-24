@@ -46,3 +46,4 @@
 - Funnel blocks live in `src/components/funnel/FunnelShared.tsx`, real captures in `src/lib/app-screens.ts` with stable interleaving via `app-screen-order.ts`, and original interaction PNGs in `src/lib/funnel-interactions.ts`; this keeps `/` and both `/empezar` offers synchronized with varied captures and stable section filters.
 - In-app reminders become system notifications whenever notification permission is granted; the in-app card is only the fallback without permission.
 - Landing registration uses a shared token-themed dock and Button variant without invented deadlines; its explicit offer link preserves the evaluation and then opens the existing discounted plans without duplicating prices or checkout links.
+- Vercel builds (VERCEL=1) switch Nitro to the `vercel` preset in vite.config.ts with vercel.json pinning the build; this lets the GitHub repo deploy on Vercel while Lovable keeps its default target.
