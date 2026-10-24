@@ -373,6 +373,9 @@ function ExerciseModal({
   const [mentalDone, setMentalDone] = useState(false);
   const [gameDone, setGameDone] = useState(false);
   const [gameOpen, setGameOpen] = useState(false);
+  const [doneSteps, setDoneSteps] = useState<Set<number>>(new Set());
+  const allStepsDone = doneSteps.size >= exercise.steps.length;
+  const quizCorrect = quizPick !== null && quizPick === quiz[quizIdx]?.correctIndex;
 
   const keywords = useMemo(() => getExerciseKeywords(exercise), [exercise]);
   const quiz = useMemo(() => getExerciseQuiz(exercise), [exercise]);
@@ -434,16 +437,19 @@ function ExerciseModal({
             {exercise.scripture && <p className="scripture mt-3 text-sm">“{exercise.scripture}”</p>}
             <ol className="mt-5 space-y-2.5 text-sm">
               {exercise.steps.map((s, i) => (
-                <li key={i} className="flex gap-3 rounded-[16px] border border-border p-3 bg-card">
-                  <span className="shrink-0 w-7 h-7 rounded-full bg-primary/10 text-primary grid place-items-center text-xs font-bold">
-                    {i + 1}
-                  </span>
-                  <span className="leading-relaxed">{s}</span>
+                <li key={i}>
+                  <button type="button" onClick={() => setDoneSteps((prev) => { const n = new Set(prev); if (n.has(i)) n.delete(i); else n.add(i); return n; })} aria-pressed={doneSteps.has(i)} className={cn("flex w-full gap-3 rounded-[16px] border p-3 text-left active:scale-[.98] transition", doneSteps.has(i) ? "border-primary bg-primary/8" : "border-border bg-card")}>
+                    <span className={cn("shrink-0 w-7 h-7 rounded-full grid place-items-center text-xs font-bold", doneSteps.has(i) ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary")}>
+                      {doneSteps.has(i) ? <Check className="w-4 h-4" /> : i + 1}
+                    </span>
+                    <span className="leading-relaxed">{s}</span>
+                  </button>
                 </li>
               ))}
             </ol>
             <AffirmationSlider className="mt-4" focus={exercise.title} words={keywords} />
-            <StepButton onClick={() => setStep(2)}>Hacer el quiz</StepButton>
+            {!allStepsDone && <p className="mt-4 text-center text-[13px] font-semibold text-muted-foreground">Marca cada paso cuando lo hayas hecho para continuar.</p>}
+            <StepButton disabled={!allStepsDone} onClick={() => setStep(2)}>Hacer el quiz</StepButton>
           </section>
         )}
 
@@ -481,9 +487,13 @@ function ExerciseModal({
                 {currentQuiz.explanation}
               </p>
             )}
-            <StepButton disabled={quizPick === null} onClick={nextQuiz}>
-              {quizDone ? "Ir al juego de verdades" : "Siguiente pregunta"}
-            </StepButton>
+            {quizPick !== null && !quizCorrect ? (
+              <StepButton onClick={() => setQuizPick(null)}>Intentar de nuevo</StepButton>
+            ) : (
+              <StepButton disabled={!quizCorrect} onClick={nextQuiz}>
+                {quizDone ? "Ir al juego de verdades" : "Siguiente pregunta"}
+              </StepButton>
+            )}
           </section>
         )}
 
