@@ -271,6 +271,14 @@ body.community-reading .community-main { padding-bottom: 0; }
 }
 .registration-cta:hover { background-image: none; }
 .dark .registration-cta { box-shadow: none; }
+@keyframes registration-soft-pulse {
+  0%, 70%, 100% { transform: scale(1); }
+  35% { transform: scale(1.015); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .registration-pulse { animation: registration-soft-pulse 3s ease-in-out infinite; }
+  .registration-pulse:hover, .registration-pulse:focus-visible, .registration-pulse:active { animation: none; }
+}
 .community-poll-option.community-poll-option { background: var(--community-poll); border: 2px solid var(--community-poll-border); color: var(--foreground); box-shadow: var(--shadow-soft); }
 .community-poll-option.community-poll-option[data-selected="true"] { background: var(--community-poll-selected); border-color: var(--primary); }
 .community-reply { background: var(--community-reply-0); border: 1px solid var(--community-reply-border-0); }
