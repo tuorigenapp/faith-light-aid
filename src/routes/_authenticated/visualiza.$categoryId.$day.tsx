@@ -51,12 +51,14 @@ function DayPlayer() {
       const { data: siblings } = await supabase.from("manifest_audios").select("id, title, day_index, affirmation, lesson, exercise, quiz, word_game").eq("category_id", categoryId).order("day_index");
       let position = Number(day);
       if ((cat.data as any)?.is_custom && audio.data) {
+        const audioDay = audio.data.day_index;
         const { data: list } = await supabase.from("manifest_audios").select("day_index").eq("category_id", categoryId).order("day_index");
-        position = (list ?? []).findIndex((r) => r.day_index === audio.data!.day_index) + 1;
+        position = (list ?? []).findIndex((r) => r.day_index === audioDay) + 1;
       }
       const { data: unlocks } = user ? await supabase.from("audio_unlocks").select("audio_id").eq("user_id", user.id) : { data: [] as { audio_id: string | null }[] };
       const credits = (unlocks ?? []).filter((u) => !u.audio_id).length;
-      const unlocked = !!audio.data && (unlocks ?? []).some((u) => u.audio_id === audio.data!.id);
+      const audioId = audio.data?.id;
+      const unlocked = !!audioId && (unlocks ?? []).some((u) => u.audio_id === audioId);
       const hiddenByPlan = !audio.data && plan !== "camino" && Number(day) > FREE_AUDIOS;
       return { cat: cat.data, audio: audio.data, siblings: siblings ?? [], entry: entry.data, credits, locked: hiddenByPlan || (plan !== "camino" && position > FREE_AUDIOS && !unlocked) };
     },
@@ -85,10 +87,11 @@ function DayPlayer() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reproducir, a?.audio_url]);
 
-  function togglePlay() {
+  async function togglePlay() {
     if (!audioRef.current || !a?.audio_url) return;
-    if (playing) audioRef.current.pause(); else { audioRef.current.play(); markPlayed(); }
-    setPlaying(!playing);
+    if (playing) { audioRef.current.pause(); setPlaying(false); return; }
+    try { await audioRef.current.play(); setPlaying(true); void markPlayed(); }
+    catch { toast.error("No pudimos reproducir el audio. Vuelve a tocar escuchar; si continúa, avisa al administrador."); }
   }
 
   async function markPlayed() {
@@ -215,6 +218,9 @@ function DayPlayer() {
               <audio
                 ref={audioRef}
                 src={a.audio_url}
+                aria-label="Audio de la práctica"
+                onPlay={() => setPlaying(true)}
+                onPause={() => setPlaying(false)}
                 onTimeUpdate={(e) => setProgress(e.currentTarget.currentTime)}
                 onLoadedMetadata={(e) => setDuration(e.currentTarget.duration)}
                 onEnded={() => { setPlaying(false); markPlayed(); }}

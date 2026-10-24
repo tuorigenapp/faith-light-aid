@@ -1,6 +1,7 @@
 import { useServerFn } from "@tanstack/react-start";
 import { adminImportAudio } from "@/lib/audio-import.functions";
 import { googleDriveFileId } from "@/lib/media-input";
+import { SubtopicIcon } from "@/components/visualiza/SubtopicIcon";
 import { Button } from "@/components/ui/button";
 import { directAudioUrl, mediaError, validAudioAddress } from "@/lib/media-input";
 import { useMemo, useState } from "react";
@@ -35,6 +36,8 @@ type Audio = {
   lesson: string | null;
   exercise: string | null;
   pdf_url: string | null;
+  quiz: unknown;
+  word_game: unknown;
 };
 
 type Cat = {
@@ -107,6 +110,8 @@ const emptyForm = {
   lesson: "",
   exercise: "",
   pdf_url: "",
+  quiz: {} as { tasks?: string[]; recipe_steps?: string[]; materials?: string[]; questions?: { question: string; options: string[]; correctIndex: number; explanation: string }[] },
+  word_game: {} as { words?: string[] },
 };
 
 const catSchema = z.object({
@@ -212,7 +217,7 @@ export function AudiosManager() {
       let q = supabase
         .from("manifest_audios")
         .select(
-          "id, category_id, day_index, title, affirmation, audio_url, cover_url, duration_seconds, lesson, exercise, pdf_url",
+          "id, category_id, day_index, title, affirmation, audio_url, cover_url, duration_seconds, lesson, exercise, pdf_url, quiz, word_game",
         )
         .order("day_index")
         .limit(400);
@@ -278,10 +283,10 @@ export function AudiosManager() {
 
   async function generateContent(current: typeof emptyForm) {
     const { data: session } = await supabase.auth.getSession();
-    const res = await fetch("/api/admin/generate-manifest", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.session?.access_token ?? ""}` }, body: JSON.stringify({ title: current.title, category: cats?.find(c => c.id === current.category_id)?.title ?? current.category_id, day: current.day_index, context: [current.affirmation, current.lesson, current.exercise].filter(Boolean).join("\n").slice(0, 2000) }) });
+    const res = await fetch("/api/admin/generate-manifest", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.session?.access_token ?? ""}` }, body: JSON.stringify({ title: current.title, category: cats?.find(c => c.id === current.category_id)?.title ?? current.category_id, categoryId: current.category_id, audioId: editing, day: current.day_index, context: [current.affirmation, current.lesson, current.exercise].filter(Boolean).join("\n").slice(0, 2000) }) });
     const result = await res.json();
     if (!res.ok) throw new Error(result.error ?? "No pudimos generar el contenido");
-    return result as { affirmation: string; lesson: string; exercise: string };
+    return result as Pick<typeof emptyForm, "affirmation" | "lesson" | "exercise" | "quiz" | "word_game">;
   }
 
   const save = useMutation({
@@ -305,10 +310,12 @@ export function AudiosManager() {
         title: d.title,
         affirmation: d.affirmation,
         audio_url: audioUrl || null,
-        cover_url: d.cover_url || null,
+        cover_url: null,
         lesson: d.lesson || null,
         exercise: d.exercise || null,
         pdf_url: d.pdf_url || null,
+        quiz: current.quiz,
+        word_game: current.word_game,
       };
       const res = editing
         ? await supabase.from("manifest_audios").update(row).eq("id", editing)
@@ -421,6 +428,8 @@ export function AudiosManager() {
       lesson: a.lesson ?? "",
       exercise: a.exercise ?? "",
       pdf_url: a.pdf_url ?? "",
+      quiz: (a.quiz as typeof emptyForm.quiz) ?? {},
+      word_game: (a.word_game as typeof emptyForm.word_game) ?? {},
     });
     setOpen(true);
   }
@@ -850,33 +859,7 @@ export function AudiosManager() {
                   <button type="button" disabled={generating || !form.title.trim()} className="mt-3 rounded-xl bg-primary px-4 py-2 text-white disabled:opacity-50" onClick={async () => { setGenerating(true); try { const content = await generateContent(form); setForm(f => ({ ...f, ...content })); toast.success("Contenido listo para revisar"); } catch (e) { toast.error((e as Error).message); } finally { setGenerating(false); } }}>{generating ? "Generando…" : "Generar contenido ahora"}</button>
                 </div>
 
-                <Field label="Portada (enlace o archivo)">
-                  <input
-                    value={form.cover_url}
-                    onChange={(e) => setForm({ ...form, cover_url: e.target.value })}
-                    placeholder="https://… o sube la imagen"
-                    className={inputCls}
-                    maxLength={800}
-                  />
-                  <label className="mt-2 inline-flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-[10px] bg-primary/10 text-[13px] font-semibold text-primary">
-                    {uploading === "cover" ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Upload className="h-4 w-4" />
-                    )}
-                    Subir portada
-                    <input
-                      type="file"
-                      accept="image/png,image/jpeg,image/webp"
-                      className="sr-only"
-                      onChange={(e) => {
-                        const f = e.target.files?.[0];
-                        if (f) void upload("cover", f);
-                        e.target.value = "";
-                      }}
-                    />
-                  </label>
-                </Field>
+                <div className="flex items-center gap-3"><SubtopicIcon title={form.title} category={cats?.find(c => c.id === form.category_id)?.title} /><span className="text-sm text-muted-foreground">{form.title || "Práctica del día"}</span></div>
 
                 <Field label="Lección / contenido del día">
                   <textarea
