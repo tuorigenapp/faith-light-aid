@@ -191,7 +191,7 @@ function CategoryInner() {
   const firstPractice = data.audios[0];
   const practice = firstPractice ? resolvePractice(c.title, firstPractice, data.audios) : thematicPractice(c.title, c.title);
   const todayIndex = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
-  const areaAffirmations = dailyAffirmations(c.title, firstPractice?.title ?? c.title, todayIndex, practice.affirmation).map(text => ({ text, Icon: Heart, color: "var(--primary)", bg: "var(--secondary)" }));
+  const areaAffirmations = dailyAffirmations(c.title, firstPractice?.title ?? c.title, todayIndex, practice.affirmation).map((text, i) => ({ text, ...affirmationStyle(i) }));
   const areaQuiz: QuizItem[] = practice.quiz.map(q => ({ q: q.question, options: q.options, correct: q.correctIndex, tip: q.explanation }));
 
   const StepDots = (
@@ -414,7 +414,7 @@ function CategoryInner() {
               <div className="w-10 h-10 rounded-2xl bg-white/70 grid place-items-center mx-auto" style={{ color: af.color }}>
                 <af.Icon className="w-5 h-5" fill={af.Icon === Heart ? "currentColor" : "none"} />
               </div>
-              <p className="text-[13px] leading-relaxed mt-3 text-foreground/85 font-medium">{af.text}</p>
+              <p className="text-[13px] leading-relaxed mt-3 text-[#2A2238] font-medium">{af.text}</p>
               <div className="mt-3 flex items-center justify-center gap-4">
                 <button className="w-8 h-8 rounded-full grid place-items-center" style={{ color: af.color }}><Play className="w-4 h-4 ml-0.5" /></button>
                 <button className="w-8 h-8 rounded-full grid place-items-center" style={{ color: af.color }}><Heart className="w-4 h-4" /></button>

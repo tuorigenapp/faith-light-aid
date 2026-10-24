@@ -846,7 +846,7 @@ function CristoPage() {
               const idx = practice.affirmations.indexOf(a);
               const active = affRead.has(idx);
               return (
-                <div key={key} className="app-card p-3 rounded-2xl flex items-center gap-3">
+                <div key={key} className="p-3 rounded-2xl flex items-center gap-3 border border-black/5" style={{ background: affirmationStyle(idx).bg }}>
                   <button className="w-9 h-9 rounded-full bg-primary/10 text-primary grid place-items-center shrink-0">
                     <Play className="w-4 h-4 ml-0.5" />
                   </button>
