@@ -1,5 +1,11 @@
 # Roadmap ORÍGEN
 
+## Correcciones del 24 de octubre, 06:44 UTC
+- [ ] Reparar portada de la consulta Sana tu árbol familiar y comprobarla con sesión.
+- [ ] Corregir regreso de Patrones Familiares al inicio.
+- [ ] Unificar todas las eliminaciones en un popup ORÍGEN con cancelar, eliminar y casilla No volver a mostrar, guardada por persona.
+- [ ] Probar cancelación, confirmación y eliminaciones siguientes sin recordatorio; verificar diario, mentora e historial.
+
 ## Portadas de Visualízate del 24 de octubre, 06:11 UTC
 - [x] Portadas 1:1 con texto (etiqueta, título grande, subtítulo, sin botón) para las 4 categorías principales: Música, Limpieza, Identidad y Cristo 3·6·9.
 - [x] Portadas registradas en el catálogo del cPanel para edición manual.
