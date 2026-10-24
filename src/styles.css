@@ -55,6 +55,11 @@ body.community-reading .community-main { padding-bottom: 0; }
   --color-sidebar-ring: var(--sidebar-ring);
   --color-community-cover: var(--community-cover);
   --color-community-cover-foreground: var(--community-cover-foreground);
+  --color-home-cover-violet: var(--home-cover-violet);
+  --color-home-cover-rose: var(--home-cover-rose);
+  --color-home-cover-teal: var(--home-cover-teal);
+  --color-home-cover-plum: var(--home-cover-plum);
+  --color-home-cover-green: var(--home-cover-green);
   --color-selection: var(--selection);
   --color-selection-border: var(--selection-border);
   --color-selection-foreground: var(--selection-foreground);
@@ -130,6 +135,11 @@ body.community-reading .community-main { padding-bottom: 0; }
   --sidebar-ring: #7C5CFF;
   --community-cover: #1B1930;
   --community-cover-foreground: #F9F7FF;
+  --home-cover-violet: #5b2fc9;
+  --home-cover-rose: #c0397f;
+  --home-cover-teal: #1a7e9e;
+  --home-cover-plum: #7a3fb0;
+  --home-cover-green: #2f8a5b;
   --selection: #EEE7FF;
   --selection-border: #7050D6;
   --selection-foreground: #472B96;
