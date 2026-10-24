@@ -436,7 +436,8 @@ export const adminUpdateCategory = createServerFn({ method: "POST" })
       patch["cover_url"] = url;
     }
     if (typeof patch["cover_url"] === "string" && patch["cover_url"]) {
-      const { data: current } = await supabaseAdmin.from("manifest_categories").select("page").eq("id", data.id).maybeSingle();
+      const { data: current, error: pageError } = await supabaseAdmin.from("manifest_categories").select("page").eq("id", data.id).maybeSingle();
+      if (pageError) throw new Error("No pudimos leer el diseño de la categoría. La portada no se cambió.");
       const page = current?.page && typeof current.page === "object" && !Array.isArray(current.page) ? current.page : {};
       patch["page"] = { ...page, cover_home: patch["cover_url"], cover_step1: patch["cover_url"], cover_step2: patch["cover_url"], cover_step3: patch["cover_url"], cover_playlist: patch["cover_url"] };
     }
