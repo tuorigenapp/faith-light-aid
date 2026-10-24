@@ -37,6 +37,10 @@ async function uniqueSlug(db: any, table: string, column: string, base: string) 
 const COVER_STYLE =
   "Fotografía hiperrealista editorial profesional para ORÍGEN, aplicación cristiana. Personas con anatomía natural, vestimenta modesta, brazos y hombros cubiertos; sin joyas, collares ni crucifijos. Escena clara de oración, reflexión bíblica o familia según el tema, color vivo, composición profesional. Nunca simbolismo esotérico, chakras, cristales, rituales, sensualidad, auras ni fantasía espiritual. Sin texto, letras ni marcas de agua; el título se muestra en la interfaz.";
 
+/** Portada principal 1:1 de cada categoría de Visualízate: texto integrado, sin botón. */
+const CATEGORY_COVER_STYLE = (title: string) =>
+  `Portada cuadrada 1:1 premium de app cristiana. Fondo degradado tonal suave acorde al tema. Arriba a la izquierda, una etiqueta pequeña en mayúsculas con el grupo del tema; a la izquierda, el TÍTULO "${title}" en español, grande, oscuro y muy legible, con un subtítulo gris de una sola línea debajo; a la derecha, una fotografía hiperrealista, cristiana y decorosa (vestimenta modesta, brazos y hombros cubiertos, sin joyas ni crucifijos) relacionada con el tema, con luz cálida. SIN botones, píldoras ni elementos clicables. Nunca simbolismo esotérico, chakras, cristales, rituales, sensualidad ni fantasía espiritual. Sin marcas de agua.`;
+
 
 /* ───────── Diseño propio de cada tema (inspirado en la estructura, nunca copiado) ───────── */
 export type TopicPage = {
@@ -64,7 +68,8 @@ Devuelve JSON con: hero_title (máx 50 caracteres), hero_text (máx 200), includ
   );
   const prompts = (page.cover_prompts ?? []).slice(0, 3);
   const covers: (string | null)[] = [];
-  for (const [i, cp] of prompts.entries()) covers.push(await uploadCover(`${cp}. ${COVER_STYLE}`, `${slug}-paso-${i + 1}`));
+  for (const [i, cp] of prompts.entries())
+    covers.push(await uploadCover(i === 0 ? `${cp}. ${CATEGORY_COVER_STYLE(title)}` : `${cp}. ${COVER_STYLE}`, `${slug}-paso-${i + 1}`));
   const { cover_prompts: _c, ...rest } = page;
   return design === "audio"
     ? { ...rest, cover_home: covers[0] ?? null, cover_playlist: covers[1] ?? null, cover_step3: covers[2] ?? null }
@@ -127,7 +132,7 @@ Devuelve JSON con: subtitle (máx 70 caracteres), description (2 a 3 frases, má
     const id = await uniqueSlug(supabaseAdmin, "manifest_categories", "id", slug);
 
     const cover = data.withCover
-      ? await uploadCover(`${generated.cover_prompt}. ${COVER_STYLE}`, slug)
+      ? await uploadCover(`${generated.cover_prompt}. ${CATEGORY_COVER_STYLE(data.title)}`, slug)
       : null;
 
     const { data: last } = await supabaseAdmin

@@ -1,5 +1,11 @@
 # Roadmap ORÍGEN
 
+## Portadas de Visualízate del 24 de octubre, 06:11 UTC
+- [x] Portadas 1:1 con texto (etiqueta, título grande, subtítulo, sin botón) para las 4 categorías principales: Música, Limpieza, Identidad y Cristo 3·6·9.
+- [x] Portadas registradas en el catálogo del cPanel para edición manual.
+- [x] Nuevas categorías del panel generan su portada principal 1:1 con título integrado automáticamente (CATEGORY_COVER_STYLE).
+- [x] Verificar /visualiza en pantalla y compilar sin errores: 4 portadas nuevas visibles a 375 px, sin desbordamiento.
+
 ## Consultas del 24 de octubre, 06:05 UTC
 - [x] Nueva sección /consultas con todas las consultas (4 fijas + personalizadas de la base) y enlace «Ver todas las consultas» del inicio.
 - [x] Portadas horizontales con texto y botón «Abrir consulta →» estilo banner de Niño interior para las 5 consultas; portada del árbol actualizada en la base.
