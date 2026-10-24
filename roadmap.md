@@ -1,5 +1,14 @@
 # Roadmap ORÍGEN
 
+## Consultas del 24 de octubre, 06:05 UTC
+- [x] Nueva sección /consultas con todas las consultas (4 fijas + personalizadas de la base) y enlace «Ver todas las consultas» del inicio.
+- [x] Portadas horizontales con texto y botón «Abrir consulta →» estilo banner de Niño interior para las 5 consultas; portada del árbol actualizada en la base.
+- [x] Portadas de consultas registradas en el catálogo del cPanel (sección «Consultas · portadas con botón») para edición manual.
+- [x] Nuevas consultas del cPanel generan portada horizontal con título y botón automáticamente; aparecen solas en /consultas y en el menú.
+- [x] «Todas las consultas» agregada al menú flotante; «Lectura(s) de pareja» cambiado a «Consulta(s) de pareja» en Perfil, Historial y Explorar.
+- [x] Verificar /consultas en pantalla con sesión y compilar sin errores: 5 banners visibles, enlaces abren cada consulta, menú actualizado, móvil 375 px sin desbordamiento.
+
+
 ## Enlaces y organización del 24 de octubre, 04:16 UTC
 - [x] Importar y reproducir el audio público de Google Drive desde ambos formularios de administración.
 - [x] Probar también el segundo enlace público de Drive recibido a las 04:33 UTC y dejarlo en Vamos a corroborar, día 3: 50 segundos, reproducción sin errores.

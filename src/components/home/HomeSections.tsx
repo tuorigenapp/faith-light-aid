@@ -122,7 +122,7 @@ export function OrigenPillars() {
             </div>
           </Link>
         ))}
-        <Link to="/explorar" className={`relative snap-start shrink-0 w-[44%] sm:w-auto aspect-[3/4] ${card} bg-gradient-to-br from-[#7950F5] to-[#F4A1D1] grid place-items-center text-white text-center p-4`}>
+        <Link to="/consultas" className={`relative snap-start shrink-0 w-[44%] sm:w-auto aspect-[3/4] ${card} bg-gradient-to-br from-[#7950F5] to-[#F4A1D1] grid place-items-center text-white text-center p-4`}>
           <span>
             <span className="mx-auto grid place-items-center w-12 h-12 rounded-full bg-white/25 border border-white/40"><LayoutGrid className="w-6 h-6" /></span>
             <span className="block mt-3 font-display font-bold text-[15px] leading-tight">Ver todas las consultas</span>

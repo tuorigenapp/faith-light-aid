@@ -61,7 +61,7 @@ Devuelve JSON con:
 - intro: 2 o 3 frases cálidas que expliquen qué va a recibir.
 - sections: entre 4 y 6 bloques de la respuesta; cada uno con key (en inglés, minúsculas, sin espacios), label (título visible en español) y hint (qué debe contener, en español, 1 frase).
 - system_prompt: instrucciones completas en español para la IA que redacta la respuesta, con el tono de ORÍGEN, sin misticismo, sin diagnósticos médicos y sin promesas absolutas.
-- cover_prompt: descripción visual en inglés de una ilustración espiritual cálida, sin texto.`,
+- cover_prompt: descripción visual en inglés de un banner horizontal 21:9 estilo app cristiana premium: fondo degradado cálido crema-rosa, a la izquierda una etiqueta pequeña en mayúsculas color coral, el TÍTULO de la sección en español grande y legible en oscuro, un subtítulo gris de una línea y un botón píldora coral con texto blanco "Abrir consulta →"; a la derecha una foto hiperrealista, cristiana y decorosa (vestimenta modesta, luz dorada, sin símbolos esotéricos) relacionada con el tema.`,
     );
 
     let coverUrl: string | null = null;

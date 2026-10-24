@@ -840,7 +840,7 @@ function ProfilePanel({ profile, onEdit }: { profile: any; onEdit: () => void })
             <MetricCard color="#7C5CFF" icon={<Sparkles className="w-4 h-4" />} label="Ministración" value={stats?.ministraciones ?? 0} to="/ministracion" />
             <MetricCard color="#F58BCB" icon={<Dumbbell className="w-4 h-4" />} label="Ejercicios" value={stats?.exercises ?? 0} to="/ejercicios" />
             <MetricCard color="#5AA9FF" icon={<BookHeart className="w-4 h-4" />} label="Diario" value={stats?.journals ?? 0} to="/diario" />
-            <MetricCard color="#3FBE8F" icon={<HeartHandshake className="w-4 h-4" />} label="Lecturas de pareja" value={stats?.parejas ?? 0} to="/pareja" />
+            <MetricCard color="#3FBE8F" icon={<HeartHandshake className="w-4 h-4" />} label="Consultas de pareja" value={stats?.parejas ?? 0} to="/pareja" />
             <MetricCard color="#F7B955" icon={<Trophy className="w-4 h-4" />} label="Hojas" value={wholeHojas(profile.gems)} to="/comprarmonedas" />
             <MetricCard color="#E05A6B" icon={<Target className="w-4 h-4" />} label="Familiares" value={stats?.familiares ?? 0} to="/arbol" />
           </div>
@@ -883,7 +883,7 @@ function ProfilePanel({ profile, onEdit }: { profile: any; onEdit: () => void })
           <div className="flex items-center justify-between mb-3">
             <div>
               <div className="text-[10px] uppercase tracking-widest text-primary font-bold">Historial</div>
-              <h2 className="font-display font-bold text-lg">Lecturas de pareja</h2>
+              <h2 className="font-display font-bold text-lg">Consultas de pareja</h2>
             </div>
             <Link to="/pareja" className="text-xs text-primary font-semibold">Nueva +</Link>
           </div>
