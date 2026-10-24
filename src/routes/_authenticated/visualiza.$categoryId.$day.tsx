@@ -185,12 +185,14 @@ function DayPlayer() {
   const questions = content.quiz;
   const tasks = content.tasks;
   const materials: string[] = Array.isArray((a as any).quiz?.materials) ? (a as any).quiz.materials : [];
-  const steps: string[] = Array.isArray((a as any).quiz?.steps) ? (a as any).quiz.steps : [];
+  const steps: string[] = Array.isArray((a as any).quiz?.recipe_steps) ? (a as any).quiz.recipe_steps : Array.isArray((a as any).quiz?.steps) ? (a as any).quiz.steps : [];
+  const page = c.page && typeof c.page === "object" && !Array.isArray(c.page) ? c.page as Record<string, unknown> : {};
+  const pageCover = typeof page["cover_step3"] === "string" ? page["cover_step3"] : null;
 
   return (
     <div className="pb-32">
       <div className="relative overflow-hidden bg-sanctuary text-sanctuary-foreground">
-        <img src={c.cover_url || lessonCover} alt="" className="absolute inset-0 h-full w-full object-cover" />
+        <img src={pageCover || c.cover_url || lessonCover} alt="" className="absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-sanctuary/80" />
         <div className="relative max-w-3xl mx-auto px-4 md:px-8 pt-6 pb-10">
           <Link to="/visualiza/$categoryId" params={{ categoryId }} className="inline-flex min-h-11 items-center gap-2 text-sanctuary-foreground text-sm"><ArrowLeft className="w-4 h-4" /> {c.title}</Link>

@@ -1,4 +1,5 @@
 import { thematicPractice } from "@/lib/visualiza-content";
+import { SubtopicIcon } from "@/components/visualiza/SubtopicIcon";
 import { ManagedImage } from "@/components/ManagedImage";
 import { useSessionState } from "@/hooks/use-session-step";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -447,9 +448,8 @@ function IdentidadPage() {
                 }}
                 className="app-card p-3 text-center rounded-2xl transition-all hover:-translate-y-0.5 active:scale-[.97] relative overflow-hidden border border-border/60"
               >
-                <div className="w-14 h-14 rounded-2xl grid place-items-center mx-auto mb-2" style={{ background: p.bg, color: p.color }}>
-                  {locked ? <Lock className="w-6 h-6" /> : <p.Icon className="w-6 h-6" />}
-                </div>
+                <SubtopicIcon title={p.title} category="Salto de Identidad" className="mx-auto mb-2 h-14 w-14 text-3xl" />
+                {locked && <Lock className="absolute right-2 top-2 h-4 w-4 text-muted-foreground" />}
                 <div className="font-bold text-[12px] leading-tight">{p.title}</div>
                 <div className="text-[10px] text-muted-foreground mt-1">{p.duration}</div>
                 <div className="text-[10px] text-primary font-bold mt-0.5">Nivel {p.level}</div>
@@ -500,6 +500,7 @@ function IdentidadPage() {
         <Card className="rounded-[1.3rem] p-5 shadow-soft">
           <div className="text-xs font-bold text-primary uppercase tracking-widest">Objetivo</div>
           <p className="text-sm text-foreground/85 mt-2 leading-relaxed">{practice.objective}</p>
+          <p className="text-sm text-foreground/85 mt-3 leading-relaxed">{practiceContent.lesson}</p>
         </Card>
 
         {/* Preguntas guiadas */}

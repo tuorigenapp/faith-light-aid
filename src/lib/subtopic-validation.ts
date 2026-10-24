@@ -16,7 +16,23 @@ export function assertOriginalSubtopic(content: z.infer<typeof subtopicSchema>, 
     for (const key of ["affirmation", "lesson", "exercise"] as const) {
       if (p[key] && normalized(p[key]) === normalized(content[key])) throw new Error("La IA repitió contenido de otra práctica. No se guardó; agrega notas específicas del subtema y vuelve a intentar.");
     }
-    const quiz = p.quiz && typeof p.quiz === "object" ? p.quiz as { tasks?: string[]; questions?: { question: string }[] } : {};
-    if (quiz.tasks?.some(t => content.tasks.some(v => normalized(t) === normalized(v))) || quiz.questions?.some(q => content.quiz.some(v => normalized(q.question) === normalized(v.question)))) throw new Error("La IA repitió tareas o preguntas de otra práctica. No se guardó; agrega notas específicas del subtema y vuelve a intentar.");
+    const quiz = p.quiz && typeof p.quiz === "object" && !Array.isArray(p.quiz) ? p.quiz as { tasks?: string[]; questions?: { question: string }[] } : {};
+    if ((Array.isArray(quiz.tasks) && quiz.tasks.some(t => typeof t === "string" && content.tasks.some(v => normalized(t) === normalized(v)))) || (Array.isArray(quiz.questions) && quiz.questions.some(q => typeof q?.question === "string" && content.quiz.some(v => normalized(q.question) === normalized(v.question))))) throw new Error("La IA repitió tareas o preguntas de otra práctica. No se guardó; agrega notas específicas del subtema y vuelve a intentar.");
+    const game = p.word_game && typeof p.word_game === "object" ? p.word_game as { words?: string[] } : {};
+    if (Array.isArray(game.words) && game.words.length === content.search_words.length && game.words.every(w => typeof w === "string") && [...game.words].map(normalized).sort().join("|") === [...content.search_words].map(normalized).sort().join("|")) throw new Error("La IA repitió el juego de palabras de otra práctica. No se guardó; agrega notas específicas del subtema y vuelve a intentar.");
+  }
+}
+
+export const renewalPracticeSchema = z.object({
+  duration: z.string().min(1).max(60), objective: z.string().min(20).max(900),
+  info: z.array(z.string().min(5)).min(3).max(6), materials: z.array(z.string().min(2)).min(1).max(8),
+  steps: z.array(z.string().min(10)).min(3).max(8).refine(distinct, "Los pasos deben ser distintos"),
+  scripture: z.string().min(10), scripture_ref: z.string().min(3),
+});
+export function assertOriginalRenewal(content: z.infer<typeof renewalPracticeSchema>, previous: { objective?: string | null; steps?: unknown }[]) {
+  for (const practice of previous) {
+    if ((practice.objective && normalized(practice.objective) === normalized(content.objective)) || (Array.isArray(practice.steps) && practice.steps.some(step => typeof step === "string" && content.steps.some(next => normalized(next) === normalized(step))))) {
+      throw new Error("La IA repitió el objetivo o los pasos de otra práctica. No se guardó; agrega notas específicas y vuelve a intentar.");
+    }
   }
 }

@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { assertOriginalRenewal, renewalPracticeSchema } from "./subtopic-validation";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function assertAdmin(context: { supabase: any; userId: string }) {
@@ -172,7 +173,6 @@ export const adminCreateVisualizaSubtopic = createServerFn({ method: "POST" })
         categoryId: z.string().min(1),
         title: z.string().trim().min(3).max(140),
         notes: z.string().trim().max(1200).default(""),
-        withCover: z.boolean().default(true),
         audioOnly: z.boolean().optional(),
       })
       .parse(input),
@@ -183,7 +183,7 @@ export const adminCreateVisualizaSubtopic = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: category } = await supabaseAdmin.from("manifest_categories").select("id, title, description, audio_only, design").eq("id", data.categoryId).maybeSingle();
     if (!category) throw new Error("Ese tema principal ya no existe.");
-    const { data: siblings, error: readError } = await supabaseAdmin.from("manifest_audios").select("day_index, title, affirmation, lesson, exercise, quiz").eq("category_id", data.categoryId).order("day_index");
+    const { data: siblings, error: readError } = await supabaseAdmin.from("manifest_audios").select("day_index, title, affirmation, lesson, exercise, quiz, word_game").eq("category_id", data.categoryId).order("day_index");
     if (readError) throw new Error(readError.message);
     const usedDays = new Set((siblings ?? []).map(s => s.day_index));
     let dayIndex = 1;
@@ -277,7 +277,6 @@ export const adminCreateLimpieza = createServerFn({ method: "POST" })
         title: z.string().trim().min(3).max(120),
         level: z.number().int().min(1).max(3).default(1),
         notes: z.string().trim().max(1200).default(""),
-        withCover: z.boolean().default(true),
       })
       .parse(input),
   )
@@ -285,20 +284,14 @@ export const adminCreateLimpieza = createServerFn({ method: "POST" })
     await assertAdmin(context);
     const { aiJson } = await import("@/lib/ai-content.server");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-
-    const generated = await aiJson<{
-      duration: string;
-      objective: string;
-      info: string[];
-      materials: string[];
-      steps: string[];
-      scripture: string;
-      scripture_ref: string;
-    }>(
+    const { data: previous, error: previousError } = await supabaseAdmin.from("limpieza_practices").select("title, objective, steps");
+    if (previousError) throw new Error("No pudimos revisar las otras prácticas. Intenta de nuevo.");
+    const generated = renewalPracticeSchema.parse(await aiJson<unknown>(
       `Crea una práctica de limpieza espiritual cristiana llamada "${data.title}", nivel ${data.level} de 3. Notas del editor: ${data.notes || "sin notas"}.
 Devuelve JSON con: duration (por ejemplo "20 min"), objective (1 o 2 frases), info (array de 4 avisos útiles y seguros), materials (array de materiales sencillos como Biblia y cuaderno), steps (array de 6 a 8 pasos claros en orden), scripture (un versículo bíblico real y textual), scripture_ref (su referencia exacta).
-Usa contenido propio de este subtema, oración y acciones cotidianas; no generes imágenes ni cover_prompt. No incluyas rituales, sustancias, ni promesas de curación física.`,
-    );
+Usa contenido propio de este subtema, oración y acciones cotidianas; no generes imágenes ni cover_prompt. No incluyas rituales, sustancias, ni promesas de curación física. No copies objetivos ni pasos existentes: ${JSON.stringify(previous ?? []).slice(0, 14000)}.`,
+    ));
+    assertOriginalRenewal(generated, previous ?? []);
 
     const slug = await uniqueSlug(supabaseAdmin, "limpieza_practices", "slug", slugify(data.title) || "practica");
     const cover = null;
@@ -357,7 +350,7 @@ export const adminListCategories = createServerFn({ method: "GET" })
     const [cats, subs] = await Promise.all([
       supabaseAdmin
         .from("manifest_categories")
-        .select("id, title, subtitle, group_key, required_plan, cover_url, is_published, is_custom, sort_order")
+        .select("id, title, subtitle, group_key, required_plan, cover_url, page, is_published, is_custom, sort_order")
         .order("sort_order"),
       supabaseAdmin.from("manifest_audios").select("category_id"),
     ]);
@@ -374,6 +367,7 @@ export const adminUpdateCategory = createServerFn({ method: "POST" })
         id: z.string().min(1),
         title: z.string().trim().min(3).max(120).optional(),
         coverUrl: z.string().trim().max(1000).optional(),
+        coverSlot: z.enum(["cover_home", "cover_step1", "cover_step2", "cover_step3", "cover_playlist"]).optional(),
         isPublished: z.boolean().optional(),
         regenerateCover: z.boolean().optional(),
         copyFromId: z.string().optional(),
@@ -386,7 +380,7 @@ export const adminUpdateCategory = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const patch: Record<string, unknown> = {};
     if (data.title) patch["title"] = data.title;
-    if (data.coverUrl !== undefined) patch["cover_url"] = data.coverUrl || null;
+    if (data.coverUrl !== undefined && !data.coverSlot) patch["cover_url"] = data.coverUrl || null;
     if (data.isPublished !== undefined) patch["is_published"] = data.isPublished;
     if (data.copyFromId) {
       const { data: src } = await supabaseAdmin
@@ -407,7 +401,12 @@ export const adminUpdateCategory = createServerFn({ method: "POST" })
       if (!url) throw new Error("No pudimos generar la portada. Intenta de nuevo.");
       patch["cover_url"] = url;
     }
-    if (typeof patch["cover_url"] === "string" && patch["cover_url"]) {
+    if (data.coverSlot && data.coverUrl !== undefined) {
+      const { data: current, error: pageError } = await supabaseAdmin.from("manifest_categories").select("page").eq("id", data.id).maybeSingle();
+      if (pageError || !current) throw new Error("No pudimos leer esta portada. Intenta de nuevo.");
+      const page = current.page && typeof current.page === "object" && !Array.isArray(current.page) ? current.page : {};
+      patch["page"] = { ...page, [data.coverSlot]: data.coverUrl || null };
+    } else if (typeof patch["cover_url"] === "string" && patch["cover_url"]) {
       const { data: current, error: pageError } = await supabaseAdmin.from("manifest_categories").select("page").eq("id", data.id).maybeSingle();
       if (pageError) throw new Error("No pudimos leer el diseño de la categoría. La portada no se cambió.");
       const page = current?.page && typeof current.page === "object" && !Array.isArray(current.page) ? current.page : {};
@@ -460,7 +459,7 @@ export const adminDeleteSubtopic = createServerFn({ method: "POST" })
 export const adminRegenerateSubtopic = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i) =>
-    z.object({ id: z.string().uuid(), notes: z.string().trim().max(1200).default(""), cover: z.boolean().default(false) }).parse(i),
+    z.object({ id: z.string().uuid(), notes: z.string().trim().max(1200).default("") }).parse(i),
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
@@ -469,13 +468,14 @@ export const adminRegenerateSubtopic = createServerFn({ method: "POST" })
     const { data: sub } = await supabaseAdmin.from("manifest_audios").select("id, title, category_id, day_index").eq("id", data.id).maybeSingle();
     if (!sub) throw new Error("Ese subtema ya no existe.");
     const { data: cat } = await supabaseAdmin.from("manifest_categories").select("title, description, design").eq("id", sub.category_id).maybeSingle();
-    const { data: siblings } = await supabaseAdmin.from("manifest_audios").select("title, affirmation, lesson, exercise, quiz").eq("category_id", sub.category_id).neq("id", data.id);
+    const { data: siblings, error: siblingsError } = await supabaseAdmin.from("manifest_audios").select("title, affirmation, lesson, exercise, quiz, word_game").eq("category_id", sub.category_id).neq("id", data.id);
+    if (siblingsError) throw new Error("No pudimos revisar las otras prácticas. Intenta de nuevo.");
     const g = await generateSubtopicContent({ category: cat?.title ?? "", description: cat?.description ?? "", title: sub.title, day: sub.day_index, notes: data.notes, recipe: cat?.design === "limpieza", previous: siblings ?? [] });
     const patch: Record<string, unknown> = {
       affirmation: g.affirmation,
       lesson: g.lesson,
       exercise: `${g.exercise}\n\nPasos:\n${(g.recipe_steps ?? []).map((s, i) => `${i + 1}. ${s}`).join("\n")}`,
-      quiz: { tasks: g.tasks ?? [], questions: g.quiz ?? [] },
+      quiz: { tasks: g.tasks ?? [], questions: g.quiz ?? [], recipe_steps: g.recipe_steps, materials: g.materials ?? [] },
       word_game: { words: g.search_words ?? [] },
     };
     patch["cover_url"] = null;
@@ -490,8 +490,6 @@ export const adminUpdateLimpieza = createServerFn({ method: "POST" })
     z.object({
       id: z.string().uuid(),
       title: z.string().trim().min(3).max(120).optional(),
-      coverUrl: z.string().trim().max(1000).optional(),
-      regenerateCover: z.boolean().optional(),
       improve: z.boolean().optional(),
       notes: z.string().trim().max(1200).default(""),
     }).parse(i),
@@ -499,28 +497,25 @@ export const adminUpdateLimpieza = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { aiJson, uploadCover } = await import("@/lib/ai-content.server");
+    const { aiJson } = await import("@/lib/ai-content.server");
     const { data: cur } = await supabaseAdmin
       .from("limpieza_practices").select("title, level, slug").eq("id", data.id).maybeSingle();
     if (!cur) throw new Error("Esa práctica ya no existe.");
     const title = data.title ?? cur.title;
-    const patch: Record<string, unknown> = {};
+    const patch: Record<string, unknown> = { cover_url: null };
     if (data.title) patch["title"] = data.title;
-    if (data.coverUrl !== undefined) patch["cover_url"] = data.coverUrl || null;
     if (data.improve) {
-      const g = await aiJson<{ duration: string; objective: string; info: string[]; materials: string[]; steps: string[]; scripture: string; scripture_ref: string }>(
+      const { data: previous, error: previousError } = await supabaseAdmin.from("limpieza_practices").select("title, objective, steps").neq("id", data.id);
+      if (previousError) throw new Error("No pudimos revisar las otras prácticas. Intenta de nuevo.");
+      const g = renewalPracticeSchema.parse(await aiJson<unknown>(
         `Mejora y reescribe la práctica de limpieza espiritual cristiana "${title}", nivel ${cur.level}. Notas: ${data.notes || "sin notas"}.
-JSON: duration, objective, info (4 avisos), materials (4-7 seguros, vela LED), steps (6-8), scripture (versículo real textual), scripture_ref. Sin rituales peligrosos ni promesas médicas.`,
-      );
+JSON: duration, objective, info (4 avisos), materials (4-7 seguros, vela LED), steps (6-8), scripture (versículo real textual), scripture_ref. Sin rituales peligrosos ni promesas médicas. Solo contenido propio de este título; no generes fotos ni cover_prompt. No copies objetivos ni pasos existentes: ${JSON.stringify(previous ?? []).slice(0, 14000)}.`,
+      ));
+      assertOriginalRenewal(g, previous ?? []);
       Object.assign(patch, {
         duration: g.duration, objective: g.objective, info: g.info, materials: g.materials,
         steps: g.steps, scripture: g.scripture, scripture_ref: g.scripture_ref,
       });
-    }
-    if (data.regenerateCover) {
-      const url = await uploadCover(`Serene spiritual cleansing scene for "${title}". ${data.notes}. ${COVER_STYLE}`, cur.slug);
-      if (!url) throw new Error("No pudimos generar la portada. Intenta de nuevo.");
-      patch["cover_url"] = url;
     }
     if (Object.keys(patch).length === 0) return { ok: true };
     const { error } = await supabaseAdmin.from("limpieza_practices").update(patch as never).eq("id", data.id);

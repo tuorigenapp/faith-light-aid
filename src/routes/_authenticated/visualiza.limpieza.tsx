@@ -1,4 +1,7 @@
 import { thematicPractice } from "@/lib/visualiza-content";
+import { SubtopicIcon } from "@/components/visualiza/SubtopicIcon";
+import { WordSearch } from "@/components/WordSearch";
+import { StageQuiz } from "@/components/StageQuiz";
 import { ManagedImage } from "@/components/ManagedImage";
 import { useSessionState } from "@/hooks/use-session-step";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -86,7 +89,7 @@ const PRACTICES: Practice[] = [
     Icon: Droplet,
     color: "#5AA9FF",
     bg: "#DCEBFF",
-    objective: "Liberar cargas y limpiar tu campo energético con la ayuda de la sal marina y la oración.",
+    objective: "Cuidar tu descanso y tu cuerpo con un momento de aseo cotidiano y oración; la sal no tiene poder espiritual.",
     info: [
       "Recomendado en días de agotamiento o pesadez emocional.",
       "Se realiza al final del día antes de descansar.",
@@ -98,8 +101,8 @@ const PRACTICES: Practice[] = [
       { label: "Biblia", Icon: BookOpen },
     ],
     steps: [
-      "Prepara agua tibia con sal marina.",
-      "Ora pidiendo protección y liberación.",
+      "Usa agua a temperatura cómoda. Evita sal si tu piel está irritada o tienes indicaciones médicas en contra.",
+      "Ora con tus propias palabras, sin atribuir poder espiritual al agua o a la sal.",
       "Toma el baño mientras confiesas gratitud.",
       "Cierra con el Salmo 23 leído en voz alta.",
     ],
@@ -113,20 +116,20 @@ const PRACTICES: Practice[] = [
     Icon: Leaf,
     color: "#3FBE8F",
     bg: "#DFF6EA",
-    objective: "Renovar tu energía y armonizar cuerpo y espíritu con la fuerza aromática de las hierbas.",
+    objective: "Preparar un entorno tranquilo para descansar y orar, sin atribuir propiedades espirituales a las plantas.",
     info: [
-      "Combina romero, ruda y albahaca para renovación.",
+      "Evita mezclas desconocidas, plantas irritantes y cualquier preparado ingerido.",
       "Ideal cuando sientes bloqueo o estancamiento.",
       "Duración aproximada: 20 minutos.",
     ],
     materials: [
-      { label: "Hierbas frescas", Icon: Leaf },
-      { label: "Agua caliente", Icon: Droplet },
-      { label: "Vela", Icon: Flame },
+      { label: "Lugar ventilado", Icon: Wind },
+      { label: "Agua tibia", Icon: Droplet },
+      { label: "Biblia", Icon: BookOpen },
     ],
     steps: [
-      "Prepara la infusión de hierbas.",
-      "Deja reposar y enfriar a temperatura tibia.",
+      "Prepara un espacio tranquilo y ventilado, sin quemar plantas ni preparar infusiones.",
+      "Cuida tu cuerpo con agua a temperatura cómoda; no apliques mezclas desconocidas sobre la piel.",
       "Ora entregando lo que quieres soltar.",
       "Toma el baño en silencio profundo.",
       "Cierra dando gracias en voz alta.",
@@ -183,8 +186,8 @@ const PRACTICES: Practice[] = [
       "Ambienta el espacio con música y luz suave.",
       "Respira profundo y entra en oración.",
       "Recorre con Dios el recuerdo que duele.",
-      "Perdona y recibe consuelo.",
-      "Escribe la palabra que sentiste de Él.",
+      "Reconoce lo que sientes sin obligarte a perdonar ni a revivir recuerdos dolorosos.",
+      "Escribe tu reflexión personal y busca acompañamiento si lo necesitas.",
     ],
     scripture: { text: "Él sana a los quebrantados de corazón y venda sus heridas.", ref: "Salmo 147:3" },
   },
@@ -196,7 +199,7 @@ const PRACTICES: Practice[] = [
     Icon: HeartHandshake,
     color: "#F5B441",
     bg: "#FFF3D6",
-    objective: "Elevar tu frecuencia y abrir tu corazón con una práctica de gratitud consciente.",
+    objective: "Reconocer ayudas y detalles reales por los que puedes agradecer a Dios, sin negar las dificultades.",
     info: [
       "Perfecta para comenzar o cerrar el día.",
       "Aumenta el bienestar emocional y la paz.",
@@ -233,7 +236,7 @@ const PRACTICES: Practice[] = [
     steps: [
       "Elige un pasaje breve.",
       "Léelo tres veces en voz alta.",
-      "Escribe qué te habla Dios.",
+      "Escribe qué observas en el pasaje y cómo podrías aplicarlo a tu vida.",
       "Ora devolviéndole esa Palabra.",
     ],
     scripture: { text: "Lámpara es a mis pies tu palabra, y lumbrera a mi camino.", ref: "Salmo 119:105" },
@@ -249,7 +252,7 @@ const PRACTICES: Practice[] = [
     objective: "Consagrar un tiempo especial de oración y ayuno para escuchar la voz de Dios con claridad.",
     info: [
       "Práctica avanzada, requiere preparación previa.",
-      "Consulta a un pastor o guía espiritual.",
+      "No restrinjas comida ni medicación: esta práctica propone pausar una distracción. Consulta a un profesional antes de cambiar tu alimentación.",
       "Duración variable según tu convicción.",
     ],
     materials: [
@@ -258,10 +261,10 @@ const PRACTICES: Practice[] = [
       { label: "Agua", Icon: Droplet },
     ],
     steps: [
-      "Define el tipo y duración del ayuno.",
+      "Elige una distracción de la que puedas descansar unos minutos, sin restringir comida ni medicación.",
       "Aparta horarios de oración intencional.",
       "Lee, escribe y reflexiona.",
-      "Cierra con acción de gracias y una comida ligera.",
+      "Cierra con acción de gracias y retoma tu rutina de cuidado habitual.",
     ],
     scripture: { text: "¿No es más bien el ayuno que yo escogí, desatar las ligaduras de impiedad?", ref: "Isaías 58:6" },
   },
@@ -469,9 +472,8 @@ function LimpiezaPage() {
                     <Check className="w-3 h-3" />
                   </div>
                 )}
-                <div className="w-14 h-14 rounded-2xl grid place-items-center mx-auto mb-2" style={{ background: p.bg, color: p.color }}>
-                  {locked ? <Lock className="w-6 h-6" /> : <p.Icon className="w-6 h-6" />}
-                </div>
+                <SubtopicIcon title={p.title} category="Limpieza Espiritual" className="mx-auto mb-2 h-14 w-14 text-3xl" />
+                {locked && <Lock className="absolute right-2 top-2 h-4 w-4 text-muted-foreground" />}
                 <div className="font-bold text-[12px] leading-tight">{p.title}</div>
                 <div className="text-[10px] text-muted-foreground mt-1">{p.duration}</div>
                 <div className="text-[10px] text-primary font-bold mt-0.5">Nivel {p.level}</div>
@@ -524,6 +526,7 @@ function LimpiezaPage() {
         <Card className="rounded-[1.3rem] p-5 shadow-soft">
           <div className="text-xs font-bold text-primary uppercase tracking-widest">Objetivo</div>
           <p className="text-sm text-foreground/85 mt-2 leading-relaxed">{practice.objective}</p>
+          <p className="text-sm text-foreground/85 mt-3 leading-relaxed">{practiceContent.lesson}</p>
         </Card>
 
         {/* Información */}
@@ -593,6 +596,9 @@ function LimpiezaPage() {
             </Link>
           )}
         </Card>
+
+        <WordSearch words={practiceContent.search_words} storageKey={`limpieza-${practice.id}`} />
+        <StageQuiz items={practiceContent.quiz.map(q => ({ q: q.question, options: q.options, correct: q.correctIndex, tip: q.explanation }))} storageKey={`limpieza-${practice.id}`} />
 
         {/* Desafío + ejercicio */}
         <div className="grid grid-cols-2 gap-3">

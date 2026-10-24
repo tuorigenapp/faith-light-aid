@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { SubtopicIcon } from "@/components/visualiza/SubtopicIcon";
 import { Fragment, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -219,7 +220,7 @@ function MainTopics({ onNote }: { onNote: Notify }) {
   );
 }
 
-type Cat = { id: string; title: string; group_key: string; cover_url: string | null; is_published: boolean | null; subtopics: number };
+type Cat = { id: string; title: string; group_key: string; cover_url: string | null; is_published: boolean | null; is_custom?: boolean | null; subtopics: number };
 
 function TopicList({ categories, loading, onNote }: { categories: Cat[]; loading: boolean; onNote: Notify }) {
   const qc = useQueryClient();
@@ -256,10 +257,10 @@ function TopicList({ categories, loading, onNote }: { categories: Cat[]; loading
       <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {shown.map((c) => (
           <article key={c.id} className="overflow-hidden rounded-[14px] border border-border bg-muted/30">
-            {c.cover_url ? (
+            {c.is_custom && c.cover_url ? (
               <img src={c.cover_url} alt={c.title} className="aspect-[16/10] w-full object-cover" />
             ) : (
-              <div className="grid aspect-[16/10] w-full place-items-center bg-muted text-foreground/40"><ImageIcon className="h-6 w-6" /></div>
+              <div className="grid aspect-[16/10] w-full place-items-center bg-muted"><SubtopicIcon title={c.title} /></div>
             )}
             <div className="p-3">
               <div className="flex items-start justify-between gap-2">
@@ -277,13 +278,13 @@ function TopicList({ categories, loading, onNote }: { categories: Cat[]; loading
                     <IconAction label={c.is_published ? "Ocultar" : "Hacer visible"} onClick={() => run(c.id, () => update({ data: { id: c.id, isPublished: !c.is_published } }), c.is_published ? "Tema oculto." : "Tema visible en la app.")}>
                       {c.is_published ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                     </IconAction>
-                    <IconAction label="Rehacer diseño propio con IA (textos y portadas de cada paso)" onClick={() => run(c.id, () => rebuild({ data: { id: c.id } }), "Listo: el tema tiene textos y portadas propias en cada paso.")}>
+                    {c.is_custom && <IconAction label="Rehacer diseño propio con IA (textos y portadas de cada paso)" onClick={() => run(c.id, () => rebuild({ data: { id: c.id } }), "Listo: el tema tiene textos y portadas propias en cada paso.")}>
                       <Sparkles className="h-4 w-4" />
-                    </IconAction>
+                    </IconAction>}
                     <IconAction label="Editar" onClick={() => setEdit(c)}><Pencil className="h-4 w-4" /></IconAction>
-                    <IconAction label="Nueva portada con IA" onClick={() => run(c.id, () => update({ data: { id: c.id, regenerateCover: true } }), "Portada nueva generada.")}>
+                    {c.is_custom && <IconAction label="Nueva portada con IA" onClick={() => run(c.id, () => update({ data: { id: c.id, regenerateCover: true } }), "Portada nueva generada.")}>
                       <RefreshCw className="h-4 w-4" />
-                    </IconAction>
+                    </IconAction>}
                     <IconAction danger label="Eliminar" onClick={() => ask(`¿Eliminar "${c.title}" y sus ${c.subtopics} subtemas? No se puede deshacer.`) && run(c.id, () => remove({ data: { id: c.id } }), "Tema eliminado.")}>
                       <Trash2 className="h-4 w-4" />
                     </IconAction>
@@ -317,13 +318,13 @@ function EditTopic({ cat, others, onCancel, onSave }: {
   return (
     <div className="mt-3 space-y-2 rounded-[12px] border border-border bg-card p-3">
       <Field label="Título"><input className={inputClass} value={title} onChange={(e) => setTitle(e.target.value)} /></Field>
-      <Field label="Portada (enlace de imagen)"><input className={inputClass} value={cover} onChange={(e) => setCover(e.target.value)} placeholder="https://…" /></Field>
-      <Field label="Usar el mismo diseño que otro tema">
+      {cat.is_custom && <Field label="Portada (enlace de imagen)"><input className={inputClass} value={cover} onChange={(e) => setCover(e.target.value)} placeholder="https://…" /></Field>}
+      {cat.is_custom && <Field label="Usar el mismo diseño que otro tema">
         <select className={inputClass} value={copy} onChange={(e) => setCopy(e.target.value)}>
           <option value="">No copiar</option>
           {others.map((o) => <option key={o.id} value={o.id}>{o.title}</option>)}
         </select>
-      </Field>
+      </Field>}
       <div className="flex gap-2">
         <button onClick={onCancel} className="min-h-11 flex-1 rounded-[12px] border border-border text-[14px] font-semibold">Cancelar</button>
         <button
@@ -379,7 +380,7 @@ function Subtopics({ onNote }: { onNote: Notify }) {
     setBusy(true);
     onNote(null);
     try {
-      const result = await create({ data: { categoryId: selected, title: title.trim(), notes, withCover: false, audioOnly } });
+      const result = await create({ data: { categoryId: selected, title: title.trim(), notes, audioOnly } });
       onNote({
         text: `Subtema creado como día ${result.dayIndex}, con lección, ejercicio, pasos, tareas, sopa de letras y preguntas. Sube el audio cuando quieras.`,
       });
@@ -390,10 +391,6 @@ function Subtopics({ onNote }: { onNote: Notify }) {
       onNote({ text: e instanceof Error ? e.message : "No pudimos crear el subtema.", error: true });
     }
     setBusy(false);
-  }
-
-  async function regenSilently(id: string) {
-    try { await regen({ data: { id, notes: "", cover: false } }); } catch { /* el audio ya quedó guardado */ }
   }
 
   async function saveAudio(id: string, audioUrl: string) {
@@ -482,7 +479,7 @@ function Subtopics({ onNote }: { onNote: Notify }) {
                   <span className="grid h-11 w-11 place-items-center"><Loader2 className="h-4 w-4 animate-spin" /></span>
                 ) : (
                   <>
-                    <IconAction label="Rehacer todo con IA" onClick={() => act(s.id, () => regen({ data: { id: s.id, notes: "", cover: false } }), "La IA reescribió el contenido propio de este subtema, sin generar imágenes.")}>
+                    <IconAction label="Rehacer todo con IA" onClick={() => act(s.id, () => regen({ data: { id: s.id, notes: "" } }), "La IA reescribió el contenido propio de este subtema, sin generar imágenes.")}>
                       <Wand2 className="h-4 w-4" />
                     </IconAction>
                     <IconAction danger label="Eliminar" onClick={() => ask(`¿Eliminar "${s.title}"?`) && act(s.id, () => removeSub({ data: { id: s.id } }), "Subtema eliminado.")}>
@@ -513,7 +510,7 @@ function Limpieza({ onNote }: { onNote: Notify }) {
   const updateL = useServerFn(adminUpdateLimpieza);
   const removeL = useServerFn(adminDeleteLimpieza);
   const [working, setWorking] = useState<string | null>(null);
-  const [editing, setEditing] = useState<{ id: string; title: string; cover: string; notes: string } | null>(null);
+  const [editing, setEditing] = useState<{ id: string; title: string; notes: string } | null>(null);
   async function act(id: string, fn: () => Promise<unknown>, ok: string) {
     setWorking(id);
     try {
@@ -528,7 +525,6 @@ function Limpieza({ onNote }: { onNote: Notify }) {
   const [title, setTitle] = useState("");
   const [level, setLevel] = useState(1);
   const [notes, setNotes] = useState("");
-  const [audioOnly, setAudioOnly] = useState(false);
   const [busy, setBusy] = useState(false);
 
   const { data: practices = [] } = useQuery({
@@ -541,7 +537,7 @@ function Limpieza({ onNote }: { onNote: Notify }) {
     setBusy(true);
     onNote(null);
     try {
-      await create({ data: { title: title.trim(), level, notes, withCover: false } });
+      await create({ data: { title: title.trim(), level, notes } });
       onNote({ text: "Práctica creada con ícono, materiales y pasos propios del tema." });
       setTitle("");
       setNotes("");
@@ -609,7 +605,7 @@ function Limpieza({ onNote }: { onNote: Notify }) {
                 <span className="grid h-11 w-11 place-items-center"><Loader2 className="h-4 w-4 animate-spin" /></span>
               ) : (
                 <>
-                  <IconAction label="Editar" onClick={() => setEditing({ id: p.id, title: p.title, cover: p.cover_url ?? "", notes: "" })}><Pencil className="h-4 w-4" /></IconAction>
+                  <IconAction label="Editar" onClick={() => setEditing({ id: p.id, title: p.title, notes: "" })}><Pencil className="h-4 w-4" /></IconAction>
                   <IconAction danger label="Eliminar" onClick={() => ask(`¿Eliminar "${p.title}"?`) && act(p.id, () => removeL({ data: { id: p.id } }), "Práctica eliminada.")}><Trash2 className="h-4 w-4" /></IconAction>
                 </>
               )}

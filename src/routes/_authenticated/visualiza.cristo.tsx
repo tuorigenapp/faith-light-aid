@@ -1,4 +1,5 @@
 import { thematicPractice } from "@/lib/visualiza-content";
+import { SubtopicIcon } from "@/components/visualiza/SubtopicIcon";
 import { ManagedImage } from "@/components/ManagedImage";
 import { useSessionState } from "@/hooks/use-session-step";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -433,8 +434,24 @@ function CristoPage() {
   });
   const isPaid = plan === "camino";
 
-  const practice = PRACTICES.find((p) => p.id === practiceId) ?? PRACTICES[0];
-  const practiceContent = thematicPractice("Método de Cristo 3·6·9", practice.title, PRACTICES.indexOf(practice) + 1);
+  const selectedPractice = PRACTICES.find((p) => p.id === practiceId) ?? PRACTICES[0];
+  const practiceContent = thematicPractice("Método de Cristo 3·6·9", selectedPractice.title, PRACTICES.indexOf(selectedPractice) + 1);
+  const practice: Practice = {
+    ...selectedPractice,
+    intention: practiceContent.affirmation,
+    actionPlan: practiceContent.tasks,
+    steps: [
+      `Mañana: escribe 3 veces tu intención para «${selectedPractice.title}» y reconoce una situación real.`,
+      `Tarde: reflexiona y escribe 6 veces tu intención; ${practiceContent.tasks[1]}`,
+      `Noche: escribe 9 veces y agradece un paso que realmente hayas dado, sin inventar resultados.`,
+      "Cierra con una oración. La repetición organiza tu escritura; no es numerología ni una fórmula que garantice resultados.",
+    ],
+    affirmations: [
+      { time: "Mañana", text: practiceContent.affirmation },
+      { time: "Tarde", text: practiceContent.tasks[1] },
+      { time: "Noche", text: `Agradezco a Dios lo aprendido en «${selectedPractice.title}» y acepto continuar a mi ritmo.` },
+    ],
+  };
   const filtered = category === "Todas" ? PRACTICES : PRACTICES.filter((p) => p.category === category);
 
   async function completePractice() {
@@ -565,9 +582,8 @@ function CristoPage() {
                 }}
                 className="app-card p-3 text-center rounded-2xl transition-all hover:-translate-y-0.5 active:scale-[.97] relative overflow-hidden border border-border/60"
               >
-                <div className="w-14 h-14 rounded-2xl grid place-items-center mx-auto mb-2" style={{ background: p.bg, color: p.color }}>
-                  {locked ? <Lock className="w-6 h-6" /> : <p.Icon className="w-6 h-6" />}
-                </div>
+                <SubtopicIcon title={p.title} category="Método de Cristo 3·6·9" className="mx-auto mb-2 h-14 w-14 text-3xl" />
+                {locked && <Lock className="absolute right-2 top-2 h-4 w-4 text-muted-foreground" />}
                 <div className="font-bold text-[12px] leading-tight">{p.title}</div>
                 <div className="text-[10px] text-muted-foreground mt-1">{p.duration}</div>
                 <div className="text-[10px] text-primary font-bold mt-0.5">Nivel {p.level}</div>
@@ -654,6 +670,7 @@ function CristoPage() {
           <p className="scripture mt-2 text-base font-semibold">"{practice.intention}"</p>
           <div className="mt-4 text-xs font-bold text-primary uppercase tracking-widest">Objetivo</div>
           <p className="text-sm text-foreground/85 mt-1.5 leading-relaxed">{practice.objective}</p>
+          <p className="text-sm text-foreground/85 mt-3 leading-relaxed">{practiceContent.lesson}</p>
         </Card>
 
         {/* Descarga guía */}
@@ -778,13 +795,13 @@ function CristoPage() {
             <div className="flex items-center gap-1.5 text-[11px] font-bold text-primary uppercase tracking-widest">
               <Sparkles className="w-3.5 h-3.5" /> Desafío del día
             </div>
-            <p className="text-xs mt-2 text-foreground/85 leading-relaxed">Actúa hoy como la persona que ya tiene eso que deseas.</p>
+            <p className="text-xs mt-2 text-foreground/85 leading-relaxed">{practiceContent.tasks[1]}</p>
           </Card>
           <Card className="rounded-[1.3rem] p-4 shadow-soft">
             <div className="flex items-center gap-1.5 text-[11px] font-bold text-primary uppercase tracking-widest">
               <PenLine className="w-3.5 h-3.5" /> Ejercicio del día
             </div>
-            <p className="text-xs mt-2 text-foreground/85 leading-relaxed">¿Qué acción puedo tomar hoy que me acerque a mi meta?</p>
+            <p className="text-xs mt-2 text-foreground/85 leading-relaxed">{`¿Qué paso darás en ${practice.title}?`}</p>
             <Input value={dailyAction} onChange={(e) => setDailyAction(e.target.value)} placeholder="Escribe aquí..." className="mt-2 rounded-xl" />
           </Card>
         </div>
