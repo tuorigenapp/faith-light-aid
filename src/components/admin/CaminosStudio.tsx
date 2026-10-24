@@ -154,8 +154,7 @@ export function CoversStudio({ onNote }: { onNote: Notify }) {
     ...APP_COVERS.map(i => ({ ...i, image: ov?.get(i.key)?.cover_url || i.image, save: (url: string) => setOv({ data: { key: i.key, scope: i.scope, coverUrl: url } }) })),
     ...CAMINOS.map(c => ({ key: `camino:${c.id}`, section: "Caminos y categorías", title: c.title, image: ov?.get(`camino:${c.id}`)?.cover_url || c.banner, save: (url: string) => setOv({ data: { key: `camino:${c.id}`, scope: "camino", coverUrl: url } }) })),
     ...caminos.map(c => ({ key: `custom-camino:${c.id}`, section: "Caminos creados", title: c.title, image: c.cover_url, save: (url: string) => updateCamino({ data: { id: c.id, coverUrl: url } }) })),
-    ...categories.filter(c => c.subtopics > 0 || c.group_key === "visualiza").map(c => ({ key: `category:${c.id}`, section: "Visualízalo · temas creados", title: c.title, image: c.cover_url, save: (url: string) => updateCategory({ data: { id: c.id, coverUrl: url } }) })),
-    ...practices.map(p => ({ key: `practice:${p.id}`, section: "Limpieza · prácticas creadas", title: p.title, image: p.cover_url, save: (url: string) => updateLimpieza({ data: { id: p.id, coverUrl: url } }) })),
+    ...categories.filter(c => c.is_custom).map(c => ({ key: `category:${c.id}`, section: "Visualízalo · temas creados", title: c.title, image: c.cover_url, save: (url: string) => updateCategory({ data: { id: c.id, coverUrl: url } }) })),
     ...consultas.map(c => ({ key: `consulta:${c.id}`, section: "Consultas creadas", title: c.title, image: c.cover_url, save: async (url: string) => { const { error } = await supabase.from("custom_consultas").update({ cover_url: url || null }).eq("id", c.id); if (error) throw error; } })),
     ...GAMES.map(g => ({ key: `juego:${g.id}`, section: "Juegos", title: g.title, image: ov?.get(`juego:${g.id}`)?.cover_url || g.img, save: (url: string) => setOv({ data: { key: `juego:${g.id}`, scope: "juego", coverUrl: url } }) })),
   ];

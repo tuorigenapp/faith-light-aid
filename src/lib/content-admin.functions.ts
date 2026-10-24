@@ -283,7 +283,7 @@ export const adminCreateLimpieza = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const { aiJson, uploadCover } = await import("@/lib/ai-content.server");
+    const { aiJson } = await import("@/lib/ai-content.server");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const generated = await aiJson<{
@@ -294,17 +294,14 @@ export const adminCreateLimpieza = createServerFn({ method: "POST" })
       steps: string[];
       scripture: string;
       scripture_ref: string;
-      cover_prompt: string;
     }>(
       `Crea una práctica de limpieza espiritual cristiana llamada "${data.title}", nivel ${data.level} de 3. Notas del editor: ${data.notes || "sin notas"}.
-Devuelve JSON con: duration (por ejemplo "20 min"), objective (1 o 2 frases), info (array de 4 avisos útiles y seguros), materials (array de 4 a 7 materiales sencillos y sin riesgo, usa vela LED en vez de fuego), steps (array de 6 a 8 pasos claros en orden), scripture (un versículo bíblico real y textual), scripture_ref (su referencia exacta) y cover_prompt (descripción visual en inglés, sin texto ni personas reconocibles).
-No incluyas rituales peligrosos, sustancias, ni promesas de curación física.`,
+Devuelve JSON con: duration (por ejemplo "20 min"), objective (1 o 2 frases), info (array de 4 avisos útiles y seguros), materials (array de materiales sencillos como Biblia y cuaderno), steps (array de 6 a 8 pasos claros en orden), scripture (un versículo bíblico real y textual), scripture_ref (su referencia exacta).
+Usa contenido propio de este subtema, oración y acciones cotidianas; no generes imágenes ni cover_prompt. No incluyas rituales, sustancias, ni promesas de curación física.`,
     );
 
     const slug = await uniqueSlug(supabaseAdmin, "limpieza_practices", "slug", slugify(data.title) || "practica");
-    const cover = data.withCover
-      ? await uploadCover(`${generated.cover_prompt}. ${COVER_STYLE}`, slug)
-      : null;
+    const cover = null;
 
     const { data: last } = await supabaseAdmin
       .from("limpieza_practices")
@@ -360,7 +357,7 @@ export const adminListCategories = createServerFn({ method: "GET" })
     const [cats, subs] = await Promise.all([
       supabaseAdmin
         .from("manifest_categories")
-        .select("id, title, subtitle, group_key, required_plan, cover_url, is_published, sort_order")
+        .select("id, title, subtitle, group_key, required_plan, cover_url, is_published, is_custom, sort_order")
         .order("sort_order"),
       supabaseAdmin.from("manifest_audios").select("category_id"),
     ]);

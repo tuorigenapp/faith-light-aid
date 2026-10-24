@@ -1,6 +1,13 @@
 import logo from "@/assets/logo-origen.png";
 import companion from "@/assets/origen-companion.png";
 import dove from "@/assets/origen-dove.png";
+import lion from "@/assets/origen-lion.png";
+import lamb from "@/assets/origen-lamb.png";
+import guia from "@/assets/mensajes/guia-palabra.png";
+import psicologa from "@/assets/mensajes/psicologa.png";
+import coach from "@/assets/mensajes/coach.png";
+import mascot from "@/assets/mensajes/origen-mascot.png";
+import abuelo from "@/assets/mensajes/abuelo-noche.png";
 import music from "@/assets/explore/music.jpg";
 import clean from "@/assets/explore/clean.jpg";
 import identity from "@/assets/explore/identity.jpg";
@@ -18,6 +25,15 @@ export const APP_COVERS: AppCover[] = [
   { key: "imagen:logo", section: "Logos e isotipos", title: "Logo original ORÍGEN", image: logo, scope: "imagen" },
   { key: "imagen:companion", section: "Logos e isotipos", title: "Compañero ORÍGEN · Perfil y Premios", image: companion, scope: "imagen" },
   { key: "imagen:dove", section: "Logos e isotipos", title: "Paloma ORÍGEN · Perfil y Premios", image: dove, scope: "imagen" },
+  { key: "imagen:lion", section: "Logos e isotipos", title: "León ORÍGEN · Premios", image: lion, scope: "imagen" },
+  { key: "imagen:lamb", section: "Logos e isotipos", title: "Cordero ORÍGEN · Premios", image: lamb, scope: "imagen" },
+  ...[
+    { id: "palabra", title: "Samuel · Guía de la Palabra", image: guia },
+    { id: "emocional", title: "Dra. Lucía · Acompañamiento emocional", image: psicologa },
+    { id: "tarea", title: "Coach · Práctica diaria", image: coach },
+    { id: "crecimiento", title: "Compañero · Crecimiento", image: mascot },
+    { id: "noche", title: "Guía · Cierre de la noche", image: abuelo },
+  ].map(a => ({ key: `imagen:mensaje:${a.id}`, section: "Mensajes ORÍGEN · asistentes", title: a.title, image: a.image, scope: "imagen" as const })),
   { key: "imagen:visualiza:principal", section: "Visualízalo y Vívelo", title: "Portada general", image: listen, scope: "imagen" },
   { key: "imagen:visualiza:musica", section: "Visualízalo y Vívelo", title: "Oración y Reflexión con Música", image: music, scope: "imagen" },
   { key: "imagen:visualiza:limpieza", section: "Visualízalo y Vívelo", title: "Limpieza Espiritual", image: clean, scope: "imagen" },

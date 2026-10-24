@@ -34,10 +34,10 @@ export const Route = createFileRoute("/_authenticated/premiosorigen")({
 });
 
 const REWARDS = [
-  { title: "Primer cierre", target: 1, image: lamb, icon: Star, gift: "Primer paso" },
-  { title: "Racha de 7 días", target: 7, image: dove, icon: Flame, gift: "Constancia" },
-  { title: "30 días de camino", target: 30, image: lion, icon: Crown, gift: "Fortaleza" },
-  { title: "100 acciones reales", target: 100, image: companion, icon: Trophy, gift: "Propósito" },
+  { title: "Primer cierre", target: 1, image: lamb, imageKey: "imagen:lamb", icon: Star, gift: "Primer paso" },
+  { title: "Racha de 7 días", target: 7, image: dove, imageKey: "imagen:dove", icon: Flame, gift: "Constancia" },
+  { title: "30 días de camino", target: 30, image: lion, imageKey: "imagen:lion", icon: Crown, gift: "Fortaleza" },
+  { title: "100 acciones reales", target: 100, image: companion, imageKey: "imagen:companion", icon: Trophy, gift: "Propósito" },
 ];
 
 function todayIso(offset = 0) {
@@ -119,7 +119,7 @@ function PremiosOrigen() {
         </section>
 
         <section className="mt-6 border-b border-border pb-6">
-          <div className="mb-4 flex items-center gap-4"><img src={lion} alt="León ORÍGEN" loading="lazy" className="mascot-motion h-24 w-24 object-contain" /><div><h2 className="font-display text-[22px] font-bold">Un giro, nuevas posibilidades</h2><p className="mt-1 text-sm text-muted-foreground">Tus premios disponibles están en la ruleta.</p></div></div>
+          <div className="mb-4 flex items-center gap-4"><ManagedImage imageKey="imagen:lion" src={lion} alt="León ORÍGEN" loading="lazy" className="mascot-motion h-24 w-24 object-contain" /><div><h2 className="font-display text-[22px] font-bold">Un giro, nuevas posibilidades</h2><p className="mt-1 text-sm text-muted-foreground">Tus premios disponibles están en la ruleta.</p></div></div>
           <p className="text-[11px] uppercase tracking-widest font-bold text-primary">Lo que puedes ganar en la ruleta</p>
           <ul className="mt-3 grid gap-2 sm:grid-cols-2">
             {WHEEL_PRIZES.map((w) => (
@@ -154,7 +154,7 @@ function PremiosOrigen() {
             return (
               <article key={reward.title} className={cn("rounded-[16px] border p-4 shadow-soft bg-card overflow-hidden", unlocked ? "border-primary/45" : "border-border")}>
                 <div className="flex items-start justify-between gap-3">
-                  <img src={reward.image} alt={reward.gift} loading="lazy" className={cn("h-28 w-28 object-contain", unlocked ? "mascot-motion" : "opacity-65 grayscale")} />
+                  <ManagedImage imageKey={reward.imageKey} src={reward.image} alt={reward.gift} loading="lazy" className={cn("h-28 w-28 object-contain", unlocked ? "mascot-motion" : "opacity-65 grayscale")} />
                   <span className={cn("w-10 h-10 rounded-[12px] grid place-items-center", unlocked ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground")}>
                     {unlocked ? <Icon className="w-5 h-5" /> : <Lock className="w-5 h-5" />}
                   </span>
