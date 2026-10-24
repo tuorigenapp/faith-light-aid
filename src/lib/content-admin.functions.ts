@@ -183,7 +183,7 @@ export const adminCreateVisualizaSubtopic = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: category } = await supabaseAdmin.from("manifest_categories").select("id, title, description, audio_only, design").eq("id", data.categoryId).maybeSingle();
     if (!category) throw new Error("Ese tema principal ya no existe.");
-    const { data: siblings, error: readError } = await supabaseAdmin.from("manifest_audios").select("day_index, title, affirmation, lesson, exercise, quiz").eq("category_id", data.categoryId).order("day_index");
+    const { data: siblings, error: readError } = await supabaseAdmin.from("manifest_audios").select("day_index, title, affirmation, lesson, exercise, quiz, word_game").eq("category_id", data.categoryId).order("day_index");
     if (readError) throw new Error(readError.message);
     const usedDays = new Set((siblings ?? []).map(s => s.day_index));
     let dayIndex = 1;
@@ -357,7 +357,7 @@ export const adminListCategories = createServerFn({ method: "GET" })
     const [cats, subs] = await Promise.all([
       supabaseAdmin
         .from("manifest_categories")
-        .select("id, title, subtitle, group_key, required_plan, cover_url, is_published, is_custom, sort_order")
+        .select("id, title, subtitle, group_key, required_plan, cover_url, page, is_published, is_custom, sort_order")
         .order("sort_order"),
       supabaseAdmin.from("manifest_audios").select("category_id"),
     ]);
@@ -374,6 +374,7 @@ export const adminUpdateCategory = createServerFn({ method: "POST" })
         id: z.string().min(1),
         title: z.string().trim().min(3).max(120).optional(),
         coverUrl: z.string().trim().max(1000).optional(),
+        coverSlot: z.enum(["cover_home", "cover_step1", "cover_step2", "cover_step3", "cover_playlist"]).optional(),
         isPublished: z.boolean().optional(),
         regenerateCover: z.boolean().optional(),
         copyFromId: z.string().optional(),
@@ -386,7 +387,7 @@ export const adminUpdateCategory = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const patch: Record<string, unknown> = {};
     if (data.title) patch["title"] = data.title;
-    if (data.coverUrl !== undefined) patch["cover_url"] = data.coverUrl || null;
+    if (data.coverUrl !== undefined && !data.coverSlot) patch["cover_url"] = data.coverUrl || null;
     if (data.isPublished !== undefined) patch["is_published"] = data.isPublished;
     if (data.copyFromId) {
       const { data: src } = await supabaseAdmin
@@ -407,7 +408,12 @@ export const adminUpdateCategory = createServerFn({ method: "POST" })
       if (!url) throw new Error("No pudimos generar la portada. Intenta de nuevo.");
       patch["cover_url"] = url;
     }
-    if (typeof patch["cover_url"] === "string" && patch["cover_url"]) {
+    if (data.coverSlot && data.coverUrl !== undefined) {
+      const { data: current, error: pageError } = await supabaseAdmin.from("manifest_categories").select("page").eq("id", data.id).maybeSingle();
+      if (pageError || !current) throw new Error("No pudimos leer esta portada. Intenta de nuevo.");
+      const page = current.page && typeof current.page === "object" && !Array.isArray(current.page) ? current.page : {};
+      patch["page"] = { ...page, [data.coverSlot]: data.coverUrl || null };
+    } else if (typeof patch["cover_url"] === "string" && patch["cover_url"]) {
       const { data: current, error: pageError } = await supabaseAdmin.from("manifest_categories").select("page").eq("id", data.id).maybeSingle();
       if (pageError) throw new Error("No pudimos leer el diseño de la categoría. La portada no se cambió.");
       const page = current?.page && typeof current.page === "object" && !Array.isArray(current.page) ? current.page : {};
@@ -469,7 +475,8 @@ export const adminRegenerateSubtopic = createServerFn({ method: "POST" })
     const { data: sub } = await supabaseAdmin.from("manifest_audios").select("id, title, category_id, day_index").eq("id", data.id).maybeSingle();
     if (!sub) throw new Error("Ese subtema ya no existe.");
     const { data: cat } = await supabaseAdmin.from("manifest_categories").select("title, description, design").eq("id", sub.category_id).maybeSingle();
-    const { data: siblings } = await supabaseAdmin.from("manifest_audios").select("title, affirmation, lesson, exercise, quiz").eq("category_id", sub.category_id).neq("id", data.id);
+    const { data: siblings, error: siblingsError } = await supabaseAdmin.from("manifest_audios").select("title, affirmation, lesson, exercise, quiz, word_game").eq("category_id", sub.category_id).neq("id", data.id);
+    if (siblingsError) throw new Error("No pudimos revisar las otras prácticas. Intenta de nuevo.");
     const g = await generateSubtopicContent({ category: cat?.title ?? "", description: cat?.description ?? "", title: sub.title, day: sub.day_index, notes: data.notes, recipe: cat?.design === "limpieza", previous: siblings ?? [] });
     const patch: Record<string, unknown> = {
       affirmation: g.affirmation,
@@ -499,14 +506,14 @@ export const adminUpdateLimpieza = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { aiJson, uploadCover } = await import("@/lib/ai-content.server");
+    const { aiJson } = await import("@/lib/ai-content.server");
     const { data: cur } = await supabaseAdmin
       .from("limpieza_practices").select("title, level, slug").eq("id", data.id).maybeSingle();
     if (!cur) throw new Error("Esa práctica ya no existe.");
     const title = data.title ?? cur.title;
     const patch: Record<string, unknown> = {};
     if (data.title) patch["title"] = data.title;
-    if (data.coverUrl !== undefined) patch["cover_url"] = data.coverUrl || null;
+    if (data.coverUrl !== undefined || data.regenerateCover) patch["cover_url"] = null;
     if (data.improve) {
       const g = await aiJson<{ duration: string; objective: string; info: string[]; materials: string[]; steps: string[]; scripture: string; scripture_ref: string }>(
         `Mejora y reescribe la práctica de limpieza espiritual cristiana "${title}", nivel ${cur.level}. Notas: ${data.notes || "sin notas"}.
@@ -516,11 +523,6 @@ JSON: duration, objective, info (4 avisos), materials (4-7 seguros, vela LED), s
         duration: g.duration, objective: g.objective, info: g.info, materials: g.materials,
         steps: g.steps, scripture: g.scripture, scripture_ref: g.scripture_ref,
       });
-    }
-    if (data.regenerateCover) {
-      const url = await uploadCover(`Serene spiritual cleansing scene for "${title}". ${data.notes}. ${COVER_STYLE}`, cur.slug);
-      if (!url) throw new Error("No pudimos generar la portada. Intenta de nuevo.");
-      patch["cover_url"] = url;
     }
     if (Object.keys(patch).length === 0) return { ok: true };
     const { error } = await supabaseAdmin.from("limpieza_practices").update(patch as never).eq("id", data.id);

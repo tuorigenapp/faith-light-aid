@@ -152,6 +152,12 @@ export function CoversStudio({ onNote }: { onNote: Notify }) {
     ...CAMINOS.map(c => ({ key: `camino:${c.id}`, section: "Caminos y categorías", title: c.title, image: ov?.get(`camino:${c.id}`)?.cover_url || c.banner, save: (url: string) => setOv({ data: { key: `camino:${c.id}`, scope: "camino", coverUrl: url } }) })),
     ...caminos.map(c => ({ key: `custom-camino:${c.id}`, section: "Caminos creados", title: c.title, image: c.cover_url, save: (url: string) => updateCamino({ data: { id: c.id, coverUrl: url } }) })),
     ...categories.filter(c => c.is_custom).map(c => ({ key: `category:${c.id}`, section: "Visualízalo · temas creados", title: c.title, image: c.cover_url, save: (url: string) => updateCategory({ data: { id: c.id, coverUrl: url } }) })),
+    ...categories.filter(c => c.is_custom).flatMap(c => {
+      const page = c.page && typeof c.page === "object" && !Array.isArray(c.page) ? c.page as Record<string, unknown> : {};
+      const slots = ["cover_home", "cover_step1", "cover_step2", "cover_step3", "cover_playlist"] as const;
+      const names = { cover_home: "Inicio", cover_step1: "Presentación", cover_step2: "Selección", cover_step3: "Lección", cover_playlist: "Playlist" };
+      return slots.filter(slot => typeof page[slot] === "string" && page[slot]).map(slot => ({ key: `category:${c.id}:${slot}`, section: `Visualízalo · ${c.title}`, title: names[slot], image: page[slot] as string, save: (url: string) => updateCategory({ data: { id: c.id, coverUrl: url, coverSlot: slot } }) }));
+    }),
     ...consultas.map(c => ({ key: `consulta:${c.id}`, section: "Consultas creadas", title: c.title, image: c.cover_url, save: async (url: string) => { const { error } = await supabase.from("custom_consultas").update({ cover_url: url || null }).eq("id", c.id); if (error) throw error; } })),
     ...GAMES.map(g => ({ key: `juego:${g.id}`, section: "Juegos", title: g.title, image: ov?.get(`juego:${g.id}`)?.cover_url || g.img, save: (url: string) => setOv({ data: { key: `juego:${g.id}`, scope: "juego", coverUrl: url } }) })),
   ];
