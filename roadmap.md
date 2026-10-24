@@ -7,7 +7,8 @@
 - [x] Verificar /visualiza en pantalla y compilar sin errores: 4 portadas nuevas visibles a 375 px, sin desbordamiento.
 - [x] Mismo estilo 1:1 con texto para los 6 programas de sanación (niño interior, glow up mujer/hombre, magnético, permiso mujer/hombre); cada uno con portada propia.
 - [x] Regla aplicada también al botón «regenerar portada» del cPanel y a los rediseños de temas.
-- [ ] Verificar la grilla completa de /visualiza con las 10 portadas nuevas.
+- [x] Mismo estilo para las 2 categorías del panel (Libérate del Narcisista, Sana Tu Árbol Familiar) con portadas locales confiables y editables en el cPanel.
+- [x] Verificar la grilla completa de /visualiza con las 12 portadas nuevas a 375 px: todas visibles, sin desbordamiento, build OK.
 
 ## Consultas del 24 de octubre, 06:05 UTC
 - [x] Nueva sección /consultas con todas las consultas (4 fijas + personalizadas de la base) y enlace «Ver todas las consultas» del inicio.
