@@ -1,33 +1,29 @@
-import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, CalendarDays, Clock3, TicketPercent } from "lucide-react";
+import { ArrowRight, BadgePercent } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { registrationClock } from "@/lib/registration-clock";
+import origenIcon from "@/assets/origen-o-icon.png";
 
 export function LandingRegistrationBar() {
-  const [clock, setClock] = useState<ReturnType<typeof registrationClock> | null>(null);
-  useEffect(() => {
-    const update = () => setClock(registrationClock(new Date()));
-    update();
-    const interval = window.setInterval(update, 1000);
-    document.addEventListener("visibilitychange", update);
-    return () => {
-      window.clearInterval(interval);
-      document.removeEventListener("visibilitychange", update);
-    };
-  }, []);
-
-  return <aside aria-label="Registro y oferta ORÍGEN" className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 px-4 pb-[max(12px,env(safe-area-inset-bottom))] pt-2 backdrop-blur-xl motion-safe:animate-in motion-safe:slide-in-from-bottom-4">
-    <div className="mx-auto w-full max-w-md">
-      <div className="flex min-h-11 items-center justify-between gap-2">
-        <span className="inline-flex items-center gap-2 text-[13px] font-semibold text-foreground"><TicketPercent className="h-4 w-4 text-primary" />Oferta especial</span>
-        <Button asChild variant="link" className="h-11 shrink-0 px-0 text-[13px] font-semibold"><Link to="/empezar" search={{ oferta: "especial" }}>Ver descuento<ArrowRight /></Link></Button>
+  return (
+    <aside aria-label="Registro y oferta ORÍGEN" className="pointer-events-none fixed inset-x-0 bottom-0 z-40 px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-4 motion-safe:animate-in motion-safe:slide-in-from-bottom-4 motion-safe:duration-300">
+      <div className="registration-dock pointer-events-auto mx-auto w-full max-w-[880px] rounded-[16px] border border-registration-border p-4 text-registration-foreground shadow-registration">
+        <div className="grid items-center gap-x-6 md:grid-cols-[minmax(0,1fr)_280px]">
+          <div className="flex min-w-0 items-center gap-3">
+            <img src={origenIcon} alt="" width={56} height={56} className="h-14 w-14 shrink-0 object-contain" />
+            <div className="min-w-0">
+              <p className="font-display text-[17px] font-bold leading-6">Tu cambio empieza aquí</p>
+              <p className="text-[13px] leading-5 text-registration-muted">Evaluación gratis · 2 minutos</p>
+            </div>
+          </div>
+          <Button asChild variant="registration" className="group mt-3 h-14 w-full justify-between rounded-[12px] px-5 text-[16px] font-bold transition-[background-color,transform] duration-150 active:scale-[.97] md:mt-0">
+            <Link to="/empezar">Registrarme gratis<ArrowRight className="transition-transform duration-150 motion-safe:group-hover:translate-x-1" /></Link>
+          </Button>
+          <div className="mt-2 flex min-w-0 items-center justify-between gap-2 border-t border-registration-border pt-1 md:col-span-2">
+            <span className="inline-flex min-w-0 items-center gap-2 text-[13px] font-medium text-registration-muted"><BadgePercent className="h-4 w-4 shrink-0" />Descuento disponible</span>
+            <Button asChild variant="link" className="h-11 shrink-0 px-0 text-[14px] font-bold text-registration-foreground focus-visible:ring-registration-cta"><Link to="/empezar" search={{ oferta: "especial" }}>Ver oferta<ArrowRight /></Link></Button>
+          </div>
+        </div>
       </div>
-      <div className="mb-3 flex min-h-6 items-center justify-between gap-2 text-[12px] text-muted-foreground">
-        <span className="inline-flex min-w-0 items-center gap-1.5"><CalendarDays className="h-4 w-4 shrink-0" />{clock ? <time dateTime={clock.dayKey}>{clock.date}</time> : <span aria-hidden className="h-4 w-40 animate-pulse rounded bg-muted" />}</span>
-        <span title="Hora local de tu dispositivo" className="inline-flex shrink-0 items-center gap-1.5 rounded-[8px] bg-secondary px-2 py-1 font-semibold tabular-nums text-secondary-foreground"><Clock3 className="h-4 w-4" />{clock ? <time dateTime={clock.iso} aria-label={`Hora local: ${clock.time}`}>{clock.time}</time> : <span aria-hidden className="h-4 w-16 animate-pulse rounded bg-muted" />}</span>
-      </div>
-      <Button asChild className="h-14 w-full rounded-[12px] bg-gradient-to-r from-primary to-accent text-[16px] font-bold text-primary-foreground shadow-glow active:scale-[.97]"><Link to="/empezar">Probar gratis ahora<ArrowRight /></Link></Button>
-    </div>
-  </aside>;
+    </aside>
+  );
 }

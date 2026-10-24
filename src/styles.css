@@ -79,6 +79,14 @@ body.community-reading .community-main { padding-bottom: 0; }
   --color-sanctuary-foreground: var(--sanctuary-foreground);
   --color-sanctuary-panel: var(--sanctuary-panel);
   --color-sanctuary-border: var(--sanctuary-border);
+  --color-registration-panel: var(--registration-panel);
+  --color-registration-foreground: var(--registration-foreground);
+  --color-registration-muted: var(--registration-muted);
+  --color-registration-border: var(--registration-border);
+  --color-registration-cta: var(--registration-cta);
+  --color-registration-cta-hover: var(--registration-cta-hover);
+  --color-registration-cta-foreground: var(--registration-cta-foreground);
+  --shadow-registration: var(--registration-shadow);
 
   --shadow-soft: 0 1px 3px rgba(27, 25, 48, 0.06), 0 6px 20px rgba(27, 25, 48, 0.04);
   --shadow-elev: 0 12px 36px rgba(27, 25, 48, 0.10);
@@ -95,6 +103,14 @@ body.community-reading .community-main { padding-bottom: 0; }
 }
 
 :root {
+  --registration-panel: oklch(0.98 0.008 295);
+  --registration-foreground: oklch(0.26 0.045 295);
+  --registration-muted: oklch(0.47 0.042 295);
+  --registration-border: oklch(0.76 0.08 295 / 0.35);
+  --registration-cta: oklch(0.44 0.18 295);
+  --registration-cta-hover: oklch(0.39 0.17 295);
+  --registration-cta-foreground: oklch(0.985 0.005 295);
+  --registration-shadow: 0 8px 30px oklch(0.26 0.045 295 / 0.12);
   --sanctuary: oklch(0.23 0.032 166);
   --sanctuary-foreground: oklch(0.98 0.007 153);
   --sanctuary-panel: oklch(0.29 0.028 166 / 0.92);
@@ -178,6 +194,14 @@ body.community-reading .community-main { padding-bottom: 0; }
 }
 
 .dark {
+  --registration-panel: oklch(0.25 0.042 295);
+  --registration-foreground: oklch(0.96 0.013 295);
+  --registration-muted: oklch(0.79 0.028 295);
+  --registration-border: oklch(0.81 0.045 295 / 0.22);
+  --registration-cta: oklch(0.8 0.105 295);
+  --registration-cta-hover: oklch(0.85 0.08 295);
+  --registration-cta-foreground: oklch(0.22 0.05 295);
+  --registration-shadow: none;
   --background: #0E0B1A;
   --foreground: #F4F2FF;
   --card: #17142A;
@@ -238,6 +262,15 @@ body.community-reading .community-main { padding-bottom: 0; }
 }
 
 .community-post-list, .community-post-detail { background: var(--card); border: 1px solid var(--border); box-shadow: var(--shadow-soft); }
+.registration-dock {
+  background: linear-gradient(115deg, var(--registration-panel), color-mix(in oklab, var(--registration-panel) 94%, var(--primary)));
+}
+.registration-cta {
+  background-image: linear-gradient(120deg, color-mix(in oklab, var(--registration-cta) 90%, var(--registration-cta-foreground)), var(--registration-cta));
+  box-shadow: 0 4px 14px color-mix(in oklab, var(--registration-cta) 25%, transparent);
+}
+.registration-cta:hover { background-image: none; }
+.dark .registration-cta { box-shadow: none; }
 .community-poll-option.community-poll-option { background: var(--community-poll); border: 2px solid var(--community-poll-border); color: var(--foreground); box-shadow: var(--shadow-soft); }
 .community-poll-option.community-poll-option[data-selected="true"] { background: var(--community-poll-selected); border-color: var(--primary); }
 .community-reply { background: var(--community-reply-0); border: 1px solid var(--community-reply-border-0); }
