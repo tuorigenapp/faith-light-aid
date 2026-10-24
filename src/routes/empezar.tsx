@@ -16,6 +16,7 @@ import { FUNNEL_BOOKS } from "@/lib/funnel-books";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import gift from "@/assets/funnel/gift.png";
 import mockup from "@/assets/funnel/mockup.png";
+import { APP_SCREENS } from "@/lib/app-screens";
 import dashboardAsset from "@/assets/funnel/shots/dashboard.png.asset.json";
 const shotDashboard = dashboardAsset.url;
 import shotChat from "@/assets/funnel/shots/chat.jpg";
@@ -110,27 +111,7 @@ const GUIAS = [
   { id: "practica", img: ePractice, t: "Con ejercicios prácticos y reflexión", d: "Para escribir y desahogar en tu diario." },
   { id: "fe", img: eBook, t: "Con enseñanzas de fe y sabiduría interior", d: "Para conectar con principios espirituales." },
 ];
-const SCREENS = [
-  { img: shotDashboard, t: "Tu inicio", d: "Tu misión del día, racha y todo tu camino" },
-  { img: journeyShot.url, t: "Caminos ORÍGEN", d: "Tu camino, una lección nueva cada día" },
-  { img: shotChat, t: "Mentora ORÍGEN", d: "Te acompaña y te escucha 24/7" },
-  { img: shotMinistracion, t: "Dios te dice hoy", d: "Una palabra personal cada día" },
-  { img: shotPareja, t: "Tu pareja de destino", d: "Entiende lo que hay entre ustedes" },
-  { img: shotPatrones, t: "Patrones generacionales", d: "Descubre lo que se repite en tu familia" },
-  { img: exercisesShot.url, t: "Ejercicios diarios", d: "Prácticas cortas que sí se sienten" },
-  { img: musicShot.url, t: "Visualízalo y Vívelo", d: "Audios y lecciones para acompañar tu fe" },
-  { img: rewardsShot.url, t: "Premios ORÍGEN", d: "Tu árbol, tus logros y tus Hojas de Sanación" },
-  { img: profileShot.url, t: "Tu espacio ORÍGEN", d: "Tu historia y el avance de tu camino" },
-  { img: shotBiblioteca, t: "Biblioteca digital", d: "Un pack de libros nuevo cada semana" },
-  { img: juegosAsset.url, t: "Juegos del día", d: "Gimnasia emocional de 3 minutos" },
-  { img: shotRuleta, t: "Ruleta de premios", d: "Un giro cada 24 horas, siempre ganas" },
-  { img: shotArbol, t: "Árbol de Sanación", d: "Mira crecer tu avance con cada paso" },
-  { img: familyTreeAsset.url, t: "Tu árbol generacional", d: "Conoce tus raíces y organiza tu historia familiar" },
-  { img: palabraAsset.url, t: "Palabra del día", d: "Escritura, reflexión y oración para cada día" },
-  { img: shotComprar, t: "Hojas de Sanación", d: "Tu moneda de avance dentro de la app" },
-  { img: shotHistorial, t: "Tu historial", d: "Todas tus respuestas guardadas en PDF" },
-  { img: shotInvita, t: "Programa de afiliados", d: "Gana compartiendo ORÍGEN" },
-];
+const SCREENS = APP_SCREENS;
 
 type Stage = "quiz" | "paywall" | "offer80";
 type Popup = null | "scratch" | "free";
