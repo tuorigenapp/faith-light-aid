@@ -47,11 +47,15 @@ export function NotificacionesCard() {
   }
 
   async function toggleEmail() {
-    if (!user) return;
+    if (!user || busy) return;
     const next = !email;
-    setEmail(next);
-    await setEmailEnabled(user.id, next);
-    toast(next ? "Correos activados" : "Correos desactivados");
+    setBusy(true);
+    try {
+      await setEmailEnabled(user.id, next);
+      setEmail(next);
+      toast(next ? "Correos activados" : "Correos desactivados");
+    } catch { toast.error("No pudimos guardar la preferencia de correos. Intenta de nuevo."); }
+    finally { setBusy(false); }
   }
 
   return (
@@ -87,8 +91,9 @@ export function NotificacionesCard() {
           </p>
         )}
 
-        <button
+        <Button variant="outline"
           onClick={toggleEmail}
+          disabled={busy}
           className="flex min-h-[52px] w-full items-center justify-between rounded-[12px] border border-border/60 bg-background px-4 text-sm font-semibold"
         >
           <span className="flex items-center gap-2">
@@ -97,7 +102,7 @@ export function NotificacionesCard() {
           <span className={`h-6 w-11 rounded-full p-0.5 transition ${email ? "bg-primary" : "bg-secondary"}`}>
             <span className={`block h-5 w-5 rounded-full bg-card transition ${email ? "translate-x-5" : ""}`} />
           </span>
-        </button>
+        </Button>
       </div>
 
       <ul className="mt-4 space-y-1.5">

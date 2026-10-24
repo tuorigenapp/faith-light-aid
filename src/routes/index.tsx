@@ -12,9 +12,11 @@ import eBrain from "@/assets/e3d-brain.png";
 import { ReviewsSlider } from "@/components/ReviewsSlider";
 import { LiveActivityToasts } from "@/components/LiveActivityToasts";
 import { DiosTeDiceHoy } from "@/components/DiosTeDiceHoy";
-import screenExercises from "@/assets/landing-screens/ejercicios.png";
-import screenVisualiza from "@/assets/landing-screens/visualiza.png";
-import screenCommunity from "@/assets/landing-screens/comunidad.png";
+import screenExercises from "@/assets/screens-current/ejercicios.png.asset.json";
+import screenVisualiza from "@/assets/screens-current/visualiza.png.asset.json";
+import screenCommunity from "@/assets/screens-current/comunidad.png.asset.json";
+import screenRewards from "@/assets/screens-current/premiosorigen.png.asset.json";
+import screenProfile from "@/assets/screens-current/perfil.png.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -78,9 +80,11 @@ function Landing() {
   const [sticky, setSticky] = useState(false);
   const [screen, setScreen] = useState(0);
   const screens = [
-    { image: screenExercises, title: "Tu camino, un día a la vez", caption: "Ejercicios diarios y progreso visible." },
-    { image: screenVisualiza, title: "Visualízalo y Vívelo", caption: "Programas guiados de fe, identidad y bienestar." },
-    { image: screenCommunity, title: "Personas que te escuchan", caption: "Preguntas, respuestas y acompañamiento en comunidad." },
+    { image: screenExercises.url, title: "Tu camino, un día a la vez", caption: "Ejercicios diarios y progreso visible." },
+    { image: screenVisualiza.url, title: "Visualízalo y Vívelo", caption: "Programas guiados de fe, identidad y bienestar." },
+    { image: screenRewards.url, title: "Tu constancia tiene raíces", caption: "Tu árbol, tus logros y tus Hojas de Sanación." },
+    { image: screenProfile.url, title: "Tu historia importa", caption: "Tu perfil y el avance de tu camino." },
+    { image: screenCommunity.url, title: "Personas que te escuchan", caption: "Preguntas, respuestas y acompañamiento en comunidad." },
   ];
 
   useEffect(() => {
@@ -167,13 +171,13 @@ function Landing() {
           </Reveal>
         </section>
 
-        <section className="mt-12 overflow-hidden rounded-[24px] border border-primary/15 bg-gradient-to-br from-primary/10 via-background to-pink-100/50 p-5 sm:p-9" aria-label="Conoce ORÍGEN desde adentro">
+        <section className="mt-12 border-y border-border bg-secondary/30 py-8" aria-label="Conoce ORÍGEN desde adentro">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div><p className="text-xs font-bold uppercase tracking-widest text-primary">La app por dentro</p><h2 className="mt-1 font-display text-2xl font-extrabold sm:text-3xl">Un lugar para volver a ti.</h2><p className="mt-2 text-sm text-muted-foreground">Explora las pantallas reales antes de empezar.</p></div>
             <div className="flex gap-2"><button type="button" onClick={() => setScreen((screen + screens.length - 1) % screens.length)} aria-label="Pantalla anterior" className="grid h-11 w-11 place-items-center rounded-full border border-primary/20 bg-card text-primary">←</button><button type="button" onClick={() => setScreen((screen + 1) % screens.length)} aria-label="Siguiente pantalla" className="grid h-11 w-11 place-items-center rounded-full border border-primary/20 bg-card text-primary">→</button></div>
           </div>
           <div className="mt-6 grid gap-5 sm:grid-cols-[minmax(0,1fr)_220px] sm:items-center">
-            <div className="h-[300px] overflow-hidden rounded-2xl border border-border bg-card shadow-soft sm:h-[390px]"><img key={screen} src={screens[screen].image} alt={`Captura real de ORÍGEN: ${screens[screen].title}`} className="w-full object-cover object-top" loading="lazy" /></div>
+            <div className="mx-auto w-full max-w-[300px] overflow-hidden rounded-[24px] border border-border bg-card shadow-soft"><img key={screen} src={screens[screen].image} alt={`Captura real de ORÍGEN: ${screens[screen].title}`} className="h-auto w-full" loading="lazy" /></div>
             <div><span className="text-xs font-bold text-primary">0{screen + 1} / 0{screens.length}</span><h3 className="mt-2 font-display text-xl font-bold">{screens[screen].title}</h3><p className="mt-2 text-sm leading-relaxed text-muted-foreground">{screens[screen].caption}</p><div className="mt-5 flex gap-2">{screens.map((s, i) => <button key={s.title} type="button" onClick={() => setScreen(i)} aria-label={`Ver ${s.title}`} className={`h-2 rounded-full transition-all ${screen === i ? "w-8 bg-primary" : "w-2 bg-primary/25"}`} />)}</div></div>
           </div>
         </section>

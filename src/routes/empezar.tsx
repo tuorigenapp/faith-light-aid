@@ -22,9 +22,12 @@ import shotChat from "@/assets/funnel/shots/chat.jpg";
 import shotPareja from "@/assets/funnel/shots/pareja.jpg";
 import shotPatrones from "@/assets/funnel/shots/patrones.jpg";
 import shotMinistracion from "@/assets/funnel/shots/ministracion.jpg";
-import shotEjercicios from "@/assets/funnel/shots/ejercicios.jpg";
+import exercisesShot from "@/assets/screens-current/ejercicios.png.asset.json";
+import journeyShot from "@/assets/screens-current/etapas.png.asset.json";
+import musicShot from "@/assets/screens-current/visualiza.png.asset.json";
+import rewardsShot from "@/assets/screens-current/premiosorigen.png.asset.json";
+import profileShot from "@/assets/screens-current/perfil.png.asset.json";
 import shotBiblioteca from "@/assets/funnel/shots/biblioteca.jpg";
-import shotCategorias from "@/assets/funnel/shots/categorias.jpg";
 import shotRuleta from "@/assets/funnel/shots/ruleta.jpg";
 import juegosAsset from "@/assets/funnel/shots/juegos.png.asset.json";
 import shotComprar from "@/assets/funnel/shots/comprarmonedas.jpg";
@@ -109,12 +112,15 @@ const GUIAS = [
 ];
 const SCREENS = [
   { img: shotDashboard, t: "Tu inicio", d: "Tu misión del día, racha y todo tu camino" },
-  { img: shotCategorias, t: "Caminos ORÍGEN", d: "20 etapas, una lección nueva cada día" },
+  { img: journeyShot.url, t: "Caminos ORÍGEN", d: "Tu camino, una lección nueva cada día" },
   { img: shotChat, t: "Mentora ORÍGEN", d: "Te acompaña y te escucha 24/7" },
   { img: shotMinistracion, t: "Dios te dice hoy", d: "Una palabra personal cada día" },
   { img: shotPareja, t: "Tu pareja de destino", d: "Entiende lo que hay entre ustedes" },
   { img: shotPatrones, t: "Patrones generacionales", d: "Descubre lo que se repite en tu familia" },
-  { img: shotEjercicios, t: "Ejercicios diarios", d: "Prácticas cortas que sí se sienten" },
+  { img: exercisesShot.url, t: "Ejercicios diarios", d: "Prácticas cortas que sí se sienten" },
+  { img: musicShot.url, t: "Visualízalo y Vívelo", d: "Audios y lecciones para acompañar tu fe" },
+  { img: rewardsShot.url, t: "Premios ORÍGEN", d: "Tu árbol, tus logros y tus Hojas de Sanación" },
+  { img: profileShot.url, t: "Tu espacio ORÍGEN", d: "Tu historia y el avance de tu camino" },
   { img: shotBiblioteca, t: "Biblioteca digital", d: "Un pack de libros nuevo cada semana" },
   { img: juegosAsset.url, t: "Juegos del día", d: "Gimnasia emocional de 3 minutos" },
   { img: shotRuleta, t: "Ruleta de premios", d: "Un giro cada 24 horas, siempre ganas" },

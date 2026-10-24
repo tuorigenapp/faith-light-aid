@@ -94,7 +94,8 @@ export async function disablePush(userId: string) {
 }
 
 export async function setEmailEnabled(userId: string, enabled: boolean) {
-  await supabase.from("notification_prefs").upsert({ user_id: userId, email_enabled: enabled });
+  const { error } = await supabase.from("notification_prefs").upsert({ user_id: userId, email_enabled: enabled });
+  if (error) throw new Error("No pudimos guardar la preferencia de correos.");
 }
 
 export async function getPrefs(userId: string) {
