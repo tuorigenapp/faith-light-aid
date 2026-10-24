@@ -12,6 +12,7 @@ import logo from "@/assets/logo-origen.png";
 import { DESIRE_PHOTOS, STRUGGLE_PHOTOS, RESULT_PHOTOS, TODAY_PHOTOS, FUTURE_PHOTOS } from "@/lib/funnel-visuals";
 import { nextFunnelVariation } from "@/lib/funnel-visual-rotation";
 import { illustrativeImpactScore } from "@/lib/funnel-impact";
+import { isRegistrationOffer } from "@/lib/registration-clock";
 import { FUNNEL_BOOKS } from "@/lib/funnel-books";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { FUNNEL_INTERACTIONS } from "@/lib/funnel-interactions";
@@ -41,6 +42,7 @@ import familyTreeAsset from "@/assets/funnel/shots/mi-arbol.png.asset.json";
 const { audio: eHeadphones, journal: ePractice, bible: eBook, prayer: eCross, couple: eCouple, healingHeart: eHeart, compass: eStar, gift } = FUNNEL_INTERACTIONS;
 
 export const Route = createFileRoute("/empezar")({
+  validateSearch: (search: Record<string, unknown>): { oferta?: "especial" } => isRegistrationOffer(search.oferta) ? { oferta: "especial" } : {},
   head: () => ({
     meta: [
       { title: "Tu evaluación ORÍGEN — descubre tu patrón" },
@@ -118,6 +120,7 @@ function useCountdown(seconds: number) {
 }
 
 function Funnel() {
+  const { oferta } = Route.useSearch();
   const [step, setStep] = useState(1);
   const [stage, setStage] = useState<Stage>("quiz");
   const [popup, setPopup] = useState<Popup>(null);
@@ -266,7 +269,7 @@ function Funnel() {
           </>}
 
           {step === 8 && <Analysis name={first} onDone={next} />}
-          {step === 9 && <Result name={first} areas={areas} variant={visualVariant} onNext={() => { setStage("paywall"); window.scrollTo(0, 0); }} />}
+          {step === 9 && <Result name={first} areas={areas} variant={visualVariant} onNext={() => { setStage(oferta === "especial" ? "offer80" : "paywall"); window.scrollTo(0, 0); }} />}
         </section>
       </div>
     </main>

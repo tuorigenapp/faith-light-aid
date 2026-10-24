@@ -45,3 +45,4 @@
 - Home and Visualiza use the same method-cover catalog, PROGRAMAS and custom-cover resolver; Home retains one gradient-overlay carousel with complete square artwork for every entry, preventing stale covers and missing programs without changing Visualiza's layout.
 - Funnel blocks live in `src/components/funnel/FunnelShared.tsx`, real captures in `src/lib/app-screens.ts` with stable interleaving via `app-screen-order.ts`, and original interaction PNGs in `src/lib/funnel-interactions.ts`; this keeps `/` and both `/empezar` offers synchronized with varied captures and stable section filters.
 - In-app reminders become system notifications whenever notification permission is granted; the in-app card is only the fallback without permission.
+- Landing registration uses a hydrated local clock, never an invented expiry; its explicit offer link preserves the evaluation and then opens the existing discounted plans without duplicating prices or checkout links.
