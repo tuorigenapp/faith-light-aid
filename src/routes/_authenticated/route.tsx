@@ -31,6 +31,8 @@ import { MiniPlayer } from "@/components/MiniPlayer";
 import { useSignedUrls } from "@/hooks/use-signed-urls";
 import { useCommunityNotifications } from "@/hooks/use-community-notifications";
 import origenIcon from "@/assets/logo-origen.png";
+import { useMensajesUnread } from "@/hooks/use-mensajes";
+import { Bell as BellIcon, MessageSquareHeart } from "lucide-react";
 
 
 
@@ -105,6 +107,7 @@ function AuthLayoutInner() {
   const { data: communityNotifications } = useCommunityNotifications(user?.id);
   const communityUnread = (communityNotifications?.length ?? 0) > 0;
   const { data: pendings } = useOrigenPendings(user?.id);
+  const mensajesUnread = useMensajesUnread();
   useSectionSeen(user?.id, location.pathname, location.searchStr ?? "");
   const ensureNotice = useServerFn(ensureDailyNotice);
   useEffect(() => {
@@ -305,6 +308,18 @@ function AuthLayoutInner() {
                 >
                   {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
                 </button>
+              </li>
+              <li className="shrink-0">
+                <Link to="/mensajes" aria-label={mensajesUnread ? `Mensajes ORÍGEN, ${mensajesUnread} nuevos` : "Mensajes ORÍGEN"} className={cn("relative inline-flex items-center gap-1.5 h-11 px-3.5 rounded-2xl border-2 text-[13px] font-semibold whitespace-nowrap", isActive("/mensajes") ? "border-primary bg-primary/10 text-primary" : "border-border/70 bg-card/80 text-foreground/80")}>
+                  <MessageSquareHeart className="w-4 h-4" /> Mensajes
+                  {mensajesUnread > 0 && <span className="grid h-5 min-w-5 place-items-center rounded-full bg-destructive px-1 text-[11px] font-bold text-destructive-foreground">{mensajesUnread}</span>}
+                </Link>
+              </li>
+              <li className="shrink-0">
+                <Link to="/avisos" aria-label="Avisos ORÍGEN" className={cn("relative inline-flex items-center gap-1.5 h-11 px-3.5 rounded-2xl border-2 text-[13px] font-semibold whitespace-nowrap", isActive("/avisos") ? "border-primary bg-primary/10 text-primary" : "border-border/70 bg-card/80 text-foreground/80")}>
+                  <BellIcon className="w-4 h-4" /> Avisos
+                  {!!pendings?.notices && <span className="grid h-5 min-w-5 place-items-center rounded-full bg-destructive px-1 text-[11px] font-bold text-destructive-foreground">{pendings.notices}</span>}
+                </Link>
               </li>
               {/* Todas las secciones */}
               {TOP_CHIPS.map(({ to, label, icon: Icon }) => {
