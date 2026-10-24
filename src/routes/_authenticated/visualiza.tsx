@@ -210,7 +210,11 @@ function Visualiza() {
           (c.subtitle as string) ||
           (c.description as string) ||
           "Tema guiado con audios, práctica y evaluación.",
-        image: (c.cover_url as string) || GROUP_FALLBACK[i % GROUP_FALLBACK.length],
+        image:
+          getOverride(`imagen:visualiza:cat-${c.id}`)?.cover_url ||
+          LOCAL_CAT_COVERS[c.id as string] ||
+          (c.cover_url as string) ||
+          GROUP_FALLBACK[i % GROUP_FALLBACK.length],
         Icon: Headphones,
         iconTint: "text-primary",
         chipBg: "bg-primary/12",

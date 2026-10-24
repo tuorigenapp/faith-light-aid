@@ -46,6 +46,8 @@ export const APP_COVERS: AppCover[] = [
   { key: "imagen:visualiza:limpieza", section: "Visualízalo y Vívelo", title: "Limpieza Espiritual", image: clean, scope: "imagen" },
   { key: "imagen:visualiza:identidad", section: "Visualízalo y Vívelo", title: "Salto de Identidad", image: identity, scope: "imagen" },
   { key: "imagen:visualiza:cristo", section: "Visualízalo y Vívelo", title: "Método de Cristo 3·6·9", image: christ, scope: "imagen" },
+  { key: "imagen:visualiza:cat-liberate-del-narcisista", section: "Visualízalo y Vívelo", title: "Libérate del Narcisista", image: catNarcisista, scope: "imagen" },
+  { key: "imagen:visualiza:cat-sana-tu-arbol-familiar", section: "Visualízalo y Vívelo", title: "Sana Tu Árbol Familiar", image: catArbolFamiliar, scope: "imagen" },
   ...PROGRAMAS.map(p => ({ key: `imagen:programa:${p.id}`, section: "Programas de sanación", title: p.title, image: p.cover, scope: "imagen" as const })),
   { key: "imagen:consulta:banner-mentora", section: "Consultas · portadas con botón", title: "Conversa con Ruth Esther · Banner", image: consultaMentora, scope: "imagen" },
   { key: "imagen:consulta:banner-pareja", section: "Consultas · portadas con botón", title: "¿Deuda o propósito? · Banner", image: consultaPareja, scope: "imagen" },
