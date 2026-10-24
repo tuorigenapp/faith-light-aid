@@ -1,7 +1,7 @@
 import { ManagedImage } from "@/components/ManagedImage";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { ArrowRight, Check, ChevronDown, CircleAlert, CircleX, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowRight, Check, ChevronDown, CircleAlert, CircleX, ShieldCheck } from "lucide-react";
 import logo from "@/assets/logo-origen.png";
 import heroImg from "@/assets/landing/hero-oracion.jpg";
 import triedImg from "@/assets/landing/probaste-todo.jpg";
@@ -206,7 +206,7 @@ function Landing() {
         <section className="mt-12 grid items-center gap-6 md:grid-cols-2">
           <Reveal><img src={eStar} alt="" loading="lazy" className="mx-auto h-40 w-40 object-contain drop-shadow-xl md:h-56 md:w-56" /></Reveal>
           <Reveal>
-            <Kicker>¿Para quién es?</Kicker>
+            <p className="text-[12px] font-bold uppercase tracking-widest text-primary">¿Para quién es?</p>
             <H2 left>Para la persona que…</H2>
             <ul className="mt-4 grid gap-3">{FOR_WHO.map((t) => <li key={t} className="flex items-start gap-2.5 text-[15px] font-medium"><CheckDot />{t}</li>)}</ul>
             <p className="mt-4 text-[15px] text-muted-foreground">Si te viste aquí, esto fue hecho para ti — y para la persona en la que te estás convirtiendo.</p>
