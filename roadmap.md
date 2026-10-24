@@ -1,11 +1,11 @@
 # Roadmap ORÍGEN
 
 ## Ajustes solicitados el 24 de octubre
-- [ ] Agregar capturas autenticadas de /palabra y /arbol?vista=mi-arbol a /empezar.
-- [ ] Crear fotos cristianas decorosas y claras para deseos y obstáculos; cinco resultados y cinco pares Hoy/6 meses.
-- [ ] Sustituir emojis circulares de reviews y Comunidad de Inicio por retratos humanos ilustrativos.
-- [ ] Mostrar todas las portadas reales en la promoción de libros con slider no clickeable.
-- [ ] Juegos e Inicio: portadas completas, sin degradados ni recortes; verificar en claro/oscuro y móvil.
+- [x] Agregar capturas autenticadas de /palabra y /arbol?vista=mi-arbol a /empezar.
+- [x] Crear fotos cristianas decorosas y claras para deseos y obstáculos; cinco resultados y cinco pares Hoy/6 meses, rotación comprobada con cinco evaluaciones.
+- [x] Sustituir emojis circulares de reviews y Comunidad de Inicio por retratos humanos ilustrativos, sin atribuir testimonios verificados.
+- [x] Mostrar las 82 portadas reales en la promoción de libros con slider no clickeable; navegación comprobada hasta el último libro.
+- [x] Juegos e Inicio: portadas completas, sin degradados ni recortes; verificados en claro/oscuro y móvil, captura de /juegos actualizada en la oferta.
 
 ## Completado (ronda actual)
 - [x] /empezar: reviews con foto circular + slider táctil móvil

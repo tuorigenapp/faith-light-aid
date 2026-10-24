@@ -2,7 +2,6 @@ import { Link } from "@tanstack/react-router";
 import { useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useGamePlays, MIN_PLAYS } from "@/lib/game-plays";
 import vivMusic from "@/assets/viv-music.jpg";
 import vivClean from "@/assets/viv-clean.jpg";
 import vivIdentity from "@/assets/viv-identity.jpg";
@@ -14,7 +13,7 @@ import afiliacion from "@/assets/home/afiliacion.jpg";
 import balanceImg from "@/assets/home/balance.jpg";
 import {
   ArrowRight, BookOpen, Check, ChevronLeft, ChevronRight, Flame, Heart, Library,
-  Mic, Network, Sparkles, Baby, Gem, Shield, Magnet, Headphones, Gamepad2, Leaf, HeartHandshake, LayoutGrid,
+  Mic, Network, Sparkles, Baby, Gem, Shield, Magnet, Headphones, Leaf, HeartHandshake, LayoutGrid,
 } from "lucide-react";
 import { EBOOKS } from "@/lib/biblioteca";
 import coverFallback from "@/assets/e3d-book.png";

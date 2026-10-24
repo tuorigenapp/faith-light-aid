@@ -23,7 +23,7 @@ import shotEjercicios from "@/assets/funnel/shots/ejercicios.jpg";
 import shotBiblioteca from "@/assets/funnel/shots/biblioteca.jpg";
 import shotCategorias from "@/assets/funnel/shots/categorias.jpg";
 import shotRuleta from "@/assets/funnel/shots/ruleta.jpg";
-import shotJuegos from "@/assets/funnel/shots/juegos.jpg";
+import juegosAsset from "@/assets/funnel/shots/juegos.png.asset.json";
 import shotComprar from "@/assets/funnel/shots/comprarmonedas.jpg";
 import shotHistorial from "@/assets/funnel/shots/historial.jpg";
 import shotArbol from "@/assets/funnel/shots/arbol.jpg";
@@ -113,7 +113,7 @@ const SCREENS = [
   { img: shotPatrones, t: "Patrones generacionales", d: "Descubre lo que se repite en tu familia" },
   { img: shotEjercicios, t: "Ejercicios diarios", d: "Prácticas cortas que sí se sienten" },
   { img: shotBiblioteca, t: "Biblioteca digital", d: "Un pack de libros nuevo cada semana" },
-  { img: shotJuegos, t: "Juegos del día", d: "Gimnasia emocional de 3 minutos" },
+  { img: juegosAsset.url, t: "Juegos del día", d: "Gimnasia emocional de 3 minutos" },
   { img: shotRuleta, t: "Ruleta de premios", d: "Un giro cada 24 horas, siempre ganas" },
   { img: shotArbol, t: "Árbol de Sanación", d: "Mira crecer tu avance con cada paso" },
   { img: familyTreeAsset.url, t: "Tu árbol generacional", d: "Conoce tus raíces y organiza tu historia familiar" },
