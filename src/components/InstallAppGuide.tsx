@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { ChevronLeft, Download, EllipsisVertical, RotateCw, Signal, Smartphone, Wifi, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -47,10 +48,10 @@ export function InstallAppGuide({ open, onClose }: { open: boolean; onClose: () 
     return () => { window.removeEventListener("keydown", onKey); document.body.style.overflow = prev; };
   }, [open, onClose]);
 
-  if (!open) return null;
+  if (!open || typeof document === "undefined") return null;
 
-  return (
-    <div role="dialog" aria-modal="true" aria-labelledby="install-title" className="fixed inset-0 z-[120] flex flex-col overflow-y-auto bg-install-bg text-install-fg motion-safe:animate-in motion-safe:fade-in motion-safe:duration-300">
+  return createPortal(
+    <div role="dialog" aria-modal="true" aria-labelledby="install-title" className="fixed inset-0 z-[200] flex flex-col overflow-y-auto bg-install-bg text-install-fg motion-safe:animate-in motion-safe:fade-in motion-safe:duration-300">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[60%] bg-[radial-gradient(ellipse_at_top,var(--color-install-phone-top),transparent_70%)] opacity-60" />
       <div className="relative mx-auto flex min-h-dvh w-full max-w-md flex-col px-5 pb-[calc(env(safe-area-inset-bottom)+16px)] pt-[calc(env(safe-area-inset-top)+12px)]">
         <div className="flex justify-end">
@@ -75,7 +76,7 @@ export function InstallAppGuide({ open, onClose }: { open: boolean; onClose: () 
               {Array.from({ length: 20 }).map((_, i) =>
                 i === 9 ? (
                   <div key={i} className="flex flex-col items-center gap-1">
-                    <img src="/apple-touch-icon.png?v=3" alt="Ícono de ORÍGEN" className="aspect-square w-full rounded-[14px] shadow-[0_0_0_2px_rgba(255,255,255,.85),0_8px_24px_rgba(167,139,250,.6)] motion-safe:animate-pulse" />
+                    <img src="/apple-touch-icon.png?v=3" alt="Ícono de ORÍGEN" className="aspect-square w-full rounded-[14px] shadow-[0_0_0_2px_rgba(255,255,255,.85),0_8px_24px_rgba(167,139,250,.6)]" />
                     <span className="text-[9px] font-semibold">ORÍGEN</span>
                   </div>
                 ) : (
@@ -124,7 +125,8 @@ export function InstallAppGuide({ open, onClose }: { open: boolean; onClose: () 
         </div>
         <button type="button" onClick={onClose} className="mx-auto mt-3 min-h-11 px-6 text-[15px] font-semibold text-install-muted">Ahora no</button>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
