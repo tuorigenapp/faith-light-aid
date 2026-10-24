@@ -1,6 +1,7 @@
 # Roadmap ORÍGEN
 
 ## Correcciones del 24 de octubre, 06:44 UTC
+- [ ] Sincronizar en Inicio las portadas de Libérate del Narcisista y Sana Tu Árbol Familiar que ya aparecen en Visualízalo.
 - [ ] Reparar portada de la consulta Sana tu árbol familiar y comprobarla con sesión.
 - [ ] Corregir regreso de Patrones Familiares al inicio.
 - [ ] Unificar todas las eliminaciones en un popup ORÍGEN con cancelar, eliminar y casilla No volver a mostrar, guardada por persona.
