@@ -528,7 +528,6 @@ function Limpieza({ onNote }: { onNote: Notify }) {
   const [title, setTitle] = useState("");
   const [level, setLevel] = useState(1);
   const [notes, setNotes] = useState("");
-  const [withCover, setWithCover] = useState(true);
   const [audioOnly, setAudioOnly] = useState(false);
   const [busy, setBusy] = useState(false);
 
@@ -542,8 +541,8 @@ function Limpieza({ onNote }: { onNote: Notify }) {
     setBusy(true);
     onNote(null);
     try {
-      await create({ data: { title: title.trim(), level, notes, withCover } });
-      onNote({ text: "Práctica creada con portada, materiales y pasos. Ya se ve en la app." });
+      await create({ data: { title: title.trim(), level, notes, withCover: false } });
+      onNote({ text: "Práctica creada con ícono, materiales y pasos propios del tema." });
       setTitle("");
       setNotes("");
       qc.invalidateQueries({ queryKey: ["studio-limpieza"] });
@@ -570,10 +569,7 @@ function Limpieza({ onNote }: { onNote: Notify }) {
         <Field label="Notas para la IA (opcional)">
           <textarea className={cn(inputClass, "min-h-24 py-2")} value={notes} onChange={(e) => setNotes(e.target.value)} />
         </Field>
-        <label className="flex min-h-11 items-center gap-2 text-[13px] font-semibold text-foreground/80">
-          <input type="checkbox" checked={withCover} onChange={(e) => setWithCover(e.target.checked)} className="h-5 w-5" />
-          Generar la portada con IA
-        </label>
+        <SubtopicIcon title={title || "Limpieza Espiritual"} />
         <button
           onClick={submit}
           disabled={busy}
@@ -590,7 +586,7 @@ function Limpieza({ onNote }: { onNote: Notify }) {
           {practices.map((p) => (
             <Fragment key={p.id}>
             <li className="flex items-center gap-3 rounded-[12px] border border-border bg-muted/40 p-3">
-              {p.cover_url && <img src={p.cover_url} alt="" className="h-12 w-12 shrink-0 rounded-[10px] object-cover" />}
+              <SubtopicIcon title={p.title} category="Limpieza Espiritual" className="h-12 w-12 text-2xl" />
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-[14px] font-bold text-foreground">{p.title}</span>
                 <span className="block text-[11.5px] text-foreground/55">
@@ -621,11 +617,9 @@ function Limpieza({ onNote }: { onNote: Notify }) {
             {editing?.id === p.id && (
               <li className="space-y-2 rounded-[12px] border border-border bg-card p-3">
                 <Field label="Título"><input className={inputClass} value={editing.title} onChange={(e) => setEditing({ ...editing, title: e.target.value })} /></Field>
-                <Field label="Portada (enlace de imagen)"><input className={inputClass} value={editing.cover} onChange={(e) => setEditing({ ...editing, cover: e.target.value })} placeholder="https://…" /></Field>
                 <Field label="Nota para la IA"><textarea className={cn(inputClass, "min-h-20 py-2")} value={editing.notes} onChange={(e) => setEditing({ ...editing, notes: e.target.value })} /></Field>
-                <div className="grid gap-2 sm:grid-cols-3">
-                  <button className="min-h-11 rounded-[12px] border border-border text-[13px] font-semibold" onClick={() => { const e = editing; setEditing(null); act(p.id, () => updateL({ data: { id: p.id, title: e.title.trim() !== p.title ? e.title.trim() : undefined, coverUrl: e.cover !== (p.cover_url ?? "") ? e.cover.trim() : undefined, notes: e.notes } }), "Práctica guardada."); }}>Guardar cambios</button>
-                  <button className="min-h-11 rounded-[12px] border border-border text-[13px] font-semibold" onClick={() => { const e = editing; setEditing(null); act(p.id, () => updateL({ data: { id: p.id, regenerateCover: true, notes: e.notes } }), "Portada nueva generada."); }}><RefreshCw className="mr-1 inline h-4 w-4" />Portada con IA</button>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <button className="min-h-11 rounded-[12px] border border-border text-[13px] font-semibold" onClick={() => { const e = editing; setEditing(null); act(p.id, () => updateL({ data: { id: p.id, title: e.title.trim() !== p.title ? e.title.trim() : undefined,  notes: e.notes } }), "Práctica guardada."); }}>Guardar cambios</button>
                   <button className="min-h-11 rounded-[12px] bg-[#7C5CFF] text-[13px] font-bold text-white" onClick={() => { const e = editing; setEditing(null); act(p.id, () => updateL({ data: { id: p.id, improve: true, notes: e.notes } }), "La IA mejoró la receta y los pasos."); }}><Wand2 className="mr-1 inline h-4 w-4" />Mejorar con IA</button>
                 </div>
               </li>

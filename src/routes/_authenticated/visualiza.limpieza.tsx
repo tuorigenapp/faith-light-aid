@@ -306,7 +306,7 @@ function LimpiezaPage() {
     queryFn: async (): Promise<Practice[]> => {
       const { data } = await supabase
         .from("limpieza_practices")
-        .select("slug, title, duration, level, objective, info, materials, steps, scripture, scripture_ref, cover_url")
+        .select("slug, title, duration, level, objective, info, materials, steps, scripture, scripture_ref")
         .eq("is_published", true)
         .order("sort_order");
       return (data ?? []).map((row) => ({
@@ -317,7 +317,6 @@ function LimpiezaPage() {
         Icon: Droplet,
         color: "#7C5CFF",
         bg: "#EDE7FF",
-        bgImage: row.cover_url ?? undefined,
         objective: row.objective ?? "",
         info: (row.info as string[] | null) ?? [],
         materials: ((row.materials as string[] | null) ?? []).map((label) => ({ label, Icon: Leaf })),
@@ -506,7 +505,7 @@ function LimpiezaPage() {
     <div className="pb-32 max-w-3xl mx-auto">
       {/* Hero image */}
       <section className="relative h-64 sm:h-80 overflow-hidden rounded-b-[2rem]">
-        <img src={practice.bgImage ?? bathImg} alt={practice.title} className="absolute inset-0 h-full w-full object-cover" />
+        <ManagedImage imageKey="imagen:visualiza:limpieza" src={heroImg} alt="" className="absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-white/60 dark:to-background/60" />
         <button onClick={() => setStep(2)} className="absolute top-4 left-4 w-10 h-10 rounded-full bg-white/90 grid place-items-center shadow-soft">
           <ArrowLeft className="w-4 h-4 text-foreground" />

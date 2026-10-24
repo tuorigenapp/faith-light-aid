@@ -363,7 +363,7 @@ export function AudiosManager() {
             title: d.title,
             subtitle: d.subtitle || null,
             description: d.description || null,
-            cover_url: d.cover_url || null,
+            cover_url: null,
             required_plan: d.required_plan,
             sort_order: d.sort_order,
           })
@@ -376,7 +376,7 @@ export function AudiosManager() {
           title: d.title,
           subtitle: d.subtitle || null,
           description: d.description || null,
-          cover_url: d.cover_url || null,
+          cover_url: null,
           required_plan: d.required_plan,
           sort_order: d.sort_order,
           group_key: selectedRoot,
@@ -599,17 +599,7 @@ export function AudiosManager() {
             {activeCat && (
               <div className="mb-3 flex items-center justify-between gap-3 rounded-[12px] border border-border/60 bg-background p-3">
                 <div className="flex min-w-0 items-center gap-3">
-                  {activeCat.cover_url ? (
-                    <img
-                      src={activeCat.cover_url}
-                      alt=""
-                      className="h-11 w-11 shrink-0 rounded-[10px] object-cover"
-                    />
-                  ) : (
-                    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[10px] bg-primary/10 text-primary">
-                      <ImageIcon className="h-4 w-4" />
-                    </span>
-                  )}
+                  <SubtopicIcon title={activeCat.title} category={GROUP_LABELS[activeCat.group_key]} className="h-11 w-11 text-2xl" />
                   <div className="min-w-0">
                     <p className="truncate text-[13.5px] font-bold leading-tight">{activeCat.title}</p>
                     <p className="truncate text-[11.5px] text-muted-foreground">
@@ -721,29 +711,10 @@ export function AudiosManager() {
                     className="w-full rounded-[10px] border-[1.5px] border-border bg-card p-3 text-[14px] outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/20"
                   />
                 </Field>
-                <Field label="Portada">
-                  <input
-                    value={catForm.cover_url}
-                    onChange={(e) => setCatForm({ ...catForm, cover_url: e.target.value })}
-                    placeholder="https://… o sube la imagen"
-                    className={inputCls}
-                    maxLength={8000}
-                  />
-                  <label className="mt-2 inline-flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-[10px] bg-primary/10 text-[13px] font-semibold text-primary">
-                    {catUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-                    Subir portada
-                    <input
-                      type="file"
-                      accept="image/png,image/jpeg,image/webp"
-                      className="sr-only"
-                      onChange={(e) => {
-                        const f = e.target.files?.[0];
-                        if (f) void uploadCatCover(f);
-                        e.target.value = "";
-                      }}
-                    />
-                  </label>
-                </Field>
+                <div className="flex items-center gap-3">
+                  <SubtopicIcon title={catForm.title} category={GROUP_LABELS[selectedRoot]} />
+                  <p className="text-sm text-muted-foreground">{catForm.title || "Subcategoría"}</p>
+                </div>
 
                 <div className="flex gap-2 sm:col-span-2">
                   <button

@@ -18,12 +18,14 @@ export const Route = createFileRoute("/api/admin/generate-manifest")({ server: {
     const { data: role } = await db.from("user_roles").select("role").eq("user_id", auth.user.id).eq("role", "admin").maybeSingle();
     if (!role) return reply({ error: "Solo administradores." }, 403);
     const input = Input.parse(await request.json());
+    const { data: category, error: categoryError } = await db.from("manifest_categories").select("title,description,design").eq("id", input.categoryId).maybeSingle();
+    if (categoryError || !category) return reply({ error: "Este tema ya no está disponible." }, 404);
     let query = db.from("manifest_audios").select("title,affirmation,lesson,exercise,quiz,word_game").eq("category_id", input.categoryId);
     if (input.audioId) query = query.neq("id", input.audioId);
     const { data: previous, error } = await query;
     if (error) throw error;
     const { generateSubtopicContent } = await import("@/lib/subtopic-generation.server");
-    const content = await generateSubtopicContent({ category: input.category, description: "", title: input.title, day: input.day, notes: input.context, previous: previous ?? [] });
+    const content = await generateSubtopicContent({ category: category.title, description: category.description ?? "", title: input.title, day: input.day, notes: input.context, recipe: category.design === "limpieza", previous: previous ?? [] });
     return reply({ affirmation: content.affirmation, lesson: content.lesson, exercise: content.exercise, word_game: { words: content.search_words }, quiz: { questions: content.quiz, tasks: content.tasks, recipe_steps: content.recipe_steps, materials: content.materials ?? [] } });
   } catch (error) { return reply({ error: error instanceof z.ZodError ? "Revisa los campos y vuelve a intentarlo; no se guardó contenido incompleto." : error instanceof Error ? error.message : "No pudimos completar el contenido. Intenta otra vez." }, 400); }
 } } } });
