@@ -1,5 +1,10 @@
 # Roadmap ORÍGEN
 
+## Papelera de la mentora, 24 de octubre, 07:12 UTC
+- [ ] Guardar conversaciones eliminadas y sus mensajes en papelera recuperable por 30 días, con privacidad por cuenta y plazo controlado en el servidor.
+- [ ] Agregar acceso a papelera y restauración en el historial del chat sin permitir borrar burbujas individuales.
+- [ ] Verificar borrar, recargar, restaurar y recuperar mensajes/borrador con sesión real; probar el límite de 30 días.
+
 ## Ajuste del 24 de octubre, 07:01 UTC
 - [x] Recuperar en Inicio el degradado, proporción y título sobre la imagen de las categorías del panel, conservando sus portadas nuevas completas; verificado a 375/1280 px con sesión.
 - [x] Quitar la eliminación de mensajes individuales del chat con la mentora; mensajes enviados y respuestas sin papelera a 375/1280 px. Historial mantiene el borrado con popup ORÍGEN y cancelación comprobada sin eliminar conversaciones.
