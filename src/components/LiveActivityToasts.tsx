@@ -4,26 +4,17 @@ import { useServerFn } from "@tanstack/react-start";
 import { X } from "lucide-react";
 import { getLiveActivity } from "@/lib/social-proof.functions";
 import { useAuth } from "@/lib/use-auth";
-import e3dbook from "@/assets/e3d-book.png";
-import e3dbrain from "@/assets/e3d-brain.png";
-import e3dbutterfly from "@/assets/e3d-butterfly.png";
-import e3dclouds from "@/assets/e3d-clouds.png";
-import e3dcoin from "@/assets/e3d-coin.png";
-import e3dcouple from "@/assets/e3d-couple.png";
-import e3dcross from "@/assets/e3d-cross.png";
-import e3dheadphones from "@/assets/e3d-headphones.png";
-import e3dheartpurple from "@/assets/e3d-heart-purple.png";
-import e3dheartgem from "@/assets/e3d-heartgem.png";
-import e3dpractice from "@/assets/e3d-practice.png";
-import e3dstar from "@/assets/e3d-star.png";
+import { FUNNEL_INTERACTIONS as icons } from "@/lib/funnel-interactions";
 import { appDayKey } from "@/lib/app-day";
 import { buildSocialProofMessages, type SocialProofMessage } from "@/components/social/social-proof-content";
 
 /** Elementos 3D propios de ORÍGEN (sin emojis del sistema). */
 const ART: Record<string, string> = {
-  book: e3dbook, brain: e3dbrain, butterfly: e3dbutterfly, clouds: e3dclouds, coin: e3dcoin, couple: e3dcouple,
-  cross: e3dcross, headphones: e3dheadphones, "heart-purple": e3dheartpurple, heartgem: e3dheartgem, practice: e3dpractice, star: e3dstar,
-  sparkles: e3dstar, users: e3dcouple, sun: e3dcross, gift: e3dcoin, compass: e3dstar, heart: e3dheartgem, eye: e3dheadphones,
+  book: icons.bible, brain: icons.brain, butterfly: icons.familyTree, clouds: icons.rest,
+  coin: icons.leafToken, couple: icons.couple, cross: icons.prayer, headphones: icons.audio,
+  "heart-purple": icons.dove, heartgem: icons.mentor, practice: icons.journal, star: icons.path,
+  sparkles: icons.path, users: icons.categories, sun: icons.sun, gift: icons.gift,
+  compass: icons.compass, heart: icons.healingHeart, eye: icons.butterfly,
 };
 
 const VISIBLE_MS = 5500;
@@ -76,7 +67,8 @@ export function LiveActivityToasts({ variant = "app" }: { variant?: "landing" | 
         schedule(gap);
         return;
       }
-      const msg = messages[idx.current % messages.length]!;
+      const msg = messages[idx.current % messages.length];
+      if (!msg) return;
       idx.current += 1;
       setCurrent(msg);
       hideTimer = setTimeout(() => setCurrent(null), VISIBLE_MS);
@@ -91,7 +83,7 @@ export function LiveActivityToasts({ variant = "app" }: { variant?: "landing" | 
   }, [messages, variant]);
 
   if (!current) return null;
-  const art = ART[current.icon] ?? e3dstar;
+  const art = ART[current.icon] ?? icons.categories;
 
   return (
     <div

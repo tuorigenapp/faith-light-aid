@@ -14,7 +14,7 @@ import { nextFunnelVariation } from "@/lib/funnel-visual-rotation";
 import { illustrativeImpactScore } from "@/lib/funnel-impact";
 import { FUNNEL_BOOKS } from "@/lib/funnel-books";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import gift from "@/assets/funnel/gift.png";
+import { FUNNEL_INTERACTIONS } from "@/lib/funnel-interactions";
 import mockup from "@/assets/funnel/mockup.png";
 import { APP_SCREENS } from "@/lib/app-screens";
 import { AppScreens, BeforeAfter, BooksGift, Cta, Includes, SectionTitle, Tick, TryConsulta } from "@/components/funnel/FunnelShared";
@@ -38,13 +38,7 @@ import shotArbol from "@/assets/funnel/shots/arbol.jpg";
 import shotInvita from "@/assets/funnel/shots/invita.jpg";
 import palabraAsset from "@/assets/funnel/shots/palabra.png.asset.json";
 import familyTreeAsset from "@/assets/funnel/shots/mi-arbol.png.asset.json";
-import eHeadphones from "@/assets/e3d-headphones.png";
-import ePractice from "@/assets/e3d-practice.png";
-import eBook from "@/assets/e3d-book.png";
-import eCross from "@/assets/e3d-cross.png";
-import eCouple from "@/assets/e3d-couple.png";
-import eHeart from "@/assets/e3d-heartgem.png";
-import eStar from "@/assets/e3d-star.png";
+const { audio: eHeadphones, journal: ePractice, bible: eBook, prayer: eCross, couple: eCouple, healingHeart: eHeart, compass: eStar, gift } = FUNNEL_INTERACTIONS;
 
 export const Route = createFileRoute("/empezar")({
   head: () => ({
