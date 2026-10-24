@@ -12,6 +12,8 @@ import music from "@/assets/visualiza/cat-musica.jpg";
 import clean from "@/assets/visualiza/cat-limpieza.jpg";
 import identity from "@/assets/visualiza/cat-identidad.jpg";
 import christ from "@/assets/visualiza/cat-cristo.jpg";
+import catNarcisista from "@/assets/visualiza/cat-narcisista.jpg";
+import catArbolFamiliar from "@/assets/visualiza/cat-arbol-familiar.jpg";
 import listen from "@/assets/explore/listen.jpg";
 import patterns from "@/assets/patrones-step1.png";
 import patternsSecond from "@/assets/patrones-step2.png";
