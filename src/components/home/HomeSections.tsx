@@ -6,6 +6,7 @@ import { Link } from "@tanstack/react-router";
 import { useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { visualizaCategoryCover } from "@/lib/visualiza-covers";
 import vivMusic from "@/assets/explore/music.jpg";
 import vivClean from "@/assets/explore/clean.jpg";
 import vivIdentity from "@/assets/explore/identity.jpg";
@@ -285,7 +286,8 @@ export function VisualizeAndLiveCarousel() {
     ...VV_METHODS.map((m) => ({ ...m, img: get(`imagen:visualiza:${m.key}`)?.cover_url || m.img })),
     ...(data ?? []).map((c, i) => ({
       key: c.id, title: c.title, desc: (c.subtitle || c.description || "Tema guiado con audios y práctica.").slice(0, 60),
-      img: c.cover_url || VV_FALLBACK[i % VV_FALLBACK.length], from: VV_TINTS[i % VV_TINTS.length],
+      img: visualizaCategoryCover(c.id, get(`imagen:visualiza:cat-${c.id}`)?.cover_url, c.cover_url, VV_FALLBACK[i % VV_FALLBACK.length]), from: VV_TINTS[i % VV_TINTS.length],
+      customCover: true,
       to: "/visualiza/$categoryId" as const, params: { categoryId: c.id },
     })),
   ];
@@ -294,8 +296,16 @@ export function VisualizeAndLiveCarousel() {
       <SectionHead title="Visualízalo y Vívelo" sub="Crea la vida que deseas con el poder de tu mente y tu fe." to="/visualiza" cta="Ver todos" />
       <div className={scroller}>
         {items.map((p) => (
-          <Link key={p.key} to={p.to as "/visualiza"} params={("params" in p ? p.params : undefined) as never} className={`relative snap-start shrink-0 w-[46%] sm:w-[23.5%] aspect-[4/5] ${card}`}>
-            <img src={p.img} alt="" loading="lazy" width={768} height={1024} className="absolute inset-0 h-full w-full object-cover" />
+          "customCover" in p ? (
+            <Link key={p.key} to="/visualiza/$categoryId" params={{ categoryId: p.key }} aria-label={`Abrir ${p.title}`} className="block snap-start shrink-0 w-[46%] sm:w-[23.5%] overflow-hidden rounded-[16px] border border-border bg-card shadow-soft transition-transform active:scale-[.98]">
+              <img src={p.img} alt={`Portada de ${p.title}`} loading="lazy" width={1024} height={1024} className="aspect-square w-full object-contain" />
+              <div className="p-3 text-card-foreground">
+                <h4 className="font-display text-[14px] font-bold leading-tight">{p.title}</h4>
+                <p className="mt-1 line-clamp-2 text-[12px] text-muted-foreground">{p.desc}</p>
+              </div>
+            </Link>
+          ) : <Link key={p.key} to={p.to as "/visualiza"} params={("params" in p ? p.params : undefined) as never} className={`relative snap-start shrink-0 w-[46%] sm:w-[23.5%] aspect-[4/5] ${card}`}>
+            <img src={p.img} alt={`Portada de ${p.title}`} loading="lazy" width={768} height={1024} className="absolute inset-0 h-full w-full object-cover" />
             <div className={`absolute inset-0 bg-gradient-to-t ${p.from} via-black/10 to-transparent`} />
             <div className="absolute inset-x-0 bottom-0 p-3 text-white">
               <span className="grid place-items-center w-8 h-8 rounded-full bg-white/25 backdrop-blur border border-white/40"><Headphones className="w-4 h-4" /></span>

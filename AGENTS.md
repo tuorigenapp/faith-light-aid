@@ -40,3 +40,4 @@
 - Updating a music category cover synchronizes its page cover variants, while named page-cover slots can be edited individually without changing lesson text; this keeps manual image changes complete and precise.
 - Every user-triggered content deletion awaits the shared root-mounted confirmation queue, with preferences scoped by account; this prevents native dialogs, premature deletion, and confirmation collisions.
 - Consultation list, detail and administration share ConsultaCover to resolve private cover objects and managed overrides with bundled fallbacks; this prevents inaccessible or expired storage URLs from breaking a consultation cover.
+- Home, Visualiza and the cover catalog resolve custom category covers through visualizaCategoryCover with override-first precedence; this prevents stale covers in one entry point and preserves manual replacements.
