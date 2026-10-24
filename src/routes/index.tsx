@@ -6,14 +6,13 @@ import logo from "@/assets/logo-origen.png";
 import heroImg from "@/assets/landing/hero-oracion.jpg";
 import triedImg from "@/assets/landing/probaste-todo.jpg";
 import familyImg from "@/assets/landing/familia-libre.jpg";
-import eHeartGem from "@/assets/e3d-heartgem.png";
-import eCross from "@/assets/e3d-cross.png";
-import eBrain from "@/assets/e3d-brain.png";
-import eButterfly from "@/assets/e3d-butterfly.png";
+import { FUNNEL_INTERACTIONS } from "@/lib/funnel-interactions";
+const { healingHeart: eHeartGem, prayer: eCross, brain: eBrain, butterfly: eButterfly } = FUNNEL_INTERACTIONS;
 import { ReviewsSlider } from "@/components/ReviewsSlider";
 import { LiveActivityToasts } from "@/components/LiveActivityToasts";
 import { InstallAppButton } from "@/components/InstallAppGuide";
 import { AppScreens, BeforeAfter, BooksGift, Includes, TryConsulta } from "@/components/funnel/FunnelShared";
+import { LandingRegistrationBar } from "@/components/funnel/LandingRegistrationBar";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -77,7 +76,7 @@ function Landing() {
   }, []);
 
   return (
-    <main className="min-h-dvh bg-background pb-28">
+    <main className="min-h-dvh bg-background pb-48">
       <LiveActivityToasts variant="landing" />
 
       <header className="sticky top-0 z-40 border-b border-border/70 bg-background/85 backdrop-blur-xl">
@@ -292,13 +291,7 @@ function Landing() {
         </footer>
       </div>
 
-      {sticky && (
-        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 px-4 pb-[max(12px,env(safe-area-inset-bottom))] pt-3 backdrop-blur-xl motion-safe:animate-in motion-safe:slide-in-from-bottom-4">
-          <Link to="/empezar" className="mx-auto grid h-14 w-full max-w-md place-items-center rounded-[12px] text-[16px] font-bold text-primary-foreground shadow-glow active:scale-[.97]" style={{ background: "var(--gradient-primary)" }}>
-            Probar gratis ahora
-          </Link>
-        </div>
-      )}
+      {sticky && <LandingRegistrationBar />}
     </main>
   );
 }

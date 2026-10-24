@@ -9,10 +9,8 @@ import { TODAY_PHOTOS, FUTURE_PHOTOS } from "@/lib/funnel-visuals";
 import { APP_SCREENS } from "@/lib/app-screens";
 import bookImg from "@/assets/libro-oficial-mockup.png";
 import mockup from "@/assets/funnel/mockup.png";
-import eBook from "@/assets/e3d-book.png";
-import eCross from "@/assets/e3d-cross.png";
-import eCouple from "@/assets/e3d-couple.png";
-import eHeart from "@/assets/e3d-heartgem.png";
+import { FUNNEL_INTERACTIONS } from "@/lib/funnel-interactions";
+const { bible: eBook, prayer: eCross, couple: eCouple, familyTree: eHeart } = FUNNEL_INTERACTIONS;
 
 /** Bloques compartidos por /empezar y la página de inicio. */
 export function Cta({ children, onClick, disabled, className }: { children: React.ReactNode; onClick?: () => void; disabled?: boolean; className?: string }) {
@@ -27,15 +25,31 @@ export function SectionTitle({ kicker, children }: { kicker?: string; children: 
 }
 
 export function AppScreens() {
+  const rail = useRef<HTMLDivElement>(null);
+  const [group, setGroup] = useState<"all" | "camino" | "visualiza">("all");
+  const screens = group === "all" ? APP_SCREENS : APP_SCREENS.filter(s => s.group === group);
+  const scrollScreens = (direction: number) => {
+    const el = rail.current;
+    if (!el) return;
+    const width = el.querySelector("figure")?.getBoundingClientRect().width ?? 224;
+    el.scrollBy({ left: direction * (width + 16), behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+  };
   return <>
     <SectionTitle kicker="La app por dentro">Así se ve ORÍGEN en tu teléfono</SectionTitle>
-    <div className="-mx-4 mt-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-4 [scrollbar-width:none]">
-      {APP_SCREENS.map((s) => <figure key={s.t} className="w-[62%] shrink-0 snap-center sm:w-56">
-        <div className="overflow-hidden rounded-[28px] border-[6px] border-foreground/85 bg-card shadow-xl"><img src={s.img} alt={`Pantalla ${s.t} de ORÍGEN`} loading="lazy" className="aspect-[390/844] w-full object-cover object-top" /></div>
-        <figcaption className="mt-3 text-center"><p className="text-sm font-bold text-foreground">{s.t}</p><p className="text-xs text-muted-foreground">{s.d}</p></figcaption>
+    <div role="group" aria-label="Secciones de las capturas" className="mt-4 flex flex-wrap justify-center gap-2">
+      {([{ id: "all", label: "Todas" }, { id: "camino", label: "Camino ORÍGEN" }, { id: "visualiza", label: "Visualízalo" }] as const).map(option => <Button key={option.id} variant={group === option.id ? "default" : "outline"} aria-pressed={group === option.id} onClick={() => { setGroup(option.id); rail.current?.scrollTo({ left: 0 }); }} className="min-h-11 rounded-[10px] px-3 text-[13px]">{option.label}</Button>)}
+    </div>
+    <div ref={rail} role="region" aria-label="Capturas actuales de ORÍGEN" tabIndex={0} className="-mx-4 mt-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-4 [scrollbar-width:none]">
+      {screens.map((s) => <figure key={s.t} className="w-[62%] shrink-0 snap-start sm:w-56">
+        <div className="overflow-hidden rounded-[28px] border-[6px] border-foreground/85 bg-card shadow-xl"><img src={s.img} alt={`Pantalla ${s.t} de ORÍGEN`} loading="lazy" width={780} height={1688} className="aspect-[390/844] w-full object-contain object-top" /></div>
+        <figcaption className="mt-3 text-center">{s.icon && <img src={FUNNEL_INTERACTIONS[s.icon]} alt="" loading="lazy" width={360} height={360} className="mx-auto mb-2 h-11 w-11 object-contain" />}<p className="text-sm font-bold text-foreground">{s.t}</p><p className="text-xs text-muted-foreground">{s.d}</p></figcaption>
       </figure>)}
     </div>
-    <p className="text-center text-xs text-muted-foreground">Desliza para ver más pantallas</p>
+    <div className="flex items-center justify-between gap-3">
+      <Button variant="outline" size="icon" title="Capturas anteriores" aria-label="Capturas anteriores" className="h-11 w-11" onClick={() => scrollScreens(-1)}><ChevronLeft className="h-5 w-5" /></Button>
+      <span className="text-xs text-muted-foreground">{screens.length} pantallas</span>
+      <Button variant="outline" size="icon" title="Más capturas" aria-label="Más capturas" className="h-11 w-11" onClick={() => scrollScreens(1)}><ChevronRight className="h-5 w-5" /></Button>
+    </div>
   </>;
 }
 
@@ -63,11 +77,11 @@ export function BooksGift() {
 }
 
 export function Includes() {
-  const incl = [{ i: Map, t: "Camino ORÍGEN", d: "20 etapas con una lección nueva cada día" }, { i: FileText, t: "Consultas con PDF", d: "Dios te dice hoy, tu patrón familiar y tu pareja" }, { i: NotebookPen, t: "Diario de sanación", d: "Escribe y desahoga en privado" }, { i: Headphones, t: "Audios guiados", d: "Respiración, afirmaciones y visualización" }, { i: Gamepad2, t: "Juegos del día", d: "Gimnasia emocional de 3 minutos" }, { i: TreePine, t: "Árbol de Sanación", d: "Mira crecer tu avance con cada paso" }];
+  const incl = [{ img: FUNNEL_INTERACTIONS.path, t: "Camino ORÍGEN", d: "20 etapas con una lección nueva cada día" }, { img: FUNNEL_INTERACTIONS.mentor, t: "Consultas con PDF", d: "Dios te dice hoy, tu patrón familiar y tu pareja" }, { img: FUNNEL_INTERACTIONS.journal, t: "Diario de sanación", d: "Escribe y desahoga en privado" }, { img: FUNNEL_INTERACTIONS.audio, t: "Audios guiados", d: "Respiración, afirmaciones y visualización" }, { img: FUNNEL_INTERACTIONS.game, t: "Juegos del día", d: "Gimnasia emocional de 3 minutos" }, { img: FUNNEL_INTERACTIONS.familyTree, t: "Árbol de Sanación", d: "Mira crecer tu avance con cada paso" }];
   return <>
     <SectionTitle kicker="Todo en un solo lugar">Lo que incluye tu plan</SectionTitle>
     <img src={mockup} alt="Pantallas de la app ORÍGEN" loading="lazy" className="mx-auto mt-4 w-full max-w-sm drop-shadow-2xl" />
-    <div className="mt-4 grid gap-3">{incl.map(({ i: I, t, d }) => <div key={t} className="flex items-center gap-3 rounded-2xl bg-card p-4 shadow-sm"><span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-primary/10"><I className="h-6 w-6 text-primary" /></span><span><span className="block font-semibold text-foreground">{t}</span><span className="block text-sm text-muted-foreground">{d}</span></span></div>)}</div>
+    <div className="mt-4 grid gap-3">{incl.map(({ img, t, d }) => <div key={t} className="flex items-center gap-3 rounded-2xl bg-card p-4 shadow-sm"><img src={img} alt="" loading="lazy" width={360} height={360} className="h-12 w-12 shrink-0 object-contain" /><span><span className="block font-semibold text-foreground">{t}</span><span className="block text-sm text-muted-foreground">{d}</span></span></div>)}</div>
     <div className="relative mt-4 grid grid-cols-[96px_1fr] items-center gap-4 overflow-hidden rounded-2xl border-2 border-primary bg-card p-4 shadow-sm">
       <img src={bookImg} alt="Libro Reconectando el Espíritu con Dios" width={96} height={128} loading="lazy" className="h-auto w-24" />
       <div>

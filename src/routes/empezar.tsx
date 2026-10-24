@@ -12,9 +12,10 @@ import logo from "@/assets/logo-origen.png";
 import { DESIRE_PHOTOS, STRUGGLE_PHOTOS, RESULT_PHOTOS, TODAY_PHOTOS, FUTURE_PHOTOS } from "@/lib/funnel-visuals";
 import { nextFunnelVariation } from "@/lib/funnel-visual-rotation";
 import { illustrativeImpactScore } from "@/lib/funnel-impact";
+import { isRegistrationOffer } from "@/lib/registration-clock";
 import { FUNNEL_BOOKS } from "@/lib/funnel-books";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import gift from "@/assets/funnel/gift.png";
+import { FUNNEL_INTERACTIONS } from "@/lib/funnel-interactions";
 import mockup from "@/assets/funnel/mockup.png";
 import { APP_SCREENS } from "@/lib/app-screens";
 import { AppScreens, BeforeAfter, BooksGift, Cta, Includes, SectionTitle, Tick, TryConsulta } from "@/components/funnel/FunnelShared";
@@ -38,15 +39,10 @@ import shotArbol from "@/assets/funnel/shots/arbol.jpg";
 import shotInvita from "@/assets/funnel/shots/invita.jpg";
 import palabraAsset from "@/assets/funnel/shots/palabra.png.asset.json";
 import familyTreeAsset from "@/assets/funnel/shots/mi-arbol.png.asset.json";
-import eHeadphones from "@/assets/e3d-headphones.png";
-import ePractice from "@/assets/e3d-practice.png";
-import eBook from "@/assets/e3d-book.png";
-import eCross from "@/assets/e3d-cross.png";
-import eCouple from "@/assets/e3d-couple.png";
-import eHeart from "@/assets/e3d-heartgem.png";
-import eStar from "@/assets/e3d-star.png";
+const { audio: eHeadphones, journal: ePractice, bible: eBook, prayer: eCross, couple: eCouple, healingHeart: eHeart, compass: eStar, gift } = FUNNEL_INTERACTIONS;
 
 export const Route = createFileRoute("/empezar")({
+  validateSearch: (search: Record<string, unknown>): { oferta?: "especial" } => isRegistrationOffer(search.oferta) ? { oferta: "especial" } : {},
   head: () => ({
     meta: [
       { title: "Tu evaluación ORÍGEN — descubre tu patrón" },
@@ -124,6 +120,7 @@ function useCountdown(seconds: number) {
 }
 
 function Funnel() {
+  const { oferta } = Route.useSearch();
   const [step, setStep] = useState(1);
   const [stage, setStage] = useState<Stage>("quiz");
   const [popup, setPopup] = useState<Popup>(null);
@@ -272,7 +269,7 @@ function Funnel() {
           </>}
 
           {step === 8 && <Analysis name={first} onDone={next} />}
-          {step === 9 && <Result name={first} areas={areas} variant={visualVariant} onNext={() => { setStage("paywall"); window.scrollTo(0, 0); }} />}
+          {step === 9 && <Result name={first} areas={areas} variant={visualVariant} onNext={() => { setStage(oferta === "especial" ? "offer80" : "paywall"); window.scrollTo(0, 0); }} />}
         </section>
       </div>
     </main>
