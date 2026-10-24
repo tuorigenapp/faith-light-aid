@@ -1,5 +1,9 @@
 # Roadmap ORÍGEN
 
+## Registro inferior del 24 de octubre, 09:18 UTC
+- [ ] Renovar el registro inferior con un diseño premium y compacto, sin reloj/fecha ni vencimiento inventado; conservar registro gratis y acceso al descuento.
+- [ ] Comprobar presentación en teléfono/computadora y ambos enlaces.
+
 ## Capturas e íconos del 24 de octubre, 08:50 UTC
 - [x] Agregar reloj local y fecha diaria junto al botón inferior de registro, con enlace a evaluación y oferta existente; sin vencimiento ficticio. Verificado a 375/432/1280 px, reloj en vivo, cambio de fecha a medianoche sin recargar y descuento del 80% tras evaluación.
 - [x] Alternar las 38 capturas de «Todas» entre herramientas, Camino ORÍGEN y Visualízalo para mostrar variedad desde el inicio; filtros de 10 caminos y 8 vistas de Visualízalo intactos, imágenes y flechas comprobadas en Inicio, pago y descuento. Dos pruebas de orden y dos de fecha/enlace; 40 pruebas aprobadas.
