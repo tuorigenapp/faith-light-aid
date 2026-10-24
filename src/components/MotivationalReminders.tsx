@@ -1,30 +1,57 @@
-import { useEffect } from "react";
-import { nextReminder, pushReminder } from "@/lib/motivational-reminders";
+import { useEffect, useRef, useState } from "react";
+import { Link, useRouterState } from "@tanstack/react-router";
+import { ArrowRight, Sparkles, X } from "lucide-react";
+import { pickReminder, pushReminder, type Reminder } from "@/lib/motivational-reminders";
 import { useAuth } from "@/lib/use-auth";
+import { useProfile } from "@/hooks/use-profile";
+
+const FIRST_MS = 45_000;
+const GAP_MS = 6 * 60_000;
+const VISIBLE_MS = 9_000;
 
 /**
- * Programador silencioso de recordatorios motivacionales.
- * NO renderiza nada ni muestra toasts/banners in-app: solo dispara
- * notificaciones del sistema (barra de notificaciones del teléfono)
- * a través del Service Worker.
+ * Recomendaciones continuas estilo tienda: una tarjeta dentro de la app cada pocos minutos
+ * mientras la persona navega, y notificación del teléfono cuando la app queda en segundo plano.
  */
 export function MotivationalReminders() {
   const { user } = useAuth();
+  const { data: profile } = useProfile();
+  const path = useRouterState({ select: (s) => s.location.pathname });
+  const [current, setCurrent] = useState<Reminder | null>(null);
+  const pathRef = useRef(path);
+  pathRef.current = path;
+  const interests = [profile?.intention ?? "", ...((profile?.interests as string[] | null) ?? [])].join(" ");
+  const interestsRef = useRef(interests);
+  interestsRef.current = interests;
 
   useEffect(() => {
     if (!user) return;
-
+    let hide: ReturnType<typeof setTimeout>;
     const fire = () => {
-      if (document.hidden) return;
-      const r = nextReminder();
-      if (!r) return;
-      pushReminder(r).catch(() => undefined);
+      const r = pickReminder(interestsRef.current, pathRef.current);
+      if (document.hidden) { pushReminder(r).catch(() => undefined); return; }
+      setCurrent(r);
+      clearTimeout(hide);
+      hide = setTimeout(() => setCurrent(null), VISIBLE_MS);
     };
-
-    const first = setTimeout(fire, 60000);
-    const loop = setInterval(fire, 15 * 60 * 1000);
-    return () => { clearTimeout(first); clearInterval(loop); };
+    const first = setTimeout(fire, FIRST_MS);
+    const loop = setInterval(fire, GAP_MS);
+    return () => { clearTimeout(first); clearInterval(loop); clearTimeout(hide); };
   }, [user]);
 
-  return null;
+  if (!current) return null;
+  return (
+    <div role="status" className="fixed inset-x-3 top-[calc(env(safe-area-inset-top)+64px)] z-[70] mx-auto max-w-md motion-safe:animate-in motion-safe:slide-in-from-top-4">
+      <div className="flex items-start gap-3 rounded-[16px] border border-border bg-card p-3 shadow-[0_8px_30px_rgba(30,25,20,.14)]">
+        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[12px] bg-primary/10 text-primary"><Sparkles className="h-5 w-5" /></span>
+        <div className="min-w-0 flex-1">
+          <p className="text-[12px] font-semibold uppercase tracking-wide text-primary">Recomendado para ti</p>
+          <p className="text-[15px] font-bold leading-tight">{current.title}</p>
+          <p className="mt-0.5 text-[13px] text-muted-foreground">{current.body}</p>
+          <Link to={current.url} onClick={() => setCurrent(null)} className="mt-2 inline-flex min-h-11 items-center gap-1 rounded-[12px] bg-primary px-4 text-[14px] font-semibold text-primary-foreground active:scale-[.97]">Ver ahora <ArrowRight className="h-4 w-4" /></Link>
+        </div>
+        <button onClick={() => setCurrent(null)} aria-label="Cerrar recomendación" className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-muted-foreground"><X className="h-5 w-5" /></button>
+      </div>
+    </div>
+  );
 }

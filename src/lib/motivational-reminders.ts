@@ -25,21 +25,27 @@ export const REMINDERS: Reminder[] = [
   { title: "No pierdas tu racha", body: "Un paso hoy sostiene lo que empezaste. Tu constancia es la señal.", url: "/dashboard" },
 ];
 
-const LAST_KEY = "origen_reminder_last";
-const IDX_KEY = "origen_reminder_idx";
-const MIN_GAP_MS = 2 * 60 * 60 * 1000; // 2 horas
-const MAX_GAP_MS = 3 * 60 * 60 * 1000; // 3 horas
+const TOPIC_WORDS: Record<string, string[]> = {
+  "/patrones": ["famil", "patr", "linaje", "padre", "madre", "repit"],
+  "/pareja": ["pareja", "relaci", "amor", "matrimon", "narcis"],
+  "/ministracion": ["dios", "fe", "respuesta", "guía", "proposit"],
+  "/visualiza": ["paz", "ansied", "calma", "sueño", "abundan", "prosper"],
+  "/categorias": ["niño", "autoestima", "glow", "valor", "depres", "pérdida", "duelo"],
+  "/diario": ["emoc", "vacío", "tristeza", "llorar"],
+  "/arbol": ["famil", "árbol", "herencia"],
+};
 
-/** Devuelve el siguiente recordatorio si ya pasaron 2–3 horas del anterior. */
-export function nextReminder(): Reminder | null {
-  if (typeof window === "undefined") return null;
-  const last = Number(localStorage.getItem(LAST_KEY) ?? 0);
-  const gap = MIN_GAP_MS + Math.random() * (MAX_GAP_MS - MIN_GAP_MS);
-  if (last && Date.now() - last < gap) return null;
-  const idx = Number(localStorage.getItem(IDX_KEY) ?? 0) % REMINDERS.length;
-  localStorage.setItem(IDX_KEY, String(idx + 1));
-  localStorage.setItem(LAST_KEY, String(Date.now()));
-  return REMINDERS[idx]!;
+/** Personalised pick: favours reminders matching the person's interests, never the page they are on, never twice in a row. */
+export function pickReminder(interests: string, currentPath: string): Reminder {
+  const text = interests.toLowerCase();
+  const last = typeof window !== "undefined" ? localStorage.getItem("origen_reminder_lastUrl") : null;
+  const pool = REMINDERS.filter((r) => r.url !== currentPath && r.url !== last);
+  const scored = pool.map((r) => ({ r, score: (TOPIC_WORDS[r.url] ?? []).some((w) => text.includes(w)) ? 3 : 1 }));
+  const total = scored.reduce((n, x) => n + x.score, 0);
+  let roll = Math.random() * total;
+  const chosen = scored.find((x) => (roll -= x.score) < 0)?.r ?? pool[0] ?? REMINDERS[0]!;
+  if (typeof window !== "undefined") localStorage.setItem("origen_reminder_lastUrl", chosen.url);
+  return chosen;
 }
 
 export async function pushReminder(r: Reminder) {
