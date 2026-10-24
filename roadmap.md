@@ -6,7 +6,7 @@
 - [x] Portadas de consultas registradas en el catálogo del cPanel (sección «Consultas · portadas con botón») para edición manual.
 - [x] Nuevas consultas del cPanel generan portada horizontal con título y botón automáticamente; aparecen solas en /consultas y en el menú.
 - [x] «Todas las consultas» agregada al menú flotante; «Lectura(s) de pareja» cambiado a «Consulta(s) de pareja» en Perfil, Historial y Explorar.
-- [ ] Verificar /consultas en pantalla con sesión y compilar sin errores.
+- [x] Verificar /consultas en pantalla con sesión y compilar sin errores: 5 banners visibles, enlaces abren cada consulta, menú actualizado, móvil 375 px sin desbordamiento.
 
 
 ## Enlaces y organización del 24 de octubre, 04:16 UTC
