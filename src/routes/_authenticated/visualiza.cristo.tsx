@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 import { WordSearch } from "@/components/WordSearch";
 import { StageQuiz } from "@/components/StageQuiz";
 import heroImg from "@/assets/explore/christ.jpg";
+import { printMinistracion } from "@/lib/print-pdf";
 
 export const Route = createFileRoute("/_authenticated/visualiza/cristo")({
   head: () => ({ meta: [
@@ -658,13 +659,13 @@ function CristoPage() {
           <p className="text-xs text-muted-foreground mt-1">Tu hoja de ejercicio 369 para hoy.</p>
           <div className="mt-3 grid grid-cols-2 gap-2">
             <button
-              onClick={() => toast.info("Descarga disponible con plan Camino Origen.")}
+              onClick={() => printMinistracion({ title: `Método de Cristo 3·6·9 — ${practice.title}`, meta: new Date().toLocaleDateString("es-MX"), sections: [{ emoji: "", title: "Tu intención", body: practice.intention }, { emoji: "", title: "Objetivo", body: practice.objective }, { emoji: "", title: "Práctica de oración y escritura", body: "Mañana: escribe tu intención 3 veces. Tarde: reflexiona y escribe 6 veces. Noche: cierra con gratitud y escribe 9 veces. La repetición es una práctica de escritura, no una fórmula que garantiza resultados." }, { emoji: "", title: "Mi reflexión", body: reflection || "________________________________________________\n________________________________________________" }, { emoji: "", title: "Mi acción de hoy", body: dailyAction || "________________________________________________" }] })}
               className="h-11 rounded-2xl bg-secondary text-foreground/85 font-bold text-xs inline-flex items-center justify-center gap-2"
             >
               <Download className="w-4 h-4" /> Descargar PDF
             </button>
             <button
-              onClick={() => window.print()}
+              onClick={() => printMinistracion({ title: `Método de Cristo 3·6·9 — ${practice.title}`, sections: [{ emoji: "", title: "Intención", body: practice.intention }, { emoji: "", title: "Objetivo", body: practice.objective }, { emoji: "", title: "Reflexión personal", body: reflection || "________________________________________________\n________________________________________________" }] })}
               className="h-11 rounded-2xl bg-secondary text-foreground/85 font-bold text-xs inline-flex items-center justify-center gap-2"
             >
               <Printer className="w-4 h-4" /> Imprimir

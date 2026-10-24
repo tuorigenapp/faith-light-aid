@@ -15,6 +15,11 @@ import { getUserPlan } from "@/lib/plan";
 import { CustomTopic, FREE_AUDIOS } from "@/components/visualiza/CustomTopic";
 import { awardGems } from "@/lib/gems";
 import heroAsset from "@/assets/explore/music.jpg";
+import coupleCover from "@/assets/explore/couple.jpg";
+import familyCover from "@/assets/explore/family.jpg";
+import workCover from "@/assets/explore/man.jpg";
+import purposeCover from "@/assets/explore/freedom.jpg";
+import journalCover from "@/assets/explore/journal.jpg";
 import { cn } from "@/lib/utils";
 import { WordSearch } from "@/components/WordSearch";
 import { CustomMusicTopic } from "@/components/visualiza/CustomMusicTopic";
@@ -46,6 +51,7 @@ const INCLUDES = [
 ];
 
 const AREA_ICONS = [DollarSign, Heart, Home, Briefcase, Flower2, HeartHandshake, User, Star];
+const AREA_COVERS: Record<string, string> = { dinero: workCover, pareja: coupleCover, casa: familyCover, negocio: journalCover, trabajo: workCover, proposito: purposeCover, abundancia: familyCover, libre: heroAsset };
 
 const AFFIRMATIONS = [
   { text: "Confío en la provisión de Dios y actúo con responsabilidad.", Icon: Sparkles, color: "#F5B441", bg: "#FFF3D6" },
@@ -278,8 +284,8 @@ function CategoryInner() {
                   active ? "border-2 border-primary shadow-glow" : "border border-border/60",
                 )}
               >
-                 <div className="w-12 h-12 rounded-2xl grid place-items-center mx-auto mb-2 bg-primary/10 text-primary">
-                   {a.cover_url ? <img src={a.cover_url} alt="" className="h-full w-full rounded-2xl object-cover" /> : <Icon className="w-5 h-5" />}
+                 <div className="aspect-[4/3] w-full overflow-hidden rounded-[12px] mx-auto mb-2 bg-primary/10 text-primary">
+                   <img src={a.cover_url || AREA_COVERS[a.id] || heroAsset} alt={a.title} loading="lazy" className="h-full w-full object-cover" />
                  </div>
                  <div className="font-bold text-[13px] leading-tight">{a.title}</div>
                  <div className="text-[10px] text-muted-foreground mt-1.5 leading-snug">{a.description}</div>
