@@ -1,3 +1,4 @@
+import { directAudioUrl } from "./ContentStudio";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -85,7 +86,7 @@ const schema = z.object({
   day_index: z.number().int().min(1, "El día empieza en 1").max(365),
   title: z.string().trim().min(3, "El título necesita al menos 3 letras").max(140),
   affirmation: z.string().trim().min(3, "Escribe la afirmación del audio").max(600),
-  audio_url: z.string().trim().max(800),
+  audio_url: z.string().trim().max(2000).transform((v) => directAudioUrl(v)),
   cover_url: z.string().trim().max(800).optional().or(z.literal("")),
   lesson: z.string().trim().max(4000).optional().or(z.literal("")),
   exercise: z.string().trim().max(2000).optional().or(z.literal("")),
@@ -219,12 +220,12 @@ export function AudiosManager() {
 
   async function uploadFile(kind: "audio" | "cover", file: File): Promise<string | null> {
     const isAudio = kind === "audio";
-    const max = isAudio ? 40 : 5;
+    const max = isAudio ? 50 : 5;
     if (file.size > max * 1024 * 1024) {
       toast.error(`El archivo supera ${max} MB.`);
       return null;
     }
-    if (isAudio && !file.type.startsWith("audio/")) {
+    if (isAudio && !file.type.startsWith("audio/") && !/\.(mp3|m4a|wav|aac|ogg)$/i.test(file.name)) {
       toast.error("Elige un archivo de audio válido (MP3, WAV, M4A).");
       return null;
     }
@@ -237,14 +238,15 @@ export function AudiosManager() {
     const path = `${crypto.randomUUID()}.${ext}`;
     const { error } = await supabase.storage.from(bucket).upload(path, file, {
       upsert: false,
-      contentType: file.type,
+      contentType: file.type || (isAudio ? "audio/mpeg" : "image/jpeg"),
     });
     if (error) {
-      toast.error("No pudimos subir el archivo. Revisa tu conexión.");
+      toast.error(`No pudimos subir el archivo: ${error.message}`);
       return null;
     }
-    const { data } = supabase.storage.from(bucket).getPublicUrl(path);
-    return data.publicUrl;
+    const signed = await supabase.storage.from(bucket).createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+    if (signed.error || !signed.data) { toast.error("Se subió, pero no pudimos crear el enlace de reproducción."); return null; }
+    return signed.data.signedUrl;
   }
 
   async function upload(kind: "audio" | "cover", file: File) {
@@ -799,6 +801,7 @@ export function AudiosManager() {
                   <input
                     value={form.audio_url}
                     onChange={(e) => setForm({ ...form, audio_url: e.target.value })}
+                    onBlur={(e) => setForm({ ...form, audio_url: directAudioUrl(e.target.value) })}
                     placeholder="https://… o sube el archivo"
                     className={inputCls}
                     maxLength={800}

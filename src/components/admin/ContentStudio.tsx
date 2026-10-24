@@ -653,17 +653,19 @@ export function directAudioUrl(raw: string) {
 function AudioInput({ current, onSave, onNote }: { current: string | null; onSave: (url: string) => void; onNote: Notify }) {
   const [busy, setBusy] = useState(false);
   async function upload(file: File) {
+    if (file.size > 50 * 1024 * 1024) return onNote({ text: "El audio supera 50 MB.", error: true });
     if (!/audio|mpeg|mp3|m4a|wav/i.test(file.type + file.name)) return onNote({ text: "Elige un archivo de audio (mp3, m4a o wav).", error: true });
     setBusy(true);
     try {
       const path = `subtemas/${Date.now()}-${file.name.replace(/[^\w.-]/g, "_")}`;
       const up = await supabase.storage.from("manifest-audios").upload(path, file, { contentType: file.type || "audio/mpeg", upsert: true });
       if (up.error) throw up.error;
-      const signed = await supabase.storage.from("manifest-audios").createSignedUrl(path, 60 * 60 * 24 * 365 * 5);
+      const signed = await supabase.storage.from("manifest-audios").createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
       if (signed.error || !signed.data) throw signed.error;
       onSave(signed.data.signedUrl);
-    } catch {
-      onNote({ text: "No pudimos subir el audio. Revisa tu conexión e intenta otra vez.", error: true });
+      onNote({ text: "Audio subido y guardado." });
+    } catch (e) {
+      onNote({ text: `No pudimos subir el audio: ${e instanceof Error ? e.message : "intenta otra vez"}.`, error: true });
     }
     setBusy(false);
   }
