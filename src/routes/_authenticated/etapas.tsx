@@ -10,8 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Check, Lock, AlertCircle, Flame, Award, Leaf } from "lucide-react";
 import { cn } from "@/lib/utils";
 import stageImg from "@/assets/stage-journey.jpg";
-import paisaje from "@/assets/fondo-mistico.png";
-import mapaCamino from "@/assets/mapa-camino.png";
 import arbolIsla from "@/assets/hojas-tree.png";
 import portal from "@/assets/onb-portal.png";
 import heartGem from "@/assets/e3d-heartgem.png";
@@ -34,6 +32,7 @@ export const Route = createFileRoute("/_authenticated/etapas")({
 });
 
 function Etapas() {
+  const seasonBg = useSeasonalBackground();
   const { user } = useAuth();
   const { data: profile } = useProfile();
   const navigate = useNavigate();

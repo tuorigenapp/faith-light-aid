@@ -11,8 +11,6 @@ import { cn } from "@/lib/utils";
 import { DuolingoPath } from "@/components/DuolingoPath";
 import { toast } from "sonner";
 import { ArrowLeft, Award, Check, Flame, Leaf, Lock, Sparkles } from "lucide-react";
-import paisaje from "@/assets/fondo-mistico.png";
-import mapaCamino from "@/assets/mapa-camino.png";
 import arbolIsla from "@/assets/hojas-tree.png";
 import heartGem from "@/assets/e3d-heartgem.png";
 import portal from "@/assets/onb-portal.png";
@@ -34,6 +32,7 @@ export const Route = createFileRoute("/_authenticated/caminos/$caminoId/")({
 function todayIso() { return new Date().toISOString().slice(0, 10); }
 
 function CaminoMapa() {
+  const seasonBg = useSeasonalBackground();
   const { caminoId } = Route.useParams();
   const { user } = useAuth();
   const qc = useQueryClient();
