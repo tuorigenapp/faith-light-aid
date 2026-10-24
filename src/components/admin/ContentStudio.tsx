@@ -669,7 +669,7 @@ function AudioInput({ current, onSave, onNote }: { current: string | null; onSav
   return (
     <div className="mt-2 space-y-2">
       <div className="flex gap-2">
-        <input
+        <input key={current ?? "without-audio"}
           defaultValue={current ?? ""}
           onBlur={(e) => {
             const v = directAudioUrl(e.target.value);
@@ -677,6 +677,7 @@ function AudioInput({ current, onSave, onNote }: { current: string | null; onSav
             if (v !== (current ?? "")) void onSave(v).catch(() => undefined);
           }}
           placeholder="Pega el enlace del audio (mp3, Google Drive o Dropbox)"
+          maxLength={8000}
           className={inputClass}
         />
         <label className="inline-flex min-h-11 shrink-0 cursor-pointer items-center gap-1.5 rounded-[12px] bg-[#7C5CFF]/10 px-3 text-[13px] font-bold text-[#5B3FD6]">

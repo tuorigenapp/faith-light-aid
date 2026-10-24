@@ -27,7 +27,7 @@ function ExplorarPage() {
   return (
     <div className="min-h-dvh bg-aura-top">
       <div className="mx-auto max-w-[1120px] px-5 pt-6 pb-28">
-        <section className="app-card p-5">
+        <section className="border-b border-border pb-6">
           <div className="flex items-start gap-3">
             <span className="w-12 h-12 rounded-[14px] bg-primary/10 grid place-items-center text-primary shrink-0">
               <Search className="w-6 h-6" />
@@ -57,14 +57,14 @@ function ExploreCard({ item }: { item: (typeof EXPLORE_ITEMS)[number] }) {
       className={cn("group overflow-hidden rounded-[16px] bg-card border border-border shadow-soft active:scale-[.99] transition", item.locked && "relative")}
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-muted">
-        <img src={item.image} alt={item.title} loading="lazy" className={cn("h-full w-full object-cover transition group-hover:scale-[1.03]", item.locked && "opacity-55")} />
+        <img src={item.image} alt={item.title} loading="lazy" className={cn("h-full w-full transition group-hover:scale-[1.03]", ["Premios", "Hojas", "Lectura"].includes(item.tag) ? "object-contain p-3" : "object-cover")} />
         <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-[10px] bg-background/85 backdrop-blur px-2.5 py-1 text-[10.5px] font-black text-primary">
           {item.locked ? <Lock className="w-3 h-3" /> : <Sparkles className="w-3 h-3" />} {item.tag}
         </span>
       </div>
       <div className="p-4">
         <h2 className="font-display font-bold text-[16px] leading-tight">{item.title}</h2>
-        <p className="mt-1 text-[12.5px] leading-snug text-muted-foreground">{item.description}</p>
+        <p className="mt-1 text-[14px] leading-snug text-muted-foreground">{item.description}</p>
         <span className="mt-3 inline-flex items-center gap-1 text-[12px] font-bold text-primary">
           {item.locked ? "Desbloquear" : "Abrir"} <ArrowRight className="w-3.5 h-3.5" />
         </span>

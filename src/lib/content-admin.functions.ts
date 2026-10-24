@@ -255,7 +255,7 @@ export const adminUpdateSubtopic = createServerFn({ method: "POST" })
     z
       .object({
         id: z.string().uuid(),
-        audioUrl: z.string().trim().max(2000).optional(),
+        audioUrl: z.string().trim().max(8000).optional(),
         pdfUrl: z.string().trim().max(2000).optional(),
         lesson: z.string().trim().max(6000).optional(),
         exercise: z.string().trim().max(6000).optional(),
@@ -434,6 +434,11 @@ export const adminUpdateCategory = createServerFn({ method: "POST" })
       );
       if (!url) throw new Error("No pudimos generar la portada. Intenta de nuevo.");
       patch["cover_url"] = url;
+    }
+    if (typeof patch["cover_url"] === "string" && patch["cover_url"]) {
+      const { data: current } = await supabaseAdmin.from("manifest_categories").select("page").eq("id", data.id).maybeSingle();
+      const page = current?.page && typeof current.page === "object" && !Array.isArray(current.page) ? current.page : {};
+      patch["page"] = { ...page, cover_home: patch["cover_url"], cover_step1: patch["cover_url"], cover_step2: patch["cover_url"], cover_step3: patch["cover_url"], cover_playlist: patch["cover_url"] };
     }
     if (Object.keys(patch).length === 0) return { ok: true };
     const { error } = await supabaseAdmin.from("manifest_categories").update(patch as never).eq("id", data.id);
