@@ -14,11 +14,7 @@ import { ProgramCard, type UnifiedProgram } from "@/components/visualiza/Program
 import { ProgramCardSkeleton } from "@/components/visualiza/SeguimientoSkeleton";
 
 import heroImg from "@/assets/explore/listen.jpg";
-import musicImg from "@/assets/visualiza/cat-musica.jpg";
-import cleanImg from "@/assets/visualiza/cat-limpieza.jpg";
-import identityImg from "@/assets/visualiza/cat-identidad.jpg";
-import cristoImg from "@/assets/visualiza/cat-cristo.jpg";
-import { visualizaCategoryCover } from "@/lib/visualiza-covers";
+import { visualizaCategoryCover, VISUALIZA_METHOD_COVERS } from "@/lib/visualiza-covers";
 
 export const Route = createFileRoute("/_authenticated/visualiza")({
   head: () => ({ meta: [{ title: "Visualízalo y Vívelo — ORÍGEN" }, { name: "description", content: "Programas, audios y prácticas de Visualízalo y Vívelo." }, { property: "og:title", content: "Visualízalo y Vívelo — ORÍGEN" }, { property: "og:description", content: "Programas, audios y prácticas para acompañar tu camino." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
@@ -30,7 +26,7 @@ const METHODS_META = [
     key: "musica",
     title: "Oración y Reflexión con Música",
     desc: "Playlists guiadas durante 21 días con música, visualización y afirmaciones diarias.",
-    image: musicImg,
+    image: VISUALIZA_METHOD_COVERS.musica,
     Icon: Headphones,
     iconTint: "text-primary",
     chipBg: "bg-primary/12",
@@ -43,7 +39,7 @@ const METHODS_META = [
     key: "limpieza",
     title: "Limpieza Espiritual",
     desc: "Prácticas guiadas de renovación con oraciones, gratitud y meditación bíblica.",
-    image: cleanImg,
+    image: VISUALIZA_METHOD_COVERS.limpieza,
     Icon: Leaf,
     iconTint: "text-accent-green",
     chipBg: "bg-accent-green/12",
@@ -56,7 +52,7 @@ const METHODS_META = [
     key: "identidad",
     title: "Salto de Identidad",
     desc: "Nuevos hábitos, visualización y acciones concretas para tu mejor versión.",
-    image: identityImg,
+    image: VISUALIZA_METHOD_COVERS.identidad,
     Icon: Star,
     iconTint: "text-gold",
     chipBg: "bg-gold/15",
@@ -69,7 +65,7 @@ const METHODS_META = [
     key: "cristo",
     title: "Método de Cristo 3·6·9",
     desc: "Oración, escritura, música y afirmaciones inspiradas en la fe, 21 días.",
-    image: cristoImg,
+    image: VISUALIZA_METHOD_COVERS.cristo,
     Icon: Cross,
     iconTint: "text-primary",
     chipBg: "bg-primary/12",
@@ -81,7 +77,7 @@ const METHODS_META = [
 ] as const;
 
 /** Portadas propias para las categorías que el panel crea sin imagen. */
-const GROUP_FALLBACK = [musicImg, cleanImg, identityImg, cristoImg];
+const GROUP_FALLBACK = Object.values(VISUALIZA_METHOD_COVERS);
 
 /** Nombre humano del grupo al que pertenece una categoría del panel. */
 function groupLabel(key: string) {

@@ -54,7 +54,7 @@ function HistorialPage() {
         supabase.from("pareja_lecturas").select("id, partner_name, question, created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(60),
         supabase.from("patrones_consultas").select("id, name, question, created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(60),
         supabase.from("ministracion_lecturas").select("id, name, question, created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(60),
-        supabase.from("messages").select("id, role, created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(80),
+        supabase.from("messages").select("id, role, created_at, conversations!inner(id)").eq("user_id", userId).is("conversations.deleted_at", null).order("created_at", { ascending: false }).limit(80),
         supabase.from("satisfaction_ratings").select("id, section, stars, created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(50),
         supabase.from("purchase_requests").select("id, pack_id, hojas, usd, status, created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(100),
       ]);

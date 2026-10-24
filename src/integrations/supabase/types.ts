@@ -693,6 +693,7 @@ export type Database = {
       conversations: {
         Row: {
           created_at: string
+          deleted_at: string | null
           id: string
           title: string
           updated_at: string
@@ -700,6 +701,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          deleted_at?: string | null
           id?: string
           title?: string
           updated_at?: string
@@ -707,6 +709,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          deleted_at?: string | null
           id?: string
           title?: string
           updated_at?: string
@@ -2606,6 +2609,10 @@ export type Database = {
         Args: { _hojas: number; _to_email: string }
         Returns: string
       }
+      delete_mentor_conversation: {
+        Args: { conversation_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -2613,12 +2620,30 @@ export type Database = {
         }
         Returns: boolean
       }
+      list_mentor_conversations: {
+        Args: never
+        Returns: {
+          created_at: string
+          deleted_at: string
+          id: string
+          title: string
+          updated_at: string
+        }[]
+      }
       resolve_marketing_audience: {
         Args: { p_audience_type: string; p_list_id: string }
         Returns: {
           email: string
           user_id: string
         }[]
+      }
+      restore_mentor_conversation: {
+        Args: { conversation_id: string }
+        Returns: boolean
+      }
+      trash_mentor_conversation: {
+        Args: { conversation_id: string }
+        Returns: boolean
       }
     }
     Enums: {
