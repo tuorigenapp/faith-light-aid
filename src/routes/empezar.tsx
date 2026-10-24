@@ -439,7 +439,7 @@ function TrustBar() {
 function BooksGift() {
   const rail = useRef<HTMLDivElement>(null);
   const scrollBooks = (direction: number) => rail.current?.scrollBy({ left: direction * 280, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
-  return <section aria-labelledby="books-gift-title" className="relative mt-10 overflow-hidden rounded-3xl bg-primary p-5 text-primary-foreground">
+  return <section aria-labelledby="books-gift-title" className="relative mt-10 overflow-hidden rounded-3xl bg-primary p-5 text-primary-foreground dark:bg-secondary dark:text-secondary-foreground">
     <div className="flex items-center gap-4">
       <img src={eBook} alt="" className="h-24 w-24 shrink-0 object-contain drop-shadow-xl" />
       <div><p className="text-xs font-bold uppercase tracking-widest opacity-80">Incluidos en tu suscripción</p><h3 id="books-gift-title" className="mt-1 font-display text-xl font-bold leading-tight">{FUNNEL_BOOKS.length} libros para ti, sin costo adicional</h3></div>
