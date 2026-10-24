@@ -1,3 +1,13 @@
+import s0 from "@/assets/etapas-bg/primavera-dia.jpg";
+import s1 from "@/assets/etapas-bg/primavera-tarde.jpg";
+import s2 from "@/assets/etapas-bg/verano-dia.jpg";
+import s3 from "@/assets/etapas-bg/verano-tarde.jpg";
+import s4 from "@/assets/etapas-bg/otono-dia.jpg";
+import s5 from "@/assets/etapas-bg/otono-tarde.jpg";
+import s6 from "@/assets/etapas-bg/invierno-dia.jpg";
+import s7 from "@/assets/etapas-bg/invierno-tarde.jpg";
+import s8 from "@/assets/etapas-bg/noche-1.jpg";
+import s9 from "@/assets/etapas-bg/noche-2.jpg";
 /**
  * Extras de la Palabra del día: fondos imprimibles, narración humana,
  * quiz "Para pensar" y enlaces para compartir en redes.
@@ -15,7 +25,7 @@ import bg8 from "@/assets/palabra-bg-8.jpg";
 import bg9 from "@/assets/palabra-bg-9.jpg";
 import bg10 from "@/assets/palabra-bg-10.jpg";
 
-export const PALABRA_BACKGROUNDS = [bg1, bg2, bg3, bg4, bg5, bg6, bg7, bg8, bg9, bg10];
+export const PALABRA_BACKGROUNDS = [bg1, bg2, bg3, bg4, bg5, bg6, bg7, bg8, bg9, bg10, s0, s1, s2, s3, s4, s5, s6, s7, s8, s9];
 
 export const APP_URL = "https://tuorigen.app";
 
