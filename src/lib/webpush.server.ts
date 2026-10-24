@@ -124,7 +124,7 @@ export async function sendPush(sub: PushSubscriptionRow, message: PushMessage): 
   const payload = await encryptPayload(sub.p256dh, sub.auth, JSON.stringify(fullPayload));
   const res = await fetch(sub.endpoint, {
     method: "POST",
-    redirect: "error",
+    redirect: "manual",
     headers: {
       Authorization: await vapidHeader(sub.endpoint, publicKey, privateKey, subject),
       "Content-Encoding": "aes128gcm",
