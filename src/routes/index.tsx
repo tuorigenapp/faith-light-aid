@@ -1,3 +1,4 @@
+import { ManagedImage } from "@/components/ManagedImage";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { ArrowRight, ChevronDown, ShieldCheck, Sparkles } from "lucide-react";
@@ -100,7 +101,7 @@ function Landing() {
       <header className="sticky top-0 z-40 border-b border-border/70 bg-background/85 backdrop-blur-xl">
         <div className="mx-auto grid max-w-[1100px] grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-2.5">
           <div className="flex min-w-0 items-center gap-2">
-            <img src={logo} alt="ORÍGEN" width={36} height={36} className="h-9 w-9 shrink-0 object-contain" />
+            <ManagedImage imageKey="imagen:logo" src={logo} alt="ORÍGEN" width={36} height={36} className="h-9 w-9 shrink-0 object-contain" />
             <span className="truncate font-display text-[15px] font-extrabold tracking-tight">ORÍGEN</span>
           </div>
           <div className="flex shrink-0 items-center gap-2">

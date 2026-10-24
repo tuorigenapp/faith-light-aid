@@ -1,3 +1,4 @@
+import { ManagedImage } from "@/components/ManagedImage";
 import { wholeHojas } from "@/lib/gems";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
@@ -84,7 +85,7 @@ function PremiosOrigen() {
         <section className="personal-banner relative overflow-hidden border-b border-border p-5">
           <div className="relative grid gap-5 md:grid-cols-[minmax(0,1fr)_220px] items-center">
             <div>
-              <div className="flex items-center gap-2"><img src={logo} alt="ORÍGEN" className="h-10 w-10 object-contain" /><p className="text-[12px] uppercase font-bold text-primary">Premios ORÍGEN</p></div>
+              <div className="flex items-center gap-2"><ManagedImage imageKey="imagen:logo" src={logo} alt="ORÍGEN" className="h-10 w-10 object-contain" /><p className="text-[12px] uppercase font-bold text-primary">Premios ORÍGEN</p></div>
               <h1 className="font-display font-extrabold text-[32px] leading-[1.12] mt-3">{name}, celebra lo que sí avanzaste</h1>
               <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground">Tu constancia tiene raíces. Cada paso real cuenta en tu historia.</p>
               <div className="mt-5 grid grid-cols-3 gap-3">
@@ -93,7 +94,7 @@ function PremiosOrigen() {
                 <Stat icon={Gift} label="Hojas" value={wholeHojas(data?.profile?.gems).toLocaleString("es")} />
               </div>
             </div>
-            <img src={companion} alt="Compañero ORÍGEN celebra tu avance" loading="eager" className="mascot-motion mx-auto h-48 w-48 object-contain" />
+            <ManagedImage imageKey="imagen:companion" src={companion} alt="Compañero ORÍGEN celebra tu avance" loading="eager" className="mascot-motion mx-auto h-48 w-48 object-contain" />
           </div>
         </section>
 

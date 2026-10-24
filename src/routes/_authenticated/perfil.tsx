@@ -1,3 +1,4 @@
+import { ManagedImage } from "@/components/ManagedImage";
 import { NotificacionesCard } from "@/components/NotificacionesCard";
 import { VoiceToggle } from "@/components/VoiceControls";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
@@ -692,7 +693,7 @@ function ProfilePanel({ profile, onEdit }: { profile: any; onEdit: () => void })
       <div className="mx-auto max-w-2xl lg:max-w-5xl px-4 pt-5 pb-24 space-y-4">
         {/* HERO */}
         <section className="personal-banner relative overflow-hidden rounded-[16px] p-5 text-foreground">
-          <div className="mb-4 flex items-center justify-between gap-4"><div className="flex items-center gap-2"><img src={origenLogo} alt="ORÍGEN" className="h-10 w-10 object-contain" /><p className="text-[12px] font-bold uppercase text-primary">Mi espacio ORÍGEN</p></div><span className="text-[12px] text-muted-foreground">{new Date().toLocaleDateString("es-MX", { day: "numeric", month: "long" })}</span></div>
+          <div className="mb-4 flex items-center justify-between gap-4"><div className="flex items-center gap-2"><ManagedImage imageKey="imagen:logo" src={origenLogo} alt="ORÍGEN" className="h-10 w-10 object-contain" /><p className="text-[12px] font-bold uppercase text-primary">Mi espacio ORÍGEN</p></div><span className="text-[12px] text-muted-foreground">{new Date().toLocaleDateString("es-MX", { day: "numeric", month: "long" })}</span></div>
           <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4">
             <div className="flex min-w-0 items-center gap-3">
               <div className="w-16 h-16 rounded-full bg-primary/10 grid place-items-center overflow-hidden text-2xl font-bold ring-2 ring-primary/30 shrink-0">
@@ -707,10 +708,10 @@ function ProfilePanel({ profile, onEdit }: { profile: any; onEdit: () => void })
               </div>
             </div>
             <div className="hidden text-center shrink-0 sm:block">
-              <img src={origenCompanion} alt="Compañero ORÍGEN" loading="eager" className="mascot-motion h-36 w-28 object-contain" />
+              <ManagedImage imageKey="imagen:companion" src={origenCompanion} alt="Compañero ORÍGEN" loading="eager" className="mascot-motion h-36 w-28 object-contain" />
             </div>
           </div>
-          <div className="mt-4 flex items-center gap-4 sm:hidden"><img src={origenCompanion} alt="Compañero ORÍGEN" className="mascot-motion h-28 w-24 object-contain" /><div><p className="font-display text-[22px] font-bold text-primary">{pct}%</p><p className="text-sm text-muted-foreground">Etapa {currentStage} de {totalStages}</p><p className="mt-1 text-sm">Un paso a la vez, con Dios.</p></div></div>
+          <div className="mt-4 flex items-center gap-4 sm:hidden"><ManagedImage imageKey="imagen:companion" src={origenCompanion} alt="Compañero ORÍGEN" className="mascot-motion h-28 w-24 object-contain" /><div><p className="font-display text-[22px] font-bold text-primary">{pct}%</p><p className="text-sm text-muted-foreground">Etapa {currentStage} de {totalStages}</p><p className="mt-1 text-sm">Un paso a la vez, con Dios.</p></div></div>
           <div className="mt-4 grid grid-cols-3 gap-2">
             <MiniStat icon={<Calendar className="w-3.5 h-3.5" />} label="Días activos" value={stats?.activeDays ?? 0} />
             <MiniStat icon={<Flame className="w-3.5 h-3.5" />} label="Racha" value={`${profile.consecutive_days ?? 0}d`} />
@@ -826,7 +827,7 @@ function ProfilePanel({ profile, onEdit }: { profile: any; onEdit: () => void })
 
         {/* MENSAJE PARA TI HOY */}
         <div className="personal-banner rounded-[16px] p-5 text-center border border-border">
-          <img src={origenDove} alt="Paloma ORÍGEN" loading="lazy" className="mascot-motion mx-auto h-24 w-24 object-contain" />
+          <ManagedImage imageKey="imagen:dove" src={origenDove} alt="Paloma ORÍGEN" loading="lazy" className="mascot-motion mx-auto h-24 w-24 object-contain" />
           <div className="text-[13px] font-bold text-primary">Mensaje para ti hoy</div>
           <p className="font-display text-[15px] leading-snug mt-2">"{message}"</p>
           <Heart className="w-6 h-6 text-accent-pink mx-auto mt-3" />

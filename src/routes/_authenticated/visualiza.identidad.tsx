@@ -1,3 +1,4 @@
+import { ManagedImage } from "@/components/ManagedImage";
 import { useSessionState } from "@/hooks/use-session-step";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useAuth } from "@/lib/use-auth";
@@ -363,7 +364,7 @@ function IdentidadPage() {
     return (
       <div className="pb-24">
         <section className="relative overflow-hidden rounded-b-[2.5rem] min-h-[92vh]">
-          <img src={heroImg} alt="" className="absolute inset-0 h-full w-full object-cover" />
+          <ManagedImage imageKey="imagen:visualiza:identidad" src={heroImg} alt="" className="absolute inset-0 h-full w-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/20 to-background dark:from-black/40 dark:via-black/60" />
           <div className="relative px-5 pt-6 pb-8 max-w-2xl mx-auto text-center flex flex-col">
             <Link to="/visualiza" className="inline-flex items-center gap-1 text-xs text-white font-bold self-start drop-shadow">
@@ -479,7 +480,7 @@ function IdentidadPage() {
   return (
     <div className="pb-32 max-w-3xl mx-auto">
       <section className="relative h-64 sm:h-80 overflow-hidden rounded-b-[2rem]">
-        <img src={heroImg} alt={practice.title} className="absolute inset-0 h-full w-full object-cover" />
+        <ManagedImage imageKey="imagen:visualiza:identidad" src={heroImg} alt={practice.title} className="absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-white/60 dark:to-background/60" />
         <button onClick={() => setStep(2)} className="absolute top-4 left-4 w-10 h-10 rounded-full bg-white/90 grid place-items-center shadow-soft">
           <ArrowLeft className="w-4 h-4 text-foreground" />

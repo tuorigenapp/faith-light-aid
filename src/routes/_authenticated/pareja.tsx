@@ -1,3 +1,4 @@
+import { ManagedImage } from "@/components/ManagedImage";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { christianContent } from "@/lib/christian-language";
 import { useEffect, useState } from "react";
@@ -221,7 +222,7 @@ function ParejaPage() {
 
         {step === 1 && (
           <div className="animate-in fade-in slide-in-from-right-6 duration-300">
-            <img
+            <ManagedImage imageKey="imagen:consulta:pareja"
               src={parejaHero}
               alt="Consulta de pareja — ORIGEN"
               width={1280}
