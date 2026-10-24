@@ -9,6 +9,8 @@ import path from "node:path";
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
 export default defineConfig({
+  // On Vercel builds (VERCEL=1), emit Vercel-native output; elsewhere keep the default target.
+  ...(process.env.VERCEL ? { nitro: { preset: "vercel" } } : {}),
   vite: {
     resolve: {
       alias: {
