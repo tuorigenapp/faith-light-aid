@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { Bell, BellOff, Mail } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/use-auth";
-import { disablePush, enablePush, getPrefs, permissionState, setEmailEnabled } from "@/lib/notifications";
+import { disablePush, enablePush, getPrefs, hasPushSubscription, permissionState, setEmailEnabled } from "@/lib/notifications";
+import { Button } from "@/components/ui/button";
 
 const AVISOS = [
   "Palabra del día lista",
@@ -22,10 +23,10 @@ export function NotificacionesCard() {
 
   useEffect(() => {
     if (!user) return;
-    getPrefs(user.id).then((p) => {
-      setPush(!!p.push_enabled && permissionState() === "granted");
+    Promise.all([getPrefs(user.id), hasPushSubscription()]).then(([p, registered]) => {
+      setPush(!!p.push_enabled && registered);
       setEmail(p.email_enabled !== false);
-    });
+    }).catch(() => toast.error("No pudimos cargar tus preferencias. Intenta de nuevo."));
   }, [user]);
 
   async function togglePush() {
@@ -58,13 +59,14 @@ export function NotificacionesCard() {
           <Bell className="h-5 w-5" />
         </span>
         <div>
-          <h3 className="font-display text-[17px] font-bold">Avisos y recordatorios</h3>
-          <p className="text-[13px] text-muted-foreground">Te avisamos solo de lo que te mueve el camino.</p>
+          <h3 className="font-display text-[17px] font-bold">Avisos fuera de ORÍGEN</h3>
+          <p className="text-[13px] text-muted-foreground">Recomendaciones diarias, incluso con la app cerrada.</p>
         </div>
       </div>
 
       <div className="mt-4 space-y-2">
-        <button
+        <Button
+          variant={push ? "secondary" : "default"}
           onClick={togglePush}
           disabled={!supported || busy}
           className={`flex min-h-[52px] w-full items-center justify-between rounded-[12px] px-4 text-sm font-semibold transition disabled:opacity-60 ${
@@ -73,9 +75,10 @@ export function NotificacionesCard() {
         >
           <span className="flex items-center gap-2">
             {push ? <BellOff className="h-4 w-4" /> : <Bell className="h-4 w-4" />}
-            {push ? "Desactivar notificaciones" : "Activar notificaciones"}
+            {push ? "Desactivar avisos externos" : "Activar avisos en este dispositivo"}
           </span>
-        </button>
+        </Button>
+        <p className="text-[13px] text-muted-foreground">Debes permitir las notificaciones del navegador. En iPhone, agrega ORÍGEN a tu pantalla de inicio; la entrega depende del dispositivo y sus ajustes.</p>
         {!supported && (
           <p className="text-[12px] text-muted-foreground">
             Tu navegador no permite notificaciones. Ábrela desde Chrome o Safari actualizado.

@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import bookImg from "@/assets/libro-reconectando.png";
+import bookImg from "@/assets/libro-oficial-mockup.png";
+import { BOOK_AMAZON_URL } from "@/lib/pdf-brand";
 import { ArrowLeft, Check, X, Heart, Sparkles, Brain, Coins, Users, Compass, Headphones, NotebookPen, BookOpen, Lock, ShieldCheck, Map, FileText, Gamepad2, Clock, Gift, Globe2, Download, Sun, TreePine, HeartHandshake, Smartphone, BadgeCheck, CalendarCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -474,6 +475,7 @@ function Includes() {
         <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-[12px] font-bold text-primary"><Gift className="h-3.5 w-3.5" /> Regalo incluido</span>
         <p className="mt-1.5 font-display text-[17px] font-bold leading-tight text-foreground">Ebook «Reconectando el Espíritu con Dios» gratis</p>
         <p className="mt-1 text-sm text-muted-foreground">El libro de Ruth Esther Paredes Sufran, autora y fundadora de ORÍGEN, donde nace este método.</p>
+        <a href={BOOK_AMAZON_URL} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex min-h-11 items-center text-sm font-bold text-primary">Comprar la edición física en Amazon <ArrowRight className="ml-1 h-4 w-4" /></a>
       </div>
     </div>
   </>;

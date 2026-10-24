@@ -5,9 +5,10 @@ let vapidCache: string | null | undefined;
 
 /** La llave pública de push se sirve desde el servidor (dato público). */
 async function getVapidKey(): Promise<string | null> {
-  if (vapidCache !== undefined) return vapidCache;
+  if (vapidCache) return vapidCache;
   try {
     const res = await fetch("/api/public/vapid-key");
+    if (!res.ok) return null;
     const json = (await res.json()) as { key: string | null };
     vapidCache = json.key ?? null;
   } catch {
@@ -17,7 +18,7 @@ async function getVapidKey(): Promise<string | null> {
 }
 
 export function pushSupported() {
-  return typeof window !== "undefined" && "Notification" in window && "serviceWorker" in navigator;
+  return typeof window !== "undefined" && window.isSecureContext && "Notification" in window && "serviceWorker" in navigator && "PushManager" in window;
 }
 
 export function permissionState(): NotificationPermission | "unsupported" {
@@ -36,33 +37,30 @@ export async function enablePush(userId: string): Promise<{ ok: boolean; message
   const perm = await Notification.requestPermission();
   if (perm !== "granted") return { ok: false, message: "No diste permiso para notificaciones." };
 
-  const reg = await navigator.serviceWorker.register("/sw.js");
-  await navigator.serviceWorker.ready;
-
-  const VAPID = await getVapidKey();
-  if (VAPID) {
-    try {
-      const sub = await reg.pushManager.subscribe({
+  try {
+    const VAPID = await getVapidKey();
+    if (!VAPID) return { ok: false, message: "No pudimos configurar los avisos externos. Intenta de nuevo más tarde." };
+    await navigator.serviceWorker.register("/sw.js");
+    const reg = await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.getSubscription() ?? await reg.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(VAPID),
       });
       const json = sub.toJSON() as { endpoint?: string; keys?: { p256dh?: string; auth?: string } };
-      await supabase.from("push_subscriptions").upsert(
+      if (!json.endpoint || !json.keys?.p256dh || !json.keys.auth) return { ok: false, message: "No pudimos registrar este dispositivo. Vuelve a activar los avisos." };
+      const { error: subscriptionError } = await supabase.from("push_subscriptions").upsert(
         {
           user_id: userId,
-          endpoint: json.endpoint!,
-          p256dh: json.keys?.p256dh ?? null,
-          auth: json.keys?.auth ?? null,
+          endpoint: json.endpoint,
+          p256dh: json.keys.p256dh,
+          auth: json.keys.auth,
           user_agent: navigator.userAgent,
         },
         { onConflict: "endpoint" },
       );
-    } catch (e) {
-      console.error("push subscribe", e);
-    }
-  }
-
-  await supabase.from("notification_prefs").upsert({ user_id: userId, push_enabled: true });
+      if (subscriptionError) return { ok: false, message: "El permiso está concedido, pero no pudimos guardar el dispositivo. Intenta activarlo otra vez." };
+  const { error: prefsError } = await supabase.from("notification_prefs").upsert({ user_id: userId, push_enabled: true });
+  if (prefsError) return { ok: false, message: "No pudimos guardar la activación. Intenta de nuevo." };
   const enabledOptions: NotificationOptions = {
     body: "Te avisaremos de la Palabra del día, tu racha y tus consultas.",
     icon: "/icon-192.png",
@@ -72,8 +70,11 @@ export async function enablePush(userId: string): Promise<{ ok: boolean; message
   };
   // @ts-expect-error renotify no está tipado en NotificationOptions estándar del DOM
   enabledOptions.renotify = false;
-  await reg.showNotification("tuorigen.app · Notificaciones activadas 🕊️", enabledOptions);
-  return { ok: true, message: "Notificaciones activadas." };
+  await reg.showNotification("ORÍGEN · Avisos externos activados", enabledOptions).catch(() => undefined);
+  return { ok: true, message: "Este dispositivo quedó registrado para recibir avisos fuera de ORÍGEN." };
+  } catch {
+    return { ok: false, message: "No pudimos activar los avisos externos. Abre ORÍGEN en tu navegador; en iPhone, agrégala primero a la pantalla de inicio." };
+  }
 }
 
 export async function disablePush(userId: string) {
@@ -95,12 +96,19 @@ export async function setEmailEnabled(userId: string, enabled: boolean) {
 }
 
 export async function getPrefs(userId: string) {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("notification_prefs")
     .select("email_enabled, push_enabled")
     .eq("user_id", userId)
     .maybeSingle();
+  if (error) throw new Error("No pudimos leer tus preferencias de avisos.");
   return data ?? { email_enabled: true, push_enabled: false };
+}
+
+export async function hasPushSubscription(): Promise<boolean> {
+  if (!pushSupported() || Notification.permission !== "granted") return false;
+  try { const reg = await navigator.serviceWorker.getRegistration("/sw.js"); return Boolean(await reg?.pushManager.getSubscription()); }
+  catch { return false; }
 }
 
 /* ---------- Recordatorios locales ---------- */

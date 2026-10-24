@@ -5,6 +5,8 @@ import eHeartPurple from "@/assets/e3d-heart-purple.png";
 import eCross from "@/assets/e3d-cross.png";
 import eStar from "@/assets/e3d-star.png";
 import eCoin from "@/assets/e3d-coin.png";
+import bookMockup from "@/assets/libro-oficial-mockup.png";
+import { BOOK_AMAZON_URL, BOOK_TITLE, BOOK_AUTHOR } from "@/lib/pdf-brand";
 
 export const Route = createFileRoute("/checkout")({
   component: Checkout,
@@ -111,6 +113,10 @@ function Checkout() {
           </ul>
         </div>
 
+        <section className="mt-8 grid grid-cols-[96px_minmax(0,1fr)] items-center gap-4 rounded-[16px] bg-card p-5 text-card-foreground">
+          <img src={bookMockup} alt={BOOK_TITLE} loading="lazy" className="h-auto w-24" />
+          <div><h2 className="font-display text-[19px] font-bold leading-tight">{BOOK_TITLE}</h2><p className="mt-2 text-sm text-muted-foreground">De {BOOK_AUTHOR}. Ebook incluido con Camino ORÍGEN.</p><a href={BOOK_AMAZON_URL} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex min-h-11 items-center gap-1 text-sm font-bold text-primary">Edición física en Amazon <ArrowRight className="h-4 w-4" /></a></div>
+        </section>
         {/* Oferta */}
         <div className="mt-8">
           <div className="flex items-center justify-center gap-2 text-[13px] font-semibold text-[#E0B25C]">
