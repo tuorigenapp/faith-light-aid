@@ -34,7 +34,7 @@ export function thematicPractice(category: string, title: string, day = 1): Prac
     lesson: `En «${topic}», dentro de ${category}, comienza por mirar una situación real sin juzgarte. ${theme.truth} Distingue lo que depende de ti de las decisiones de otras personas. Tu paso de esta práctica será ${theme.action}. Lleva tus dudas a la oración y busca apoyo cuando lo necesites; avanzar no significa resolver todo de una vez.`,
     exercise: `Trabaja «${topic}»: ${tasks.join(" ")}`,
     tasks,
-    search_words: [...new Set([...words, ...theme.words])].slice(0, 8),
+    search_words: [...new Set([...words, ...theme.words])].filter(word => word.length >= 4 && word.length <= 9).slice(0, 8),
     quiz: [
       { question: `En «${topic}», ¿cuál es un paso responsable?`, options: [theme.action, theme.avoid, "Ignorar lo que sucede"], correctIndex: 0, explanation: theme.truth },
       { question: `¿Qué conviene evitar al trabajar «${topic}»?`, options: ["Pedir apoyo cuando lo necesitas", theme.avoid, "Reconocer tu situación con honestidad"], correctIndex: 1, explanation: `Para ${category}, el cuidado y la responsabilidad van juntos.` },
@@ -52,8 +52,8 @@ export function resolvePractice(category: string, row: LegacyRow, siblings: Lega
     affirmation: row.affirmation && !repeated("affirmation", row.affirmation) ? row.affirmation : fallback.affirmation,
     lesson: row.lesson && !repeated("lesson", row.lesson) ? row.lesson : fallback.lesson,
     exercise: row.exercise && !repeated("exercise", row.exercise) ? row.exercise : fallback.exercise,
-    tasks: q.tasks?.length && !repeated("quiz", row.quiz) ? q.tasks : fallback.tasks,
-    quiz: q.questions?.length && !repeated("quiz", row.quiz) ? q.questions : fallback.quiz,
+    tasks: q.tasks?.length && !siblings.some(s => s.id !== row.id && JSON.stringify((s.quiz as typeof q)?.tasks) === JSON.stringify(q.tasks)) ? q.tasks : fallback.tasks,
+    quiz: q.questions?.length && !siblings.some(s => s.id !== row.id && JSON.stringify((s.quiz as typeof q)?.questions) === JSON.stringify(q.questions)) ? q.questions : fallback.quiz,
     search_words: game.words?.length && !repeated("word_game", row.word_game) ? game.words : fallback.search_words,
   };
 }

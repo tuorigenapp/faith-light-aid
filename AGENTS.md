@@ -30,6 +30,9 @@
 - Journey screens use the browser-hydrated seasonal picker with separate exercise and journey image pools; this avoids hydration mismatches and cross-section background collisions.
 - Layout and profile queries sharing the profile cache key always select the complete profile row; this prevents missing completion state from reopening registration.
 - Audio upload and audio publication are separate operations, with explicit completion/error reporting and awaited writes; AI content enrichment never blocks saving a valid audio.
+- Shared Google Drive audio links are imported server-side through the linked connector into audio storage before publication; this avoids depending on Drive's HTML sharing page for playback.
+- Named cover catalogs and ManagedImage use shared content overrides while background pools remain separate; this keeps manual image changes consistent across entry points.
+- Visualiza subtopics use thematic emojis and one shared validated text generator with sibling duplicate checks; this prevents image charges and mismatched lesson, task and game content.
 - Browser push activation is confirmed only after the subscription and preference persist; internal popups cannot enable external push delivery.
 - Web Push delivery validates browser push-service hosts on the client and again before server fetch, with redirects forbidden; this prevents stored endpoints from targeting private services.
 - Exploration cards share one asset catalog between Home and Explore; this prevents stale covers in one entry point.
