@@ -13,7 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { WordSearch } from "@/components/WordSearch";
 import { cn } from "@/lib/utils";
-import heroFallback from "@/assets/visualiza-hero.jpg";
+import heroFallback from "@/assets/explore/music.jpg";
 import { FREE_AUDIOS } from "@/components/visualiza/CustomTopic";
 import { StageQuiz, type QuizItem } from "@/components/StageQuiz";
 
@@ -190,14 +190,14 @@ function LessonStep({ cat, page, accent, subs, sel, entries, isPaid, onBack, onP
   const [choice, setChoice] = useState<Sub | null>(null);
   const lessonOf = (a: Sub) => navigate({ to: "/visualiza/$categoryId/$day", params: { categoryId: cat.id, day: String(a.day_index) } });
   function open(a: Sub) {
-    if (!isPaid && a.day_index > FREE_AUDIOS) return navigate({ to: "/membresia" });
     onPick(a.id);
-    if (!a.audio_url) return lessonOf(a);
-    if (playingId === a.id) return player.toggle();
     setChoice(a);
   }
   function listen(a: Sub) {
     setChoice(null);
+    if (!a.audio_url) return;
+    if (!isPaid && a.day_index > FREE_AUDIOS) { navigate({ to: "/membresia" }); return; }
+    if (playingId === a.id) { player.toggle(); return; }
     player.play(toTrack(a), subs.filter((x) => x.audio_url && (isPaid || x.day_index <= FREE_AUDIOS)).map(toTrack));
   }
   const fillers = Array.from({ length: Math.max(0, PLAYLIST_SLOTS - subs.length) }, (_, i) => subs.length + i + 1);
@@ -264,7 +264,7 @@ function LessonStep({ cat, page, accent, subs, sel, entries, isPaid, onBack, onP
             </div>
           ))}
         </div>
-        {choice && <PlayChoice title={choice.title} onClose={() => setChoice(null)} onLesson={() => { setChoice(null); lessonOf(choice); }} onListen={() => listen(choice)} />}
+        {choice && <PlayChoice title={choice.title} canListen={Boolean(choice.audio_url)} onClose={() => setChoice(null)} onLesson={() => { setChoice(null); lessonOf(choice); }} onListen={() => listen(choice)} />}
         {!isPaid && (
           <Card className="mt-3 rounded-[16px] border p-4" style={{ borderColor: `${accent}50`, background: `${accent}10` }}>
             <div className="flex items-start gap-3">

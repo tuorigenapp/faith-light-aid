@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import { getUserPlan } from "@/lib/plan";
 import { CustomTopic, FREE_AUDIOS } from "@/components/visualiza/CustomTopic";
 import { awardGems } from "@/lib/gems";
-import heroAsset from "@/assets/manifest-music-hero.jpg";
+import heroAsset from "@/assets/explore/music.jpg";
 import { cn } from "@/lib/utils";
 import { WordSearch } from "@/components/WordSearch";
 import { CustomMusicTopic } from "@/components/visualiza/CustomMusicTopic";
@@ -138,23 +138,14 @@ function CategoryInner() {
   });
 
   function toggle(a: any, dayIndex: number) {
-    if (!isPaid && dayIndex > FREE_AUDIOS) {
-      toast.error("Este día se libera con el plan Camino Origen.");
-      return;
-    }
-    if (!a.audio_url) {
-      navigate({ to: "/visualiza/$categoryId/$day", params: { categoryId, day: String(dayIndex) } });
-      return;
-    }
-    if (playingId === a.id) {
-      player.toggle();
-      return;
-    }
     setChoice(a);
   }
   const [choice, setChoice] = useState<any | null>(null);
   function listen(a: any) {
     setChoice(null);
+    if (!a.audio_url) return;
+    if (!isPaid && a.day_index > FREE_AUDIOS) { navigate({ to: "/membresia" }); return; }
+    if (playingId === a.id) { player.toggle(); return; }
     const available = (data?.audios ?? []).filter((x: any) => x.audio_url && (isPaid || x.day_index <= FREE_AUDIOS));
     player.play(toTrack(a), available.map(toTrack));
   }
@@ -379,7 +370,7 @@ function CategoryInner() {
             </div>
           ))}
         </div>
-        {choice && <PlayChoice title={choice.title || DAY_TITLES[choice.day_index - 1] || c.title} onClose={() => setChoice(null)} onLesson={() => { const d = choice.day_index; setChoice(null); navigate({ to: "/visualiza/$categoryId/$day", params: { categoryId, day: String(d) } }); }} onListen={() => listen(choice)} />}
+        {choice && <PlayChoice title={choice.title || DAY_TITLES[choice.day_index - 1] || c.title} canListen={Boolean(choice.audio_url)} onClose={() => setChoice(null)} onLesson={() => { const d = choice.day_index; setChoice(null); navigate({ to: "/visualiza/$categoryId/$day", params: { categoryId, day: String(d) } }); }} onListen={() => listen(choice)} />}
 
         {!isPaid && (
           <Card className="mt-3 rounded-2xl p-4 bg-gradient-to-br from-primary/10 to-pink-100/50 dark:to-pink-500/10 border border-primary/30">
