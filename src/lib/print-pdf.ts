@@ -151,7 +151,7 @@ export function printConsulta(opts: ConsultaPDFOptions) {
   <div class="footer">
     Documento personal generado en <b>ORIGEN</b>, tu espacio de sanación y propósito.<br/>
     Sigue tu camino de transformación cada día.<br/>
-    <a class="cta" href="https://faith-light-aid.lovable.app" target="_blank" rel="noopener">Continuar en ORIGEN →</a>
+    <a class="cta" href="https://tuorigen.app" target="_blank" rel="noopener">Continuar en ORIGEN →</a>
   </div>
   </div>
   <script>window.addEventListener('load', function(){ setTimeout(function(){ window.print(); }, 400); });</script>

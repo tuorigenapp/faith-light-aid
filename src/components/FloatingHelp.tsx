@@ -106,7 +106,7 @@ export function FloatingHelp() {
           </div>
 
           <a
-            href="mailto:infodenegociorm@gmail.com"
+            href="mailto:supportorigenapp@gmail.com"
             className="mt-4 flex min-h-[48px] items-center justify-center gap-2 rounded-full bg-primary/10 text-sm font-semibold text-primary"
           >
             <Mail className="h-4 w-4" /> No encontré mi respuesta, escribir a soporte
@@ -163,7 +163,7 @@ export function FloatingHelp() {
                 Para qué sirven las hojas
               </button>
               <a
-                href="mailto:infodenegociorm@gmail.com"
+                href="mailto:supportorigenapp@gmail.com"
                 className="flex min-h-11 items-center gap-3 rounded-[10px] px-2 text-sm font-medium hover:bg-secondary"
               >
                 <span className="grid h-8 w-8 place-items-center rounded-[10px] bg-primary/10 text-primary">

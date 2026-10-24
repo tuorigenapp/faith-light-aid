@@ -6,17 +6,13 @@ import logo from "@/assets/logo-origen.png";
 import heroImg from "@/assets/landing/hero-oracion.jpg";
 import triedImg from "@/assets/landing/probaste-todo.jpg";
 import familyImg from "@/assets/landing/familia-libre.jpg";
-import eHeartPurple from "@/assets/e3d-heart-purple.png";
 import eHeartGem from "@/assets/e3d-heartgem.png";
 import eCross from "@/assets/e3d-cross.png";
-import eStar from "@/assets/e3d-star.png";
-import ePractice from "@/assets/e3d-practice.png";
-import eHeadphones from "@/assets/e3d-headphones.png";
 import eBrain from "@/assets/e3d-brain.png";
 import eButterfly from "@/assets/e3d-butterfly.png";
 import { ReviewsSlider } from "@/components/ReviewsSlider";
 import { LiveActivityToasts } from "@/components/LiveActivityToasts";
-import { DiosTeDiceHoy } from "@/components/DiosTeDiceHoy";
+import { InstallAppButton } from "@/components/InstallAppGuide";
 import { AppScreens, BeforeAfter, BooksGift, Includes, TryConsulta } from "@/components/funnel/FunnelShared";
 
 export const Route = createFileRoute("/")({
@@ -291,7 +287,7 @@ function Landing() {
             <a href="/reembolsos" className="underline-offset-2 hover:underline">Reembolsos</a>
             <a href="/disclaimer-ia" className="underline-offset-2 hover:underline">Uso de IA</a>
           </div>
-          <p className="mt-3">Soporte: infodenegociorm@gmail.com</p>
+          <p className="mt-3">Soporte: supportorigenapp@gmail.com</p>
           <p className="mt-1">© {new Date().getFullYear()} ORÍGEN. Acompañamiento espiritual, no sustituye atención médica o psicológica.</p>
         </footer>
       </div>

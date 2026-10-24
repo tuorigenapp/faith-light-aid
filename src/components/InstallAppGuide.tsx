@@ -110,7 +110,7 @@ export function InstallAppGuide({ open, onClose }: { open: boolean; onClose: () 
         {/* Barra del navegador móvil */}
         <div className="mx-auto mt-3 flex w-full max-w-[340px] items-center gap-2 rounded-[18px] bg-install-bar px-3 py-2.5 text-install-muted">
           <ChevronLeft className="h-5 w-5" aria-hidden />
-          <div className="flex-1 truncate rounded-[10px] bg-install-tile px-3 py-1.5 text-center text-[13px]">faith-light-aid.lovable.app</div>
+          <div className="flex-1 truncate rounded-[10px] bg-install-tile px-3 py-1.5 text-center text-[13px]">tuorigen.app</div>
           {platform === "ios" ? <ShareIcon className="h-5 w-5 text-install-accent" /> : <EllipsisVertical className="h-5 w-5 text-install-fg" aria-hidden />}
           <RotateCw className="h-4 w-4" aria-hidden />
         </div>
