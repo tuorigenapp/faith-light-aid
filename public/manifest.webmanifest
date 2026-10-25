@@ -2,7 +2,7 @@
   "name": "ORÍGEN — Reconectando el Espíritu con Dios",
   "short_name": "ORÍGEN",
   "description": "Plataforma cristiana de restauración espiritual, sanidad interior y crecimiento.",
-  "start_url": "/dashboard",
+  "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
