@@ -155,7 +155,7 @@ export function InstallAppButton({ className, label = "Agregar al inicio" }: { c
     return () => window.removeEventListener("beforeinstallprompt", onPrompt);
   }, []);
 
-  if (installed) return null;
+  void installed;
 
   const start = async () => {
     if (deferred) {
