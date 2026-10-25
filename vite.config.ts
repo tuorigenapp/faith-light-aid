@@ -18,7 +18,7 @@ export default defineConfig({
           routeRules: {
             "/__l5e/**": { proxy: "https://faith-light-aid.lovable.app/__l5e/**" },
           },
-        },
+        } as { preset: string },
       }
     : {}),
   vite: {
