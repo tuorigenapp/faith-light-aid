@@ -66,7 +66,7 @@ export async function enablePush(userId: string): Promise<{ ok: boolean; message
   const enabledOptions: NotificationOptions = {
     body: "Te avisaremos de la Palabra del día, tu racha y tus consultas.",
     icon: "/icon-192.png",
-    badge: "/icon-192.png",
+    badge: "/badge-96.png",
     tag: "origen-push-enabled",
     data: { url: "/dashboard" },
   };
@@ -156,7 +156,7 @@ export async function showLocalNotification(r: LocalReminder) {
     const options: NotificationOptions = {
       body: r.body,
       icon: "/icon-192.png",
-      badge: "/icon-192.png",
+      badge: "/badge-96.png",
       tag: `origen-local-${r.kind}`,
       data: { url: "/dashboard" },
     };

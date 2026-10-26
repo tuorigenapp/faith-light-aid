@@ -56,7 +56,7 @@ export async function pushReminder(r: Reminder) {
       const options: NotificationOptions = {
         body: r.body,
         icon: "/icon-192.png",
-        badge: "/icon-192.png",
+        badge: "/badge-96.png",
         tag: `origen-reminder-${r.url}`,
         data: { url: r.url },
       };

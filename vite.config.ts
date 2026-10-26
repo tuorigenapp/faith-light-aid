@@ -10,13 +10,16 @@ import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
 export default defineConfig({
   // On Vercel builds (VERCEL=1), emit Vercel-native output; elsewhere keep the default target.
-  // Hosted images/audio (/__l5e/...) live on Lovable's CDN, so Vercel proxies them there.
+  // Hosted media (/__l5e) and all privileged server work (/api, /_serverFn) run on the Lovable
+  // deployment, which holds the server-only keys Vercel cannot have.
   ...(process.env.VERCEL
     ? {
         nitro: {
           preset: "vercel",
           routeRules: {
             "/__l5e/**": { proxy: "https://faith-light-aid.lovable.app/__l5e/**" },
+            "/api/**": { proxy: "https://faith-light-aid.lovable.app/api/**" },
+            "/_serverFn/**": { proxy: "https://faith-light-aid.lovable.app/_serverFn/**" },
           },
         } as { preset: string },
       }

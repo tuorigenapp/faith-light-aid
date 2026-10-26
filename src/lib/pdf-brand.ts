@@ -7,7 +7,13 @@ export const BOOK_TITLE = "Reconectando el Espíritu con Dios";
 export const BOOK_AUTHOR = "Ruth Esther Paredes Sufran";
 /** Official product link supplied by the author. */
 export const BOOK_AMAZON_URL = "https://a.co/d/07RJbIzg";
-export const METHOD_TITLE = "MÉTODO ORÍGEN basado en el Método de Cristo";
+export const METHOD_TITLE = "MÉTODO ORÍGEN BASADO EN EL MÉTODO DE CRISTO";
+/** Used by every PDF outside /visualiza. */
+export const BOOK_METHOD_TITLE = "MÉTODO ORÍGEN · BASADO EN LA EXPERIENCIA DE RUTH ESTHER EN SU LIBRO «RECONECTANDO EL ESPÍRITU CON DIOS»";
+/** /visualiza PDFs carry the Christ-method line; the rest of the app carries the book line. */
+export function methodTitleFor(pathname = typeof window !== "undefined" ? window.location.pathname : "") {
+  return pathname.startsWith("/visualiza") ? METHOD_TITLE : BOOK_METHOD_TITLE;
+}
 
 const PLAN_KEY = "origen-plan";
 export function rememberPlan(tier: "explorador" | "camino") {
@@ -26,11 +32,13 @@ export const brandCss = `
   .ob-promo{margin-top:26px;border:2px solid #E7DCCB;border-radius:18px;padding:18px;display:grid;grid-template-columns:120px 1fr;gap:18px;align-items:center;page-break-inside:avoid}
   .ob-promo img{width:120px;height:auto}
   .ob-promo h3{margin:0 0 6px;font-size:16px}.ob-promo p{margin:0 0 10px;font-size:13px;line-height:1.55;color:#4b4339}
-  .ob-btn{display:inline-block;margin:4px 6px 0 0;background:#7C5CFF;color:#fff;font-weight:700;font-size:12px;padding:9px 16px;border-radius:10px;text-decoration:none}
-  .ob-btn.alt{background:#F5EFE6;color:#5b4a36}
+  .ob-head,.ob-promo,.ob-btn{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .ob-btn{display:inline-block;margin:6px 8px 0 0;background:linear-gradient(180deg,#22C55E,#15A34A);color:#fff !important;font-weight:800;font-size:13px;padding:11px 20px;border-radius:999px;text-decoration:none;border:1px solid #128a3e;box-shadow:0 3px 0 #0f7a36,0 6px 14px rgba(22,163,74,.35)}
+  .ob-btn::after{content:"  ➜"}
+  .ob-btn.alt{background:linear-gradient(180deg,#38BDF8,#0EA5E9);border-color:#0b87c0;box-shadow:0 3px 0 #0b78ab,0 6px 14px rgba(14,165,233,.3)}
 `;
 
-export function brandHeaderHtml(tagline = METHOD_TITLE) {
+export function brandHeaderHtml(tagline = methodTitleFor()) {
   return `<div class="ob-head"><img src="${abs(logoUrl)}" alt="ORÍGEN"/><div><div class="ob-name">ORÍGEN</div><div class="ob-tag">${tagline}</div></div></div>`;
 }
 
@@ -95,10 +103,11 @@ export async function jsPdfPromoPage(doc: JsPdfLike, premium = isPremiumPlan()) 
     doc.setFont("helvetica", "normal"); doc.setFontSize(10); doc.setTextColor(90, 80, 70);
     doc.text(`por ${BOOK_AUTHOR}, autora y fundadora de ORÍGEN`, w / 2, y, { align: "center" }); y += 10;
     const btn = (label: string, url: string, yy: number) => {
-      doc.setFillColor(124, 92, 255); doc.roundedRect(w / 2 - 50, yy - 6, 100, 11, 4, 4, "F");
-      doc.setTextColor(255, 255, 255); doc.setFont("helvetica", "bold"); doc.setFontSize(11);
-      doc.text(label, w / 2, yy + 1, { align: "center" });
-      doc.link(w / 2 - 50, yy - 6, 100, 11, { url });
+      doc.setFillColor(15, 122, 54); doc.roundedRect(w / 2 - 55, yy - 5, 110, 13, 6.5, 6.5, "F");
+      doc.setFillColor(34, 197, 94); doc.roundedRect(w / 2 - 55, yy - 6.5, 110, 13, 6.5, 6.5, "F");
+      doc.setTextColor(255, 255, 255); doc.setFont("helvetica", "bold"); doc.setFontSize(11.5);
+      doc.text(`${label}  >`, w / 2, yy + 1.8, { align: "center" });
+      doc.link(w / 2 - 55, yy - 6.5, 110, 14.5, { url });
     };
     btn("Comprar el libro en Amazon", BOOK_AMAZON_URL, y); y += 22;
     doc.setTextColor(30, 25, 20); doc.setFont("times", "bold"); doc.setFontSize(13);
