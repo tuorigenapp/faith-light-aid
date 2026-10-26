@@ -32,7 +32,7 @@ export function printMinistracion(opts: {
     .plans { margin-top: 22px; border: 2px solid #7C5CFF; border-radius: 18px; padding: 18px; page-break-inside: avoid; }
     .plans h3 { margin: 0 0 12px; font-size: 16px; color:#1B1930; }
     .plan { margin-bottom: 12px; font-size: 13px; }
-    .pbtn { display:inline-block; margin: 6px 6px 0 0; background:#7C5CFF; color:#fff; font-weight:700; font-size: 12px; padding: 8px 14px; border-radius: 10px; text-decoration:none; }
+    .pbtn { display:inline-block; margin: 6px 6px 0 0; background:linear-gradient(180deg,#22C55E,#15A34A); color:#fff; font-weight:800; font-size: 13px; padding: 11px 20px; border-radius: 999px; text-decoration:none; border:1px solid #128a3e; box-shadow:0 3px 0 #0f7a36,0 6px 14px rgba(22,163,74,.35); -webkit-print-color-adjust:exact; print-color-adjust:exact; }
     @media print { body { padding: 20px; } .section { break-inside: avoid; } }
   `;
   const html = `<!doctype html><html><head><meta charset="utf-8"><title>${escape(opts.title)}</title>
@@ -114,12 +114,12 @@ export function printConsulta(opts: ConsultaPDFOptions) {
     .section p { margin:0; font-size: 14px; line-height: 1.7; white-space: pre-line; }
     .footer { margin-top: 32px; padding-top: 18px; border-top: 1px solid #ecebf4; font-size: 11.5px; color:#6B6A85; text-align:center; line-height: 1.7; }
     .footer a { color:#7C5CFF; font-weight: 600; text-decoration: none; }
-    .cta { margin-top: 10px; display:inline-block; background: linear-gradient(135deg,#7C5CFF,#F58BCB); color:#fff; font-weight:700; font-size: 12px; padding: 10px 22px; border-radius: 999px; text-decoration:none; }
+    .cta { margin-top: 10px; display:inline-block; background:linear-gradient(180deg,#22C55E,#15A34A); color:#fff; font-weight:800; font-size: 13px; padding: 11px 20px; border-radius: 999px; text-decoration:none; border:1px solid #128a3e; box-shadow:0 3px 0 #0f7a36,0 6px 14px rgba(22,163,74,.35); -webkit-print-color-adjust:exact; print-color-adjust:exact; }
     .plans { margin-top: 22px; border: 2px solid #7C5CFF; border-radius: 18px; padding: 18px; page-break-inside: avoid; }
     .plans h3 { margin: 0 0 12px; font-size: 16px; color:#1B1930; }
     .plan { margin-bottom: 12px; font-size: 13px; }
-    .pbtn { display:inline-block; margin: 6px 6px 0 0; background:#7C5CFF; color:#fff; font-weight:700; font-size: 12px; padding: 8px 14px; border-radius: 10px; text-decoration:none; }
-    @media print { body { padding: 20px; } .section { break-inside: avoid; } .cta { display:none; } }
+    .pbtn { display:inline-block; margin: 6px 6px 0 0; background:linear-gradient(180deg,#22C55E,#15A34A); color:#fff; font-weight:800; font-size: 13px; padding: 11px 20px; border-radius: 999px; text-decoration:none; border:1px solid #128a3e; box-shadow:0 3px 0 #0f7a36,0 6px 14px rgba(22,163,74,.35); -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    @media print { body { padding: 20px; } .section { break-inside: avoid; } }
   `;
   const html = `<!doctype html><html><head><meta charset="utf-8"><title>${escape(opts.title)}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
