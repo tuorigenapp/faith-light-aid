@@ -117,7 +117,7 @@ export async function sendPush(sub: PushSubscriptionRow, message: PushMessage): 
     body: message.body,
     url,
     icon: "/icon-192.png",
-    badge: "/icon-192.png",
+    badge: "/badge-96.png",
     tag: message.tag ?? `origen-${url}`,
   };
 

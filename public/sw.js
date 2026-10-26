@@ -22,7 +22,7 @@ self.addEventListener("push", (event) => {
     self.registration.showNotification(title, {
       body: payload.body,
       icon: "/icon-192.png",
-      badge: "/icon-192.png",
+      badge: "/badge-96.png",
       tag,
       renotify: false,
       data: { url },
