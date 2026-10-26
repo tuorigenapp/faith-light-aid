@@ -94,6 +94,9 @@ function PalabraPage() {
     if (localStorage.getItem(key)) return;
     localStorage.setItem(key, "1");
     (async () => {
+      const { data: existing } = await supabase.from("daily_activity").select("id")
+        .eq("user_id", user.id).eq("activity_date", appDayKey()).eq("activity_type", "palabra").maybeSingle();
+      if (existing) return;
       await supabase.from("daily_activity").insert({
         user_id: user.id,
         activity_date: appDayKey(),
