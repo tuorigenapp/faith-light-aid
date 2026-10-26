@@ -118,7 +118,7 @@ function DayPlayer() {
     doc.setFont("times", "italic"); doc.setFontSize(11);
     await jsPdfLogo(doc as never, 4);
     doc.text(`CATEGORÍA: ${c.title.toUpperCase()}`, w / 2, 24, { align: "center" });
-    doc.setFont("times", "bold"); doc.setFontSize(18);
+    doc.setFont("times", "bold"); doc.setFontSize(15);
     doc.text(METHOD_TITLE, w / 2, 33, { align: "center" });
     doc.setFont("helvetica", "italic"); doc.setFontSize(10);
     doc.text(`Hoy es: ___/___/____   ·   Día ${a.day_index}`, w / 2, 42, { align: "center" });

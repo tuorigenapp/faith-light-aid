@@ -1,5 +1,5 @@
 import { christianText } from "./christian-language";
-import { brandCss, brandHeaderHtml, promoHtml } from "./pdf-brand";
+import { brandCss, brandHeaderHtml, methodTitleFor, promoHtml } from "./pdf-brand";
 
 // Opens a printable view in a new window with app-branded styles so the user
 // can "Save as PDF" from the native browser dialog. Zero external deps.
@@ -48,7 +48,7 @@ export function printMinistracion(opts: {
       <p>${escape(christianText(s.body))}</p>
     </div>`).join("")}
   ${promoHtml()}
-  <div class="footer">Documento personal generado en ORÍGEN · MÉTODO ORÍGEN basado en el Método de Cristo</div>
+  <div class="footer">Documento personal generado en ORÍGEN · ${methodTitleFor()}</div>
   </div>
   <script>window.addEventListener('load', function(){ setTimeout(function(){ window.print(); }, 400); });</script>
   </body></html>`;
