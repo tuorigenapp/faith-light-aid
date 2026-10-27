@@ -22,7 +22,7 @@ export const Route = createFileRoute("/_authenticated/etapas")({
     meta: [
       { title: "Mi camino ORIGEN — Mapa de etapas" },
       { name: "description", content: "Avanza por tu mapa de restauración: cada etapa desbloquea la siguiente parada de tu camino." },
-      { property: "og:title", content: "Mi camino ORIGEN — Mapa de etapas" },
+      { property: "og:image", content: "https://tuorigen.app/og/etapas.jpg" }, { name: "twitter:image", content: "https://tuorigen.app/og/etapas.jpg" }, { property: "og:title", content: "Mi camino ORIGEN — Mapa de etapas" },
       { property: "og:description", content: "Tu mapa de restauración paso a paso, con hojas de sanación y logros." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

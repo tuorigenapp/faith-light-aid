@@ -13,7 +13,7 @@ export const Route = createFileRoute("/_authenticated/membresia")({
     meta: [
       { title: "Planes ORÍGEN — Membresía" },
       { name: "description", content: "Elige Explorador, Caminante o Propósito ORÍGEN y abre tu plan semanal, mensual o anual." },
-      { property: "og:title", content: "Planes ORÍGEN" },
+      { property: "og:image", content: "https://tuorigen.app/og/membresia.jpg" }, { name: "twitter:image", content: "https://tuorigen.app/og/membresia.jpg" }, { property: "og:title", content: "Planes ORÍGEN" },
       { property: "og:description", content: "Tres niveles de acompañamiento con pago semanal, mensual o anual." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

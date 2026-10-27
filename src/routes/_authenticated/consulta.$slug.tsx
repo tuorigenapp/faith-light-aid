@@ -52,7 +52,7 @@ export const Route = createFileRoute("/_authenticated/consulta/$slug")({
     meta: [
       { title: "Tu respuesta de hoy — ORÍGEN" },
       { name: "description", content: "Recibe una respuesta personalizada del método ORÍGEN a partir de tu nombre, tu fecha de nacimiento y lo que hoy te inquieta." },
-      { property: "og:title", content: "Tu respuesta de hoy — ORÍGEN" },
+      { property: "og:image", content: "https://tuorigen.app/og/consultas.jpg" }, { name: "twitter:image", content: "https://tuorigen.app/og/consultas.jpg" }, { property: "og:title", content: "Tu respuesta de hoy — ORÍGEN" },
       { property: "og:description", content: "Una respuesta personalizada del método ORÍGEN para lo que hoy te inquieta." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

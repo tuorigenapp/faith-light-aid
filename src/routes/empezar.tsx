@@ -47,7 +47,7 @@ export const Route = createFileRoute("/empezar")({
     meta: [
       { title: "Tu evaluación ORÍGEN — descubre tu patrón" },
       { name: "description", content: "Responde 7 preguntas y recibe tu mapa personalizado para romper los patrones que vienes cargando." },
-      { property: "og:title", content: "Tu evaluación ORÍGEN" },
+      { property: "og:image", content: "https://tuorigen.app/og/inicio.jpg" }, { name: "twitter:image", content: "https://tuorigen.app/og/inicio.jpg" }, { property: "og:title", content: "Tu evaluación ORÍGEN" },
       { property: "og:description", content: "Descubre de dónde viene lo que repites y cómo transformarlo." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

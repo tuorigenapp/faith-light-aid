@@ -47,7 +47,7 @@ import { useCommunityNotifications, useMarkCommunityRead } from "@/hooks/use-com
 import { confirmDeletion } from "@/lib/deletion-confirmation";
 
 export const Route = createFileRoute("/_authenticated/comunidad")({
-  head: () => ({ meta: [{ title: "Comunidad ORÍGEN — un lugar para acompañarnos" }, { name: "description", content: "Comparte preguntas y conversa con respeto. Comunidad abierta a todas las membresías." }, { property: "og:title", content: "Comunidad ORÍGEN" }, { property: "og:description", content: "Preguntas y conversaciones para acompañarnos." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
+  head: () => ({ meta: [{ title: "Comunidad ORÍGEN — un lugar para acompañarnos" }, { name: "description", content: "Comparte preguntas y conversa con respeto. Comunidad abierta a todas las membresías." }, { property: "og:image", content: "https://tuorigen.app/og/comunidad.jpg" }, { name: "twitter:image", content: "https://tuorigen.app/og/comunidad.jpg" }, { property: "og:title", content: "Comunidad ORÍGEN" }, { property: "og:description", content: "Preguntas y conversaciones para acompañarnos." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
   component: Comunidad,
 });
 

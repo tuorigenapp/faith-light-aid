@@ -17,7 +17,7 @@ export const Route = createFileRoute("/_authenticated/ruleta")({
     meta: [
       { title: "Ruleta de Premios — ORÍGEN" },
       { name: "description", content: "Gira una vez cada 24 horas y gana hojas de sanación y consultas dentro de ORÍGEN." },
-      { property: "og:title", content: "Ruleta de Premios — ORÍGEN" },
+      { property: "og:image", content: "https://tuorigen.app/og/ruleta.jpg" }, { name: "twitter:image", content: "https://tuorigen.app/og/ruleta.jpg" }, { property: "og:title", content: "Ruleta de Premios — ORÍGEN" },
       { property: "og:description", content: "Gira una vez cada 24 horas y gana hojas de sanación y consultas dentro de ORÍGEN." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

@@ -9,7 +9,7 @@ export const Route = createFileRoute("/_authenticated/explorar")({
     meta: [
       { title: "Explorar ORÍGEN — Todo el contenido" },
       { name: "description", content: "Encuentra todas las secciones, programas, consultas, ejercicios y premios disponibles dentro de ORÍGEN." },
-      { property: "og:title", content: "Explorar ORÍGEN" },
+      { property: "og:image", content: "https://tuorigen.app/og/dashboard.jpg" }, { name: "twitter:image", content: "https://tuorigen.app/og/dashboard.jpg" }, { property: "og:title", content: "Explorar ORÍGEN" },
       { property: "og:description", content: "Todo el contenido de ORÍGEN organizado con imágenes, accesos y candados según tu plan." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

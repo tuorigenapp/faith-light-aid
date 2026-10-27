@@ -24,7 +24,7 @@ export const Route = createFileRoute("/_authenticated/chat")({
   head: () => ({ meta: [
     { title: "Conversa con Ruth Esther — ORÍGEN" },
     { name: "description", content: "Conversa con tu mentora espiritual de ORÍGEN, vuelve a tu historial y recupera conversaciones desde la papelera durante 30 días." },
-    { property: "og:title", content: "Conversa con Ruth Esther — ORÍGEN" },
+    { property: "og:image", content: "https://tuorigen.app/og/chat.jpg" }, { name: "twitter:image", content: "https://tuorigen.app/og/chat.jpg" }, { property: "og:title", content: "Conversa con Ruth Esther — ORÍGEN" },
     { property: "og:description", content: "Acompañamiento espiritual cristiano con historial privado y papelera recuperable durante 30 días." },
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary_large_image" },

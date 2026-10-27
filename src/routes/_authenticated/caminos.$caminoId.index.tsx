@@ -20,7 +20,7 @@ export const Route = createFileRoute("/_authenticated/caminos/$caminoId/")({
     meta: [
       { title: "Mi transformación diaria — Caminos ORIGEN" },
       { name: "description", content: "Una lección por día: mapa guiado con lección, tareas, juegos y recompensas para tu tema." },
-      { property: "og:title", content: "Mi transformación diaria — Caminos ORIGEN" },
+      { property: "og:image", content: "https://tuorigen.app/og/camino.jpg" }, { name: "twitter:image", content: "https://tuorigen.app/og/camino.jpg" }, { property: "og:title", content: "Mi transformación diaria — Caminos ORIGEN" },
       { property: "og:description", content: "Lección diaria con tareas espirituales, quiz y juegos." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

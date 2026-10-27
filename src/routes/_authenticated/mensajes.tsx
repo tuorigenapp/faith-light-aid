@@ -15,10 +15,10 @@ export const Route = createFileRoute("/_authenticated/mensajes")({
     meta: [
       { title: "Mensajes ORÍGEN — tus guías del día" },
       { name: "description", content: "Cinco guías de ORÍGEN te escriben una vez al día: la Palabra, tu estado emocional, tu práctica, tu crecimiento y el cierre de la noche." },
-      { property: "og:title", content: "Mensajes ORÍGEN" },
+      { property: "og:image", content: "https://tuorigen.app/og/dashboard.jpg" }, { name: "twitter:image", content: "https://tuorigen.app/og/dashboard.jpg" }, { property: "og:title", content: "Mensajes ORÍGEN" },
       { property: "og:description", content: "Un mensaje de cada guía al día, pensado para tu proceso de sanación." },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: MensajesPage,

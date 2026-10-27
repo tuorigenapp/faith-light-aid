@@ -14,7 +14,7 @@ export const Route = createFileRoute("/_authenticated/biblioteca")({
     meta: [
       { title: "Biblioteca Digital — ORIGEN" },
       { name: "description", content: "Descarga los libros de ORIGEN: lecturas que acompañan tu proceso de sanación y reconexión." },
-      { property: "og:title", content: "Biblioteca Digital — ORIGEN" },
+      { property: "og:image", content: "https://tuorigen.app/og/biblioteca.jpg" }, { name: "twitter:image", content: "https://tuorigen.app/og/biblioteca.jpg" }, { property: "og:title", content: "Biblioteca Digital — ORIGEN" },
       { property: "og:description", content: "Libros para acompañar tu camino de sanación y reconexión." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

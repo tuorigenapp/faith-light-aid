@@ -22,7 +22,7 @@ export const Route = createFileRoute("/_authenticated/programas/$programaId")({
     meta: [
       { title: "Programa de 21 días — ORIGEN" },
       { name: "description", content: "Programa guiado de 21 días con audio, afirmaciones y ejercicios diarios para sanar tu historia." },
-      { property: "og:title", content: "Programa de 21 días — ORIGEN" },
+      { property: "og:image", content: "https://tuorigen.app/og/visualiza.jpg" }, { name: "twitter:image", content: "https://tuorigen.app/og/visualiza.jpg" }, { property: "og:title", content: "Programa de 21 días — ORIGEN" },
       { property: "og:description", content: "Audio guiado, afirmaciones y ejercicios diarios." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
