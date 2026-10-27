@@ -2,6 +2,7 @@ import "./lib/error-capture";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
+import { applySharePreview, sharePreviewFor } from "./lib/share-previews";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -41,8 +42,14 @@ export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
       const handler = await getServerEntry();
-      const response = await handler.fetch(request, env, ctx);
-      return await normalizeCatastrophicSsrResponse(response);
+      const response = await normalizeCatastrophicSsrResponse(await handler.fetch(request, env, ctx));
+      const pathname = new URL(request.url).pathname;
+      if (request.method === "GET" && response.ok && (response.headers.get("content-type") ?? "").includes("text/html") && sharePreviewFor(pathname)) {
+        const headers = new Headers(response.headers);
+        headers.delete("content-length");
+        return new Response(applySharePreview(await response.text(), pathname), { status: response.status, headers });
+      }
+      return response;
     } catch (error) {
       console.error(error);
       return new Response(renderErrorPage(), {
