@@ -47,3 +47,5 @@
 - In-app reminders become system notifications whenever notification permission is granted; the in-app card is only the fallback without permission.
 - Landing registration uses a shared token-themed dock and Button variant without invented deadlines; its explicit offer link preserves the evaluation and then opens the existing discounted plans without duplicating prices or checkout links.
 - Vercel builds (VERCEL=1) switch Nitro to the `vercel` preset in vite.config.ts with vercel.json pinning the build; this lets the GitHub repo deploy on Vercel while Lovable keeps its default target.
+- Vercel builds proxy `/api/**`, `/_serverFn/**` and `/__l5e/**` to the Lovable deployment (vite.config.ts routeRules); server-only keys exist only there, so both hosts must be published from the same version.
+- Private (client-rendered) sections get link-preview tags injected in `src/server.ts` from `src/lib/share-previews.ts` with 1200x630 cards in `public/og/`; crawlers never see their route `head()`.
