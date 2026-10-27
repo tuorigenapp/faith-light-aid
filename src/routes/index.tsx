@@ -23,7 +23,7 @@ export const Route = createFileRoute("/")({
         content:
           "Repites los mismos errores, sientes un vacío que no sabes explicar y empiezas cosas que abandonas. El Método ORÍGEN te muestra de dónde viene y qué hacer hoy, con Dios en el centro. Pruébalo gratis.",
       },
-      { property: "og:title", content: "ORÍGEN — lo que no se sana, se hereda" },
+      { property: "og:image", content: "https://tuorigen.app/og/inicio.jpg" }, { name: "twitter:image", content: "https://tuorigen.app/og/inicio.jpg" }, { property: "og:title", content: "ORÍGEN — lo que no se sana, se hereda" },
       { property: "og:description", content: "El Método ORÍGEN: sana la raíz del patrón que se repite en tu vida, un paso al día con Dios." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

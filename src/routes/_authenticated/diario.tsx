@@ -20,7 +20,7 @@ export const Route = createFileRoute("/_authenticated/diario")({
     meta: [
       { title: "Diario espiritual — ORÍGEN" },
       { name: "description", content: "Tu diario privado: oración, gratitud, reflexión y testimonio, con papelera de 30 días." },
-      { property: "og:title", content: "Diario espiritual — ORÍGEN" },
+      { property: "og:image", content: "https://tuorigen.app/og/diario.jpg" }, { name: "twitter:image", content: "https://tuorigen.app/og/diario.jpg" }, { property: "og:title", content: "Diario espiritual — ORÍGEN" },
       { property: "og:description", content: "Escribe lo que solo tú y Dios necesitan leer." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

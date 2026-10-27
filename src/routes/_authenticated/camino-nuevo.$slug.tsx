@@ -6,10 +6,10 @@ export const Route = createFileRoute("/_authenticated/camino-nuevo/$slug")({
     meta: [
       { title: "Camino ORÍGEN — Transformación diaria" },
       { name: "description", content: "Ocho etapas diarias de sanación con lección, juegos y recompensas." },
-      { property: "og:title", content: "Camino ORÍGEN — Transformación diaria" },
+      { property: "og:image", content: "https://tuorigen.app/og/camino.jpg" }, { name: "twitter:image", content: "https://tuorigen.app/og/camino.jpg" }, { property: "og:title", content: "Camino ORÍGEN — Transformación diaria" },
       { property: "og:description", content: "Ocho etapas diarias de sanación." },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Redirect,

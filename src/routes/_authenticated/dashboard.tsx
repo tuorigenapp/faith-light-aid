@@ -22,7 +22,7 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [
     { title: "Hoy — ORIGEN" },
     { name: "description", content: "Tu misión diaria, ejercicios, racha y contenido recomendado dentro de ORÍGEN." },
-    { property: "og:title", content: "Hoy — ORIGEN" },
+    { property: "og:image", content: "https://tuorigen.app/og/dashboard.jpg" }, { name: "twitter:image", content: "https://tuorigen.app/og/dashboard.jpg" }, { property: "og:title", content: "Hoy — ORIGEN" },
     { property: "og:description", content: "Tu home diaria con misión, racha, ejercicios y contenido de ORÍGEN." },
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary_large_image" },

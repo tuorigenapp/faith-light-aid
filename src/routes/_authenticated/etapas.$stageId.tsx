@@ -42,7 +42,7 @@ export const Route = createFileRoute("/_authenticated/etapas/$stageId")({
     meta: [
       { title: "Etapa de tu camino — Mi camino ORIGEN" },
       { name: "description", content: "Vive tu etapa en 13 pasos: lección, tareas, quiz, juegos y tu recompensa del día." },
-      { property: "og:title", content: "Etapa de tu camino — Mi camino ORIGEN" },
+      { property: "og:image", content: "https://tuorigen.app/og/etapas.jpg" }, { name: "twitter:image", content: "https://tuorigen.app/og/etapas.jpg" }, { property: "og:title", content: "Etapa de tu camino — Mi camino ORIGEN" },
       { property: "og:description", content: "Lección, tareas espirituales, quiz y juegos para sanar un día a la vez." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

@@ -31,7 +31,7 @@ export const Route = createFileRoute("/_authenticated/visualiza/cristo")({
   head: () => ({ meta: [
     { title: "Método de Cristo 3·6·9 — ORÍGEN" },
     { name: "description", content: "Prácticas de oración, escritura y reflexión cristiana para cuidar tu vida emocional en ORÍGEN." },
-    { property: "og:title", content: "Método de Cristo 3·6·9 — ORÍGEN" },
+    { property: "og:image", content: "https://tuorigen.app/og/cristo.jpg" }, { name: "twitter:image", content: "https://tuorigen.app/og/cristo.jpg" }, { property: "og:title", content: "Método de Cristo 3·6·9 — ORÍGEN" },
     { property: "og:description", content: "Encuentra prácticas de fe, oración y reflexión en Cristo." },
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary_large_image" },

@@ -25,7 +25,7 @@ export const Route = createFileRoute("/_authenticated/patrones")({
   head: () => ({ meta: [
     { title: "Explora tus patrones familiares — ORÍGEN" },
     { name: "description", content: "Explora dinámicas familiares y pasos de cuidado emocional desde la fe cristiana con ORÍGEN." },
-    { property: "og:title", content: "Explora tus patrones familiares — ORÍGEN" },
+    { property: "og:image", content: "https://tuorigen.app/og/patrones.jpg" }, { name: "twitter:image", content: "https://tuorigen.app/og/patrones.jpg" }, { property: "og:title", content: "Explora tus patrones familiares — ORÍGEN" },
     { property: "og:description", content: "Comprende lo que se repite y encuentra pasos para cuidar tus vínculos." },
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary_large_image" },

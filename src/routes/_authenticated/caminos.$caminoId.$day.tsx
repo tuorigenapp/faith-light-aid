@@ -38,7 +38,7 @@ export const Route = createFileRoute("/_authenticated/caminos/$caminoId/$day")({
     meta: [
       { title: "Etapa del día — Caminos ORIGEN" },
       { name: "description", content: "Vive tu etapa del día en 13 pasos: lección, soluciones, tareas, quiz, juegos y tu recompensa." },
-      { property: "og:title", content: "Etapa del día — Caminos ORIGEN" },
+      { property: "og:image", content: "https://tuorigen.app/og/camino.jpg" }, { name: "twitter:image", content: "https://tuorigen.app/og/camino.jpg" }, { property: "og:title", content: "Etapa del día — Caminos ORIGEN" },
       { property: "og:description", content: "Lección, tareas espirituales, quiz y juegos para transformarte un día a la vez." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

@@ -51,7 +51,7 @@ export const Route = createFileRoute("/_authenticated/ejercicios")({
         content:
           "Mapa diario estilo Duolingo con prácticas, quiz, juegos mentales y cierre espiritual de ORIGEN.",
       },
-      { property: "og:title", content: "Ejercicios diarios — ORIGEN" },
+      { property: "og:image", content: "https://tuorigen.app/og/ejercicios.jpg" }, { name: "twitter:image", content: "https://tuorigen.app/og/ejercicios.jpg" }, { property: "og:title", content: "Ejercicios diarios — ORIGEN" },
       {
         property: "og:description",
         content: "Un ejercicio por día, desbloqueado a medianoche, con 5 pasos interactivos.",

@@ -12,7 +12,7 @@ export const Route = createFileRoute("/registro")({
     meta: [
       { title: "Crea tu cuenta ORÍGEN — empieza tu camino hoy" },
       { name: "description", content: "Crea tu cuenta en 30 segundos y responde 6 preguntas cortas para recibir tu camino de sanación personalizado." },
-      { property: "og:title", content: "Crea tu cuenta ORÍGEN" },
+      { property: "og:image", content: "https://tuorigen.app/og/inicio.jpg" }, { name: "twitter:image", content: "https://tuorigen.app/og/inicio.jpg" }, { property: "og:title", content: "Crea tu cuenta ORÍGEN" },
       { property: "og:description", content: "Responde 6 preguntas cortas y recibe tu camino de sanación personalizado." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

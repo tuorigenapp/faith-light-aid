@@ -35,7 +35,7 @@ export const Route = createFileRoute("/_authenticated/perfil")({
     meta: [
       { title: "Mi perfil y mi panel — ORIGEN" },
       { name: "description", content: "Completa tu perfil en ORIGEN y entra a tu panel: etapas, ejercicios, racha, diario y ministraciones en un solo lugar." },
-      { property: "og:title", content: "Mi perfil y mi panel — ORIGEN" },
+      { property: "og:image", content: "https://tuorigen.app/og/perfil.jpg" }, { name: "twitter:image", content: "https://tuorigen.app/og/perfil.jpg" }, { property: "og:title", content: "Mi perfil y mi panel — ORIGEN" },
       { property: "og:description", content: "Tu espacio sagrado dentro de ORIGEN: perfil, progreso y todo tu proceso." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

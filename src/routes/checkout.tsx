@@ -18,7 +18,7 @@ export const Route = createFileRoute("/checkout")({
         content:
           "Acceso completo al Camino ORÍGEN: diagnóstico de tu patrón familiar, mentora, caminos de 365 días y consultas. 7 días de prueba y cancelas cuando quieras.",
       },
-      { property: "og:title", content: "Camino ORÍGEN — rompe el patrón que se repite" },
+      { property: "og:image", content: "https://tuorigen.app/og/membresia.jpg" }, { name: "twitter:image", content: "https://tuorigen.app/og/membresia.jpg" }, { property: "og:title", content: "Camino ORÍGEN — rompe el patrón que se repite" },
       { property: "og:description", content: "7 días de prueba. Entiende de dónde viene lo que se repite y cierra el ciclo." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

@@ -24,7 +24,7 @@ export const Route = createFileRoute("/_authenticated/premiosorigen")({
     meta: [
       { title: "Premios ORÍGEN — Bonificaciones" },
       { name: "description", content: "Consulta tu trayectoria, racha, XP y recompensas desbloqueables dentro de ORÍGEN." },
-      { property: "og:title", content: "Premios ORÍGEN" },
+      { property: "og:image", content: "https://tuorigen.app/og/premios.jpg" }, { name: "twitter:image", content: "https://tuorigen.app/og/premios.jpg" }, { property: "og:title", content: "Premios ORÍGEN" },
       { property: "og:description", content: "Bonificaciones, logros y recompensas para motivar tu camino diario." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

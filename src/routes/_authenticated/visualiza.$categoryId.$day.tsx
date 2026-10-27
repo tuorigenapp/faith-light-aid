@@ -21,7 +21,7 @@ import { StageQuiz } from "@/components/StageQuiz";
 import lessonCover from "@/assets/explore/listen.jpg";
 
 export const Route = createFileRoute("/_authenticated/visualiza/$categoryId/$day")({
-  head: () => ({ meta: [{ title: "Práctica de Visualízalo y Vívelo — ORÍGEN" }, { name: "description", content: "Audio, afirmación y práctica guiada del día." }, { property: "og:title", content: "Práctica de Visualízalo y Vívelo — ORÍGEN" }, { property: "og:description", content: "Audio, afirmación y práctica guiada del día." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
+  head: () => ({ meta: [{ title: "Práctica de Visualízalo y Vívelo — ORÍGEN" }, { name: "description", content: "Audio, afirmación y práctica guiada del día." }, { property: "og:image", content: "https://tuorigen.app/og/visualiza.jpg" }, { name: "twitter:image", content: "https://tuorigen.app/og/visualiza.jpg" }, { property: "og:title", content: "Práctica de Visualízalo y Vívelo — ORÍGEN" }, { property: "og:description", content: "Audio, afirmación y práctica guiada del día." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
   validateSearch: (s: Record<string, unknown>): { reproducir?: number } => (s.reproducir ? { reproducir: 1 } : {}),
   component: DayPlayer,
 });

@@ -17,7 +17,7 @@ import heroImg from "@/assets/explore/listen.jpg";
 import { visualizaCategoryCover, VISUALIZA_METHOD_COVERS } from "@/lib/visualiza-covers";
 
 export const Route = createFileRoute("/_authenticated/visualiza")({
-  head: () => ({ meta: [{ title: "Visualízalo y Vívelo — ORÍGEN" }, { name: "description", content: "Programas, audios y prácticas de Visualízalo y Vívelo." }, { property: "og:title", content: "Visualízalo y Vívelo — ORÍGEN" }, { property: "og:description", content: "Programas, audios y prácticas para acompañar tu camino." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
+  head: () => ({ meta: [{ title: "Visualízalo y Vívelo — ORÍGEN" }, { name: "description", content: "Programas, audios y prácticas de Visualízalo y Vívelo." }, { property: "og:image", content: "https://tuorigen.app/og/visualiza.jpg" }, { name: "twitter:image", content: "https://tuorigen.app/og/visualiza.jpg" }, { property: "og:title", content: "Visualízalo y Vívelo — ORÍGEN" }, { property: "og:description", content: "Programas, audios y prácticas para acompañar tu camino." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
   component: Visualiza,
 });
 

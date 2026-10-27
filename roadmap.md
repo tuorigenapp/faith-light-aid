@@ -112,3 +112,10 @@
 - [x] Tutorial oscuro «Añadir a pantalla de inicio» (iPhone/Android) en Perfil e Inicio.
 - [x] Ícono de la app a sangre completa (sin borde blanco) + versión adaptable para Android.
 - [x] Página de inicio rediseñada con la estructura de la página de referencia, sin pagos y con prueba gratis.
+
+## Ajustes solicitados el 26 de octubre
+- [x] PDF: «Método de Cristo» solo en /visualiza; el resto con la línea del libro de Ruth Esther.
+- [x] PDF: botones verdes con relieve y clicables (también al imprimir).
+- [x] Ícono de ORÍGEN en el círculo de las notificaciones de Android.
+- [x] Vista previa con imagen, título e invitación al compartir cada sección.
+- [x] Comunidad, cPanel, Google Drive y consultas en Vercel: el trabajo del servidor se atiende en la copia publicada que tiene las claves.

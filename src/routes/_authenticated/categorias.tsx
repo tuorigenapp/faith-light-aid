@@ -13,7 +13,7 @@ export const Route = createFileRoute("/_authenticated/categorias")({
     meta: [
       { title: "Categorías ORIGEN — Una transformación por día" },
       { name: "description", content: "Elige tu tema: niño interior, glow up mujer u hombre, magnetismo o dejar de pedir permiso. Una lección diaria guiada en cada camino." },
-      { property: "og:title", content: "Categorías ORIGEN — Una transformación por día" },
+      { property: "og:image", content: "https://tuorigen.app/og/categorias.jpg" }, { name: "twitter:image", content: "https://tuorigen.app/og/categorias.jpg" }, { property: "og:title", content: "Categorías ORIGEN — Una transformación por día" },
       { property: "og:description", content: "Mapas guiados con lección diaria, tareas, juegos y recompensas." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

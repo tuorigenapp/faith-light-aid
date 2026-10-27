@@ -24,7 +24,7 @@ export const Route = createFileRoute("/_authenticated/pareja")({
   head: () => ({ meta: [
     { title: "Comprende tu relación — ORÍGEN" },
     { name: "description", content: "Reflexiona sobre tu relación, tus límites y tus necesidades con acompañamiento cristiano de ORÍGEN." },
-    { property: "og:title", content: "Comprende tu relación — ORÍGEN" },
+    { property: "og:image", content: "https://tuorigen.app/og/pareja.jpg" }, { name: "twitter:image", content: "https://tuorigen.app/og/pareja.jpg" }, { property: "og:title", content: "Comprende tu relación — ORÍGEN" },
     { property: "og:description", content: "Una reflexión sobre respeto, comunicación y cuidado en tu relación." },
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary_large_image" },

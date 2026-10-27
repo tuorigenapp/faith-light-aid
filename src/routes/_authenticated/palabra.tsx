@@ -53,7 +53,7 @@ export const Route = createFileRoute("/_authenticated/palabra")({
         content:
           "Cada día una enseñanza, un pasaje, reflexión para ti y tu familia, quiz e imagen descargable para compartir.",
       },
-      { property: "og:title", content: "Palabra del día — ORÍGEN" },
+      { property: "og:image", content: "https://tuorigen.app/og/palabra.jpg" }, { name: "twitter:image", content: "https://tuorigen.app/og/palabra.jpg" }, { property: "og:title", content: "Palabra del día — ORÍGEN" },
       {
         property: "og:description",
         content: "Una palabra de Dios, distinta cada día, para nutrir tu relación con Él.",

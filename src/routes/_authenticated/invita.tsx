@@ -7,7 +7,7 @@ export const Route = createFileRoute("/_authenticated/invita")({
     meta: [
       { title: "Programa de afiliados — ORÍGEN" },
       { name: "description", content: "Afíliate a ORÍGEN en Hotmart y gana comisiones recomendando el Camino ORÍGEN." },
-      { property: "og:title", content: "Programa de afiliados — ORÍGEN" },
+      { property: "og:image", content: "https://tuorigen.app/og/invita.jpg" }, { name: "twitter:image", content: "https://tuorigen.app/og/invita.jpg" }, { property: "og:title", content: "Programa de afiliados — ORÍGEN" },
       { property: "og:description", content: "Comisiones por cada venta y renovación, gestionadas por Hotmart." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

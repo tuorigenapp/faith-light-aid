@@ -28,7 +28,7 @@ export const Route = createFileRoute("/_authenticated/juegos/$gameId")({
       meta: [
         { title },
         { name: "description", content: `${loaderData.desc}. Cinco partidas liberan tu hoja de sanación del día.` },
-        { property: "og:title", content: title },
+        { property: "og:image", content: "https://tuorigen.app/og/juegos.jpg" }, { name: "twitter:image", content: "https://tuorigen.app/og/juegos.jpg" }, { property: "og:title", content: title },
         { property: "og:description", content: loaderData.desc },
         { property: "og:type", content: "website" },
         { name: "twitter:card", content: "summary_large_image" },

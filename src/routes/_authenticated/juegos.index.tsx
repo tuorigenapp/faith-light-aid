@@ -12,7 +12,7 @@ export const Route = createFileRoute("/_authenticated/juegos/")({
         content:
           "Diez juegos mentales de ORÍGEN. Cinco partidas en cualquiera libera tu hoja de sanación del día, sin límite de tiempo.",
       },
-      { property: "og:title", content: "Juegos del día — ORÍGEN" },
+      { property: "og:image", content: "https://tuorigen.app/og/juegos.jpg" }, { name: "twitter:image", content: "https://tuorigen.app/og/juegos.jpg" }, { property: "og:title", content: "Juegos del día — ORÍGEN" },
       {
         property: "og:description",
         content: "Diez juegos mentales para concentrarte y liberar tu hoja de sanación del día.",

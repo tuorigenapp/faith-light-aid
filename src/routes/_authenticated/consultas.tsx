@@ -14,7 +14,7 @@ export const Route = createFileRoute("/_authenticated/consultas")({
     meta: [
       { title: "Todas las consultas — ORÍGEN" },
       { name: "description", content: "Todas las consultas de ORÍGEN en un solo lugar: mentora, pareja, patrones familiares, palabra de Dios y las consultas creadas para ti." },
-      { property: "og:title", content: "Todas las consultas — ORÍGEN" },
+      { property: "og:image", content: "https://tuorigen.app/og/consultas.jpg" }, { name: "twitter:image", content: "https://tuorigen.app/og/consultas.jpg" }, { property: "og:title", content: "Todas las consultas — ORÍGEN" },
       { property: "og:description", content: "Elige la consulta que tu corazón necesita hoy y recibe tu respuesta personalizada." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

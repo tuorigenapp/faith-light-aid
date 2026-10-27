@@ -18,7 +18,7 @@ export const Route = createFileRoute("/_authenticated/avisos")({
         content:
           "Recibe cada día un mensaje de ORÍGEN hecho para tu proceso, más los avisos de tu camino, compras y comunidad.",
       },
-      { property: "og:title", content: "Avisos de ORÍGEN" },
+      { property: "og:image", content: "https://tuorigen.app/og/dashboard.jpg" }, { name: "twitter:image", content: "https://tuorigen.app/og/dashboard.jpg" }, { property: "og:title", content: "Avisos de ORÍGEN" },
       {
         property: "og:description",
         content: "Un mensaje al día para tu proceso y todos los avisos de tu cuenta en un solo lugar.",

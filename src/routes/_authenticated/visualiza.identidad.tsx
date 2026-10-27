@@ -26,7 +26,7 @@ import { StageQuiz } from "@/components/StageQuiz";
 import heroImg from "@/assets/explore/identity.jpg";
 
 export const Route = createFileRoute("/_authenticated/visualiza/identidad")({
-  head: () => ({ meta: [{ title: "Salto de Identidad — ORÍGEN" }, { name: "description", content: "Reflexiones y acciones para fortalecer tu identidad con fe cristiana en ORÍGEN." }, { property: "og:title", content: "Salto de Identidad — ORÍGEN" }, { property: "og:description", content: "Cultiva hábitos y una identidad firme, un paso a la vez." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
+  head: () => ({ meta: [{ title: "Salto de Identidad — ORÍGEN" }, { name: "description", content: "Reflexiones y acciones para fortalecer tu identidad con fe cristiana en ORÍGEN." }, { property: "og:image", content: "https://tuorigen.app/og/visualiza.jpg" }, { name: "twitter:image", content: "https://tuorigen.app/og/visualiza.jpg" }, { property: "og:title", content: "Salto de Identidad — ORÍGEN" }, { property: "og:description", content: "Cultiva hábitos y una identidad firme, un paso a la vez." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
   component: IdentidadPage,
 });
 
