@@ -21,11 +21,12 @@ self.addEventListener("push", (event) => {
   event.waitUntil(
     self.registration.showNotification(title, {
       body: payload.body,
-      icon: "/icon-192.png",
+      icon: payload.icon || "/icon-192.png",
       badge: "/badge-96.png",
+      ...(payload.image ? { image: payload.image } : {}),
       tag,
       renotify: false,
-      data: { url },
+      data: { url, track: payload.track || null },
     }),
   );
 });
@@ -33,6 +34,9 @@ self.addEventListener("push", (event) => {
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
   const url = (event.notification.data && event.notification.data.url) || "/dashboard";
+  const track = event.notification.data && event.notification.data.track;
+  // Registra la apertura en tiempo real sin bloquear la navegación.
+  if (track) event.waitUntil(fetch(track, { method: "GET", mode: "no-cors", keepalive: true }).catch(() => {}));
   event.waitUntil(
     self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((list) => {
       for (const client of list) {

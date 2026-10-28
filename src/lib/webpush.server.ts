@@ -97,7 +97,18 @@ export type PushSubscriptionRow = {
   auth: string | null;
 };
 
-export type PushMessage = { title: string; body: string; url?: string; tag?: string };
+export type PushMessage = {
+  title: string;
+  body: string;
+  url?: string;
+  tag?: string;
+  /** Banner grande (Android/Chrome lo muestra al expandir). */
+  image?: string;
+  /** Ícono grande temático; el logo de ORÍGEN siempre va como badge. */
+  icon?: string;
+  /** URL para registrar la apertura (se llama al tocar la notificación). */
+  track?: string;
+};
 
 /** Envía una notificación. Devuelve el status HTTP del servicio de push. */
 export async function sendPush(sub: PushSubscriptionRow, message: PushMessage): Promise<number> {
@@ -116,9 +127,11 @@ export async function sendPush(sub: PushSubscriptionRow, message: PushMessage): 
     title,
     body: message.body,
     url,
-    icon: "/icon-192.png",
+    icon: message.icon ?? "/icon-192.png",
     badge: "/badge-96.png",
     tag: message.tag ?? `origen-${url}`,
+    ...(message.image ? { image: message.image } : {}),
+    ...(message.track ? { track: message.track } : {}),
   };
 
   const payload = await encryptPayload(sub.p256dh, sub.auth, JSON.stringify(fullPayload));
