@@ -1597,6 +1597,7 @@ export type Database = {
       }
       marketing_campaigns: {
         Row: {
+          ai_generated: boolean
           audience_type: string
           button_text: string | null
           button_url: string | null
@@ -1605,21 +1606,29 @@ export type Database = {
           content: string
           created_at: string
           created_by: string | null
+          discount_label: string | null
           ends_at: string | null
           id: string
           image_url: string | null
+          kind: string
           last_sent_at: string | null
           list_id: string | null
           max_per_day: number
           name: string
+          open_count: number
+          push_icon: string | null
+          push_style: string
           scheduled_at: string | null
           sent_count: number
           sent_today: number
+          source_campaign_id: string | null
           status: string
           subject: string | null
+          template_id: string | null
           updated_at: string
         }
         Insert: {
+          ai_generated?: boolean
           audience_type?: string
           button_text?: string | null
           button_url?: string | null
@@ -1628,21 +1637,29 @@ export type Database = {
           content: string
           created_at?: string
           created_by?: string | null
+          discount_label?: string | null
           ends_at?: string | null
           id?: string
           image_url?: string | null
+          kind?: string
           last_sent_at?: string | null
           list_id?: string | null
           max_per_day?: number
           name: string
+          open_count?: number
+          push_icon?: string | null
+          push_style?: string
           scheduled_at?: string | null
           sent_count?: number
           sent_today?: number
+          source_campaign_id?: string | null
           status?: string
           subject?: string | null
+          template_id?: string | null
           updated_at?: string
         }
         Update: {
+          ai_generated?: boolean
           audience_type?: string
           button_text?: string | null
           button_url?: string | null
@@ -1651,18 +1668,25 @@ export type Database = {
           content?: string
           created_at?: string
           created_by?: string | null
+          discount_label?: string | null
           ends_at?: string | null
           id?: string
           image_url?: string | null
+          kind?: string
           last_sent_at?: string | null
           list_id?: string | null
           max_per_day?: number
           name?: string
+          open_count?: number
+          push_icon?: string | null
+          push_style?: string
           scheduled_at?: string | null
           sent_count?: number
           sent_today?: number
+          source_campaign_id?: string | null
           status?: string
           subject?: string | null
+          template_id?: string | null
           updated_at?: string
         }
         Relationships: [
