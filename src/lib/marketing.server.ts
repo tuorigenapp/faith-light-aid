@@ -1,15 +1,30 @@
 import { logUsage } from "./usage-log.server.ts";
 import { sendPush, type PushSubscriptionRow } from "@/lib/webpush.server";
+import { SITE, buildPush, firstName, personalize, renderEmailHtml, renderEmailText } from "@/lib/marketing-render";
 
 export type AudienceRow = { user_id: string; email: string | null };
 
-/** Resuelve la audiencia real de una campaña consultando la función SQL del proyecto. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Admin = any;
+
+/** Audiencia real. Remarketing: abrieron / no abrieron / hicieron clic en otra campaña. */
 export async function resolveAudience(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  supabaseAdmin: any,
+  supabaseAdmin: Admin,
   audienceType: string,
   listId: string | null,
+  sourceCampaignId?: string | null,
 ): Promise<AudienceRow[]> {
+  if (["opened", "not_opened", "clicked"].includes(audienceType)) {
+    if (!sourceCampaignId) return [];
+    const all = await resolveAudience(supabaseAdmin, "all", null);
+    const ev = await supabaseAdmin
+      .from("marketing_events")
+      .select("user_id, event_type")
+      .eq("campaign_id", sourceCampaignId)
+      .in("event_type", audienceType === "clicked" ? ["click"] : ["open", "click"]);
+    const hit = new Set((ev.data ?? []).map((e: { user_id: string | null }) => e.user_id).filter(Boolean));
+    return all.filter((a) => (audienceType === "not_opened" ? !hit.has(a.user_id) : hit.has(a.user_id)));
+  }
   const { data, error } = await supabaseAdmin.rpc("resolve_marketing_audience", {
     p_audience_type: audienceType,
     p_list_id: listId,
@@ -18,44 +33,74 @@ export async function resolveAudience(
   return (data ?? []) as AudienceRow[];
 }
 
-function personalize(text: string, displayName: string | null) {
-  return text
-    .replaceAll("[usuario]", displayName || "amiga")
-    .replaceAll("[sitio]", "tuorigen.app")
-    .replace(/\[enlace:(.*?)\]/g, (_m, p1: string) => p1);
+async function hmac(text: string): Promise<string> {
+  const secret = process.env["PUSH_CRON_SECRET"] ?? "origen";
+  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const sig = new Uint8Array(await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(text)));
+  return [...sig.slice(0, 12)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-/** Envía la campaña por push a un lote de usuarios, respetando preferencias y limpiando suscripciones muertas. */
+export async function trackToken(campaignId: string, userId: string) {
+  return hmac(`${campaignId}.${userId}`);
+}
+
+export async function verifyTrackToken(campaignId: string, userId: string, token: string) {
+  return (await hmac(`${campaignId}.${userId}`)) === token;
+}
+
+export async function trackUrl(kind: "open" | "click", campaignId: string, userId: string, to?: string) {
+  const t = await trackToken(campaignId, userId);
+  const q = new URLSearchParams({ e: kind, c: campaignId, u: userId, t });
+  if (to) q.set("to", to);
+  return `${SITE}/api/public/marketing-track?${q.toString()}`;
+}
+
+async function namesFor(supabaseAdmin: Admin, ids: string[]) {
+  const map = new Map<string, string>();
+  for (let i = 0; i < ids.length; i += 500) {
+    const { data } = await supabaseAdmin.from("profiles").select("id, display_name, full_name").in("id", ids.slice(i, i + 500));
+    for (const p of data ?? []) map.set(p.id, firstName(p));
+  }
+  return map;
+}
+
+type Campaign = {
+  id?: string;
+  subject: string | null;
+  content: string;
+  button_text: string | null;
+  button_url: string | null;
+  image_url: string | null;
+  push_style?: string | null;
+  push_icon?: string | null;
+  discount_label?: string | null;
+};
+
+/** Push a cada dispositivo registrado (no requiere correo), personalizado y con registro de apertura. */
 export async function dispatchPush(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  supabaseAdmin: any,
+  supabaseAdmin: Admin,
   userIds: string[],
-  campaign: { subject: string | null; content: string; button_url: string | null },
+  campaign: Campaign,
 ): Promise<{ sent: number; failed: number }> {
   if (userIds.length === 0) return { sent: 0, failed: 0 };
+  const off = await supabaseAdmin.from("notification_prefs").select("user_id").eq("push_enabled", false).in("user_id", userIds);
+  const blocked = new Set((off.data ?? []).map((p: { user_id: string }) => p.user_id));
+  const allowed = userIds.filter((id) => !blocked.has(id));
+  if (allowed.length === 0) return { sent: 0, failed: 0 };
 
-  const prefs = await supabaseAdmin
-    .from("notification_prefs")
-    .select("user_id")
-    .eq("push_enabled", true)
-    .in("user_id", userIds);
-  const allowed = new Set((prefs.data ?? []).map((p: { user_id: string }) => p.user_id));
-  if (allowed.size === 0) return { sent: 0, failed: 0 };
-
-  const subs = await supabaseAdmin
-    .from("push_subscriptions")
-    .select("endpoint, p256dh, auth, user_id")
-    .in("user_id", [...allowed]);
+  const subs = await supabaseAdmin.from("push_subscriptions").select("endpoint, p256dh, auth, user_id").in("user_id", allowed);
+  const names = await namesFor(supabaseAdmin, allowed);
 
   let sent = 0;
   let failed = 0;
   const dead: string[] = [];
   for (const sub of (subs.data ?? []) as (PushSubscriptionRow & { user_id: string })[]) {
     try {
+      const p = buildPush(campaign, names.get(sub.user_id) ?? "");
       const status = await sendPush(sub, {
-        title: campaign.subject || "tuorigen.app",
-        body: personalize(campaign.content, null),
-        url: campaign.button_url || "/dashboard",
+        ...p,
+        tag: campaign.id ? `camp-${campaign.id}` : undefined,
+        track: campaign.id ? await trackUrl("open", campaign.id, sub.user_id) : undefined,
       });
       if (status === 404 || status === 410) dead.push(sub.endpoint);
       else if (status >= 200 && status < 300) sent += 1;
@@ -68,51 +113,79 @@ export async function dispatchPush(
   return { sent, failed };
 }
 
-/** Envía la campaña por correo usando el sistema de email de Lovable (LOVABLE_API_KEY). */
+/** Correo personalizado: nombre real, etiquetas como botones, pie de soporte y lectura registrada. */
 export async function dispatchEmail(
+  supabaseAdmin: Admin,
   audience: AudienceRow[],
-  campaign: { subject: string | null; content: string; button_text: string | null; button_url: string | null; image_url: string | null },
-): Promise<{ sent: number; failed: number; unconfigured: boolean }> {
+  campaign: Campaign,
+  opts: { testTo?: string } = {},
+): Promise<{ sent: number; failed: number; unconfigured: boolean; error?: string }> {
   const apiKey = process.env["LOVABLE_API_KEY"];
   if (!apiKey) return { sent: 0, failed: 0, unconfigured: true };
-
   const { sendLovableEmail } = await import("@lovable.dev/email-js");
-  const from = "ORÍGEN <noreply@notify.tuorigen.app>";
+
+  let people = audience.filter((a) => !!a.email);
+  if (!opts.testTo && people.length) {
+    const off = await supabaseAdmin.from("notification_prefs").select("user_id").eq("email_enabled", false).in("user_id", people.map((p) => p.user_id));
+    const blocked = new Set((off.data ?? []).map((p: { user_id: string }) => p.user_id));
+    people = people.filter((p) => !blocked.has(p.user_id));
+  }
+  const names = await namesFor(supabaseAdmin, people.map((p) => p.user_id));
+
   let sent = 0;
   let failed = 0;
-  for (const person of audience) {
-    if (!person.email) continue;
+  let lastError: string | undefined;
+  for (const person of people) {
+    const name = names.get(person.user_id) ?? "";
+    const cid = campaign.id;
+    const wrapCache = new Map<string, string>();
+    if (cid) {
+      for (const m of collectUrls(campaign)) wrapCache.set(m, await trackUrl("click", cid, person.user_id, m));
+    }
     try {
-      const html = `
-        <div style="font-family:sans-serif;max-width:480px;margin:auto">
-          <p>${personalize(campaign.content, null).replace(/\n/g, "<br/>")}</p>
-          ${campaign.image_url ? `<img src="${campaign.image_url}" style="width:100%;border-radius:12px" />` : ""}
-          ${
-            campaign.button_text && campaign.button_url
-              ? `<p><a href="https://tuorigen.app${campaign.button_url}" style="background:#7c5cff;color:#fff;padding:12px 20px;border-radius:12px;text-decoration:none;display:inline-block">${campaign.button_text}</a></p>`
-              : ""
-          }
-        </div>`;
+      const html = renderEmailHtml(
+        { ...campaign, subject: campaign.subject || "Novedades de ORÍGEN" },
+        {
+          name,
+          pixelUrl: cid ? await trackUrl("open", cid, person.user_id) : undefined,
+          wrap: (u) => wrapCache.get(u) ?? u,
+        },
+      );
       const res = await sendLovableEmail(
         {
-          to: person.email,
-          from,
+          to: opts.testTo ?? person.email!,
+          from: "ORÍGEN <noreply@notify.tuorigen.app>",
           sender_domain: "notify.tuorigen.app",
-          subject: campaign.subject || "Novedades de ORÍGEN",
+          subject: personalize(campaign.subject || "Novedades de ORÍGEN", name),
           html,
-          text: personalize(campaign.content, null),
+          text: renderEmailText({ ...campaign, subject: campaign.subject || "" }, name),
           purpose: "transactional",
-          idempotency_key: `origen-camp-${(campaign as { id?: string }).id ?? "x"}-${person.user_id}-${new Date().toISOString().slice(0, 10)}`,
+          idempotency_key: `origen-camp-${cid ?? "x"}-${person.user_id}-${opts.testTo ? Date.now() : new Date().toISOString().slice(0, 13)}`,
         } as Parameters<typeof sendLovableEmail>[0],
         { apiKey },
       );
       if (res.success) sent += 1;
-      else failed += 1;
+      else {
+        failed += 1;
+        lastError = JSON.stringify(res).slice(0, 200);
+      }
       await logUsage({ kind: "email", feature: "campaña", ok: !!res.success });
     } catch (e) {
       failed += 1;
-      await logUsage({ kind: "email", feature: "campaña", ok: false, error: e instanceof Error ? e.message : "error" });
+      lastError = e instanceof Error ? e.message : "error";
+      await logUsage({ kind: "email", feature: "campaña", ok: false, error: lastError });
     }
   }
-  return { sent, failed, unconfigured: false };
+  return { sent, failed, unconfigured: false, error: lastError };
+}
+
+/** URLs absolutas que aparecerán en el correo (para envolverlas con registro de clic). */
+function collectUrls(c: Campaign): string[] {
+  const urls = new Set<string>();
+  const abs = (p: string) => (/^https?:/i.test(p) ? p : `${SITE}${p.startsWith("/") ? "" : "/"}${p}`);
+  urls.add(abs(c.button_url || "/dashboard"));
+  for (const m of c.content.matchAll(/\[enlace:([^\]\s]+)\]/gi)) urls.add(abs(m[1]!));
+  for (const m of c.content.matchAll(/https?:\/\/[^\s<)\]]+/g)) urls.add(m[0]);
+  import("@/lib/marketing-render").catch(() => {});
+  return [...urls];
 }
