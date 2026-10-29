@@ -343,14 +343,13 @@ export function buildTemplates(variants: Record<string, number> = {}): EmailTemp
       const angle = Math.floor(i / topics.length) + v;
       const subj = SUBJECTS[cat.key][angle % SUBJECTS[cat.key].length]!.replace("{t}", topic.title.replace(/, \[usuario\]$/, ""));
       const body = BODIES[cat.key][angle % BODIES[cat.key].length]!;
-      const tag = sectionTagFor(topic.url);
       all.push({
         id,
         category: cat.key,
         title: `${topic.title}${angle ? ` · v${angle + 1}` : ""}`,
         subject: subj,
         headline: topic.title,
-        content: tag ? `${body}\n\n[${tag}]` : body,
+        content: body,
         image_url: `/email/${topic.image}.jpg`,
         button_text: topic.cta,
         button_url: topic.url,
@@ -361,11 +360,6 @@ export function buildTemplates(variants: Record<string, number> = {}): EmailTemp
     }
   }
   return all;
-}
-
-function sectionTagFor(path: string): string | null {
-  const entry = Object.entries(SECTION_TAGS).find(([, v]) => v.path === path);
-  return entry ? null && entry[0] : null;
 }
 
 /* ---------------------- Asistente automático ---------------------- */
