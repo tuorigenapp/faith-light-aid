@@ -1,6 +1,6 @@
 import { logUsage } from "./usage-log.server.ts";
 import { sendPush, type PushSubscriptionRow } from "@/lib/webpush.server";
-import { SITE, buildPush, firstName, personalize, renderEmailHtml, renderEmailText } from "@/lib/marketing-render";
+import { SECTION_TAGS, SITE, buildPush, firstName, personalize, renderEmailHtml, renderEmailText } from "@/lib/marketing-render";
 
 export type AudienceRow = { user_id: string; email: string | null };
 
@@ -185,7 +185,10 @@ function collectUrls(c: Campaign): string[] {
   const abs = (p: string) => (/^https?:/i.test(p) ? p : `${SITE}${p.startsWith("/") ? "" : "/"}${p}`);
   urls.add(abs(c.button_url || "/dashboard"));
   for (const m of c.content.matchAll(/\[enlace:([^\]\s]+)\]/gi)) urls.add(abs(m[1]!));
+  for (const m of c.content.matchAll(/\[([a-záéíóúñ]+)\]/gi)) {
+    const t = SECTION_TAGS[m[1]!.toLowerCase()];
+    if (t) urls.add(abs(t.path));
+  }
   for (const m of c.content.matchAll(/https?:\/\/[^\s<)\]]+/g)) urls.add(m[0]);
-  import("@/lib/marketing-render").catch(() => {});
   return [...urls];
 }
