@@ -29,6 +29,13 @@
       "when": 1793155075907,
       "tag": "0003_marketing_rich_tracking",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793233368378,
+      "tag": "0004_marketing_dispatch_every_minute",
+      "breakpoints": true
     }
   ]
 }

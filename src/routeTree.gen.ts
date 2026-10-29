@@ -73,6 +73,7 @@ import { Route as ApiCommunityMediaRouteImport } from './routes/api/community/me
 import { Route as ApiCommunityVoteRouteImport } from './routes/api/community/vote'
 import { Route as ApiPublicDemoConsultaRouteImport } from './routes/api/public/demo-consulta'
 import { Route as ApiPublicMarketingDispatchRouteImport } from './routes/api/public/marketing-dispatch'
+import { Route as ApiPublicMarketingTrackRouteImport } from './routes/api/public/marketing-track'
 import { Route as ApiPublicMinistracionTeaserRouteImport } from './routes/api/public/ministracion-teaser'
 import { Route as ApiPublicPushBroadcastRouteImport } from './routes/api/public/push-broadcast'
 import { Route as ApiPublicPushDailyRouteImport } from './routes/api/public/push-daily'
@@ -419,6 +420,11 @@ const ApiPublicMarketingDispatchRoute =
     path: '/api/public/marketing-dispatch',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicMarketingTrackRoute = ApiPublicMarketingTrackRouteImport.update({
+  id: '/api/public/marketing-track',
+  path: '/api/public/marketing-track',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicMinistracionTeaserRoute =
   ApiPublicMinistracionTeaserRouteImport.update({
     id: '/api/public/ministracion-teaser',
@@ -532,6 +538,7 @@ export interface FileRoutesByFullPath {
   '/api/community/vote': typeof ApiCommunityVoteRoute
   '/api/public/demo-consulta': typeof ApiPublicDemoConsultaRoute
   '/api/public/marketing-dispatch': typeof ApiPublicMarketingDispatchRoute
+  '/api/public/marketing-track': typeof ApiPublicMarketingTrackRoute
   '/api/public/ministracion-teaser': typeof ApiPublicMinistracionTeaserRoute
   '/api/public/push-broadcast': typeof ApiPublicPushBroadcastRoute
   '/api/public/push-daily': typeof ApiPublicPushDailyRoute
@@ -605,6 +612,7 @@ export interface FileRoutesByTo {
   '/api/community/vote': typeof ApiCommunityVoteRoute
   '/api/public/demo-consulta': typeof ApiPublicDemoConsultaRoute
   '/api/public/marketing-dispatch': typeof ApiPublicMarketingDispatchRoute
+  '/api/public/marketing-track': typeof ApiPublicMarketingTrackRoute
   '/api/public/ministracion-teaser': typeof ApiPublicMinistracionTeaserRoute
   '/api/public/push-broadcast': typeof ApiPublicPushBroadcastRoute
   '/api/public/push-daily': typeof ApiPublicPushDailyRoute
@@ -681,6 +689,7 @@ export interface FileRoutesById {
   '/api/community/vote': typeof ApiCommunityVoteRoute
   '/api/public/demo-consulta': typeof ApiPublicDemoConsultaRoute
   '/api/public/marketing-dispatch': typeof ApiPublicMarketingDispatchRoute
+  '/api/public/marketing-track': typeof ApiPublicMarketingTrackRoute
   '/api/public/ministracion-teaser': typeof ApiPublicMinistracionTeaserRoute
   '/api/public/push-broadcast': typeof ApiPublicPushBroadcastRoute
   '/api/public/push-daily': typeof ApiPublicPushDailyRoute
@@ -757,6 +766,7 @@ export interface FileRouteTypes {
     | '/api/community/vote'
     | '/api/public/demo-consulta'
     | '/api/public/marketing-dispatch'
+    | '/api/public/marketing-track'
     | '/api/public/ministracion-teaser'
     | '/api/public/push-broadcast'
     | '/api/public/push-daily'
@@ -830,6 +840,7 @@ export interface FileRouteTypes {
     | '/api/community/vote'
     | '/api/public/demo-consulta'
     | '/api/public/marketing-dispatch'
+    | '/api/public/marketing-track'
     | '/api/public/ministracion-teaser'
     | '/api/public/push-broadcast'
     | '/api/public/push-daily'
@@ -905,6 +916,7 @@ export interface FileRouteTypes {
     | '/api/community/vote'
     | '/api/public/demo-consulta'
     | '/api/public/marketing-dispatch'
+    | '/api/public/marketing-track'
     | '/api/public/ministracion-teaser'
     | '/api/public/push-broadcast'
     | '/api/public/push-daily'
@@ -944,6 +956,7 @@ export interface RootRouteChildren {
   ApiCommunityVoteRoute: typeof ApiCommunityVoteRoute
   ApiPublicDemoConsultaRoute: typeof ApiPublicDemoConsultaRoute
   ApiPublicMarketingDispatchRoute: typeof ApiPublicMarketingDispatchRoute
+  ApiPublicMarketingTrackRoute: typeof ApiPublicMarketingTrackRoute
   ApiPublicMinistracionTeaserRoute: typeof ApiPublicMinistracionTeaserRoute
   ApiPublicPushBroadcastRoute: typeof ApiPublicPushBroadcastRoute
   ApiPublicPushDailyRoute: typeof ApiPublicPushDailyRoute
@@ -1402,6 +1415,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicMarketingDispatchRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/marketing-track': {
+      id: '/api/public/marketing-track'
+      path: '/api/public/marketing-track'
+      fullPath: '/api/public/marketing-track'
+      preLoaderRoute: typeof ApiPublicMarketingTrackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/ministracion-teaser': {
       id: '/api/public/ministracion-teaser'
       path: '/api/public/ministracion-teaser'
@@ -1635,6 +1655,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiCommunityVoteRoute: ApiCommunityVoteRoute,
   ApiPublicDemoConsultaRoute: ApiPublicDemoConsultaRoute,
   ApiPublicMarketingDispatchRoute: ApiPublicMarketingDispatchRoute,
+  ApiPublicMarketingTrackRoute: ApiPublicMarketingTrackRoute,
   ApiPublicMinistracionTeaserRoute: ApiPublicMinistracionTeaserRoute,
   ApiPublicPushBroadcastRoute: ApiPublicPushBroadcastRoute,
   ApiPublicPushDailyRoute: ApiPublicPushDailyRoute,

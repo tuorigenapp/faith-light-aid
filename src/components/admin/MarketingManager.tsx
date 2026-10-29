@@ -2,36 +2,51 @@ import { useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  BarChart3,
   Bell,
+  Bot,
+  Eye,
+  FlaskConical,
   Image as ImageIcon,
-  Link2,
-  List,
   Loader2,
   Mail,
+  MailOpen,
   MousePointerClick,
   Pause,
-  Plus,
+  RefreshCw,
   Send,
+  Smartphone,
+  Tag,
   Trash2,
-  Users,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
-import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
-import { getAudienceCount, sendCampaignNow, scheduleCampaign, pauseCampaign, getAiPush, setAiPush } from "@/lib/marketing.functions";
+import {
+  getAiMarketing,
+  pauseCampaign,
+  refreshTemplates,
+  scheduleTestPush,
+  sendCampaignNow,
+  sendTestEmail,
+  setAiMarketing,
+  getAudienceCount,
+} from "@/lib/marketing.functions";
+import {
+  PUSH_ICONS,
+  SHORTCODES,
+  TEMPLATE_CATEGORIES,
+  buildPush,
+  buildTemplates,
+  renderEmailHtml,
+  type EmailTemplate,
+  type PushStyle,
+  type TemplateCategory,
+} from "@/lib/marketing-render";
 import { confirmDeletion } from "@/lib/deletion-confirmation";
 
 type Channel = "email" | "push";
-
-type MList = {
-  id: string;
-  name: string;
-  description: string | null;
-  filter_type: string;
-  created_at: string;
-};
+type Kind = "marketing" | "remarketing";
 
 type Campaign = {
   id: string;
@@ -43,758 +58,786 @@ type Campaign = {
   button_text: string | null;
   button_url: string | null;
   audience_type: string;
-  list_id: string | null;
   status: string;
   scheduled_at: string | null;
   ends_at: string | null;
   sent_count: number;
   click_count: number;
+  open_count: number;
   created_at: string;
-  max_per_day: number;
   last_sent_at: string | null;
+  push_style: string;
+  push_icon: string | null;
+  kind: string;
+  ai_generated: boolean;
+  discount_label: string | null;
+  template_id: string | null;
 };
 
-/** Listas predefinidas + libres, con la misma idea que MailerLite. */
-const FILTERS: { value: string; label: string; hint: string }[] = [
-  { value: "all", label: "Todos los registrados", hint: "Cada persona con cuenta en ORÍGEN" },
-  { value: "buyers", label: "Compradores", hint: "Con suscripción activa" },
-  { value: "non_buyers", label: "No compradores", hint: "Todavía en plan Explorador" },
-  { value: "active", label: "Frecuentan mucho", hint: "Con actividad en los últimos 7 días" },
-  { value: "inactive", label: "Frecuentan poco", hint: "Sin actividad en 14 días o más" },
-  { value: "custom", label: "Lista propia", hint: "La armas tú a mano" },
+const AUDIENCES: { value: string; label: string; remarketing?: boolean }[] = [
+  { value: "all", label: "Todos los registrados" },
+  { value: "buyers", label: "Compradores (Camino Origen)" },
+  { value: "non_buyers", label: "Plan Explorador (aún no compran)" },
+  { value: "active", label: "Activos esta semana" },
+  { value: "inactive", label: "Sin entrar en 14 días" },
+  { value: "opened", label: "Abrieron una campaña", remarketing: true },
+  { value: "not_opened", label: "No abrieron una campaña", remarketing: true },
+  { value: "clicked", label: "Hicieron clic en una campaña", remarketing: true },
 ];
 
-const SHORTCODES = [
-  { code: "[usuario]", desc: "Nombre de la persona" },
-  { code: "[hojas]", desc: "Sus hojas de sanación" },
-  { code: "[enlace:/etapas]", desc: "Botón a Camino ORÍGEN" },
-  { code: "[enlace:/ejercicios]", desc: "Botón a Ejercicios diarios" },
-  { code: "[enlace:/visualiza]", desc: "Botón a Visualízalo y Vívelo" },
-  { code: "[enlace:/palabra]", desc: "Botón a Palabra de hoy" },
-  { code: "[sitio]", desc: "tuorigen.app" },
-];
+const TEST_EMAIL = "infodenegociorm@gmail.com";
 
-const listSchema = z.object({
-  name: z.string().trim().min(3, "Ponle un nombre a la lista").max(80),
-  description: z.string().trim().max(300).optional().or(z.literal("")),
-  filter_type: z.string().trim().min(2),
-});
-
-const campaignSchema = z.object({
-  name: z.string().trim().min(3, "Ponle un nombre a la campaña").max(120),
-  channel: z.enum(["email", "push"]),
-  subject: z.string().trim().max(160).optional().or(z.literal("")),
-  content: z.string().trim().min(5, "Escribe el mensaje").max(6000),
-  image_url: z.string().trim().max(800).optional().or(z.literal("")),
-  button_text: z.string().trim().max(60).optional().or(z.literal("")),
-  button_url: z.string().trim().max(400).optional().or(z.literal("")),
-  audience_type: z.string().trim().min(2),
-  list_id: z.string().uuid().nullable(),
-  scheduled_at: z.string().trim().optional().or(z.literal("")),
-  ends_at: z.string().trim().optional().or(z.literal("")),
-  max_per_day: z.number().int().min(1).max(24),
-});
-
-const emptyCampaign = {
+const empty = {
   name: "",
-  channel: "email" as Channel,
   subject: "",
+  headline: "",
   content: "",
   image_url: "",
   button_text: "",
   button_url: "",
+  discount_label: "",
+  push_style: "text" as PushStyle,
+  push_icon: "logo",
   audience_type: "all",
-  list_id: "",
+  source_campaign_id: "",
   scheduled_at: "",
   ends_at: "",
-  max_per_day: 1,
+  template_id: "",
+  accent: "#6d4aff",
 };
 
-/** Email marketing y campañas push: listas, editor con etiquetas, horarios e historial de clics. */
+/** Marketing y remarketing: correo con plantillas, push con 3 estilos, asistente 24/7 y lecturas en vivo. */
 export function MarketingManager() {
   const qc = useQueryClient();
-  const audienceCount = useServerFn(getAudienceCount);
-  const sendNow = useServerFn(sendCampaignNow);
-  const schedule = useServerFn(scheduleCampaign);
-  const pause = useServerFn(pauseCampaign);
   const [channel, setChannel] = useState<Channel>("email");
-  const [form, setForm] = useState(emptyCampaign);
-  const [listForm, setListForm] = useState({ name: "", description: "", filter_type: "all" });
-  const [openList, setOpenList] = useState(false);
+  const [kind, setKind] = useState<Kind>("marketing");
+  const [form, setForm] = useState(empty);
+  const [preview, setPreview] = useState<null | { channel: Channel; data: typeof empty }>(null);
+  const [testTo, setTestTo] = useState(TEST_EMAIL);
 
-  const { data: lists } = useQuery({
-    queryKey: ["admin-marketing-lists"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("marketing_lists")
-        .select("id, name, description, filter_type, created_at")
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return (data ?? []) as MList[];
-    },
-  });
+  const fetchAi = useServerFn(getAiMarketing);
+  const saveAi = useServerFn(setAiMarketing);
+  const refresh = useServerFn(refreshTemplates);
+  const sendNow = useServerFn(sendCampaignNow);
+  const pause = useServerFn(pauseCampaign);
+  const testEmail = useServerFn(sendTestEmail);
+  const testPush = useServerFn(scheduleTestPush);
+  const count = useServerFn(getAudienceCount);
 
-  const { data: campaigns, isLoading } = useQuery({
+  const ai = useQuery({ queryKey: ["admin-ai-marketing"], queryFn: () => fetchAi() });
+  const templates = useMemo(() => buildTemplates(ai.data?.variants ?? {}), [ai.data?.variants]);
+
+  const campaigns = useQuery({
     queryKey: ["admin-marketing-campaigns"],
+    refetchInterval: 15_000,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("marketing_campaigns")
         .select(
-          "id, name, channel, subject, content, image_url, button_text, button_url, audience_type, list_id, status, scheduled_at, ends_at, sent_count, click_count, created_at, max_per_day, last_sent_at",
+          "id, name, channel, subject, content, image_url, button_text, button_url, audience_type, status, scheduled_at, ends_at, sent_count, click_count, open_count, created_at, last_sent_at, push_style, push_icon, kind, ai_generated, discount_label, template_id",
         )
         .order("created_at", { ascending: false })
-        .limit(120);
+        .limit(200);
       if (error) throw error;
       return (data ?? []) as Campaign[];
     },
   });
 
-  const byChannel = useMemo(
-    () => (campaigns ?? []).filter((c) => c.channel === channel),
-    [campaigns, channel],
-  );
-
-  const audienceListId = form.audience_type === "list" && form.list_id ? form.list_id : null;
-  const {
-    data: audience,
-    isLoading: audienceLoading,
-    isError: audienceError,
-  } = useQuery({
-    queryKey: ["admin-marketing-audience-count", form.audience_type, audienceListId],
-    queryFn: () => audienceCount({ data: { audienceType: form.audience_type, listId: audienceListId } }),
-    enabled: form.audience_type !== "list" || !!audienceListId,
+  const isRemarketingAudience = AUDIENCES.find((a) => a.value === form.audience_type)?.remarketing;
+  const audienceQ = useQuery({
+    queryKey: ["admin-mkt-count", form.audience_type, form.source_campaign_id],
+    enabled: !isRemarketingAudience,
+    queryFn: () => count({ data: { audienceType: form.audience_type, listId: null } }),
   });
 
-  /** Horas en que la gente abre: se calcula del historial de eventos. */
-  const { data: hours } = useQuery({
-    queryKey: ["admin-marketing-hours"],
-    queryFn: async () => {
+  const invalidate = () => void qc.invalidateQueries({ queryKey: ["admin-marketing-campaigns"] });
+
+  function payload() {
+    return {
+      subject: form.subject.trim() || null,
+      content: form.headline.trim() && channel === "email" ? form.content : form.content,
+      image_url: form.image_url.trim() || null,
+      button_text: form.button_text.trim() || null,
+      button_url: form.button_url.trim() || null,
+      push_style: form.push_style,
+      push_icon: form.push_icon,
+      discount_label: form.discount_label.trim() || null,
+    };
+  }
+
+  function validate() {
+    if (!form.subject.trim()) throw new Error(channel === "email" ? "Escribe el asunto del correo" : "Escribe el título");
+    if (form.content.trim().length < 3) throw new Error("Escribe el mensaje");
+    if (channel === "push" && form.push_style === "banner" && !form.image_url.trim()) throw new Error("Pega el enlace de la imagen del banner");
+    if (isRemarketingAudience && !form.source_campaign_id) throw new Error("Elige de qué campaña sale el grupo");
+  }
+
+  const save = useMutation({
+    mutationFn: async (mode: "now" | "schedule") => {
+      validate();
+      const scheduled = mode === "schedule" && form.scheduled_at ? new Date(form.scheduled_at) : new Date();
+      const { data: user } = await supabase.auth.getUser();
       const { data, error } = await supabase
-        .from("marketing_events")
-        .select("event_type, created_at")
-        .order("created_at", { ascending: false })
-        .limit(4000);
+        .from("marketing_campaigns")
+        .insert({
+          name: form.name.trim() || form.subject.trim().slice(0, 80),
+          channel,
+          ...payload(),
+          content: form.headline.trim() && channel === "email" ? `${form.headline.trim()}\n\n${form.content}` : form.content,
+          audience_type: form.audience_type,
+          source_campaign_id: form.source_campaign_id || null,
+          kind,
+          template_id: form.template_id || null,
+          status: mode === "now" ? "draft" : "scheduled",
+          scheduled_at: scheduled.toISOString(),
+          ends_at: form.ends_at ? new Date(form.ends_at).toISOString() : null,
+          created_by: user.user?.id ?? null,
+        })
+        .select("id")
+        .single();
       if (error) throw error;
-      const buckets = Array.from({ length: 24 }, () => 0);
-      for (const e of data ?? []) {
-        if (e.event_type === "click") buckets[new Date(e.created_at).getHours()]! += 1;
-      }
-      return buckets;
+      if (mode === "now") return sendNow({ data: { campaignId: data.id } });
+      return null;
     },
-  });
-
-  const saveList = useMutation({
-    mutationFn: async () => {
-      const parsed = listSchema.safeParse(listForm);
-      if (!parsed.success) throw new Error(parsed.error.issues[0]!.message);
-      const { error } = await supabase.from("marketing_lists").insert({
-        name: parsed.data.name,
-        description: parsed.data.description || null,
-        filter_type: parsed.data.filter_type,
-      });
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      toast.success("Lista creada");
-      setListForm({ name: "", description: "", filter_type: "all" });
-      setOpenList(false);
-      void qc.invalidateQueries({ queryKey: ["admin-marketing-lists"] });
-    },
-    onError: (e: Error) => toast.error(e.message || "No pudimos crear la lista"),
-  });
-
-  const removeList = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from("marketing_lists").delete().eq("id", id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      toast.success("Lista eliminada");
-      void qc.invalidateQueries({ queryKey: ["admin-marketing-lists"] });
-    },
-    onError: () => toast.error("No pudimos eliminar la lista"),
-  });
-
-  const saveCampaign = useMutation({
-    mutationFn: async (status: "draft" | "scheduled") => {
-      const parsed = campaignSchema.safeParse({
-        ...form,
-        channel,
-        list_id: form.list_id ? form.list_id : null,
-        max_per_day: Number(form.max_per_day) || 1,
-      });
-      if (!parsed.success) throw new Error(parsed.error.issues[0]!.message);
-      const d = parsed.data;
-      if (channel === "email" && !d.subject) throw new Error("El correo necesita un asunto");
-      const { error } = await supabase.from("marketing_campaigns").insert({
-        name: d.name,
-        channel,
-        subject: d.subject || null,
-        content: d.content,
-        image_url: d.image_url || null,
-        button_text: d.button_text || null,
-        button_url: d.button_url || null,
-        audience_type: d.audience_type,
-        list_id: d.list_id,
-        status,
-        scheduled_at: d.scheduled_at ? new Date(d.scheduled_at).toISOString() : null,
-        ends_at: d.ends_at ? new Date(d.ends_at).toISOString() : null,
-        max_per_day: d.max_per_day,
-      });
-      if (error) throw error;
-    },
-    onSuccess: (_r, status) => {
-      toast.success(status === "scheduled" ? "Campaña programada" : "Borrador guardado");
-      setForm(emptyCampaign);
-      void qc.invalidateQueries({ queryKey: ["admin-marketing-campaigns"] });
+    onSuccess: (r, mode) => {
+      toast.success(mode === "now" ? `Enviada${r ? ` a ${r.sent} ${channel === "email" ? "correos" : "dispositivos"}` : ""}` : "Campaña programada");
+      setForm(empty);
+      invalidate();
     },
     onError: (e: Error) => toast.error(e.message || "No pudimos guardar la campaña"),
   });
 
-  function invalidateCampaigns() {
-    void qc.invalidateQueries({ queryKey: ["admin-marketing-campaigns"] });
-  }
-
-  function handleUnconfigured(r: { emailUnconfigured?: boolean } | undefined) {
-    if (r?.emailUnconfigured) {
-      toast.warning("Los correos aún no están activados; el push sí se envió.");
-    }
-  }
-
-  const sendNowMutation = useMutation({
-    mutationFn: (campaignId: string) => sendNow({ data: { campaignId } }),
-    onSuccess: (r) => {
-      toast.success(`Campaña enviada a ${r.audienceSize} personas.`);
-      handleUnconfigured(r);
-      invalidateCampaigns();
+  const testEmailM = useMutation({
+    mutationFn: async () => {
+      validate();
+      return testEmail({ data: { ...payload(), content: withHeadline(form), to: testTo.trim() } });
     },
-    onError: (e: Error) => toast.error(e.message || "No pudimos enviar la campaña"),
+    onSuccess: () => toast.success(`Prueba enviada a ${testTo}. Revisa también Spam o Promociones.`),
+    onError: (e: Error) => toast.error(e.message),
   });
 
-  const scheduleMutation = useMutation({
-    mutationFn: (vars: { campaignId: string; scheduledAt: string; endsAt?: string | null; maxPerDay: number }) =>
-      schedule({ data: vars }),
+  const testPushM = useMutation({
+    mutationFn: async (minutes: number) => {
+      validate();
+      return testPush({ data: { ...payload(), minutes } });
+    },
+    onSuccess: (r, minutes) => {
+      if (!r.devices) toast.warning("Tu cuenta no tiene un teléfono con avisos activados. Actívalos en Perfil desde el teléfono.");
+      else toast.success(minutes ? `Prueba programada para las ${new Date(r.at).toLocaleTimeString("es", { hour: "2-digit", minute: "2-digit" })}` : "Prueba enviada a tu teléfono");
+      invalidate();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const aiSave = useMutation({
+    mutationFn: (v: { email: boolean; push: boolean; mode: Kind }) => saveAi({ data: v }),
     onSuccess: () => {
-      toast.success("Campaña programada");
-      invalidateCampaigns();
+      toast.success("Asistente actualizado");
+      void qc.invalidateQueries({ queryKey: ["admin-ai-marketing"] });
     },
-    onError: (e: Error) => toast.error(e.message || "No pudimos programar la campaña"),
+    onError: (e: Error) => toast.error(e.message),
   });
 
-  const pauseMutation = useMutation({
-    mutationFn: (campaignId: string) => pause({ data: { campaignId } }),
-    onSuccess: () => {
-      toast.success("Campaña pausada");
-      invalidateCampaigns();
+  const refreshM = useMutation({
+    mutationFn: (ids: string[]) => refresh({ data: { ids } }),
+    onSuccess: (_r, ids) => {
+      toast.success(`${ids.length} plantillas renovadas`);
+      void qc.invalidateQueries({ queryKey: ["admin-ai-marketing"] });
     },
-    onError: (e: Error) => toast.error(e.message || "No pudimos pausar la campaña"),
+    onError: (e: Error) => toast.error(e.message),
   });
 
-  function insertCode(code: string) {
-    setForm((f) => ({ ...f, content: `${f.content}${f.content && !f.content.endsWith(" ") ? " " : ""}${code}` }));
+  function applyTemplate(t: EmailTemplate) {
+    setForm((f) => ({
+      ...f,
+      name: t.title,
+      subject: t.subject,
+      headline: t.headline,
+      content: t.content,
+      image_url: t.image_url,
+      button_text: t.button_text,
+      button_url: t.button_url,
+      discount_label: t.discount_label ?? "",
+      template_id: t.id,
+      accent: t.accent,
+    }));
+    toast.success("Plantilla cargada: ajusta lo que quieras");
   }
 
-  const maxHour = Math.max(1, ...(hours ?? [1]));
+  const settings = ai.data?.settings ?? { email: false, push: false, mode: "marketing" as Kind };
+  const list = campaigns.data ?? [];
+  const sentCampaigns = list.filter((c) => c.sent_count > 0 || c.status === "sent");
 
   return (
-    <>
-    <AiPushPanel />
-    <section className="mt-4 grid gap-4 lg:grid-cols-[260px_minmax(0,1fr)]">
-      {/* Barra lateral estilo MailerLite */}
-      <aside className="rounded-[16px] border border-border/60 bg-card p-4 shadow-soft">
-        <h2 className="inline-flex items-center gap-2 font-display text-[15px] font-bold">
-          <Send className="h-4 w-4 text-primary" /> Marketing
-        </h2>
+    <section className="mt-4 grid gap-4">
+      {/* Asistente 24/7 */}
+      <div className="rounded-[16px] border border-border/60 bg-card p-4 shadow-soft">
+        <div className="flex items-start gap-3">
+          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[12px] bg-primary/10 text-primary">
+            <Bot className="h-5 w-5" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <h2 className="font-display text-[17px] font-bold">Asistente de marketing 24/7</h2>
+            <p className="text-[13px] text-muted-foreground">
+              Encendido, elige plantilla según la fecha y la temporada: 3 correos al día (9 am, 2 pm, 7 pm) y una notificación cada 2 horas
+              (8 am a 10 pm). Todo queda en el historial con su vista previa.
+            </p>
+          </div>
+        </div>
+        <div className="mt-3 grid gap-2 sm:grid-cols-3">
+          <ToggleRow label="Correos automáticos" on={settings.email} busy={aiSave.isPending} onChange={(v) => aiSave.mutate({ ...settings, email: v })} />
+          <ToggleRow label="Push automáticas" on={settings.push} busy={aiSave.isPending} onChange={(v) => aiSave.mutate({ ...settings, push: v })} />
+          <div className="flex h-12 items-center gap-1 rounded-[12px] bg-muted/50 p-1">
+            {(["marketing", "remarketing"] as Kind[]).map((m) => (
+              <button
+                key={m}
+                onClick={() => aiSave.mutate({ ...settings, mode: m })}
+                className={cn("h-10 flex-1 rounded-[10px] text-[13px] font-semibold capitalize", settings.mode === m ? "bg-card text-primary shadow-soft" : "text-muted-foreground")}
+              >
+                {m}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
 
-        <div className="mt-3 grid gap-1.5">
-          {(["email", "push"] as Channel[]).map((c) => (
+      {/* Selector canal + tipo */}
+      <div className="flex flex-wrap gap-2">
+        {(["email", "push"] as Channel[]).map((c) => (
+          <button
+            key={c}
+            onClick={() => setChannel(c)}
+            className={cn("inline-flex h-11 items-center gap-2 rounded-[12px] px-4 text-[14px] font-semibold", channel === c ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary")}
+          >
+            {c === "email" ? <Mail className="h-4 w-4" /> : <Bell className="h-4 w-4" />}
+            {c === "email" ? "Correo electrónico" : "Notificaciones push"}
+          </button>
+        ))}
+        <div className="ml-auto flex h-11 items-center gap-1 rounded-[12px] bg-muted/50 p-1">
+          {(["marketing", "remarketing"] as Kind[]).map((k) => (
             <button
-              key={c}
-              onClick={() => setChannel(c)}
-              className={cn(
-                "inline-flex h-11 items-center gap-2 rounded-[12px] px-3 text-left text-[13px] font-semibold",
-                channel === c ? "bg-primary/10 text-primary" : "text-muted-foreground",
-              )}
+              key={k}
+              onClick={() => {
+                setKind(k);
+                setForm((f) => ({ ...f, audience_type: k === "remarketing" ? "not_opened" : "all" }));
+              }}
+              className={cn("h-9 rounded-[10px] px-3 text-[13px] font-semibold capitalize", kind === k ? "bg-card text-primary shadow-soft" : "text-muted-foreground")}
             >
-              {c === "email" ? <Mail className="h-4 w-4" /> : <Bell className="h-4 w-4" />}
-              {c === "email" ? "Correo electrónico" : "Notificaciones push"}
+              {k}
             </button>
           ))}
         </div>
+      </div>
 
-        <div className="mt-4 border-t border-border pt-3">
-          <div className="flex items-center justify-between">
-            <span className="inline-flex items-center gap-1.5 text-[12px] font-bold text-muted-foreground">
-              <List className="h-3.5 w-3.5" /> Mis listas
-            </span>
-            <button
-              onClick={() => setOpenList((v) => !v)}
-              aria-label="Crear lista"
-              className="grid h-9 w-9 place-items-center rounded-[10px] bg-primary/10 text-primary"
-            >
-              <Plus className="h-4 w-4" />
-            </button>
-          </div>
+      {channel === "email" && (
+        <TemplateLibrary
+          templates={templates}
+          kind={kind}
+          selected={form.template_id}
+          onPick={applyTemplate}
+          onRefresh={(ids) => refreshM.mutate(ids)}
+          refreshing={refreshM.isPending}
+        />
+      )}
 
-          {openList && (
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                saveList.mutate();
-              }}
-              className="mt-2 grid gap-2 rounded-[12px] border border-border/60 bg-background p-3"
-            >
-              <input
-                value={listForm.name}
-                onChange={(e) => setListForm({ ...listForm, name: e.target.value })}
-                placeholder="Nombre de la lista"
-                className={inputSm}
-                maxLength={80}
-              />
-              <select
-                value={listForm.filter_type}
-                onChange={(e) => setListForm({ ...listForm, filter_type: e.target.value })}
-                className={inputSm}
-              >
-                {FILTERS.map((f) => (
-                  <option key={f.value} value={f.value}>
-                    {f.label}
-                  </option>
-                ))}
-              </select>
-              <p className="text-[11px] text-muted-foreground">
-                {FILTERS.find((f) => f.value === listForm.filter_type)?.hint}
-              </p>
+      {/* Editor */}
+      <div className="rounded-[16px] border border-border/60 bg-card p-4 shadow-soft">
+        <h3 className="font-display text-[17px] font-bold">
+          {channel === "email" ? "Escribir correo" : "Escribir notificación"} · <span className="capitalize text-primary">{kind}</span>
+        </h3>
+        {channel === "email" && !form.template_id && (
+          <p className="mt-1 text-[13px] text-muted-foreground">Sin plantilla: escribe tu mensaje en texto. La imagen es opcional.</p>
+        )}
+
+        {channel === "push" && (
+          <div className="mt-3 grid grid-cols-3 gap-2">
+            {(
+              [
+                ["text", "Solo texto", Bell],
+                ["banner", "Con imagen", ImageIcon],
+                ["discount", "Descuento", Tag],
+              ] as const
+            ).map(([v, l, Icon]) => (
               <button
-                type="submit"
-                disabled={saveList.isPending}
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-[12px] bg-primary text-[13px] font-bold text-primary-foreground disabled:opacity-60"
-              >
-                {saveList.isPending && <Loader2 className="h-4 w-4 animate-spin" />} Crear lista
-              </button>
-            </form>
-          )}
-
-          <ul className="mt-2 space-y-1.5">
-            {(lists ?? []).length === 0 && (
-              <li className="rounded-[10px] border border-dashed border-border p-3 text-[12px] text-muted-foreground">
-                Todavía no tienes listas. Crea la primera: compradores o no compradores.
-              </li>
-            )}
-            {(lists ?? []).map((l) => (
-              <li
-                key={l.id}
-                className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 rounded-[10px] border border-border/60 p-2.5"
-              >
-                <div className="min-w-0">
-                  <p className="truncate text-[12.5px] font-bold">{l.name}</p>
-                  <p className="truncate text-[11px] text-muted-foreground">
-                    {FILTERS.find((f) => f.value === l.filter_type)?.label ?? l.filter_type}
-                  </p>
-                </div>
-                <button
-                  onClick={async () => {
-                    if (await confirmDeletion("Esta lista se eliminará.")) removeList.mutate(l.id);
-                  }}
-                  aria-label={`Eliminar ${l.name}`}
-                  className="grid h-9 w-9 place-items-center rounded-[10px] bg-destructive/10 text-destructive"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </aside>
-
-      <div className="min-w-0">
-        {/* Editor */}
-        <div className="rounded-[16px] border border-border/60 bg-card p-5 shadow-soft">
-          <h3 className="font-display text-[16px] font-bold">
-            {channel === "email" ? "Nuevo correo para tus usuarias" : "Nueva notificación push"}
-          </h3>
-          <p className="mt-1 text-[12.5px] text-muted-foreground">
-            {channel === "email"
-              ? "Escribe el mensaje, agrega imagen, botón y etiquetas que se personalizan solas."
-              : "El texto y la imagen aparecen en la barra de notificaciones del teléfono, con el ícono de ORÍGEN."}
-          </p>
-
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <Field label="Nombre interno de la campaña">
-              <input
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                className={inputCls}
-                maxLength={120}
-              />
-            </Field>
-            {channel === "email" ? (
-              <Field label="Asunto del correo">
-                <input
-                  value={form.subject}
-                  onChange={(e) => setForm({ ...form, subject: e.target.value })}
-                  className={inputCls}
-                  maxLength={160}
-                />
-              </Field>
-            ) : (
-              <Field label="Título de la notificación">
-                <input
-                  value={form.subject}
-                  onChange={(e) => setForm({ ...form, subject: e.target.value })}
-                  placeholder="tuorigen.app"
-                  className={inputCls}
-                  maxLength={80}
-                />
-              </Field>
-            )}
-
-            <Field label="A quién le llega">
-              <select
-                value={form.audience_type}
-                onChange={(e) => setForm({ ...form, audience_type: e.target.value, list_id: "" })}
-                className={inputCls}
-              >
-                {FILTERS.filter((f) => f.value !== "custom").map((f) => (
-                  <option key={f.value} value={f.value}>
-                    {f.label}
-                  </option>
-                ))}
-                <option value="list">Una de mis listas</option>
-              </select>
-            </Field>
-            <Field label="Lista (si elegiste una lista)">
-              <select
-                value={form.list_id}
-                onChange={(e) => setForm({ ...form, list_id: e.target.value })}
-                disabled={form.audience_type !== "list"}
-                className={cn(inputCls, form.audience_type !== "list" && "opacity-60")}
-              >
-                <option value="">Elige una lista</option>
-                {(lists ?? []).map((l) => (
-                  <option key={l.id} value={l.id}>
-                    {l.name}
-                  </option>
-                ))}
-              </select>
-            </Field>
-
-            <div className="sm:col-span-2 -mt-1">
-              {form.audience_type === "list" && !audienceListId ? (
-                <p className="text-[12px] text-muted-foreground">Elige una lista para ver a cuántas personas llegará.</p>
-              ) : audienceLoading ? (
-                <div className="h-4 w-40 animate-pulse rounded-full bg-muted" />
-              ) : audienceError ? (
-                <p className="text-[12px] text-destructive">No pudimos calcular la audiencia. Intenta de nuevo.</p>
-              ) : (
-                <p className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-primary">
-                  <Users className="h-3.5 w-3.5" /> Llegará a {audience?.count ?? 0} personas
-                </p>
-              )}
-            </div>
-
-            <div className="sm:col-span-2">
-              <Field label="Mensaje">
-                <textarea
-                  value={form.content}
-                  onChange={(e) => setForm({ ...form, content: e.target.value })}
-                  rows={channel === "email" ? 7 : 4}
-                  maxLength={6000}
-                  placeholder={
-                    channel === "email"
-                      ? "Hola [usuario], hoy te espera un paso nuevo en tu camino…"
-                      : "[usuario], tu ejercicio de hoy ya está abierto 🍃"
-                  }
-                  className="w-full rounded-[10px] border-[1.5px] border-border bg-card p-3 text-[14px] outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/20"
-                />
-              </Field>
-              <div className="mt-2 flex flex-wrap gap-1.5">
-                {SHORTCODES.map((s) => (
-                  <button
-                    key={s.code}
-                    onClick={() => insertCode(s.code)}
-                    title={s.desc}
-                    className="h-8 rounded-[10px] bg-primary/10 px-2.5 text-[11.5px] font-bold text-primary"
-                  >
-                    {s.code}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <Field label="Imagen (enlace)">
-              <div className="relative">
-                <ImageIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <input
-                  value={form.image_url}
-                  onChange={(e) => setForm({ ...form, image_url: e.target.value })}
-                  placeholder="https://…"
-                  className={cn(inputCls, "pl-9")}
-                  maxLength={800}
-                />
-              </div>
-            </Field>
-            <Field label="Texto del botón">
-              <input
-                value={form.button_text}
-                onChange={(e) => setForm({ ...form, button_text: e.target.value })}
-                placeholder="Abrir mi camino"
-                className={inputCls}
-                maxLength={60}
-              />
-            </Field>
-            <Field label="Enlace del botón">
-              <div className="relative">
-                <Link2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <input
-                  value={form.button_url}
-                  onChange={(e) => setForm({ ...form, button_url: e.target.value })}
-                  placeholder="/etapas"
-                  className={cn(inputCls, "pl-9")}
-                  maxLength={400}
-                />
-              </div>
-            </Field>
-            <Field label="Máximo de envíos por día">
-              <input
-                type="number"
-                min={1}
-                max={24}
-                value={form.max_per_day}
-                onChange={(e) => setForm({ ...form, max_per_day: Number(e.target.value) || 1 })}
-                className={inputCls}
-              />
-            </Field>
-            <Field label="Empieza (fecha y hora)">
-              <input
-                type="datetime-local"
-                value={form.scheduled_at}
-                onChange={(e) => setForm({ ...form, scheduled_at: e.target.value })}
-                className={inputCls}
-              />
-            </Field>
-            <Field label="Termina (fecha y hora)">
-              <input
-                type="datetime-local"
-                value={form.ends_at}
-                onChange={(e) => setForm({ ...form, ends_at: e.target.value })}
-                className={inputCls}
-              />
-            </Field>
-
-            <div className="grid gap-2 sm:col-span-2 sm:grid-cols-3">
-              <button
-                onClick={() => saveCampaign.mutate("draft")}
-                disabled={saveCampaign.isPending}
-                className="inline-flex h-12 items-center justify-center rounded-[12px] bg-primary/10 text-[14px] font-bold text-primary disabled:opacity-60"
-              >
-                Guardar borrador
-              </button>
-              <button
-                onClick={() => saveCampaign.mutate("scheduled")}
-                disabled={saveCampaign.isPending}
-                className="inline-flex h-12 items-center justify-center gap-2 rounded-[12px] bg-primary/80 text-[14px] font-bold text-primary-foreground disabled:opacity-60"
-              >
-                {saveCampaign.isPending && <Loader2 className="h-4 w-4 animate-spin" />} Programar campaña
-              </button>
-              <button
-                onClick={async () => {
-                  const parsed = campaignSchema.safeParse({
-                    ...form,
-                    channel,
-                    list_id: form.list_id ? form.list_id : null,
-                    max_per_day: Number(form.max_per_day) || 1,
-                  });
-                  if (!parsed.success) {
-                    toast.error(parsed.error.issues[0]!.message);
-                    return;
-                  }
-                  const d = parsed.data;
-                  if (channel === "email" && !d.subject) {
-                    toast.error("El correo necesita un asunto");
-                    return;
-                  }
-                  const { data: inserted, error } = await supabase
-                    .from("marketing_campaigns")
-                    .insert({
-                      name: d.name,
-                      channel,
-                      subject: d.subject || null,
-                      content: d.content,
-                      image_url: d.image_url || null,
-                      button_text: d.button_text || null,
-                      button_url: d.button_url || null,
-                      audience_type: d.audience_type,
-                      list_id: d.list_id,
-                      status: "sending",
-                      max_per_day: d.max_per_day,
-                    })
-                    .select("id")
-                    .single();
-                  if (error || !inserted) {
-                    toast.error(error?.message || "No pudimos crear la campaña");
-                    return;
-                  }
-                  invalidateCampaigns();
-                  sendNowMutation.mutate(inserted.id, {
-                    onSuccess: () => setForm(emptyCampaign),
-                  });
-                }}
-                disabled={saveCampaign.isPending || sendNowMutation.isPending}
-                className="inline-flex h-12 items-center justify-center gap-2 rounded-[12px] bg-primary text-[15px] font-bold text-primary-foreground disabled:opacity-60"
-              >
-                {sendNowMutation.isPending ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Send className="h-4 w-4" />
+                key={v}
+                onClick={() => setForm((f) => ({ ...f, push_style: v, push_icon: v === "discount" ? "descuento" : f.push_icon }))}
+                className={cn(
+                  "flex h-16 flex-col items-center justify-center gap-1 rounded-[12px] border-[1.5px] text-[13px] font-semibold",
+                  form.push_style === v ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground",
                 )}
-                Publicar ahora
+              >
+                <Icon className="h-5 w-5" /> {l}
               </button>
-            </div>
-          </div>
-
-          {/* Vista previa */}
-          <div className="mt-5 rounded-[16px] border border-border/60 bg-background p-4">
-            <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Vista previa</p>
-            <div className="mt-2 rounded-[12px] border border-border bg-card p-3">
-              <p className="text-[12px] font-bold text-primary">tuorigen.app</p>
-              <p className="mt-0.5 text-[14px] font-bold">{form.subject || "Sin asunto todavía"}</p>
-              <p className="mt-1 whitespace-pre-wrap text-[13px] text-muted-foreground">
-                {form.content.replace("[usuario]", "María").replace("[sitio]", "tuorigen.app") ||
-                  "Aquí verás tu mensaje."}
-              </p>
-              {form.image_url && (
-                <img src={form.image_url} alt="" className="mt-2 h-28 w-full rounded-[10px] object-cover" />
-              )}
-              {form.button_text && (
-                <span className="mt-2 inline-flex h-10 items-center rounded-[12px] bg-primary px-4 text-[13px] font-bold text-primary-foreground">
-                  {form.button_text}
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Horas con más clics */}
-        <div className="mt-4 rounded-[16px] border border-border/60 bg-card p-5 shadow-soft">
-          <h3 className="inline-flex items-center gap-2 font-display text-[15px] font-bold">
-            <BarChart3 className="h-4 w-4 text-primary" /> Horas en que más te abren
-          </h3>
-          <div className="mt-3 grid grid-cols-12 items-end gap-1 sm:grid-cols-24">
-            {(hours ?? Array.from({ length: 24 }, () => 0)).map((v, h) => (
-              <div key={h} className="flex flex-col items-center gap-1">
-                <div
-                  className="w-full rounded-t-[4px] bg-primary/70"
-                  style={{ height: `${8 + (v / maxHour) * 56}px` }}
-                  title={`${h}:00 · ${v} clics`}
-                />
-                <span className="text-[9px] text-muted-foreground">{h}</span>
-              </div>
             ))}
           </div>
+        )}
+
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          <Field label={channel === "email" ? "Asunto del correo" : "Título de la notificación"}>
+            <input value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })} className={inputCls} maxLength={160} placeholder="Ej: [usuario], tu regalo está listo" />
+          </Field>
+          <Field label="Nombre interno (opcional)">
+            <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className={inputCls} maxLength={120} />
+          </Field>
+          {channel === "email" && (
+            <Field label="Título grande dentro del correo (opcional)">
+              <input value={form.headline} onChange={(e) => setForm({ ...form, headline: e.target.value })} className={inputCls} maxLength={120} />
+            </Field>
+          )}
+          {(channel === "email" || form.push_style === "banner") && (
+            <Field label={channel === "email" ? "Enlace de la imagen (opcional, vertical)" : "Enlace de la imagen del banner (horizontal 2:1)"}>
+              <input value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} className={inputCls} placeholder="https://..." />
+            </Field>
+          )}
+          {(channel === "email" || form.push_style === "discount") && (
+            <Field label="Descuento o cupón (opcional)">
+              <input value={form.discount_label} onChange={(e) => setForm({ ...form, discount_label: e.target.value })} className={inputCls} maxLength={60} placeholder="Ej: 50% OFF" />
+            </Field>
+          )}
         </div>
 
-        {/* Historial */}
-        <div className="mt-4 rounded-[16px] border border-border/60 bg-card p-5 shadow-soft">
-          <h3 className="inline-flex items-center gap-2 font-display text-[15px] font-bold">
-            <Users className="h-4 w-4 text-primary" /> Historial de campañas
-          </h3>
-          {isLoading && <div className="mt-3 h-16 animate-pulse rounded-[12px] bg-muted" />}
-          {!isLoading && byChannel.length === 0 && (
-            <p className="mt-3 rounded-[12px] border border-dashed border-border p-6 text-center text-[13px] text-muted-foreground">
-              Todavía no has creado campañas por {channel === "email" ? "correo" : "push"}. La primera que envíes
-              aparecerá aquí con sus clics.
-            </p>
+        <Field label={channel === "email" ? "Texto del correo" : "Texto de la notificación"}>
+          <textarea
+            value={form.content}
+            onChange={(e) => setForm({ ...form, content: e.target.value })}
+            rows={channel === "email" ? 7 : 3}
+            maxLength={channel === "email" ? 6000 : 240}
+            className={cn(inputCls, "h-auto py-3")}
+          />
+        </Field>
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {SHORTCODES.map((s) => (
+            <button
+              key={s.code}
+              title={s.desc}
+              onClick={() => setForm((f) => ({ ...f, content: `${f.content}${f.content && !/\s$/.test(f.content) ? " " : ""}${s.code}` }))}
+              className="h-8 rounded-[10px] bg-primary/10 px-2.5 text-[12px] font-semibold text-primary"
+            >
+              {s.code}
+            </button>
+          ))}
+        </div>
+        <p className="mt-1 text-[12px] text-muted-foreground">
+          [usuario] pone el nombre registrado de cada persona (también en el asunto). Las etiquetas de sección se vuelven botón en el correo.
+        </p>
+
+        {channel === "push" && (
+          <div className="mt-3">
+            <span className="mb-1 block text-[12px] font-semibold text-muted-foreground">Ícono grande (el logo de ORÍGEN va siempre al lado)</span>
+            <div className="flex flex-wrap gap-2">
+              {PUSH_ICONS.map((i) => (
+                <button
+                  key={i.key}
+                  title={i.label}
+                  onClick={() => setForm((f) => ({ ...f, push_icon: i.key }))}
+                  className={cn("grid h-12 w-12 place-items-center rounded-[12px] border-2 bg-background", form.push_icon === i.key ? "border-primary" : "border-transparent")}
+                >
+                  <img src={i.src} alt={i.label} className="h-9 w-9 object-contain" />
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          <Field label={channel === "email" ? "Texto del botón verde" : "—"}>
+            {channel === "email" ? (
+              <input value={form.button_text} onChange={(e) => setForm({ ...form, button_text: e.target.value })} className={inputCls} maxLength={60} placeholder="Ej: Ver mi descuento" />
+            ) : (
+              <p className="pt-3 text-[13px] text-muted-foreground">Al tocar la notificación se abre el enlace de la derecha.</p>
+            )}
+          </Field>
+          <Field label="Enlace al tocar (sección de ORÍGEN o URL)">
+            <input value={form.button_url} onChange={(e) => setForm({ ...form, button_url: e.target.value })} className={inputCls} placeholder="/membresia" />
+          </Field>
+          <Field label="A quién le llega">
+            <select value={form.audience_type} onChange={(e) => setForm({ ...form, audience_type: e.target.value })} className={inputCls}>
+              {AUDIENCES.filter((a) => (kind === "remarketing" ? true : !a.remarketing)).map((a) => (
+                <option key={a.value} value={a.value}>
+                  {a.label}
+                </option>
+              ))}
+            </select>
+          </Field>
+          {isRemarketingAudience ? (
+            <Field label="De qué campaña sale el grupo">
+              <select value={form.source_campaign_id} onChange={(e) => setForm({ ...form, source_campaign_id: e.target.value })} className={inputCls}>
+                <option value="">Elige una campaña enviada</option>
+                {sentCampaigns.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.channel === "email" ? "Correo" : "Push"} · {c.name} ({c.open_count} abrieron)
+                  </option>
+                ))}
+              </select>
+            </Field>
+          ) : (
+            <div className="flex items-end pb-3 text-[13px] text-muted-foreground">
+              {audienceQ.isLoading ? "Calculando…" : audienceQ.data ? `${audienceQ.data.count} personas registradas` : ""}
+              {channel === "email" ? " · solo se envía a quien tiene correo" : " · llega a quien activó avisos en su teléfono"}
+            </div>
           )}
-          <ul className="mt-3 space-y-2">
-            {byChannel.map((c) => {
-              const noClick = Math.max(0, c.sent_count - c.click_count);
-              return (
-                <li key={c.id} className="rounded-[12px] border border-border/60 p-3">
-                  <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2">
-                    <div className="min-w-0">
-                      <p className="truncate text-[14px] font-bold">{c.name}</p>
-                      <p className="truncate text-[12px] text-muted-foreground">
-                        {c.subject || "Sin asunto"} ·{" "}
-                        {c.scheduled_at ? new Date(c.scheduled_at).toLocaleString("es") : "sin fecha"}
-                      </p>
-                    </div>
-                    <span
-                      className={cn(
-                        "shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold",
-                        c.status === "scheduled" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground",
-                      )}
-                    >
-                      {c.status === "scheduled" ? "Programada" : c.status === "sent" ? "Enviada" : "Borrador"}
-                    </span>
-                  </div>
-                  <div className="mt-2 flex flex-wrap gap-1.5 text-[11.5px] font-semibold">
-                    <span className="rounded-[10px] bg-muted px-2 py-1">Enviados {c.sent_count}</span>
-                    <span className="inline-flex items-center gap-1 rounded-[10px] bg-[#3FBE8F]/15 px-2 py-1 text-[#3FBE8F]">
-                      <MousePointerClick className="h-3 w-3" /> Clics {c.click_count}
-                    </span>
-                    <span className="rounded-[10px] bg-muted px-2 py-1">Sin abrir {noClick}</span>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
+          <Field label="Inicio (opcional; vacío = ahora)">
+            <input type="datetime-local" value={form.scheduled_at} onChange={(e) => setForm({ ...form, scheduled_at: e.target.value })} className={inputCls} />
+          </Field>
+          <Field label="Final (opcional)">
+            <input type="datetime-local" value={form.ends_at} onChange={(e) => setForm({ ...form, ends_at: e.target.value })} className={inputCls} />
+          </Field>
+        </div>
+
+        <div className="mt-4 grid gap-2 sm:grid-cols-2">
+          <button onClick={() => setPreview({ channel, data: form })} className={secondaryBtn}>
+            <Eye className="h-4 w-4" /> Vista previa
+          </button>
+          {channel === "email" ? (
+            <div className="flex gap-2">
+              <input value={testTo} onChange={(e) => setTestTo(e.target.value)} className={cn(inputCls, "h-12")} aria-label="Correo de prueba" />
+              <button onClick={() => testEmailM.mutate()} disabled={testEmailM.isPending} className={cn(secondaryBtn, "shrink-0 px-4")}>
+                {testEmailM.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <FlaskConical className="h-4 w-4" />} Prueba
+              </button>
+            </div>
+          ) : (
+            <div className="flex gap-2">
+              <button onClick={() => testPushM.mutate(0)} disabled={testPushM.isPending} className={cn(secondaryBtn, "flex-1")}>
+                <Smartphone className="h-4 w-4" /> Probar ya
+              </button>
+              <button onClick={() => testPushM.mutate(1)} disabled={testPushM.isPending} className={cn(secondaryBtn, "flex-1")}>
+                {testPushM.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <FlaskConical className="h-4 w-4" />} Prueba en 1 min
+              </button>
+            </div>
+          )}
+          <button onClick={() => save.mutate("schedule")} disabled={save.isPending || !form.scheduled_at} className={cn(secondaryBtn, "disabled:opacity-50")}>
+            Programar
+          </button>
+          <button onClick={() => save.mutate("now")} disabled={save.isPending} className={primaryBtn}>
+            {save.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />} Publicar ahora
+          </button>
         </div>
       </div>
+
+      <History
+        campaigns={list}
+        loading={campaigns.isLoading}
+        onPreview={(c) => setPreview({ channel: c.channel === "push" ? "push" : "email", data: campaignToForm(c) })}
+        onPause={async (id) => {
+          await pause({ data: { campaignId: id } });
+          invalidate();
+        }}
+        onDelete={async (c) => {
+          if (!(await confirmDeletion({ title: "¿Eliminar esta campaña?", body: c.name }))) return;
+          await supabase.from("marketing_events").delete().eq("campaign_id", c.id);
+          const { error } = await supabase.from("marketing_campaigns").delete().eq("id", c.id);
+          if (error) toast.error("No pudimos eliminarla");
+          invalidate();
+        }}
+      />
+
+      {preview && <PreviewModal preview={preview} onClose={() => setPreview(null)} />}
     </section>
-    </>
   );
+}
+
+function withHeadline(f: typeof empty) {
+  return f.headline.trim() ? `${f.headline.trim()}\n\n${f.content}` : f.content;
+}
+
+function campaignToForm(c: Campaign): typeof empty {
+  return {
+    ...empty,
+    name: c.name,
+    subject: c.subject ?? "",
+    content: c.content,
+    image_url: c.image_url ?? "",
+    button_text: c.button_text ?? "",
+    button_url: c.button_url ?? "",
+    discount_label: c.discount_label ?? "",
+    push_style: (c.push_style as PushStyle) || "text",
+    push_icon: c.push_icon ?? "logo",
+  };
+}
+
+function TemplateLibrary({
+  templates,
+  kind,
+  selected,
+  onPick,
+  onRefresh,
+  refreshing,
+}: {
+  templates: EmailTemplate[];
+  kind: Kind;
+  selected: string;
+  onPick: (t: EmailTemplate) => void;
+  onRefresh: (ids: string[]) => void;
+  refreshing: boolean;
+}) {
+  const [cat, setCat] = useState<TemplateCategory>(kind === "remarketing" ? "remarketing" : "estaciones");
+  const [howMany, setHowMany] = useState(5);
+  const items = templates.filter((t) => t.category === cat);
+  return (
+    <div className="rounded-[16px] border border-border/60 bg-card p-4 shadow-soft">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h3 className="font-display text-[17px] font-bold">Plantillas ({templates.length})</h3>
+        <div className="flex items-center gap-2">
+          <input
+            type="number"
+            min={1}
+            max={items.length}
+            value={howMany}
+            onChange={(e) => setHowMany(Math.max(1, Math.min(items.length, Number(e.target.value) || 1)))}
+            className="h-10 w-16 rounded-[10px] border-[1.5px] border-border bg-card px-2 text-center text-[14px]"
+            aria-label="Cuántas actualizar"
+          />
+          <button onClick={() => onRefresh(items.slice(0, howMany).map((t) => t.id))} disabled={refreshing} className={cn(secondaryBtn, "h-10 px-3")}>
+            {refreshing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />} Actualizar
+          </button>
+        </div>
+      </div>
+      <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+        {TEMPLATE_CATEGORIES.map((c) => (
+          <button
+            key={c.key}
+            onClick={() => setCat(c.key)}
+            className={cn("h-9 shrink-0 rounded-[10px] px-3 text-[13px] font-semibold", cat === c.key ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary")}
+          >
+            {c.label} · {c.count}
+          </button>
+        ))}
+      </div>
+      <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {items.map((t) => (
+          <button
+            key={t.id}
+            onClick={() => onPick(t)}
+            className={cn("overflow-hidden rounded-[14px] border-2 bg-background text-left transition active:scale-[.97]", selected === t.id ? "border-primary" : "border-transparent")}
+          >
+            <div className="relative aspect-[3/4]">
+              <img src={t.image_url} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+              <div className="absolute inset-x-0 bottom-0 p-2" style={{ background: `linear-gradient(transparent, ${t.accent})` }}>
+                <p className="line-clamp-2 font-display text-[13px] font-bold leading-tight text-primary-foreground">{t.headline}</p>
+                {t.discount_label && <span className="mt-1 inline-block rounded-[8px] bg-card px-1.5 text-[11px] font-bold text-foreground">{t.discount_label}</span>}
+              </div>
+            </div>
+            <p className="line-clamp-2 p-2 text-[12px] text-muted-foreground">{t.subject}</p>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function History({
+  campaigns,
+  loading,
+  onPreview,
+  onPause,
+  onDelete,
+}: {
+  campaigns: Campaign[];
+  loading: boolean;
+  onPreview: (c: Campaign) => void;
+  onPause: (id: string) => void;
+  onDelete: (c: Campaign) => void;
+}) {
+  const [tab, setTab] = useState<"email" | "push">("email");
+  const [kindF, setKindF] = useState<"all" | Kind>("all");
+  const rows = campaigns.filter((c) => (tab === "push" ? c.channel === "push" : c.channel !== "push") && (kindF === "all" || c.kind === kindF));
+  const aiPush = tab === "push" ? rows.filter((c) => c.ai_generated) : [];
+  const manual = tab === "push" ? rows.filter((c) => !c.ai_generated) : rows;
+  return (
+    <div className="rounded-[16px] border border-border/60 bg-card p-4 shadow-soft">
+      <div className="flex flex-wrap items-center gap-2">
+        <h3 className="mr-auto font-display text-[17px] font-bold">Historial en vivo</h3>
+        {(["email", "push"] as const).map((t) => (
+          <button key={t} onClick={() => setTab(t)} className={cn("h-9 rounded-[10px] px-3 text-[13px] font-semibold", tab === t ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary")}>
+            {t === "email" ? "Correos" : "Push"}
+          </button>
+        ))}
+        <select value={kindF} onChange={(e) => setKindF(e.target.value as "all" | Kind)} className="h-9 rounded-[10px] border-[1.5px] border-border bg-card px-2 text-[13px]">
+          <option value="all">Todas</option>
+          <option value="marketing">Marketing</option>
+          <option value="remarketing">Remarketing</option>
+        </select>
+      </div>
+
+      {loading && <div className="mt-3 h-20 animate-pulse rounded-[12px] bg-muted" />}
+      {!loading && rows.length === 0 && (
+        <div className="mt-4 grid place-items-center gap-2 py-6 text-center">
+          <Send className="h-8 w-8 text-primary" />
+          <p className="text-[14px] font-semibold">Tu primera campaña aparecerá aquí</p>
+          <p className="text-[13px] text-muted-foreground">Verás cuántas personas la recibieron, la abrieron y tocaron el botón.</p>
+        </div>
+      )}
+
+      {aiPush.length > 0 && (
+        <details className="mt-3 rounded-[12px] bg-muted/40 p-3">
+          <summary className="cursor-pointer text-[14px] font-semibold">
+            <Bot className="mr-1 inline h-4 w-4 text-primary" /> Push del asistente ({aiPush.length}) ·{" "}
+            {aiPush.reduce((n, c) => n + c.open_count, 0)} aperturas
+          </summary>
+          <ul className="mt-2 divide-y divide-border">
+            {aiPush.map((c) => (
+              <li key={c.id} className="flex items-center gap-2 py-2 text-[13px]">
+                <img src={PUSH_ICONS.find((i) => i.key === c.push_icon)?.src ?? "/icon-192.png"} alt="" className="h-7 w-7 object-contain" />
+                <span className="min-w-0 flex-1 truncate">{c.subject}</span>
+                <span className="text-muted-foreground">{fmt(c.last_sent_at ?? c.scheduled_at)}</span>
+                <Metric icon={Send} v={c.sent_count} />
+                <Metric icon={MailOpen} v={c.open_count} />
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
+
+      <ul className="mt-3 grid gap-2">
+        {manual.map((c) => (
+          <li key={c.id} className="rounded-[12px] border border-border/60 p-3">
+            <div className="flex items-start gap-2">
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[14px] font-semibold">
+                  {c.ai_generated && <Bot className="mr-1 inline h-4 w-4 text-primary" />}
+                  {c.name}
+                </p>
+                <p className="text-[12px] text-muted-foreground">
+                  <span className="capitalize">{c.kind}</span> · {statusLabel(c.status)} · {fmt(c.last_sent_at ?? c.scheduled_at)}
+                </p>
+              </div>
+              <button onClick={() => onPreview(c)} className={iconBtn} aria-label="Vista previa">
+                <Eye className="h-4 w-4" />
+              </button>
+              {c.status === "scheduled" && (
+                <button onClick={() => onPause(c.id)} className={iconBtn} aria-label="Pausar">
+                  <Pause className="h-4 w-4" />
+                </button>
+              )}
+              <button onClick={() => onDelete(c)} className={iconBtn} aria-label="Eliminar">
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="mt-2 flex flex-wrap gap-3 text-[13px]">
+              <Metric icon={Send} v={c.sent_count} label="enviados" />
+              <Metric icon={MailOpen} v={c.open_count} label={`abrieron${c.sent_count ? ` (${Math.round((c.open_count / c.sent_count) * 100)}%)` : ""}`} />
+              <Metric icon={MousePointerClick} v={c.click_count} label="clics" />
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function PreviewModal({ preview, onClose }: { preview: { channel: Channel; data: typeof empty }; onClose: () => void }) {
+  const f = preview.data;
+  const name = "Ruth";
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-center bg-foreground/40 p-3" onClick={onClose}>
+      <div className="relative max-h-[92dvh] w-full max-w-[420px] overflow-auto rounded-[24px] bg-card p-3 shadow-xl" onClick={(e) => e.stopPropagation()}>
+        <button onClick={onClose} aria-label="Cerrar" className="absolute right-2 top-2 z-10 grid h-11 w-11 place-items-center rounded-full bg-muted">
+          <X className="h-5 w-5" />
+        </button>
+        <p className="mb-2 px-1 text-[12px] font-semibold text-muted-foreground">Vista previa con el nombre de ejemplo «{name}»</p>
+        {preview.channel === "email" ? (
+          <>
+            <p className="mb-2 rounded-[10px] bg-muted px-3 py-2 text-[13px]">
+              <b>Asunto:</b> {(f.subject || "").replace(/\[(usuario|nombre)\]/gi, name)}
+            </p>
+            <iframe
+              title="Vista previa del correo"
+              className="h-[70dvh] w-full rounded-[14px] border border-border bg-background"
+              srcDoc={renderEmailHtml(
+                {
+                  subject: f.subject,
+                  content: f.content,
+                  headline: f.headline || null,
+                  image_url: f.image_url || null,
+                  button_text: f.button_text || null,
+                  button_url: f.button_url || null,
+                  discount_label: f.discount_label || null,
+                  accent: f.accent,
+                },
+                { name },
+              )}
+            />
+          </>
+        ) : (
+          <PushPreview f={f} name={name} />
+        )}
+      </div>
+    </div>
+  );
+}
+
+function PushPreview({ f, name }: { f: typeof empty; name: string }) {
+  const p = buildPush(
+    { subject: f.subject, content: f.content, button_url: f.button_url || null, image_url: f.image_url || null, push_style: f.push_style, push_icon: f.push_icon, discount_label: f.discount_label || null },
+    name,
+  );
+  return (
+    <div className="rounded-[20px] bg-foreground p-3">
+      <div className="rounded-[18px] bg-background/10 p-3 text-background">
+        <div className="flex gap-3">
+          <div className="relative h-12 w-12 shrink-0">
+            <img src={p.icon} alt="" className="h-12 w-12 rounded-[10px] object-contain" />
+            <img src="/badge-96.png" alt="" className="absolute -bottom-1 -right-1 h-5 w-5 rounded-[4px] bg-muted-foreground p-0.5" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-[11px] opacity-70">ORÍGEN · tuorigen.app · ahora</p>
+            <p className="text-[15px] font-semibold leading-tight">{p.title}</p>
+            <p className="mt-0.5 text-[14px] leading-snug opacity-80">{p.body}</p>
+          </div>
+        </div>
+        {p.image && <img src={p.image} alt="" className="mt-3 aspect-[2/1] w-full rounded-[14px] object-cover" />}
+      </div>
+      <p className="mt-2 text-center text-[12px] text-background/70">Al tocar abre: {p.url}</p>
+    </div>
+  );
+}
+
+function ToggleRow({ label, on, busy, onChange }: { label: string; on: boolean; busy: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <button
+      onClick={() => onChange(!on)}
+      disabled={busy}
+      role="switch"
+      aria-checked={on}
+      className={cn("flex h-12 items-center justify-between rounded-[12px] border-[1.5px] px-3 text-[14px] font-semibold", on ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground")}
+    >
+      {label}
+      <span className={cn("relative h-6 w-11 rounded-full transition", on ? "bg-primary" : "bg-muted")}>
+        <span className={cn("absolute top-0.5 h-5 w-5 rounded-full bg-card shadow transition-all", on ? "left-[22px]" : "left-0.5")} />
+      </span>
+    </button>
+  );
+}
+
+function Metric({ icon: Icon, v, label }: { icon: typeof Send; v: number; label?: string }) {
+  return (
+    <span className="inline-flex items-center gap-1 text-muted-foreground">
+      <Icon className="h-4 w-4 text-primary" /> <b className="text-foreground">{v}</b> {label}
+    </span>
+  );
+}
+
+function statusLabel(s: string) {
+  return ({ draft: "Borrador", scheduled: "Programada", sending: "Enviando", sent: "Enviada", paused: "Pausada" } as Record<string, string>)[s] ?? s;
+}
+
+function fmt(d: string | null) {
+  if (!d) return "—";
+  return new Date(d).toLocaleString("es", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
 }
 
 const inputCls =
-  "h-12 w-full rounded-[10px] border-[1.5px] border-border bg-card px-3 text-[14px] outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/20";
-const inputSm =
-  "h-11 w-full rounded-[10px] border-[1.5px] border-border bg-card px-3 text-[13px] outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/20";
+  "h-12 w-full rounded-[10px] border-[1.5px] border-border bg-card px-3 text-[14px] text-foreground outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/20";
+const secondaryBtn = "inline-flex h-12 items-center justify-center gap-2 rounded-[12px] bg-primary/10 text-[14px] font-semibold text-primary disabled:opacity-60";
+const primaryBtn =
+  "inline-flex h-12 items-center justify-center gap-2 rounded-[12px] bg-primary text-[15px] font-bold text-primary-foreground shadow-[0_4px_14px_hsl(var(--primary)/.3)] disabled:opacity-60";
+const iconBtn = "grid h-11 w-11 place-items-center rounded-[10px] bg-muted/60 text-muted-foreground";
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <label className="block">
+    <label className="mt-3 block">
       <span className="mb-1 block text-[12px] font-semibold text-muted-foreground">{label}</span>
       {children}
     </label>
-  );
-}
-
-function AiPushPanel() {
-  const qc = useQueryClient();
-  const fetchIt = useServerFn(getAiPush);
-  const save = useServerFn(setAiPush);
-  const { data } = useQuery({ queryKey: ["ai-push"], queryFn: () => fetchIt() });
-  const toggle = useMutation({
-    mutationFn: (enabled: boolean) => save({ data: { enabled } }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["ai-push"] }); toast.success("Listo, guardado."); },
-    onError: () => toast.error("No se pudo guardar. Intenta de nuevo."),
-  });
-  return (
-    <section className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto]">
-      <div className="rounded-[16px] border border-border/60 bg-card p-4 shadow-soft">
-        <p className="inline-flex items-center gap-2 font-display text-[15px] font-bold"><Users className="h-4 w-4 text-primary" /> Personas registradas</p>
-        <div className="mt-2 grid grid-cols-3 gap-2 text-center">
-          {[["Total", data?.total], ["Con pago", data?.paid], ["Sin pago", data?.free]].map(([l, v]) => (
-            <div key={String(l)} className="rounded-[10px] bg-muted p-2">
-              <p className="font-display text-[20px] font-bold">{v ?? "–"}</p>
-              <p className="text-[12px] text-muted-foreground">{l}</p>
-            </div>
-          ))}
-        </div>
-        <p className="mt-2 text-[12px] text-muted-foreground">Elige "Compradores" o "No compradores" como audiencia para separar tus campañas.</p>
-      </div>
-      <div className="rounded-[16px] border border-border/60 bg-card p-4 shadow-soft sm:w-[300px]">
-        <p className="inline-flex items-center gap-2 font-display text-[15px] font-bold"><Bell className="h-4 w-4 text-primary" /> Avisos push con IA</p>
-        <p className="mt-1 text-[12.5px] text-muted-foreground">Cada día recomienda al azar algo de ORÍGEN según los intereses de cada persona.</p>
-        <button
-          disabled={!data || toggle.isPending}
-          onClick={() => toggle.mutate(!data?.enabled)}
-          className={cn("mt-3 min-h-11 w-full rounded-[12px] text-[14px] font-bold", data?.enabled ? "bg-primary text-primary-foreground" : "bg-muted text-foreground")}
-        >
-          {data?.enabled ? "Encendido" : "Apagado"}
-        </button>
-      </div>
-    </section>
   );
 }
