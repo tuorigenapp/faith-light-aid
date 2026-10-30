@@ -204,6 +204,7 @@ export const scheduleTestPush = createServerFn({ method: "POST" })
         name: `Prueba push ${at.toISOString().slice(11, 16)} UTC`,
         channel: "push",
         ...c,
+        push_style: c.push_style ?? "text",
         audience_type: "me",
         status: minutes === 0 ? "draft" : "scheduled",
         scheduled_at: at.toISOString(),
