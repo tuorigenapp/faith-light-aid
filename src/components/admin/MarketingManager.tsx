@@ -523,7 +523,7 @@ export function MarketingManager() {
           invalidate();
         }}
         onDelete={async (c) => {
-          if (!(await confirmDeletion({ title: "¿Eliminar esta campaña?", body: c.name }))) return;
+          if (!(await confirmDeletion(`La campaña «${c.name}» y sus estadísticas se eliminarán.`))) return;
           await supabase.from("marketing_events").delete().eq("campaign_id", c.id);
           const { error } = await supabase.from("marketing_campaigns").delete().eq("id", c.id);
           if (error) toast.error("No pudimos eliminarla");
