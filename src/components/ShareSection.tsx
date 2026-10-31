@@ -35,8 +35,8 @@ export function ShareSection() {
       <button
         onClick={() => setOpen(true)}
         aria-label="Compartir esta sección"
-        className="fixed left-4 z-40 grid h-11 w-11 place-items-center rounded-full border border-border bg-card text-primary shadow-soft transition active:scale-[.97] lg:bottom-6"
-        style={{ bottom: "calc(env(safe-area-inset-bottom) + 100px)" }}
+        className="fixed left-4 z-40 grid h-11 w-11 place-items-center rounded-full border border-border bg-card text-primary shadow-soft transition active:scale-[.97]"
+        style={{ bottom: "calc(env(safe-area-inset-bottom) + 152px)" }}
       >
         <Share2 className="h-5 w-5" />
       </button>
