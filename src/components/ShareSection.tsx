@@ -57,7 +57,7 @@ export function ShareSection() {
             </div>
             {preview && (
               <div className="mt-4 overflow-hidden rounded-[16px] border border-border">
-                <img src={preview.image} alt="" className="aspect-[1200/630] w-full object-cover" loading="lazy" />
+                <img src={preview.image.replace("https://tuorigen.app", "")} alt="" className="aspect-[1200/630] w-full object-cover" loading="lazy" />
                 <div className="p-3">
                   <p className="text-[14px] font-semibold text-foreground">{preview.title}</p>
                   <p className="text-[12px] text-muted-foreground">{preview.description}</p>

@@ -23,6 +23,7 @@ import { cn } from "@/lib/utils";
 import { FloatingChatFab } from "@/components/FloatingChatFab";
 import { FloatingHelp } from "@/components/FloatingHelp";
 import { FloatingOrigenMenu } from "@/components/FloatingOrigenMenu";
+import { ShareSection } from "@/components/ShareSection";
 import { LiveActivityToasts } from "@/components/LiveActivityToasts";
 import { SatisfactionPulse } from "@/components/SatisfactionPulse";
 import { MotivationalReminders } from "@/components/MotivationalReminders";
@@ -376,7 +377,7 @@ function AuthLayoutInner() {
         {/* Floating chat with Ruth Esther */}
           {isCommunity && <PromoPopup userId={user?.id} placement="comunidad" />}
           {!isCommunity && !focusMode && <><FloatingChatFab /><FloatingHelp /><PromoPopup userId={user?.id} placement="inicio" /><RoulettePrompt userId={user?.id} />
-      <FloatingOrigenMenu /><LiveActivityToasts /><SatisfactionPulse /><MotivationalReminders /></>}
+      <FloatingOrigenMenu /><ShareSection /><LiveActivityToasts /><SatisfactionPulse /><MotivationalReminders /></>}
 
 
         {/* Mobile bottom nav — con botón central O */}
