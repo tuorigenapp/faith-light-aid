@@ -119,3 +119,6 @@
 - [x] Ícono de ORÍGEN en el círculo de las notificaciones de Android.
 - [x] Vista previa con imagen, título e invitación al compartir cada sección.
 - [x] Comunidad, cPanel, Google Drive y consultas en Vercel: el trabajo del servidor se atiende en la copia publicada que tiene las claves.
+- [x] Marketing: push 3 estilos (texto/banner/descuento) con íconos 3D, correo con 100 plantillas renovables, etiquetas reales, pie de soporte, aperturas y clics en vivo, remarketing, asistente 24/7, pruebas.
+- [x] Modo oscuro en consultas y secciones internas; botón de compartir sección.
+- [ ] Prueba push en tu teléfono: falta activar avisos desde el teléfono con la cuenta administradora y publicar.
