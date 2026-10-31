@@ -235,7 +235,7 @@ function Visualiza() {
         />
         <div className="absolute inset-0 bg-gradient-to-r from-primary/95 via-primary/70 to-transparent md:via-primary/40" />
         <div className="relative z-10 p-6 md:p-10 max-w-xl text-primary-foreground">
-          <div className="inline-flex items-center gap-2 rounded-full bg-white/15 border border-white/25 backdrop-blur px-3 py-1 text-[11px] font-bold">
+          <div className="inline-flex items-center gap-2 rounded-full bg-card/15 border border-white/25 backdrop-blur px-3 py-1 text-[11px] font-bold">
             <Sparkles className="w-3.5 h-3.5" /> Nueva experiencia · Programa de Transformación
           </div>
           <h1 className="font-display font-extrabold text-3xl md:text-5xl mt-4 leading-tight">Visualízalo y Vívelo</h1>

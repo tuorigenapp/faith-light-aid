@@ -183,7 +183,7 @@ function HomeView({ displayName, avatar, gems, onOpenTree, onTransfer }: { displ
         <Link to="/patrones" className="mt-5 block rounded-[16px] p-4 text-white active:scale-[.99] transition"
           style={{ background: "linear-gradient(135deg,#8F6BFF 0%,#F58BCB 100%)", boxShadow: "0 4px 14px rgba(124,92,255,.30)" }}>
           <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
-            <span className="w-11 h-11 shrink-0 rounded-full bg-white/20 grid place-items-center backdrop-blur">
+            <span className="w-11 h-11 shrink-0 rounded-full bg-card/20 grid place-items-center backdrop-blur">
               <Sparkles className="w-5 h-5" />
             </span>
             <span className="min-w-0">
@@ -264,7 +264,7 @@ function TreeDetailView({
             </div>
           </div>
           <div className="text-right">
-            <div className="inline-flex items-center gap-1 bg-white/10 backdrop-blur rounded-2xl px-3 py-1.5">
+            <div className="inline-flex items-center gap-1 bg-card/10 backdrop-blur rounded-2xl px-3 py-1.5">
               <span className="text-lg">🍃</span>
               <span className="font-display font-black text-lg leading-none">+{gemsFromMembers.toLocaleString()}</span>
             </div>

@@ -243,7 +243,7 @@ function PatronesPage() {
   }));
 
   return (
-    <div className="relative min-h-[calc(100vh-4rem)] bg-white overflow-hidden">
+    <div className="relative min-h-[calc(100vh-4rem)] bg-card overflow-hidden">
       {/* Ambient lights */}
       <div aria-hidden className="pointer-events-none absolute -top-40 -left-32 w-[30rem] h-[30rem] rounded-full blur-[110px]"
         style={{ background: "radial-gradient(circle, rgba(124,92,255,0.16), transparent 65%)" }} />
@@ -255,17 +255,17 @@ function PatronesPage() {
       <div className="relative z-10 mx-auto max-w-lg px-5 pt-6 pb-16">
         {/* Progress header */}
         <div className="flex items-center justify-between mb-6">
-          <Link to="/dashboard" aria-label="Volver al inicio" className="w-11 h-11 rounded-full bg-white shadow-soft grid place-items-center">
-            <ArrowLeft className="w-4 h-4 text-[#1B1B27]" />
+          <Link to="/dashboard" aria-label="Volver al inicio" className="w-11 h-11 rounded-full bg-card shadow-soft grid place-items-center">
+            <ArrowLeft className="w-4 h-4 text-foreground" />
           </Link>
-          <div className="text-[13px] font-medium text-[#64667A]">Paso {step} de 3</div>
+          <div className="text-[13px] font-medium text-muted-foreground">Paso {step} de 3</div>
           <div className="w-10" />
         </div>
         <div className="flex items-center justify-center gap-2 mb-8">
           {[1, 2, 3].map((s) => (
             <div key={s} className={cn(
               "h-1.5 rounded-full transition-all duration-500",
-              s <= step ? "w-14 bg-gradient-to-r from-[#7C5CFF] via-[#61A8FF] to-[#F58BCB]" : "w-8 bg-[#ECEEF5]"
+              s <= step ? "w-14 bg-gradient-to-r from-[#7C5CFF] via-[#61A8FF] to-[#F58BCB]" : "w-8 bg-muted"
             )} />
           ))}
         </div>
@@ -324,37 +324,37 @@ function Step1({
   return (
     <div>
       {/* Hero illustration */}
-      <div className="relative rounded-[2rem] overflow-hidden bg-gradient-to-b from-[#F5F0FF] to-white shadow-soft">
+      <div className="relative rounded-[2rem] overflow-hidden bg-gradient-to-b from-primary/10 to-white shadow-soft">
         <ManagedImage imageKey="imagen:consulta:patrones" src={step1Asset} alt="Consulta de patrones familiares — ORIGEN" className="w-full h-auto object-cover" />
       </div>
 
-      <h1 className="text-center font-display font-extrabold text-[28px] leading-tight mt-6 text-[#1B1B27]">
+      <h1 className="text-center font-display font-extrabold text-[28px] leading-tight mt-6 text-foreground">
         Explora tus <span className="bg-gradient-to-r from-[#7C5CFF] to-[#F58BCB] bg-clip-text text-transparent">Patrones Familiares</span>
       </h1>
-      <p className="text-center text-[14px] text-[#64667A] mt-3 leading-relaxed">
+      <p className="text-center text-[14px] text-muted-foreground mt-3 leading-relaxed">
         Formula la situación que deseas comprender. Analizaremos únicamente la información registrada durante tu proceso para ofrecerte una nueva consulta personalizada.
       </p>
 
       <div className="mt-6 space-y-4">
         <Field label="Nombre">
           <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Escribe tu nombre"
-            className="h-12 rounded-[16px] border-[#ECEEF5] bg-white text-[15px] focus-visible:ring-2 focus-visible:ring-[#7C5CFF]/25 focus-visible:border-[#7C5CFF]" />
+            className="h-12 rounded-[16px] border-border bg-card text-[15px] focus-visible:ring-2 focus-visible:ring-[#7C5CFF]/25 focus-visible:border-[#7C5CFF]" />
         </Field>
         <Field label="Fecha de nacimiento">
           <Input type="date" value={birthdate} onChange={(e) => setBirthdate(e.target.value)}
-            className="h-12 rounded-[16px] border-[#ECEEF5] bg-white text-[15px] focus-visible:ring-2 focus-visible:ring-[#7C5CFF]/25 focus-visible:border-[#7C5CFF]" />
+            className="h-12 rounded-[16px] border-border bg-card text-[15px] focus-visible:ring-2 focus-visible:ring-[#7C5CFF]/25 focus-visible:border-[#7C5CFF]" />
         </Field>
         <Field label="¿Qué situación deseas comprender?">
           <Textarea
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
             placeholder={"Ejemplos:\n• ¿Por qué siempre repito este patrón?\n• ¿Qué podría estar influyendo en mis relaciones?\n• ¿Qué necesito comprender de mi historia familiar?"}
-            className="min-h-32 rounded-[16px] border-[#ECEEF5] bg-white text-[14px] resize-none focus-visible:ring-2 focus-visible:ring-[#7C5CFF]/25 focus-visible:border-[#7C5CFF]"
+            className="min-h-32 rounded-[16px] border-border bg-card text-[14px] resize-none focus-visible:ring-2 focus-visible:ring-[#7C5CFF]/25 focus-visible:border-[#7C5CFF]"
           />
         </Field>
       </div>
 
-      <div className="mt-4 flex items-center justify-between rounded-[14px] bg-[#F5F0FF] px-4 py-3">
+      <div className="mt-4 flex items-center justify-between rounded-[14px] bg-primary/10 px-4 py-3">
         <div className="flex items-center gap-2 text-[13px] font-semibold text-[#7C5CFF]">
           <Leaf className="w-4 h-4" /> Costo de esta consulta
         </div>
@@ -373,7 +373,7 @@ function Step1({
       >
         <Sparkles className="w-4 h-4" /> Analizar mi patrón <ArrowRight className="w-4 h-4" />
       </button>
-      <div className="mt-3 inline-flex items-center gap-1.5 text-[12px] text-[#64667A] w-full justify-center">
+      <div className="mt-3 inline-flex items-center gap-1.5 text-[12px] text-muted-foreground w-full justify-center">
         <Lock className="w-3.5 h-3.5" /> Tu información es privada y segura.
       </div>
 
@@ -391,7 +391,7 @@ function Step1({
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="text-[13px] font-semibold text-[#1B1B27]">{label}</label>
+      <label className="text-[13px] font-semibold text-foreground">{label}</label>
       <div className="mt-1.5">{children}</div>
     </div>
   );
@@ -405,18 +405,18 @@ function Step2({ line, progress }: { line: string; progress: number }) {
         <div aria-hidden className="absolute inset-0 rounded-full blur-3xl -z-10"
           style={{ background: "radial-gradient(circle at 50% 60%, rgba(245,139,203,0.35), transparent 65%)" }} />
       </div>
-      <h2 className="mt-6 font-display font-extrabold text-[24px] text-[#1B1B27]">Analizando tu información…</h2>
+      <h2 className="mt-6 font-display font-extrabold text-[24px] text-foreground">Analizando tu información…</h2>
 
-      <div className="mt-6 mx-auto max-w-sm rounded-[18px] bg-white/70 border border-[#ECEEF5] shadow-soft px-4 py-3">
-        <p key={line} className="text-[14px] text-[#64667A] animate-in fade-in slide-in-from-bottom-2 duration-500 inline-flex items-center gap-2">
+      <div className="mt-6 mx-auto max-w-sm rounded-[18px] bg-card/70 border border-border shadow-soft px-4 py-3">
+        <p key={line} className="text-[14px] text-muted-foreground animate-in fade-in slide-in-from-bottom-2 duration-500 inline-flex items-center gap-2">
           <Heart className="w-4 h-4 text-[#F58BCB] fill-[#F58BCB] animate-pulse" /> {line}
         </p>
       </div>
 
-      <div className="mt-8 mx-auto max-w-sm h-2 rounded-full bg-[#ECEEF5] overflow-hidden">
+      <div className="mt-8 mx-auto max-w-sm h-2 rounded-full bg-muted overflow-hidden">
         <div className="h-full bg-gradient-to-r from-[#7C5CFF] via-[#61A8FF] to-[#F58BCB] transition-all duration-500" style={{ width: `${progress}%` }} />
       </div>
-      <div className="mt-2 text-[12px] text-[#64667A]">{progress}%</div>
+      <div className="mt-2 text-[12px] text-muted-foreground">{progress}%</div>
     </div>
   );
 }
@@ -441,7 +441,7 @@ function Step3({
 
   return (
     <div>
-      <h2 className="text-center font-display font-extrabold text-[26px] mt-2 text-[#1B1B27]">Tu Reflexión Personal</h2>
+      <h2 className="text-center font-display font-extrabold text-[26px] mt-2 text-foreground">Tu Reflexión Personal</h2>
       <div className="mt-1 mx-auto w-12 h-0.5 rounded-full bg-gradient-to-r from-[#7C5CFF] to-[#F58BCB]" />
 
       {/* Lo que observamos */}
@@ -450,7 +450,7 @@ function Step3({
       </ResultCard>
 
       {/* Patrones */}
-      <div className="mt-4 rounded-[20px] bg-white border-2 border-[#ECEEF5] shadow-soft p-5">
+      <div className="mt-4 rounded-[20px] bg-card border-2 border-border shadow-soft p-5">
         <div className="flex items-center gap-2.5">
           <img src={e3dCross} className="w-10 h-10" alt="" />
           <div className="text-[11px] uppercase tracking-widest font-bold text-primary">Posibles patrones identificados</div>
@@ -459,11 +459,11 @@ function Step3({
           {result.patterns.map((p, i) => {
             const Icon = patternIcons[i % patternIcons.length];
             return (
-              <div key={i} className="rounded-[14px] bg-white border border-[#ECEEF5] p-3 flex flex-col items-center gap-1.5 text-center shadow-[0_2px_10px_rgba(22,25,45,0.03)]">
-                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#F5F0FF] to-[#E6F1FF] grid place-items-center">
+              <div key={i} className="rounded-[14px] bg-card border border-border p-3 flex flex-col items-center gap-1.5 text-center shadow-[0_2px_10px_rgba(22,25,45,0.03)]">
+                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary/10 to-primary/5 grid place-items-center">
                   <Icon className="w-4 h-4 text-[#7C5CFF]" />
                 </div>
-                <div className="text-[12px] font-semibold text-[#1B1B27] leading-tight">{p}</div>
+                <div className="text-[12px] font-semibold text-foreground leading-tight">{p}</div>
               </div>
             );
           })}
@@ -476,7 +476,7 @@ function Step3({
       </ResultCard>
 
       {/* Recomendaciones */}
-      <div className="mt-4 rounded-[20px] bg-white border-2 border-[#ECEEF5] shadow-soft p-5">
+      <div className="mt-4 rounded-[20px] bg-card border-2 border-border shadow-soft p-5">
         <div className="flex items-center gap-2.5">
           <img src={e3dStar} className="w-10 h-10" alt="" />
           <div className="text-[11px] uppercase tracking-widest font-bold text-primary">Recursos recomendados</div>
@@ -485,11 +485,11 @@ function Step3({
           {result.recommendations.map((r, i) => {
             const Icon = recIcons[i % recIcons.length];
             return (
-              <div key={i} className="rounded-[14px] bg-white border border-[#ECEEF5] p-3 flex items-start gap-2 shadow-[0_2px_10px_rgba(22,25,45,0.03)]">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#F5F0FF] to-[#FFE9F5] grid place-items-center shrink-0">
+              <div key={i} className="rounded-[14px] bg-card border border-border p-3 flex items-start gap-2 shadow-[0_2px_10px_rgba(22,25,45,0.03)]">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/10 to-primary/5 grid place-items-center shrink-0">
                   <Icon className="w-4 h-4 text-[#F58BCB]" />
                 </div>
-                <div className="text-[12px] text-[#1B1B27] leading-snug">{r}</div>
+                <div className="text-[12px] text-foreground leading-snug">{r}</div>
               </div>
             );
           })}
@@ -506,7 +506,7 @@ function Step3({
         </button>
         <button
           onClick={onFinish}
-          className="w-full h-14 rounded-[18px] bg-white border-2 border-[#ECEEF5] text-[#1B1B27] font-semibold text-[15px] inline-flex items-center justify-center gap-2 active:scale-[.98] transition"
+          className="w-full h-14 rounded-[18px] bg-card border-2 border-border text-foreground font-semibold text-[15px] inline-flex items-center justify-center gap-2 active:scale-[.98] transition"
         >
           <Home className="w-4 h-4" /> Finalizar
         </button>
@@ -527,12 +527,12 @@ function ResultCard({
   image, title, children, tint,
 }: { image: string; title: string; children: React.ReactNode; tint?: boolean }) {
   return (
-    <div className={cn("mt-4 rounded-[20px] bg-white border-2 border-[#ECEEF5] shadow-soft p-5", tint && "bg-[#F5F0FF]")}>
+    <div className={cn("mt-4 rounded-[20px] bg-card border-2 border-border shadow-soft p-5", tint && "bg-primary/10")}>
       <div className="flex items-center gap-2.5">
         <img src={image} className="w-10 h-10" alt="" />
         <div className="text-[11px] uppercase tracking-widest font-bold text-primary">{title}</div>
       </div>
-      <div className="mt-2 text-[14px] text-[#64667A] leading-relaxed">{children}</div>
+      <div className="mt-2 text-[14px] text-muted-foreground leading-relaxed">{children}</div>
     </div>
   );
 }

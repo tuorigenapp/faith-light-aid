@@ -111,7 +111,7 @@ function CaminoMapa() {
 
       <div className="relative z-10 px-4 py-5 max-w-[520px] mx-auto mobile-safe-bottom lg:pb-10">
         <Link to="/categorias" className="inline-flex items-center gap-2 text-[13.5px] font-semibold text-white/85">
-          <span className="w-11 h-11 rounded-[12px] bg-white/15 backdrop-blur grid place-items-center"><ArrowLeft className="w-5 h-5" /></span>
+          <span className="w-11 h-11 rounded-[12px] bg-card/15 backdrop-blur grid place-items-center"><ArrowLeft className="w-5 h-5" /></span>
           Categorías
         </Link>
 
@@ -121,7 +121,7 @@ function CaminoMapa() {
             <h1 className="font-display font-extrabold text-[25px] leading-tight text-white mt-1">{camino.title}</h1>
             <p className="text-[13.5px] text-white/75 mt-1 leading-snug">{camino.claim}</p>
           </div>
-          <div className="shrink-0 inline-flex items-center gap-1.5 rounded-full bg-white px-3.5 py-2 shadow-soft">
+          <div className="shrink-0 inline-flex items-center gap-1.5 rounded-full bg-card px-3.5 py-2 shadow-soft">
             <span className="font-display font-extrabold text-[15px] text-foreground">{gems}</span>
             <Leaf className="w-4 h-4 text-[#3FBE8F]" />
           </div>
@@ -133,7 +133,7 @@ function CaminoMapa() {
         </div>
 
         {/* Progreso */}
-        <div className="relative overflow-hidden mt-4 p-4 rounded-[16px] bg-white/95 shadow-soft">
+        <div className="relative overflow-hidden mt-4 p-4 rounded-[16px] bg-card/95 shadow-soft">
           <div className="text-[13px] font-bold text-primary">Hola {firstName}, tu progreso aquí</div>
           <div className="mt-3 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-4">
             <Donut pct={pct} />
@@ -148,7 +148,7 @@ function CaminoMapa() {
         </div>
 
         {!weekOpen && (
-          <button onClick={unlockWeek} className="mt-3 w-full h-[52px] rounded-[12px] bg-white/95 text-[15px] font-semibold text-primary inline-flex items-center justify-center gap-2 shadow-soft active:scale-[.97] transition">
+          <button onClick={unlockWeek} className="mt-3 w-full h-[52px] rounded-[12px] bg-card/95 text-[15px] font-semibold text-primary inline-flex items-center justify-center gap-2 shadow-soft active:scale-[.97] transition">
             <Leaf className="w-4.5 h-4.5 text-[#3FBE8F]" /> Abrir la semana completa · {WEEK_UNLOCK_COST} hojas
           </button>
         )}
@@ -190,7 +190,7 @@ function CaminoMapa() {
           <Stat label="Insignias" value={String(completedCount)} icon={<Award className="w-4 h-4 text-gold" />} />
         </div>
 
-        <div className="relative overflow-hidden mt-4 p-4 pr-24 rounded-[16px] bg-white/92 shadow-soft">
+        <div className="relative overflow-hidden mt-4 p-4 pr-24 rounded-[16px] bg-card/92 shadow-soft">
           <p className="scripture text-[14px] leading-snug">“{camino.scripture.text}”</p>
           <p className="text-[12px] font-bold text-primary mt-2">— {camino.scripture.ref}</p>
           <img src={portal} alt="" aria-hidden width={512} height={512} loading="lazy" className="pointer-events-none absolute -right-2 bottom-0 w-24 object-contain" />
@@ -217,7 +217,7 @@ function Donut({ pct }: { pct: number }) {
 
 function Stat({ label, value, icon }: { label: string; value: string; icon: React.ReactNode }) {
   return (
-    <div className="rounded-[16px] bg-white/92 p-3 text-center shadow-soft">
+    <div className="rounded-[16px] bg-card/92 p-3 text-center shadow-soft">
       <div className="text-[11px] font-semibold text-muted-foreground leading-tight">{label}</div>
       <div className="mt-1 inline-flex items-center gap-1.5">
         <span className="font-display font-extrabold text-[16px] text-foreground">{value}</span>
