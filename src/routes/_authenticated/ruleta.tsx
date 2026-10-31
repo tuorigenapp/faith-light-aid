@@ -257,7 +257,7 @@ function RuletaPage() {
           className="btn-primary-gradient relative min-h-[56px] w-full overflow-hidden rounded-full text-[17px] font-bold text-white transition active:scale-[.97] disabled:opacity-70"
         >
           {!spinning && !locked && (
-            <span aria-hidden className="absolute inset-0 animate-pulse bg-white/10" />
+            <span aria-hidden className="absolute inset-0 animate-pulse bg-card/10" />
           )}
           <span className="relative inline-flex items-center justify-center gap-2">
             {spinning ? (<><Loader2 className="h-5 w-5 animate-spin" /> Girando…</>) : locked ? (

@@ -340,14 +340,14 @@ function StepShell({ step, position, total, dark, onClose, children }: {
             Paso {step} de {TOTAL_STEPS}
           </span>
 
-          <button onClick={onClose} aria-label="Cerrar etapa" className={cn("w-11 h-11 shrink-0 grid place-items-center rounded-full transition active:scale-95", dark ? "text-white/80 hover:bg-white/10" : "text-muted-foreground hover:bg-primary/8")}>
+          <button onClick={onClose} aria-label="Cerrar etapa" className={cn("w-11 h-11 shrink-0 grid place-items-center rounded-full transition active:scale-95", dark ? "text-white/80 hover:bg-card/10" : "text-muted-foreground hover:bg-primary/8")}>
             <X className="w-5 h-5" />
           </button>
         </header>
 
         <div className="mt-3 flex items-center gap-1.5" aria-label={`Paso ${step} de ${TOTAL_STEPS}`}>
           {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
-            <span key={i} className={cn("h-1.5 flex-1 rounded-full transition-all duration-500", i + 1 <= step ? "bg-primary" : dark ? "bg-white/18" : "bg-primary/15")} />
+            <span key={i} className={cn("h-1.5 flex-1 rounded-full transition-all duration-500", i + 1 <= step ? "bg-primary" : dark ? "bg-card/18" : "bg-primary/15")} />
           ))}
         </div>
 
@@ -834,7 +834,7 @@ function Step5({ items, reward, onNext }: { items: { q: string; options: string[
                 revealed && !isCorrect && picked === oi && "bg-[#D64545]/12 text-[#B91C1C] border-[#D64545]/40",
                 revealed && !isCorrect && picked !== oi && "opacity-60")}>
               <span className={cn("w-6 h-6 shrink-0 rounded-full grid place-items-center text-[11px] font-extrabold",
-                revealed && isCorrect ? "bg-white/25 text-white" : "bg-primary/10 text-primary")}>{letters[oi]}</span>
+                revealed && isCorrect ? "bg-card/25 text-white" : "bg-primary/10 text-primary")}>{letters[oi]}</span>
               <span className="min-w-0">{op}</span>
               {revealed && isCorrect && <Check className="w-4 h-4 shrink-0" />}
               {revealed && !isCorrect && picked === oi && <X className="w-4 h-4 shrink-0" />}

@@ -500,7 +500,7 @@ function CristoPage() {
               </h1>
             </div>
 
-            <Card className="mt-8 rounded-[1.75rem] p-6 text-center bg-white/95 dark:bg-card/95 backdrop-blur-xl border border-white/60 shadow-soft">
+            <Card className="mt-8 rounded-[1.75rem] p-6 text-center bg-card/95 dark:bg-card/95 backdrop-blur-xl border border-white/60 shadow-soft">
               <div className="inline-flex items-center gap-1.5 text-xs text-primary font-bold">
                 <Sparkles className="w-3.5 h-3.5" /> Programa de Oración y Escritura
               </div>
@@ -622,16 +622,16 @@ function CristoPage() {
       <section className="relative overflow-hidden rounded-b-[2rem]">
         <ManagedImage imageKey="imagen:visualiza:cristo" src={heroImg} alt={practice.title} className="absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-background/70" />
-        <button onClick={() => setStep(2)} className="absolute top-4 left-4 w-10 h-10 rounded-full bg-white/90 grid place-items-center shadow-soft z-10">
+        <button onClick={() => setStep(2)} className="absolute top-4 left-4 w-10 h-10 rounded-full bg-card/90 grid place-items-center shadow-soft z-10">
           <ArrowLeft className="w-4 h-4 text-foreground" />
         </button>
-        <div className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/90 grid place-items-center shadow-soft z-10">
+        <div className="absolute top-4 right-4 w-10 h-10 rounded-full bg-card/90 grid place-items-center shadow-soft z-10">
           <Heart className="w-4 h-4 text-pink-500" />
         </div>
         <div className="relative pt-24 pb-8 px-4 text-center">
           <div className="text-[11px] uppercase tracking-widest text-white font-bold drop-shadow">Paso 3 de 3</div>
           <h2 className="font-display font-extrabold text-2xl sm:text-3xl mt-1 drop-shadow-lg text-white">{practice.title}</h2>
-          <div className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 text-primary text-[11px] font-bold shadow-soft">
+          <div className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-card/90 text-primary text-[11px] font-bold shadow-soft">
             <Star className="w-3 h-3" /> Categoría: {practice.category}
           </div>
 

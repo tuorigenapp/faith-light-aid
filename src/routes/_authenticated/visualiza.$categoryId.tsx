@@ -223,7 +223,7 @@ function CategoryInner() {
 
             <div className="mt-auto pt-56 sm:pt-72" />
 
-            <Card className="rounded-[1.5rem] p-5 text-left bg-white/95 dark:bg-card/95 backdrop-blur-xl border border-white/60 shadow-soft">
+            <Card className="rounded-[1.5rem] p-5 text-left bg-card/95 dark:bg-card/95 backdrop-blur-xl border border-white/60 shadow-soft">
               <div className="font-display font-bold text-base mb-3">Este programa incluye:</div>
               <ul className="space-y-2.5">
                 {INCLUDES.map((it, i) => (
@@ -411,7 +411,7 @@ function CategoryInner() {
         <div className="mt-5 flex gap-3 overflow-x-auto snap-x snap-mandatory -mx-4 px-4 pb-2 no-scrollbar">
           {areaAffirmations.map((af, i) => (
             <Card key={i} className="snap-center shrink-0 w-[62%] sm:w-[45%] max-w-[220px] rounded-2xl p-4 text-center shadow-soft border border-border/60" style={{ background: af.bg }}>
-              <div className="w-10 h-10 rounded-2xl bg-white/70 grid place-items-center mx-auto" style={{ color: af.color }}>
+              <div className="w-10 h-10 rounded-2xl bg-card/70 grid place-items-center mx-auto" style={{ color: af.color }}>
                 <af.Icon className="w-5 h-5" fill={af.Icon === Heart ? "currentColor" : "none"} />
               </div>
               <p className="text-[13px] leading-relaxed mt-3 text-[#2A2238] font-medium">{af.text}</p>

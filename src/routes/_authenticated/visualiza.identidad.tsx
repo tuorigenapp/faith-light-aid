@@ -382,7 +382,7 @@ function IdentidadPage() {
               </h1>
             </div>
 
-            <Card className="mt-8 rounded-[1.75rem] p-6 text-center bg-white/95 dark:bg-card/95 backdrop-blur-xl border border-white/60 shadow-soft">
+            <Card className="mt-8 rounded-[1.75rem] p-6 text-center bg-card/95 dark:bg-card/95 backdrop-blur-xl border border-white/60 shadow-soft">
               <div className="inline-flex items-center gap-1.5 text-xs text-primary font-bold">
                 <Sparkles className="w-3.5 h-3.5" /> Programa de Transformación Personal
               </div>
@@ -485,10 +485,10 @@ function IdentidadPage() {
       <section className="relative h-64 sm:h-80 overflow-hidden rounded-b-[2rem]">
         <ManagedImage imageKey="imagen:visualiza:identidad" src={heroImg} alt={practice.title} className="absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-white/60 dark:to-background/60" />
-        <button onClick={() => setStep(2)} className="absolute top-4 left-4 w-10 h-10 rounded-full bg-white/90 grid place-items-center shadow-soft">
+        <button onClick={() => setStep(2)} className="absolute top-4 left-4 w-10 h-10 rounded-full bg-card/90 grid place-items-center shadow-soft">
           <ArrowLeft className="w-4 h-4 text-foreground" />
         </button>
-        <div className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/90 grid place-items-center shadow-soft">
+        <div className="absolute top-4 right-4 w-10 h-10 rounded-full bg-card/90 grid place-items-center shadow-soft">
           <Heart className="w-4 h-4 text-pink-500" />
         </div>
         <div className="absolute inset-x-0 bottom-4 text-center px-4">

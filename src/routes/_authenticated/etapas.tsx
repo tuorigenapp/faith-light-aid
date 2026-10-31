@@ -95,7 +95,7 @@ function Etapas() {
         {[12, 34, 58, 76, 90].map((l, i) => (
           <span
             key={l}
-            className="absolute w-1.5 h-1.5 rounded-full bg-white/70"
+            className="absolute w-1.5 h-1.5 rounded-full bg-card/70"
             style={{ left: `${l}%`, top: `${18 + i * 14}%`, animation: `fade-in 2.4s ease-in-out ${i * 420}ms infinite alternate` }}
           />
         ))}
@@ -108,14 +108,14 @@ function Etapas() {
             <h1 className="font-display font-extrabold text-[26px] leading-tight text-white truncate">¡Hola, {firstName} hermosa! 💜</h1>
             <p className="text-[13.5px] text-white/75 mt-1 leading-snug">Tu transformación espiritual es un viaje, no una carrera.</p>
           </div>
-          <div className="shrink-0 inline-flex items-center gap-1.5 rounded-full bg-white px-3.5 py-2 shadow-soft">
+          <div className="shrink-0 inline-flex items-center gap-1.5 rounded-full bg-card px-3.5 py-2 shadow-soft">
             <span className="font-display font-extrabold text-[15px] text-foreground">{gems}</span>
             <Leaf className="w-4 h-4 text-[#3FBE8F]" />
           </div>
         </header>
 
         {/* Progreso general */}
-        <Card className="relative overflow-hidden mt-4 p-4 rounded-[16px] border-white/15 bg-white/95 shadow-soft">
+        <Card className="relative overflow-hidden mt-4 p-4 rounded-[16px] border-white/15 bg-card/95 shadow-soft">
           <div className="text-[13px] font-bold text-primary">Tu progreso general</div>
           <div className="mt-3 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-4">
             <Donut pct={pct} />
@@ -175,7 +175,7 @@ function Etapas() {
         </div>
 
         {/* XP e insignias ganadas */}
-        <Card className="mt-4 p-4 rounded-[16px] border-white/15 bg-white/95 shadow-soft">
+        <Card className="mt-4 p-4 rounded-[16px] border-white/15 bg-card/95 shadow-soft">
           <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
             <div className="min-w-0">
               <div className="text-[11px] uppercase tracking-widest font-bold text-primary">Tus recompensas</div>
@@ -200,7 +200,7 @@ function Etapas() {
         </Card>
 
         {/* Escritura */}
-        <Card className="relative overflow-hidden mt-4 p-4 pr-24 rounded-[16px] border-white/15 bg-white/92 shadow-soft">
+        <Card className="relative overflow-hidden mt-4 p-4 pr-24 rounded-[16px] border-white/15 bg-card/92 shadow-soft">
           <p className="scripture text-[14px] leading-snug">
             “Venid a mí todos los que estáis trabajados y cargados, y yo os haré descansar.”
           </p>
@@ -233,7 +233,7 @@ function Donut({ pct }: { pct: number }) {
 
 function StatCard({ label, value, icon }: { label: string; value: string; icon: React.ReactNode }) {
   return (
-    <div className="rounded-[16px] bg-white/92 p-3 text-center shadow-soft">
+    <div className="rounded-[16px] bg-card/92 p-3 text-center shadow-soft">
       <div className="text-[11px] font-semibold text-muted-foreground leading-tight">{label}</div>
       <div className="mt-1 inline-flex items-center gap-1.5">
         <span className="font-display font-extrabold text-[16px] text-foreground">{value}</span>

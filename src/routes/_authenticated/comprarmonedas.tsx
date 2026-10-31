@@ -129,7 +129,7 @@ function HojasFlow() {
 
         {step !== 6 && <Dots active={step} />}
         {step === 1 && <Rules />}
-        <p className="mt-6 text-center text-[13px] leading-snug text-[#64667A]">
+        <p className="mt-6 text-center text-[13px] leading-snug text-muted-foreground">
           <span className="text-[#F58BCB]">♥</span> Cada hoja te acerca más a tu sanación, tu verdad y tu propósito.
           <br /><span className="font-semibold text-primary">Tú puedes. Estamos contigo.</span>
         </p>
@@ -163,7 +163,7 @@ function Title({ eyebrow, title, sub }: { eyebrow?: string; title: React.ReactNo
     <div>
       {eyebrow && <p className="text-[11px] uppercase tracking-[0.18em] font-bold text-primary">{eyebrow}</p>}
       <h1 className="mt-1 font-display font-extrabold text-[28px] leading-[1.15] text-foreground">{title}</h1>
-      {sub && <p className="mt-2 text-[14px] leading-relaxed text-[#64667A]">{sub}</p>}
+      {sub && <p className="mt-2 text-[14px] leading-relaxed text-muted-foreground">{sub}</p>}
     </div>
   );
 }
@@ -203,7 +203,7 @@ function StepPacks({ pack, onPick, onConfirm }: { pack: HojaPack | null; onPick:
                 </span>
               )}
               <div className="font-display font-extrabold text-[19px] text-foreground leading-none">
-                {p.hojas.toLocaleString()} <span className="text-[13px] font-semibold text-[#64667A]">hojas</span>
+                {p.hojas.toLocaleString()} <span className="text-[13px] font-semibold text-muted-foreground">hojas</span>
               </div>
               <div className="mt-1 text-[13px] font-semibold text-foreground">{usd(p.usd)}</div>
               {p.tag === "especial" && <div className="mt-1 text-[10px] font-black uppercase tracking-wider text-[#3FBE8F]">Oferta especial</div>}
@@ -217,7 +217,7 @@ function StepPacks({ pack, onPick, onConfirm }: { pack: HojaPack | null; onPick:
         style={{ background: "linear-gradient(135deg,#8F6BFF 0%,#F58BCB 100%)", boxShadow: "0 4px 14px rgba(124,92,255,.30)" }}>
         <div className="flex items-center gap-3">
           <div className="min-w-0">
-            <div className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider bg-white/20 rounded-full px-2 py-0.5">
+            <div className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider bg-card/20 rounded-full px-2 py-0.5">
               <Sparkles className="w-3 h-3" /> Más popular
             </div>
             <div className="mt-1.5 font-display font-black text-[24px] leading-none">10,000 <span className="text-[14px]">hojas</span></div>
@@ -249,7 +249,7 @@ function StepSummary({ pack, onNext }: { pack: HojaPack; onNext: () => void }) {
 
       <Card className="mt-4">
         <div className="text-center">
-          <div className="text-[12px] text-[#64667A] font-semibold">Paquete seleccionado</div>
+          <div className="text-[12px] text-muted-foreground font-semibold">Paquete seleccionado</div>
           <div className="mt-1 font-display font-black text-[30px] text-[#F58BCB] leading-none">{pack.hojas.toLocaleString()} hojas</div>
         </div>
         <div className="mt-4 space-y-2.5 text-[14px]">
@@ -263,7 +263,7 @@ function StepSummary({ pack, onNext }: { pack: HojaPack; onNext: () => void }) {
         </div>
       </Card>
 
-      <div className="mt-4 flex items-center justify-center gap-2 text-[13px] text-[#64667A]">
+      <div className="mt-4 flex items-center justify-center gap-2 text-[13px] text-muted-foreground">
         <span className="w-9 h-9 rounded-[10px] bg-[#3FBE8F]/10 grid place-items-center text-[#3FBE8F] shrink-0"><ShieldCheck className="w-4 h-4" /></span>
         Pago 100% seguro y encriptado.
       </div>
@@ -277,7 +277,7 @@ function StepSummary({ pack, onNext }: { pack: HojaPack; onNext: () => void }) {
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between">
-      <span className="text-[#64667A]">{label}</span>
+      <span className="text-muted-foreground">{label}</span>
       <span className="font-semibold text-foreground">{value}</span>
     </div>
   );
@@ -343,7 +343,7 @@ function Timeline({ label, done, current }: { label: string; done?: boolean; cur
         done ? "bg-[#3FBE8F] border-[#3FBE8F] text-white" : current ? "border-[#F58BCB] bg-card" : "border-[#D9D5EA] bg-card")}>
         {done ? <Check className="w-3.5 h-3.5" /> : current ? <span className="w-2 h-2 rounded-full bg-[#F58BCB]" /> : null}
       </span>
-      <span className={cn("text-[14px]", done ? "font-semibold text-foreground" : current ? "font-semibold text-[#F58BCB]" : "text-[#64667A]")}>{label}</span>
+      <span className={cn("text-[14px]", done ? "font-semibold text-foreground" : current ? "font-semibold text-[#F58BCB]" : "text-muted-foreground")}>{label}</span>
       {current && <span className="flex-1 h-[2px] rounded-full bg-gradient-to-r from-[#F58BCB] to-transparent" />}
     </div>
   );
@@ -372,7 +372,7 @@ function StepHistory({ tx }: { tx: Tx[] }) {
       <div className="mt-5 grid grid-cols-3 rounded-[12px] bg-card border border-border p-1">
         {(["todas", "compras", "transferencias"] as const).map((t) => (
           <button key={t} onClick={() => setTab(t)}
-            className={cn("h-9 rounded-[10px] text-[12.5px] font-bold capitalize transition", tab === t ? "bg-[#F58BCB]/12 text-[#F58BCB]" : "text-[#64667A]")}>
+            className={cn("h-9 rounded-[10px] text-[12.5px] font-bold capitalize transition", tab === t ? "bg-[#F58BCB]/12 text-[#F58BCB]" : "text-muted-foreground")}>
             {t}
           </button>
         ))}
@@ -383,7 +383,7 @@ function StepHistory({ tx }: { tx: Tx[] }) {
           <Card className="text-center">
             <img src={treePng} alt="" aria-hidden loading="lazy" width={1024} height={1024} className="w-28 h-28 mx-auto object-contain" />
             <div className="font-display font-bold text-[16px] text-foreground">Tu historial comienza hoy</div>
-            <p className="mt-1 text-[13px] text-[#64667A]">Cuando recargues o transfieras hojas, verás cada movimiento aquí.</p>
+            <p className="mt-1 text-[13px] text-muted-foreground">Cuando recargues o transfieras hojas, verás cada movimiento aquí.</p>
           </Card>
         )}
         {rows.map((r) => (
@@ -395,7 +395,7 @@ function StepHistory({ tx }: { tx: Tx[] }) {
               <div className="font-display font-bold text-[15px] text-foreground truncate">
                 {r.hojas > 0 ? `${r.hojas.toLocaleString()} hojas` : `${r.hojas.toLocaleString()} hojas`}
               </div>
-              <div className="text-[12px] text-[#64667A] truncate">{r.reason}</div>
+              <div className="text-[12px] text-muted-foreground truncate">{r.reason}</div>
               <div className="text-[11px] text-[#9A97AC] mt-0.5">
                 {r.date.toLocaleDateString("es-ES", { day: "2-digit", month: "short", year: "numeric" })} · {r.date.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}
               </div>
@@ -443,7 +443,7 @@ function Rules() {
             <span className="w-10 h-10 rounded-[10px] bg-[#7C5CFF]/10 grid place-items-center shrink-0 text-primary">
               <r.icon className="w-4 h-4" />
             </span>
-            <p className="text-[13px] leading-snug text-[#64667A]">{r.text}</p>
+            <p className="text-[13px] leading-snug text-muted-foreground">{r.text}</p>
           </div>
         ))}
       </div>
@@ -516,7 +516,7 @@ function StepReceipt({ pack, paymentRef, onDone }: { pack: HojaPack; paymentRef:
   return (
     <section className="rounded-[16px] bg-card p-5 shadow-[0_1px_3px_rgba(30,25,20,.06)]">
       <h2 className="font-display text-[22px] font-bold leading-tight text-foreground">Confirmar pago</h2>
-      <p className="mt-1 text-[15px] leading-relaxed text-[#64667A]">
+      <p className="mt-1 text-[15px] leading-relaxed text-muted-foreground">
         Adjunta la captura o foto del comprobante de {usd(pack.usd)} por {pack.hojas} hojas. Lo revisamos y te avisamos aquí mismo.
       </p>
 
@@ -529,7 +529,7 @@ function StepReceipt({ pack, paymentRef, onDone }: { pack: HojaPack; paymentRef:
               <Camera className="h-5 w-5" />
             </span>
             <span className="text-[14px] font-bold text-foreground">Tocar para elegir la foto</span>
-            <span className="text-[12.5px] text-[#64667A]">Captura de la transferencia o del pago</span>
+            <span className="text-[12.5px] text-muted-foreground">Captura de la transferencia o del pago</span>
           </>
         )}
         <input type="file" accept="image/*" className="hidden" onChange={(e) => pick(e.target.files?.[0] ?? null)} />
@@ -552,7 +552,7 @@ function StepReceipt({ pack, paymentRef, onDone }: { pack: HojaPack; paymentRef:
         {busy ? <Loader2 className="h-5 w-5 animate-spin" /> : <Check className="h-5 w-5" />}
         Confirmar pago
       </button>
-      <p className="mt-2 text-center text-[12.5px] text-[#64667A]">Tu foto es privada, solo la ve el equipo de ORÍGEN.</p>
+      <p className="mt-2 text-center text-[12.5px] text-muted-foreground">Tu foto es privada, solo la ve el equipo de ORÍGEN.</p>
     </section>
   );
 }

@@ -184,7 +184,7 @@ export const sendTestEmail = createServerFn({ method: "POST" })
     const me = await selfAudience(supabaseAdmin, context.userId);
     const r = await dispatchEmail(supabaseAdmin, me.length ? me : [{ user_id: context.userId, email: data.to }], { ...data, id: undefined }, { testTo: data.to });
     if (r.unconfigured) throw new Error("El envío de correos no está activado en el servidor.");
-    if (!r.sent) throw new Error(`No se pudo enviar la prueba${r.error ? `: ${r.error}` : ""}`);
+    if (!r.sent) throw new Error(`No se pudo enviar la prueba${r.error ? `: ${r.error}` : ` (destinatarios: ${me.length}, fallidos: ${r.failed})`}`);
     return { ok: true };
   });
 

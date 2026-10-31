@@ -124,7 +124,7 @@ export async function dispatchEmail(
   if (!apiKey) return { sent: 0, failed: 0, unconfigured: true };
   const { sendLovableEmail } = await import("@lovable.dev/email-js");
 
-  let people = audience.filter((a) => !!a.email);
+  let people = opts.testTo ? audience.slice(0, 1) : audience.filter((a) => !!a.email);
   if (!opts.testTo && people.length) {
     const off = await supabaseAdmin.from("notification_prefs").select("user_id").eq("email_enabled", false).in("user_id", people.map((p) => p.user_id));
     const blocked = new Set((off.data ?? []).map((p: { user_id: string }) => p.user_id));

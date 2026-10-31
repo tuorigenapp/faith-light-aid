@@ -279,7 +279,7 @@ function Onboarding() {
 
   if (loading) {
     return (
-      <div className="min-h-dvh grid place-items-center bg-white">
+      <div className="min-h-dvh grid place-items-center bg-card">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
@@ -308,15 +308,15 @@ function Onboarding() {
             <div className="flex items-center gap-3">
               {step > 2 ? (
                 <button onClick={() => back(step - 1)} aria-label="Atrás"
-                  className="w-9 h-9 rounded-full bg-white shadow-soft grid place-items-center text-[#64667A] active:scale-95 transition">
+                  className="w-9 h-9 rounded-full bg-card shadow-soft grid place-items-center text-muted-foreground active:scale-95 transition">
                   <ArrowLeft className="w-4 h-4" />
                 </button>
               ) : <div className="w-9 h-9" />}
-              <div className="flex-1 h-2 rounded-full bg-[#ECEEF5] overflow-hidden">
+              <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
                 <div className="h-full rounded-full bg-gradient-primary transition-all duration-500"
                   style={{ width: `${Math.round((step / TOTAL_STEPS) * 100)}%` }} />
               </div>
-              <span className="text-[12px] font-semibold text-[#64667A] tabular-nums">{step}/{TOTAL_STEPS}</span>
+              <span className="text-[12px] font-semibold text-muted-foreground tabular-nums">{step}/{TOTAL_STEPS}</span>
             </div>
           </div>
         )}
@@ -376,7 +376,7 @@ function Emoji({ src, size = 64, className = "" }: { src: string; size?: number;
 
 function ScreenCard({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={cn("rounded-[2rem] bg-white/90 backdrop-blur shadow-soft p-6 animate-in fade-in slide-in-from-bottom-4 duration-500", className)}>
+    <div className={cn("rounded-[2rem] bg-card/90 backdrop-blur shadow-soft p-6 animate-in fade-in slide-in-from-bottom-4 duration-500", className)}>
       {children}
     </div>
   );
@@ -393,7 +393,7 @@ function PrimaryButton({ children, onClick, disabled }: { children: React.ReactN
 
 function PrivacyNote() {
   return (
-    <div className="inline-flex items-center gap-1.5 text-[12px] text-[#64667A]">
+    <div className="inline-flex items-center gap-1.5 text-[12px] text-muted-foreground">
       <Lock className="w-3.5 h-3.5" /> Solo tú podrás leer esto.
     </div>
   );
@@ -457,7 +457,7 @@ function makePerson(seed: number): Person {
 function Avatar({ person }: { person: Person }) {
   return (
     <div className="relative shrink-0">
-      <div className="w-14 h-14 rounded-full overflow-hidden bg-gradient-to-br from-[#F1EDFF] to-[#FFE9F5] border-2 border-white shadow-[0_2px_10px_rgba(124,92,255,0.25)]">
+      <div className="w-14 h-14 rounded-full overflow-hidden bg-gradient-to-br from-[#F1EDFF] to-primary/5 border-2 border-white shadow-[0_2px_10px_rgba(124,92,255,0.25)]">
         <img src={person.avatar} alt="" aria-hidden loading="lazy" width={512} height={512} className="w-full h-full object-cover object-top" />
       </div>
       <img src={NET_ICON[person.net]} alt="" aria-hidden width={64} height={64}
@@ -490,20 +490,20 @@ function SocialProof() {
   if (!item) return null;
   return (
     <div className="pointer-events-none fixed bottom-5 left-1/2 -translate-x-1/2 z-40 w-[min(92vw,380px)] animate-in fade-in slide-in-from-bottom-4 duration-300">
-      <div className="rounded-[16px] bg-white/95 backdrop-blur border border-[#1B1B27]/[0.08] shadow-[0_8px_30px_rgba(30,25,20,0.12)] px-4 py-3 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3">
+      <div className="rounded-[16px] bg-card/95 backdrop-blur border border-[#1B1B27]/[0.08] shadow-[0_8px_30px_rgba(30,25,20,0.12)] px-4 py-3 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3">
         <Avatar person={item.person} />
         <div className="min-w-0">
           {item.kind === "signup" ? (
             <>
-              <p className="text-[12.5px] leading-snug text-[#1B1B27]">
+              <p className="text-[12.5px] leading-snug text-foreground">
                 <span className="font-bold">{item.person.name}</span> {item.text}
               </p>
-              <p className="text-[11px] text-[#64667A] mt-0.5">{item.person.place} · hace un momento</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">{item.person.place} · hace un momento</p>
             </>
           ) : (
             <>
-              <p className="text-[12.5px] leading-snug text-[#1B1B27] italic">“{item.text}”</p>
-              <p className="text-[11px] text-[#64667A] mt-0.5">
+              <p className="text-[12.5px] leading-snug text-foreground italic">“{item.text}”</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">
                 <span className="font-semibold">{item.person.name}</span> · {item.person.place} · <span className="text-[#F7B955]">★★★★★</span>
               </p>
             </>
@@ -587,7 +587,7 @@ function ScreenIntro({ onNext }: { onNext: () => void }) {
               key={n}
               onClick={() => setI(n)}
               aria-label={`Testimonio ${n + 1}`}
-              className={cn("h-1.5 rounded-full transition-all", n === i ? "w-6 bg-[#E0B25C]" : "w-1.5 bg-white/25")}
+              className={cn("h-1.5 rounded-full transition-all", n === i ? "w-6 bg-[#E0B25C]" : "w-1.5 bg-card/25")}
             />
           ))}
         </div>
@@ -614,18 +614,18 @@ function ScreenName({ name, setName, onNext }: { name: string; setName: (s: stri
           <Emoji src={eHeartGem} size={92} className="relative animate-breathe" />
         </div>
       </div>
-      <h1 className="text-center font-display font-extrabold text-[30px] leading-[1.12] mt-4 text-[#1B1B27]">
+      <h1 className="text-center font-display font-extrabold text-[30px] leading-[1.12] mt-4 text-foreground">
         Bienvenido <span className="text-[#F58BCB]">♡</span>
       </h1>
-      <p className="text-center text-[15px] text-[#64667A] mt-3 leading-relaxed">
+      <p className="text-center text-[15px] text-muted-foreground mt-3 leading-relaxed">
         Este recorrido dura menos de 3 minutos.<br />Cada respuesta nos ayuda a comprender tu historia.
       </p>
       <p className="text-center text-[13px] text-[#7C5CFF] font-medium mt-2">No existen respuestas correctas.</p>
 
-      <div className="mt-6 rounded-[18px] border border-[#ECEEF5] bg-white px-4 py-3">
+      <div className="mt-6 rounded-[18px] border border-border bg-card px-4 py-3">
         <div className="flex items-center gap-2 text-[#7C5CFF]">
           <UserIcon className="w-4 h-4" />
-          <span className="text-[13px] font-semibold text-[#1B1B27]">¿Cómo quieres que te llamemos?</span>
+          <span className="text-[13px] font-semibold text-foreground">¿Cómo quieres que te llamemos?</span>
         </div>
         <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Escribe tu nombre"
           className="mt-1 h-11 border-0 shadow-none bg-transparent px-0 text-[16px] focus-visible:ring-0" />
@@ -646,7 +646,7 @@ function ScreenChoice({ eyebrow, title, options, value, onSelect }: {
   return (
     <div>
       <Eyebrow>{eyebrow}</Eyebrow>
-      <h2 className="mt-3 text-center font-display font-extrabold text-[26px] leading-[1.15] text-[#1B1B27]">{title}</h2>
+      <h2 className="mt-3 text-center font-display font-extrabold text-[26px] leading-[1.15] text-foreground">{title}</h2>
       <div className="mt-6 space-y-3">
         {options.map((o, i) => {
           const active = value === o.id;
@@ -654,11 +654,11 @@ function ScreenChoice({ eyebrow, title, options, value, onSelect }: {
             <button key={o.id} onClick={() => onSelect(o.id)}
               style={{ animationDelay: `${i * 60}ms` }}
               className={cn(
-                "w-full min-h-[64px] rounded-[20px] bg-white px-4 py-3 flex items-center gap-3 text-left transition active:scale-[.98] animate-in fade-in slide-in-from-bottom-3 duration-300 fill-mode-both",
-                active ? "border-2 border-[#7C5CFF] shadow-[0_4px_14px_rgba(124,92,255,0.25)]" : "border border-[#ECEEF5] shadow-[0_1px_3px_rgba(30,25,20,0.06)]"
+                "w-full min-h-[64px] rounded-[20px] bg-card px-4 py-3 flex items-center gap-3 text-left transition active:scale-[.98] animate-in fade-in slide-in-from-bottom-3 duration-300 fill-mode-both",
+                active ? "border-2 border-[#7C5CFF] shadow-[0_4px_14px_rgba(124,92,255,0.25)]" : "border border-border shadow-[0_1px_3px_rgba(30,25,20,0.06)]"
               )}>
               <Emoji src={o.img} size={44} />
-              <span className="flex-1 text-[15px] font-semibold text-[#1B1B27] leading-snug">{o.label}</span>
+              <span className="flex-1 text-[15px] font-semibold text-foreground leading-snug">{o.label}</span>
               <span className={cn("w-6 h-6 rounded-full grid place-items-center shrink-0",
                 active ? "bg-[#7C5CFF] text-white" : "border border-[#E3E5EF]")}>
                 {active && <Check className="w-3.5 h-3.5" />}
@@ -676,7 +676,7 @@ function ScreenAreas({ areas, setAreas, onNext }: { areas: string[]; setAreas: (
   return (
     <div>
       <Eyebrow>Tus áreas</Eyebrow>
-      <h2 className="mt-3 text-center font-display font-extrabold text-[26px] leading-[1.15] text-[#1B1B27]">
+      <h2 className="mt-3 text-center font-display font-extrabold text-[26px] leading-[1.15] text-foreground">
         ¿Qué área de tu vida quieres transformar primero?
       </h2>
       <div className="mt-6 grid grid-cols-2 gap-3">
@@ -685,11 +685,11 @@ function ScreenAreas({ areas, setAreas, onNext }: { areas: string[]; setAreas: (
           return (
             <button key={a.id} onClick={() => toggle(a.id)} style={{ animationDelay: `${i * 60}ms` }}
               className={cn(
-                "rounded-[20px] bg-white p-4 grid place-items-center gap-2 min-h-[124px] transition active:scale-[.98] animate-in fade-in zoom-in-95 duration-300 fill-mode-both",
-                active ? "border-2 border-[#7C5CFF] shadow-[0_4px_14px_rgba(124,92,255,0.25)]" : "border border-[#ECEEF5] shadow-[0_1px_3px_rgba(30,25,20,0.06)]"
+                "rounded-[20px] bg-card p-4 grid place-items-center gap-2 min-h-[124px] transition active:scale-[.98] animate-in fade-in zoom-in-95 duration-300 fill-mode-both",
+                active ? "border-2 border-[#7C5CFF] shadow-[0_4px_14px_rgba(124,92,255,0.25)]" : "border border-border shadow-[0_1px_3px_rgba(30,25,20,0.06)]"
               )}>
               <Emoji src={a.img} size={52} />
-              <span className="text-[14px] font-semibold text-[#1B1B27]">{a.label}</span>
+              <span className="text-[14px] font-semibold text-foreground">{a.label}</span>
             </button>
           );
         })}
@@ -712,22 +712,22 @@ function ScreenMulti({ eyebrow, title, hint, options, values, setValues, onNext 
   return (
     <div>
       <Eyebrow>{eyebrow}</Eyebrow>
-      <h2 className="mt-3 text-center font-display font-extrabold text-[26px] leading-[1.15] text-[#1B1B27]">{title}</h2>
-      <p className="mt-2 text-center text-[13px] text-[#64667A]">{hint}</p>
+      <h2 className="mt-3 text-center font-display font-extrabold text-[26px] leading-[1.15] text-foreground">{title}</h2>
+      <p className="mt-2 text-center text-[13px] text-muted-foreground">{hint}</p>
       <div className="mt-6 space-y-3">
         {options.map((o, i) => {
           const active = values.includes(o);
           return (
             <button key={o} onClick={() => toggle(o)} style={{ animationDelay: `${i * 60}ms` }}
               className={cn(
-                "w-full min-h-[56px] rounded-[18px] bg-white px-4 py-3 flex items-center gap-3 text-left transition active:scale-[.98] animate-in fade-in slide-in-from-bottom-3 duration-300 fill-mode-both",
-                active ? "border-2 border-[#7C5CFF] shadow-[0_4px_14px_rgba(124,92,255,0.25)]" : "border border-[#ECEEF5] shadow-[0_1px_3px_rgba(30,25,20,0.06)]"
+                "w-full min-h-[56px] rounded-[18px] bg-card px-4 py-3 flex items-center gap-3 text-left transition active:scale-[.98] animate-in fade-in slide-in-from-bottom-3 duration-300 fill-mode-both",
+                active ? "border-2 border-[#7C5CFF] shadow-[0_4px_14px_rgba(124,92,255,0.25)]" : "border border-border shadow-[0_1px_3px_rgba(30,25,20,0.06)]"
               )}>
               <span className={cn("w-7 h-7 rounded-full grid place-items-center shrink-0",
                 active ? "bg-[#7C5CFF] text-white" : "bg-[#F1EDFF] text-[#7C5CFF]")}>
                 <Check className="w-4 h-4" />
               </span>
-              <span className="flex-1 text-[15px] font-semibold text-[#1B1B27] leading-snug">{o}</span>
+              <span className="flex-1 text-[15px] font-semibold text-foreground leading-snug">{o}</span>
             </button>
           );
         })}
@@ -764,8 +764,8 @@ function ScreenRaices({ value, setValue, onNext }: { value: string; setValue: (s
       <div className="grid place-items-center">
         <Emoji src={eCouple} size={86} className="animate-breathe" />
       </div>
-      <h2 className="text-center font-display font-extrabold text-[26px] mt-4 text-[#1B1B27]">Tus raíces 🌿</h2>
-      <p className="text-center text-[14px] text-[#64667A] mt-2 leading-relaxed">
+      <h2 className="text-center font-display font-extrabold text-[26px] mt-4 text-foreground">Tus raíces 🌿</h2>
+      <p className="text-center text-[14px] text-muted-foreground mt-2 leading-relaxed">
         Toca lo que más se repite en tu familia.
       </p>
       <PickGrid options={RAICES_OPCIONES} value={value} setValue={setValue} />
@@ -783,10 +783,10 @@ function ScreenRecuerdos({ value, setValue, onNext }: { value: string; setValue:
       <div className="grid place-items-center">
         <Emoji src={eClouds} size={86} className="animate-breathe" />
       </div>
-      <h2 className="text-center font-display font-extrabold text-[26px] mt-4 text-[#1B1B27]">
+      <h2 className="text-center font-display font-extrabold text-[26px] mt-4 text-foreground">
         Tus primeros recuerdos <span className="text-[#F58BCB]">♡</span>
       </h2>
-      <p className="text-center text-[14px] text-[#64667A] mt-2 leading-relaxed">
+      <p className="text-center text-[14px] text-muted-foreground mt-2 leading-relaxed">
         Toca lo que más se parece a tu infancia.
       </p>
       <PickGrid options={RECUERDOS_OPCIONES} value={value} setValue={setValue} />
@@ -824,14 +824,14 @@ function PickGrid({
             onClick={() => toggle(o.label)}
             style={{ animationDelay: `${i * 50}ms` }}
             className={cn(
-              "min-h-[104px] rounded-[16px] bg-white px-3 py-3 text-center transition active:scale-[.97] animate-in fade-in slide-in-from-bottom-3 duration-300 fill-mode-both",
+              "min-h-[104px] rounded-[16px] bg-card px-3 py-3 text-center transition active:scale-[.97] animate-in fade-in slide-in-from-bottom-3 duration-300 fill-mode-both",
               active
                 ? "border-2 border-[#7C5CFF] shadow-[0_4px_14px_rgba(124,92,255,0.25)]"
-                : "border border-[#ECEEF5] shadow-[0_1px_3px_rgba(30,25,20,0.06)]",
+                : "border border-border shadow-[0_1px_3px_rgba(30,25,20,0.06)]",
             )}
           >
             <span className="block text-[30px] leading-none">{o.emoji}</span>
-            <span className="mt-2 block text-[13px] font-semibold leading-snug text-[#1B1B27]">
+            <span className="mt-2 block text-[13px] font-semibold leading-snug text-foreground">
               {o.label}
             </span>
           </button>
@@ -850,12 +850,12 @@ function ScreenLoading({ line, progress }: { line: string; progress: number }) {
         <img src={portal} alt="" aria-hidden width={768} height={1024}
           className="relative w-36 h-36 object-cover rounded-full shadow-soft animate-breathe" />
       </div>
-      <h2 className="mt-7 font-display font-extrabold text-[26px] text-[#1B1B27]">Preparando tu transformación…</h2>
-      <div className="mt-5 mx-auto w-[220px] h-2 rounded-full bg-[#ECEEF5] overflow-hidden">
+      <h2 className="mt-7 font-display font-extrabold text-[26px] text-foreground">Preparando tu transformación…</h2>
+      <div className="mt-5 mx-auto w-[220px] h-2 rounded-full bg-muted overflow-hidden">
         <div className="h-full rounded-full bg-gradient-primary transition-all duration-700" style={{ width: `${progress}%` }} />
       </div>
       <div className="mt-5 h-6">
-        <p key={line} className="text-[14px] text-[#64667A] animate-in fade-in slide-in-from-bottom-2 duration-500">{line}</p>
+        <p key={line} className="text-[14px] text-muted-foreground animate-in fade-in slide-in-from-bottom-2 duration-500">{line}</p>
       </div>
     </div>
   );
@@ -893,14 +893,14 @@ function Screen5({ ai, onNext }: { ai: AIResult; onNext: () => void }) {
       </h2>
 
       <div className="mt-6 rounded-[24px] bg-[#F7F8FD] p-5">
-        <p className="text-[14px] leading-relaxed text-[#1B1B27]">
+        <p className="text-[14px] leading-relaxed text-foreground">
           <span className="text-[#7C5CFF] font-bold">“</span>
           {ai.pattern_summary}
           <span className="text-[#7C5CFF] font-bold">”</span>
         </p>
       </div>
 
-      <p className="mt-7 font-display font-semibold text-[15px] text-[#1B1B27]">Cómo afecta hoy</p>
+      <p className="mt-7 font-display font-semibold text-[15px] text-foreground">Cómo afecta hoy</p>
       <div className="mt-3 grid grid-cols-3 gap-3">
         <ImpactCard icon={<Heart className="w-5 h-5" />} tint="pink" title="Relaciones" text={ai.impact.relaciones} />
         <ImpactCard icon={<DollarSign className="w-5 h-5" />} tint="purple" title="Prosperidad" text={ai.impact.prosperidad} />
@@ -918,12 +918,12 @@ function ImpactCard({ icon, tint, title, text }: { icon: React.ReactNode; tint: 
   const color = tint === "pink" ? "#F58BCB" : tint === "blue" ? "#61A8FF" : "#7C5CFF";
   const bg = tint === "pink" ? "#FFF1F8" : tint === "blue" ? "#EEF5FF" : "#F1EDFF";
   return (
-    <div className="rounded-[20px] bg-white border border-[#ECEEF5] p-3.5 text-center">
+    <div className="rounded-[20px] bg-card border border-border p-3.5 text-center">
       <div className="mx-auto w-10 h-10 rounded-2xl grid place-items-center" style={{ background: bg, color }}>
         {icon}
       </div>
       <div className="mt-2 text-[12px] font-semibold" style={{ color }}>{title}</div>
-      <p className="mt-1 text-[11px] leading-snug text-[#64667A]">{text}</p>
+      <p className="mt-1 text-[11px] leading-snug text-muted-foreground">{text}</p>
     </div>
   );
 }
@@ -954,7 +954,7 @@ function TresPasosPrueba() {
     },
   ];
   return (
-    <div className="mt-8 rounded-[24px] bg-white border border-[#ECEEF5] p-5 shadow-[0_1px_3px_rgba(30,25,20,0.06)]">
+    <div className="mt-8 rounded-[24px] bg-card border border-border p-5 shadow-[0_1px_3px_rgba(30,25,20,0.06)]">
       <p className="text-[12px] tracking-widest font-semibold text-[#7C5CFF] uppercase">Cómo funciona</p>
       <div className="mt-4 space-y-3">
         {pasos.map((p) => (
@@ -963,10 +963,10 @@ function TresPasosPrueba() {
               {p.emoji}
             </span>
             <div className="min-w-0">
-              <p className="text-[14px] font-bold text-[#1B1B27]">
+              <p className="text-[14px] font-bold text-foreground">
                 {p.letra}. {p.title}
               </p>
-              <p className="mt-1 text-[12.5px] leading-relaxed text-[#64667A]">{p.body}</p>
+              <p className="mt-1 text-[12.5px] leading-relaxed text-muted-foreground">{p.body}</p>
             </div>
           </div>
         ))}
@@ -977,7 +977,7 @@ function TresPasosPrueba() {
       >
         Ver mis 3 planes
       </Link>
-      <p className="mt-3 text-center text-[11.5px] text-[#64667A]">
+      <p className="mt-3 text-center text-[11.5px] text-muted-foreground">
         Cancela cuando quieras · te avisamos antes del cobro · garantía real
       </p>
     </div>
@@ -988,10 +988,10 @@ function Screen6({ ai, onNext }: { ai: AIResult; onNext: () => void }) {
   return (
     <div>
       <p className="text-[12px] tracking-widest font-semibold text-[#43C78E] uppercase">Lo positivo ♡</p>
-      <h2 className="font-display font-extrabold text-[26px] mt-2 text-[#1B1B27]">
+      <h2 className="font-display font-extrabold text-[26px] mt-2 text-foreground">
         Toda herida también desarrolla fortalezas.
       </h2>
-      <p className="text-[14px] text-[#64667A] mt-2">Has aprendido a…</p>
+      <p className="text-[14px] text-muted-foreground mt-2">Has aprendido a…</p>
 
       <div className="mt-5 grid grid-cols-3 gap-3">
         <StrengthCard icon={<Sprout className="w-5 h-5" />} tint="blue" title="Adaptarte" text={ai.strengths.adaptarte} />
@@ -1001,8 +1001,8 @@ function Screen6({ ai, onNext }: { ai: AIResult; onNext: () => void }) {
 
       <div className="mt-8 rounded-[24px] bg-[#F7F8FD] p-6">
         <p className="text-[12px] tracking-widest font-semibold text-[#7C5CFF] uppercase">Tu camino ✨</p>
-        <h3 className="mt-2 font-display font-bold text-[20px] text-[#1B1B27]">Aquí empieza el verdadero cambio.</h3>
-        <p className="mt-3 text-[14px] leading-relaxed text-[#64667A]">
+        <h3 className="mt-2 font-display font-bold text-[20px] text-foreground">Aquí empieza el verdadero cambio.</h3>
+        <p className="mt-3 text-[14px] leading-relaxed text-muted-foreground">
           No prometemos milagros. Te acompañaremos con herramientas prácticas para ayudarte a comprender tu historia,
           fortalecer tu bienestar emocional y avanzar paso a paso hacia una vida con mayor claridad y equilibrio.
         </p>
@@ -1026,12 +1026,12 @@ function StrengthCard({ icon, tint, title, text }: { icon: React.ReactNode; tint
   const color = tint === "pink" ? "#F58BCB" : tint === "blue" ? "#61A8FF" : "#7C5CFF";
   const bg = tint === "pink" ? "#FFF1F8" : tint === "blue" ? "#EEF5FF" : "#F1EDFF";
   return (
-    <div className="rounded-[20px] bg-white border border-[#ECEEF5] p-3.5 text-center">
+    <div className="rounded-[20px] bg-card border border-border p-3.5 text-center">
       <div className="mx-auto w-10 h-10 rounded-2xl grid place-items-center" style={{ background: bg, color }}>
         {icon}
       </div>
-      <div className="mt-2 text-[12px] font-semibold text-[#1B1B27]">{title}</div>
-      <p className="mt-1 text-[11px] leading-snug text-[#64667A]">{text}</p>
+      <div className="mt-2 text-[12px] font-semibold text-foreground">{title}</div>
+      <p className="mt-1 text-[11px] leading-snug text-muted-foreground">{text}</p>
     </div>
   );
 }
