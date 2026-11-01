@@ -1,6 +1,6 @@
 import { logUsage } from "./usage-log.server.ts";
 import { sendPush, type PushSubscriptionRow } from "@/lib/webpush.server";
-import { SECTION_TAGS, SITE, buildPush, firstName, personalize, renderEmailHtml, renderEmailText } from "@/lib/marketing-render";
+import { SECTION_TAGS, SITE, buildPush, firstName, personalize, renderEmailHtml, renderEmailText, layoutForTemplate } from "@/lib/marketing-render";
 
 export type AudienceRow = { user_id: string; email: string | null };
 
