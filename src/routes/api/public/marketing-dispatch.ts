@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { authorizedCaller } from "@/lib/cron-auth.server";
-import { runCampaignSend } from "@/lib/marketing.functions";
-import { AI_EMAIL_SLOTS_UTC, AI_PUSH_SLOTS_UTC, buildTemplates, pickAiPush, pickAiTemplate } from "@/lib/marketing-render";
+import { loadCoupons, runCampaignSend } from "@/lib/marketing.functions";
+import { AI_EMAIL_SLOTS_UTC, AI_PUSH_SLOTS_UTC, applyCoupon, buildTemplates, pickAiPush, pickAiTemplate, pickCoupon } from "@/lib/marketing-render";
 
 /**
  * Disparador de campañas programadas (llamado por un cron externo).
@@ -77,6 +77,8 @@ async function createAiCampaigns(admin: any, now: Date) {
   const hour = now.getUTCHours();
   const slotStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), hour)).toISOString();
   const audience = mode === "remarketing" ? "inactive" : "all";
+  // Solo cupones reales de la bandeja; sin cupón activo no se promete descuento.
+  const coupon = pickCoupon(await loadCoupons(admin), now);
 
   async function exists(channel: string) {
     const { data } = await admin
@@ -91,7 +93,7 @@ async function createAiCampaigns(admin: any, now: Date) {
 
   if (cfg.email && AI_EMAIL_SLOTS_UTC.includes(hour) && !(await exists("email"))) {
     const v = await admin.from("community_settings").select("value").eq("key", "mkt_template_variants").maybeSingle();
-    const t = pickAiTemplate(now, AI_EMAIL_SLOTS_UTC.indexOf(hour), mode, buildTemplates((v.data?.value ?? {}) as Record<string, number>));
+    const t = applyCoupon(pickAiTemplate(now, AI_EMAIL_SLOTS_UTC.indexOf(hour), mode, buildTemplates((v.data?.value ?? {}) as Record<string, number>)), coupon);
     await admin.from("marketing_campaigns").insert({
       name: `Asistente · ${t.title}`,
       channel: "email",
@@ -110,7 +112,8 @@ async function createAiCampaigns(admin: any, now: Date) {
     });
   }
   if (cfg.push && AI_PUSH_SLOTS_UTC.includes(hour) && !(await exists("push"))) {
-    const p = pickAiPush(now, mode);
+    const { coupon_code: _c, ...p } = applyCoupon({ ...pickAiPush(now, mode), coupon_code: null as string | null }, coupon);
+    void _c;
     await admin.from("marketing_campaigns").insert({
       name: `Asistente · ${p.subject.replace("[usuario]", "").trim()}`,
       channel: "push",

@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { resolveAudience, dispatchPush, dispatchEmail } from "@/lib/marketing.server";
+import { isValidCouponUrl, type HotmartCoupon } from "@/lib/marketing-render";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function assertAdmin(context: { supabase: any; userId: string }) {
@@ -259,4 +260,48 @@ export const refreshTemplates = createServerFn({ method: "POST" })
     for (const id of data.ids) v[id] = (v[id] ?? 0) + 1;
     await supabaseAdmin.from("community_settings").upsert({ key: "mkt_template_variants", value: v, updated_at: new Date().toISOString() });
     return { variants: v };
+  });
+
+/* --------------------------- Bandeja de cupones --------------------------- */
+
+const couponSchema = z.object({
+  id: z.string().min(1).max(40),
+  text: z.string().trim().min(2).max(40),
+  code: z.string().trim().min(2).max(20),
+  url: z
+    .string()
+    .trim()
+    .max(600)
+    .refine((u) => isValidCouponUrl(u), "El enlace debe empezar con https://"),
+  plan: z.string().max(40),
+  active: z.boolean(),
+});
+
+/** Lee los cupones (de uso interno del servidor, también para el asistente). */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function loadCoupons(supabaseAdmin: any): Promise<HotmartCoupon[]> {
+  const { data } = await supabaseAdmin.from("community_settings").select("value").eq("key", "hotmart_coupons").maybeSingle();
+  return Array.isArray(data?.value) ? (data.value as HotmartCoupon[]) : [];
+}
+
+export const getCoupons = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    return { coupons: await loadCoupons(supabaseAdmin) };
+  });
+
+export const saveCoupons = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ coupons: z.array(couponSchema).max(100) }).parse(input))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const coupons = data.coupons.map((c) => ({ ...c, code: c.code.toUpperCase() }));
+    const { error } = await supabaseAdmin
+      .from("community_settings")
+      .upsert({ key: "hotmart_coupons", value: coupons, updated_at: new Date().toISOString() });
+    if (error) throw new Error("No pudimos guardar los cupones. Intenta de nuevo.");
+    return { coupons };
   });

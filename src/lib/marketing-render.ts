@@ -112,7 +112,52 @@ export type EmailInput = {
   headline?: string | null;
   discount_label?: string | null;
   accent?: string;
+  /** Estilo editorial propio de cada categoría. */
+  layout?: EmailLayout | null;
+  /** Código de cupón real de la bandeja (se muestra aparte del texto del descuento). */
+  coupon_code?: string | null;
 };
+
+export type EmailLayout = "seasonal" | "festive" | "steps" | "coupon" | "gift" | "news" | "return";
+
+const LAYOUT_KICKER: Record<EmailLayout, string> = {
+  seasonal: "TEMPORADA ORÍGEN",
+  festive: "FECHA ESPECIAL",
+  steps: "MÉTODO ORÍGEN",
+  coupon: "OFERTA EXCLUSIVA",
+  gift: "REGALA ORÍGEN",
+  news: "NUEVO EN ORÍGEN",
+  return: "TU LUGAR SIGUE AQUÍ",
+};
+
+/** Bloque secundario con diseño único por categoría, siempre en la paleta ORÍGEN. */
+function layoutBlock(layout: EmailLayout, accent: string): string {
+  const card = (inner: string) =>
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:6px 0 16px"><tr><td style="background:#f6f2fd;border-left:4px solid ${accent};border-radius:14px;padding:16px 18px;font:15px/1.55 Arial,sans-serif;color:#2b2533">${inner}</td></tr></table>`;
+  const steps = (items: string[]) =>
+    items
+      .map(
+        (t, i) =>
+          `<tr><td width="36" valign="top" style="padding:6px 0"><div style="width:28px;height:28px;border-radius:14px;background:${accent};color:#ffffff;font:700 14px/28px Arial,sans-serif;text-align:center">${i + 1}</div></td><td style="padding:6px 0 6px 8px;font:15px/1.5 Arial,sans-serif;color:#2b2533">${t}</td></tr>`,
+      )
+      .join("");
+  switch (layout) {
+    case "steps":
+      return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:6px 0 16px;background:#f6f2fd;border-radius:14px;padding:12px 16px">${steps(["Descubre qué se repite en tu historia", "Sana la raíz de la mano de Dios", "Vive en paz, un paso cada día"])}</table>`;
+    case "seasonal":
+      return card(`<i style="font-family:Georgia,serif;font-size:17px">«Todo tiene su tiempo, y todo lo que se quiere debajo del cielo tiene su hora.»</i><br/><span style="font-size:12px;color:#6b6478">Eclesiastés 3:1</span>`);
+    case "festive":
+      return card(`<i style="font-family:Georgia,serif;font-size:17px">«Este es el día que hizo el Señor; nos gozaremos y alegraremos en él.»</i><br/><span style="font-size:12px;color:#6b6478">Salmo 118:24</span>`);
+    case "gift":
+      return card(`<b style="color:${accent}">Un regalo que se vive:</b> diagnóstico, ejercicios diarios, audios y acompañamiento para sanar su historia.`);
+    case "news":
+      return card(`<b style="color:${accent}">Recién llegado.</b> Ya está disponible en tu aplicación, entra y descúbrelo antes que nadie.`);
+    case "return":
+      return card(`Sin culpa y sin presión: <b style="color:${accent}">un paso hoy es suficiente</b>. Tu progreso te está esperando.`);
+    default:
+      return "";
+  }
+}
 
 /** Correo completo: cabecera, imagen vertical clickeable, texto, botón y pie con soporte. */
 export function renderEmailHtml(
@@ -128,18 +173,27 @@ export function renderEmailHtml(
   const headline = c.headline
     ? `<h1 style="margin:0 0 12px;font:800 28px/1.15 Georgia,serif;color:${accent};text-align:center">${escapeHtml(personalize(c.headline, opts.name))}</h1>`
     : "";
-  const coupon = c.discount_label
-    ? `<table role="presentation" align="center" style="margin:6px auto 14px"><tr><td style="border:2px dashed ${accent};border-radius:14px;padding:12px 22px;font:800 22px Arial,sans-serif;color:${accent};text-align:center;letter-spacing:1px">${escapeHtml(c.discount_label)}</td></tr></table>`
+  const parts = splitDiscount(c.discount_label);
+  const couponCode = c.coupon_code || parts.code;
+  const code = couponCode
+    ? `<div style="margin-top:8px;font:700 13px Arial,sans-serif;color:#6b6478;letter-spacing:.5px">CÓDIGO: <span style="display:inline-block;background:#ffffff;border:1.5px solid ${accent};border-radius:8px;padding:4px 10px;color:${accent};font-size:16px;letter-spacing:2px">${escapeHtml(couponCode!)}</span></div>`
     : "";
+  const coupon = c.discount_label
+    ? `<table role="presentation" align="center" style="margin:6px auto 14px"><tr><td style="background:#f6f2fd;border:2px dashed ${accent};border-radius:14px;padding:14px 22px;font:800 22px Arial,sans-serif;color:${accent};text-align:center;letter-spacing:1px">${escapeHtml(parts.text)}${code}</td></tr></table>`
+    : "";
+  const kicker = c.layout
+    ? `<p style="margin:0 0 8px;text-align:center;font:700 11px Arial,sans-serif;letter-spacing:2.5px;color:${accent}">${LAYOUT_KICKER[c.layout]}</p>`
+    : "";
+  const extra = c.layout ? layoutBlock(c.layout, accent) : "";
   const cta = c.button_text ? buttonHtml(c.button_text, wrap(target), "green") : "";
   const unsub = opts.unsubscribeUrl ?? `${SITE}/perfil`;
   return `<!doctype html><html lang="es"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>${escapeHtml(personalize(c.subject, opts.name))}</title></head>
 <body style="margin:0;padding:0;background:#f4f1f8">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f1f8"><tr><td align="center" style="padding:16px 8px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border-radius:18px;overflow:hidden">
-<tr><td style="background:${accent};padding:14px 20px;text-align:center;font:800 18px Georgia,serif;letter-spacing:3px;color:#ffffff">ORÍGEN</td></tr>
+<tr><td style="background:${accent};background-image:linear-gradient(135deg,${accent},#4b2fb8);padding:16px 20px;text-align:center;font:800 18px Georgia,serif;letter-spacing:4px;color:#ffffff">ORÍGEN<div style="font:400 11px Arial,sans-serif;letter-spacing:1.5px;opacity:.85;margin-top:2px">Sana tu origen de la mano de Dios</div></td></tr>
 ${img ? `<tr><td>${img}</td></tr>` : ""}
-<tr><td style="padding:26px 24px 8px">${headline}${coupon}${renderEmailBody(c.content, opts.name, wrap)}${cta}</td></tr>
+<tr><td style="padding:26px 24px 8px">${kicker}${headline}${coupon}${renderEmailBody(c.content, opts.name, wrap)}${extra}${cta}</td></tr>
 <tr><td style="padding:18px 24px 24px;border-top:1px solid #eee;text-align:center;font:12px/1.6 Arial,sans-serif;color:#9a94a6">
 ¿Tienes alguna duda o inquietud? Escríbenos a <a href="mailto:${SUPPORT_EMAIL}" style="color:#7b7488">${SUPPORT_EMAIL}</a><br/>
 Recibes este correo porque tienes una cuenta en tuorigen.app.<br/>
@@ -222,71 +276,86 @@ export type EmailTemplate = {
   button_url: string;
   discount_label: string | null;
   accent: string;
+  layout: EmailLayout;
   variant: number;
+};
+
+export const CATEGORY_LAYOUT: Record<TemplateCategory, EmailLayout> = {
+  estaciones: "seasonal",
+  fechas: "festive",
+  metodo: "steps",
+  descuentos: "coupon",
+  regalar: "gift",
+  novedades: "news",
+  remarketing: "return",
 };
 
 type Topic = { title: string; image: string; url: string; cta: string; accent: string; discount?: string; months?: number[] };
 
 const TOPICS: Record<TemplateCategory, Topic[]> = {
   estaciones: [
-    { title: "Primavera: florece por dentro", image: "primavera", url: "/etapas", cta: "Empezar mi camino", accent: "#3f8f4e", months: [3, 4, 5] },
-    { title: "Verano: pausa y paz", image: "verano", url: "/visualiza", cta: "Tomar mi pausa", accent: "#d17a22", months: [6, 7, 8] },
-    { title: "Otoño: suelta lo que pesa", image: "otono", url: "/diario", cta: "Soltar hoy", accent: "#a5531f", months: [9, 10, 11] },
-    { title: "Invierno: refugio en Dios", image: "invierno", url: "/palabra", cta: "Leer mi Palabra", accent: "#2f4a7a", months: [12, 1, 2] },
+    { title: "Primavera: florece por dentro", image: "primavera", url: "/etapas", cta: "Empezar mi camino", accent: "#16a34a", months: [3, 4, 5] },
+    { title: "Verano: pausa y paz", image: "verano", url: "/visualiza", cta: "Tomar mi pausa", accent: "#a77b2c", months: [6, 7, 8] },
+    { title: "Otoño: suelta lo que pesa", image: "otono", url: "/diario", cta: "Soltar hoy", accent: "#a77b2c", months: [9, 10, 11] },
+    { title: "Invierno: refugio en Dios", image: "invierno", url: "/palabra", cta: "Leer mi Palabra", accent: "#4b2fb8", months: [12, 1, 2] },
   ],
   fechas: [
+    { title: "Día de Reyes: el regalo de la luz", image: "regalo", url: "/invita", cta: "Regalar ORÍGEN", accent: "#a77b2c", months: [1] },
     { title: "Año Nuevo, historia nueva", image: "fechas", url: "/etapas", cta: "Empezar el año sanando", accent: "#6d4aff", months: [1] },
-    { title: "Amor que sana", image: "pareja", url: "/pareja", cta: "Sanar mi relación", accent: "#c2185b", months: [2] },
-    { title: "Mujer valiosa", image: "metodo", url: "/visualiza", cta: "Reconocer mi valor", accent: "#8e44ad", months: [3] },
-    { title: "Semana Santa: vida nueva", image: "fechas", url: "/palabra", cta: "Vivir esta semana con Él", accent: "#7a5a2f", months: [3, 4] },
-    { title: "Para mamá, con amor", image: "familia", url: "/arbol", cta: "Sanar mi linaje materno", accent: "#c2185b", months: [5] },
-    { title: "Para papá, con gratitud", image: "otono", url: "/arbol", cta: "Sanar mi linaje paterno", accent: "#2f4a7a", months: [6] },
-    { title: "Mitad de año: ¿cómo está tu alma?", image: "verano", url: "/diagnostico", cta: "Hacer mi evaluación", accent: "#d17a22", months: [7] },
-    { title: "Regreso a la rutina con paz", image: "remarketing", url: "/ejercicios", cta: "Mi ejercicio de hoy", accent: "#3f8f4e", months: [8, 9] },
-    { title: "Gratitud que transforma", image: "familia", url: "/diario", cta: "Escribir mi gratitud", accent: "#a5531f", months: [11] },
-    { title: "Black Friday ORÍGEN", image: "regalo", url: "/membresia", cta: "Ver mi descuento", accent: "#1d1b26", discount: "60% OFF", months: [11] },
-    { title: "Navidad: el regalo de la paz", image: "invierno", url: "/invita", cta: "Regalar ORÍGEN", accent: "#b3261e", months: [12] },
+    { title: "Amor que sana", image: "pareja", url: "/pareja", cta: "Sanar mi relación", accent: "#7a3fa0", months: [2] },
+    { title: "Mujer valiosa", image: "metodo", url: "/visualiza", cta: "Reconocer mi valor", accent: "#7a3fa0", months: [3] },
+    { title: "Semana Santa: vida nueva", image: "fechas", url: "/palabra", cta: "Vivir esta semana con Él", accent: "#a77b2c", months: [3, 4] },
+    { title: "Para mamá, con amor", image: "familia", url: "/arbol", cta: "Sanar mi linaje materno", accent: "#7a3fa0", months: [5] },
+    { title: "Día del Trabajador: descansa en Él", image: "verano", url: "/visualiza", cta: "Tomar mi descanso", accent: "#16a34a", months: [5] },
+    { title: "Día del Niño: abraza a tu niña interior", image: "primavera", url: "/etapas", cta: "Sanar mi infancia", accent: "#7a3fa0", months: [4, 5] },
+    { title: "Para papá, con gratitud", image: "otono", url: "/arbol", cta: "Sanar mi linaje paterno", accent: "#4b2fb8", months: [6] },
+    { title: "Mitad de año: ¿cómo está tu alma?", image: "verano", url: "/diagnostico", cta: "Hacer mi evaluación", accent: "#a77b2c", months: [7] },
+    { title: "Regreso a la rutina con paz", image: "remarketing", url: "/ejercicios", cta: "Mi ejercicio de hoy", accent: "#16a34a", months: [8, 9] },
+    { title: "Noche de luz: elige la luz de Cristo", image: "otono", url: "/palabra", cta: "Leer mi Palabra", accent: "#4b2fb8", months: [10] },
+    { title: "Gratitud que transforma", image: "familia", url: "/diario", cta: "Escribir mi gratitud", accent: "#a77b2c", months: [11] },
+    { title: "Black Friday ORÍGEN", image: "regalo", url: "/membresia", cta: "Ver mi descuento", accent: "#4b2fb8", discount: "60% OFF", months: [11] },
+    { title: "Navidad: el regalo de la paz", image: "invierno", url: "/invita", cta: "Regalar ORÍGEN", accent: "#4b2fb8", months: [12] },
     { title: "Cierra el año en paz", image: "fechas", url: "/diario", cta: "Mi cierre de año", accent: "#6d4aff", months: [12] },
   ],
   metodo: [
     { title: "Rompe el ciclo que se repite", image: "familia", url: "/patrones", cta: "Descubrir mi patrón", accent: "#6d4aff" },
     { title: "Ese vacío tiene un origen", image: "metodo", url: "/etapas", cta: "Encontrar el origen", accent: "#6d4aff" },
-    { title: "Reconecta tu espíritu con Dios", image: "fechas", url: "/palabra", cta: "Reconectar hoy", accent: "#7a5a2f" },
-    { title: "Tu árbol quiere sanar", image: "familia", url: "/arbol", cta: "Ver mi árbol", accent: "#3f8f4e" },
-    { title: "5 minutos que cambian tu día", image: "primavera", url: "/ejercicios", cta: "Hacer mis 5 minutos", accent: "#3f8f4e" },
-    { title: "Visualízalo y vívelo", image: "metodo", url: "/visualiza", cta: "Escuchar ahora", accent: "#8e44ad" },
+    { title: "Reconecta tu espíritu con Dios", image: "fechas", url: "/palabra", cta: "Reconectar hoy", accent: "#a77b2c" },
+    { title: "Tu árbol quiere sanar", image: "familia", url: "/arbol", cta: "Ver mi árbol", accent: "#16a34a" },
+    { title: "5 minutos que cambian tu día", image: "primavera", url: "/ejercicios", cta: "Hacer mis 5 minutos", accent: "#16a34a" },
+    { title: "Visualízalo y vívelo", image: "metodo", url: "/visualiza", cta: "Escuchar ahora", accent: "#7a3fa0" },
     { title: "Tu mentora te escucha", image: "remarketing", url: "/chat", cta: "Hablar con mi mentora", accent: "#6d4aff" },
-    { title: "No estás sola en esto", image: "pareja", url: "/comunidad", cta: "Entrar a la comunidad", accent: "#c2185b" },
+    { title: "No estás sola en esto", image: "pareja", url: "/comunidad", cta: "Entrar a la comunidad", accent: "#7a3fa0" },
   ],
   descuentos: [
     { title: "Camino Origen a US$5.99/mes", image: "regalo", url: "/membresia", cta: "Activar mi plan", accent: "#16a34a", discount: "6 MESES GRATIS" },
-    { title: "Solo por hoy", image: "remarketing", url: "/membresia", cta: "Usar mi descuento", accent: "#b3261e", discount: "50% OFF" },
-    { title: "Tu cupón expira pronto", image: "regalo", url: "/membresia", cta: "Usar antes de que caduque", accent: "#b3261e", discount: "40% OFF" },
-    { title: "Oferta de temporada", image: "verano", url: "/membresia", cta: "Ver la oferta", accent: "#d17a22", discount: "30% OFF" },
+    { title: "Solo por hoy", image: "remarketing", url: "/membresia", cta: "Usar mi descuento", accent: "#4b2fb8", discount: "50% OFF" },
+    { title: "Tu cupón expira pronto", image: "regalo", url: "/membresia", cta: "Usar antes de que caduque", accent: "#4b2fb8", discount: "40% OFF" },
+    { title: "Oferta de temporada", image: "verano", url: "/membresia", cta: "Ver la oferta", accent: "#a77b2c", discount: "30% OFF" },
     { title: "Plan anual especial", image: "metodo", url: "/membresia", cta: "Elegir plan anual", accent: "#16a34a", discount: "AHORRA 60%" },
-    { title: "Últimas horas", image: "invierno", url: "/membresia", cta: "Aprovechar ahora", accent: "#b3261e", discount: "ÚLTIMO DÍA" },
+    { title: "Últimas horas", image: "invierno", url: "/membresia", cta: "Aprovechar ahora", accent: "#4b2fb8", discount: "ÚLTIMO DÍA" },
     { title: "Descuento de bienvenida", image: "primavera", url: "/membresia", cta: "Reclamar mi regalo", accent: "#16a34a", discount: "20% OFF" },
   ],
   regalar: [
     { title: "Regala paz a quien amas", image: "regalo", url: "/invita", cta: "Regalar ORÍGEN", accent: "#6d4aff" },
     { title: "Invita y gana", image: "familia", url: "/invita", cta: "Invitar ahora", accent: "#16a34a" },
-    { title: "Un regalo que sana", image: "pareja", url: "/invita", cta: "Enviar mi regalo", accent: "#c2185b" },
-    { title: "Sana en familia", image: "familia", url: "/invita", cta: "Invitar a mi familia", accent: "#3f8f4e" },
+    { title: "Un regalo que sana", image: "pareja", url: "/invita", cta: "Enviar mi regalo", accent: "#7a3fa0" },
+    { title: "Sana en familia", image: "familia", url: "/invita", cta: "Invitar a mi familia", accent: "#16a34a" },
     { title: "Comparte tu camino", image: "remarketing", url: "/invita", cta: "Compartir ORÍGEN", accent: "#6d4aff" },
   ],
   novedades: [
-    { title: "Nuevo en Visualízalo", image: "metodo", url: "/visualiza", cta: "Ver lo nuevo", accent: "#8e44ad" },
+    { title: "Nuevo en Visualízalo", image: "metodo", url: "/visualiza", cta: "Ver lo nuevo", accent: "#7a3fa0" },
     { title: "Nuevas consultas", image: "remarketing", url: "/consultas", cta: "Hacer mi consulta", accent: "#6d4aff" },
-    { title: "Nuevos juegos de calma", image: "verano", url: "/juegos", cta: "Jugar ahora", accent: "#d17a22" },
-    { title: "Nueva etapa disponible", image: "primavera", url: "/etapas", cta: "Abrir la etapa", accent: "#3f8f4e" },
+    { title: "Nuevos juegos de calma", image: "verano", url: "/juegos", cta: "Jugar ahora", accent: "#a77b2c" },
+    { title: "Nueva etapa disponible", image: "primavera", url: "/etapas", cta: "Abrir la etapa", accent: "#16a34a" },
     { title: "Nuevos premios ORÍGEN", image: "regalo", url: "/premiosorigen", cta: "Ver mis premios", accent: "#16a34a" },
   ],
   remarketing: [
     { title: "Te extrañamos, [usuario]", image: "remarketing", url: "/dashboard", cta: "Volver a mi camino", accent: "#6d4aff" },
-    { title: "Dejaste algo pendiente", image: "otono", url: "/etapas", cta: "Continuar donde quedé", accent: "#a5531f" },
+    { title: "Dejaste algo pendiente", image: "otono", url: "/etapas", cta: "Continuar donde quedé", accent: "#a77b2c" },
     { title: "Tu plan sigue esperándote", image: "metodo", url: "/membresia", cta: "Retomar mi plan", accent: "#16a34a", discount: "VUELVE CON 30% OFF" },
-    { title: "Tu racha puede volver hoy", image: "primavera", url: "/ejercicios", cta: "Recuperar mi racha", accent: "#3f8f4e" },
-    { title: "Última oportunidad", image: "invierno", url: "/membresia", cta: "Aprovechar ahora", accent: "#b3261e", discount: "ÚLTIMO AVISO" },
+    { title: "Tu racha puede volver hoy", image: "primavera", url: "/ejercicios", cta: "Recuperar mi racha", accent: "#16a34a" },
+    { title: "Última oportunidad", image: "invierno", url: "/membresia", cta: "Aprovechar ahora", accent: "#4b2fb8", discount: "ÚLTIMO AVISO" },
   ],
 };
 
@@ -355,6 +424,7 @@ export function buildTemplates(variants: Record<string, number> = {}): EmailTemp
         button_url: topic.url,
         discount_label: topic.discount ?? null,
         accent: topic.accent,
+        layout: CATEGORY_LAYOUT[cat.key],
         variant: v,
       });
     }
@@ -410,4 +480,69 @@ export function pickAiPush(date: Date, mode: "marketing" | "remarketing"): AiPus
   const list = mode === "remarketing" ? AI_PUSHES_REMARKETING : AI_PUSHES;
   const idx = Math.floor(date.getTime() / 7_200_000);
   return list[idx % list.length]!;
+}
+
+/* ------------------------ Bandeja de cupones ------------------------ */
+
+/** Cupón creado a mano en Hotmart. La IA solo usa los activos; nunca inventa descuentos. */
+export type HotmartCoupon = {
+  id: string;
+  text: string; // p. ej. «50% OFF en Camino Origen anual»
+  code: string; // p. ej. ORIGEN50
+  url: string; // enlace de pago de Hotmart con el cupón
+  plan: string; // "all" o el nombre de la membresía
+  active: boolean;
+};
+
+export const COUPON_PLANS: { key: string; label: string }[] = [
+  { key: "all", label: "Todas las membresías" },
+  { key: "mensual", label: "Camino Origen mensual" },
+  { key: "anual", label: "Camino Origen anual" },
+];
+
+export function isValidCouponUrl(url: string): boolean {
+  try {
+    const u = new URL(url.trim());
+    return u.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+/** Elige un cupón activo y válido, rotando por día; null si no hay ninguno. */
+export function pickCoupon(coupons: HotmartCoupon[], date: Date = new Date()): HotmartCoupon | null {
+  const ok = coupons.filter((c) => c.active && c.code.trim() && isValidCouponUrl(c.url));
+  if (!ok.length) return null;
+  return ok[Math.floor(date.getTime() / 86_400_000) % ok.length]!;
+}
+
+/**
+ * Aplica un cupón real a una pieza con descuento. Si no hay cupón activo, quita el
+ * descuento y lleva a la página de planes: así nunca se promete algo que no existe.
+ */
+export function applyCoupon<T extends { discount_label: string | null; button_url: string | null; coupon_code?: string | null }>(
+  item: T,
+  coupon: HotmartCoupon | null,
+): T {
+  if (!item.discount_label) return item;
+  if (!coupon) return { ...item, discount_label: null, coupon_code: null, button_url: "/membresia" };
+  return { ...item, discount_label: joinDiscount(coupon.text, coupon.code), coupon_code: coupon.code, button_url: coupon.url };
+}
+
+const CODE_SEP = " · Código ";
+/** Guarda texto + código en un solo campo (máx. 60) y lo separa al dibujar el correo. */
+export function joinDiscount(text: string, code: string): string {
+  const c = code.trim().toUpperCase();
+  return `${text.trim().slice(0, Math.max(8, 60 - CODE_SEP.length - c.length))}${CODE_SEP}${c}`;
+}
+export function splitDiscount(label: string | null | undefined): { text: string; code: string | null } {
+  if (!label) return { text: "", code: null };
+  const i = label.lastIndexOf(CODE_SEP);
+  return i < 0 ? { text: label, code: null } : { text: label.slice(0, i), code: label.slice(i + CODE_SEP.length) };
+}
+
+/** Diseño editorial según la plantilla de origen (p. ej. "metodo-03" → pasos). */
+export function layoutForTemplate(templateId: string | null | undefined): EmailLayout | null {
+  const cat = (templateId ?? "").split("-")[0] as TemplateCategory;
+  return CATEGORY_LAYOUT[cat] ?? null;
 }
