@@ -173,11 +173,13 @@ export function renderEmailHtml(
   const headline = c.headline
     ? `<h1 style="margin:0 0 12px;font:800 28px/1.15 Georgia,serif;color:${accent};text-align:center">${escapeHtml(personalize(c.headline, opts.name))}</h1>`
     : "";
-  const code = c.coupon_code
-    ? `<div style="margin-top:8px;font:700 13px Arial,sans-serif;color:#6b6478;letter-spacing:.5px">CÓDIGO: <span style="display:inline-block;background:#ffffff;border:1.5px solid ${accent};border-radius:8px;padding:4px 10px;color:${accent};font-size:16px;letter-spacing:2px">${escapeHtml(c.coupon_code)}</span></div>`
+  const parts = splitDiscount(c.discount_label);
+  const couponCode = c.coupon_code || parts.code;
+  const code = couponCode
+    ? `<div style="margin-top:8px;font:700 13px Arial,sans-serif;color:#6b6478;letter-spacing:.5px">CÓDIGO: <span style="display:inline-block;background:#ffffff;border:1.5px solid ${accent};border-radius:8px;padding:4px 10px;color:${accent};font-size:16px;letter-spacing:2px">${escapeHtml(couponCode!)}</span></div>`
     : "";
   const coupon = c.discount_label
-    ? `<table role="presentation" align="center" style="margin:6px auto 14px"><tr><td style="background:#f6f2fd;border:2px dashed ${accent};border-radius:14px;padding:14px 22px;font:800 22px Arial,sans-serif;color:${accent};text-align:center;letter-spacing:1px">${escapeHtml(c.discount_label)}${code}</td></tr></table>`
+    ? `<table role="presentation" align="center" style="margin:6px auto 14px"><tr><td style="background:#f6f2fd;border:2px dashed ${accent};border-radius:14px;padding:14px 22px;font:800 22px Arial,sans-serif;color:${accent};text-align:center;letter-spacing:1px">${escapeHtml(parts.text)}${code}</td></tr></table>`
     : "";
   const kicker = c.layout
     ? `<p style="margin:0 0 8px;text-align:center;font:700 11px Arial,sans-serif;letter-spacing:2.5px;color:${accent}">${LAYOUT_KICKER[c.layout]}</p>`
@@ -524,5 +526,23 @@ export function applyCoupon<T extends { discount_label: string | null; button_ur
 ): T {
   if (!item.discount_label) return item;
   if (!coupon) return { ...item, discount_label: null, coupon_code: null, button_url: "/membresia" };
-  return { ...item, discount_label: coupon.text, coupon_code: coupon.code, button_url: coupon.url };
+  return { ...item, discount_label: joinDiscount(coupon.text, coupon.code), coupon_code: coupon.code, button_url: coupon.url };
+}
+
+const CODE_SEP = " · Código ";
+/** Guarda texto + código en un solo campo (máx. 60) y lo separa al dibujar el correo. */
+export function joinDiscount(text: string, code: string): string {
+  const c = code.trim().toUpperCase();
+  return `${text.trim().slice(0, Math.max(8, 60 - CODE_SEP.length - c.length))}${CODE_SEP}${c}`;
+}
+export function splitDiscount(label: string | null | undefined): { text: string; code: string | null } {
+  if (!label) return { text: "", code: null };
+  const i = label.lastIndexOf(CODE_SEP);
+  return i < 0 ? { text: label, code: null } : { text: label.slice(0, i), code: label.slice(i + CODE_SEP.length) };
+}
+
+/** Diseño editorial según la plantilla de origen (p. ej. "metodo-03" → pasos). */
+export function layoutForTemplate(templateId: string | null | undefined): EmailLayout | null {
+  const cat = (templateId ?? "").split("-")[0] as TemplateCategory;
+  return CATEGORY_LAYOUT[cat] ?? null;
 }

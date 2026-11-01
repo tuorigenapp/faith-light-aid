@@ -74,6 +74,7 @@ type Campaign = {
   push_style?: string | null;
   push_icon?: string | null;
   discount_label?: string | null;
+  template_id?: string | null;
 };
 
 /** Push a cada dispositivo registrado (no requiere correo), personalizado y con registro de apertura. */
@@ -144,7 +145,7 @@ export async function dispatchEmail(
     }
     try {
       const html = renderEmailHtml(
-        { ...campaign, subject: campaign.subject || "Novedades de ORÍGEN" },
+        { ...campaign, subject: campaign.subject || "Novedades de ORÍGEN", layout: layoutForTemplate(campaign.template_id) },
         {
           name,
           pixelUrl: cid ? await trackUrl("open", cid, person.user_id) : undefined,
