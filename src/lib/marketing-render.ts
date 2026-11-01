@@ -112,7 +112,52 @@ export type EmailInput = {
   headline?: string | null;
   discount_label?: string | null;
   accent?: string;
+  /** Estilo editorial propio de cada categoría. */
+  layout?: EmailLayout | null;
+  /** Código de cupón real de la bandeja (se muestra aparte del texto del descuento). */
+  coupon_code?: string | null;
 };
+
+export type EmailLayout = "seasonal" | "festive" | "steps" | "coupon" | "gift" | "news" | "return";
+
+const LAYOUT_KICKER: Record<EmailLayout, string> = {
+  seasonal: "TEMPORADA ORÍGEN",
+  festive: "FECHA ESPECIAL",
+  steps: "MÉTODO ORÍGEN",
+  coupon: "OFERTA EXCLUSIVA",
+  gift: "REGALA ORÍGEN",
+  news: "NUEVO EN ORÍGEN",
+  return: "TU LUGAR SIGUE AQUÍ",
+};
+
+/** Bloque secundario con diseño único por categoría, siempre en la paleta ORÍGEN. */
+function layoutBlock(layout: EmailLayout, accent: string): string {
+  const card = (inner: string) =>
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:6px 0 16px"><tr><td style="background:#f6f2fd;border-left:4px solid ${accent};border-radius:14px;padding:16px 18px;font:15px/1.55 Arial,sans-serif;color:#2b2533">${inner}</td></tr></table>`;
+  const steps = (items: string[]) =>
+    items
+      .map(
+        (t, i) =>
+          `<tr><td width="36" valign="top" style="padding:6px 0"><div style="width:28px;height:28px;border-radius:14px;background:${accent};color:#ffffff;font:700 14px/28px Arial,sans-serif;text-align:center">${i + 1}</div></td><td style="padding:6px 0 6px 8px;font:15px/1.5 Arial,sans-serif;color:#2b2533">${t}</td></tr>`,
+      )
+      .join("");
+  switch (layout) {
+    case "steps":
+      return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:6px 0 16px;background:#f6f2fd;border-radius:14px;padding:12px 16px">${steps(["Descubre qué se repite en tu historia", "Sana la raíz de la mano de Dios", "Vive en paz, un paso cada día"])}</table>`;
+    case "seasonal":
+      return card(`<i style="font-family:Georgia,serif;font-size:17px">«Todo tiene su tiempo, y todo lo que se quiere debajo del cielo tiene su hora.»</i><br/><span style="font-size:12px;color:#6b6478">Eclesiastés 3:1</span>`);
+    case "festive":
+      return card(`<i style="font-family:Georgia,serif;font-size:17px">«Este es el día que hizo el Señor; nos gozaremos y alegraremos en él.»</i><br/><span style="font-size:12px;color:#6b6478">Salmo 118:24</span>`);
+    case "gift":
+      return card(`<b style="color:${accent}">Un regalo que se vive:</b> diagnóstico, ejercicios diarios, audios y acompañamiento para sanar su historia.`);
+    case "news":
+      return card(`<b style="color:${accent}">Recién llegado.</b> Ya está disponible en tu aplicación, entra y descúbrelo antes que nadie.`);
+    case "return":
+      return card(`Sin culpa y sin presión: <b style="color:${accent}">un paso hoy es suficiente</b>. Tu progreso te está esperando.`);
+    default:
+      return "";
+  }
+}
 
 /** Correo completo: cabecera, imagen vertical clickeable, texto, botón y pie con soporte. */
 export function renderEmailHtml(
@@ -128,18 +173,25 @@ export function renderEmailHtml(
   const headline = c.headline
     ? `<h1 style="margin:0 0 12px;font:800 28px/1.15 Georgia,serif;color:${accent};text-align:center">${escapeHtml(personalize(c.headline, opts.name))}</h1>`
     : "";
-  const coupon = c.discount_label
-    ? `<table role="presentation" align="center" style="margin:6px auto 14px"><tr><td style="border:2px dashed ${accent};border-radius:14px;padding:12px 22px;font:800 22px Arial,sans-serif;color:${accent};text-align:center;letter-spacing:1px">${escapeHtml(c.discount_label)}</td></tr></table>`
+  const code = c.coupon_code
+    ? `<div style="margin-top:8px;font:700 13px Arial,sans-serif;color:#6b6478;letter-spacing:.5px">CÓDIGO: <span style="display:inline-block;background:#ffffff;border:1.5px solid ${accent};border-radius:8px;padding:4px 10px;color:${accent};font-size:16px;letter-spacing:2px">${escapeHtml(c.coupon_code)}</span></div>`
     : "";
+  const coupon = c.discount_label
+    ? `<table role="presentation" align="center" style="margin:6px auto 14px"><tr><td style="background:#f6f2fd;border:2px dashed ${accent};border-radius:14px;padding:14px 22px;font:800 22px Arial,sans-serif;color:${accent};text-align:center;letter-spacing:1px">${escapeHtml(c.discount_label)}${code}</td></tr></table>`
+    : "";
+  const kicker = c.layout
+    ? `<p style="margin:0 0 8px;text-align:center;font:700 11px Arial,sans-serif;letter-spacing:2.5px;color:${accent}">${LAYOUT_KICKER[c.layout]}</p>`
+    : "";
+  const extra = c.layout ? layoutBlock(c.layout, accent) : "";
   const cta = c.button_text ? buttonHtml(c.button_text, wrap(target), "green") : "";
   const unsub = opts.unsubscribeUrl ?? `${SITE}/perfil`;
   return `<!doctype html><html lang="es"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>${escapeHtml(personalize(c.subject, opts.name))}</title></head>
 <body style="margin:0;padding:0;background:#f4f1f8">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f1f8"><tr><td align="center" style="padding:16px 8px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border-radius:18px;overflow:hidden">
-<tr><td style="background:${accent};padding:14px 20px;text-align:center;font:800 18px Georgia,serif;letter-spacing:3px;color:#ffffff">ORÍGEN</td></tr>
+<tr><td style="background:${accent};background-image:linear-gradient(135deg,${accent},#4b2fb8);padding:16px 20px;text-align:center;font:800 18px Georgia,serif;letter-spacing:4px;color:#ffffff">ORÍGEN<div style="font:400 11px Arial,sans-serif;letter-spacing:1.5px;opacity:.85;margin-top:2px">Sana tu origen de la mano de Dios</div></td></tr>
 ${img ? `<tr><td>${img}</td></tr>` : ""}
-<tr><td style="padding:26px 24px 8px">${headline}${coupon}${renderEmailBody(c.content, opts.name, wrap)}${cta}</td></tr>
+<tr><td style="padding:26px 24px 8px">${kicker}${headline}${coupon}${renderEmailBody(c.content, opts.name, wrap)}${extra}${cta}</td></tr>
 <tr><td style="padding:18px 24px 24px;border-top:1px solid #eee;text-align:center;font:12px/1.6 Arial,sans-serif;color:#9a94a6">
 ¿Tienes alguna duda o inquietud? Escríbenos a <a href="mailto:${SUPPORT_EMAIL}" style="color:#7b7488">${SUPPORT_EMAIL}</a><br/>
 Recibes este correo porque tienes una cuenta en tuorigen.app.<br/>
@@ -222,7 +274,18 @@ export type EmailTemplate = {
   button_url: string;
   discount_label: string | null;
   accent: string;
+  layout: EmailLayout;
   variant: number;
+};
+
+export const CATEGORY_LAYOUT: Record<TemplateCategory, EmailLayout> = {
+  estaciones: "seasonal",
+  fechas: "festive",
+  metodo: "steps",
+  descuentos: "coupon",
+  regalar: "gift",
+  novedades: "news",
+  remarketing: "return",
 };
 
 type Topic = { title: string; image: string; url: string; cta: string; accent: string; discount?: string; months?: number[] };
@@ -359,6 +422,7 @@ export function buildTemplates(variants: Record<string, number> = {}): EmailTemp
         button_url: topic.url,
         discount_label: topic.discount ?? null,
         accent: topic.accent,
+        layout: CATEGORY_LAYOUT[cat.key],
         variant: v,
       });
     }
@@ -414,4 +478,51 @@ export function pickAiPush(date: Date, mode: "marketing" | "remarketing"): AiPus
   const list = mode === "remarketing" ? AI_PUSHES_REMARKETING : AI_PUSHES;
   const idx = Math.floor(date.getTime() / 7_200_000);
   return list[idx % list.length]!;
+}
+
+/* ------------------------ Bandeja de cupones ------------------------ */
+
+/** Cupón creado a mano en Hotmart. La IA solo usa los activos; nunca inventa descuentos. */
+export type HotmartCoupon = {
+  id: string;
+  text: string; // p. ej. «50% OFF en Camino Origen anual»
+  code: string; // p. ej. ORIGEN50
+  url: string; // enlace de pago de Hotmart con el cupón
+  plan: string; // "all" o el nombre de la membresía
+  active: boolean;
+};
+
+export const COUPON_PLANS: { key: string; label: string }[] = [
+  { key: "all", label: "Todas las membresías" },
+  { key: "mensual", label: "Camino Origen mensual" },
+  { key: "anual", label: "Camino Origen anual" },
+];
+
+export function isValidCouponUrl(url: string): boolean {
+  try {
+    const u = new URL(url.trim());
+    return u.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+/** Elige un cupón activo y válido, rotando por día; null si no hay ninguno. */
+export function pickCoupon(coupons: HotmartCoupon[], date: Date = new Date()): HotmartCoupon | null {
+  const ok = coupons.filter((c) => c.active && c.code.trim() && isValidCouponUrl(c.url));
+  if (!ok.length) return null;
+  return ok[Math.floor(date.getTime() / 86_400_000) % ok.length]!;
+}
+
+/**
+ * Aplica un cupón real a una pieza con descuento. Si no hay cupón activo, quita el
+ * descuento y lleva a la página de planes: así nunca se promete algo que no existe.
+ */
+export function applyCoupon<T extends { discount_label: string | null; button_url: string | null; coupon_code?: string | null }>(
+  item: T,
+  coupon: HotmartCoupon | null,
+): T {
+  if (!item.discount_label) return item;
+  if (!coupon) return { ...item, discount_label: null, coupon_code: null, button_url: "/membresia" };
+  return { ...item, discount_label: coupon.text, coupon_code: coupon.code, button_url: coupon.url };
 }
