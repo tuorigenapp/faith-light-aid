@@ -44,6 +44,8 @@ import {
   type TemplateCategory,
 } from "@/lib/marketing-render";
 import { confirmDeletion } from "@/lib/deletion-confirmation";
+import { CouponTray, COUPONS_QUERY_KEY } from "@/components/admin/CouponTray";
+import { applyCoupon, layoutForTemplate, pickCoupon, type HotmartCoupon } from "@/lib/marketing-render";
 
 type Channel = "email" | "push";
 type Kind = "marketing" | "remarketing";
@@ -247,7 +249,10 @@ export function MarketingManager() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  function applyTemplate(t: EmailTemplate) {
+  function applyTemplate(raw: EmailTemplate) {
+    const coupons = (qc.getQueryData(COUPONS_QUERY_KEY) as { coupons: HotmartCoupon[] } | undefined)?.coupons ?? [];
+    const t = applyCoupon({ ...raw, coupon_code: null }, pickCoupon(coupons));
+    if (raw.discount_label && !t.discount_label) toast.info("No hay cupones activos: la plantilla irá sin descuento. Agrega uno en la bandeja.");
     setForm((f) => ({
       ...f,
       name: t.title,
@@ -300,6 +305,8 @@ export function MarketingManager() {
           </div>
         </div>
       </div>
+
+      <CouponTray />
 
       {/* Selector canal + tipo */}
       <div className="flex flex-wrap gap-2">
@@ -552,6 +559,7 @@ function campaignToForm(c: Campaign): typeof empty {
     discount_label: c.discount_label ?? "",
     push_style: (c.push_style as PushStyle) || "text",
     push_icon: c.push_icon ?? "logo",
+    template_id: c.template_id ?? "",
   };
 }
 
@@ -753,6 +761,7 @@ function PreviewModal({ preview, onClose }: { preview: { channel: Channel; data:
                   button_url: f.button_url || null,
                   discount_label: f.discount_label || null,
                   accent: f.accent,
+                  layout: layoutForTemplate(f.template_id),
                 },
                 { name },
               )}
