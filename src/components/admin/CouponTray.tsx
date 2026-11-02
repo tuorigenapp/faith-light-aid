@@ -47,7 +47,7 @@ export function CouponTray() {
   }
 
   async function remove(c: HotmartCoupon) {
-    const ok = await confirmDeletion({ title: "¿Eliminar este cupón?", description: `«${c.text}» (${c.code}) dejará de usarse en campañas.` });
+    const ok = await confirmDeletion(`El cupón «${c.text}» (${c.code}) dejará de usarse en campañas.`);
     if (!ok) return;
     save.mutate(coupons.filter((x) => x.id !== c.id), { onSuccess: () => toast.success("Cupón eliminado") });
   }

@@ -1,5 +1,11 @@
 # Roadmap ORÍGEN
 
+## Marketing del 31 de octubre
+- [x] Corregir la publicación en Vercel (librería de lectura de HTML) y compilar la versión Vercel sin errores.
+- [x] Bandeja de cupones Hotmart: texto, código y enlace por separado; activar/pausar, editar y eliminar; asistente y plantillas usan solo cupones activos.
+- [x] Fechas festivas nuevas (Reyes, Trabajador, Día del Niño, Noche de luz) y diseño propio por categoría en la paleta ORÍGEN; 97 pruebas aprobadas.
+
+
 ## Registro directo del 24 de octubre, 09:24 UTC
 - [x] Quitar logos e íconos; destacar «Desbloquea tu descuento especial» antes de «Probar gratis ahora», con pulso suave y un solo recorrido a la evaluación y oferta existente.
 - [x] Verificado a 375/432/1280 px, claro/oscuro, sin desbordamiento; pulso desactivado con movimiento reducido, evaluación completa hasta descuento, dos pruebas aprobadas y build OK.
