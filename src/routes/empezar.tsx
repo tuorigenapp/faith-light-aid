@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ReviewsSlider } from "@/components/ReviewsSlider";
 import { printConsulta } from "@/lib/print-pdf";
+import { PLAN_LEVELS, CADENCES, OFF_PCT, type Cadence as PlanCadence, type PlanLevel } from "@/lib/plans-catalog";
 import { detectCurrency, discounted, formatLocal, formatUsd, USD, type LocalCurrency } from "@/lib/currency";
 import logo from "@/assets/logo-origen.png";
 import { DESIRE_PHOTOS, STRUGGLE_PHOTOS, RESULT_PHOTOS, TODAY_PHOTOS, FUTURE_PHOTOS } from "@/lib/funnel-visuals";
@@ -57,26 +58,10 @@ export const Route = createFileRoute("/empezar")({
 });
 
 // ---------- Plans (Hotmart) ----------
-type Cadence = "weekly" | "monthly" | "annual";
-type Level = { id: string; name: string; claim: string; img: string; usd: Record<Cadence, number>; url: Record<Cadence, string>; off: Record<Cadence, string>; perks: string[] };
-const H = (o: string) => `https://pay.hotmart.com/D107250120S?off=${o}&checkoutMode=6`;
-const LEVELS: Level[] = [
-  { id: "explorador", name: "EXPLORADOR ORÍGEN", claim: "Para dar tu primer paso", img: eStar, usd: { weekly: 2.99, monthly: 14.99, annual: 49.99 },
-    url: { weekly: H("pz5lp6r7"), monthly: H("2tqo0bnc"), annual: H("0kyotde7") }, off: { weekly: H("1n9cgz6n"), monthly: H("9mne3xdg"), annual: H("3si9u63f") },
-    perks: ["Diagnóstico de tu origen", "Etapa 1 del Camino ORÍGEN", "Diario y Palabra del día"] },
-  { id: "caminante", name: "CAMINANTE ORÍGEN", claim: "La experiencia completa", img: eHeart, usd: { weekly: 4.99, monthly: 19.99, annual: 69.99 },
-    url: { weekly: H("m3mf4woy"), monthly: H("m9cvnhi4"), annual: H("ip8loh6o") }, off: { weekly: H("gv5wx433"), monthly: H("7jifsui7"), annual: H("zqn998l2") },
-    perks: ["Camino de 20 etapas completo", "Visualízalo y Vívelo", "Consultas con PDF"] },
-  { id: "proposito", name: "PROPÓSITO ORÍGEN", claim: "Acompañamiento total", img: eCross, usd: { weekly: 7.99, monthly: 29.99, annual: 99.99 },
-    url: { weekly: H("rpp21n33"), monthly: H("z12ipqpy"), annual: H("lf0finnj") }, off: { weekly: H("8yqx728h"), monthly: H("k7ymwjcn"), annual: H("fcbnhwb8") },
-    perks: ["Todo lo de Caminante", "Mentora y consultas sin límite", "Biblioteca y bonos VIP"] },
-];
-const CAD: { id: Cadence; label: string; per: string; days: number }[] = [
-  { id: "weekly", label: "Semanal", per: "semana", days: 7 },
-  { id: "monthly", label: "Mensual", per: "mes", days: 30 },
-  { id: "annual", label: "Anual", per: "año", days: 365 },
-];
-const OFF_PCT: Record<Cadence, number> = { weekly: 65, monthly: 80, annual: 80 };
+type Cadence = PlanCadence;
+type Level = PlanLevel & { img: string };
+const LEVELS: Level[] = PLAN_LEVELS.map((l, i) => ({ ...l, img: [eStar, eHeart, eCross][i]! }));
+const CAD = CADENCES;
 type Mode = "normal" | "discount" | "trial";
 
 function priceOf(l: Level, c: Cadence, mode: Mode) {

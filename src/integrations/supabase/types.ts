@@ -230,6 +230,7 @@ export type Database = {
           created_at: string
           from_plan: string | null
           id: string
+          kind: string
           reason: string
           user_id: string
         }
@@ -238,6 +239,7 @@ export type Database = {
           created_at?: string
           from_plan?: string | null
           id?: string
+          kind?: string
           reason: string
           user_id: string
         }
@@ -246,6 +248,7 @@ export type Database = {
           created_at?: string
           from_plan?: string | null
           id?: string
+          kind?: string
           reason?: string
           user_id?: string
         }
@@ -1171,6 +1174,51 @@ export type Database = {
         }
         Relationships: []
       }
+      grace_periods: {
+        Row: {
+          admin_note: string | null
+          created_at: string
+          days: number
+          ends_at: string | null
+          from_plan: string | null
+          id: string
+          purge_at: string | null
+          reason: string
+          starts_at: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_note?: string | null
+          created_at?: string
+          days?: number
+          ends_at?: string | null
+          from_plan?: string | null
+          id?: string
+          purge_at?: string | null
+          reason?: string
+          starts_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_note?: string | null
+          created_at?: string
+          days?: number
+          ends_at?: string | null
+          from_plan?: string | null
+          id?: string
+          purge_at?: string | null
+          reason?: string
+          starts_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       hoja_transfers: {
         Row: {
           admin_note: string | null
@@ -2014,6 +2062,39 @@ export type Database = {
         }
         Relationships: []
       }
+      plan_change_requests: {
+        Row: {
+          created_at: string
+          direction: string
+          from_plan: string | null
+          id: string
+          note: string | null
+          status: string
+          to_plan: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          direction?: string
+          from_plan?: string | null
+          id?: string
+          note?: string | null
+          status?: string
+          to_plan: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          direction?: string
+          from_plan?: string | null
+          id?: string
+          note?: string | null
+          status?: string
+          to_plan?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           age: number | null
@@ -2214,6 +2295,42 @@ export type Database = {
           id?: string
           p256dh?: string | null
           user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      quiz_answers: {
+        Row: {
+          answer: string
+          correct: boolean
+          created_at: string
+          id: string
+          level: number
+          question_id: string
+          quiz_date: string
+          source: string
+          user_id: string
+        }
+        Insert: {
+          answer: string
+          correct?: boolean
+          created_at?: string
+          id?: string
+          level?: number
+          question_id: string
+          quiz_date?: string
+          source?: string
+          user_id: string
+        }
+        Update: {
+          answer?: string
+          correct?: boolean
+          created_at?: string
+          id?: string
+          level?: number
+          question_id?: string
+          quiz_date?: string
+          source?: string
           user_id?: string
         }
         Relationships: []
