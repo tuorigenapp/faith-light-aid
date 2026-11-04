@@ -20,6 +20,7 @@ import {
 import { useState } from "react";
 import { toast } from "sonner";
 import { getUserPlan } from "@/lib/plan";
+import { freeItemsFor, useToolsPref } from "@/lib/tools-preference";
 import { awardGems } from "@/lib/gems";
 import { cn } from "@/lib/utils";
 import { WordSearch } from "@/components/WordSearch";
@@ -434,6 +435,8 @@ function CristoPage() {
     queryFn: async () => (user ? await getUserPlan(user.id) : "explorador"),
   });
   const isPaid = plan === "camino";
+  const { data: toolsPref } = useToolsPref(user?.id);
+  const freeItems = freeItemsFor(toolsPref ?? null);
 
   const selectedPractice = PRACTICES.find((p) => p.id === practiceId) ?? PRACTICES[0];
   const practiceContent = thematicPractice("Método de Cristo 3·6·9", selectedPractice.title, PRACTICES.indexOf(selectedPractice) + 1);
@@ -752,7 +755,7 @@ function CristoPage() {
           <ul className="mt-3 space-y-2.5">
             {practice.info.map((line, i) => {
               const Ic = infoIcons[i % infoIcons.length];
-              const locked = !isPaid && i >= 2;
+              const locked = !isPaid && i >= freeItems;
               return (
                 <li key={i} className="flex items-start gap-2.5 text-sm">
                   <span className="w-6 h-6 rounded-lg bg-primary/12 text-primary grid place-items-center shrink-0 mt-0.5">
@@ -770,7 +773,7 @@ function CristoPage() {
           <div className="text-xs font-bold text-primary uppercase tracking-widest">Guía paso a paso del día</div>
           <ol className="mt-3 space-y-3 relative">
             {practice.steps.map((s, i) => {
-              const locked = !isPaid && i >= 1;
+              const locked = !isPaid && i >= freeItems - 1;
               return (
                 <li key={i} className="flex items-start gap-3 text-sm">
                   <span className={cn("w-7 h-7 rounded-full grid place-items-center shrink-0 font-bold text-xs", locked ? "bg-muted text-muted-foreground" : "bg-primary/12 text-primary")}>

@@ -15,6 +15,7 @@ import { celebrateOnce, milestoneMessage } from "@/lib/celebrate";
 
 
 import { InstallAppButton } from "@/components/InstallAppGuide";
+import { MentorRecommendations } from "@/components/home/MentorRecommendations";
 import { HomeHero, OrigenPillars, DailyExerciseBanner, DigitalLibraryCarousel, DailyMessageBanner, OrigenCommunityBanner, HealingPracticesCarousel, VisualizeAndLiveCarousel, DailyGamesSection, ExploreOrigen, AffiliateBanner, BalanceCard } from "@/components/home/HomeSections";
 import arbolImg from "@/assets/home/arbol.jpg";
 
@@ -114,6 +115,7 @@ function Dashboard() {
           total={20}
           to={hasOnboarding ? "/etapas" : "/onboarding"}
         />
+        <MentorRecommendations />
         <OrigenPillars />
         <DailyExerciseBanner done={!!exerciseDone} streak={activeCount} />
         <DigitalLibraryCarousel />

@@ -20,6 +20,7 @@ import {
 import { useState } from "react";
 import { toast } from "sonner";
 import { getUserPlan } from "@/lib/plan";
+import { freeItemsFor, useToolsPref } from "@/lib/tools-preference";
 import { awardGems } from "@/lib/gems";
 import { cn } from "@/lib/utils";
 import heroImg from "@/assets/explore/clean.jpg";
@@ -340,6 +341,8 @@ function LimpiezaPage() {
     queryFn: async () => (user ? await getUserPlan(user.id) : "explorador"),
   });
   const isPaid = plan === "camino";
+  const { data: toolsPref } = useToolsPref(user?.id);
+  const freeItems = freeItemsFor(toolsPref ?? null);
 
   const practice = allPractices.find((p) => p.id === practiceId) ?? PRACTICES[0];
   const practiceContent = thematicPractice("Limpieza Espiritual", practice.title);
@@ -560,7 +563,7 @@ function LimpiezaPage() {
           </div>
           <div className="mt-3 grid grid-cols-4 gap-3">
             {practice.materials.map((m, i) => {
-              const locked = !isPaid && i >= 2;
+              const locked = !isPaid && i >= freeItems;
               return (
                 <div key={i} className="flex flex-col items-center text-center gap-1.5 relative">
                   <span className={cn("w-12 h-12 rounded-2xl grid place-items-center", locked ? "bg-muted text-muted-foreground" : "bg-primary/10 text-primary")}>
@@ -578,7 +581,7 @@ function LimpiezaPage() {
           <div className="text-xs font-bold text-primary uppercase tracking-widest">Paso a paso</div>
           <ol className="mt-3 space-y-3 relative">
             {practice.steps.map((s, i) => {
-              const locked = !isPaid && i >= 2;
+              const locked = !isPaid && i >= freeItems;
               return (
                 <li key={i} className="flex items-start gap-3 text-sm">
                   <span className={cn("w-7 h-7 rounded-full grid place-items-center shrink-0 font-bold text-xs", locked ? "bg-muted text-muted-foreground" : "bg-primary/12 text-primary")}>

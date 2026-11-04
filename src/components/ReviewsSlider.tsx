@@ -62,8 +62,7 @@ export function ReviewsSlider() {
 
   return (
     <section className="mt-12">
-      <p className="px-4 text-[13px] font-semibold text-muted-foreground">Historias y retratos ilustrativos; no son testimonios verificados.</p>
-      <h2 className="mt-2 px-4 font-display text-[26px] font-extrabold leading-tight">
+      <h2 className="px-4 font-display text-[26px] font-extrabold leading-tight">
         Historias con las que puedes identificarte
       </h2>
 

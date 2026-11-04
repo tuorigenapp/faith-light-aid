@@ -50,6 +50,8 @@ body.community-reading .community-main { padding-bottom: 0; }
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-success: var(--success);
+  --color-cta-green: var(--cta-green);
+  --color-cta-green-foreground: var(--cta-green-foreground);
   --color-impact-low: var(--impact-low);
   --color-impact-high: var(--impact-high);
   --color-impact-mid: var(--impact-mid);
@@ -143,6 +145,8 @@ body.community-reading .community-main { padding-bottom: 0; }
   --destructive: #FF5F74;
   --destructive-foreground: #FFFFFF;
   --success: #3FBE8F;
+  --cta-green: #15803D;
+  --cta-green-foreground: #F7FFF9;
   --warning: #F7B955;
   --impact-low: #F0142F;
   --impact-mid: #FFB300;
@@ -221,6 +225,8 @@ body.community-reading .community-main { padding-bottom: 0; }
   --destructive: #FF5F74;
   --destructive-foreground: #FFFFFF;
   --success: #3FBE8F;
+  --cta-green: #15803D;
+  --cta-green-foreground: #F7FFF9;
   --border: rgba(255, 255, 255, 0.08);
   --impact-low: #FF2E4D;
   --impact-mid: #FFC21A;

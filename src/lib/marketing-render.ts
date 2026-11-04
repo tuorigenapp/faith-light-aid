@@ -496,8 +496,15 @@ export type HotmartCoupon = {
 
 export const COUPON_PLANS: { key: string; label: string }[] = [
   { key: "all", label: "Todas las membresías" },
-  { key: "mensual", label: "Camino Origen mensual" },
-  { key: "anual", label: "Camino Origen anual" },
+  { key: "semanal", label: "Camino Origen semanal (todos los niveles)" },
+  { key: "mensual", label: "Camino Origen mensual (todos los niveles)" },
+  { key: "anual", label: "Camino Origen anual (todos los niveles)" },
+  ...(["Explorador", "Caminante", "Propósito"] as const).flatMap((lvl) =>
+    (["semanal", "mensual", "anual"] as const).map((c) => ({
+      key: `${lvl.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")}-${c}`,
+      label: `${lvl.toUpperCase()} ORÍGEN · ${c}`,
+    })),
+  ),
 ];
 
 export function isValidCouponUrl(url: string): boolean {

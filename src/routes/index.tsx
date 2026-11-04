@@ -12,6 +12,8 @@ import { ReviewsSlider } from "@/components/ReviewsSlider";
 import { LiveActivityToasts } from "@/components/LiveActivityToasts";
 import { InstallAppButton } from "@/components/InstallAppGuide";
 import { AppScreens, BeforeAfter, BooksGift, Includes, TryConsulta } from "@/components/funnel/FunnelShared";
+import { FreePlansSection } from "@/components/funnel/FreePlansSection";
+import { StoriesShowcase } from "@/components/funnel/StoriesShowcase";
 import { LandingRegistrationBar } from "@/components/funnel/LandingRegistrationBar";
 
 export const Route = createFileRoute("/")({
@@ -201,6 +203,9 @@ function Landing() {
           </div>
         </section>
 
+        {/* 4. PRUÉBALO GRATIS — una consulta real */}
+        <section className="mx-auto max-w-2xl"><TryConsulta name="" /></section>
+
         {/* 5. ANTES Y DESPUÉS */}
         <section className="mt-14">
           <Reveal><Kicker>Lo que puede cambiar</Kicker><H2>De cargar el patrón a vivir en paz</H2></Reveal>
@@ -210,6 +215,7 @@ function Landing() {
 
         {/* 6. LA APP POR DENTRO */}
         <section className="mx-auto mt-4 max-w-3xl"><AppScreens /></section>
+        <StoriesShowcase />
 
         {/* 7. POR QUÉ FALLÓ LO ANTERIOR */}
         <section className="mt-14 overflow-hidden rounded-[24px] bg-card shadow-[0_1px_3px_rgba(30,25,20,.06)]">
@@ -232,8 +238,9 @@ function Landing() {
         {/* 9. TESTIMONIOS */}
         <section className="-mx-4 mt-14 bg-primary/5 py-4"><ReviewsSlider /></section>
 
-        {/* 10. PRUEBA UNA CONSULTA */}
-        <section className="mx-auto max-w-2xl"><TryConsulta name="" /></section>
+        {/* 9b. PLANES SIN PRECIO, CON PRUEBA GRATIS */}
+        <FreePlansSection />
+
 
         <section className="mx-auto mt-12 max-w-md">
           <Kicker>iPhone y Android</Kicker><H2>Tenla en tu celular</H2>
