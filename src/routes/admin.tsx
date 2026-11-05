@@ -38,6 +38,7 @@ import { WalletManager } from "@/components/admin/WalletManager";
 import { PromoManager } from "@/components/admin/PromoManager";
 import { Megaphone, BrainCircuit, Wand2 } from "lucide-react";
 import { BrainManager } from "@/components/admin/BrainManager";
+import { RetentionManager } from "@/components/admin/RetentionManager";
 import { AssistantDashboard } from "@/components/admin/AssistantDashboard";
 import { ConsultasStudio } from "@/components/admin/ConsultasStudio";
 import { UsagePanel } from "@/components/admin/UsagePanel";
@@ -174,12 +175,14 @@ type SectionId =
   | "comunidad"
   | "marketing"
   | "backup"
-  | "opiniones";
+  | "opiniones"
+  | "retencion";
 
 const NAV: { id: SectionId; label: string; icon: typeof Users }[] = [
   { id: "resumen", label: "Resumen", icon: LayoutDashboard },
   { id: "ventas", label: "Ventas", icon: CreditCard },
   { id: "usuarios", label: "Usuarios", icon: Users },
+  { id: "retencion", label: "Gracia y cancelaciones", icon: ShieldCheck },
   { id: "uso", label: "Uso de la app", icon: TrendingUp },
   { id: "contenido", label: "Contenido", icon: Library },
   { id: "studio", label: "Crear con IA", icon: Sparkles },
@@ -528,6 +531,7 @@ function Admin() {
         {section === "wallet" && <WalletManager />}
         {section === "promos" && <PromoManager />}
         {section === "cerebro" && <BrainManager />}
+        {section === "retencion" && <RetentionManager />}
         {section === "asistente" && <AssistantDashboard />}
         {section === "consultas" && <><UsagePanel kind="ai" className="mb-4" /><ConsultasStudio /></>}
 

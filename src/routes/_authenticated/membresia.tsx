@@ -3,7 +3,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { useQuery } from "@tanstack/react-query";
-import { CancelSurvey } from "@/components/CancelSurvey";
+import { ManageMembership } from "@/components/membership/ManageMembership";
+import { levelFromPlan } from "@/lib/plans-catalog";
 import { Check, ChevronRight, Crown, Eye, Infinity as InfinityIcon, Leaf, ShieldCheck, Sparkles, Sprout } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -137,6 +138,8 @@ function Membresia() {
     queryFn: async () => (await supabase.from("subscriptions").select("plan, status").eq("user_id", user!.id).maybeSingle()).data,
   });
 
+  const activePlan = sub && ["active", "trialing"].includes(sub.status) ? levelFromPlan(sub.plan) : null;
+  const activeLevel = activePlan ? LEVELS.find((l) => l.id === activePlan.id) ?? null : null;
   const level = useMemo(() => LEVELS.find((l) => l.id === selected) ?? null, [selected]);
   const currentName = sub?.plan ? sub.plan : "EXPLORADOR (gratis)";
 
@@ -159,6 +162,26 @@ function Membresia() {
           </p>
         </header>
 
+        {activeLevel && (
+          <section className="mx-auto mt-6 max-w-[560px] rounded-[16px] border-2 border-primary bg-card p-5 shadow-soft">
+            <div className="flex items-start gap-3">
+              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-[12px] bg-primary text-primary-foreground"><activeLevel.icon className="h-6 w-6" /></span>
+              <div className="min-w-0">
+                <p className="text-[12px] font-bold uppercase tracking-widest text-primary">{sub?.status === "trialing" ? "Tu plan de prueba" : "Tu plan activo"}</p>
+                <h2 className="font-display text-[20px] font-extrabold leading-tight">{activeLevel.name}</h2>
+                <p className="text-[13px] text-muted-foreground">{activeLevel.claim}</p>
+              </div>
+            </div>
+            <h3 className="mt-5 font-display text-[16px] font-bold">Desbloqueado para ti</h3>
+            <ul className="mt-2 space-y-2">
+              {activeLevel.included.map((i) => (
+                <li key={i} className="flex items-start gap-3"><span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-primary/12"><Check className="h-4 w-4 text-primary" /></span><span className="text-[15px] leading-snug">{i}</span></li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {!activeLevel && <>
         {/* Paso 1 — niveles sin precio visible */}
         <div className="-mx-5 mt-6 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-2 md:mx-0 md:grid md:grid-cols-3 md:overflow-visible md:px-0">
           {LEVELS.map((l) => {
@@ -300,18 +323,20 @@ function Membresia() {
           </div>
         )}
 
+        </>}
+
         <p className="mx-auto mt-8 max-w-[440px] text-center text-[12.5px] leading-relaxed text-muted-foreground">
           Cancelas cuando quieras · Te avisamos antes del cobro · Pago seguro procesado por Hotmart
         </p>
 
         <div className="mt-6 text-center">
           <button onClick={() => setCancelOpen(true)} className="text-[13.5px] font-semibold text-muted-foreground underline">
-            Quiero cancelar o bajar de plan
+            Quiero bajar de plan o darme de baja
           </button>
         </div>
       </div>
 
-      <CancelSurvey open={cancelOpen} onClose={() => setCancelOpen(false)} fromPlan={sub?.plan ?? null} />
+      <ManageMembership open={cancelOpen} onClose={() => setCancelOpen(false)} current={activePlan} />
     </div>
   );
 }

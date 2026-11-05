@@ -35,6 +35,8 @@ import { useCommunityNotifications } from "@/hooks/use-community-notifications";
 import origenIcon from "@/assets/logo-origen.png";
 import { useMensajesUnread } from "@/hooks/use-mensajes";
 import { getUserPlan } from "@/lib/plan";
+import { graceState, useGrace } from "@/lib/grace";
+import { GraceLockScreen, GraceWarning } from "@/components/grace/GraceLockScreen";
 import { rememberPlan } from "@/lib/pdf-brand";
 import { Bell as BellIcon, MessageSquareHeart } from "lucide-react";
 
@@ -112,6 +114,7 @@ function AuthLayoutInner() {
   const communityUnread = (communityNotifications?.length ?? 0) > 0;
   const { data: pendings } = useOrigenPendings(user?.id);
   const mensajesUnread = useMensajesUnread();
+  const { data: graceRow } = useGrace(user?.id);
   useEffect(() => { if (user?.id) void getUserPlan(user.id).then(rememberPlan).catch(() => {}); }, [user?.id]);
   useSectionSeen(user?.id, location.pathname, location.searchStr ?? "");
   const ensureNotice = useServerFn(ensureDailyNotice);
@@ -185,6 +188,11 @@ function AuthLayoutInner() {
 
   const isActive = (to: string) =>
     location.pathname === to || (to !== "/dashboard" && location.pathname.startsWith(to));
+
+  const grace = graceState(graceRow);
+  if (grace.kind === "locked") {
+    return <GraceLockScreen name={displayName === "Amigo" ? "" : displayName} purgeAt={grace.purgeAt} daysToPurge={grace.daysToPurge} onSignOut={signOut} />;
+  }
 
   const FOCUS = ["/visualiza", "/ejercicios", "/caminos", "/camino-nuevo", "/etapas", "/juegos/", "/palabra", "/programas", "/chat", "/patrones", "/pareja", "/ministracion", "/consulta/", "/diagnostico"];
   const focusMode = FOCUS.some((f) => location.pathname.startsWith(f));
@@ -372,7 +380,7 @@ function AuthLayoutInner() {
           </div>
         </div>
 
-         <main className="community-main flex-1 pb-[calc(env(safe-area-inset-bottom)+92px)] lg:pb-0"><Outlet /></main>
+         <main className="community-main flex-1 pb-[calc(env(safe-area-inset-bottom)+92px)] lg:pb-0">{grace.kind === "active" && grace.warn && grace.row.ends_at && <div className="px-4 pt-3"><GraceWarning day={grace.day} total={grace.row.days} daysLeft={grace.daysLeft} endsAt={new Date(grace.row.ends_at)} /></div>}<Outlet /></main>
 
         {/* Floating chat with Ruth Esther */}
           {isCommunity && <PromoPopup userId={user?.id} placement="comunidad" />}

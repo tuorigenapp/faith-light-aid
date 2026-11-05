@@ -11,6 +11,7 @@ const REASONS = [
   "Me dio miedo el cobro",
   "No tengo tiempo",
   "Es muy caro",
+  "No puedo pagar ahora mismo",
   "Otro motivo",
 ];
 
@@ -31,17 +32,18 @@ export function CancelSurvey({
   if (!open) return null;
 
   async function send() {
-    if (!user || !reason) return;
+    if (!user || !reason || comment.trim().length < 3) return;
     setSaving(true);
     const { error } = await supabase.from("cancellation_surveys").insert({
       user_id: user.id,
       reason,
-      comment: comment || null,
+      comment: comment.trim(),
+      kind: "final",
       from_plan: fromPlan ?? null,
     });
     setSaving(false);
     if (error) return toast.error("No pudimos enviar tu respuesta.");
-    toast.success("Gracias por tu honestidad", { description: "Nos ayuda a mejorar el camino." });
+    toast.success("Recibimos tu cancelación", { description: "Para detener cobros futuros, cancela también tu suscripción en Hotmart (Mis compras)." });
     onClose();
   }
 
@@ -52,7 +54,7 @@ export function CancelSurvey({
           <div>
             <h2 className="font-display text-[20px] font-bold leading-tight">Antes de irte, ¿qué pasó?</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Una respuesta corta y sincera. No te pedimos nada más.
+              Elige un motivo y escríbelo con tus palabras. Nos ayuda a mejorar.
             </p>
           </div>
           <button onClick={onClose} aria-label="Cerrar" className="grid h-11 w-11 shrink-0 place-items-center rounded-full hover:bg-secondary">
@@ -74,24 +76,27 @@ export function CancelSurvey({
           ))}
         </div>
 
-        {reason === "Otro motivo" && (
+        <label className="mt-4 block text-[14px] font-semibold" htmlFor="cancel-why">Cuéntanos el motivo exacto (obligatorio)</label>
+        {(
           <textarea
+            id="cancel-why"
+            required
             value={comment}
             onChange={(e) => setComment(e.target.value)}
-            placeholder="Cuéntanos con tus palabras"
+            placeholder="Corto o largo, como quieras: ¿qué no te gustó o no te ayudó?"
             className="mt-3 min-h-20 w-full rounded-[10px] border-[1.5px] border-border bg-background p-3 text-sm outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/20"
           />
         )}
 
         <button
           onClick={send}
-          disabled={!reason || saving}
+          disabled={!reason || comment.trim().length < 3 || saving}
           className="btn-primary-gradient mt-4 min-h-[52px] w-full rounded-full text-[16px] font-semibold disabled:opacity-50"
         >
-          {saving ? "Enviando…" : "Enviar y continuar"}
+          {saving ? "Enviando…" : "Confirmar cancelación"}
         </button>
         <button onClick={onClose} className="mt-2 min-h-11 w-full text-sm font-medium text-muted-foreground">
-          Prefiero no responder
+          Volver sin cancelar
         </button>
       </div>
     </div>
