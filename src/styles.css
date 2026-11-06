@@ -529,3 +529,9 @@ body.community-reading .community-main { padding-bottom: 0; }
 .mascot-motion { animation: companion-wave 4s ease-in-out infinite; transform-origin: bottom center; }
 @keyframes companion-wave { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-7px) rotate(2deg); } }
 @media (prefers-reduced-motion: reduce) { .mascot-motion { animation: none; } }
+
+@keyframes fade-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes slide-in-from-top { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  [style*="fade-in"], [style*="slide-in-from-top"] { animation: none !important; }
+}

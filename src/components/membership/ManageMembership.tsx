@@ -47,7 +47,7 @@ export function ManageMembership({ open, onClose, current }: { open: boolean; on
   if (survey) return <CancelSurvey open onClose={() => { setSurvey(false); close(); }} fromPlan={current?.name ?? null} />;
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-end bg-foreground/40 sm:place-items-center sm:p-6" onClick={close}>
+    <div className="fixed inset-0 z-[70] grid place-items-end bg-foreground/40 sm:place-items-center sm:p-6" onClick={close}>
       <div className="max-h-[92dvh] w-full overflow-y-auto rounded-t-[20px] bg-card p-5 shadow-elevated animate-in slide-in-from-bottom sm:max-w-[460px] sm:rounded-[16px]" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-start justify-between gap-3">
           {step !== "choose" && step !== "grace-sent" && step !== "changed" ? (

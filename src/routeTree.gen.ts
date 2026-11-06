@@ -43,6 +43,7 @@ import { Route as AuthenticatedParejaRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedPatronesRouteImport } from './routes/_authenticated/patrones'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedPremiosorigenRouteImport } from './routes/_authenticated/premiosorigen'
+import { Route as AuthenticatedQuizRouteImport } from './routes/_authenticated/quiz'
 import { Route as AuthenticatedRuletaRouteImport } from './routes/_authenticated/ruleta'
 import { Route as AuthenticatedVisualizaRouteImport } from './routes/_authenticated/visualiza'
 import { Route as ApiCaminoPackRouteImport } from './routes/api/camino-pack'
@@ -257,6 +258,11 @@ const AuthenticatedPremiosorigenRoute =
     path: '/premiosorigen',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedQuizRoute = AuthenticatedQuizRouteImport.update({
+  id: '/quiz',
+  path: '/quiz',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedRuletaRoute = AuthenticatedRuletaRouteImport.update({
   id: '/ruleta',
   path: '/ruleta',
@@ -509,6 +515,7 @@ export interface FileRoutesByFullPath {
   '/patrones': typeof AuthenticatedPatronesRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/premiosorigen': typeof AuthenticatedPremiosorigenRoute
+  '/quiz': typeof AuthenticatedQuizRoute
   '/ruleta': typeof AuthenticatedRuletaRoute
   '/visualiza': typeof AuthenticatedVisualizaRouteWithChildren
   '/api/camino-pack': typeof ApiCaminoPackRoute
@@ -584,6 +591,7 @@ export interface FileRoutesByTo {
   '/patrones': typeof AuthenticatedPatronesRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/premiosorigen': typeof AuthenticatedPremiosorigenRoute
+  '/quiz': typeof AuthenticatedQuizRoute
   '/ruleta': typeof AuthenticatedRuletaRoute
   '/visualiza': typeof AuthenticatedVisualizaRouteWithChildren
   '/api/camino-pack': typeof ApiCaminoPackRoute
@@ -660,6 +668,7 @@ export interface FileRoutesById {
   '/_authenticated/patrones': typeof AuthenticatedPatronesRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
   '/_authenticated/premiosorigen': typeof AuthenticatedPremiosorigenRoute
+  '/_authenticated/quiz': typeof AuthenticatedQuizRoute
   '/_authenticated/ruleta': typeof AuthenticatedRuletaRoute
   '/_authenticated/visualiza': typeof AuthenticatedVisualizaRouteWithChildren
   '/api/camino-pack': typeof ApiCaminoPackRoute
@@ -737,6 +746,7 @@ export interface FileRouteTypes {
     | '/patrones'
     | '/perfil'
     | '/premiosorigen'
+    | '/quiz'
     | '/ruleta'
     | '/visualiza'
     | '/api/camino-pack'
@@ -812,6 +822,7 @@ export interface FileRouteTypes {
     | '/patrones'
     | '/perfil'
     | '/premiosorigen'
+    | '/quiz'
     | '/ruleta'
     | '/visualiza'
     | '/api/camino-pack'
@@ -887,6 +898,7 @@ export interface FileRouteTypes {
     | '/_authenticated/patrones'
     | '/_authenticated/perfil'
     | '/_authenticated/premiosorigen'
+    | '/_authenticated/quiz'
     | '/_authenticated/ruleta'
     | '/_authenticated/visualiza'
     | '/api/camino-pack'
@@ -1203,6 +1215,13 @@ declare module '@tanstack/react-router' {
       path: '/premiosorigen'
       fullPath: '/premiosorigen'
       preLoaderRoute: typeof AuthenticatedPremiosorigenRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/quiz': {
+      id: '/_authenticated/quiz'
+      path: '/quiz'
+      fullPath: '/quiz'
+      preLoaderRoute: typeof AuthenticatedQuizRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/ruleta': {
@@ -1578,6 +1597,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPatronesRoute: typeof AuthenticatedPatronesRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
   AuthenticatedPremiosorigenRoute: typeof AuthenticatedPremiosorigenRoute
+  AuthenticatedQuizRoute: typeof AuthenticatedQuizRoute
   AuthenticatedRuletaRoute: typeof AuthenticatedRuletaRoute
   AuthenticatedVisualizaRoute: typeof AuthenticatedVisualizaRouteWithChildren
   AuthenticatedCaminoNuevoSlugRoute: typeof AuthenticatedCaminoNuevoSlugRoute
@@ -1614,6 +1634,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPatronesRoute: AuthenticatedPatronesRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
   AuthenticatedPremiosorigenRoute: AuthenticatedPremiosorigenRoute,
+  AuthenticatedQuizRoute: AuthenticatedQuizRoute,
   AuthenticatedRuletaRoute: AuthenticatedRuletaRoute,
   AuthenticatedVisualizaRoute: AuthenticatedVisualizaRouteWithChildren,
   AuthenticatedCaminoNuevoSlugRoute: AuthenticatedCaminoNuevoSlugRoute,
