@@ -60,6 +60,7 @@ import { Route as AuthenticatedConsultaSlugRouteImport } from './routes/_authent
 import { Route as AuthenticatedEtapasStageIdRouteImport } from './routes/_authenticated/etapas.$stageId'
 import { Route as AuthenticatedJuegosIndexRouteImport } from './routes/_authenticated/juegos.index'
 import { Route as AuthenticatedJuegosGameIdRouteImport } from './routes/_authenticated/juegos.$gameId'
+import { Route as AuthenticatedPalabraMomentoRouteImport } from './routes/_authenticated/palabra_.$momento'
 import { Route as AuthenticatedProgramasProgramaIdRouteImport } from './routes/_authenticated/programas.$programaId'
 import { Route as AuthenticatedVisualizaCategoryIdRouteImport } from './routes/_authenticated/visualiza.$categoryId'
 import { Route as AuthenticatedVisualizaCristoRouteImport } from './routes/_authenticated/visualiza.cristo'
@@ -349,6 +350,12 @@ const AuthenticatedJuegosGameIdRoute =
     path: '/juegos/$gameId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedPalabraMomentoRoute =
+  AuthenticatedPalabraMomentoRouteImport.update({
+    id: '/palabra_/$momento',
+    path: '/palabra/$momento',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedProgramasProgramaIdRoute =
   AuthenticatedProgramasProgramaIdRouteImport.update({
     id: '/programas/$programaId',
@@ -531,6 +538,7 @@ export interface FileRoutesByFullPath {
   '/consulta/$slug': typeof AuthenticatedConsultaSlugRoute
   '/etapas/$stageId': typeof AuthenticatedEtapasStageIdRoute
   '/juegos/$gameId': typeof AuthenticatedJuegosGameIdRoute
+  '/palabra/$momento': typeof AuthenticatedPalabraMomentoRoute
   '/programas/$programaId': typeof AuthenticatedProgramasProgramaIdRoute
   '/visualiza/$categoryId': typeof AuthenticatedVisualizaCategoryIdRouteWithChildren
   '/visualiza/cristo': typeof AuthenticatedVisualizaCristoRoute
@@ -606,6 +614,7 @@ export interface FileRoutesByTo {
   '/consulta/$slug': typeof AuthenticatedConsultaSlugRoute
   '/etapas/$stageId': typeof AuthenticatedEtapasStageIdRoute
   '/juegos/$gameId': typeof AuthenticatedJuegosGameIdRoute
+  '/palabra/$momento': typeof AuthenticatedPalabraMomentoRoute
   '/programas/$programaId': typeof AuthenticatedProgramasProgramaIdRoute
   '/visualiza/$categoryId': typeof AuthenticatedVisualizaCategoryIdRouteWithChildren
   '/visualiza/cristo': typeof AuthenticatedVisualizaCristoRoute
@@ -684,6 +693,7 @@ export interface FileRoutesById {
   '/_authenticated/consulta/$slug': typeof AuthenticatedConsultaSlugRoute
   '/_authenticated/etapas/$stageId': typeof AuthenticatedEtapasStageIdRoute
   '/_authenticated/juegos/$gameId': typeof AuthenticatedJuegosGameIdRoute
+  '/_authenticated/palabra_/$momento': typeof AuthenticatedPalabraMomentoRoute
   '/_authenticated/programas/$programaId': typeof AuthenticatedProgramasProgramaIdRoute
   '/_authenticated/visualiza/$categoryId': typeof AuthenticatedVisualizaCategoryIdRouteWithChildren
   '/_authenticated/visualiza/cristo': typeof AuthenticatedVisualizaCristoRoute
@@ -762,6 +772,7 @@ export interface FileRouteTypes {
     | '/consulta/$slug'
     | '/etapas/$stageId'
     | '/juegos/$gameId'
+    | '/palabra/$momento'
     | '/programas/$programaId'
     | '/visualiza/$categoryId'
     | '/visualiza/cristo'
@@ -837,6 +848,7 @@ export interface FileRouteTypes {
     | '/consulta/$slug'
     | '/etapas/$stageId'
     | '/juegos/$gameId'
+    | '/palabra/$momento'
     | '/programas/$programaId'
     | '/visualiza/$categoryId'
     | '/visualiza/cristo'
@@ -914,6 +926,7 @@ export interface FileRouteTypes {
     | '/_authenticated/consulta/$slug'
     | '/_authenticated/etapas/$stageId'
     | '/_authenticated/juegos/$gameId'
+    | '/_authenticated/palabra_/$momento'
     | '/_authenticated/programas/$programaId'
     | '/_authenticated/visualiza/$categoryId'
     | '/_authenticated/visualiza/cristo'
@@ -1336,6 +1349,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedJuegosGameIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/palabra_/$momento': {
+      id: '/_authenticated/palabra_/$momento'
+      path: '/palabra/$momento'
+      fullPath: '/palabra/$momento'
+      preLoaderRoute: typeof AuthenticatedPalabraMomentoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/programas/$programaId': {
       id: '/_authenticated/programas/$programaId'
       path: '/programas/$programaId'
@@ -1604,6 +1624,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCaminosCaminoIdRoute: typeof AuthenticatedCaminosCaminoIdRouteWithChildren
   AuthenticatedConsultaSlugRoute: typeof AuthenticatedConsultaSlugRoute
   AuthenticatedJuegosGameIdRoute: typeof AuthenticatedJuegosGameIdRoute
+  AuthenticatedPalabraMomentoRoute: typeof AuthenticatedPalabraMomentoRoute
   AuthenticatedProgramasProgramaIdRoute: typeof AuthenticatedProgramasProgramaIdRoute
   AuthenticatedJuegosIndexRoute: typeof AuthenticatedJuegosIndexRoute
 }
@@ -1642,6 +1663,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedCaminosCaminoIdRouteWithChildren,
   AuthenticatedConsultaSlugRoute: AuthenticatedConsultaSlugRoute,
   AuthenticatedJuegosGameIdRoute: AuthenticatedJuegosGameIdRoute,
+  AuthenticatedPalabraMomentoRoute: AuthenticatedPalabraMomentoRoute,
   AuthenticatedProgramasProgramaIdRoute: AuthenticatedProgramasProgramaIdRoute,
   AuthenticatedJuegosIndexRoute: AuthenticatedJuegosIndexRoute,
 }

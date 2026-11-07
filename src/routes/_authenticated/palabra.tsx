@@ -33,6 +33,26 @@ import { useAuth } from "@/lib/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { SatisfactionRating } from "@/components/SatisfactionRating";
 import { CELEBRATIONS } from "@/lib/celebrate-step";
+import { OracionesDelDia } from "@/components/palabra/OracionesDelDia";
+import { speak, stopSpeaking } from "@/lib/oraciones-dia";
+import { Volume2, Square } from "lucide-react";
+
+function ListenButton({ text }: { text: string }) {
+  const [on, setOn] = useState(false);
+  useEffect(() => () => stopSpeaking(), []);
+  return (
+    <button
+      onClick={() => {
+        if (on) { stopSpeaking(); setOn(false); return; }
+        if (!speak(text, () => setOn(false))) { toast.error("Tu dispositivo no permite lectura en voz alta"); return; }
+        setOn(true);
+      }}
+      className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-full bg-primary/10 px-4 text-sm font-semibold text-primary"
+    >
+      {on ? <Square className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />} {on ? "Detener" : "Escuchar la palabra"}
+    </button>
+  );
+}
 
 const SHARE_ICONS: Record<string, typeof Share2> = {
   whatsapp: MessageCircle,
@@ -234,7 +254,10 @@ function PalabraPage() {
         <section className="rounded-[16px] bg-brand-soft p-5">
           <p className="text-[11px] font-bold uppercase tracking-widest text-primary">{palabra.passage.reference}</p>
           <p className="mt-2 whitespace-pre-line text-[15px] font-medium leading-relaxed">{palabra.passage.text}</p>
+          <ListenButton text={`${palabra.title}. ${palabra.passage.reference}. ${palabra.passage.text}. ${blocks.map((b) => b.text).join(". ")}`} />
         </section>
+
+        <OracionesDelDia />
 
         {/* Bloques narrados con emoji 3D */}
         {blocks.map((b) => (

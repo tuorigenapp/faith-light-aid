@@ -197,7 +197,10 @@ function AuthLayoutInner() {
 
   const FOCUS = ["/visualiza", "/ejercicios", "/caminos", "/camino-nuevo", "/etapas", "/juegos/", "/palabra", "/programas", "/chat", "/patrones", "/pareja", "/ministracion", "/consulta/", "/diagnostico"];
   const focusMode = FOCUS.some((f) => location.pathname.startsWith(f));
-  const immersive = location.pathname.startsWith("/onboarding") || location.pathname.startsWith("/ruleta");
+  // Secciones tranquilas: solo preguntas frecuentes y compartir, sin otros emergentes.
+  const CALM = ["/quiz", "/comprarmonedas", "/diario", "/membresia", "/perfil", "/historial", "/arbol", "/invita"];
+  const calmMode = CALM.some((f) => location.pathname.startsWith(f)) || grace.kind === "active";
+  const immersive = location.pathname.startsWith("/onboarding") || location.pathname.startsWith("/ruleta") || location.pathname.startsWith("/palabra/") || location.pathname.startsWith("/quiz");
   if (immersive) {
     return (
       <div className="min-h-screen bg-background text-foreground">
@@ -385,7 +388,8 @@ function AuthLayoutInner() {
 
         {/* Floating chat with Ruth Esther */}
           {isCommunity && <PromoPopup userId={user?.id} placement="comunidad" />}
-          {!isCommunity && !focusMode && <><FloatingChatFab /><FloatingHelp /><PromoPopup userId={user?.id} placement="inicio" /><RoulettePrompt userId={user?.id} />
+          {!isCommunity && !focusMode && calmMode && <><FloatingHelp /><ShareSection /></>}
+          {!isCommunity && !focusMode && !calmMode && <><FloatingChatFab /><FloatingHelp /><PromoPopup userId={user?.id} placement="inicio" /><RoulettePrompt userId={user?.id} />
       <FloatingOrigenMenu /><QuizNudge /><ShareSection /><LiveActivityToasts /><SatisfactionPulse /><MotivationalReminders /></>}
 
 

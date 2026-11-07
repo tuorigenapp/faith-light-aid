@@ -5,6 +5,19 @@ import { enablePush, permissionState } from "@/lib/notifications";
 import { pickReminder, pushReminder, type Reminder } from "@/lib/motivational-reminders";
 import { useAuth } from "@/lib/use-auth";
 import { useProfile } from "@/hooks/use-profile";
+import { MOMENTOS, isOpen, lecturaFor } from "@/lib/oraciones-dia";
+
+/** Oración del momento actual, una sola vez por momento y día; abre su lectura inmersiva. */
+function prayerReminder(): Reminder | null {
+  const d = new Date();
+  const open = MOMENTOS.filter((m) => m.id !== "afirmacion" && isOpen(m, d));
+  const m = open[open.length - 1];
+  if (!m) return null;
+  const key = `origen_prayer_sent_${d.toDateString()}_${m.id}`;
+  try { if (localStorage.getItem(key)) return null; localStorage.setItem(key, "1"); } catch { return null; }
+  const l = lecturaFor(m, d);
+  return { title: `${m.emoji} ${m.label}`, body: l.text.length > 140 ? `${l.text.slice(0, 137)}…` : l.text, url: `/palabra/${m.id}` };
+}
 
 const FIRST_MS = 45_000;
 const GAP_MS = 6 * 60_000;
@@ -30,7 +43,7 @@ export function MotivationalReminders() {
     if (!user) return;
     let hide: ReturnType<typeof setTimeout>;
     const fire = () => {
-      const r = pickReminder(interestsRef.current, pathRef.current);
+      const r = prayerReminder() ?? pickReminder(interestsRef.current, pathRef.current);
       // Con permiso concedido el recordatorio sale como notificación real del teléfono/navegador.
       if (permissionState() === "granted") { pushReminder(r).catch(() => undefined); return; }
       if (document.hidden) return;
