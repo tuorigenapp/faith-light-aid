@@ -70,7 +70,7 @@ function MomentoPage() {
   }
 
   return (
-    <div className="relative min-h-dvh overflow-hidden bg-background">
+    <div className="relative flex min-h-dvh flex-col overflow-hidden bg-card">
       <div className="relative min-h-[58dvh] w-full">
         <img src={m.bg} alt="" className="absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-b from-foreground/70 via-foreground/55 to-foreground/80 dark:from-background/70 dark:via-background/60 dark:to-background/90" />
