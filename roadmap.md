@@ -128,3 +128,15 @@
 - [x] Marketing: push 3 estilos (texto/banner/descuento) con íconos 3D, correo con 100 plantillas renovables, etiquetas reales, pie de soporte, aperturas y clics en vivo, remarketing, asistente 24/7, pruebas.
 - [x] Modo oscuro en consultas y secciones internas; botón de compartir sección.
 - [ ] Prueba push en tu teléfono: falta activar avisos desde el teléfono con la cuenta administradora y publicar.
+
+## Pedido del 6 de noviembre
+- [x] Oraciones del día (madrugada, mañana, mediodía, tarde, noche), versículo de la noche y palabra para tu corazón dentro de Palabra del día, con lista de completadas, pantalla inmersiva sin menús, meditación, Amén y lectura en voz alta gratis.
+- [x] Recordatorio/notificación de cada oración que abre su pantalla.
+- [x] Paywall: gancho diario + fichas «Tu meta» y «Tu objetivo», resto intacto.
+- [x] Quitar emergentes en quiz, monedas, diario, membresía, perfil, historial, árbol, invita y período de gracia (quedan preguntas frecuentes y compartir).
+- [ ] Contabilidad completa en el panel con Excel/PDF y gráficos por día/semana/mes.
+- [ ] Gracia y cancelaciones: orden, gráficos, borrado manual, retención 180 días; página especial de gracia en membresía con 80%/65%.
+- [ ] Cupones con duración del descuento; IA de remarketing push/email; envío masivo por proveedor externo (necesita cuenta Resend/Brevo).
+- [ ] Reseñas UGC en landing, paywall y carga del onboarding.
+- [ ] Quiz rediseñado con imágenes; crucigrama bíblico; sonidos de notificación, insignias, FAQ y legales en popup, tema día/noche en perfil.
+- [ ] Campañas emergentes por antigüedad (1/3/6/9/12 meses); íconos PNG propios para push; 100 flyers (necesita créditos de imágenes).

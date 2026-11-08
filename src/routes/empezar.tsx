@@ -401,6 +401,32 @@ function TopBar({ onClose, time, label, cta }: { onClose: () => void; time: stri
     </div>
   </div>;
 }
+const DAILY_HOOKS = [
+  "Lo que no se sana se repite. Hoy puede ser el día en que se detiene.",
+  "Tus hijos no tienen que heredar lo que a ti te dolió.",
+  "Cinco minutos al día con Dios cambian lo que años de esfuerzo no lograron.",
+  "No estás roto: estás cargando algo que no era tuyo.",
+  "El ciclo que empezó antes de ti puede terminar contigo.",
+  "La paz que buscas no está en otro libro; está en volver a tu origen con Dios.",
+  "Cada día que esperas, el patrón se repite una vez más.",
+];
+function GoalCards() {
+  const [hook, setHook] = useState<string | null>(null);
+  useEffect(() => { const d = new Date(); setHook(DAILY_HOOKS[(d.getFullYear() * 400 + d.getMonth() * 31 + d.getDate()) % DAILY_HOOKS.length]!); }, []);
+  return <div className="mt-5">
+    <p className="min-h-[44px] text-center text-[15px] font-semibold leading-snug text-primary">{hook ?? "\u00a0"}</p>
+    <div className="mt-3 grid grid-cols-2 gap-3">
+      <div className="flex items-center gap-2 rounded-[14px] bg-secondary p-3">
+        <span className="text-2xl" aria-hidden>🎯</span>
+        <div><p className="text-[12px] text-muted-foreground">Tu meta</p><p className="text-[14px] font-bold leading-tight text-foreground">Romper el ciclo familiar</p></div>
+      </div>
+      <div className="flex items-center gap-2 rounded-[14px] bg-secondary p-3">
+        <span className="text-2xl" aria-hidden>🕊️</span>
+        <div><p className="text-[12px] text-muted-foreground">Tu objetivo</p><p className="text-[14px] font-bold leading-tight text-foreground">Paz real con Dios</p></div>
+      </div>
+    </div>
+  </div>;
+}
 const toPlans = () => document.getElementById("planes")?.scrollIntoView({ behavior: "smooth" });
 
 function Paywall({ name, cur, variant, onClose }: { name: string; cur: LocalCurrency; variant: number; onClose: () => void }) {
@@ -410,6 +436,7 @@ function Paywall({ name, cur, variant, onClose }: { name: string; cur: LocalCurr
     <div className="mx-auto max-w-md px-4">
       <BeforeAfter variant={variant} />
       <h1 className="mt-6 text-center font-display text-[28px] font-bold leading-tight text-foreground">Tu plan para {name ? `${name}, ` : ""}romper el ciclo está listo</h1>
+      <GoalCards />
       <div id="planes" className="scroll-mt-24"><PlansBoard cur={cur} mode="normal" /></div>
       <TrustBar />
       <AppScreens />
