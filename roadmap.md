@@ -134,7 +134,7 @@
 - [x] Recordatorio/notificación de cada oración que abre su pantalla.
 - [x] Paywall: gancho diario + fichas «Tu meta» y «Tu objetivo», resto intacto.
 - [x] Quitar emergentes en quiz, monedas, diario, membresía, perfil, historial, árbol, invita y período de gracia (quedan preguntas frecuentes y compartir).
-- [ ] Contabilidad completa en el panel con Excel/PDF y gráficos por día/semana/mes.
+- [x] Contabilidad completa en el panel con Excel/PDF y gráficos por día/semana/mes/año.
 - [ ] Gracia y cancelaciones: orden, gráficos, borrado manual, retención 180 días; página especial de gracia en membresía con 80%/65%.
 - [ ] Cupones con duración del descuento; IA de remarketing push/email; envío masivo por proveedor externo (necesita cuenta Resend/Brevo).
 - [ ] Reseñas UGC en landing, paywall y carga del onboarding.
