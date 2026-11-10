@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, Leaf } from "lucide-react";
+import { ArrowLeft, BookOpen, Grid3x3, Leaf } from "lucide-react";
 import { GAMES, GameCard } from "@/components/games/DailyGames";
 import { MIN_PLAYS } from "@/lib/game-plays";
 
@@ -43,6 +43,14 @@ function JuegosIndex() {
         </p>
         <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1.5 text-[12px] font-bold text-primary">
           <Leaf className="h-3.5 w-3.5" /> {GAMES.length} juegos disponibles
+        </div>
+        <div className="mt-4 grid grid-cols-2 gap-3">
+          <Link to="/crucigrama" className="flex h-14 items-center justify-center gap-2 rounded-[12px] bg-primary text-[15px] font-bold text-primary-foreground shadow-md active:scale-[.97]">
+            <Grid3x3 className="h-5 w-5" /> Crucigrama Bíblico
+          </Link>
+          <Link to="/quiz" className="flex h-14 items-center justify-center gap-2 rounded-[12px] bg-primary/10 text-[15px] font-bold text-primary active:scale-[.97]">
+            <BookOpen className="h-5 w-5" /> Quiz Bíblico
+          </Link>
         </div>
       </header>
 

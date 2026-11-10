@@ -26,6 +26,7 @@ import { Route as AuthenticatedChatRouteImport } from './routes/_authenticated/c
 import { Route as AuthenticatedComprarmonedasRouteImport } from './routes/_authenticated/comprarmonedas'
 import { Route as AuthenticatedComunidadRouteImport } from './routes/_authenticated/comunidad'
 import { Route as AuthenticatedConsultasRouteImport } from './routes/_authenticated/consultas'
+import { Route as AuthenticatedCrucigramaRouteImport } from './routes/_authenticated/crucigrama'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedDiagnosticoRouteImport } from './routes/_authenticated/diagnostico'
 import { Route as AuthenticatedDiarioRouteImport } from './routes/_authenticated/diario'
@@ -169,6 +170,11 @@ const AuthenticatedComunidadRoute = AuthenticatedComunidadRouteImport.update({
 const AuthenticatedConsultasRoute = AuthenticatedConsultasRouteImport.update({
   id: '/consultas',
   path: '/consultas',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedCrucigramaRoute = AuthenticatedCrucigramaRouteImport.update({
+  id: '/crucigrama',
+  path: '/crucigrama',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
@@ -505,6 +511,7 @@ export interface FileRoutesByFullPath {
   '/comprarmonedas': typeof AuthenticatedComprarmonedasRoute
   '/comunidad': typeof AuthenticatedComunidadRoute
   '/consultas': typeof AuthenticatedConsultasRoute
+  '/crucigrama': typeof AuthenticatedCrucigramaRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/diagnostico': typeof AuthenticatedDiagnosticoRoute
   '/diario': typeof AuthenticatedDiarioRoute
@@ -582,6 +589,7 @@ export interface FileRoutesByTo {
   '/comprarmonedas': typeof AuthenticatedComprarmonedasRoute
   '/comunidad': typeof AuthenticatedComunidadRoute
   '/consultas': typeof AuthenticatedConsultasRoute
+  '/crucigrama': typeof AuthenticatedCrucigramaRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/diagnostico': typeof AuthenticatedDiagnosticoRoute
   '/diario': typeof AuthenticatedDiarioRoute
@@ -660,6 +668,7 @@ export interface FileRoutesById {
   '/_authenticated/comprarmonedas': typeof AuthenticatedComprarmonedasRoute
   '/_authenticated/comunidad': typeof AuthenticatedComunidadRoute
   '/_authenticated/consultas': typeof AuthenticatedConsultasRoute
+  '/_authenticated/crucigrama': typeof AuthenticatedCrucigramaRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/diagnostico': typeof AuthenticatedDiagnosticoRoute
   '/_authenticated/diario': typeof AuthenticatedDiarioRoute
@@ -739,6 +748,7 @@ export interface FileRouteTypes {
     | '/comprarmonedas'
     | '/comunidad'
     | '/consultas'
+    | '/crucigrama'
     | '/dashboard'
     | '/diagnostico'
     | '/diario'
@@ -816,6 +826,7 @@ export interface FileRouteTypes {
     | '/comprarmonedas'
     | '/comunidad'
     | '/consultas'
+    | '/crucigrama'
     | '/dashboard'
     | '/diagnostico'
     | '/diario'
@@ -893,6 +904,7 @@ export interface FileRouteTypes {
     | '/_authenticated/comprarmonedas'
     | '/_authenticated/comunidad'
     | '/_authenticated/consultas'
+    | '/_authenticated/crucigrama'
     | '/_authenticated/dashboard'
     | '/_authenticated/diagnostico'
     | '/_authenticated/diario'
@@ -1109,6 +1121,13 @@ declare module '@tanstack/react-router' {
       path: '/consultas'
       fullPath: '/consultas'
       preLoaderRoute: typeof AuthenticatedConsultasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/crucigrama': {
+      id: '/_authenticated/crucigrama'
+      path: '/crucigrama'
+      fullPath: '/crucigrama'
+      preLoaderRoute: typeof AuthenticatedCrucigramaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard': {
@@ -1600,6 +1619,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedComprarmonedasRoute: typeof AuthenticatedComprarmonedasRoute
   AuthenticatedComunidadRoute: typeof AuthenticatedComunidadRoute
   AuthenticatedConsultasRoute: typeof AuthenticatedConsultasRoute
+  AuthenticatedCrucigramaRoute: typeof AuthenticatedCrucigramaRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedDiagnosticoRoute: typeof AuthenticatedDiagnosticoRoute
   AuthenticatedDiarioRoute: typeof AuthenticatedDiarioRoute
@@ -1638,6 +1658,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedComprarmonedasRoute: AuthenticatedComprarmonedasRoute,
   AuthenticatedComunidadRoute: AuthenticatedComunidadRoute,
   AuthenticatedConsultasRoute: AuthenticatedConsultasRoute,
+  AuthenticatedCrucigramaRoute: AuthenticatedCrucigramaRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedDiagnosticoRoute: AuthenticatedDiagnosticoRoute,
   AuthenticatedDiarioRoute: AuthenticatedDiarioRoute,

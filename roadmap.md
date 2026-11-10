@@ -135,8 +135,10 @@
 - [x] Paywall: gancho diario + fichas «Tu meta» y «Tu objetivo», resto intacto.
 - [x] Quitar emergentes en quiz, monedas, diario, membresía, perfil, historial, árbol, invita y período de gracia (quedan preguntas frecuentes y compartir).
 - [x] Contabilidad completa en el panel con Excel/PDF y gráficos por día/semana/mes/año.
-- [ ] Gracia y cancelaciones: orden, gráficos, borrado manual, retención 180 días; página especial de gracia en membresía con 80%/65%.
+- [x] Página especial de gracia en membresía con días restantes y renovación con 80%/65%.
+- [ ] Gracia y cancelaciones en panel: gráficos, borrado manual, retención 180 días.
 - [ ] Cupones con duración del descuento; IA de remarketing push/email; envío masivo por proveedor externo (necesita cuenta Resend/Brevo).
 - [ ] Reseñas UGC en landing, paywall y carga del onboarding.
-- [ ] Quiz rediseñado con imágenes; crucigrama bíblico; sonidos de notificación, insignias, FAQ y legales en popup, tema día/noche en perfil.
+- [x] Crucigrama bíblico de 8 niveles con teclado, ayuda y salida confirmada (desde Juegos).
+- [ ] Quiz rediseñado con imágenes; sonidos de notificación, insignias, FAQ y legales en popup, tema día/noche en perfil.
 - [ ] Campañas emergentes por antigüedad (1/3/6/9/12 meses); íconos PNG propios para push; 100 flyers (necesita créditos de imágenes).

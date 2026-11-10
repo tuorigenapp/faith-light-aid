@@ -200,7 +200,7 @@ function AuthLayoutInner() {
   // Secciones tranquilas: solo preguntas frecuentes y compartir, sin otros emergentes.
   const CALM = ["/quiz", "/comprarmonedas", "/diario", "/membresia", "/perfil", "/historial", "/arbol", "/invita"];
   const calmMode = CALM.some((f) => location.pathname.startsWith(f)) || grace.kind === "active";
-  const immersive = location.pathname.startsWith("/onboarding") || location.pathname.startsWith("/ruleta") || location.pathname.startsWith("/palabra/") || location.pathname.startsWith("/quiz");
+  const immersive = location.pathname.startsWith("/onboarding") || location.pathname.startsWith("/ruleta") || location.pathname.startsWith("/palabra/") || location.pathname.startsWith("/quiz") || location.pathname.startsWith("/crucigrama");
   if (immersive) {
     return (
       <div className="min-h-screen bg-background text-foreground">

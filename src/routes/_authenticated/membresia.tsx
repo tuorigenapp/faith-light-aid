@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { useQuery } from "@tanstack/react-query";
 import { ManageMembership } from "@/components/membership/ManageMembership";
+import { GraceRenewal } from "@/components/grace/GraceRenewal";
+import { graceState, useGrace } from "@/lib/grace";
 import { levelFromPlan } from "@/lib/plans-catalog";
 import { Check, ChevronRight, Crown, Eye, Infinity as InfinityIcon, Leaf, ShieldCheck, Sparkles, Sprout } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -138,6 +140,8 @@ function Membresia() {
     queryFn: async () => (await supabase.from("subscriptions").select("plan, status").eq("user_id", user!.id).maybeSingle()).data,
   });
 
+  const { data: graceRow } = useGrace(user?.id);
+  const grace = graceState(graceRow);
   const activePlan = sub && ["active", "trialing"].includes(sub.status) ? levelFromPlan(sub.plan) : null;
   const activeLevel = activePlan ? LEVELS.find((l) => l.id === activePlan.id) ?? null : null;
   const level = useMemo(() => LEVELS.find((l) => l.id === selected) ?? null, [selected]);
@@ -162,7 +166,11 @@ function Membresia() {
           </p>
         </header>
 
-        {activeLevel && (
+        {grace.kind === "active" && (
+          <div className="mt-6"><GraceRenewal daysLeft={grace.daysLeft} total={grace.row.days} endsAt={new Date(grace.row.ends_at!)} current={levelFromPlan(grace.row.from_plan ?? sub?.plan)} /></div>
+        )}
+
+        {grace.kind !== "active" && activeLevel && (
           <section className="mx-auto mt-6 max-w-[560px] rounded-[16px] border-2 border-primary bg-card p-5 shadow-soft">
             <div className="flex items-start gap-3">
               <span className="grid h-12 w-12 shrink-0 place-items-center rounded-[12px] bg-primary text-primary-foreground"><activeLevel.icon className="h-6 w-6" /></span>
@@ -181,7 +189,7 @@ function Membresia() {
           </section>
         )}
 
-        {!activeLevel && <>
+        {grace.kind !== "active" && !activeLevel && <>
         {/* Paso 1 — niveles sin precio visible */}
         <div className="-mx-5 mt-6 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-2 md:mx-0 md:grid md:grid-cols-3 md:overflow-visible md:px-0">
           {LEVELS.map((l) => {
