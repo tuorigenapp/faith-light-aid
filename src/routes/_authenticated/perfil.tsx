@@ -2,6 +2,8 @@ import { ManagedImage } from "@/components/ManagedImage";
 import { NotificacionesCard } from "@/components/NotificacionesCard";
 import { InstallAppButton } from "@/components/InstallAppGuide";
 import { VoiceToggle } from "@/components/VoiceControls";
+import { useTheme } from "@/lib/theme";
+import { Sun, Moon } from "lucide-react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
@@ -982,6 +984,7 @@ function NotificationsBlock() {
             </div>
             <Switch checked={prefs?.email_enabled ?? true} onCheckedChange={(v) => update({ email_enabled: v })} />
           </div>
+          <ThemePicker />
           <InstallAppButton />
           <NotificacionesCard />
           <div className="rounded-2xl border border-border p-3">
@@ -1035,6 +1038,34 @@ function EmptyMini({ label, cta, to }: { label: string; cta: string; to: string 
     <div className="text-center py-4">
       <div className="text-sm text-muted-foreground">{label}</div>
       <Link to={to} className="mt-2 inline-block text-xs font-semibold text-primary">{cta} →</Link>
+    </div>
+  );
+}
+
+function ThemePicker() {
+  const { theme, toggle } = useTheme();
+  const opts = [
+    { id: "light" as const, label: "Claro", Icon: Sun },
+    { id: "dark" as const, label: "Oscuro", Icon: Moon },
+  ];
+  return (
+    <div className="rounded-2xl border border-border p-3">
+      <div className="text-[13px] font-semibold">Apariencia</div>
+      <div className="text-[11.5px] text-muted-foreground">Elige cómo quieres ver ORÍGEN.</div>
+      <div className="mt-3 grid grid-cols-2 gap-2">
+        {opts.map(({ id, label, Icon }) => (
+          <Button
+            key={id}
+            type="button"
+            variant={theme === id ? "default" : "outline"}
+            className="h-11"
+            aria-pressed={theme === id}
+            onClick={() => { if (theme !== id) toggle(); }}
+          >
+            <Icon className="mr-2 h-4 w-4" /> {label}
+          </Button>
+        ))}
+      </div>
     </div>
   );
 }
