@@ -140,5 +140,5 @@
 - [ ] Cupones con duración del descuento; IA de remarketing push/email; envío masivo por proveedor externo (necesita cuenta Resend/Brevo).
 - [ ] Reseñas UGC en landing, paywall y carga del onboarding.
 - [x] Crucigrama bíblico de 8 niveles con teclado, ayuda y salida confirmada (desde Juegos).
-- [ ] Quiz rediseñado con imágenes; sonidos de notificación, insignias, FAQ y legales en popup, tema día/noche en perfil.
+- [ ] (Guía de permisos Android lista) Quiz rediseñado con imágenes; sonidos de notificación, insignias, FAQ y legales en popup, tema día/noche en perfil.
 - [ ] Campañas emergentes por antigüedad (1/3/6/9/12 meses); íconos PNG propios para push; 100 flyers (necesita créditos de imágenes).

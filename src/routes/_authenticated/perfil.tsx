@@ -1,6 +1,7 @@
 import { ManagedImage } from "@/components/ManagedImage";
 import { NotificacionesCard } from "@/components/NotificacionesCard";
 import { InstallAppButton } from "@/components/InstallAppGuide";
+import { AndroidOverlayGuide } from "@/components/perfil/AndroidOverlayGuide";
 import { VoiceToggle } from "@/components/VoiceControls";
 import { useTheme } from "@/lib/theme";
 import { Sun, Moon } from "lucide-react";
@@ -986,6 +987,7 @@ function NotificationsBlock() {
           </div>
           <ThemePicker />
           <InstallAppButton />
+          <AndroidOverlayGuide />
           <NotificacionesCard />
           <div className="rounded-2xl border border-border p-3">
             <div className="text-[13px] font-semibold">Escuchar las instrucciones</div>
